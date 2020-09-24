@@ -22,7 +22,6 @@ Corresponding medium post can be found [here](https://medium.com/@maartengrooten
         3.1. [Installation](#installation)    
         3.2. [Basic Usage](#usage)   
         3.3. [Overview](#overview)    
-   4. [Example - 20Newsgroups](#example)  
            
 <!--te-->
  
