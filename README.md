@@ -3,7 +3,7 @@
 [![PyPI - Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://pypi.org/project/vlac/)
 [![PyPI - Python](https://img.shields.io/badge/python-3.6-blue.svg)](https://pypi.org/project/bertopic/)
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
-[![PyPI - PyPi](https://img.shields.io/badge/pypi-v0.1.0-EF6C00.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - PyPi](https://img.shields.io/badge/pypi-v0.1.1-EF6C00.svg)](https://pypi.org/project/bertopic/)
 
 BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
@@ -42,10 +42,18 @@ and 🤗 transformers embeddings. The results is **BERTopic**, an algorithm for 
 
 <a name="installation"/></a>
 ###  2.1. Installation
+**[PyTorch 1.2.0](https://pytorch.org/get-started/locally/)** or higher is recommended. If the install below gives an
+error, please install pytorch first [here](https://pytorch.org/get-started/locally/). 
 
-Installation can be done using [pypi](https://pypi.org/project/bertopic/)
+Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 
 ``pip install bertopic``
+
+**PyTorch**  
+If you get  
+
+If you want to use a GPU / CUDA, you must install PyTorch with the matching CUDA Version. Follow
+[PyTorch - Get Started](https://pytorch.org/get-started/locally/) for further details how to install PyTorch.
 
 <a name="usage"/></a>
 ###  2.2. Usage

@@ -1,5 +1,3 @@
--f https://download.pytorch.org/whl/torch_stable.html
-torch==1.6.0
 tqdm==4.49.0
 numpy==1.19.2
 umap-learn==0.4.6
