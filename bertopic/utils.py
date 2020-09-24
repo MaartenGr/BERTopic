@@ -1,9 +1,14 @@
-import time
+import logging
 
 
-def ts():
-    """ Generates a timestamp for use in logging messages when verbose=True """
-    return time.ctime(time.time())
+def create_logger():
+    """ Initialize logger """
+    logger = logging.getLogger('BERTopic')
+    logger.setLevel(logging.WARNING)
+    sh = logging.StreamHandler()
+    sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
+    logger.addHandler(sh)
+    return logger
 
 
 def sentence_models():
