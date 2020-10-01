@@ -74,6 +74,7 @@ class BERTopic:
         self.topics = None
         self.topic_sizes = None
         self.reduced_topics_mapped = None
+        self.mapped_topics = None
 
         if verbose:
             logger.setLevel(logging.DEBUG)

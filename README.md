@@ -1,9 +1,9 @@
-# BERTopic
+<img src="https://raw.githubusercontent.com/MaartenGr/BERTopic/master/images/logo.png" height="220" />
 
 [![PyPI - Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://pypi.org/project/vlac/)
 [![PyPI - Python](https://img.shields.io/badge/python-3.6-blue.svg)](https://pypi.org/project/bertopic/)
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
-[![PyPI - PyPi](https://img.shields.io/badge/pypi-v0.1.1-EF6C00.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - PyPi](https://img.shields.io/badge/pypi-v0.1.2-EF6C00.svg)](https://pypi.org/project/bertopic/)
 
 BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
@@ -22,7 +22,7 @@ Corresponding medium post can be found [here](https://medium.com/@maartengrooten
         3.1. [Installation](#installation)    
         3.2. [Basic Usage](#usage)   
         3.3. [Overview](#overview)    
-           
+   4. [Google Colaboratory](#colab)   
 <!--te-->
  
 <a name="about"/></a>
@@ -158,6 +158,17 @@ Each cluster is converted to a single document instead of a set of documents.
 Then, the frequency of word `t` are extracted for each class `i` and divided by the total number of words `w`. 
 This action can now be seen as a form of regularization of frequent words in the class.
 Next, the total, unjoined, number of documents `m` is divided by the total frequency of word `t` across all classes `n`.
+
+<a name="colab"/></a>
+## 4. Google Colaboratory
+[Back to ToC](#toc)  
+Since we are using transformer-based embeddings you might want to leverage gpu-acceleration
+to speed up the model. For that, I have created a tutorial 
+[Google Colab Notebook](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing)
+that you can use to run the model as shown above. 
+
+If you want to tweak the inner workings or follow along with the medium post, use [this](https://colab.research.google.com/drive/1-SOw0WHZ_ZXfNE36KUe3Z-UpAO3vdhGg?usp=sharing)
+ notebook instead. 
 
 
 
