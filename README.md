@@ -8,7 +8,7 @@
 BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
 
-Corresponding medium post can be found [here](https://medium.com/@maartengrootendorst).
+Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99).
 
 <a name="toc"/></a>
 ## Table of Contents  
