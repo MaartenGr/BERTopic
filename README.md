@@ -170,5 +170,9 @@ that you can use to run the model as shown above.
 If you want to tweak the inner workings or follow along with the medium post, use [this](https://colab.research.google.com/drive/1-SOw0WHZ_ZXfNE36KUe3Z-UpAO3vdhGg?usp=sharing)
  notebook instead. 
 
+## References
+Angelov, D. (2020). [Top2Vec: Distributed Representations of Topics.](https://arxiv.org/abs/2008.09470) *arXiv preprint arXiv*:2008.09470.
+
+
 
 
