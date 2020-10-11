@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import joblib
 import logging
 import numpy as np
@@ -11,8 +14,9 @@ from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# utils
-from bertopic.utils import create_logger
+# BERTopic
+from .ctfidf import ClassTFIDF
+from .utils import create_logger, check_documents_type
 logger = create_logger()
 
 
@@ -89,6 +93,7 @@ class BERTopic:
         documents : List[str]
             A list of documents to fit on
         """
+        check_documents_type(documents)
         self.fit_transform(documents)
         return self
 
@@ -114,6 +119,7 @@ class BERTopic:
         predictions : List[int]
             Topic predictions for each documents
         """
+        check_documents_type(documents)
         documents = pd.DataFrame({"Document": documents,
                                   "ID": range(len(documents)),
                                   "Topic": None})
@@ -128,15 +134,15 @@ class BERTopic:
         documents = self._cluster_embeddings(umap_embeddings, documents)
 
         # Extract topics by calculating c-TF-IDF
-        tf_idf = self._extract_topics(documents)
+        c_tf_idf = self._extract_topics(documents)
 
         if self.nr_topics:
-            documents = self._reduce_topics(documents, tf_idf)
+            documents = self._reduce_topics(documents, c_tf_idf)
 
         predictions = documents.Topic.to_list()
 
         if debug:
-            return documents, embeddings, umap_embeddings, tf_idf
+            return documents, embeddings, umap_embeddings, c_tf_idf
 
         return predictions
 
@@ -246,17 +252,17 @@ class BERTopic:
 
         Returns
         -------
-        tf_idf : np.ndarray
+        c_tf_idf : np.ndarray
             The resulting matrix giving a value (importance score) for each word per topic
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
-        tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
-        self._extract_words_per_topic(tf_idf, words)
+        c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
+        self._extract_words_per_topic(c_tf_idf, words)
 
         if topic_reduction:
             logger.info("Constructed topics with c-TF-IDF")
 
-        return tf_idf
+        return c_tf_idf
 
     def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[np.ndarray, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
@@ -287,15 +293,13 @@ class BERTopic:
             The vectorized used
         """
         documents = documents_per_topic.Document.values
-        count = CountVectorizer(ngram_range=self.n_gram_range, stop_words="english").fit(documents)
-        t = count.transform(documents).toarray()
-        w = t.sum(axis=1)
-        tf = np.divide(t.T, w)
-        sum_t = t.sum(axis=0)
-        idf = np.log(np.divide(m, sum_t)).reshape(-1, 1)
-        tf_idf = np.multiply(tf, idf)
+        count = CountVectorizer(stop_words="english").fit(documents)
         words = count.get_feature_names()
-        return tf_idf, words
+        X = count.transform(documents)
+        transformer = ClassTFIDF().fit(X, n_samples=m)
+        c_tf_idf = transformer.transform(X).toarray()
+
+        return c_tf_idf, words
 
     def _update_topic_size(self, documents: pd.DataFrame) -> None:
         """ Calculate the topic sizes
@@ -308,7 +312,7 @@ class BERTopic:
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
         self.topic_sizes = dict(zip(sizes.Topic, sizes.Document))
 
-    def _extract_words_per_topic(self, tf_idf: np.ndarray, words: List[str]):
+    def _extract_words_per_topic(self, c_tf_idf: np.ndarray, words: List[str]):
         """ Based on tf_idf scores per topic, extract the top n words per topic
 
         Parameters
@@ -320,9 +324,8 @@ class BERTopic:
             List of all words (sorted according to tf_idf matrix position)
         """
         labels = sorted(list(self.topic_sizes.keys()))
-        tf_idf_transposed = tf_idf.T
-        indices = tf_idf_transposed.argsort()[:, -self.top_n_words:]
-        self.topics = {label: [(words[j], tf_idf_transposed[i][j])
+        indices = c_tf_idf.argsort()[:, -self.top_n_words:]
+        self.topics = {label: [(words[j], c_tf_idf[i][j])
                                for j in indices[i]][::-1]
                        for i, label in enumerate(labels)}
 
@@ -342,7 +345,7 @@ class BERTopic:
         """ Return the the size of a topic """
         return self.topic_sizes.items()[topic]
 
-    def _reduce_topics(self, documents: pd.DataFrame, tf_idf: np.ndarray) -> pd.DataFrame:
+    def _reduce_topics(self, documents: pd.DataFrame, c_tf_idf: np.ndarray) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
         Parameters
@@ -350,7 +353,7 @@ class BERTopic:
         documents : pd.DataFrame
             Dataframe with documents and their corresponding IDs and Topics
 
-        tf_idf : np.ndarray
+        c_tf_idf : np.ndarray
             c-TF-IDF matrix
 
         Returns
@@ -364,7 +367,7 @@ class BERTopic:
 
         for _ in range(nr_to_reduce):
             # Create topic similarity matrix
-            similarities = cosine_similarity(tf_idf.T)
+            similarities = cosine_similarity(c_tf_idf)
             np.fill_diagonal(similarities, 0)
 
             # Find most similar topic to least common topic
