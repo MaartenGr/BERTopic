@@ -1,5 +1,10 @@
 import setuptools
 
+test_packages = [
+    "pytest>=5.4.3",
+    "pytest-cov>=2.6.1"
+]
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -40,5 +45,8 @@ setuptools.setup(
         'sentence_transformers',
         'joblib',
       ],
+    extras_require={
+        "test": test_packages,
+    },
     python_requires='>=3.6',
 )
