@@ -1,31 +1,17 @@
 import setuptools
 
-
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
-
-base_packages = [
-    "tqdm>=4.49.0",
-    "numpy>=1.19.2",
-    "umap-learn>=0.4.6",
-    "hdbscan>=0.8.26",
-    'pandas>=1.1.2',
-    "scikit_learn>=0.23.2",
-    "sentence_transformers>=0.3.6",
-    "joblib>=0.15.1",
-    "scipy>=1.5.2"
-]
-
 test_packages = [
     "pytest>=5.4.3",
     "pytest-cov>=2.6.1"
 ]
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setuptools.setup(
     name="bertopic",
     packages=["bertopic"],
-    version="0.2.0",
+    version="0.2.1",
     author="Maarten Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
@@ -48,9 +34,19 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.8",
     ],
-    install_requires=base_packages,
+    install_requires=[
+        'torch',
+        'tqdm',
+        'numpy',
+        'umap-learn',
+        'hdbscan',
+        'pandas',
+        'scikit_learn',
+        'sentence_transformers',
+        'joblib',
+      ],
     extras_require={
-            "test": test_packages,
-        },
+        "test": test_packages,
+    },
     python_requires='>=3.6',
 )
