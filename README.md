@@ -1,4 +1,4 @@
-[![PyPI - Python](https://img.shields.io/badge/python-3.6|3.7|3.8-blue.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - Python](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-blue.svg)](https://pypi.org/project/bertopic/)
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
@@ -17,14 +17,14 @@ Corresponding medium post can be found [here](https://towardsdatascience.com/top
 ## Table of Contents  
 <!--ts-->
    1. [About the Project](#about)  
-   2. [Algorithm](#algorithm)  
-        2.1. [Sentence Transformer](#sentence)  
-        2.2. [UMAP + HDBSCAN](#umap)  
-        2.3. [c-TF-IDF](#ctfidf)  
-   3. [Getting Started](#gettingstarted)    
-        3.1. [Installation](#installation)    
-        3.2. [Basic Usage](#usage)   
-        3.3. [Overview](#overview)    
+   2. [Getting Started](#gettingstarted)    
+        2.1. [Installation](#installation)    
+        2.2. [Basic Usage](#usage)   
+        2.3. [Overview](#overview) 
+   3. [Algorithm](#algorithm)  
+        3.1. [Sentence Transformer](#sentence)  
+        3.2. [UMAP + HDBSCAN](#umap)  
+        3.3. [c-TF-IDF](#ctfidf)     
    4. [Google Colaboratory](#colab)   
 <!--te-->
  
