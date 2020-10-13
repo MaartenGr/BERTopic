@@ -48,12 +48,6 @@ Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 
 ``pip install bertopic``
 
-**PyTorch**  
-If you get  
-
-If you want to use a GPU / CUDA, you must install PyTorch with the matching CUDA Version. Follow
-[PyTorch - Get Started](https://pytorch.org/get-started/locally/) for further details how to install PyTorch.
-
 <a name="usage"/></a>
 ###  2.2. Usage
 
@@ -86,6 +80,7 @@ The resulting topics can be accessed through `model.get_topic(topic)`:
  ('baseball', 0.0029245163154193524)]
 ``` 
 
+You can find an overview of all models currently in BERTopic [here](https://www.sbert.net/docs/pretrained_models.html) and [here](https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0). 
 
 <a name="overview"/></a>
 ###  2.3. Overview
