@@ -1,9 +1,12 @@
-<img src="https://raw.githubusercontent.com/MaartenGr/BERTopic/master/images/logo.png" height="220" />
-
-[![PyPI - Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://pypi.org/project/vlac/)
-[![PyPI - Python](https://img.shields.io/badge/python-3.6-blue.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - Python](https://img.shields.io/badge/python-3.6|3.7|3.8-blue.svg)](https://pypi.org/project/bertopic/)
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
-[![PyPI - PyPi](https://img.shields.io/badge/pypi-v0.2.1-EF6C00.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
+[![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
+
+
+# BERTopic
+
+<img src="images/logo.png" width="35%" height="35%" align="right" />
 
 BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
