@@ -21,40 +21,36 @@ logger = create_logger()
 
 
 class BERTopic:
-    """ Transformer-based model for Topic Modeling
+    """Transformer-based model for Topic Modeling
 
-    Parameters
-    ----------
-    bert_model, str, default 'distilbert-base-nli-mean-tokens'
-        Model to use. Overview of options:
-            https://www.sbert.net/docs/pretrained_models.html
+    Arguments:
+        bert_model: Model to use. Overview of options can be found here
+                          https://www.sbert.net/docs/pretrained_models.html
+        top_n_words: The number of words per topic to extract
+        nr_topics: Specifying the number of topics will reduce the initial
+                         number of topics to the value specified. This reduction can take
+                         a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
+                         IF this is set to None, no reduction is applied.
+        n_gram_range: The n-gram range for the CountVectorizer.
+                      Advised to keep high values between 1 and 3.
+                      More would likely lead to memory issues.
+        min_topic_size: The minimum size of the topic.
+        n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
+                     for manifold approximation (UMAP).
+        n_components: The dimension of the space to embed into when reducing dimensionality with UMAP.
+        verbose: Changes the verbosity of the model, Set to True if you want
+                 to track the stages of the model.
 
-    top_n_words : int, default 20
-        The number of words per topic to extract
+    Usage:
+    ```python
+    from bertopic import BERTopic
+    from sklearn.datasets import fetch_20newsgroups
 
-    nr_topics : int, default None
-        Specifying the number of topics will reduce the initial
-        number of topics to the value specified. This reduction can take
-        a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-        IF this is set to None, no reduction is applied.
+    docs = fetch_20newsgroups(subset='all')['data']
 
-    n_gram_range : Tuple[int (low), int (high)], default (1, 1)
-        The n-gram range for the CountVectorizer. Advised to keep high values
-        between 1 and 3. More would likely lead to memory issues.
-
-    min_topic_size : int, optional (default=30)
-        The minimum size of the topic.
-
-    n_neighbors: int, default 15
-        The size of local neighborhood (in terms of number of neighboring sample points) used
-        for manifold approximation (UMAP).
-
-    n_components: int, default 5
-        The dimension of the space to embed into when reducing dimensionality with UMAP.
-
-    verbose, bool, optional (default=False)
-        Changes the verbosity of the model, Set to True if you want
-        to track the stages of the model.
+    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+    topics = model.fit_transform(docs)
+    ```
     """
     def __init__(self,
                  bert_model: str = 'distilbert-base-nli-mean-tokens',
@@ -88,36 +84,22 @@ class BERTopic:
     def fit(self, documents: List[str]):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
-        Parameters
-        ----------
-        documents : List[str]
-            A list of documents to fit on
+        Arguments:
+            documents: A list of documents to fit on
         """
         check_documents_type(documents)
         self.fit_transform(documents)
         return self
 
     def fit_transform(self,
-                      documents: List[str],
-                      debug: bool = False) -> Union[List[int],
-                                                    Tuple[pd.DataFrame,
-                                                          np.ndarray,
-                                                          np.ndarray,
-                                                          np.ndarray]]:
+                      documents: List[str]) -> List[int]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
-        Parameters
-        ----------
-        documents : List[str]
-            A list of documents to fit on
+        Arguments:
+            documents: A list of documents to fit on
 
-        debug : bool, default False
-            Whether to return all intermediate results
-
-        Returns
-        -------
-        predictions : List[int]
-            Topic predictions for each documents
+        Returns:
+            predictions: Topic predictions for each documents
         """
         check_documents_type(documents)
         documents = pd.DataFrame({"Document": documents,
@@ -141,9 +123,6 @@ class BERTopic:
 
         predictions = documents.Topic.to_list()
 
-        if debug:
-            return documents, embeddings, umap_embeddings, c_tf_idf
-
         return predictions
 
     def transform(self, documents: Union[str, List[str]]) -> List[int]:
@@ -164,16 +143,12 @@ class BERTopic:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
-        Parameters
-        ----------
-        documents : pd.DataFrame
-            Dataframe with documents and their corresponding IDs
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs
 
-        Returns
-        -------
-        embeddings : np.ndarray
-            The extracted embeddings using the sentence transformer
-            module. Typically uses pre-trained huggingface models.
+        Returns:
+            embeddings: The extracted embeddings using the sentence transformer
+                        module. Typically uses pre-trained huggingface models.
         """
         model = SentenceTransformer(self.bert_model)
         logger.info("Loaded BERT model")
@@ -193,15 +168,11 @@ class BERTopic:
     def _reduce_dimensionality(self, embeddings: np.ndarray) -> np.ndarray:
         """ Reduce dimensionality of embeddings using UMAP and train a UMAP model
 
-        Parameters
-        ----------
-        embeddings : np.ndarray
-            The extracted embeddings using the sentence transformer module.
+        Arguments:
+            embeddings: The extracted embeddings using the sentence transformer module.
 
-        Returns
-        -------
-        umap_embeddings : np.ndarray
-            The reduced embeddings
+        Returns:
+            umap_embeddings: The reduced embeddings
         """
         self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
                                     n_components=self.n_components,
@@ -214,18 +185,13 @@ class BERTopic:
     def _cluster_embeddings(self, umap_embeddings: np.ndarray, documents: pd.DataFrame) -> pd.DataFrame:
         """ Cluster UMAP embeddings with HDBSCAN
 
-        Parameters
-        ----------
-        umap_embeddings : np.ndarray
-            The reduced sentence embeddings with UMAP
+        Arguments:
+            umap_embeddings: The reduced sentence embeddings with UMAP
+            documents: Dataframe with documents and their corresponding IDs
 
-        documents : pd.DataFrame
-            Dataframe with documents and their corresponding IDs
-
-        Returns
-        -------
-        documents : pd.DataFrame
-            Updated dataframe with documents and their corresponding IDs and newly added Topics
+        Returns:
+            documents: Updated dataframe with documents and their corresponding IDs
+                       and newly added Topics
         """
         self.cluster_model = hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
                                              metric='euclidean',
@@ -241,19 +207,14 @@ class BERTopic:
                         topic_reduction: bool = False) -> np.ndarray:
         """ Extract topics from the clusters using a class-based TF-IDF
 
-        Parameters
-        ----------
-        documents : pd.DataFrame
-            Dataframe with documents and their corresponding IDs
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs
 
-        topic_reduction : bool, default = False
-            Controls verbosity if topic reduction is applied since
-            it should not show reduction over and over again.
+            topic_reduction: Controls verbosity if topic reduction is applied since
+                             it should not show reduction over and over again.
 
-        Returns
-        -------
-        c_tf_idf : np.ndarray
-            The resulting matrix giving a value (importance score) for each word per topic
+        Returns:
+            c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
@@ -267,30 +228,14 @@ class BERTopic:
     def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[np.ndarray, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
-        C-TF-IDF can best be explained as a TF-IDF formula adopted for multiple classes
-        by joining all documents per class. Thus, each class is converted to a single document
-        instead of set of documents. Then, the frequency of words **t** are extracted for
-        each class **i** and divided by the total number of words **w**.
-        Next, the total, unjoined, number of documents across all classes **m** is divided by the total
-        sum of word **i** across all classes.
+        Arguments:
+            documents_per_topic: The joined documents per topic such that each topic has a single
+                                 string made out of multiple documents
+            m: The total number of documents (unjoined)
 
-        Parameters
-        ----------
-        documents_per_topic : pd.DataFrame
-            The joined documents per topic such that each topic has a single
-            string made out of multiple documents
-
-        m : int
-            The total number of documents (unjoined)
-
-
-        Returns
-        -------
-        tf_idf : np.ndarray
-            The resulting matrix giving a value (importance score) for each word per topic
-
-        count : CountVectorizer
-            The vectorized used
+        Returns:
+            tf_idf: The resulting matrix giving a value (importance score) for each word per topic
+            words: The names of the words to which values were given
         """
         documents = documents_per_topic.Document.values
         count = CountVectorizer(stop_words="english").fit(documents)
@@ -304,10 +249,8 @@ class BERTopic:
     def _update_topic_size(self, documents: pd.DataFrame) -> None:
         """ Calculate the topic sizes
 
-        Parameters
-        ----------
-        documents : pd.DataFrame
-            Updated dataframe with documents and their corresponding IDs and newly added Topics
+        Arguments:
+            documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
         """
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
         self.topic_sizes = dict(zip(sizes.Topic, sizes.Document))
@@ -315,13 +258,9 @@ class BERTopic:
     def _extract_words_per_topic(self, c_tf_idf: np.ndarray, words: List[str]):
         """ Based on tf_idf scores per topic, extract the top n words per topic
 
-        Parameters
-        ----------
-        tf_idf : np.ndarray
-            tf_idf matrix
-
-        words : List[str]
-            List of all words (sorted according to tf_idf matrix position)
+        Arguments:
+        tf_idf: tf_idf matrix
+        words: List of all words (sorted according to tf_idf matrix position)
         """
         labels = sorted(list(self.topic_sizes.keys()))
         indices = c_tf_idf.argsort()[:, -self.top_n_words:]
@@ -348,18 +287,12 @@ class BERTopic:
     def _reduce_topics(self, documents: pd.DataFrame, c_tf_idf: np.ndarray) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
-        Parameters
-        ----------
-        documents : pd.DataFrame
-            Dataframe with documents and their corresponding IDs and Topics
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs and Topics
+            c_tf_idf: c-TF-IDF matrix
 
-        c_tf_idf : np.ndarray
-            c-TF-IDF matrix
-
-        Returns
-        -------
-        documents : pd.DataFrame
-            Updated dataframe with documents and the reduced number of Topics
+        Returns:
+            documents: Updated dataframe with documents and the reduced number of Topics
         """
         self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())

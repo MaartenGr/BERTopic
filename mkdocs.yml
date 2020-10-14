@@ -1,0 +1,45 @@
+site_name: BERTopic
+extra_css: [style.css]
+repo_url: https://github.com/MaartenGr/BERTopic
+site_url: https://maartengr.github.io/bertopic/
+site_description: Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.
+site_author: Maarten P. Grootendorst
+use_directory_urls: false
+nav:
+  - Home:
+    - Index: index.md
+  - BERTopic:
+      - Algorithm: algorithm.md
+  - API:
+      - cTFIDF: api/ctfidf.md
+      - BERTopic: api/bertopic.md
+plugins:
+  - mkdocstrings:
+      watch:
+        - bertopic
+  - search
+copyright: Copyright &copy; 2020 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+theme:
+  custom_dir: images/
+  name: material
+  icon:
+    logo: material/library
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  favicon: icon.png
+  logo: icon.png
+  feature:
+    tabs: true
+  palette:
+    primary: indigo
+    accent: blue
+markdown_extensions:
+  - codehilite
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.highlight:
+      use_pygments: true
+  - toc:
+      permalink: true
