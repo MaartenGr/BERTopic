@@ -622,7 +622,7 @@
 <td><code></code></td>
 <td>
 <p>Model to use. Overview of options can be found here
-        https://www.sbert.net/docs/pretrained_models.html</p>
+              https://www.sbert.net/docs/pretrained_models.html</p>
 </td>
 <td><em>required</em></td>
 </tr>
@@ -639,9 +639,9 @@
 <td><code></code></td>
 <td>
 <p>Specifying the number of topics will reduce the initial
-       number of topics to the value specified. This reduction can take
-       a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-       IF this is set to None, no reduction is applied.</p>
+             number of topics to the value specified. This reduction can take
+             a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
+             IF this is set to None, no reduction is applied.</p>
 </td>
 <td><em>required</em></td>
 </tr>
@@ -677,6 +677,15 @@
 <td><code></code></td>
 <td>
 <p>The dimension of the space to embed into when reducing dimensionality with UMAP.</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>stop_words</code></td>
+<td><code></code></td>
+<td>
+<p>Stopwords that can be used as either a list of strings, or the name of the
+        language as a string. For example: 'english' or ['the', 'and', 'I'].</p>
 </td>
 <td><em>required</em></td>
 </tr>
@@ -802,7 +811,8 @@ fit_transform<span class="p">(</span><span class="bp">self</span><span class="p"
 <details class="quote">
           <summary>Source code in <code>bertopic\model.py</code></summary>
           <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<pre><span></span><code><span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
     <span class="sd">""" Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
 
 <span class="sd">    Arguments:</span>
