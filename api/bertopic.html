@@ -406,13 +406,6 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bertopic.model.BERTopic" class="md-nav__link">
-    bertopic.model.BERTopic
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#bertopic.model.BERTopic.fit" class="md-nav__link">
     fit()
   </a>
@@ -471,6 +464,13 @@
         <li class="md-nav__item">
   <a href="#bertopic.model.BERTopic.transform" class="md-nav__link">
     transform()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bertopic.model.BERTopic.visualize_distribution" class="md-nav__link">
+    visualize_distribution()
   </a>
   
 </li>
@@ -512,13 +512,6 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bertopic.model.BERTopic" class="md-nav__link">
-    bertopic.model.BERTopic
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#bertopic.model.BERTopic.fit" class="md-nav__link">
     fit()
   </a>
@@ -581,6 +574,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#bertopic.model.BERTopic.visualize_distribution" class="md-nav__link">
+    visualize_distribution()
+  </a>
+  
+</li>
+      
       
       
       
@@ -601,12 +601,8 @@
                 
                 
                 <h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
-<div class="doc doc-object doc-class">
-<h2 class="hidden-toc" href="#bertopic.model.BERTopic" id="bertopic.model.BERTopic" style="visibility: hidden; position: absolute;">
-        <a class="headerlink" href="#bertopic.model.BERTopic" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents first">
 <p>Transformer-based model for Topic Modeling</p>
-<p><strong>Parameters:</strong></p>
+<p><strong>Parameters</strong></p>
 <table>
 <thead>
 <tr>
@@ -619,110 +615,92 @@
 <tbody>
 <tr>
 <td><code>bert_model</code></td>
-<td><code></code></td>
-<td>
-<p>Model to use. Overview of options can be found here
-              https://www.sbert.net/docs/pretrained_models.html</p>
-</td>
-<td><em>required</em></td>
+<td><code>str</code></td>
+<td>Model to use. Overview of options can be found here https://www.sbert.net/docs/pretrained_models.html</td>
+<td><code>'distilbert-base-nli-mean-tokens'</code></td>
 </tr>
 <tr>
 <td><code>top_n_words</code></td>
-<td><code></code></td>
-<td>
-<p>The number of words per topic to extract</p>
-</td>
-<td><em>required</em></td>
+<td><code>int</code></td>
+<td>The number of words per topic to extract</td>
+<td><code>20</code></td>
 </tr>
 <tr>
 <td><code>nr_topics</code></td>
-<td><code></code></td>
-<td>
-<p>Specifying the number of topics will reduce the initial
-             number of topics to the value specified. This reduction can take
-             a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-             IF this is set to None, no reduction is applied.</p>
-</td>
-<td><em>required</em></td>
+<td><code>int</code></td>
+<td>Specifying the number of topics will reduce the initial number of topics to the value specified. This reduction can take a while as each reduction in topics (-1) activates a c-TF-IDF calculation. IF this is set to None, no reduction is applied.</td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>n_gram_range</code></td>
-<td><code></code></td>
-<td>
-<p>The n-gram range for the CountVectorizer.
-          Advised to keep high values between 1 and 3.
-          More would likely lead to memory issues.</p>
-</td>
-<td><em>required</em></td>
+<td><code>Tuple[int, int]</code></td>
+<td>The n-gram range for the CountVectorizer. Advised to keep high values between 1 and 3. More would likely lead to memory issues.</td>
+<td><code>(1, 1)</code></td>
 </tr>
 <tr>
 <td><code>min_topic_size</code></td>
-<td><code></code></td>
-<td>
-<p>The minimum size of the topic.</p>
-</td>
-<td><em>required</em></td>
+<td><code>int</code></td>
+<td>The minimum size of the topic.</td>
+<td><code>30</code></td>
 </tr>
 <tr>
 <td><code>n_neighbors</code></td>
-<td><code></code></td>
-<td>
-<p>The size of local neighborhood (in terms of number of neighboring sample points) used
-         for manifold approximation (UMAP).</p>
-</td>
-<td><em>required</em></td>
+<td><code>int</code></td>
+<td>The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation (UMAP).</td>
+<td><code>15</code></td>
 </tr>
 <tr>
 <td><code>n_components</code></td>
-<td><code></code></td>
-<td>
-<p>The dimension of the space to embed into when reducing dimensionality with UMAP.</p>
-</td>
-<td><em>required</em></td>
+<td><code>int</code></td>
+<td>The dimension of the space to embed into when reducing dimensionality with UMAP.</td>
+<td><code>5</code></td>
 </tr>
 <tr>
 <td><code>stop_words</code></td>
-<td><code></code></td>
-<td>
-<p>Stopwords that can be used as either a list of strings, or the name of the
-        language as a string. For example: 'english' or ['the', 'and', 'I'].</p>
-</td>
-<td><em>required</em></td>
+<td><code>Union[str, List[str]]</code></td>
+<td>Stopwords that can be used as either a list of strings, or the name of the language as a string. For example: 'english' or ['the', 'and', 'I'].</td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>verbose</code></td>
-<td><code></code></td>
-<td>
-<p>Changes the verbosity of the model, Set to True if you want
-     to track the stages of the model.</p>
-</td>
-<td><em>required</em></td>
+<td><code>bool</code></td>
+<td>Changes the verbosity of the model, Set to True if you want to track the stages of the model.</td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
-<p>Usage:</p>
-<div class="codehilite">
-<pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<p>Usage:
+    <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
-<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">"distilbert-base-nli-mean-tokens"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-</code></pre>
-</div>
-<div class="doc doc-children">
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.fit">
+</code></pre></div></p>
+<h2 id="bertopic.model.BERTopic.fit"><code class="highlight"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>90
+91
+92
+93
+94
+95
+96
+97
+98</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
 
-        <code class="highlight language-python">
-fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.fit" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
+<span class="sd">        Arguments:</span>
+<span class="sd">            documents: A list of documents to fit on</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_documents_type</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+</td></tr></table>
+</details>
 <p>Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</p>
-<p><strong>Parameters:</strong></p>
+<p><strong>Parameters</strong></p>
 <table>
 <thead>
 <tr>
@@ -736,41 +714,88 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 <tr>
 <td><code>documents</code></td>
 <td><code>List[str]</code></td>
-<td>
-<p>A list of documents to fit on</p>
-</td>
+<td>A list of documents to fit on</td>
 <td><em>required</em></td>
 </tr>
 </tbody>
 </table>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-    <span class="sd">""" Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
+<h2 id="bertopic.model.BERTopic.fit_transform"><code class="highlight"><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit_transform" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                                     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        documents: A list of documents to fit on</span>
-<span class="sd">    """</span>
-    <span class="n">check_documents_type</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span>
-</code></pre>
-</div>
+<span class="sd">        Arguments:</span>
+<span class="sd">            documents: A list of documents to fit on</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            predictions: Topic predictions for each documents</span>
+<span class="sd">            probabilities: The topic probability distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_documents_type</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+        <span class="n">documents</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Document&quot;</span><span class="p">:</span> <span class="n">documents</span><span class="p">,</span>
+                                  <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">documents</span><span class="p">)),</span>
+                                  <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+
+        <span class="c1"># Extract BERT sentence embeddings</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="o">.</span><span class="n">Document</span><span class="p">)</span>
+
+        <span class="c1"># Reduce dimensionality with UMAP</span>
+        <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_dimensionality</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+
+        <span class="c1"># Cluster UMAP embeddings with HDBSCAN</span>
+        <span class="n">documents</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_embeddings</span><span class="p">(</span><span class="n">umap_embeddings</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>
+
+        <span class="c1"># Extract topics by calculating c-TF-IDF</span>
+        <span class="n">c_tf_idf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_topics</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_topics</span><span class="p">:</span>
+            <span class="n">documents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_topics</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">)</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_probabilities</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">probabilities</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.fit_transform">
-
-        <code class="highlight language-python">
-fit_transform<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.fit_transform" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Fit the models on a collection of documents, generate topics, and return the docs with topics</p>
-<p><strong>Parameters:</strong></p>
+<p><strong>Parameters</strong></p>
 <table>
 <thead>
 <tr>
@@ -784,14 +809,12 @@ fit_transform<span class="p">(</span><span class="bp">self</span><span class="p"
 <tr>
 <td><code>documents</code></td>
 <td><code>List[str]</code></td>
-<td>
-<p>A list of documents to fit on</p>
-</td>
+<td>A list of documents to fit on</td>
 <td><em>required</em></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Returns:</strong></p>
+<p><strong>Returns</strong></p>
 <table>
 <thead>
 <tr>
@@ -801,220 +824,346 @@ fit_transform<span class="p">(</span><span class="bp">self</span><span class="p"
 </thead>
 <tbody>
 <tr>
-<td><code>List[int]</code></td>
-<td>
-<p>predictions: Topic predictions for each documents</p>
-</td>
+<td><code>Tuple[List[int], numpy.ndarray]</code></td>
+<td>predictions: Topic predictions for each documents     probabilities: The topic probability distribution</td>
 </tr>
 </tbody>
 </table>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                  <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">""" Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        documents: A list of documents to fit on</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        predictions: Topic predictions for each documents</span>
-<span class="sd">    """</span>
-    <span class="n">check_documents_type</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-    <span class="n">documents</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Document"</span><span class="p">:</span> <span class="n">documents</span><span class="p">,</span>
-                              <span class="s2">"ID"</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">documents</span><span class="p">)),</span>
-                              <span class="s2">"Topic"</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
-
-    <span class="c1"># Extract BERT sentence embeddings</span>
-    <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="o">.</span><span class="n">Document</span><span class="p">)</span>
-
-    <span class="c1"># Reduce dimensionality with UMAP</span>
-    <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_dimensionality</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
-
-    <span class="c1"># Cluster UMAP embeddings with HDBSCAN</span>
-    <span class="n">documents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cluster_embeddings</span><span class="p">(</span><span class="n">umap_embeddings</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>
-
-    <span class="c1"># Extract topics by calculating c-TF-IDF</span>
-    <span class="n">c_tf_idf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_topics</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_topics</span><span class="p">:</span>
-        <span class="n">documents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_topics</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">)</span>
-
-    <span class="n">predictions</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">predictions</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.get_topic"><code class="highlight"><span class="n">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topic" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>302
+303
+304
+305
+306
+307</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">topic</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.get_topic">
-
-        <code class="highlight language-python">
-get_topic<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.get_topic" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Return top n words for a specific topic and their c-TF-IDF scores </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">""" Return top n words for a specific topic and their c-TF-IDF scores """</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.get_topic_freq"><code class="highlight"><span class="n">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topic_freq" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>313
+314
+315</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the the size of a topic &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="n">topic</span><span class="p">]</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.get_topic_freq">
-
-        <code class="highlight language-python">
-get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.get_topic_freq" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Return the the size of a topic </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">""" Return the the size of a topic """</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="n">topic</span><span class="p">]</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.get_topics"><code class="highlight"><span class="n">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topics" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>298
+299
+300</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.get_topics">
-
-        <code class="highlight language-python">
-get_topics<span class="p">(</span><span class="bp">self</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.get_topics" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Return topics with top n words and their c-TF-IDF score </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">""" Return topics with top n words and their c-TF-IDF score """</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.get_topics_freq"><code class="highlight"><span class="n">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topics_freq" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>309
+310
+311</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order) &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Topic&#39;</span><span class="p">,</span> <span class="s1">&#39;Count&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Count&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.get_topics_freq">
-
-        <code class="highlight language-python">
-get_topics_freq<span class="p">(</span><span class="bp">self</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.get_topics_freq" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Return the the size of topics (descending order) </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">""" Return the the size of topics (descending order) """</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'Topic'</span><span class="p">,</span> <span class="s1">'Count'</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"Count"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.load"><code class="highlight"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code> <em>(classmethod)</em><a class="headerlink" href="#bertopic.model.BERTopic.load" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>446
+447
+448
+449
+450</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Loads the model from the specified path &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.load">
-
-        <code class="highlight language-python">
-load<span class="p">(</span><span class="n">path</span><span class="p">)</span>        </code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
-  </span>
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.load" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Loads the model from the specified path </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">""" Loads the model from the specified path """</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.save"><code class="highlight"><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.save" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>441
+442
+443
+444</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Saves the model to the specified path &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.save">
-
-        <code class="highlight language-python">
-save<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>        </code>
-
-
-      <a class="headerlink" href="#bertopic.model.BERTopic.save" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
 <p>Saves the model to the specified path </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">""" Saves the model to the specified path """</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-</code></pre>
-</div>
+<h2 id="bertopic.model.BERTopic.transform"><code class="highlight"><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.transform" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            documents: A single document or a list of documents to fit on</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            predictions: Topic predictions for each documents</span>
+<span class="sd">            probabilities: The topic probability distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">documents</span><span class="p">]</span>
+
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+        <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">umap_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">membership_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
+        <span class="n">predictions</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">approximate_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_topics</span><span class="p">:</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_probabilities</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">probabilities</span> <span class="o">=</span> <span class="n">probabilities</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">probabilities</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-<div class="doc doc-object doc-method">
-<h2 class="doc doc-heading" id="bertopic.model.BERTopic.transform">
+<p>After having fit a model, use transform to predict new instances</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents</code></td>
+<td><code>Union[str, List[str]]</code></td>
+<td>A single document or a list of documents to fit on</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Tuple[List[int], numpy.ndarray]</code></td>
+<td>predictions: Topic predictions for each documents     probabilities: The topic probability distribution</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bertopic.model.BERTopic.visualize_distribution"><code class="highlight"><span class="n">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">min_probability</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.visualize_distribution" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                               <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                               <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                               <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
 
-        <code class="highlight language-python">
-transform<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>        </code>
+<span class="sd">        Arguments:</span>
+<span class="sd">            probabilities: An array of probability scores</span>
+<span class="sd">            min_probability: The minimum probability score to visualize.</span>
+<span class="sd">                             All others are ignored.</span>
+<span class="sd">            figsize: The size of the figure</span>
+<span class="sd">            save: Whether to save the resulting graph to probility.png</span>
 
+<span class="sd">        Returns</span>
+<span class="sd">            fig: The Matplotlib figure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-      <a class="headerlink" href="#bertopic.model.BERTopic.transform" title="Permanent link">&para;</a></h2>
-<div class="doc doc-contents ">
-<p>After having fit a model, use transform to predict new instances </p>
-<details class="quote">
-          <summary>Source code in <code>bertopic\model.py</code></summary>
-          <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">""" After having fit a model, use transform to predict new instances """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">documents</span><span class="p">]</span>
+        <span class="c1"># Get values and indices equal or exceed the minimum probability</span>
+        <span class="n">labels_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&gt;=</span> <span class="n">min_probability</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">labels_idx</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-    <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-    <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">umap_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
-    <span class="n">predictions</span><span class="p">,</span> <span class="n">strengths</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">approximate_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
+        <span class="c1"># Create labels</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">labels_idx</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">words</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>
+                    <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\bf{Topic }$ &quot;</span> <span class="o">+</span>
+                            <span class="sa">r</span><span class="s2">&quot;$\bf{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:}$ &quot;</span> <span class="o">+</span>
+                            <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                <span class="n">vals</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapped_topics</span><span class="p">:</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+        <span class="c1"># Create figure</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="n">vals</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#333F4B&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#333F4B&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">predictions</span>
-</code></pre>
-</div>
+        <span class="c1"># Set ticks and labels</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Probability&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#333F4B&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Topic Probability Distribution&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#333F4B&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Update spine style</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_bounds</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_bounds</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s1">&#39;axes&#39;</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">))</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;probability.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span>
+</code></pre></div>
+</td></tr></table>
 </details>
-</div>
-</div>
-</div>
-</div>
-</div>
+<p>Visualize the distribution of topic probabilities</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>probabilities</code></td>
+<td><code>ndarray</code></td>
+<td>An array of probability scores</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>min_probability</code></td>
+<td><code>float</code></td>
+<td>The minimum probability score to visualize. All others are ignored.</td>
+<td><code>0.01</code></td>
+</tr>
+<tr>
+<td><code>figsize</code></td>
+<td><code>tuple</code></td>
+<td>The size of the figure</td>
+<td><code>(10, 5)</code></td>
+</tr>
+<tr>
+<td><code>save</code></td>
+<td><code>bool</code></td>
+<td>Whether to save the resulting graph to probility.png</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p>Returns
+    fig: The Matplotlib figure.</p>
                 
                   
                 
