@@ -103,9 +103,6 @@ def test_topic_reduction(reduced_topics):
     assert not set(base_bertopic.get_topics_freq().Topic).difference(set(new_documents.Topic))
     assert base_bertopic.mapped_topics
 
-    for topic in set(base_bertopic.mapped_topics.keys()):
-        assert topic not in new_documents.Topic.unique()
-
 
 def test_topic_reduction_edge_cases(base_bertopic):
     """ Test whether the topics are not reduced if the reduced number
