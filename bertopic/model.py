@@ -351,12 +351,12 @@ class BERTopic:
         the topics that were mapped from were set to 0 as they
         were reduced.
         """
-        if self.mapped_topics:
-            for from_topic, to_topic in self.mapped_topics.items():
-                probabilities[:, to_topic] += probabilities[:, from_topic]
-                probabilities[:, from_topic] = 0
+        print("Reduced!")
+        for from_topic, to_topic in self.mapped_topics.items():
+            probabilities[:, to_topic] += probabilities[:, from_topic]
+            probabilities[:, from_topic] = 0
 
-        return probabilities
+        return probabilities.round(3)
 
     def save(self, path: str) -> None:
         """ Saves the model to the specified path """
