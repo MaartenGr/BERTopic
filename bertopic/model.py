@@ -6,6 +6,7 @@ import logging
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Dict, Union
+import matplotlib.pyplot as plt
 
 # Models
 import umap
@@ -21,11 +22,12 @@ logger = create_logger()
 
 
 class BERTopic:
-    """Transformer-based model for Topic Modeling
+    """
+    Transformer-based model for Topic Modeling
 
     Arguments:
         bert_model: Model to use. Overview of options can be found here
-                    https://www.sbert.net/docs/pretrained_models.html
+                        https://www.sbert.net/docs/pretrained_models.html
         top_n_words: The number of words per topic to extract
         nr_topics: Specifying the number of topics will reduce the initial
                    number of topics to the value specified. This reduction can take
@@ -44,15 +46,15 @@ class BERTopic:
                  to track the stages of the model.
 
     Usage:
-    ```python
-    from bertopic import BERTopic
-    from sklearn.datasets import fetch_20newsgroups
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
 
-    docs = fetch_20newsgroups(subset='all')['data']
+        docs = fetch_20newsgroups(subset='all')['data']
 
-    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
-    topics = model.fit_transform(docs)
-    ```
+        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+        topics = model.fit_transform(docs)
+        ```
     """
     def __init__(self,
                  bert_model: str = 'distilbert-base-nli-mean-tokens',
@@ -356,12 +358,85 @@ class BERTopic:
         of all topics that were mapped to the same topic. Then,
         the topics that were mapped from were set to 0 as they
         were reduced.
+
+        Arguments:
+            probabilities: An array containing probabilities
+
+        Returns:
+            probabilities: Updated probabilities
+
         """
         for from_topic, to_topic in self.mapped_topics.items():
             probabilities[:, to_topic] += probabilities[:, from_topic]
             probabilities[:, from_topic] = 0
 
         return probabilities.round(3)
+
+    def visualize_distribution(self,
+                               probabilities: np.ndarray,
+                               min_probability: float = 0.01,
+                               figsize: tuple = (10, 5),
+                               save: bool = False) -> plt.Figure:
+        """ Visualize the distribution of topic probabilities
+
+        Arguments:
+            probabilities: An array of probability scores
+            min_probability: The minimum probability score to visualize.
+                             All others are ignored.
+            figsize: The size of the figure
+            save: Whether to save the resulting graph to probility.png
+
+        Returns
+            fig: The Matplotlib figure.
+        """
+
+        # Get values and indices equal or exceed the minimum probability
+        labels_idx = np.argwhere(probabilities >= min_probability).flatten()
+        vals = probabilities[labels_idx].tolist()
+
+        # Create labels
+        labels = []
+        for idx in labels_idx:
+            label = []
+            words = self.get_topic(idx)
+            if words:
+                for word in words[:5]:
+                    label.append(word[0])
+                label = str(r"$\bf{Topic }$ " +
+                            r"$\bf{" + str(idx) + ":}$ " +
+                            " ".join(label))
+                labels.append(label)
+            else:
+                print(idx, probabilities[idx])
+                vals.remove(probabilities[idx])
+        pos = range(len(vals))
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=figsize)
+        plt.hlines(y=pos, xmin=0, xmax=vals, color='#333F4B', alpha=0.2, linewidth=15)
+        plt.hlines(y=np.argmax(vals), xmin=0, xmax=max(vals), color='#333F4B', alpha=1, linewidth=15)
+
+        # Set ticks and labels
+        ax.tick_params(axis='both', which='major', labelsize=12)
+        ax.set_xlabel('Probability', fontsize=15, fontweight='black', color='#333F4B')
+        ax.set_ylabel('')
+        plt.yticks(pos, labels)
+        fig.text(0, 1, 'Topic Probability Distribution', fontsize=15, fontweight='black', color='#333F4B')
+
+        # Update spine style
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['left'].set_bounds(pos[0], pos[-1])
+        ax.spines['bottom'].set_bounds(0, max(vals))
+        ax.spines['bottom'].set_position(('axes', -0.02))
+        ax.spines['left'].set_position(('axes', 0.02))
+
+        fig.tight_layout()
+
+        if save:
+            fig.savefig("probability.png", dpi=300, bbox_inches='tight')
+
+        return fig
 
     def save(self, path: str) -> None:
         """ Saves the model to the specified path """
@@ -373,6 +448,3 @@ class BERTopic:
         """ Loads the model from the specified path """
         with open(path, 'rb') as file:
             return joblib.load(file)
-
-
-

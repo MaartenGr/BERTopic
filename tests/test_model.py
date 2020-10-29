@@ -55,7 +55,7 @@ def test_cluster_embeddings(base_bertopic, samples, features, centers):
     old_df = pd.DataFrame({"Document": documents,
                            "ID": range(len(documents)),
                            "Topic": None})
-    new_df = base_bertopic._cluster_embeddings(embeddings, old_df)
+    new_df, _ = base_bertopic._cluster_embeddings(embeddings, old_df)
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
@@ -136,7 +136,7 @@ def test_fit(base_bertopic):
         all_topics = base_bertopic.get_topics()
         topic_zero = base_bertopic.get_topic(0)
 
-        prediction = base_bertopic.transform(["This is a new document to predict"])
+        prediction, probabilities = base_bertopic.transform(["This is a new document to predict"])
 
         assert isinstance(topic_zero, list)
         assert len(topic_zero) > 0
@@ -151,6 +151,7 @@ def test_fit(base_bertopic):
 
         assert isinstance(prediction, np.ndarray)
         assert len(prediction) == 1
+        assert len(probabilities) == len(all_topics)
 
 
 @mock.patch("bertopic.model.BERTopic._extract_embeddings")
@@ -158,11 +159,12 @@ def test_fit_transform(embeddings, base_bertopic):
     """ Test whether predictions are correctly made """
     blobs, _ = make_blobs(n_samples=len(newsgroup_docs), centers=5, n_features=768, random_state=42)
     embeddings.return_value = blobs
-    predictions = base_bertopic.fit_transform(newsgroup_docs)
+    predictions, probabilities = base_bertopic.fit_transform(newsgroup_docs)
 
     assert isinstance(predictions, list)
     assert len(predictions) == len(newsgroup_docs)
     assert not set(predictions).difference(set(base_bertopic.get_topics().keys()))
+    assert probabilities.shape[0] == len(newsgroup_docs)
 
 
 def test_load_model(base_bertopic):
