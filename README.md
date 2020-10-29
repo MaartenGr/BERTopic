@@ -18,8 +18,9 @@ Corresponding medium post can be found [here](https://towardsdatascience.com/top
    1. [About the Project](#about)  
    2. [Getting Started](#gettingstarted)    
         2.1. [Installation](#installation)    
-        2.2. [Basic Usage](#usage)   
-        2.3. [Overview](#overview) 
+        2.2. [Basic Usage](#usage)  
+        2.3. [Visualize Topic Probabilities](#prob)     
+        2.4. [Overview](#overview)   
    3. [Algorithm](#algorithm)  
         3.1. [Sentence Transformer](#sentence)  
         3.2. [UMAP + HDBSCAN](#umap)  
@@ -63,7 +64,7 @@ from sklearn.datasets import fetch_20newsgroups
 docs = fetch_20newsgroups(subset='all')['data']
 
 model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
-topics = model.fit_transform(docs)
+topics, probabilities = model.fit_transform(docs)
 ```
 
 The resulting topics can be accessed through `model.get_topic(topic)`:
@@ -84,8 +85,27 @@ The resulting topics can be accessed through `model.get_topic(topic)`:
 
 You can find an overview of all models currently in BERTopic [here](https://www.sbert.net/docs/pretrained_models.html) and [here](https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0). 
 
+<a name="prob"/></a>
+###  2.3. Visualize Topic Probabilities
+
+The variable `probabilities` that is returned from `transform()` or 'fit_transform()' can 
+be used to understand how confident BERTopic is that certain topics can be found in a document. 
+
+To visualize the distributions, we simply call:
+```python
+model.visualize_distribution(probabilities)
+```
+
+<img src="images/probabilities.png" width="75%" height="75%"/>
+
+
+**NOTE**: The distribution of the probabilities does not give an indication to 
+the distribution of the frequencies of topics across a document. It merely shows
+how confident BERTopic is that certain topics can be found in a document. 
+
+
 <a name="overview"/></a>
-###  2.3. Overview
+###  2.4. Overview
 
 
 | Methods | Code  | Returns  |
@@ -95,7 +115,9 @@ You can find an overview of all models currently in BERTopic [here](https://www.
 | Get single topic freq |  `model.get_topic_freq(12)` | int |
 | Get all topic freq    |  `model.get_topics_freq()` | DataFrame  |
 | Fit the model    |  `model.fit(docs])` | -  |
-| Predict new documents    |  `model.transform([new_doc])` | List[int]  |
+| Fit the model and predict documents    |  `model.fit_transform(docs])` | List[int], List[float]  |
+| Predict new documents    |  `model.transform([new_doc])` | List[int], List[float]  |
+| Visualize Topic Probability Distribution    |  `model.visualize_distribution(probabilities)` | Matplotlib.Figure  |
 | Save model    |  `model.save("my_model")` | -  |
 | Load model    |  `BERTopic.load("my_model")` | - |
    
