@@ -126,7 +126,7 @@ class BERTopic:
 
         if self.nr_topics:
             documents = self._reduce_topics(documents, c_tf_idf)
-            probabilities = self._reduce_probabilities(probabilities)
+            probabilities = self._map_probabilities(probabilities)
 
         predictions = documents.Topic.to_list()
 
@@ -152,7 +152,10 @@ class BERTopic:
 
         if self.mapped_topics:
             predictions = self._map_predictions(predictions)
-            probabilities = self._reduce_probabilities(probabilities)
+            probabilities = self._map_probabilities(probabilities)
+
+        if len(documents) == 1:
+            probabilities = probabilities.flatten()
 
         return predictions, probabilities
 
@@ -294,9 +297,12 @@ class BERTopic:
         """ Return topics with top n words and their c-TF-IDF score """
         return self.topics
 
-    def get_topic(self, topic: int) -> Dict[str, Tuple[str, float]]:
+    def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
         """ Return top n words for a specific topic and their c-TF-IDF scores """
-        return self.topics[topic]
+        if self.topics.get(topic):
+            return self.topics[topic]
+        else:
+            return False
 
     def get_topics_freq(self) -> pd.DataFrame:
         """ Return the the size of topics (descending order) """
@@ -344,14 +350,13 @@ class BERTopic:
 
         return documents
 
-    def _reduce_probabilities(self, probabilities: np.ndarray) -> np.ndarray:
-        """ Reduce the probabilities to the mapped topics.
+    def _map_probabilities(self, probabilities: np.ndarray) -> np.ndarray:
+        """ Map the probabilities to the reduced topics.
         This is achieved by adding the probabilities together
         of all topics that were mapped to the same topic. Then,
         the topics that were mapped from were set to 0 as they
         were reduced.
         """
-        print("Reduced!")
         for from_topic, to_topic in self.mapped_topics.items():
             probabilities[:, to_topic] += probabilities[:, from_topic]
             probabilities[:, from_topic] = 0
