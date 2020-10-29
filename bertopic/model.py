@@ -247,9 +247,6 @@ class BERTopic:
         c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
         self._extract_words_per_topic(c_tf_idf, words)
 
-        if topic_reduction:
-            logger.info("Constructed topics with c-TF-IDF")
-
         return c_tf_idf
 
     def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[np.ndarray, List[str]]:
