@@ -25,12 +25,12 @@ class BERTopic:
 
     Arguments:
         bert_model: Model to use. Overview of options can be found here
-                          https://www.sbert.net/docs/pretrained_models.html
+                    https://www.sbert.net/docs/pretrained_models.html
         top_n_words: The number of words per topic to extract
         nr_topics: Specifying the number of topics will reduce the initial
-                         number of topics to the value specified. This reduction can take
-                         a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-                         IF this is set to None, no reduction is applied.
+                   number of topics to the value specified. This reduction can take
+                   a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
+                   IF this is set to None, no reduction is applied.
         n_gram_range: The n-gram range for the CountVectorizer.
                       Advised to keep high values between 1 and 3.
                       More would likely lead to memory issues.
@@ -96,7 +96,8 @@ class BERTopic:
         return self
 
     def fit_transform(self,
-                      documents: List[str]) -> List[int]:
+                      documents: List[str]) -> Tuple[List[int],
+                                                     np.ndarray]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
@@ -104,6 +105,7 @@ class BERTopic:
 
         Returns:
             predictions: Topic predictions for each documents
+            probabilities: The topic probability distribution
         """
         check_documents_type(documents)
         documents = pd.DataFrame({"Document": documents,
@@ -117,31 +119,42 @@ class BERTopic:
         umap_embeddings = self._reduce_dimensionality(embeddings)
 
         # Cluster UMAP embeddings with HDBSCAN
-        documents = self._cluster_embeddings(umap_embeddings, documents)
+        documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
 
         # Extract topics by calculating c-TF-IDF
         c_tf_idf = self._extract_topics(documents)
 
         if self.nr_topics:
             documents = self._reduce_topics(documents, c_tf_idf)
+            probabilities = self._reduce_probabilities(probabilities)
 
         predictions = documents.Topic.to_list()
 
-        return predictions
+        return predictions, probabilities
 
-    def transform(self, documents: Union[str, List[str]]) -> List[int]:
-        """ After having fit a model, use transform to predict new instances """
+    def transform(self, documents: Union[str, List[str]]) -> Tuple[List[int], np.ndarray]:
+        """ After having fit a model, use transform to predict new instances
+
+        Arguments:
+            documents: A single document or a list of documents to fit on
+
+        Returns:
+            predictions: Topic predictions for each documents
+            probabilities: The topic probability distribution
+        """
         if isinstance(documents, str):
             documents = [documents]
 
         embeddings = self._extract_embeddings(documents)
         umap_embeddings = self.umap_model.transform(embeddings)
-        predictions, strengths = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)
+        probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
+        predictions, _ = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)
 
         if self.mapped_topics:
             predictions = self._map_predictions(predictions)
+            probabilities = self._reduce_probabilities(probabilities)
 
-        return predictions
+        return predictions, probabilities
 
     def _extract_embeddings(self, documents: List[str]) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
@@ -186,7 +199,10 @@ class BERTopic:
         logger.info("Reduced dimensionality with UMAP")
         return umap_embeddings
 
-    def _cluster_embeddings(self, umap_embeddings: np.ndarray, documents: pd.DataFrame) -> pd.DataFrame:
+    def _cluster_embeddings(self,
+                            umap_embeddings: np.ndarray,
+                            documents: pd.DataFrame) -> Tuple[pd.DataFrame,
+                                                              np.ndarray]:
         """ Cluster UMAP embeddings with HDBSCAN
 
         Arguments:
@@ -196,15 +212,17 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and their corresponding IDs
                        and newly added Topics
+            probabilities: The distribution of probabilities
         """
         self.cluster_model = hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
                                              metric='euclidean',
                                              cluster_selection_method='eom',
                                              prediction_data=True).fit(umap_embeddings)
         documents['Topic'] = self.cluster_model.labels_
+        probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
         self._update_topic_size(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
-        return documents
+        return documents, probabilities
 
     def _extract_topics(self,
                         documents: pd.DataFrame,
@@ -325,6 +343,20 @@ class BERTopic:
             logger.info(f"Reduced number of topics from {initial_nr_topics} to {self.nr_topics}")
 
         return documents
+
+    def _reduce_probabilities(self, probabilities: np.ndarray) -> np.ndarray:
+        """ Reduce the probabilities to the mapped topics.
+        This is achieved by adding the probabilities together
+        of all topics that were mapped to the same topic. Then,
+        the topics that were mapped from were set to 0 as they
+        were reduced.
+        """
+        if self.mapped_topics:
+            for from_topic, to_topic in self.mapped_topics.items():
+                probabilities[:, to_topic] += probabilities[:, from_topic]
+                probabilities[:, from_topic] = 0
+
+        return probabilities
 
     def save(self, path: str) -> None:
         """ Saves the model to the specified path """
