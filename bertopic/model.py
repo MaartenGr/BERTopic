@@ -374,9 +374,9 @@ class BERTopic:
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
-                               min_probability: float = 0.01,
+                               min_probability: float = 0.015,
                                figsize: tuple = (10, 5),
-                               save: bool = False) -> plt.Figure:
+                               save: bool = False):
         """ Visualize the distribution of topic probabilities
 
         Arguments:
@@ -385,9 +385,6 @@ class BERTopic:
                              All others are ignored.
             figsize: The size of the figure
             save: Whether to save the resulting graph to probility.png
-
-        Returns
-            fig: The Matplotlib figure.
         """
 
         # Get values and indices equal or exceed the minimum probability
@@ -435,8 +432,6 @@ class BERTopic:
 
         if save:
             fig.savefig("probability.png", dpi=300, bbox_inches='tight')
-
-        return fig
 
     def save(self, path: str) -> None:
         """ Saves the model to the specified path """
