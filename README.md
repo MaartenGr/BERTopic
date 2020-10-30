@@ -88,7 +88,7 @@ You can find an overview of all models currently in BERTopic [here](https://www.
 <a name="prob"/></a>
 ###  2.3. Visualize Topic Probabilities
 
-The variable `probabilities` that is returned from `transform()` or 'fit_transform()' can 
+The variable `probabilities` that is returned from `transform()` or `fit_transform()` can 
 be used to understand how confident BERTopic is that certain topics can be found in a document. 
 
 To visualize the distributions, we simply call:
