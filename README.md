@@ -93,7 +93,8 @@ be used to understand how confident BERTopic is that certain topics can be found
 
 To visualize the distributions, we simply call:
 ```python
-model.visualize_distribution(probabilities)
+# Make sure to input the probabilities of a single document!
+model.visualize_distribution(probabilities[0])
 ```
 
 <img src="images/probabilities.png" width="75%" height="75%"/>
