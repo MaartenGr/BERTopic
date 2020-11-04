@@ -217,7 +217,7 @@
   
     <li class="md-tabs__item">
       
-        <a href="ctfidf.html" class="md-tabs__link md-tabs__link--active">
+        <a href="bertopic.html" class="md-tabs__link md-tabs__link--active">
           API
         </a>
       
@@ -365,18 +365,6 @@
           
           
 
-
-  <li class="md-nav__item">
-    <a href="ctfidf.html" title="cTFIDF" class="md-nav__link">
-      cTFIDF
-    </a>
-  </li>
-
-        
-          
-          
-          
-
   
 
 
@@ -483,6 +471,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="ctfidf.html" title="cTFIDF" class="md-nav__link">
+      cTFIDF
+    </a>
   </li>
 
         
@@ -601,7 +601,9 @@
                 
                 
                 <h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
-<p>Transformer-based model for Topic Modeling</p>
+<p>BERTopic is a topic modeling technique that leverages BERT embeddings and
+c-TF-IDF to create dense clusters allowing for easily interpretable topics
+whilst keeping important words in the topic descriptions.</p>
 <p><strong>Parameters</strong></p>
 <table>
 <thead>
@@ -669,32 +671,110 @@
 </tr>
 </tbody>
 </table>
-<p>Usage:
-    <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-</code></pre></div></p>
-<h2 id="bertopic.model.BERTopic.fit"><code class="highlight"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>90
-91
-92
-93
-94
-95
-96
-97
-98</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+</code></pre></div>
+<p>If you want to use your own embeddings, use it as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Create embeddings</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create topic model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+<p>Due to the stochastisch nature of UMAP, the results from BERTopic might differ
+and the quality can degrade. Using your own embeddings allows you to
+try out BERTopic several times until you find the topics that suit
+you best.</p>
+<h2 id="bertopic.model.BERTopic.fit"><code class="highlight"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A list of documents to fit on</span>
+<span class="sd">            embeddings: Pre-trained document embeddings. These can be used</span>
+<span class="sd">                        instead of the sentence-transformer model</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        from bertopic import BERTopic</span>
+<span class="sd">        from sklearn.datasets import fetch_20newsgroups</span>
+
+<span class="sd">        docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
+<span class="sd">        model = BERTopic(&quot;distilbert-base-nli-mean-tokens&quot;, verbose=True).fit(docs)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        If you want to use your own embeddings, use it as follows:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        from bertopic import BERTopic</span>
+<span class="sd">        from sklearn.datasets import fetch_20newsgroups</span>
+<span class="sd">        from sentence_transformers import SentenceTransformer</span>
+
+<span class="sd">        # Create embeddings</span>
+<span class="sd">        docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
+<span class="sd">        sentence_model = SentenceTransformer(&quot;distilbert-base-nli-mean-tokens&quot;)</span>
+<span class="sd">        embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
+
+<span class="sd">        # Create topic model</span>
+<span class="sd">        model = BERTopic(None, verbose=True).fit(docs, embeddings)</span>
+<span class="sd">        ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">check_documents_type</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div>
 </td></tr></table>
@@ -717,55 +797,147 @@
 <td>A list of documents to fit on</td>
 <td><em>required</em></td>
 </tr>
+<tr>
+<td><code>embeddings</code></td>
+<td><code>ndarray</code></td>
+<td>Pre-trained document embeddings. These can be used instead of the sentence-transformer model</td>
+<td><code>None</code></td>
+</tr>
 </tbody>
 </table>
-<h2 id="bertopic.model.BERTopic.fit_transform"><code class="highlight"><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit_transform" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                      <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-                                                     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>If you want to use your own embeddings, use it as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Create embeddings</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create topic model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="bertopic.model.BERTopic.fit_transform"><code class="highlight"><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit_transform" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                      <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                                              <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot; Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A list of documents to fit on</span>
+<span class="sd">            embeddings: Pre-trained document embeddings. These can be used</span>
+<span class="sd">                        instead of the sentence-transformer model</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            predictions: Topic predictions for each documents</span>
 <span class="sd">            probabilities: The topic probability distribution</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        from bertopic import BERTopic</span>
+<span class="sd">        from sklearn.datasets import fetch_20newsgroups</span>
+
+<span class="sd">        docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
+
+<span class="sd">        model = BERTopic(&quot;distilbert-base-nli-mean-tokens&quot;, verbose=True)</span>
+<span class="sd">        topics = model.fit_transform(docs)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        If you want to use your own embeddings, use it as follows:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        from bertopic import BERTopic</span>
+<span class="sd">        from sklearn.datasets import fetch_20newsgroups</span>
+<span class="sd">        from sentence_transformers import SentenceTransformer</span>
+
+<span class="sd">        # Create embeddings</span>
+<span class="sd">        docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
+<span class="sd">        sentence_model = SentenceTransformer(&quot;distilbert-base-nli-mean-tokens&quot;)</span>
+<span class="sd">        embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
+
+<span class="sd">        # Create topic model</span>
+<span class="sd">        model = BERTopic(None, verbose=True)</span>
+<span class="sd">        topics = model.fit_transform(docs, embeddings)</span>
+<span class="sd">        ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">check_documents_type</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
         <span class="n">documents</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Document&quot;</span><span class="p">:</span> <span class="n">documents</span><span class="p">,</span>
@@ -773,7 +945,9 @@
                                   <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
 
         <span class="c1"># Extract BERT sentence embeddings</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="o">.</span><span class="n">Document</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">check_embeddings_shape</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>
+            <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="o">.</span><span class="n">Document</span><span class="p">)</span>
 
         <span class="c1"># Reduce dimensionality with UMAP</span>
         <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_dimensionality</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
@@ -812,6 +986,12 @@
 <td>A list of documents to fit on</td>
 <td><em>required</em></td>
 </tr>
+<tr>
+<td><code>embeddings</code></td>
+<td><code>ndarray</code></td>
+<td>Pre-trained document embeddings. These can be used instead of the sentence-transformer model</td>
+<td><code>None</code></td>
+</tr>
 </tbody>
 </table>
 <p><strong>Returns</strong></p>
@@ -829,14 +1009,51 @@
 </tr>
 </tbody>
 </table>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>If you want to use your own embeddings, use it as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Create embeddings</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create topic model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topic"><code class="highlight"><span class="n">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topic" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>302
-303
-304
-305
-306
-307</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores &quot;&quot;&quot;</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        topic = model.get_topic(12)</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">topic</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -844,103 +1061,336 @@
 </code></pre></div>
 </td></tr></table>
 </details>
-<p>Return top n words for a specific topic and their c-TF-IDF scores </p>
+<p>Return top n words for a specific topic and their c-TF-IDF scores</p>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topic_freq"><code class="highlight"><span class="n">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topic_freq" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>313
-314
-315</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return the the size of a topic &quot;&quot;&quot;</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the the size of a topic</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">             topic: the name of the topic as retrieved by get_topics</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        frequency = model.get_topic_freq(12)</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="n">topic</span><span class="p">]</span>
 </code></pre></div>
 </td></tr></table>
 </details>
-<p>Return the the size of a topic </p>
+<p>Return the the size of a topic</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topic</code></td>
+<td><code>int</code></td>
+<td>the name of the topic as retrieved by get_topics</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">frequency</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topics"><code class="highlight"><span class="n">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topics" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>298
-299
-300</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score &quot;&quot;&quot;</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>419
+420
+421
+422
+423
+424
+425
+426
+427
+428</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        all_topics = model.get_topics()</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span>
 </code></pre></div>
 </td></tr></table>
 </details>
-<p>Return topics with top n words and their c-TF-IDF score </p>
+<p>Return topics with top n words and their c-TF-IDF score</p>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">all_topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span>
+</code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topics_freq"><code class="highlight"><span class="n">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topics_freq" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>309
-310
-311</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order) &quot;&quot;&quot;</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>444
+445
+446
+447
+448
+449
+450
+451
+452
+453</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order)</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        frequency = model.get_topics_freq()</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Topic&#39;</span><span class="p">,</span> <span class="s1">&#39;Count&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Count&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
 </details>
-<p>Return the the size of topics (descending order) </p>
+<p>Return the the size of topics (descending order)</p>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">frequency</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topics_freq</span><span class="p">()</span>
+</code></pre></div>
 <h2 id="bertopic.model.BERTopic.load"><code class="highlight"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code> <em>(classmethod)</em><a class="headerlink" href="#bertopic.model.BERTopic.load" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>446
-447
-448
-449
-450</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="nd">@classmethod</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Loads the model from the specified path &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Loads the model from the specified path</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            path: the location and name of the BERTopic file you want to load</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        BERTopic.load(&quot;my_model&quot;)</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">joblib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
 </details>
-<p>Loads the model from the specified path </p>
+<p>Loads the model from the specified path</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td><code>str</code></td>
+<td>the location and name of the BERTopic file you want to load</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="bertopic.model.BERTopic.save"><code class="highlight"><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.save" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>441
-442
-443
-444</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Saves the model to the specified path &quot;&quot;&quot;</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Saves the model to the specified path</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            path: the location and name of the file you want to save</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        model.save(&quot;my_model&quot;)</span>
+<span class="sd">        ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 </code></pre></div>
 </td></tr></table>
 </details>
-<p>Saves the model to the specified path </p>
-<h2 id="bertopic.model.BERTopic.transform"><code class="highlight"><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.transform" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<p>Saves the model to the specified path</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path</code></td>
+<td><code>str</code></td>
+<td>the location and name of the file you want to save</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="bertopic.model.BERTopic.transform"><code class="highlight"><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.transform" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                  <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A single document or a list of documents to fit on</span>
+<span class="sd">            embeddings: Pre-trained document embeddings. These can be used</span>
+<span class="sd">                        instead of the sentence-transformer model.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            predictions: Topic predictions for each documents</span>
 <span class="sd">            probabilities: The topic probability distribution</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        from bertopic import BERTopic</span>
+<span class="sd">        from sklearn.datasets import fetch_20newsgroups</span>
+
+<span class="sd">        docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
+<span class="sd">        model = BERTopic(&quot;distilbert-base-nli-mean-tokens&quot;, verbose=True).fit(docs)</span>
+<span class="sd">        topics = model.transform(docs)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        If you want to use your own embeddings:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        from bertopic import BERTopic</span>
+<span class="sd">        from sklearn.datasets import fetch_20newsgroups</span>
+<span class="sd">        from sentence_transformers import SentenceTransformer</span>
+
+<span class="sd">        # Create embeddings</span>
+<span class="sd">        docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
+<span class="sd">        sentence_model = SentenceTransformer(&quot;distilbert-base-nli-mean-tokens&quot;)</span>
+<span class="sd">        embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
+
+<span class="sd">        # Create topic model</span>
+<span class="sd">        model = BERTopic(None, verbose=True).fit(docs, embeddings)</span>
+<span class="sd">        topics = model.transform(docs, embeddings)</span>
+<span class="sd">        ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">documents</span><span class="p">]</span>
 
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">check_embeddings_shape</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>
+            <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+
         <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">umap_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
         <span class="n">probabilities</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">membership_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
         <span class="n">predictions</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">approximate_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
@@ -974,6 +1424,12 @@
 <td>A single document or a list of documents to fit on</td>
 <td><em>required</em></td>
 </tr>
+<tr>
+<td><code>embeddings</code></td>
+<td><code>ndarray</code></td>
+<td>Pre-trained document embeddings. These can be used instead of the sentence-transformer model.</td>
+<td><code>None</code></td>
+</tr>
 </tbody>
 </table>
 <p><strong>Returns</strong></p>
@@ -991,76 +1447,104 @@
 </tr>
 </tbody>
 </table>
-<h2 id="bertopic.model.BERTopic.visualize_distribution"><code class="highlight"><span class="n">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">min_probability</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.visualize_distribution" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>375
-376
-377
-378
-379
-380
-381
-382
-383
-384
-385
-386
-387
-388
-389
-390
-391
-392
-393
-394
-395
-396
-397
-398
-399
-400
-401
-402
-403
-404
-405
-406
-407
-408
-409
-410
-411
-412
-413
-414
-415
-416
-417
-418
-419
-420
-421
-422
-423
-424
-425
-426
-427
-428
-429
-430
-431
-432
-433
-434
-435
-436
-437
-438
-439</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>If you want to use your own embeddings:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Create embeddings</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create topic model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="bertopic.model.BERTopic.visualize_distribution"><code class="highlight"><span class="n">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">min_probability</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.visualize_distribution" title="Permanent link">&para;</a></h2>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                               <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+                               <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">,</span>
                                <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-                               <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+                               <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
 
 <span class="sd">        Arguments:</span>
@@ -1070,8 +1554,16 @@
 <span class="sd">            figsize: The size of the figure</span>
 <span class="sd">            save: Whether to save the resulting graph to probility.png</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">            fig: The Matplotlib figure.</span>
+<span class="sd">        Usage:</span>
+
+<span class="sd">        Make sure to fit the model before and only input the</span>
+<span class="sd">        probabilities of a single document:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        model.visualize_distribution(probabilities[0])</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        ![](../img/probabilities.png)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Get values and indices equal or exceed the minimum probability</span>
@@ -1119,8 +1611,6 @@
 
         <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;probability.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div>
 </td></tr></table>
 </details>
@@ -1146,7 +1636,7 @@
 <td><code>min_probability</code></td>
 <td><code>float</code></td>
 <td>The minimum probability score to visualize. All others are ignored.</td>
-<td><code>0.01</code></td>
+<td><code>0.015</code></td>
 </tr>
 <tr>
 <td><code>figsize</code></td>
@@ -1162,8 +1652,12 @@
 </tr>
 </tbody>
 </table>
-<p>Returns
-    fig: The Matplotlib figure.</p>
+<p>Usage:</p>
+<p>Make sure to fit the model before and only input the
+probabilities of a single document:</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<p><img alt="" src="../img/probabilities.png" /></p>
                 
                   
                 
@@ -1185,7 +1679,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="ctfidf.html" title="cTFIDF" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../algorithm.html" title="Algorithm" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1194,11 +1688,25 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                cTFIDF
+                Algorithm
               </span>
             </div>
           </a>
         
+        
+          <a href="ctfidf.html" title="cTFIDF" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                cTFIDF
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
         
       </nav>
     </div>

@@ -224,7 +224,7 @@
   
     <li class="md-tabs__item">
       
-        <a href="api/ctfidf.html" class="md-tabs__link">
+        <a href="api/bertopic.html" class="md-tabs__link">
           API
         </a>
       
@@ -351,6 +351,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#custom-embeddings" class="md-nav__link">
+    Custom Embeddings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualize-topic-probabilities" class="md-nav__link">
+    Visualize Topic Probabilities
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     Overview
   </a>
@@ -453,8 +467,8 @@
 
 
   <li class="md-nav__item">
-    <a href="api/ctfidf.html" title="cTFIDF" class="md-nav__link">
-      cTFIDF
+    <a href="api/bertopic.html" title="BERTopic" class="md-nav__link">
+      BERTopic
     </a>
   </li>
 
@@ -465,8 +479,8 @@
 
 
   <li class="md-nav__item">
-    <a href="api/bertopic.html" title="BERTopic" class="md-nav__link">
-      BERTopic
+    <a href="api/ctfidf.html" title="cTFIDF" class="md-nav__link">
+      cTFIDF
     </a>
   </li>
 
@@ -514,6 +528,20 @@
           <li class="md-nav__item">
   <a href="#usage" class="md-nav__link">
     Usage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-embeddings" class="md-nav__link">
+    Custom Embeddings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualize-topic-probabilities" class="md-nav__link">
+    Visualize Topic Probabilities
   </a>
   
 </li>
@@ -591,7 +619,7 @@ error, please install pytorch first <a href="https://pytorch.org/get-started/loc
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 
 <p>The resulting topics can be accessed through <code>model.get_topic(topic)</code>:</p>
@@ -609,6 +637,42 @@ error, please install pytorch first <a href="https://pytorch.org/get-started/loc
 </code></pre></div>
 
 <p>You can find an overview of all models currently in BERTopic <a href="https://www.sbert.net/docs/pretrained_models.html">here</a> and <a href="https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0">here</a>. </p>
+<h3 id="custom-embeddings">Custom Embeddings<a class="headerlink" href="#custom-embeddings" title="Permanent link">&para;</a></h3>
+<p>If you use BERTopic as shown above, then you are forced to use <code>sentence-transformers</code> as the main
+package for which to create embeddings. However, you might have your own model or package that
+you believe is better suited for representing documents. </p>
+<p>Fortunately, for those that want to use their own embeddings there is an option in BERTopic.
+For this example I will still be using <code>sentence-transformers</code> but the general principle holds:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Prepare embeddings</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Create topic model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
+multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
+topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
+with different parameters. </p>
+<h3 id="visualize-topic-probabilities">Visualize Topic Probabilities<a class="headerlink" href="#visualize-topic-probabilities" title="Permanent link">&para;</a></h3>
+<p>The variable <code>probabilities</code> that is returned from <code>transform()</code> or <code>fit_transform()</code> can 
+be used to understand how confident BERTopic is that certain topics can be found in a document. </p>
+<p>To visualize the distributions, we simply call:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Make sure to input the probabilities of a single document!</span>
+<span class="n">model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+
+<p><img src="../img/probabilities.png" width="75%" height="75%"/></p>
+<p><strong>NOTE</strong>: The distribution of the probabilities does not give an indication to 
+the distribution of the frequencies of topics across a document. It merely shows
+how confident BERTopic is that certain topics can be found in a document. </p>
 <h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -626,7 +690,7 @@ error, please install pytorch first <a href="https://pytorch.org/get-started/loc
 </tr>
 <tr>
 <td>Access all topics</td>
-<td><code>model.get_topic()</code></td>
+<td><code>model.get_topics()</code></td>
 <td>List[Tuple[Word, Score]]</td>
 </tr>
 <tr>
@@ -645,9 +709,19 @@ error, please install pytorch first <a href="https://pytorch.org/get-started/loc
 <td>-</td>
 </tr>
 <tr>
+<td>Fit the model and predict documents</td>
+<td><code>model.fit_transform(docs])</code></td>
+<td>List[int], List[float]</td>
+</tr>
+<tr>
 <td>Predict new documents</td>
 <td><code>model.transform([new_doc])</code></td>
-<td>List[int]</td>
+<td>List[int], List[float]</td>
+</tr>
+<tr>
+<td>Visualize Topic Probability Distribution</td>
+<td><code>model.visualize_distribution(probabilities)</code></td>
+<td>Matplotlib.Figure</td>
 </tr>
 <tr>
 <td>Save model</td>
