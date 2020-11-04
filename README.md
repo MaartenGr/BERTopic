@@ -18,9 +18,10 @@ Corresponding medium post can be found [here](https://towardsdatascience.com/top
    1. [About the Project](#about)  
    2. [Getting Started](#gettingstarted)    
         2.1. [Installation](#installation)    
-        2.2. [Basic Usage](#usage)  
-        2.3. [Visualize Topic Probabilities](#prob)     
-        2.4. [Overview](#overview)   
+        2.2. [Basic Usage](#usage)
+        2.3. [Custom Embeddings](#custom)  
+        2.4. [Visualize Topic Probabilities](#prob)     
+        2.5. [Overview](#overview)   
    3. [Algorithm](#algorithm)  
         3.1. [Sentence Transformer](#sentence)  
         3.2. [UMAP + HDBSCAN](#umap)  
@@ -85,8 +86,37 @@ The resulting topics can be accessed through `model.get_topic(topic)`:
 
 You can find an overview of all models currently in BERTopic [here](https://www.sbert.net/docs/pretrained_models.html) and [here](https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0). 
 
+<a name="custom"/></a>
+###  2.3. Custom Embeddings
+If you use BERTopic as shown above, then you are forced to use `sentence-transformers` as the main
+package for which to create embeddings. However, you might have your own model or package that
+you believe is better suited for representing documents. 
+
+Fortunately, for those that want to use their own embeddings there is an option in BERTopic.
+For this example I will still be using `sentence-transformers` but the general principle holds:
+
+```python
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+from sentence_transformers import SentenceTransformer
+
+# Prepare embeddings
+docs = fetch_20newsgroups(subset='all')['data']
+sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+# Create topic model
+model = BERTopic(verbose=True)
+topics = model.fit_transform(docs, embeddings)
+```
+
+Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
+multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
+topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
+with different parameters. 
+
 <a name="prob"/></a>
-###  2.3. Visualize Topic Probabilities
+###  2.4. Visualize Topic Probabilities
 
 The variable `probabilities` that is returned from `transform()` or `fit_transform()` can 
 be used to understand how confident BERTopic is that certain topics can be found in a document. 
@@ -106,13 +136,13 @@ how confident BERTopic is that certain topics can be found in a document.
 
 
 <a name="overview"/></a>
-###  2.4. Overview
+###  2.5. Overview
 
 
 | Methods | Code  | Returns  |
 |-----------------------|---|---|
 | Access single topic   | `model.get_topic(12)`  | Tuple[Word, Score]  |   
-| Access all topics     |  `model.get_topic()` | List[Tuple[Word, Score]]  |
+| Access all topics     |  `model.get_topics()` | List[Tuple[Word, Score]]  |
 | Get single topic freq |  `model.get_topic_freq(12)` | int |
 | Get all topic freq    |  `model.get_topics_freq()` | DataFrame  |
 | Fit the model    |  `model.fit(docs])` | -  |

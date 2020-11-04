@@ -11,8 +11,8 @@ nav:
   - BERTopic:
       - Algorithm: algorithm.md
   - API:
-      - cTFIDF: api/ctfidf.md
       - BERTopic: api/bertopic.md
+      - cTFIDF: api/ctfidf.md
 plugins:
   - mkdocstrings:
       watch:

@@ -17,13 +17,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
 from .ctfidf import ClassTFIDF
-from .utils import create_logger, check_documents_type
+from .utils import create_logger, check_documents_type, check_embeddings_shape
 logger = create_logger()
 
 
 class BERTopic:
     """
-    Transformer-based model for Topic Modeling
+    BERTopic is a topic modeling technique that leverages BERT embeddings and
+    c-TF-IDF to create dense clusters allowing for easily interpretable topics
+    whilst keeping important words in the topic descriptions.
 
     Arguments:
         bert_model: Model to use. Overview of options can be found here
@@ -46,15 +48,38 @@ class BERTopic:
                  to track the stages of the model.
 
     Usage:
-        ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
 
-        docs = fetch_20newsgroups(subset='all')['data']
+    ```python
+    from bertopic import BERTopic
+    from sklearn.datasets import fetch_20newsgroups
 
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
-        topics = model.fit_transform(docs)
-        ```
+    docs = fetch_20newsgroups(subset='all')['data']
+
+    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+    topics = model.fit_transform(docs)
+    ```
+
+    If you want to use your own embeddings, use it as follows:
+
+    ```python
+    from bertopic import BERTopic
+    from sklearn.datasets import fetch_20newsgroups
+    from sentence_transformers import SentenceTransformer
+
+    # Create embeddings
+    docs = fetch_20newsgroups(subset='all')['data']
+    sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+    embeddings = sentence_model.encode(docs, show_progress_bar=True)
+
+    # Create topic model
+    model = BERTopic(None, verbose=True)
+    topics = model.fit_transform(docs, embeddings)
+    ```
+
+    Due to the stochastisch nature of UMAP, the results from BERTopic might differ
+    and the quality can degrade. Using your own embeddings allows you to
+    try out BERTopic several times until you find the topics that suit
+    you best.
     """
     def __init__(self,
                  bert_model: str = 'distilbert-base-nli-mean-tokens',
@@ -87,27 +112,89 @@ class BERTopic:
         else:
             logger.setLevel(logging.WARNING)
 
-    def fit(self, documents: List[str]):
+    def fit(self,
+            documents: List[str],
+            embeddings: np.ndarray = None):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
         Arguments:
             documents: A list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        docs = fetch_20newsgroups(subset='all')['data']
+        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)
+        ```
+
+        If you want to use your own embeddings, use it as follows:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+
+        # Create embeddings
+        docs = fetch_20newsgroups(subset='all')['data']
+        sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+        embeddings = sentence_model.encode(docs, show_progress_bar=True)
+
+        # Create topic model
+        model = BERTopic(None, verbose=True).fit(docs, embeddings)
+        ```
         """
         check_documents_type(documents)
-        self.fit_transform(documents)
+        self.fit_transform(documents, embeddings)
         return self
 
     def fit_transform(self,
-                      documents: List[str]) -> Tuple[List[int],
-                                                     np.ndarray]:
+                      documents: List[str],
+                      embeddings: np.ndarray = None) -> Tuple[List[int],
+                                                              np.ndarray]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
             documents: A list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
 
         Returns:
             predictions: Topic predictions for each documents
             probabilities: The topic probability distribution
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        docs = fetch_20newsgroups(subset='all')['data']
+
+        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+        topics = model.fit_transform(docs)
+        ```
+
+        If you want to use your own embeddings, use it as follows:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+
+        # Create embeddings
+        docs = fetch_20newsgroups(subset='all')['data']
+        sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+        embeddings = sentence_model.encode(docs, show_progress_bar=True)
+
+        # Create topic model
+        model = BERTopic(None, verbose=True)
+        topics = model.fit_transform(docs, embeddings)
+        ```
         """
         check_documents_type(documents)
         documents = pd.DataFrame({"Document": documents,
@@ -115,7 +202,9 @@ class BERTopic:
                                   "Topic": None})
 
         # Extract BERT sentence embeddings
-        embeddings = self._extract_embeddings(documents.Document)
+        if not isinstance(embeddings, np.ndarray):
+            check_embeddings_shape(embeddings, documents)
+            embeddings = self._extract_embeddings(documents.Document)
 
         # Reduce dimensionality with UMAP
         umap_embeddings = self._reduce_dimensionality(embeddings)
@@ -134,20 +223,55 @@ class BERTopic:
 
         return predictions, probabilities
 
-    def transform(self, documents: Union[str, List[str]]) -> Tuple[List[int], np.ndarray]:
+    def transform(self,
+                  documents: Union[str, List[str]],
+                  embeddings: np.ndarray = None) -> Tuple[List[int], np.ndarray]:
         """ After having fit a model, use transform to predict new instances
 
         Arguments:
             documents: A single document or a list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model.
 
         Returns:
             predictions: Topic predictions for each documents
             probabilities: The topic probability distribution
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        docs = fetch_20newsgroups(subset='all')['data']
+        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)
+        topics = model.transform(docs)
+        ```
+
+        If you want to use your own embeddings:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+
+        # Create embeddings
+        docs = fetch_20newsgroups(subset='all')['data']
+        sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+        embeddings = sentence_model.encode(docs, show_progress_bar=True)
+
+        # Create topic model
+        model = BERTopic(None, verbose=True).fit(docs, embeddings)
+        topics = model.transform(docs, embeddings)
+        ```
         """
         if isinstance(documents, str):
             documents = [documents]
 
-        embeddings = self._extract_embeddings(documents)
+        if not isinstance(embeddings, np.ndarray):
+            check_embeddings_shape(embeddings, documents)
+            embeddings = self._extract_embeddings(documents)
+
         umap_embeddings = self.umap_model.transform(embeddings)
         probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
         predictions, _ = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)
@@ -293,22 +417,53 @@ class BERTopic:
                        for i, label in enumerate(labels)}
 
     def get_topics(self) -> Dict[str, Tuple[str, float]]:
-        """ Return topics with top n words and their c-TF-IDF score """
+        """ Return topics with top n words and their c-TF-IDF score
+
+        Usage:
+
+        ```python
+        all_topics = model.get_topics()
+        ```
+        """
         return self.topics
 
     def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
-        """ Return top n words for a specific topic and their c-TF-IDF scores """
+        """ Return top n words for a specific topic and their c-TF-IDF scores
+
+        Usage:
+
+        ```python
+        topic = model.get_topic(12)
+        ```
+        """
         if self.topics.get(topic):
             return self.topics[topic]
         else:
             return False
 
     def get_topics_freq(self) -> pd.DataFrame:
-        """ Return the the size of topics (descending order) """
+        """ Return the the size of topics (descending order)
+
+        Usage:
+
+        ```python
+        frequency = model.get_topics_freq()
+        ```
+        """
         return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
 
     def get_topic_freq(self, topic: int) -> int:
-        """ Return the the size of a topic """
+        """ Return the the size of a topic
+
+        Arguments:
+             topic: the name of the topic as retrieved by get_topics
+
+        Usage:
+
+        ```python
+        frequency = model.get_topic_freq(12)
+        ```
+        """
         return self.topic_sizes.items()[topic]
 
     def _reduce_topics(self, documents: pd.DataFrame, c_tf_idf: np.ndarray) -> pd.DataFrame:
@@ -382,6 +537,17 @@ class BERTopic:
                              All others are ignored.
             figsize: The size of the figure
             save: Whether to save the resulting graph to probility.png
+
+        Usage:
+
+        Make sure to fit the model before and only input the
+        probabilities of a single document:
+
+        ```python
+        model.visualize_distribution(probabilities[0])
+        ```
+
+        ![](../img/probabilities.png)
         """
 
         # Get values and indices equal or exceed the minimum probability
@@ -431,12 +597,32 @@ class BERTopic:
             fig.savefig("probability.png", dpi=300, bbox_inches='tight')
 
     def save(self, path: str) -> None:
-        """ Saves the model to the specified path """
+        """ Saves the model to the specified path
+
+        Arguments:
+            path: the location and name of the file you want to save
+
+        Usage:
+
+        ```python
+        model.save("my_model")
+        ```
+        """
         with open(path, 'wb') as file:
             joblib.dump(self, file)
 
     @classmethod
     def load(cls, path: str):
-        """ Loads the model from the specified path """
+        """ Loads the model from the specified path
+
+        Arguments:
+            path: the location and name of the BERTopic file you want to load
+
+        Usage:
+
+        ```python
+        BERTopic.load("my_model")
+        ```
+        """
         with open(path, 'rb') as file:
             return joblib.load(file)
