@@ -17,7 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
 from .ctfidf import ClassTFIDF
-from .utils import create_logger, check_documents_type
+from .utils import create_logger, check_documents_type, check_embeddings_shape
 logger = create_logger()
 
 
@@ -55,6 +55,24 @@ class BERTopic:
         model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
         topics = model.fit_transform(docs)
         ```
+
+        If you want to use your own embeddings, use it as follows:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+
+        # Create embeddings
+        docs = fetch_20newsgroups(subset='all')['data']
+        model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+        embeddings = model.encode(docs[:10], show_progress_bar=False)
+
+        # Create topic model
+        model = BERTopic(None, verbose=True)
+        topics = model.fit_transform(docs, embeddings)
+        ```
+
     """
     def __init__(self,
                  bert_model: str = 'distilbert-base-nli-mean-tokens',
@@ -87,23 +105,30 @@ class BERTopic:
         else:
             logger.setLevel(logging.WARNING)
 
-    def fit(self, documents: List[str]):
+    def fit(self,
+            documents: List[str],
+            embeddings: np.ndarray = None):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
         Arguments:
             documents: A list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
         """
         check_documents_type(documents)
-        self.fit_transform(documents)
+        self.fit_transform(documents, embeddings)
         return self
 
     def fit_transform(self,
-                      documents: List[str]) -> Tuple[List[int],
-                                                     np.ndarray]:
+                      documents: List[str],
+                      embeddings: np.ndarray = None) -> Tuple[List[int],
+                                                              np.ndarray]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
             documents: A list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
 
         Returns:
             predictions: Topic predictions for each documents
@@ -115,7 +140,9 @@ class BERTopic:
                                   "Topic": None})
 
         # Extract BERT sentence embeddings
-        embeddings = self._extract_embeddings(documents.Document)
+        if not isinstance(embeddings, np.ndarray):
+            check_embeddings_shape(embeddings, documents)
+            embeddings = self._extract_embeddings(documents.Document)
 
         # Reduce dimensionality with UMAP
         umap_embeddings = self._reduce_dimensionality(embeddings)
@@ -134,11 +161,15 @@ class BERTopic:
 
         return predictions, probabilities
 
-    def transform(self, documents: Union[str, List[str]]) -> Tuple[List[int], np.ndarray]:
+    def transform(self,
+                  documents: Union[str, List[str]],
+                  embeddings: np.ndarray = None) -> Tuple[List[int], np.ndarray]:
         """ After having fit a model, use transform to predict new instances
 
         Arguments:
             documents: A single document or a list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model.
 
         Returns:
             predictions: Topic predictions for each documents
@@ -147,7 +178,10 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
-        embeddings = self._extract_embeddings(documents)
+        if not isinstance(embeddings, np.ndarray):
+            check_embeddings_shape(embeddings, documents)
+            embeddings = self._extract_embeddings(documents)
+
         umap_embeddings = self.umap_model.transform(embeddings)
         probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
         predictions, _ = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)

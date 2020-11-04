@@ -1,3 +1,4 @@
+import numpy as np
 import logging
 from collections.abc import Iterable
 
@@ -10,6 +11,18 @@ def check_documents_type(documents):
 
     else:
         raise TypeError("Make sure that the documents variable is an iterable containing strings only.")
+
+
+def check_embeddings_shape(embeddings, docs):
+    """ Check if the embeddings have the correct shape """
+    if embeddings is not None:
+        if not isinstance(embeddings, np.ndarray):
+            raise ValueError("Make sure to input embeddings as a numpy array. ")
+        else:
+            if embeddings.shape[0] != len(docs):
+                raise ValueError("Make sure that the embeddings are a numpy array with shape: "
+                                 "(len(docs), vector_dim) where vector_dim is the dimensionality "
+                                 "of the vector embeddings. ")
 
 
 def create_logger():
