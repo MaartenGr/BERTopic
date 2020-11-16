@@ -478,13 +478,12 @@ class BERTopic:
         """
         self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())
-        nr_to_reduce = initial_nr_topics - self.nr_topics
 
-        for _ in range(nr_to_reduce):
-            # Create topic similarity matrix
-            similarities = cosine_similarity(c_tf_idf)
-            np.fill_diagonal(similarities, 0)
+        # Create topic similarity matrix
+        similarities = cosine_similarity(c_tf_idf)
+        np.fill_diagonal(similarities, 0)
 
+        while len(self.get_topics()) > self.nr_topics + 1:
             # Find most similar topic to least common topic
             topic_to_merge = self.get_topics_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
