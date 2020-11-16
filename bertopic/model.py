@@ -154,7 +154,8 @@ class BERTopic:
 
     def fit_transform(self,
                       documents: List[str],
-                      embeddings: np.ndarray = None):
+                      embeddings: np.ndarray = None) -> Tuple[List[int],
+                                                              np.ndarray]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
@@ -220,7 +221,7 @@ class BERTopic:
 
         predictions = documents.Topic.to_list()
 
-        return predictions, probabilities, c_tf_idf, documents
+        return predictions, probabilities
 
     def transform(self,
                   documents: Union[str, List[str]],
@@ -477,9 +478,8 @@ class BERTopic:
         """
         self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())
-        nr_to_reduce = initial_nr_topics - self.nr_topics
 
-        for _ in range(nr_to_reduce):
+        while len(self.get_topics()) > self.nr_topics:
             # Create topic similarity matrix
             similarities = cosine_similarity(c_tf_idf)
             np.fill_diagonal(similarities, 0)
