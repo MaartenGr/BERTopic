@@ -154,8 +154,7 @@ class BERTopic:
 
     def fit_transform(self,
                       documents: List[str],
-                      embeddings: np.ndarray = None) -> Tuple[List[int],
-                                                              np.ndarray]:
+                      embeddings: np.ndarray = None):
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
@@ -221,7 +220,7 @@ class BERTopic:
 
         predictions = documents.Topic.to_list()
 
-        return predictions, probabilities
+        return predictions, probabilities, c_tf_idf, documents
 
     def transform(self,
                   documents: Union[str, List[str]],
