@@ -494,7 +494,7 @@ class BERTopic:
 
             # Update new topic content
             self._update_topic_size(documents)
-            self._extract_topics(documents, topic_reduction=True)
+            c_tf_idf = self._extract_topics(documents, topic_reduction=True)
 
         if initial_nr_topics <= self.nr_topics:
             logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
