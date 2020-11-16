@@ -479,11 +479,11 @@ class BERTopic:
         self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())
 
-        while len(self.get_topics()) > self.nr_topics:
-            # Create topic similarity matrix
-            similarities = cosine_similarity(c_tf_idf)
-            np.fill_diagonal(similarities, 0)
+        # Create topic similarity matrix
+        similarities = cosine_similarity(c_tf_idf)
+        np.fill_diagonal(similarities, 0)
 
+        while len(self.get_topics()) > self.nr_topics:
             # Find most similar topic to least common topic
             topic_to_merge = self.get_topics_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
@@ -494,7 +494,7 @@ class BERTopic:
 
             # Update new topic content
             self._update_topic_size(documents)
-            c_tf_idf = self._extract_topics(documents, topic_reduction=True)
+            self._extract_topics(documents, topic_reduction=True)
 
         if initial_nr_topics <= self.nr_topics:
             logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
