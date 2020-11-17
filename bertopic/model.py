@@ -553,7 +553,7 @@ class BERTopic:
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
 
             # Only map topics if they have a high similarity
-            if (similarity > 0.9) & (topic_to_merge_into not in has_mapped):
+            if (similarity > 0.915) & (topic_to_merge_into not in has_mapped):
                 # Update Topic labels
                 documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
                 self.mapped_topics[topic_to_merge] = topic_to_merge_into
