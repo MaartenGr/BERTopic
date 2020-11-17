@@ -34,7 +34,8 @@ class BERTopic:
         nr_topics: Specifying the number of topics will reduce the initial
                    number of topics to the value specified. This reduction can take
                    a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-                   IF this is set to None, no reduction is applied.
+                   IF this is set to None, no reduction is applied. Use "auto" to automatically
+                   reduce topics that have a similarity of at least 0.9, do not maps all others.
         n_gram_range: The n-gram range for the CountVectorizer.
                       Advised to keep high values between 1 and 3.
                       More would likely lead to memory issues.
@@ -84,7 +85,7 @@ class BERTopic:
     def __init__(self,
                  bert_model: str = 'distilbert-base-nli-mean-tokens',
                  top_n_words: int = 20,
-                 nr_topics: int = None,
+                 nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
                  min_topic_size: int = 30,
                  n_neighbors: int = 15,
@@ -476,6 +477,25 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        if isinstance(self.nr_topics, int):
+            documents = self._reduce_to_n_topics(c_tf_idf, documents)
+        elif isinstance(self.nr_topics, str):
+            documents = self._auto_reduce_topics(c_tf_idf, documents)
+        else:
+            raise ValueError("nr_topics needs to be an int or 'auto'! ")
+
+        return documents
+
+    def _reduce_to_n_topics(self, c_tf_idf, documents):
+        """ Reduce topics to self.nr_topics
+
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs and Topics
+            c_tf_idf: c-TF-IDF matrix
+
+        Returns:
+            documents: Updated dataframe with documents and the reduced number of Topics
+        """
         self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())
 
@@ -483,10 +503,11 @@ class BERTopic:
         similarities = cosine_similarity(c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
-        while len(self.get_topics()) > self.nr_topics + 1:
+        while len(self.get_topics_freq()) > self.nr_topics + 1:
             # Find most similar topic to least common topic
             topic_to_merge = self.get_topics_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
+            similarities[:, topic_to_merge + 1] = -1
 
             # Update Topic labels
             documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
@@ -494,12 +515,57 @@ class BERTopic:
 
             # Update new topic content
             self._update_topic_size(documents)
-            self._extract_topics(documents, topic_reduction=True)
+
+        self._extract_topics(documents, topic_reduction=True)
 
         if initial_nr_topics <= self.nr_topics:
             logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
         else:
-            logger.info(f"Reduced number of topics from {initial_nr_topics} to {self.nr_topics}")
+            logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+
+        return documents
+
+    def _auto_reduce_topics(self, c_tf_idf, documents):
+        """ Reduce the number of topics as long as it exceeds a minimum similarity of 0.9
+
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs and Topics
+            c_tf_idf: c-TF-IDF matrix
+
+        Returns:
+            documents: Updated dataframe with documents and the reduced number of Topics
+        """
+        initial_nr_topics = len(self.get_topics())
+
+        # Create topic similarity matrix
+        similarities = cosine_similarity(c_tf_idf)
+        np.fill_diagonal(similarities, 0)
+
+        # Do not map the top 10% most frequent topics
+        not_mapped = int(np.ceil(len(self.get_topics_freq()) * 0.1))
+        to_map = self.get_topics_freq().Topic.values[not_mapped:][::-1]
+
+        self.mapped_topics = {}
+        has_mapped = []
+
+        for topic_to_merge in to_map:
+            similarity = np.max(similarities[topic_to_merge + 1])
+            topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
+
+            # Only map topics if they have a high similarity
+            if (similarity > 0.915) & (topic_to_merge_into not in has_mapped):
+                # Update Topic labels
+                documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
+                self.mapped_topics[topic_to_merge] = topic_to_merge_into
+                similarities[:, topic_to_merge + 1] = -1
+
+                # Update new topic content
+                self._update_topic_size(documents)
+                has_mapped.append(topic_to_merge)
+
+        _ = self._extract_topics(documents, topic_reduction=True)
+
+        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
 
         return documents
 
