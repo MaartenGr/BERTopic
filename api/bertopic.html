@@ -629,14 +629,14 @@ whilst keeping important words in the topic descriptions.</p>
 </tr>
 <tr>
 <td><code>nr_topics</code></td>
-<td><code>int</code></td>
-<td>Specifying the number of topics will reduce the initial number of topics to the value specified. This reduction can take a while as each reduction in topics (-1) activates a c-TF-IDF calculation. IF this is set to None, no reduction is applied.</td>
+<td><code>Union[int, str]</code></td>
+<td>Specifying the number of topics will reduce the initial number of topics to the value specified. This reduction can take a while as each reduction in topics (-1) activates a c-TF-IDF calculation. IF this is set to None, no reduction is applied. Use "auto" to automatically reduce topics that have a similarity of at least 0.9, do not maps all others.</td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>n_gram_range</code></td>
 <td><code>Tuple[int, int]</code></td>
-<td>The n-gram range for the CountVectorizer. Advised to keep high values between 1 and 3. More would likely lead to memory issues.</td>
+<td>The n-gram range for the CountVectorizer. Advised to keep high values between 1 and 3. More would likely lead to memory issues. Note that this will not be used if you pass in your own CountVectorizer.</td>
 <td><code>(1, 1)</code></td>
 </tr>
 <tr>
@@ -660,7 +660,7 @@ whilst keeping important words in the topic descriptions.</p>
 <tr>
 <td><code>stop_words</code></td>
 <td><code>Union[str, List[str]]</code></td>
-<td>Stopwords that can be used as either a list of strings, or the name of the language as a string. For example: 'english' or ['the', 'and', 'I'].</td>
+<td>Stopwords that can be used as either a list of strings, or the name of the language as a string. For example: 'english' or ['the', 'and', 'I']. Note that this will not be used if you pass in your own CountVectorizer.</td>
 <td><code>None</code></td>
 </tr>
 <tr>
@@ -668,6 +668,12 @@ whilst keeping important words in the topic descriptions.</p>
 <td><code>bool</code></td>
 <td>Changes the verbosity of the model, Set to True if you want to track the stages of the model.</td>
 <td><code>False</code></td>
+</tr>
+<tr>
+<td><code>vectorizer</code></td>
+<td><code>CountVectorizer</code></td>
+<td>Pass in your own CountVectorizer from scikit-learn</td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
@@ -699,13 +705,7 @@ and the quality can degrade. Using your own embeddings allows you to
 try out BERTopic several times until you find the topics that suit
 you best.</p>
 <h2 id="bertopic.model.BERTopic.fit"><code class="highlight"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>115
-116
-117
-118
-119
-120
-121
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>121
 122
 123
 124
@@ -737,7 +737,13 @@ you best.</p>
 150
 151
 152
-153</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+153
+154
+155
+156
+157
+158
+159</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
             <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
@@ -826,13 +832,7 @@ you best.</p>
 <span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.fit_transform"><code class="highlight"><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.fit_transform" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>155
-156
-157
-158
-159
-160
-161
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>161
 162
 163
 164
@@ -895,7 +895,13 @@ you best.</p>
 221
 222
 223
-224</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+224
+225
+226
+227
+228
+229
+230</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                       <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                       <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
                                                               <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
@@ -1033,19 +1039,19 @@ you best.</p>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topic"><code class="highlight"><span class="n">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topic" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>430
-431
-432
-433
-434
-435
-436
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>436
 437
 438
 439
 440
 441
-442</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
+442
+443
+444
+445
+446
+447
+448</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores</span>
 
 <span class="sd">        Usage:</span>
@@ -1066,19 +1072,19 @@ you best.</p>
 <div class="highlight"><pre><span></span><code><span class="n">topic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topic_freq"><code class="highlight"><span class="n">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topic_freq" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>455
-456
-457
-458
-459
-460
-461
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>461
 462
 463
 464
 465
 466
-467</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+467
+468
+469
+470
+471
+472
+473</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Return the the size of a topic</span>
 
 <span class="sd">        Arguments:</span>
@@ -1118,16 +1124,16 @@ you best.</p>
 <div class="highlight"><pre><span></span><code><span class="n">frequency</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topics"><code class="highlight"><span class="n">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topics" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>419
-420
-421
-422
-423
-424
-425
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>425
 426
 427
-428</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+428
+429
+430
+431
+432
+433
+434</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score</span>
 
 <span class="sd">        Usage:</span>
@@ -1145,16 +1151,16 @@ you best.</p>
 <div class="highlight"><pre><span></span><code><span class="n">all_topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.get_topics_freq"><code class="highlight"><span class="n">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.get_topics_freq" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>444
-445
-446
-447
-448
-449
-450
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>450
 451
 452
-453</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+453
+454
+455
+456
+457
+458
+459</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_topics_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order)</span>
 
 <span class="sd">        Usage:</span>
@@ -1172,21 +1178,21 @@ you best.</p>
 <div class="highlight"><pre><span></span><code><span class="n">frequency</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topics_freq</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.load"><code class="highlight"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code> <em>(classmethod)</em><a class="headerlink" href="#bertopic.model.BERTopic.load" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>614
-615
-616
-617
-618
-619
-620
-621
-622
-623
-624
-625
-626
-627
-628</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="nd">@classmethod</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697
+698</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Loads the model from the specified path</span>
 
@@ -1228,20 +1234,20 @@ you best.</p>
 <div class="highlight"><pre><span></span><code><span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.save"><code class="highlight"><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.save" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>599
-600
-601
-602
-603
-604
-605
-606
-607
-608
-609
-610
-611
-612</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot; Saves the model to the specified path</span>
 
 <span class="sd">        Arguments:</span>
@@ -1282,13 +1288,7 @@ you best.</p>
 <div class="highlight"><pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.transform"><code class="highlight"><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.transform" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>226
-227
-228
-229
-230
-231
-232
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>232
 233
 234
 235
@@ -1342,7 +1342,13 @@ you best.</p>
 283
 284
 285
-286</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+286
+287
+288
+289
+290
+291
+292</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
                   <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
@@ -1470,77 +1476,77 @@ you best.</p>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="bertopic.model.BERTopic.visualize_distribution"><code class="highlight"><span class="n">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">min_probability</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#bertopic.model.BERTopic.visualize_distribution" title="Permanent link">&para;</a></h2>
-<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>527
-528
-529
-530
-531
-532
-533
-534
-535
-536
-537
-538
-539
-540
-541
-542
-543
-544
-545
-546
-547
-548
-549
-550
-551
-552
-553
-554
-555
-556
-557
-558
-559
-560
-561
-562
-563
-564
-565
-566
-567
-568
-569
-570
-571
-572
-573
-574
-575
-576
-577
-578
-579
-580
-581
-582
-583
-584
-585
-586
-587
-588
-589
-590
-591
-592
-593
-594
-595
-596
-597</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<details class="note"><summary>Show source code in <code>bertopic\model.py</code></summary><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667</pre></div></td><td class="code"><div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">,</span>
                                <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
