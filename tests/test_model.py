@@ -80,6 +80,26 @@ def test_extract_topics(base_bertopic):
     assert len(freq.Topic.unique()) == len(freq)
 
 
+def test_extract_topics_custom_cv(base_bertopic_custom_cv):
+    """ Test whether the topics are correctly extracted using c-TF-IDF
+    with custom CountVectorizer
+    """
+    nr_topics = 5
+    documents = pd.DataFrame({"Document": newsgroup_docs,
+                              "ID": range(len(newsgroup_docs)),
+                              "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
+    base_bertopic_custom_cv._update_topic_size(documents)
+    c_tf_idf = base_bertopic_custom_cv._extract_topics(documents, topic_reduction=False)
+    freq = base_bertopic_custom_cv.get_topics_freq()
+
+    assert c_tf_idf.shape[0] == 5
+    assert c_tf_idf.shape[1] > 100
+    assert isinstance(freq, pd.DataFrame)
+    assert nr_topics == len(freq.Topic.unique())
+    assert freq.Count.sum() == len(documents)
+    assert len(freq.Topic.unique()) == len(freq)
+
+
 @pytest.mark.parametrize("reduced_topics", [5, 10, 20, 40])
 def test_topic_reduction(reduced_topics):
     """ Test whether the topics are correctly reduced """

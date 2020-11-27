@@ -39,14 +39,17 @@ class BERTopic:
         n_gram_range: The n-gram range for the CountVectorizer.
                       Advised to keep high values between 1 and 3.
                       More would likely lead to memory issues.
+                      Note that this will not be used if you pass in your own CountVectorizer.
         min_topic_size: The minimum size of the topic.
         n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
                      for manifold approximation (UMAP).
         n_components: The dimension of the space to embed into when reducing dimensionality with UMAP.
         stop_words: Stopwords that can be used as either a list of strings, or the name of the
                     language as a string. For example: 'english' or ['the', 'and', 'I'].
+                    Note that this will not be used if you pass in your own CountVectorizer.
         verbose: Changes the verbosity of the model, Set to True if you want
                  to track the stages of the model.
+        vectorizer: Pass in your own CountVectorizer from scikit-learn
 
     Usage:
 
@@ -91,7 +94,8 @@ class BERTopic:
                  n_neighbors: int = 15,
                  n_components: int = 5,
                  stop_words: Union[str, List[str]] = None,
-                 verbose: bool = False):
+                 verbose: bool = False,
+                 vectorizer: CountVectorizer = None):
         self.bert_model = bert_model
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
@@ -100,6 +104,7 @@ class BERTopic:
         self.n_neighbors = n_neighbors
         self.n_components = n_components
         self.stop_words = stop_words
+        self.vectorizer = vectorizer or CountVectorizer(ngram_range=self.n_gram_range, stop_words=self.stop_words)
 
         self.umap_model = None
         self.cluster_model = None
@@ -387,7 +392,7 @@ class BERTopic:
             words: The names of the words to which values were given
         """
         documents = documents_per_topic.Document.values
-        count = CountVectorizer(ngram_range=self.n_gram_range, stop_words=self.stop_words).fit(documents)
+        count = self.vectorizer.fit(documents)
         words = count.get_feature_names()
         X = count.transform(documents)
         transformer = ClassTFIDF().fit(X, n_samples=m)
