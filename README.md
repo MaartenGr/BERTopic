@@ -107,7 +107,7 @@ embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Create topic model
 model = BERTopic(verbose=True)
-topics = model.fit_transform(docs, embeddings)
+topics, probabilities = model.fit_transform(docs, embeddings)
 ```
 
 Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
