@@ -21,7 +21,6 @@ base_packages = [
     "joblib>=0.17.0",
     "matplotlib>=3.2.2",
     "torch>=1.2.0",
-    "flair>= 0.7",
     "sentence-transformers>=0.3.9"
 ]
 

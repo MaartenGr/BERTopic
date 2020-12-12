@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt
 # Models
 import umap
 import hdbscan
-from flair.data import Sentence
-from flair.embeddings import SentenceTransformerDocumentEmbeddings, DocumentEmbeddings
+from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -85,7 +84,7 @@ class BERTopic:
     you best.
     """
     def __init__(self,
-                 embedding_model: Union[str, DocumentEmbeddings] = 'distilbert-base-nli-mean-tokens',
+                 embedding_model: str = 'distilbert-base-nli-mean-tokens',
                  top_n_words: int = 20,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
@@ -301,23 +300,9 @@ class BERTopic:
             embeddings: The extracted embeddings using the sentence transformer
                         module. Typically uses pre-trained huggingface models.
         """
-        # Instantiate embedding model
-        if isinstance(self.embedding_model, str):
-            model = SentenceTransformerDocumentEmbeddings(self.embedding_model)
-        elif isinstance(self.embedding_model, DocumentEmbeddings):
-            model = self.embedding_model
-        else:
-            raise ValueError("Make sure to either pass a string to the parameter `embedding_model` which "
-                             "indicates a sentence-transformers model. For example \n"
-                             "* 'distilbert-base-nli-mean-tokens'.\n"
-                             "Or pass in a DocumentEmbedding model from Flair. For example, \n"
-                             "* TransformerDocumentEmbeddings('bert-base-uncased')")
+        model = SentenceTransformer(self.embedding_model)
         self.logger.info("Loaded embedding model")
-
-        # Extract embeddings
-        sentences = [Sentence(document) for document in documents]
-        model.embed(sentences)
-        embeddings = np.array([sentence.get_embedding().cpu().numpy() for sentence in sentences])
+        embeddings = model.encode(documents, show_progress_bar=False)
         self.logger.info("Transformed documents to Embeddings")
 
         return embeddings
