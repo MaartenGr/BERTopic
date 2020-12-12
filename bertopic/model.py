@@ -2,7 +2,6 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 import joblib
-import logging
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Dict, Union
@@ -11,14 +10,14 @@ import matplotlib.pyplot as plt
 # Models
 import umap
 import hdbscan
-from sentence_transformers import SentenceTransformer
+from flair.data import Sentence
+from flair.embeddings import SentenceTransformerDocumentEmbeddings, DocumentEmbeddings
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
 from .ctfidf import ClassTFIDF
-from .utils import create_logger, check_documents_type, check_embeddings_shape
-logger = create_logger()
+from .utils import MyLogger, check_documents_type, check_embeddings_shape
 
 
 class BERTopic:
@@ -28,7 +27,7 @@ class BERTopic:
     whilst keeping important words in the topic descriptions.
 
     Arguments:
-        bert_model: Model to use. Overview of options can be found here
+        embedding_model: Model to use. Overview of options can be found here
                         https://www.sbert.net/docs/pretrained_models.html
         top_n_words: The number of words per topic to extract
         nr_topics: Specifying the number of topics will reduce the initial
@@ -86,7 +85,7 @@ class BERTopic:
     you best.
     """
     def __init__(self,
-                 bert_model: str = 'distilbert-base-nli-mean-tokens',
+                 embedding_model: Union[str, DocumentEmbeddings] = 'distilbert-base-nli-mean-tokens',
                  top_n_words: int = 20,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
@@ -96,7 +95,7 @@ class BERTopic:
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None):
-        self.bert_model = bert_model
+        self.embedding_model = embedding_model
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
         self.n_gram_range = n_gram_range
@@ -114,9 +113,9 @@ class BERTopic:
         self.mapped_topics = None
 
         if verbose:
-            logger.setLevel(logging.DEBUG)
+            self.logger = MyLogger("DEBUG")
         else:
-            logger.setLevel(logging.WARNING)
+            self.logger = MyLogger("WARNING")
 
     def fit(self,
             documents: List[str],
@@ -302,10 +301,25 @@ class BERTopic:
             embeddings: The extracted embeddings using the sentence transformer
                         module. Typically uses pre-trained huggingface models.
         """
-        model = SentenceTransformer(self.bert_model)
-        logger.info("Loaded BERT model")
-        embeddings = model.encode(documents, show_progress_bar=False)
-        logger.info("Transformed documents to Embeddings")
+        # Instantiate embedding model
+        if isinstance(self.embedding_model, str):
+            model = SentenceTransformerDocumentEmbeddings(self.embedding_model)
+        elif isinstance(self.embedding_model, DocumentEmbeddings):
+            model = self.embedding_model
+        else:
+            raise ValueError("Make sure to either pass a string to the parameter `embedding_model` which "
+                             "indicates a sentence-transformers model. For example \n"
+                             "* 'distilbert-base-nli-mean-tokens'.\n"
+                             "Or pass in a DocumentEmbedding model from Flair. For example, \n"
+                             "* TransformerDocumentEmbeddings('bert-base-uncased')")
+        self.logger.info("Loaded embedding model")
+
+        # Extract embeddings
+        sentences = [Sentence(document) for document in documents]
+        model.embed(sentences)
+        embeddings = np.array([sentence.get_embedding().cpu().numpy() for sentence in sentences])
+        self.logger.info("Transformed documents to Embeddings")
+
         return embeddings
 
     def _map_predictions(self, predictions):
@@ -331,7 +345,7 @@ class BERTopic:
                                     min_dist=0.0,
                                     metric='cosine').fit(embeddings)
         umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("Reduced dimensionality with UMAP")
+        self.logger.info("Reduced dimensionality with UMAP")
         return umap_embeddings
 
     def _cluster_embeddings(self,
@@ -356,7 +370,7 @@ class BERTopic:
         documents['Topic'] = self.cluster_model.labels_
         probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
         self._update_topic_size(documents)
-        logger.info("Clustered UMAP embeddings with HDBSCAN")
+        self.logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
     def _extract_topics(self,
@@ -524,9 +538,9 @@ class BERTopic:
         self._extract_topics(documents, topic_reduction=True)
 
         if initial_nr_topics <= self.nr_topics:
-            logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
+            self.logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
         else:
-            logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+            self.logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
 
         return documents
 
@@ -570,7 +584,7 @@ class BERTopic:
 
         _ = self._extract_topics(documents, topic_reduction=True)
 
-        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+        self.logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
 
         return documents
 

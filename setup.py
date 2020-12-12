@@ -11,6 +11,20 @@ docs_packages = [
     "mkdocstrings==0.8.0",
 ]
 
+base_packages = [
+    "tqdm>=4.41.1",
+    "numpy>=1.18.5",
+    "umap-learn>=0.4.6",
+    "hdbscan>=0.8.26",
+    "pandas==1.1.5",
+    "scikit-learn>=0.22.2.post1",
+    "joblib>=0.17.0",
+    "matplotlib>=3.2.2",
+    "torch>=1.2.0",
+    "flair>= 0.7",
+    "sentence-transformers>=0.3.9"
+]
+
 dev_packages = docs_packages + test_packages
 
 
@@ -20,7 +34,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="bertopic",
     packages=["bertopic"],
-    version="0.3.4",
+    version="1.0.0",
     author="Maarten Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
@@ -43,18 +57,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.8",
     ],
-    install_requires=[
-        'torch',
-        'tqdm',
-        'numpy',
-        'umap-learn',
-        'hdbscan',
-        'pandas',
-        'scikit_learn',
-        'sentence_transformers',
-        'joblib',
-        'matplotlib'
-      ],
+    install_requires=base_packages,
     extras_require={
         "test": test_packages,
         "docs": docs_packages,

@@ -3,6 +3,31 @@ import logging
 from collections.abc import Iterable
 
 
+class MyLogger:
+    def __init__(self, level):
+        self.logger = logging.getLogger('BERTopic')
+        self._set_level(level)
+        self._add_handler()
+        self.logger.propagate = False
+
+    def info(self, message):
+        self.logger.info("{}".format(message))
+
+    def _set_level(self, level):
+        levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        if level in levels:
+            self.logger.setLevel(level)
+
+    def _add_handler(self):
+        sh = logging.StreamHandler()
+        sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
+        self.logger.addHandler(sh)
+
+        # Remove duplicate handlers
+        if len(self.logger.handlers) > 1:
+            self.logger.handlers = [self.logger.handlers[0]]
+
+
 def check_documents_type(documents):
     """ Check whether the input documents are indeed a list of strings """
     if isinstance(documents, Iterable) and not isinstance(documents, str):
@@ -23,16 +48,6 @@ def check_embeddings_shape(embeddings, docs):
                 raise ValueError("Make sure that the embeddings are a numpy array with shape: "
                                  "(len(docs), vector_dim) where vector_dim is the dimensionality "
                                  "of the vector embeddings. ")
-
-
-def create_logger():
-    """ Initialize logger """
-    logger = logging.getLogger('BERTopic')
-    logger.setLevel(logging.WARNING)
-    sh = logging.StreamHandler()
-    sh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
-    logger.addHandler(sh)
-    return logger
 
 
 def sentence_models():
