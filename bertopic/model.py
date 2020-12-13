@@ -90,7 +90,7 @@ class BERTopic:
                  top_n_words: int = 20,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
-                 min_topic_size: int = 30,
+                 min_topic_size: int = 15,
                  n_neighbors: int = 15,
                  n_components: int = 5,
                  stop_words: Union[str, List[str]] = None,
