@@ -16,7 +16,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
 from .ctfidf import ClassTFIDF
-from .utils import MyLogger, check_documents_type, check_embeddings_shape
+from .utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from .embeddings import languages, embedding_models
 
 
 class BERTopic:
@@ -84,7 +85,8 @@ class BERTopic:
     you best.
     """
     def __init__(self,
-                 embedding_model: str = 'distilbert-base-nli-mean-tokens',
+                 language: str = "english",
+                 embedding_model: str = None,
                  top_n_words: int = 20,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
@@ -94,14 +96,23 @@ class BERTopic:
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None):
+
+        # Embedding model
+        self.language = language
         self.embedding_model = embedding_model
+
+        # Topic-based parameters
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
-        self.n_gram_range = n_gram_range
         self.min_topic_size = min_topic_size
+
+        # Umap parameters
         self.n_neighbors = n_neighbors
         self.n_components = n_components
+
+        # Vectorizer parameters
         self.stop_words = stop_words
+        self.n_gram_range = n_gram_range
         self.vectorizer = vectorizer or CountVectorizer(ngram_range=self.n_gram_range, stop_words=self.stop_words)
 
         self.umap_model = None
@@ -269,6 +280,8 @@ class BERTopic:
         topics = model.transform(docs, embeddings)
         ```
         """
+        check_is_fitted(self)
+
         if isinstance(documents, str):
             documents = [documents]
 
@@ -300,7 +313,7 @@ class BERTopic:
             embeddings: The extracted embeddings using the sentence transformer
                         module. Typically uses pre-trained huggingface models.
         """
-        model = SentenceTransformer(self.embedding_model)
+        model = self._select_embedding_model()
         self.logger.info("Loaded embedding model")
         embeddings = model.encode(documents, show_progress_bar=False)
         self.logger.info("Transformed documents to Embeddings")
@@ -359,15 +372,11 @@ class BERTopic:
         return documents, probabilities
 
     def _extract_topics(self,
-                        documents: pd.DataFrame,
-                        topic_reduction: bool = False) -> np.ndarray:
+                        documents: pd.DataFrame) -> np.ndarray:
         """ Extract topics from the clusters using a class-based TF-IDF
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
-
-            topic_reduction: Controls verbosity if topic reduction is applied since
-                             it should not show reduction over and over again.
 
         Returns:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
@@ -421,55 +430,42 @@ class BERTopic:
                                for j in indices[i]][::-1]
                        for i, label in enumerate(labels)}
 
-    def get_topics(self) -> Dict[str, Tuple[str, float]]:
-        """ Return topics with top n words and their c-TF-IDF score
-
-        Usage:
-
-        ```python
-        all_topics = model.get_topics()
-        ```
+    def _select_embedding_model(self) -> SentenceTransformer:
+        """ Select an embedding model based on language or a specific sentence transformer models.
+        When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
+        xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
         """
-        return self.topics
 
-    def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
-        """ Return top n words for a specific topic and their c-TF-IDF scores
+        # Select embedding model based on language
+        if self.language:
+            if self.language.lower() in ["English", "english", "en"]:
+                return SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 
-        Usage:
+            elif self.language.lower() in languages:
+                return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
-        ```python
-        topic = model.get_topic(12)
-        ```
-        """
-        if self.topics.get(topic):
-            return self.topics[topic]
+            else:
+                raise ValueError(f"{self.language} is currently not supported. However, you can "
+                                 f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
+                                 "Else, please select a language from the following list:\n"
+                                 f"{languages}")
+
+        # Select embedding model based on specific sentence transformer model
+        elif self.embedding_model:
+            if self.embedding_model in embedding_models:
+                return SentenceTransformer(self.embedding_model)
+            else:
+                raise ValueError("Please select an embedding model from the following list:\n"
+                                 f"{embedding_models}\n\n"
+                                 f"For more information about the models, see:\n"
+                                 f"https://www.sbert.net/docs/pretrained_models.html")
+
         else:
-            return False
-
-    def get_topics_freq(self) -> pd.DataFrame:
-        """ Return the the size of topics (descending order)
-
-        Usage:
-
-        ```python
-        frequency = model.get_topics_freq()
-        ```
-        """
-        return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
-
-    def get_topic_freq(self, topic: int) -> int:
-        """ Return the the size of a topic
-
-        Arguments:
-             topic: the name of the topic as retrieved by get_topics
-
-        Usage:
-
-        ```python
-        frequency = model.get_topic_freq(12)
-        ```
-        """
-        return self.topic_sizes.items()[topic]
+            raise ValueError("Please select either a language or an embedding model to use: \n"
+                             "Supported languages: \n"
+                             f"{languages}\n\n"
+                             f"Supported Embeddings:\n"
+                             f"")
 
     def _reduce_topics(self, documents: pd.DataFrame, c_tf_idf: np.ndarray) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
@@ -520,7 +516,7 @@ class BERTopic:
             # Update new topic content
             self._update_topic_size(documents)
 
-        self._extract_topics(documents, topic_reduction=True)
+        self._extract_topics(documents)
 
         if initial_nr_topics <= self.nr_topics:
             self.logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
@@ -567,7 +563,7 @@ class BERTopic:
                 self._update_topic_size(documents)
                 has_mapped.append(topic_to_merge)
 
-        _ = self._extract_topics(documents, topic_reduction=True)
+        _ = self._extract_topics(documents)
 
         self.logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
 
@@ -592,6 +588,60 @@ class BERTopic:
             probabilities[:, from_topic] = 0
 
         return probabilities.round(3)
+
+    def get_topics(self) -> Dict[str, Tuple[str, float]]:
+        """ Return topics with top n words and their c-TF-IDF score
+
+        Usage:
+
+        ```python
+        all_topics = model.get_topics()
+        ```
+        """
+        check_is_fitted(self)
+        return self.topics
+
+    def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
+        """ Return top n words for a specific topic and their c-TF-IDF scores
+
+        Usage:
+
+        ```python
+        topic = model.get_topic(12)
+        ```
+        """
+        check_is_fitted(self)
+        if self.topics.get(topic):
+            return self.topics[topic]
+        else:
+            return False
+
+    def get_topics_freq(self) -> pd.DataFrame:
+        """ Return the the size of topics (descending order)
+
+        Usage:
+
+        ```python
+        frequency = model.get_topics_freq()
+        ```
+        """
+        check_is_fitted(self)
+        return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
+
+    def get_topic_freq(self, topic: int) -> int:
+        """ Return the the size of a topic
+
+        Arguments:
+             topic: the name of the topic as retrieved by get_topics
+
+        Usage:
+
+        ```python
+        frequency = model.get_topic_freq(12)
+        ```
+        """
+        check_is_fitted(self)
+        return self.topic_sizes.items()[topic]
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
@@ -618,6 +668,7 @@ class BERTopic:
 
         ![](../img/probabilities.png)
         """
+        check_is_fitted(self)
 
         # Get values and indices equal or exceed the minimum probability
         labels_idx = np.argwhere(probabilities >= min_probability).flatten()

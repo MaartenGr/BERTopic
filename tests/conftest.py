@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture(scope="module")
 def base_bertopic():
-    model = BERTopic(bert_model='distilbert-base-nli-mean-tokens',
+    model = BERTopic(embedding_model='distilbert-base-nli-mean-tokens',
                      top_n_words=20,
                      nr_topics=None,
                      n_gram_range=(1, 1),
@@ -19,7 +19,7 @@ def base_bertopic():
 @pytest.fixture(scope="module")
 def base_bertopic_custom_cv():
     cv = CountVectorizer(ngram_range=(1, 2))
-    model = BERTopic(bert_model='distilbert-base-nli-mean-tokens',
+    model = BERTopic(embedding_model='distilbert-base-nli-mean-tokens',
                      top_n_words=20,
                      nr_topics=None,
                      min_topic_size=30,
