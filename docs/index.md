@@ -1,11 +1,6 @@
-[![PyPI - Python](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-blue.svg)](https://pypi.org/project/bertopic/)
-[![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
-[![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
-[![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
+# BERTopic
 
 <img src="logo.png" width="35%" height="35%" align="right" />
-
-# BERTopic
 
 BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
@@ -25,7 +20,9 @@ error, please install pytorch first [here](https://pytorch.org/get-started/local
 
 Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 
-``pip install bertopic``
+```bash
+pip install bertopic
+```
 
 ###  Usage
 
@@ -99,7 +96,7 @@ To visualize the distributions, we simply call:
 model.visualize_distribution(probabilities[0])
 ```
 
-<img src="../img/probabilities.png" width="75%" height="75%"/>
+<img src="img/probabilities.png" width="75%" height="75%"/>
 
 **NOTE**: The distribution of the probabilities does not give an indication to 
 the distribution of the frequencies of topics across a document. It merely shows

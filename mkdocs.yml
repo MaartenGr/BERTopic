@@ -1,7 +1,7 @@
 site_name: BERTopic
 extra_css: [style.css]
 repo_url: https://github.com/MaartenGr/BERTopic
-site_url: https://maartengr.github.io/bertopic/
+site_url: https://maartengr.github.io/BERTopic/
 site_description: Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.
 site_author: Maarten P. Grootendorst
 use_directory_urls: false
@@ -32,7 +32,7 @@ theme:
   feature:
     tabs: true
   palette:
-    primary: indigo
+    primary: white
     accent: blue
 markdown_extensions:
   - codehilite

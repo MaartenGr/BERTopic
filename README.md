@@ -2,58 +2,35 @@
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
+[![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)  
 
-<img src="images/logo.png" width="35%" height="35%" align="right" />
 
 # BERTopic
 
-BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
+<img src="images/logo.png" width="35%" height="35%" align="right" />
+
+BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
 
 Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99).
 
-<a name="toc"/></a>
-## Table of Contents  
-<!--ts-->
-   1. [About the Project](#about)  
-   2. [Getting Started](#gettingstarted)    
-        2.1. [Installation](#installation)    
-        2.2. [Basic Usage](#usage)  
-        2.3. [Custom Embeddings](#custom)    
-        2.4. [Visualize Topic Probabilities](#prob)       
-        2.5. [Overview](#overview)   
-   3. [Algorithm](#algorithm)  
-        3.1. [Sentence Transformer](#sentence)  
-        3.2. [UMAP + HDBSCAN](#umap)  
-        3.3. [c-TF-IDF](#ctfidf)     
-   4. [Google Colaboratory](#colab)   
-<!--te-->
- 
-<a name="about"/></a>
-## 1. About the Project
-[Back to ToC](#toc)  
+## Installation
 
-The initial purpose of this project was to generalize [Top2Vec](https://github.com/ddangelov/Top2Vec) such that it could be 
-used with state-of-art pre-trained transformer models. However, this proved difficult due to the different natures 
-of Doc2Vec and transformer models. Instead, I decided to come up with a different algorithm that could use BERT 
-and 🤗 transformers embeddings. The results is **BERTopic**, an algorithm for generating topics using state-of-the-art embeddings.  
- 
-
-<a name="gettingstarted"/></a>
-## 2. Getting Started
-[Back to ToC](#toc)  
-
-<a name="installation"/></a>
-###  2.1. Installation
 **[PyTorch 1.2.0](https://pytorch.org/get-started/locally/)** or higher is recommended. If the install below gives an
 error, please install pytorch first [here](https://pytorch.org/get-started/locally/). 
 
 Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 
-``pip install bertopic``
+```bash
+pip install bertopic
+```
 
-<a name="usage"/></a>
-###  2.2. Usage
+## Getting Started
+For an in-depth overview of the possibilities of `PolyFuzz` 
+you can check the full documentation [here](https://maartengr.github.io/PolyFuzz/) or you can follow along 
+with the notebook [here](https://github.com/MaartenGr/PolyFuzz/blob/master/notebooks/Overview.ipynb).
+
+### Quick Start
 
 Below is an example of how to use the model. The example uses the 
 [20 newsgroups](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) dataset.  
@@ -82,12 +59,9 @@ The resulting topics can be accessed through `model.get_topic(topic)`:
  ('year', 0.002962343114817677),
  ('nhl', 0.0029577648449943144),
  ('baseball', 0.0029245163154193524)]
-``` 
+```  
 
-You can find an overview of all models currently in BERTopic [here](https://www.sbert.net/docs/pretrained_models.html) and [here](https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0). 
-
-<a name="custom"/></a>
-###  2.3. Custom Embeddings
+### Custom Embeddings
 If you use BERTopic as shown above, then you are forced to use `sentence-transformers` as the main
 package for which to create embeddings. However, you might have your own model or package that
 you believe is better suited for representing documents. 
@@ -115,8 +89,7 @@ multiple times. Using your own embeddings allows you to try out BERTopic several
 topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
 with different parameters. 
 
-<a name="prob"/></a>
-###  2.4. Visualize Topic Probabilities
+### Visualize Topic Probabilities
 
 The variable `probabilities` that is returned from `transform()` or `fit_transform()` can 
 be used to understand how confident BERTopic is that certain topics can be found in a document. 
@@ -134,9 +107,7 @@ model.visualize_distribution(probabilities[0])
 the distribution of the frequencies of topics across a document. It merely shows
 how confident BERTopic is that certain topics can be found in a document. 
 
-
-<a name="overview"/></a>
-###  2.5. Overview
+### Overview
 
 
 | Methods | Code  | Returns  |
@@ -157,10 +128,8 @@ Therefore, it is advised to only use `fit` and then `transform` if you are looki
 For existing documents, it is best to use `fit_transform` directly as it only needs to generate the document
 embeddings once.   
 
-
 <a name="algorithm"/></a>
-## 3. Algorithm
-[Back to ToC](#toc)  
+## Algorithm  
 The algorithm contains, roughly, 3 stages:
 * Extract document embeddings with **Sentence Transformers**
 * Cluster document embeddings to create groups of similar documents with **UMAP** and **HDBSCAN**
@@ -168,7 +137,7 @@ The algorithm contains, roughly, 3 stages:
 
 
 <a name="sentence"/></a>
-###  3.1. Sentence Transformer
+###  Sentence Transformer
 We start by creating document embeddings from a set of documents using 
 [sentence-transformer](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
 language and are great for creating either document- or sentence-embeddings. 
@@ -177,19 +146,19 @@ If you have long documents, I would advise you to split up your documents into p
 model in `sentence-transformer` typically has a token limit. 
 
 <a name="umap"/></a>
-###  3.2. UMAP + HDBSCAN
+###  UMAP + HDBSCAN
 Next, in order to cluster the documents using a clustering algorithm such as HDBSCAN we first need to 
 reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.
 
 <p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png"/>
+<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png" width="70%" height="70%"/>
 </p>
 
 Thus, we first lower dimensionality with UMAP as it preserves local structure well after which we can 
 use HDBSCAN to cluster similar documents.  
 
 <a name="ctfidf"/></a>
-###  3.3. c-TF-IDF
+###  c-TF-IDF
 What we want to know from the clusters that we generated, is what makes one cluster, based on their content, 
 different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per topic
 instead of per document. 
@@ -210,8 +179,7 @@ This action can now be seen as a form of regularization of frequent words in the
 Next, the total, unjoined, number of documents `m` is divided by the total frequency of word `t` across all classes `n`.
 
 <a name="colab"/></a>
-## 4. Google Colaboratory
-[Back to ToC](#toc)  
+## Google Colaboratory  
 Since we are using transformer-based embeddings you might want to leverage gpu-acceleration
 to speed up the model. For that, I have created a tutorial 
 [Google Colab Notebook](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing)
