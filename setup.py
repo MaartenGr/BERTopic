@@ -6,10 +6,11 @@ test_packages = [
 ]
 
 docs_packages = [
-    "mkdocs==1.1",
-    "mkdocs-material==4.6.3",
-    "mkdocstrings==0.8.0",
+    "mkdocs>=1.1",
+    "mkdocs-material>=4.6.3",
+    "mkdocstrings>=0.8.0",
 ]
+
 
 base_packages = [
     "tqdm>=4.41.1",
@@ -21,7 +22,7 @@ base_packages = [
     "scikit-learn>=0.22.2.post1",
     "joblib>=0.17.0",
     "matplotlib>=3.2.2",
-    "torch>=1.6.0",
+    "torch>=1.4.0",
     "sentence-transformers>=0.3.9"
 ]
 

@@ -1,3 +1,3 @@
 # `BERTopic`
 
-::: bertopic.model.BERTopic
+::: bertopic._bertopic.BERTopic

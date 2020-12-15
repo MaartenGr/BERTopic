@@ -1,4 +1,4 @@
-# BERTopic
+# **BERTopic**
 
 <img src="logo.png" width="35%" height="35%" align="right" />
 
@@ -7,14 +7,7 @@ allowing for easily interpretable topics whilst keeping important words in the t
 
 Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99).
 
-## About the Project  
-
-The initial purpose of this project was to generalize [Top2Vec](https://github.com/ddangelov/Top2Vec) such that it could be 
-used with state-of-art pre-trained transformer models. However, this proved difficult due to the different natures 
-of Doc2Vec and transformer models. Instead, I decided to come up with a different algorithm that could use BERT 
-and 🤗 transformers embeddings. The results is **BERTopic**, an algorithm for generating topics using state-of-the-art embeddings.  
- 
-###  Installation
+###  **Installation**
 **[PyTorch 1.2.0](https://pytorch.org/get-started/locally/)** or higher is recommended. If the install below gives an
 error, please install pytorch first [here](https://pytorch.org/get-started/locally/). 
 
@@ -24,7 +17,7 @@ Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 pip install bertopic
 ```
 
-###  Usage
+###  **Usage**
 
 Below is an example of how to use the model. The example uses the 
 [20 newsgroups](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) dataset.  
@@ -35,7 +28,7 @@ from sklearn.datasets import fetch_20newsgroups
  
 docs = fetch_20newsgroups(subset='all')['data']
 
-model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+model = BERTopic()
 topics, probabilities = model.fit_transform(docs)
 ```
 
@@ -55,56 +48,7 @@ The resulting topics can be accessed through `model.get_topic(topic)`:
  ('baseball', 0.0029245163154193524)]
 ``` 
 
-You can find an overview of all models currently in BERTopic [here](https://www.sbert.net/docs/pretrained_models.html) and [here](https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0). 
-
-###  Custom Embeddings
-If you use BERTopic as shown above, then you are forced to use `sentence-transformers` as the main
-package for which to create embeddings. However, you might have your own model or package that
-you believe is better suited for representing documents. 
-
-Fortunately, for those that want to use their own embeddings there is an option in BERTopic.
-For this example I will still be using `sentence-transformers` but the general principle holds:
-
-```python
-from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-from sentence_transformers import SentenceTransformer
-
-# Prepare embeddings
-docs = fetch_20newsgroups(subset='all')['data']
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-embeddings = sentence_model.encode(docs, show_progress_bar=False)
-
-# Create topic model
-model = BERTopic(verbose=True)
-topics = model.fit_transform(docs, embeddings)
-```
-
-Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
-multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
-topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
-with different parameters. 
-
-###  Visualize Topic Probabilities
-
-The variable `probabilities` that is returned from `transform()` or `fit_transform()` can 
-be used to understand how confident BERTopic is that certain topics can be found in a document. 
-
-To visualize the distributions, we simply call:
-```python
-# Make sure to input the probabilities of a single document!
-model.visualize_distribution(probabilities[0])
-```
-
-<img src="img/probabilities.png" width="75%" height="75%"/>
-
-**NOTE**: The distribution of the probabilities does not give an indication to 
-the distribution of the frequencies of topics across a document. It merely shows
-how confident BERTopic is that certain topics can be found in a document. 
-
-
-
-###  Overview
+###  **Function Overview**
 
 | Methods | Code  | Returns  |
 |-----------------------|---|---|
@@ -112,19 +56,15 @@ how confident BERTopic is that certain topics can be found in a document.
 | Access all topics     |  `model.get_topics()` | List[Tuple[Word, Score]]  |
 | Get single topic freq |  `model.get_topic_freq(12)` | int |
 | Get all topic freq    |  `model.get_topics_freq()` | DataFrame  |
-| Fit the model    |  `model.fit(docs])` | -  |
+| Fit the model    |  `model.fit(docs])` | BERTopic  |
 | Fit the model and predict documents    |  `model.fit_transform(docs])` | List[int], List[float]  |
 | Predict new documents    |  `model.transform([new_doc])` | List[int], List[float]  |
 | Visualize Topic Probability Distribution    |  `model.visualize_distribution(probabilities)` | Matplotlib.Figure  |
 | Save model    |  `model.save("my_model")` | -  |
 | Load model    |  `BERTopic.load("my_model")` | - |
-   
-**NOTE**: The embeddings itself are not preserved in the model as they are only vital for creating the clusters. 
-Therefore, it is advised to only use `fit` and then `transform` if you are looking to generalize the model to new documents.
-For existing documents, it is best to use `fit_transform` directly as it only needs to generate the document
-embeddings once.   
 
-## Google Colaboratory  
+
+## **Google Colaboratory**  
 Since we are using transformer-based embeddings you might want to leverage gpu-acceleration
 to speed up the model. For that, I have created a tutorial 
 [Google Colab Notebook](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing)
@@ -132,10 +72,3 @@ that you can use to run the model as shown above.
 
 If you want to tweak the inner workings or follow along with the medium post, use [this](https://colab.research.google.com/drive/1-SOw0WHZ_ZXfNE36KUe3Z-UpAO3vdhGg?usp=sharing)
  notebook instead. 
-
-## References
-Angelov, D. (2020). [Top2Vec: Distributed Representations of Topics.](https://arxiv.org/abs/2008.09470) *arXiv preprint arXiv*:2008.09470.
-
-
-
-

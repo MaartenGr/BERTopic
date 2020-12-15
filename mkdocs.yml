@@ -6,15 +6,19 @@ site_description: Leveraging BERT and a class-based TF-IDF to create easily inte
 site_author: Maarten P. Grootendorst
 use_directory_urls: false
 nav:
-  - Home:
-    - Index: index.md
-  - BERTopic:
-      - Algorithm: algorithm.md
+  - Home: index.md
+  - Guides:
+      - Getting Started: tutorial/quickstart/quickstart.md
+      - Custom Embeddings: tutorial/embeddings/embeddings.md
+      - Topic Reduction: tutorial/topicreduction/topicreduction.md
+  - The Algorithm: tutorial/algorithm/algorithm.md
   - API:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
 plugins:
   - mkdocstrings:
+      setup_commands:
+        - import bertopic
       watch:
         - bertopic
   - search
@@ -35,6 +39,7 @@ theme:
     primary: white
     accent: blue
 markdown_extensions:
+  - admonition
   - codehilite
   - pymdownx.inlinehilite
   - pymdownx.details

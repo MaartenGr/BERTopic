@@ -1,30 +1,36 @@
-# The Algorithm  
+
 The algorithm contains, roughly, 3 stages:   
    
-- Extract document embeddings with **Sentence Transformers**  
-- Cluster document embeddings to create groups of similar documents with **UMAP** and **HDBSCAN**  
-- Extract and reduce topics with **c-TF-IDF**  
+- Extract document embeddings with **`Sentence Transformers`** or **`TF-IDF`**  
+- Cluster document embeddings to create groups of similar documents with **`UMAP`** and **`HDBSCAN`**  
+- Extract and reduce topics with **`c-TF-IDF`**  
 
-##  Sentence Transformer
+##  **Create Document Embeddings**
 We start by creating document embeddings from a set of documents using 
-[sentence-transformer](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
+[sentence-transformers](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
 language and are great for creating either document- or sentence-embeddings. 
 
-If you have long documents, I would advise you to split up your documents into paragraphs or sentences as a BERT-based
-model in `sentence-transformer` typically has a token limit. 
+In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:
+* "distilbert-base-nli-stsb-mean-tokens"
+* "xlm-r-bert-base-nli-stsb-mean-tokens"
 
-##  UMAP + HDBSCAN
+The first is an English BERT-based model trained specifically for semantic similarity tasks which works quite 
+well for most use-cases. The second model is very similar to the first with one major difference is that the 
+`xlm` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
+you select any language other than English.
+
+##  **Cluster Document Embeddings**
 Next, in order to cluster the documents using a clustering algorithm such as HDBSCAN we first need to 
 reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.
 
 <p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png"/>
+<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png" width="50%" height="50%"/>
 </p>
 
 Thus, we first lower dimensionality with UMAP as it preserves local structure well after which we can 
 use HDBSCAN to cluster similar documents.  
 
-##  c-TF-IDF
+##  **Extract Topics**
 What we want to know from the clusters that we generated, is what makes one cluster, based on their content, 
 different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per topic
 instead of per document. 
@@ -33,7 +39,8 @@ When you apply TF-IDF as usual on a set of documents, what you are basically doi
 words between documents. Now, what if, we instead treat all documents in a single category (e.g., a cluster) 
 as a single document and then apply TF-IDF? The result would be importance scores for words within a cluster. 
 The more important words are within a cluster, the more it is representative of that topic. In other words, 
-if we extract the most important words per cluster, we get descriptions of **topics**! 
+if we extract the most important words per cluster, we get descriptions of **topics**! This model is called 
+class-based TF-IDF
 
 <p align="center">
 <img src="https://github.com/MaartenGr/BERTopic/raw/master/images/ctfidf.png" height="50"/>

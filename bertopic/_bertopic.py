@@ -16,9 +16,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
-from .ctfidf import ClassTFIDF
-from .utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
-from .embeddings import languages, embedding_models
+from ._ctfidf import ClassTFIDF
+from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from ._embeddings import languages, embedding_models
 
 
 class BERTopic:
@@ -28,6 +28,8 @@ class BERTopic:
     whilst keeping important words in the topic descriptions.
 
     Arguments:
+        language: The main language used in your documents. For a full overview of supported languages
+                  see bertopic.embeddings.languages
         embedding_model: Model to use. Overview of options can be found here
                         https://www.sbert.net/docs/pretrained_models.html
         top_n_words: The number of words per topic to extract

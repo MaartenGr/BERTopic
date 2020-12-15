@@ -1,7 +1,7 @@
 import pytest
 import logging
 import numpy as np
-from bertopic.utils import check_documents_type, check_embeddings_shape, MyLogger
+from bertopic._utils import check_documents_type, check_embeddings_shape, MyLogger
 
 
 def test_logger():
