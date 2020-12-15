@@ -651,6 +651,43 @@ class BERTopic:
         check_is_fitted(self)
         return self.topic_sizes.items()[topic]
 
+    def reduce_topics(self,
+                      docs: List[str],
+                      topics: List[int],
+                      nr_topics: int,
+                      probabilities: np.ndarray = None) -> Tuple[List[int], np.ndarray]:
+        """ Further reduce the nr of topics to nr_topics
+
+        Arguments:
+            docs: The docs you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            nr_topics: The number of topics you want reduced to
+            probabilities: The probabilities that were returned when calling either `fit` or `fit_transform`
+
+        Returns:
+            new_topics: Updated topics
+            new_probabilities: Updated probabilities
+
+        """
+        self.nr_topics = nr_topics
+
+        # Prepare data
+        documents = pd.DataFrame(docs, columns=["Document"])
+        documents["Topic"] = topics
+
+        # Reduce number of topics
+        self._update_topic_size(documents)
+        c_tf_idf = self._extract_topics(documents)
+        documents = self._reduce_topics(documents, c_tf_idf)
+        new_topics = documents.Topic.to_list()
+
+        if isinstance(probabilities, np.ndarray):
+            new_probabilities = self._map_probabilities(probabilities)
+        else:
+            new_probabilities = probabilities
+
+        return new_topics, new_probabilities
+
     def visualize_distribution(self,
                                probabilities: np.ndarray,
                                min_probability: float = 0.015,
