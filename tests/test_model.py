@@ -204,7 +204,7 @@ def test_topic_reduction_edge_cases():
     pd.testing.assert_frame_equal(old_freq, new_freq)
 
 
-@mock.patch("bertopic.model.BERTopic._extract_embeddings")
+@mock.patch("bertopic._bertopic.BERTopic._extract_embeddings")
 def test_fit_transform(embeddings):
     """ Test whether predictions are correctly made """
     blobs, _ = make_blobs(n_samples=len(newsgroup_docs), centers=5, n_features=768, random_state=42)
