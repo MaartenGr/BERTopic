@@ -4,6 +4,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 import joblib
 import numpy as np
 import pandas as pd
+from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Dict, Union
 import matplotlib.pyplot as plt
 
@@ -163,7 +164,6 @@ class BERTopic:
         model = BERTopic(None, verbose=True).fit(docs, embeddings)
         ```
         """
-        check_documents_type(documents)
         self.fit_transform(documents, embeddings)
         return self
 
@@ -212,13 +212,14 @@ class BERTopic:
         ```
         """
         check_documents_type(documents)
+        check_embeddings_shape(embeddings, documents)
+
         documents = pd.DataFrame({"Document": documents,
                                   "ID": range(len(documents)),
                                   "Topic": None})
 
-        # Extract BERT sentence embeddings
-        if not isinstance(embeddings, np.ndarray):
-            check_embeddings_shape(embeddings, documents)
+        # Extract embeddings
+        if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
             embeddings = self._extract_embeddings(documents.Document)
 
         # Reduce dimensionality with UMAP
@@ -281,12 +282,12 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
+        check_embeddings_shape(embeddings, documents)
 
         if isinstance(documents, str):
             documents = [documents]
 
         if not isinstance(embeddings, np.ndarray):
-            check_embeddings_shape(embeddings, documents)
             embeddings = self._extract_embeddings(documents)
 
         umap_embeddings = self.umap_model.transform(embeddings)
@@ -329,7 +330,7 @@ class BERTopic:
             mapped_predictions.append(prediction)
         return mapped_predictions
 
-    def _reduce_dimensionality(self, embeddings: np.ndarray) -> np.ndarray:
+    def _reduce_dimensionality(self, embeddings: Union[np.ndarray, csr_matrix]) -> np.ndarray:
         """ Reduce dimensionality of embeddings using UMAP and train a UMAP model
 
         Arguments:
@@ -338,10 +339,15 @@ class BERTopic:
         Returns:
             umap_embeddings: The reduced embeddings
         """
-        self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
-                                    n_components=self.n_components,
-                                    min_dist=0.0,
-                                    metric='cosine').fit(embeddings)
+        if isinstance(embeddings, csr_matrix):
+            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
+                                        n_components=self.n_components,
+                                        metric='hellinger').fit(embeddings)
+        else:
+            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
+                                        n_components=self.n_components,
+                                        min_dist=0.0,
+                                        metric='cosine').fit(embeddings)
         umap_embeddings = self.umap_model.transform(embeddings)
         self.logger.info("Reduced dimensionality with UMAP")
         return umap_embeddings

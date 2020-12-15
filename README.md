@@ -41,7 +41,7 @@ from sklearn.datasets import fetch_20newsgroups
  
 docs = fetch_20newsgroups(subset='all')['data']
 
-model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+model = BERTopic(language="English")
 topics, probabilities = model.fit_transform(docs)
 ```
 
@@ -80,7 +80,7 @@ sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Create topic model
-model = BERTopic(verbose=True)
+model = BERTopic()
 topics, probabilities = model.fit_transform(docs, embeddings)
 ```
 

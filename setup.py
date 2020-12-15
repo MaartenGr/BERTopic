@@ -16,11 +16,12 @@ base_packages = [
     "numpy>=1.18.5",
     "umap-learn>=0.4.6",
     "hdbscan>=0.8.26",
-    "pandas==1.1.5",
+    "pandas>=1.1.5",
+    "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
     "joblib>=0.17.0",
     "matplotlib>=3.2.2",
-    "torch>=1.2.0",
+    "torch>=1.6.0",
     "sentence-transformers>=0.3.9"
 ]
 
@@ -33,7 +34,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="bertopic",
     packages=["bertopic"],
-    version="1.0.0",
+    version="0.4.0",
     author="Maarten Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
