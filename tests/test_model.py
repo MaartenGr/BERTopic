@@ -46,6 +46,22 @@ def test_full():
     assert len(probs_test) == len(model.get_topics_freq())-1
     assert len(topics_test) == 1
 
+    # Test find topic
+    similar_topics, similarity = model.find_topics("query", top_n=2)
+    assert len(similar_topics) == 2
+    assert len(similarity) == 2
+    assert max(similarity) <= 1
+
+    # Test update topics
+    topic = model.get_topic(1)[:10]
+    model.update_topics(newsgroup_docs, topics, n_gram_range=(2, 2), stop_words="english")
+    updated_topic = model.get_topic(1)[:10]
+    model.update_topics(newsgroup_docs, topics)
+    original_topic = model.get_topic(1)[:10]
+
+    assert topic != updated_topic
+    assert topic == original_topic
+
     # Test topic reduction
     nr_topics = 2
     new_topics, new_probs = model.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)

@@ -13,6 +13,7 @@ import umap
 import hdbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
@@ -127,6 +128,7 @@ class BERTopic:
         self.topic_sizes = None
         self.reduced_topics_mapped = None
         self.mapped_topics = None
+        self.topic_embeddings = None
 
         if verbose:
             logger.set_level("DEBUG")
@@ -393,7 +395,70 @@ class BERTopic:
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
         self._extract_words_per_topic(c_tf_idf, words)
+        self._create_topic_vectors()
         return c_tf_idf
+
+    def _create_topic_vectors(self):
+        """ Creates embeddings per topics based on their topic representation
+
+        We start by creating embeddings out of the topic representation. This
+        results in a number of embeddings per topic. Then, we take the weighted
+        average of embeddings in a topic by their c-TF-IDF score. This will put
+        more emphasis to words that represent a topic best.
+        """
+        topic_list = list(self.topics.keys())
+        topic_list.sort()
+        n = self.top_n_words
+
+        # Extract embeddings for all words in all topics
+        topic_words = [self.get_topic(topic) for topic in topic_list]
+        topic_words = [word[0] for topic in topic_words for word in topic]
+        embeddings = self._extract_embeddings(topic_words)
+
+        # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
+        # The embeddings var is a single numpy matrix and therefore slicing is necessary to
+        # access the words per topic
+        topic_embeddings = []
+        for i, topic in enumerate(topic_list):
+            word_importance = [val[1] for val in self.get_topic(topic)]
+            topic_embedding = np.average(embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
+            topic_embeddings.append(topic_embedding)
+
+        self.topic_embeddings = topic_embeddings
+
+    def find_topics(self, search_term: str, top_n: int = 5) -> Tuple[List[int], List[float]]:
+        """ Find topics most similar to a search_term
+
+        Creates an embedding for search_term and compares that with
+        the topic embeddings. The most similar topics are returned
+        along with their similarity values.
+
+        The search_term can be of any size but since it compares
+        with the topic representation it is advised to keep it
+        below 5 words.
+
+        Args:
+            search_term: the term you want to use to search for topics
+            top_n: the number of topics to return
+
+        Returns:
+            similar_topics: the most similar topics from high to low
+            similarity: the similarity scores from high to low
+
+        """
+        topic_list = list(self.topics.keys())
+        topic_list.sort()
+
+        # Extract search_term embeddings and compare with topic embeddings
+        search_embedding = self._extract_embeddings([search_term]).flatten()
+        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
+
+        # Extract topics most similar to search_term
+        ids = np.argsort(sims)[-top_n:]
+        similarity = [sims[i] for i in ids][::-1]
+        similar_topics = [topic_list[index] for index in ids][::-1]
+
+        return similar_topics, similarity
 
     def update_topics(self,
                       docs: List[str],
@@ -515,12 +580,7 @@ class BERTopic:
                                  f"For more information about the models, see:\n"
                                  f"https://www.sbert.net/docs/pretrained_models.html")
 
-        else:
-            raise ValueError("Please select either a language or an embedding model to use: \n"
-                             "Supported languages: \n"
-                             f"{languages}\n\n"
-                             f"Supported Embeddings:\n"
-                             f"")
+        return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
     def _reduce_topics(self, documents: pd.DataFrame, c_tf_idf: np.ndarray) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
