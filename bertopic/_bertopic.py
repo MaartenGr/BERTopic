@@ -455,7 +455,6 @@ class BERTopic:
             words: The names of the words to which values were given
         """
         documents = documents_per_topic.Document.values
-        documents = [" ".join(list(set(doc))) for doc in documents]
         count = self.vectorizer.fit(documents)
         words = count.get_feature_names()
         X = count.transform(documents)
