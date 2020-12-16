@@ -21,6 +21,9 @@ from ._utils import MyLogger, check_documents_type, check_embeddings_shape, chec
 from ._embeddings import languages, embedding_models
 
 
+logger = MyLogger("WARNING")
+
+
 class BERTopic:
     """
     BERTopic is a topic modeling technique that leverages BERT embeddings and
@@ -126,9 +129,7 @@ class BERTopic:
         self.mapped_topics = None
 
         if verbose:
-            self.logger = MyLogger("DEBUG")
-        else:
-            self.logger = MyLogger("WARNING")
+            logger.set_level("DEBUG")
 
     def fit(self,
             documents: List[str],
@@ -317,9 +318,9 @@ class BERTopic:
                         module. Typically uses pre-trained huggingface models.
         """
         model = self._select_embedding_model()
-        self.logger.info("Loaded embedding model")
+        logger.info("Loaded embedding model")
         embeddings = model.encode(documents, show_progress_bar=False)
-        self.logger.info("Transformed documents to Embeddings")
+        logger.info("Transformed documents to Embeddings")
 
         return embeddings
 
@@ -351,7 +352,7 @@ class BERTopic:
                                         min_dist=0.0,
                                         metric='cosine').fit(embeddings)
         umap_embeddings = self.umap_model.transform(embeddings)
-        self.logger.info("Reduced dimensionality with UMAP")
+        logger.info("Reduced dimensionality with UMAP")
         return umap_embeddings
 
     def _cluster_embeddings(self,
@@ -375,8 +376,7 @@ class BERTopic:
                                              prediction_data=True).fit(umap_embeddings)
         documents['Topic'] = self.cluster_model.labels_
         probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
-        self._update_topic_size(documents)
-        self.logger.info("Clustered UMAP embeddings with HDBSCAN")
+        logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
     def _extract_topics(self,
@@ -389,11 +389,59 @@ class BERTopic:
         Returns:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
+        self._update_topic_size(documents)
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
         self._extract_words_per_topic(c_tf_idf, words)
 
         return c_tf_idf
+
+    def update_topics(self,
+                      docs: List[str],
+                      topics: List[int],
+                      n_gram_range: Tuple[int, int] = None,
+                      stop_words: str = None,
+                      vectorizer: CountVectorizer = None):
+        """ Updates the topic representation by recalculating c-TF-IDF with the new
+        parameters as defined in this function.
+
+        When you have trained a model and viewed the topics and the words that represent them,
+        you might not be satisfied with the representation. Perhaps you forgot to remove
+        stop_words or you want to try out a different n_gram_range. This function allows you
+        to update the topic representation after they have been formed.
+
+        Args:
+            docs: The docs you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            n_gram_range: The n-gram range for the CountVectorizer.
+            stop_words: Stopwords that can be used as either a list of strings, or the name of the
+                        language as a string. For example: 'english' or ['the', 'and', 'I'].
+                        Note that this will not be used if you pass in your own CountVectorizer.
+            vectorizer: Pass in your own CountVectorizer from scikit-learn
+
+        Usage:
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        # Create topics
+        docs = fetch_20newsgroups(subset='train')['data']
+        model = BERTopic(n_gram_range=(1, 1), stop_words=None)
+        topics, probs = model.fit_transform(docs)
+
+        # Update topic representation
+        mode.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="English")
+        ```
+        """
+        if not n_gram_range:
+            n_gram_range = self.n_gram_range
+
+        if not stop_words:
+            stop_words = self.stop_words
+
+        self.vectorizer = vectorizer or CountVectorizer(ngram_range=n_gram_range, stop_words=stop_words)
+        documents = pd.DataFrame({"Document": docs, "Topic": topics})
+        self._extract_topics(documents)
 
     def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[np.ndarray, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
@@ -504,7 +552,8 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        self.mapped_topics = {}
+        if not self.mapped_topics:
+            self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())
 
         # Create topic similarity matrix
@@ -527,9 +576,9 @@ class BERTopic:
         self._extract_topics(documents)
 
         if initial_nr_topics <= self.nr_topics:
-            self.logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
+            logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
         else:
-            self.logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+            logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
 
         return documents
 
@@ -544,6 +593,9 @@ class BERTopic:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
         initial_nr_topics = len(self.get_topics())
+        has_mapped = []
+        if not self.mapped_topics:
+            self.mapped_topics = {}
 
         # Create topic similarity matrix
         similarities = cosine_similarity(c_tf_idf)
@@ -553,10 +605,8 @@ class BERTopic:
         not_mapped = int(np.ceil(len(self.get_topics_freq()) * 0.1))
         to_map = self.get_topics_freq().Topic.values[not_mapped:][::-1]
 
-        self.mapped_topics = {}
-        has_mapped = []
-
         for topic_to_merge in to_map:
+            # Find most similar topic to least common topic
             similarity = np.max(similarities[topic_to_merge + 1])
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
 
@@ -573,7 +623,7 @@ class BERTopic:
 
         _ = self._extract_topics(documents)
 
-        self.logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
 
         return documents
 
@@ -654,9 +704,19 @@ class BERTopic:
     def reduce_topics(self,
                       docs: List[str],
                       topics: List[int],
-                      nr_topics: int,
-                      probabilities: np.ndarray = None) -> Tuple[List[int], np.ndarray]:
-        """ Further reduce the nr of topics to nr_topics
+                      probabilities: np.ndarray,
+                      nr_topics: int = 20) -> Tuple[List[int], np.ndarray]:
+        """ Further reduce the number of topics to nr_topics.
+
+        The number of topics is further reduced by calculating the c-TF-IDF matrix
+        of the documents and then reducing them by iteratively merging the least
+        frequent topic with the most similar one based on their c-TF-IDF matrices.
+        The topics, their sizes, and representations are updated.
+
+        The reasoning for putting `docs`, `topics`, and `probs` as parameters is that
+        these values are not saved within BERTopic on purpose. If you were to have a
+        million documents, it seems very inefficient to save those in BERTopic
+        instead of a dedicated database.
 
         Arguments:
             docs: The docs you used when calling either `fit` or `fit_transform`
@@ -668,23 +728,29 @@ class BERTopic:
             new_topics: Updated topics
             new_probabilities: Updated probabilities
 
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        # Create topics -> Typically over 50 topics
+        docs = fetch_20newsgroups(subset='train')['data']
+        model = BERTopic()
+        topics, probs = model.fit_transform(docs)
+
+        # Further reduce topics
+        new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
+        ```
         """
         self.nr_topics = nr_topics
-
-        # Prepare data
-        documents = pd.DataFrame(docs, columns=["Document"])
-        documents["Topic"] = topics
+        documents = pd.DataFrame({"Document": docs, "Topic": topics})
 
         # Reduce number of topics
-        self._update_topic_size(documents)
         c_tf_idf = self._extract_topics(documents)
         documents = self._reduce_topics(documents, c_tf_idf)
         new_topics = documents.Topic.to_list()
-
-        if isinstance(probabilities, np.ndarray):
-            new_probabilities = self._map_probabilities(probabilities)
-        else:
-            new_probabilities = probabilities
+        new_probabilities = self._map_probabilities(probabilities)
 
         return new_topics, new_probabilities
 

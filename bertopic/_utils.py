@@ -7,14 +7,14 @@ from scipy.sparse.csr import csr_matrix
 class MyLogger:
     def __init__(self, level):
         self.logger = logging.getLogger('BERTopic')
-        self._set_level(level)
+        self.set_level(level)
         self._add_handler()
         self.logger.propagate = False
 
     def info(self, message):
         self.logger.info("{}".format(message))
 
-    def _set_level(self, level):
+    def set_level(self, level):
         levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         if level in levels:
             self.logger.setLevel(level)

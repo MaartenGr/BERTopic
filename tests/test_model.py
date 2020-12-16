@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 
 from bertopic import BERTopic
 
-newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:500]
+newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:1000]
 embedding_model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 
 
@@ -36,7 +36,7 @@ def test_full():
         assert len(words) == 10
 
     assert len(model.get_topics_freq()) > 2
-    assert probs.shape == (500, len(model.get_topics_freq())-1)
+    assert probs.shape == (1000, len(model.get_topics_freq())-1)
     assert len(model.get_topics()) == len(model.get_topics_freq())
 
     # Test transform
@@ -45,6 +45,14 @@ def test_full():
 
     assert len(probs_test) == len(model.get_topics_freq())-1
     assert len(topics_test) == 1
+
+    # Test topic reduction
+    nr_topics = 2
+    new_topics, new_probs = model.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
+
+    assert len(model.get_topics_freq()) == nr_topics + 1
+    assert len(new_topics) == len(topics)
+    assert len(new_probs) == len(probs)
 
 
 def test_load_model():

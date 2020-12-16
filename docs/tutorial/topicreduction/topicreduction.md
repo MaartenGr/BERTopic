@@ -45,9 +45,12 @@ I would recommend a value between 3 and 10 dimensions.
 
 ## **Hierarchical Topic Reduction**
 It is not possible for HDBSCAN to specify the number of clusters you would want. To a certain extent, 
-this is actually an advantage, as we can trust HDBSCAN to be better in finding the number of clusters than we ware.
-
-Instead, we can try to reduce the number of topics after they have been created. Each resulting topic has its own 
+this is actually an advantage, as we can trust HDBSCAN to be better in finding the number of clusters than we are.
+Instead, we can try to reduce the number of topics that have been created. Below, you will find three methods of doing 
+so. 
+  
+### Manual Topic Reduction
+Each resulting topic has its own 
 feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
 topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number 
 of topics quite easily. We do this until we reach the value of `nr_topics`:  
@@ -57,7 +60,8 @@ from bertopic import BERTopic
 model = BERTopic(nr_topics=20)
 ```
 
-One issue with this approach is that it will merge topics regardless of whether they are actually very similar. They 
+### Automatic Topic Reduction
+One issue with the approach above is that it will merge topics regardless of whether they are actually very similar. They 
 are simply the most similar out of all options. This can be resolved by reducing the number of topics automatically. 
 It will reduce the number of topics, starting from the least frequent topic, as long as it exceeds a minimum 
 similarity of 0.9. To use this option, we simply set `nr_topics` to `"auto"`:
@@ -67,6 +71,26 @@ from bertopic import BERTopic
 model = BERTopic(nr_topics="auto")
 ```
 
+### Topic Reduction after Training
+Finally, we can also reduce the number of topics after having trained a BERTopic model. The advantage of doing so, 
+is that you can decide the number of topics after knowing how many are actually created. It is difficult to 
+predict before training your model how many topics that are in your documents and how many will be extracted. 
+Instead, we can decide afterwards how many topics seems realistic:
 
+```python
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+ 
+# Create topics -> Typically over 50 topics
+docs = fetch_20newsgroups(subset='train')['data']
+model = BERTopic()
+topics, probs = model.fit_transform(docs)
 
+# Further reduce topics
+new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
+```
+
+The reasoning for putting `docs`, `topics`, and `probs` as parameters is that these values are not saved within 
+BERTopic on purpose. If you were to have a million documents, it seems very inefficient to save those in BERTopic 
+instead of a dedicated database.  
 
