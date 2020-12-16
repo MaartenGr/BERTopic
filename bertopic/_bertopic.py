@@ -376,6 +376,7 @@ class BERTopic:
                                              prediction_data=True).fit(umap_embeddings)
         documents['Topic'] = self.cluster_model.labels_
         probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
+        self._update_topic_size(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
@@ -389,11 +390,9 @@ class BERTopic:
         Returns:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
-        self._update_topic_size(documents)
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
         self._extract_words_per_topic(c_tf_idf, words)
-
         return c_tf_idf
 
     def update_topics(self,
@@ -430,7 +429,7 @@ class BERTopic:
         topics, probs = model.fit_transform(docs)
 
         # Update topic representation
-        mode.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="English")
+        model.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="english")
         ```
         """
         if not n_gram_range:
@@ -456,6 +455,7 @@ class BERTopic:
             words: The names of the words to which values were given
         """
         documents = documents_per_topic.Document.values
+        documents = [" ".join(list(set(doc))) for doc in documents]
         count = self.vectorizer.fit(documents)
         words = count.get_feature_names()
         X = count.transform(documents)

@@ -11,6 +11,7 @@ nav:
       - Getting Started: tutorial/quickstart/quickstart.md
       - Custom Embeddings: tutorial/embeddings/embeddings.md
       - Topic Reduction: tutorial/topicreduction/topicreduction.md
+      - Topic Reduction: tutorial/topicrepresentation/topicrepresentation.md
   - The Algorithm: tutorial/algorithm/algorithm.md
   - API:
       - BERTopic: api/bertopic.md
