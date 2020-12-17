@@ -102,28 +102,17 @@ model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
 
 Click [here](https://www.sbert.net/docs/pretrained_models.html) for a list of supported sentence transformers models.  
 
-### Custom Embeddings
-If you use BERTopic as shown above, then you are forced to use `sentence-transformers` as the main
-package for which to create embeddings. However, you might have your own model or package that
-you believe is better suited for representing documents. 
-
-Fortunately, for those that want to use their own embeddings there is an option in BERTopic.
-For this example I will still be using `sentence-transformers` but the general principle holds:
+### Visualize Topics
+After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
+understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+Instead, we can visualize the topics that were generated in a way very similar to 
+[LDAvis](https://github.com/cpsievert/LDAvis):
 
 ```python
-from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-from sentence_transformers import SentenceTransformer
+model.visualize_topics()
+``` 
 
-# Prepare embeddings
-docs = fetch_20newsgroups(subset='all')['data']
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-embeddings = sentence_model.encode(docs, show_progress_bar=False)
-
-# Create topic model
-model = BERTopic()
-topics, probabilities = model.fit_transform(docs, embeddings)
-```
+<img src="images/topic_visualization.gif" width="50%" height="50%" align="center" />
 
 ### Visualize Topic Probabilities
 
@@ -154,9 +143,14 @@ how confident BERTopic is that certain topics can be found in a document.
 | Fit the model    |  `model.fit(docs])` | -  |
 | Fit the model and predict documents    |  `model.fit_transform(docs])` | List[int], List[float]  |
 | Predict new documents    |  `model.transform([new_doc])` | List[int], List[float]  |
+| Visualize Topics    |  `model.visualize_topics()` | -  |
 | Visualize Topic Probability Distribution    |  `model.visualize_distribution(probabilities)` | Matplotlib.Figure  |
 | Save model    |  `model.save("my_model")` | -  |
 | Load model    |  `BERTopic.load("my_model")` | - |
+| Update topic representation | `model.update_topics(docs, topics, n_gram_range=(1, 3))` | - |
+| Reduces nr of topics | `model.reduce_topics(docs, topics, probs, nr_topics=30)` | Tuple[List[int], List[float]] |
+| Find topics | `model.find_topics("vehicle")` | Tuple[List[int], List[float]] | 
+   
    
 **NOTE**: The embeddings itself are not preserved in the model as they are only vital for creating the clusters. 
 Therefore, it is advised to only use `fit` and then `transform` if you are looking to generalize the model to new documents.

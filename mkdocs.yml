@@ -10,6 +10,7 @@ nav:
   - Guides:
       - Getting Started: tutorial/quickstart/quickstart.md
       - Custom Embeddings: tutorial/embeddings/embeddings.md
+      - Topic Visualization: tutorial/visualization/visualization.md
       - Topic Reduction: tutorial/topicreduction/topicreduction.md
       - Topic Representation: tutorial/topicrepresentation/topicrepresentation.md
       - Search Topics: tutorial/search/search.md
