@@ -49,7 +49,7 @@ this is actually an advantage, as we can trust HDBSCAN to be better in finding t
 Instead, we can try to reduce the number of topics that have been created. Below, you will find three methods of doing 
 so. 
   
-### Manual Topic Reduction
+### **Manual Topic Reduction**
 Each resulting topic has its own 
 feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
 topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number 
@@ -60,7 +60,7 @@ from bertopic import BERTopic
 model = BERTopic(nr_topics=20)
 ```
 
-### Automatic Topic Reduction
+### **Automatic Topic Reduction**
 One issue with the approach above is that it will merge topics regardless of whether they are actually very similar. They 
 are simply the most similar out of all options. This can be resolved by reducing the number of topics automatically. 
 It will reduce the number of topics, starting from the least frequent topic, as long as it exceeds a minimum 
@@ -71,7 +71,7 @@ from bertopic import BERTopic
 model = BERTopic(nr_topics="auto")
 ```
 
-### Topic Reduction after Training
+### **Topic Reduction after Training**
 Finally, we can also reduce the number of topics after having trained a BERTopic model. The advantage of doing so, 
 is that you can decide the number of topics after knowing how many are actually created. It is difficult to 
 predict before training your model how many topics that are in your documents and how many will be extracted. 

@@ -17,6 +17,7 @@ nav:
   - API:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
+  - Changelog: changelog.md
 plugins:
   - mkdocstrings:
       setup_commands:

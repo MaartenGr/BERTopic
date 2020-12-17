@@ -149,11 +149,11 @@ def test_extract_topics():
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model = BERTopic()
     model._update_topic_size(documents)
-    c_tf_idf = model._extract_topics(documents)
+    model._extract_topics(documents)
     freq = model.get_topics_freq()
 
-    assert c_tf_idf.shape[0] == 5
-    assert c_tf_idf.shape[1] > 100
+    assert model.c_tf_idf.shape[0] == 5
+    assert model.c_tf_idf.shape[1] > 100
     assert isinstance(freq, pd.DataFrame)
     assert nr_topics == len(freq.Topic.unique())
     assert freq.Count.sum() == len(documents)
@@ -172,11 +172,11 @@ def test_extract_topics_custom_cv():
     cv = CountVectorizer(ngram_range=(1, 2))
     model = BERTopic(vectorizer=cv)
     model._update_topic_size(documents)
-    c_tf_idf = model._extract_topics(documents)
+    model._extract_topics(documents)
     freq = model.get_topics_freq()
 
-    assert c_tf_idf.shape[0] == 5
-    assert c_tf_idf.shape[1] > 100
+    assert model.c_tf_idf.shape[0] == 5
+    assert model.c_tf_idf.shape[1] > 100
     assert isinstance(freq, pd.DataFrame)
     assert nr_topics == len(freq.Topic.unique())
     assert freq.Count.sum() == len(documents)
@@ -193,10 +193,10 @@ def test_topic_reduction(reduced_topics):
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model._update_topic_size(old_documents)
-    c_tf_idf = model._extract_topics(old_documents.copy())
+    model._extract_topics(old_documents.copy())
     old_freq = model.get_topics_freq()
 
-    new_documents = model._reduce_topics(old_documents.copy(), c_tf_idf)
+    new_documents = model._reduce_topics(old_documents.copy())
     new_freq = model.get_topics_freq()
 
     assert old_freq.Count.sum() == new_freq.Count.sum()
@@ -217,10 +217,10 @@ def test_topic_reduction_edge_cases():
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model._update_topic_size(old_documents)
-    c_tf_idf = model._extract_topics(old_documents)
+    model._extract_topics(old_documents)
     old_freq = model.get_topics_freq()
 
-    new_documents = model._reduce_topics(old_documents, c_tf_idf)
+    new_documents = model._reduce_topics(old_documents)
     new_freq = model.get_topics_freq()
 
     assert not set(old_documents.Topic).difference(set(new_documents.Topic))

@@ -21,12 +21,16 @@ base_packages = [
     "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
     "joblib>=0.17.0",
-    "matplotlib>=3.2.2",
     "torch>=1.4.0",
     "sentence-transformers>=0.3.9"
 ]
 
-dev_packages = docs_packages + test_packages
+visualization_packages = [
+    "matplotlib>=3.2.2",
+    "plotly>=4.7.0"
+]
+
+dev_packages = docs_packages + test_packages + visualization_packages
 
 
 with open("README.md", "r") as fh:
@@ -63,6 +67,7 @@ setuptools.setup(
         "test": test_packages,
         "docs": docs_packages,
         "dev": dev_packages,
+        "visualization": visualization_packages
     },
     python_requires='>=3.6',
 )

@@ -6,14 +6,12 @@ import numpy as np
 import pandas as pd
 from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Dict, Union
-import matplotlib.pyplot as plt
 
 # Models
 import umap
 import hdbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
@@ -21,6 +19,13 @@ from ._ctfidf import ClassTFIDF
 from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 from ._embeddings import languages, embedding_models
 
+# Additional dependencies
+try:
+    import matplotlib.pyplot as plt
+    import plotly.express as px
+    _HAS_VIZ = True
+except ModuleNotFoundError as e:
+    _HAS_VIZ = False
 
 logger = MyLogger("WARNING")
 
@@ -129,6 +134,7 @@ class BERTopic:
         self.reduced_topics_mapped = None
         self.mapped_topics = None
         self.topic_embeddings = None
+        self.topic_sim_matrix = None
 
         if verbose:
             logger.set_level("DEBUG")
@@ -234,10 +240,10 @@ class BERTopic:
         documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
 
         # Extract topics by calculating c-TF-IDF
-        c_tf_idf = self._extract_topics(documents)
+        self._extract_topics(documents)
 
         if self.nr_topics:
-            documents = self._reduce_topics(documents, c_tf_idf)
+            documents = self._reduce_topics(documents)
             probabilities = self._map_probabilities(probabilities)
 
         predictions = documents.Topic.to_list()
@@ -383,7 +389,7 @@ class BERTopic:
         return documents, probabilities
 
     def _extract_topics(self,
-                        documents: pd.DataFrame) -> np.ndarray:
+                        documents: pd.DataFrame):
         """ Extract topics from the clusters using a class-based TF-IDF
 
         Arguments:
@@ -393,10 +399,10 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
-        c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
-        self._extract_words_per_topic(c_tf_idf, words)
+        self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
+        self._extract_words_per_topic(words)
         self._create_topic_vectors()
-        return c_tf_idf
+        self.topic_sim_matrix = cosine_similarity(self.c_tf_idf)
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -507,7 +513,7 @@ class BERTopic:
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
         self._extract_topics(documents)
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[np.ndarray, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
@@ -524,7 +530,7 @@ class BERTopic:
         words = count.get_feature_names()
         X = count.transform(documents)
         transformer = ClassTFIDF().fit(X, n_samples=m)
-        c_tf_idf = transformer.transform(X).toarray()
+        c_tf_idf = transformer.transform(X)
 
         return c_tf_idf, words
 
@@ -537,13 +543,13 @@ class BERTopic:
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
         self.topic_sizes = dict(zip(sizes.Topic, sizes.Document))
 
-    def _extract_words_per_topic(self, c_tf_idf: np.ndarray, words: List[str]):
+    def _extract_words_per_topic(self, words: List[str]):
         """ Based on tf_idf scores per topic, extract the top n words per topic
 
         Arguments:
-        tf_idf: tf_idf matrix
         words: List of all words (sorted according to tf_idf matrix position)
         """
+        c_tf_idf = self.c_tf_idf.toarray()
         labels = sorted(list(self.topic_sizes.keys()))
         indices = c_tf_idf.argsort()[:, -self.top_n_words:]
         self.topics = {label: [(words[j], c_tf_idf[i][j])
@@ -582,31 +588,29 @@ class BERTopic:
 
         return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
-    def _reduce_topics(self, documents: pd.DataFrame, c_tf_idf: np.ndarray) -> pd.DataFrame:
+    def _reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
-            c_tf_idf: c-TF-IDF matrix
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
         if isinstance(self.nr_topics, int):
-            documents = self._reduce_to_n_topics(c_tf_idf, documents)
+            documents = self._reduce_to_n_topics(documents)
         elif isinstance(self.nr_topics, str):
-            documents = self._auto_reduce_topics(c_tf_idf, documents)
+            documents = self._auto_reduce_topics(documents)
         else:
             raise ValueError("nr_topics needs to be an int or 'auto'! ")
 
         return documents
 
-    def _reduce_to_n_topics(self, c_tf_idf, documents):
+    def _reduce_to_n_topics(self, documents):
         """ Reduce topics to self.nr_topics
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
-            c_tf_idf: c-TF-IDF matrix
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
@@ -616,7 +620,7 @@ class BERTopic:
         initial_nr_topics = len(self.get_topics())
 
         # Create topic similarity matrix
-        similarities = cosine_similarity(c_tf_idf)
+        similarities = cosine_similarity(self.c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
         while len(self.get_topics_freq()) > self.nr_topics + 1:
@@ -641,12 +645,11 @@ class BERTopic:
 
         return documents
 
-    def _auto_reduce_topics(self, c_tf_idf, documents):
+    def _auto_reduce_topics(self, documents):
         """ Reduce the number of topics as long as it exceeds a minimum similarity of 0.9
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
-            c_tf_idf: c-TF-IDF matrix
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
@@ -657,7 +660,7 @@ class BERTopic:
             self.mapped_topics = {}
 
         # Create topic similarity matrix
-        similarities = cosine_similarity(c_tf_idf)
+        similarities = cosine_similarity(self.c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
         # Do not map the top 10% most frequent topics
@@ -758,7 +761,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        return self.topic_sizes.items()[topic]
+        return self.topic_sizes[topic]
 
     def reduce_topics(self,
                       docs: List[str],
@@ -806,12 +809,106 @@ class BERTopic:
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
 
         # Reduce number of topics
-        c_tf_idf = self._extract_topics(documents)
-        documents = self._reduce_topics(documents, c_tf_idf)
+        self._extract_topics(documents)
+        documents = self._reduce_topics(documents)
         new_topics = documents.Topic.to_list()
         new_probabilities = self._map_probabilities(probabilities)
 
         return new_topics, new_probabilities
+
+    def visualize_topics(self):
+        """ Visualize topics, their sizes, and their corresponding words
+
+        This visualization is highly inspired by LDAvis, a great visualization
+        technique typically reserved for LDA.
+        """
+        if not _HAS_VIZ:
+            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
+                                      f"additional dependencies;\npip install bertopic[visualization]")
+
+        # Extract topic words and their frequencies
+        topic_list = sorted(list(self.topics.keys()))
+        frequencies = [self.topic_sizes[topic] for topic in topic_list]
+        words = [" | ".join([word[0] for word in self.get_topic(topic)[:5]]) for topic in topic_list]
+
+        # Embed c-TF-IDF into 2D
+        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='cosine').fit_transform(self.c_tf_idf)
+
+        # Visualize with plotly
+        df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
+                           "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
+        self._plotly_topic_visualization(df, topic_list)
+
+    @staticmethod
+    def _plotly_topic_visualization(df: pd.DataFrame,
+                                    topic_list: List[str]):
+        """ Create plotly-based visualization of topics with a slider for topic selection """
+
+        def get_color(topic_selected):
+            if topic_selected == -1:
+                marker_color = ["#B0BEC5" for _ in topic_list[1:]]
+            else:
+                marker_color = ["red" if topic == topic_selected else "#B0BEC5" for topic in topic_list[1:]]
+            return [{'marker.color': [marker_color]}]
+
+        # Prepare figure range
+        x_range = (df.x.min() * 1.4, df.x.max() * 1.2)
+        y_range = (df.y.min() * 1.4, df.y.max() * 1.2)
+
+        # Plot topics
+        fig = px.scatter(df, x="x", y="y", size="Size", size_max=40, template="simple_white", labels={"x": "", "y": ""},
+                         hover_data={"x": False, "y": False, "Topic": True, "Words": True, "Size": True})
+        fig.update_traces(marker=dict(color="#B0BEC5", line=dict(width=2, color='DarkSlateGrey')))
+
+        # Update hover order
+        fig.update_traces(hovertemplate="<br>".join(["<b>Topic %{customdata[2]}</b>",
+                                                     "Words: %{customdata[3]}",
+                                                     "Size: %{customdata[4]}"]))
+
+        # Create a slider for topic selection
+        steps = [dict(label=f"Topic {topic}", method="update", args=get_color(topic)) for topic in topic_list[1:]]
+        sliders = [dict(active=0, pad={"t": 50}, steps=steps)]
+
+        # Stylize layout
+        fig.update_layout(
+            title={
+                'text': "<b>Intertopic Distance Map",
+                'y': .95,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            width=650,
+            height=650,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+            xaxis={"visible": False},
+            yaxis={"visible": False},
+            sliders=sliders
+        )
+
+        # Update axes ranges
+        fig.update_xaxes(range=x_range)
+        fig.update_yaxes(range=y_range)
+
+        # Add grid in a 'plus' shape
+        fig.add_shape(type="line",
+                      x0=sum(x_range) / 2, y0=y_range[0], x1=sum(x_range) / 2, y1=y_range[1],
+                      line=dict(color="#CFD8DC", width=2))
+        fig.add_shape(type="line",
+                      x0=x_range[0], y0=sum(y_range) / 2, x1=y_range[1], y1=sum(y_range) / 2,
+                      line=dict(color="#9E9E9E", width=2))
+        fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
+        fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
+        fig.data = fig.data[::-1]
+
+        fig.show()
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
@@ -839,6 +936,9 @@ class BERTopic:
         ![](../img/probabilities.png)
         """
         check_is_fitted(self)
+        if not _HAS_VIZ:
+            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
+                                      f"additional dependencies;\npip install bertopic[visualization]")
 
         # Get values and indices equal or exceed the minimum probability
         labels_idx = np.argwhere(probabilities >= min_probability).flatten()

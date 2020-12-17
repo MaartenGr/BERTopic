@@ -25,6 +25,13 @@ Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 pip install bertopic
 ```
 
+To use the visualization option, install BERTopic as follows:
+
+```bash
+pip install bertopic[visualization]
+```
+
+
 ## Getting Started
 For an in-depth overview of the possibilities of `BERTopic` 
 you can check the full documentation [here](https://maartengr.github.io/BERTopic/) or you can follow along 

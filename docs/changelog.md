@@ -1,0 +1,100 @@
+
+## **Version 0.4.0**
+*Release date: TBA*
+
+**Highlights**:  
+
+* Visualize Topics similar to LDAviz
+* Added option to reduce topics after training
+* Added option to update topic representation after training
+* Added option to search topics using a search term
+* More extensive tutorials in the documentation
+* Significantly improved the stability of generating clusters
+
+**Notable Changes**:  
+
+* Option to select language instead of sentence-transformers models to minimize the complexity of using BERTopic
+* Improved logging (remove duplicates) 
+* Check if BERTopic is fitted 
+* Added TF-IDF as an embedder instead of transformer models (see tutorial)
+* Numpy for Python 3.6 will be dropped and was therefore removed from the workflow.
+
+## **Version 0.3.2**
+*Release date:  16 November, 2020*
+
+**Highlights**:
+
+* Fixed a bug with the topic reduction method that seems to reduce the number of topics but not to the nr_topics as defined in the class. Since this was, to a certain extend, breaking the topic reduction method a new release was necessary.
+
+## **Version 0.3.1**
+*Release date:  4 November, 2020*
+
+**Highlights**:
+
+* Adding the option to use custom embeddings or embeddings that you generated beforehand with whatever package you'd like to use. This allows users to further customize BERTopic to their liking.
+
+## **Version 0.3.0**
+*Release date:  29 October, 2020*
+
+**Highlights**:
+
+- transform() and fit_transform() now also return the topic probability distributions
+- Added visualize_distribution() which visualizes the topic probability distribution for a single document
+
+## **Version 0.2.2**
+*Release date:  17 October, 2020*
+
+**Highlights**:
+
+- Fixed n_gram_range not being used
+- Added option for using stopwords
+
+## **Version 0.2.1**
+*Release date:  11 October, 2020*
+
+**Highlights**:
+
+* Improved the calculation of the class-based TF-IDF procedure by limiting the calculation to sparse matrices. This prevents out-of-memory problems when faced with large datasets.
+
+## **Version 0.2.0**  
+*Release date:  11 October, 2020*
+
+**Highlights**:
+
+- Changed c-TF-IDF procedure such that it implements a version of scikit-learns procedure. This should also speed up the calculation of the sparse matrix and prevent memory errors.
+- Added automated unit tests  
+
+## **Version 0.1.2**
+*Release date:  1 October, 2020*
+
+**Highlights**:
+
+* When transforming new documents, self.mapped_topics seemed to be missing. Added to the init.
+
+## **Version 0.1.1**
+*Release date:  24 September, 2020*
+
+**Highlights**:
+
+* Fixed requirements --> Issue with pytorch
+* Update documentation
+
+## **Version 0.1.0**  
+*Release date:  24 September, 2020*
+
+**Highlights**:  
+
+- First release of `BERTopic`
+- Added parameters for UMAP and HDBSCAN
+- Option to choose sentence-transformer model
+- Method for transforming unseen documents
+- Save and load trained models (UMAP and HDBSCAN)
+- Extract topics and their sizes
+
+**Notable Changes**:  
+
+- Optimized c-TF-IDF
+- Improved documentation
+- Improved topic reduction
+ 
+

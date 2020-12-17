@@ -1,5 +1,5 @@
 
-### Search Topics
+### **Search Topics**
 After having created a BERTopic model, you might end up with over a hundred topics. Searching through those 
 can be quite cumbersome especially if you are searching for a specific topic. Fortunately, BERTopic allows you 
 to search for topics using search terms. First, let's create an train a BERTopic model:
