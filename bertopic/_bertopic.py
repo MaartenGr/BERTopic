@@ -20,6 +20,7 @@ from sklearn.preprocessing import MinMaxScaler
 from ._ctfidf import ClassTFIDF
 from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 from ._embeddings import languages, embedding_models
+from ._mmr import mmr
 
 # Additional dependencies
 try:
@@ -63,6 +64,9 @@ class BERTopic:
         verbose: Changes the verbosity of the model, Set to True if you want
                  to track the stages of the model.
         vectorizer: Pass in your own CountVectorizer from scikit-learn
+        allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
+                        to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
+                        Moreover, it will allow you to search for topics based on search queries.
 
     Usage:
 
@@ -109,13 +113,17 @@ class BERTopic:
                  n_components: int = 5,
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
-                 vectorizer: CountVectorizer = None):
+                 vectorizer: CountVectorizer = None,
+                 allow_st_model: bool = True):
 
         # Embedding model
         self.language = language
         self.embedding_model = embedding_model
+        self.allow_st_model = allow_st_model
 
         # Topic-based parameters
+        if top_n_words > 30:
+            raise ValueError("top_n_words should be lower or equal to 30")
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
         self.min_topic_size = min_topic_size
@@ -137,6 +145,7 @@ class BERTopic:
         self.mapped_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
+        self.custom_embeddings = False
 
         if verbose:
             logger.set_level("DEBUG")
@@ -234,6 +243,8 @@ class BERTopic:
         # Extract embeddings
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
             embeddings = self._extract_embeddings(documents.Document)
+        else:
+            self.custom_embeddings = True
 
         # Reduce dimensionality with UMAP
         umap_embeddings = self._reduce_dimensionality(embeddings)
@@ -390,8 +401,7 @@ class BERTopic:
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
-    def _extract_topics(self,
-                        documents: pd.DataFrame):
+    def _extract_topics(self, documents: pd.DataFrame):
         """ Extract topics from the clusters using a class-based TF-IDF
 
         Arguments:
@@ -415,7 +425,6 @@ class BERTopic:
             * Replace \n and \t with whitespace
             * Only keep alpha-numerical characters
         """
-
         cleaned_documents = [doc.lower() for doc in documents]
         cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
         cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
@@ -430,26 +439,31 @@ class BERTopic:
         results in a number of embeddings per topic. Then, we take the weighted
         average of embeddings in a topic by their c-TF-IDF score. This will put
         more emphasis to words that represent a topic best.
+
+        Only allow topic vectors to be created if there are no custom embeddings and therefore
+        a sentence-transformer model to be used or there are custom embeddings but it is allowed
+        to use a different multi-lingual sentence-transformer model
         """
-        topic_list = list(self.topics.keys())
-        topic_list.sort()
-        n = self.top_n_words
+        if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
+            topic_list = list(self.topics.keys())
+            topic_list.sort()
+            n = self.top_n_words
 
-        # Extract embeddings for all words in all topics
-        topic_words = [self.get_topic(topic) for topic in topic_list]
-        topic_words = [word[0] for topic in topic_words for word in topic]
-        embeddings = self._extract_embeddings(topic_words)
+            # Extract embeddings for all words in all topics
+            topic_words = [self.get_topic(topic) for topic in topic_list]
+            topic_words = [word[0] for topic in topic_words for word in topic]
+            embeddings = self._extract_embeddings(topic_words)
 
-        # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
-        # The embeddings var is a single numpy matrix and therefore slicing is necessary to
-        # access the words per topic
-        topic_embeddings = []
-        for i, topic in enumerate(topic_list):
-            word_importance = [val[1] for val in self.get_topic(topic)]
-            topic_embedding = np.average(embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
-            topic_embeddings.append(topic_embedding)
+            # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
+            # The embeddings var is a single numpy matrix and therefore slicing is necessary to
+            # access the words per topic
+            topic_embeddings = []
+            for i, topic in enumerate(topic_list):
+                word_importance = [val[1] for val in self.get_topic(topic)]
+                topic_embedding = np.average(embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
+                topic_embeddings.append(topic_embedding)
 
-        self.topic_embeddings = topic_embeddings
+            self.topic_embeddings = topic_embeddings
 
     def find_topics(self, search_term: str, top_n: int = 5) -> Tuple[List[int], List[float]]:
         """ Find topics most similar to a search_term
@@ -471,6 +485,10 @@ class BERTopic:
             similarity: the similarity scores from high to low
 
         """
+        if self.custom_embeddings and not self.allow_st_model:
+            raise Exception("This method can only be used if you set `allow_st_model` to True when "
+                            "using custom embeddings.")
+
         topic_list = list(self.topics.keys())
         topic_list.sort()
 
@@ -568,6 +586,8 @@ class BERTopic:
         Arguments:
         words: List of all words (sorted according to tf_idf matrix position)
         """
+
+        # Get top 50 words per topic based on c-TF-IDF score
         c_tf_idf = self.c_tf_idf.toarray()
         labels = sorted(list(self.topic_sizes.keys()))
         indices = c_tf_idf.argsort()[:, -self.top_n_words:]
@@ -575,14 +595,32 @@ class BERTopic:
                                for j in indices[i]][::-1]
                        for i, label in enumerate(labels)}
 
+        # Extract word embeddings for the top 50 words per topic and compare it
+        # with the topic embedding to keep only the words most similar to the topic embedding
+        if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
+            model = self._select_embedding_model()
+
+            for topic, topic_words in self.topics.items():
+                words = [word[0] for word in topic_words]
+                word_embeddings = model.encode(words)
+                topic_embedding = model.encode(" ".join(words)).reshape(1, -1)
+                topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
+                self.topics[topic] = [(word, value) for word, value in self.topics[topic] if word in topic_words]
+
     def _select_embedding_model(self) -> SentenceTransformer:
         """ Select an embedding model based on language or a specific sentence transformer models.
         When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
         xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
         """
 
+        # Used for fine-tuning the topic representation
+        # If a custom embeddings are used, we use the multi-langual model
+        # to extract word embeddings
+        if self.custom_embeddings and self.allow_st_model:
+            return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
+
         # Select embedding model based on language
-        if self.language:
+        elif self.language:
             if self.language.lower() in ["English", "english", "en"]:
                 return SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 

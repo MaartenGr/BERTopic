@@ -8,8 +8,9 @@
 * Added option to reduce topics after training
 * Added option to update topic representation after training
 * Added option to search topics using a search term
-* More extensive tutorials in the documentation
 * Significantly improved the stability of generating clusters
+* Finetune the topic words by selecting the most coherent words with the highest c-TF-IDF values 
+* More extensive tutorials in the documentation
 
 **Notable Changes**:  
 
