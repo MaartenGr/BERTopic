@@ -105,7 +105,7 @@ class BERTopic:
     def __init__(self,
                  language: str = "english",
                  embedding_model: str = None,
-                 top_n_words: int = 20,
+                 top_n_words: int = 10,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
                  min_topic_size: int = 15,
@@ -123,7 +123,7 @@ class BERTopic:
 
         # Topic-based parameters
         if top_n_words > 30:
-            raise ValueError("top_n_words should be lower or equal to 30")
+            raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
         self.min_topic_size = min_topic_size
@@ -587,15 +587,15 @@ class BERTopic:
         words: List of all words (sorted according to tf_idf matrix position)
         """
 
-        # Get top 50 words per topic based on c-TF-IDF score
+        # Get top 30 words per topic based on c-TF-IDF score
         c_tf_idf = self.c_tf_idf.toarray()
         labels = sorted(list(self.topic_sizes.keys()))
-        indices = c_tf_idf.argsort()[:, -self.top_n_words:]
+        indices = c_tf_idf.argsort()[:, -30:]
         self.topics = {label: [(words[j], c_tf_idf[i][j])
                                for j in indices[i]][::-1]
                        for i, label in enumerate(labels)}
 
-        # Extract word embeddings for the top 50 words per topic and compare it
+        # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
         if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
             model = self._select_embedding_model()
