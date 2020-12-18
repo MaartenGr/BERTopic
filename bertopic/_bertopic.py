@@ -412,8 +412,8 @@ class BERTopic:
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
-        self._extract_words_per_topic(words)
         self._create_topic_vectors()
+        self._extract_words_per_topic(words)
         self.topic_sim_matrix = cosine_similarity(self.c_tf_idf)
 
     @staticmethod
