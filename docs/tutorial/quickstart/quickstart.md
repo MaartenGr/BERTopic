@@ -39,6 +39,10 @@ The resulting topics can be accessed through `model.get_topic(topic)`:
  ('baseball', 0.0029245163154193524)]
 ```  
 
+**NOTE**: If you get less than 10 topics, it is advised to decrease the `min_topic_size` in `BERTopic`. This 
+will allow clusters to be created more easily and will typically result in more clusters.   
+
+
 ### **Languages**
 BERTopic is set to `english` but supports essentially any language for which a document embedding model exists. 
 You can choose the language by simply setting the `language` parameter in BERTopic. 

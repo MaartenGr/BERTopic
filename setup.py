@@ -20,7 +20,7 @@ base_packages = [
     "pandas>=1.1.5",
     "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
-    "joblib>=0.17.0",
+    "joblib==0.17.0",
     "torch>=1.4.0",
     "sentence-transformers>=0.3.9"
 ]
