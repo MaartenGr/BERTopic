@@ -1,6 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+import re
 import joblib
 import numpy as np
 import pandas as pd
@@ -404,6 +405,23 @@ class BERTopic:
         self._create_topic_vectors()
         self.topic_sim_matrix = cosine_similarity(self.c_tf_idf)
 
+    @staticmethod
+    def _preprocess_text(documents: np.ndarray) -> List[str]:
+        """ Basic preprocessing of text
+
+        Steps:
+            * Lower text
+            * Replace \n and \t with whitespace
+            * Only keep alpha-numerical characters
+        """
+
+        cleaned_documents = [doc.lower() for doc in documents]
+        cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
+        cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
+        cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
+
+        return cleaned_documents
+
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
 
@@ -525,7 +543,7 @@ class BERTopic:
             tf_idf: The resulting matrix giving a value (importance score) for each word per topic
             words: The names of the words to which values were given
         """
-        documents = documents_per_topic.Document.values
+        documents = self._preprocess_text(documents_per_topic.Document.values)
         count = self.vectorizer.fit(documents)
         words = count.get_feature_names()
         X = count.transform(documents)
@@ -832,7 +850,7 @@ class BERTopic:
         words = [" | ".join([word[0] for word in self.get_topic(topic)[:5]]) for topic in topic_list]
 
         # Embed c-TF-IDF into 2D
-        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='cosine').fit_transform(self.c_tf_idf)
+        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(self.c_tf_idf)
 
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
@@ -852,8 +870,8 @@ class BERTopic:
             return [{'marker.color': [marker_color]}]
 
         # Prepare figure range
-        x_range = (df.x.min() * 1.4, df.x.max() * 1.2)
-        y_range = (df.y.min() * 1.4, df.y.max() * 1.2)
+        x_range = (df.x.min() * 1.6, df.x.max() * 1.6)
+        y_range = (df.y.min() * 1.6, df.y.max() * 1.6)
 
         # Plot topics
         fig = px.scatter(df, x="x", y="y", size="Size", size_max=40, template="simple_white", labels={"x": "", "y": ""},
