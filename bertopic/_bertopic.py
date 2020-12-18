@@ -14,6 +14,7 @@ import hdbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
 
 # BERTopic
 from ._ctfidf import ClassTFIDF
@@ -850,7 +851,8 @@ class BERTopic:
         words = [" | ".join([word[0] for word in self.get_topic(topic)[:5]]) for topic in topic_list]
 
         # Embed c-TF-IDF into 2D
-        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(self.c_tf_idf)
+        embeddings = MinMaxScaler().fit_transform(self.c_tf_idf.toarray())
+        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
@@ -870,8 +872,8 @@ class BERTopic:
             return [{'marker.color': [marker_color]}]
 
         # Prepare figure range
-        x_range = (df.x.min() * 1.6, df.x.max() * 1.6)
-        y_range = (df.y.min() * 1.6, df.y.max() * 1.6)
+        x_range = (df.x.min() - abs((df.x.min()) * .15), df.x.max() + abs((df.x.max()) * .15))
+        y_range = (df.y.min() - abs((df.y.min()) * .15), df.y.max() + abs((df.y.max()) * .15))
 
         # Plot topics
         fig = px.scatter(df, x="x", y="y", size="Size", size_max=40, template="simple_white", labels={"x": "", "y": ""},
