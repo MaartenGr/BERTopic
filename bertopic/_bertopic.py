@@ -415,7 +415,6 @@ class BERTopic:
         self._extract_words_per_topic(words)
         self._create_topic_vectors()
 
-
     @staticmethod
     def _preprocess_text(documents: np.ndarray) -> List[str]:
         """ Basic preprocessing of text
@@ -429,7 +428,7 @@ class BERTopic:
         cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
         cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
         cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
-
+        cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
         return cleaned_documents
 
     def _create_topic_vectors(self):
