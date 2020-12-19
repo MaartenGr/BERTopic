@@ -108,7 +108,7 @@ class BERTopic:
                  top_n_words: int = 10,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
-                 min_topic_size: int = 15,
+                 min_topic_size: int = 10,
                  n_neighbors: int = 15,
                  n_components: int = 5,
                  stop_words: Union[str, List[str]] = None,
@@ -327,6 +327,334 @@ class BERTopic:
 
         return predictions, probabilities
 
+    def find_topics(self,
+                    search_term: str,
+                    top_n: int = 5) -> Tuple[List[int], List[float]]:
+        """ Find topics most similar to a search_term
+
+        Creates an embedding for search_term and compares that with
+        the topic embeddings. The most similar topics are returned
+        along with their similarity values.
+
+        The search_term can be of any size but since it compares
+        with the topic representation it is advised to keep it
+        below 5 words.
+
+        Args:
+            search_term: the term you want to use to search for topics
+            top_n: the number of topics to return
+
+        Returns:
+            similar_topics: the most similar topics from high to low
+            similarity: the similarity scores from high to low
+
+        """
+        if self.custom_embeddings and not self.allow_st_model:
+            raise Exception("This method can only be used if you set `allow_st_model` to True when "
+                            "using custom embeddings.")
+
+        topic_list = list(self.topics.keys())
+        topic_list.sort()
+
+        # Extract search_term embeddings and compare with topic embeddings
+        search_embedding = self._extract_embeddings([search_term]).flatten()
+        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
+
+        # Extract topics most similar to search_term
+        ids = np.argsort(sims)[-top_n:]
+        similarity = [sims[i] for i in ids][::-1]
+        similar_topics = [topic_list[index] for index in ids][::-1]
+
+        return similar_topics, similarity
+
+    def update_topics(self,
+                      docs: List[str],
+                      topics: List[int],
+                      n_gram_range: Tuple[int, int] = None,
+                      stop_words: str = None,
+                      vectorizer: CountVectorizer = None):
+        """ Updates the topic representation by recalculating c-TF-IDF with the new
+        parameters as defined in this function.
+
+        When you have trained a model and viewed the topics and the words that represent them,
+        you might not be satisfied with the representation. Perhaps you forgot to remove
+        stop_words or you want to try out a different n_gram_range. This function allows you
+        to update the topic representation after they have been formed.
+
+        Args:
+            docs: The docs you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            n_gram_range: The n-gram range for the CountVectorizer.
+            stop_words: Stopwords that can be used as either a list of strings, or the name of the
+                        language as a string. For example: 'english' or ['the', 'and', 'I'].
+                        Note that this will not be used if you pass in your own CountVectorizer.
+            vectorizer: Pass in your own CountVectorizer from scikit-learn
+
+        Usage:
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        # Create topics
+        docs = fetch_20newsgroups(subset='train')['data']
+        model = BERTopic(n_gram_range=(1, 1), stop_words=None)
+        topics, probs = model.fit_transform(docs)
+
+        # Update topic representation
+        model.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="english")
+        ```
+        """
+        check_is_fitted(self)
+        if not n_gram_range:
+            n_gram_range = self.n_gram_range
+
+        if not stop_words:
+            stop_words = self.stop_words
+
+        self.vectorizer = vectorizer or CountVectorizer(ngram_range=n_gram_range, stop_words=stop_words)
+        documents = pd.DataFrame({"Document": docs, "Topic": topics})
+        self._extract_topics(documents)
+
+    def get_topics(self) -> Dict[str, Tuple[str, float]]:
+        """ Return topics with top n words and their c-TF-IDF score
+
+        Usage:
+
+        ```python
+        all_topics = model.get_topics()
+        ```
+        """
+        check_is_fitted(self)
+        return self.topics
+
+    def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
+        """ Return top n words for a specific topic and their c-TF-IDF scores
+
+        Usage:
+
+        ```python
+        topic = model.get_topic(12)
+        ```
+        """
+        check_is_fitted(self)
+        if self.topics.get(topic):
+            return self.topics[topic]
+        else:
+            return False
+
+    def get_topics_freq(self) -> pd.DataFrame:
+        """ Return the the size of topics (descending order)
+
+        Usage:
+
+        ```python
+        frequency = model.get_topics_freq()
+        ```
+        """
+        check_is_fitted(self)
+        return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
+
+    def get_topic_freq(self, topic: int) -> int:
+        """ Return the the size of a topic
+
+        Arguments:
+             topic: the name of the topic as retrieved by get_topics
+
+        Usage:
+
+        ```python
+        frequency = model.get_topic_freq(12)
+        ```
+        """
+        check_is_fitted(self)
+        return self.topic_sizes[topic]
+
+    def reduce_topics(self,
+                      docs: List[str],
+                      topics: List[int],
+                      probabilities: np.ndarray,
+                      nr_topics: int = 20) -> Tuple[List[int], np.ndarray]:
+        """ Further reduce the number of topics to nr_topics.
+
+        The number of topics is further reduced by calculating the c-TF-IDF matrix
+        of the documents and then reducing them by iteratively merging the least
+        frequent topic with the most similar one based on their c-TF-IDF matrices.
+        The topics, their sizes, and representations are updated.
+
+        The reasoning for putting `docs`, `topics`, and `probs` as parameters is that
+        these values are not saved within BERTopic on purpose. If you were to have a
+        million documents, it seems very inefficient to save those in BERTopic
+        instead of a dedicated database.
+
+        Arguments:
+            docs: The docs you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            nr_topics: The number of topics you want reduced to
+            probabilities: The probabilities that were returned when calling either `fit` or `fit_transform`
+
+        Returns:
+            new_topics: Updated topics
+            new_probabilities: Updated probabilities
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        # Create topics -> Typically over 50 topics
+        docs = fetch_20newsgroups(subset='train')['data']
+        model = BERTopic()
+        topics, probs = model.fit_transform(docs)
+
+        # Further reduce topics
+        new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
+        ```
+        """
+        check_is_fitted(self)
+        self.nr_topics = nr_topics
+        documents = pd.DataFrame({"Document": docs, "Topic": topics})
+
+        # Reduce number of topics
+        self._extract_topics(documents)
+        documents = self._reduce_topics(documents)
+        new_topics = documents.Topic.to_list()
+        new_probabilities = self._map_probabilities(probabilities)
+
+        return new_topics, new_probabilities
+
+    def visualize_topics(self):
+        """ Visualize topics, their sizes, and their corresponding words
+
+        This visualization is highly inspired by LDAvis, a great visualization
+        technique typically reserved for LDA.
+        """
+        check_is_fitted(self)
+        if not _HAS_VIZ:
+            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
+                                      f"additional dependencies;\npip install bertopic[visualization]")
+
+        # Extract topic words and their frequencies
+        topic_list = sorted(list(self.topics.keys()))
+        frequencies = [self.topic_sizes[topic] for topic in topic_list]
+        words = [" | ".join([word[0] for word in self.get_topic(topic)[:5]]) for topic in topic_list]
+
+        # Embed c-TF-IDF into 2D
+        embeddings = MinMaxScaler().fit_transform(self.c_tf_idf.toarray())
+        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
+
+        # Visualize with plotly
+        df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
+                           "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
+        self._plotly_topic_visualization(df, topic_list)
+
+    def visualize_distribution(self,
+                               probabilities: np.ndarray,
+                               min_probability: float = 0.015,
+                               figsize: tuple = (10, 5),
+                               save: bool = False):
+        """ Visualize the distribution of topic probabilities
+
+        Arguments:
+            probabilities: An array of probability scores
+            min_probability: The minimum probability score to visualize.
+                             All others are ignored.
+            figsize: The size of the figure
+            save: Whether to save the resulting graph to probility.png
+
+        Usage:
+
+        Make sure to fit the model before and only input the
+        probabilities of a single document:
+
+        ```python
+        model.visualize_distribution(probabilities[0])
+        ```
+
+        ![](../img/probabilities.png)
+        """
+        check_is_fitted(self)
+        if not _HAS_VIZ:
+            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
+                                      f"additional dependencies;\npip install bertopic[visualization]")
+
+        # Get values and indices equal or exceed the minimum probability
+        labels_idx = np.argwhere(probabilities >= min_probability).flatten()
+        vals = probabilities[labels_idx].tolist()
+
+        # Create labels
+        labels = []
+        for idx in labels_idx:
+            label = []
+            words = self.get_topic(idx)
+            if words:
+                for word in words[:5]:
+                    label.append(word[0])
+                label = str(r"$\bf{Topic }$ " +
+                            r"$\bf{" + str(idx) + ":}$ " +
+                            " ".join(label))
+                labels.append(label)
+            else:
+                print(idx, probabilities[idx])
+                vals.remove(probabilities[idx])
+        pos = range(len(vals))
+
+        # Create figure
+        fig, ax = plt.subplots(figsize=figsize)
+        plt.hlines(y=pos, xmin=0, xmax=vals, color='#333F4B', alpha=0.2, linewidth=15)
+        plt.hlines(y=np.argmax(vals), xmin=0, xmax=max(vals), color='#333F4B', alpha=1, linewidth=15)
+
+        # Set ticks and labels
+        ax.tick_params(axis='both', which='major', labelsize=12)
+        ax.set_xlabel('Probability', fontsize=15, fontweight='black', color='#333F4B')
+        ax.set_ylabel('')
+        plt.yticks(pos, labels)
+        fig.text(0, 1, 'Topic Probability Distribution', fontsize=15, fontweight='black', color='#333F4B')
+
+        # Update spine style
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['left'].set_bounds(pos[0], pos[-1])
+        ax.spines['bottom'].set_bounds(0, max(vals))
+        ax.spines['bottom'].set_position(('axes', -0.02))
+        ax.spines['left'].set_position(('axes', 0.02))
+
+        fig.tight_layout()
+
+        if save:
+            fig.savefig("probability.png", dpi=300, bbox_inches='tight')
+
+    def save(self, path: str) -> None:
+        """ Saves the model to the specified path
+
+        Arguments:
+            path: the location and name of the file you want to save
+
+        Usage:
+
+        ```python
+        model.save("my_model")
+        ```
+        """
+        with open(path, 'wb') as file:
+            joblib.dump(self, file)
+
+    @classmethod
+    def load(cls, path: str):
+        """ Loads the model from the specified path
+
+        Arguments:
+            path: the location and name of the BERTopic file you want to load
+
+        Usage:
+
+        ```python
+        BERTopic.load("my_model")
+        ```
+        """
+        with open(path, 'rb') as file:
+            return joblib.load(file)
+
     def _extract_embeddings(self, documents: List[str]) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
@@ -415,22 +743,6 @@ class BERTopic:
         self._extract_words_per_topic(words)
         self._create_topic_vectors()
 
-    @staticmethod
-    def _preprocess_text(documents: np.ndarray) -> List[str]:
-        """ Basic preprocessing of text
-
-        Steps:
-            * Lower text
-            * Replace \n and \t with whitespace
-            * Only keep alpha-numerical characters
-        """
-        cleaned_documents = [doc.lower() for doc in documents]
-        cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
-        cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
-        cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
-        cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
-        return cleaned_documents
-
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
 
@@ -459,95 +771,12 @@ class BERTopic:
             topic_embeddings = []
             for i, topic in enumerate(topic_list):
                 word_importance = [val[1] for val in self.get_topic(topic)]
+                if sum(word_importance) == 0:
+                    word_importance = [1 for _ in range(len(self.get_topic(topic)))]
                 topic_embedding = np.average(embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
                 topic_embeddings.append(topic_embedding)
 
             self.topic_embeddings = topic_embeddings
-
-    def find_topics(self, search_term: str, top_n: int = 5) -> Tuple[List[int], List[float]]:
-        """ Find topics most similar to a search_term
-
-        Creates an embedding for search_term and compares that with
-        the topic embeddings. The most similar topics are returned
-        along with their similarity values.
-
-        The search_term can be of any size but since it compares
-        with the topic representation it is advised to keep it
-        below 5 words.
-
-        Args:
-            search_term: the term you want to use to search for topics
-            top_n: the number of topics to return
-
-        Returns:
-            similar_topics: the most similar topics from high to low
-            similarity: the similarity scores from high to low
-
-        """
-        if self.custom_embeddings and not self.allow_st_model:
-            raise Exception("This method can only be used if you set `allow_st_model` to True when "
-                            "using custom embeddings.")
-
-        topic_list = list(self.topics.keys())
-        topic_list.sort()
-
-        # Extract search_term embeddings and compare with topic embeddings
-        search_embedding = self._extract_embeddings([search_term]).flatten()
-        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
-
-        # Extract topics most similar to search_term
-        ids = np.argsort(sims)[-top_n:]
-        similarity = [sims[i] for i in ids][::-1]
-        similar_topics = [topic_list[index] for index in ids][::-1]
-
-        return similar_topics, similarity
-
-    def update_topics(self,
-                      docs: List[str],
-                      topics: List[int],
-                      n_gram_range: Tuple[int, int] = None,
-                      stop_words: str = None,
-                      vectorizer: CountVectorizer = None):
-        """ Updates the topic representation by recalculating c-TF-IDF with the new
-        parameters as defined in this function.
-
-        When you have trained a model and viewed the topics and the words that represent them,
-        you might not be satisfied with the representation. Perhaps you forgot to remove
-        stop_words or you want to try out a different n_gram_range. This function allows you
-        to update the topic representation after they have been formed.
-
-        Args:
-            docs: The docs you used when calling either `fit` or `fit_transform`
-            topics: The topics that were returned when calling either `fit` or `fit_transform`
-            n_gram_range: The n-gram range for the CountVectorizer.
-            stop_words: Stopwords that can be used as either a list of strings, or the name of the
-                        language as a string. For example: 'english' or ['the', 'and', 'I'].
-                        Note that this will not be used if you pass in your own CountVectorizer.
-            vectorizer: Pass in your own CountVectorizer from scikit-learn
-
-        Usage:
-        ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
-
-        # Create topics
-        docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic(n_gram_range=(1, 1), stop_words=None)
-        topics, probs = model.fit_transform(docs)
-
-        # Update topic representation
-        model.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="english")
-        ```
-        """
-        if not n_gram_range:
-            n_gram_range = self.n_gram_range
-
-        if not stop_words:
-            stop_words = self.stop_words
-
-        self.vectorizer = vectorizer or CountVectorizer(ngram_range=n_gram_range, stop_words=stop_words)
-        documents = pd.DataFrame({"Document": docs, "Topic": topics})
-        self._extract_topics(documents)
 
     def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
@@ -766,137 +995,6 @@ class BERTopic:
 
         return probabilities.round(3)
 
-    def get_topics(self) -> Dict[str, Tuple[str, float]]:
-        """ Return topics with top n words and their c-TF-IDF score
-
-        Usage:
-
-        ```python
-        all_topics = model.get_topics()
-        ```
-        """
-        check_is_fitted(self)
-        return self.topics
-
-    def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
-        """ Return top n words for a specific topic and their c-TF-IDF scores
-
-        Usage:
-
-        ```python
-        topic = model.get_topic(12)
-        ```
-        """
-        check_is_fitted(self)
-        if self.topics.get(topic):
-            return self.topics[topic]
-        else:
-            return False
-
-    def get_topics_freq(self) -> pd.DataFrame:
-        """ Return the the size of topics (descending order)
-
-        Usage:
-
-        ```python
-        frequency = model.get_topics_freq()
-        ```
-        """
-        check_is_fitted(self)
-        return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
-
-    def get_topic_freq(self, topic: int) -> int:
-        """ Return the the size of a topic
-
-        Arguments:
-             topic: the name of the topic as retrieved by get_topics
-
-        Usage:
-
-        ```python
-        frequency = model.get_topic_freq(12)
-        ```
-        """
-        check_is_fitted(self)
-        return self.topic_sizes[topic]
-
-    def reduce_topics(self,
-                      docs: List[str],
-                      topics: List[int],
-                      probabilities: np.ndarray,
-                      nr_topics: int = 20) -> Tuple[List[int], np.ndarray]:
-        """ Further reduce the number of topics to nr_topics.
-
-        The number of topics is further reduced by calculating the c-TF-IDF matrix
-        of the documents and then reducing them by iteratively merging the least
-        frequent topic with the most similar one based on their c-TF-IDF matrices.
-        The topics, their sizes, and representations are updated.
-
-        The reasoning for putting `docs`, `topics`, and `probs` as parameters is that
-        these values are not saved within BERTopic on purpose. If you were to have a
-        million documents, it seems very inefficient to save those in BERTopic
-        instead of a dedicated database.
-
-        Arguments:
-            docs: The docs you used when calling either `fit` or `fit_transform`
-            topics: The topics that were returned when calling either `fit` or `fit_transform`
-            nr_topics: The number of topics you want reduced to
-            probabilities: The probabilities that were returned when calling either `fit` or `fit_transform`
-
-        Returns:
-            new_topics: Updated topics
-            new_probabilities: Updated probabilities
-
-        Usage:
-
-        ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
-
-        # Create topics -> Typically over 50 topics
-        docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic()
-        topics, probs = model.fit_transform(docs)
-
-        # Further reduce topics
-        new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
-        ```
-        """
-        self.nr_topics = nr_topics
-        documents = pd.DataFrame({"Document": docs, "Topic": topics})
-
-        # Reduce number of topics
-        self._extract_topics(documents)
-        documents = self._reduce_topics(documents)
-        new_topics = documents.Topic.to_list()
-        new_probabilities = self._map_probabilities(probabilities)
-
-        return new_topics, new_probabilities
-
-    def visualize_topics(self):
-        """ Visualize topics, their sizes, and their corresponding words
-
-        This visualization is highly inspired by LDAvis, a great visualization
-        technique typically reserved for LDA.
-        """
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
-
-        # Extract topic words and their frequencies
-        topic_list = sorted(list(self.topics.keys()))
-        frequencies = [self.topic_sizes[topic] for topic in topic_list]
-        words = [" | ".join([word[0] for word in self.get_topic(topic)[:5]]) for topic in topic_list]
-
-        # Embed c-TF-IDF into 2D
-        embeddings = MinMaxScaler().fit_transform(self.c_tf_idf.toarray())
-        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
-
-        # Visualize with plotly
-        df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
-                           "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
-        self._plotly_topic_visualization(df, topic_list)
-
     @staticmethod
     def _plotly_topic_visualization(df: pd.DataFrame,
                                     topic_list: List[str]):
@@ -968,109 +1066,18 @@ class BERTopic:
 
         fig.show()
 
-    def visualize_distribution(self,
-                               probabilities: np.ndarray,
-                               min_probability: float = 0.015,
-                               figsize: tuple = (10, 5),
-                               save: bool = False):
-        """ Visualize the distribution of topic probabilities
+    @staticmethod
+    def _preprocess_text(documents: np.ndarray) -> List[str]:
+        """ Basic preprocessing of text
 
-        Arguments:
-            probabilities: An array of probability scores
-            min_probability: The minimum probability score to visualize.
-                             All others are ignored.
-            figsize: The size of the figure
-            save: Whether to save the resulting graph to probility.png
-
-        Usage:
-
-        Make sure to fit the model before and only input the
-        probabilities of a single document:
-
-        ```python
-        model.visualize_distribution(probabilities[0])
-        ```
-
-        ![](../img/probabilities.png)
+        Steps:
+            * Lower text
+            * Replace \n and \t with whitespace
+            * Only keep alpha-numerical characters
         """
-        check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
-
-        # Get values and indices equal or exceed the minimum probability
-        labels_idx = np.argwhere(probabilities >= min_probability).flatten()
-        vals = probabilities[labels_idx].tolist()
-
-        # Create labels
-        labels = []
-        for idx in labels_idx:
-            label = []
-            words = self.get_topic(idx)
-            if words:
-                for word in words[:5]:
-                    label.append(word[0])
-                label = str(r"$\bf{Topic }$ " +
-                            r"$\bf{" + str(idx) + ":}$ " +
-                            " ".join(label))
-                labels.append(label)
-            else:
-                print(idx, probabilities[idx])
-                vals.remove(probabilities[idx])
-        pos = range(len(vals))
-
-        # Create figure
-        fig, ax = plt.subplots(figsize=figsize)
-        plt.hlines(y=pos, xmin=0, xmax=vals, color='#333F4B', alpha=0.2, linewidth=15)
-        plt.hlines(y=np.argmax(vals), xmin=0, xmax=max(vals), color='#333F4B', alpha=1, linewidth=15)
-
-        # Set ticks and labels
-        ax.tick_params(axis='both', which='major', labelsize=12)
-        ax.set_xlabel('Probability', fontsize=15, fontweight='black', color='#333F4B')
-        ax.set_ylabel('')
-        plt.yticks(pos, labels)
-        fig.text(0, 1, 'Topic Probability Distribution', fontsize=15, fontweight='black', color='#333F4B')
-
-        # Update spine style
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.spines['left'].set_bounds(pos[0], pos[-1])
-        ax.spines['bottom'].set_bounds(0, max(vals))
-        ax.spines['bottom'].set_position(('axes', -0.02))
-        ax.spines['left'].set_position(('axes', 0.02))
-
-        fig.tight_layout()
-
-        if save:
-            fig.savefig("probability.png", dpi=300, bbox_inches='tight')
-
-    def save(self, path: str) -> None:
-        """ Saves the model to the specified path
-
-        Arguments:
-            path: the location and name of the file you want to save
-
-        Usage:
-
-        ```python
-        model.save("my_model")
-        ```
-        """
-        with open(path, 'wb') as file:
-            joblib.dump(self, file)
-
-    @classmethod
-    def load(cls, path: str):
-        """ Loads the model from the specified path
-
-        Arguments:
-            path: the location and name of the BERTopic file you want to load
-
-        Usage:
-
-        ```python
-        BERTopic.load("my_model")
-        ```
-        """
-        with open(path, 'rb') as file:
-            return joblib.load(file)
+        cleaned_documents = [doc.lower() for doc in documents]
+        cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
+        cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
+        cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
+        cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
+        return cleaned_documents
