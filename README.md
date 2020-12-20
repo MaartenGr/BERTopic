@@ -59,11 +59,11 @@ After generating topics and their probabilities, we can access the frequent topi
 ```python
 >>> model.get_topic_freq().head()
 Topic	Count
-0	-1	7288
-1	49	3992
-2	30	701
-3	27	684
-4	11	568
+-1	7288
+49	3992
+30	701
+27	684
+11	568
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
@@ -83,14 +83,13 @@ frequent topic that was generated, `topic 49`:
  ('pc', 0.003047105930670237)]
 ```  
 
-For a list of supported languages, please select the link below. 
-
 <details>
 <summary>Supported Languages</summary>
 
+<br>
 Use <b>"multilingual"</b> to select a model that supports 50+ languages. 
 <br><br>
-Moreover, the following languages are supported: <br>
+Moreover, the following <b>languages</b> are supported: <br>
 Afrikaans, Albanian, Amharic, Arabic, Armenian, Assamese,
 Azerbaijani, Basque, Belarusian, Bengali, Bengali Romanize, Bosnian,
 Breton, Bulgarian, Burmese, Burmese zawgyi font, Catalan, Chinese (Simplified),
@@ -109,17 +108,6 @@ Xhosa, Yiddish
 <br>
 </details>  
 
-### Embedding model
-You can select any model from `sentence-transformers` and pass it through 
-BERTopic with `embedding_model`:
-
-```python
-from bertopic import BERTopic
-model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
-```
-
-Click [here](https://www.sbert.net/docs/pretrained_models.html) for a list of supported sentence transformers models.  
-
 ### Visualize Topics
 After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
 understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
@@ -130,7 +118,7 @@ Instead, we can visualize the topics that were generated in a way very similar t
 model.visualize_topics()
 ``` 
 
-<img src="images/topic_visualization.gif" width="50%" height="50%" align="center" />
+<img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
 
 ### Visualize Topic Probabilities
 
@@ -145,6 +133,23 @@ model.visualize_distribution(probabilities[0])
 
 <img src="images/probabilities.png" width="75%" height="75%"/>
 
+### Embedding Models
+You can select any model from `sentence-transformers` and pass it through 
+BERTopic with `embedding_model`:
+
+```python
+from bertopic import BERTopic
+model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+```
+
+You can also use previously generated embeddings by passing it through `fit_transform()`:
+
+```python
+model = BERTopic()
+topics, probabilities = model.fit_transform(docs, embeddings)
+```
+
+Click [here](https://www.sbert.net/docs/pretrained_models.html) for a list of supported sentence transformers models.  
 
 ### Overview
 

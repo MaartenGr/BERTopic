@@ -84,6 +84,7 @@ class BERTopic:
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None,
+                 calculate_probabilities: bool = True,
                  allow_st_model: bool = True):
         """BERTopic initialization
 
@@ -113,6 +114,9 @@ class BERTopic:
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
             vectorizer: Pass in your own CountVectorizer from scikit-learn
+            calculate_probabilities: Whether to calculate the topic probabilities. This could slow down
+                                     extraction of topics if you have many documents (>100_000). If so,
+                                     set this to False to increase speed.
             allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
                             to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
                             Moreover, it will allow you to search for topics based on search queries.
@@ -147,6 +151,7 @@ class BERTopic:
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
         self.min_topic_size = min_topic_size
+        self.calculate_probabilities = calculate_probabilities
 
         # Umap parameters
         self.n_neighbors = n_neighbors
@@ -212,7 +217,7 @@ class BERTopic:
     def fit_transform(self,
                       documents: List[str],
                       embeddings: np.ndarray = None) -> Tuple[List[int],
-                                                              np.ndarray]:
+                                                              Union[np.ndarray, None]]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
@@ -335,15 +340,18 @@ class BERTopic:
             embeddings = self._extract_embeddings(documents)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
         predictions, _ = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)
+
+        if self.calculate_probabilities:
+            probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
+            if len(documents) == 1:
+                probabilities = probabilities.flatten()
+        else:
+            probabilities = None
 
         if self.mapped_topics:
             predictions = self._map_predictions(predictions)
             probabilities = self._map_probabilities(probabilities)
-
-        if len(documents) == 1:
-            probabilities = probabilities.flatten()
 
         return predictions, probabilities
 
@@ -489,7 +497,7 @@ class BERTopic:
     def reduce_topics(self,
                       docs: List[str],
                       topics: List[int],
-                      probabilities: np.ndarray,
+                      probabilities: np.ndarray = None,
                       nr_topics: int = 20) -> Tuple[List[int], np.ndarray]:
         """ Further reduce the number of topics to nr_topics.
 
@@ -594,9 +602,12 @@ class BERTopic:
         if not _HAS_VIZ:
             raise ModuleNotFoundError(f"In order to use this function you'll need to install "
                                       f"additional dependencies;\npip install bertopic[visualization]")
-        if len(probabilities[probabilities>min_probability]) == 0:
+        if len(probabilities[probabilities > min_probability]) == 0:
             raise ValueError("There are no values where `min_probability` is higher than the "
                              "probabilities that were supplied. Lower `min_probability` to prevent this error.")
+        if not self.calculate_probabilities:
+            raise ValueError("This visualization cannot be used if you have set `calculate_probabilities` to False "
+                             "as it uses the topic probabilities. ")
 
         # Get values and indices equal or exceed the minimum probability
         labels_idx = np.argwhere(probabilities >= min_probability).flatten()
@@ -744,7 +755,12 @@ class BERTopic:
                                              cluster_selection_method='eom',
                                              prediction_data=True).fit(umap_embeddings)
         documents['Topic'] = self.cluster_model.labels_
-        probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
+
+        if self.calculate_probabilities:
+            probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
+        else:
+            probabilities = None
+
         self._update_topic_size(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
@@ -998,7 +1014,7 @@ class BERTopic:
 
         return documents
 
-    def _map_probabilities(self, probabilities: np.ndarray) -> np.ndarray:
+    def _map_probabilities(self, probabilities: Union[np.ndarray, None]) -> Union[np.ndarray, None]:
         """ Map the probabilities to the reduced topics.
         This is achieved by adding the probabilities together
         of all topics that were mapped to the same topic. Then,
@@ -1012,11 +1028,14 @@ class BERTopic:
             probabilities: Updated probabilities
 
         """
-        for from_topic, to_topic in self.mapped_topics.items():
-            probabilities[:, to_topic] += probabilities[:, from_topic]
-            probabilities[:, from_topic] = 0
+        if isinstance(probabilities, np.ndarray):
+            for from_topic, to_topic in self.mapped_topics.items():
+                probabilities[:, to_topic] += probabilities[:, from_topic]
+                probabilities[:, from_topic] = 0
 
-        return probabilities.round(3)
+            return probabilities.round(3)
+        else:
+            return None
 
     @staticmethod
     def _plotly_topic_visualization(df: pd.DataFrame,
@@ -1089,8 +1108,7 @@ class BERTopic:
 
         fig.show()
 
-    @staticmethod
-    def _preprocess_text(documents: np.ndarray) -> List[str]:
+    def _preprocess_text(self, documents: np.ndarray) -> List[str]:
         """ Basic preprocessing of text
 
         Steps:
@@ -1101,6 +1119,7 @@ class BERTopic:
         cleaned_documents = [doc.lower() for doc in documents]
         cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
         cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
-        cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
+        if self.language == "english":
+            cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
         cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
         return cleaned_documents
