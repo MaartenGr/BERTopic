@@ -34,39 +34,9 @@ logger = MyLogger("WARNING")
 
 
 class BERTopic:
-    """
-    BERTopic is a topic modeling technique that leverages BERT embeddings and
+    """BERTopic is a topic modeling technique that leverages BERT embeddings and
     c-TF-IDF to create dense clusters allowing for easily interpretable topics
     whilst keeping important words in the topic descriptions.
-
-    Arguments:
-        language: The main language used in your documents. For a full overview of supported languages
-                  see bertopic.embeddings.languages
-        embedding_model: Model to use. Overview of options can be found here
-                        https://www.sbert.net/docs/pretrained_models.html
-        top_n_words: The number of words per topic to extract
-        nr_topics: Specifying the number of topics will reduce the initial
-                   number of topics to the value specified. This reduction can take
-                   a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-                   IF this is set to None, no reduction is applied. Use "auto" to automatically
-                   reduce topics that have a similarity of at least 0.9, do not maps all others.
-        n_gram_range: The n-gram range for the CountVectorizer.
-                      Advised to keep high values between 1 and 3.
-                      More would likely lead to memory issues.
-                      Note that this will not be used if you pass in your own CountVectorizer.
-        min_topic_size: The minimum size of the topic.
-        n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
-                     for manifold approximation (UMAP).
-        n_components: The dimension of the space to embed into when reducing dimensionality with UMAP.
-        stop_words: Stopwords that can be used as either a list of strings, or the name of the
-                    language as a string. For example: 'english' or ['the', 'and', 'I'].
-                    Note that this will not be used if you pass in your own CountVectorizer.
-        verbose: Changes the verbosity of the model, Set to True if you want
-                 to track the stages of the model.
-        vectorizer: Pass in your own CountVectorizer from scikit-learn
-        allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
-                        to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
-                        Moreover, it will allow you to search for topics based on search queries.
 
     Usage:
 
@@ -93,7 +63,7 @@ class BERTopic:
     embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
     # Create topic model
-    model = BERTopic(None, verbose=True)
+    model = BERTopic(verbose=True)
     topics = model.fit_transform(docs, embeddings)
     ```
 
@@ -115,6 +85,56 @@ class BERTopic:
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None,
                  allow_st_model: bool = True):
+        """BERTopic initialization
+
+        Args:
+            language: The main language used in your documents. For a full overview of supported languages
+                      see bertopic.embeddings.languages. Select "multilingual" to load in a model that
+                      support 50+ languages.
+            embedding_model: Model to use. Overview of options can be found here
+                            https://www.sbert.net/docs/pretrained_models.html
+            top_n_words: The number of words per topic to extract
+            nr_topics: Specifying the number of topics will reduce the initial
+                       number of topics to the value specified. This reduction can take
+                       a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
+                       IF this is set to None, no reduction is applied. Use "auto" to automatically
+                       reduce topics that have a similarity of at least 0.9, do not maps all others.
+            n_gram_range: The n-gram range for the CountVectorizer.
+                          Advised to keep high values between 1 and 3.
+                          More would likely lead to memory issues.
+                          Note that this will not be used if you pass in your own CountVectorizer.
+            min_topic_size: The minimum size of the topic.
+            n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
+                         for manifold approximation (UMAP).
+            n_components: The dimension of the space to embed into when reducing dimensionality with UMAP.
+            stop_words: Stopwords that can be used as either a list of strings, or the name of the
+                        language as a string. For example: 'english' or ['the', 'and', 'I'].
+                        Note that this will not be used if you pass in your own CountVectorizer.
+            verbose: Changes the verbosity of the model, Set to True if you want
+                     to track the stages of the model.
+            vectorizer: Pass in your own CountVectorizer from scikit-learn
+            allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
+                            to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
+                            Moreover, it will allow you to search for topics based on search queries.
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        model = BERTopic(language = "english",
+                         embedding_model = None,
+                         top_n_words = 10,
+                         nr_topics = 30,
+                         n_gram_range = (1, 1),
+                         min_topic_size = 10,
+                         n_neighbors = 15,
+                         n_components = 5,
+                         stop_words = None,
+                         verbose = True,
+                         vectorizer = None,
+                         allow_st_model = True)
+        ```
+        """
 
         # Embedding model
         self.language = language
@@ -442,32 +462,29 @@ class BERTopic:
         else:
             return False
 
-    def get_topics_freq(self) -> pd.DataFrame:
+    def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
         """ Return the the size of topics (descending order)
 
         Usage:
 
+        To extract the frequency of all topics:
+
         ```python
-        frequency = model.get_topics_freq()
+        frequency = model.get_topic_freq()
         ```
-        """
-        check_is_fitted(self)
-        return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
 
-    def get_topic_freq(self, topic: int) -> int:
-        """ Return the the size of a topic
-
-        Arguments:
-             topic: the name of the topic as retrieved by get_topics
-
-        Usage:
+        To get the frequency of a single topic:
 
         ```python
         frequency = model.get_topic_freq(12)
         ```
         """
         check_is_fitted(self)
-        return self.topic_sizes[topic]
+        if isinstance(topic, int):
+            return self.topic_sizes[topic]
+        else:
+            return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count",
+                                                                                                  ascending=False)
 
     def reduce_topics(self,
                       docs: List[str],
@@ -577,6 +594,9 @@ class BERTopic:
         if not _HAS_VIZ:
             raise ModuleNotFoundError(f"In order to use this function you'll need to install "
                                       f"additional dependencies;\npip install bertopic[visualization]")
+        if len(probabilities[probabilities>min_probability]) == 0:
+            raise ValueError("There are no values where `min_probability` is higher than the "
+                             "probabilities that were supplied. Lower `min_probability` to prevent this error.")
 
         # Get values and indices equal or exceed the minimum probability
         labels_idx = np.argwhere(probabilities >= min_probability).flatten()
@@ -856,6 +876,9 @@ class BERTopic:
             elif self.language.lower() in languages:
                 return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
+            elif self.language == "multilingual":
+                return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
+
             else:
                 raise ValueError(f"{self.language} is currently not supported. However, you can "
                                  f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
@@ -909,9 +932,9 @@ class BERTopic:
         similarities = cosine_similarity(self.c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
-        while len(self.get_topics_freq()) > self.nr_topics + 1:
+        while len(self.get_topic_freq()) > self.nr_topics + 1:
             # Find most similar topic to least common topic
-            topic_to_merge = self.get_topics_freq().iloc[-1].Topic
+            topic_to_merge = self.get_topic_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
             similarities[:, topic_to_merge + 1] = -1
 
@@ -927,7 +950,7 @@ class BERTopic:
         if initial_nr_topics <= self.nr_topics:
             logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
         else:
-            logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+            logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
 
         return documents
 
@@ -950,8 +973,8 @@ class BERTopic:
         np.fill_diagonal(similarities, 0)
 
         # Do not map the top 10% most frequent topics
-        not_mapped = int(np.ceil(len(self.get_topics_freq()) * 0.1))
-        to_map = self.get_topics_freq().Topic.values[not_mapped:][::-1]
+        not_mapped = int(np.ceil(len(self.get_topic_freq()) * 0.1))
+        to_map = self.get_topic_freq().Topic.values[not_mapped:][::-1]
 
         for topic_to_merge in to_map:
             # Find most similar topic to least common topic
@@ -971,7 +994,7 @@ class BERTopic:
 
         _ = self._extract_topics(documents)
 
-        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topics_freq())}")
+        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
 
         return documents
 

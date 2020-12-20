@@ -4,7 +4,7 @@
 
 **Highlights**:  
 
-* Visualize Topics similar to LDAviz
+* Visualize Topics similar to [LDAvis](https://github.com/cpsievert/LDAvis)
 * Added option to reduce topics after training
 * Added option to update topic representation after training
 * Added option to search topics using a search term
@@ -19,6 +19,12 @@
 * Check if BERTopic is fitted 
 * Added TF-IDF as an embedder instead of transformer models (see tutorial)
 * Numpy for Python 3.6 will be dropped and was therefore removed from the workflow.
+* Preprocess text before passing it through c-TF-IDF
+* Merged `get_topics_freq()` with `get_topic_freq()` 
+
+**Fixes**:  
+
+* Fix error handling topic probabilities
 
 ## **Version 0.3.2**
 *Release date:  16 November, 2020*

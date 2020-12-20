@@ -31,19 +31,19 @@ def test_full():
         words = model.get_topic(topic)[:10]
         assert len(words) == 10
 
-    for topic in model.get_topics_freq().Topic:
+    for topic in model.get_topic_freq().Topic:
         words = model.get_topic(topic)[:10]
         assert len(words) == 10
 
-    assert len(model.get_topics_freq()) > 2
-    assert probs.shape == (1000, len(model.get_topics_freq())-1)
-    assert len(model.get_topics()) == len(model.get_topics_freq())
+    assert len(model.get_topic_freq()) > 2
+    assert probs.shape == (1000, len(model.get_topic_freq())-1)
+    assert len(model.get_topics()) == len(model.get_topic_freq())
 
     # Test transform
     doc = "This is a new document to predict."
     topics_test, probs_test = model.transform([doc])
 
-    assert len(probs_test) == len(model.get_topics_freq())-1
+    assert len(probs_test) == len(model.get_topic_freq())-1
     assert len(topics_test) == 1
 
     # Test find topic
@@ -66,7 +66,7 @@ def test_full():
     nr_topics = 2
     new_topics, new_probs = model.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
 
-    assert len(model.get_topics_freq()) == nr_topics + 1
+    assert len(model.get_topic_freq()) == nr_topics + 1
     assert len(new_topics) == len(topics)
     assert len(new_probs) == len(probs)
 
@@ -150,7 +150,7 @@ def test_extract_topics():
     model = BERTopic()
     model._update_topic_size(documents)
     model._extract_topics(documents)
-    freq = model.get_topics_freq()
+    freq = model.get_topic_freq()
 
     assert model.c_tf_idf.shape[0] == 5
     assert model.c_tf_idf.shape[1] > 100
@@ -173,7 +173,7 @@ def test_extract_topics_custom_cv():
     model = BERTopic(vectorizer=cv)
     model._update_topic_size(documents)
     model._extract_topics(documents)
-    freq = model.get_topics_freq()
+    freq = model.get_topic_freq()
 
     assert model.c_tf_idf.shape[0] == 5
     assert model.c_tf_idf.shape[1] > 100
@@ -194,16 +194,16 @@ def test_topic_reduction(reduced_topics):
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model._update_topic_size(old_documents)
     model._extract_topics(old_documents.copy())
-    old_freq = model.get_topics_freq()
+    old_freq = model.get_topic_freq()
 
     new_documents = model._reduce_topics(old_documents.copy())
-    new_freq = model.get_topics_freq()
+    new_freq = model.get_topic_freq()
 
     assert old_freq.Count.sum() == new_freq.Count.sum()
     assert len(old_freq.Topic.unique()) == len(old_freq)
     assert len(new_freq.Topic.unique()) == len(new_freq)
     assert isinstance(model.mapped_topics, dict)
-    assert not set(model.get_topics_freq().Topic).difference(set(new_documents.Topic))
+    assert not set(model.get_topic_freq().Topic).difference(set(new_documents.Topic))
     assert model.mapped_topics
 
 
@@ -218,10 +218,10 @@ def test_topic_reduction_edge_cases():
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model._update_topic_size(old_documents)
     model._extract_topics(old_documents)
-    old_freq = model.get_topics_freq()
+    old_freq = model.get_topic_freq()
 
     new_documents = model._reduce_topics(old_documents)
-    new_freq = model.get_topics_freq()
+    new_freq = model.get_topic_freq()
 
     assert not set(old_documents.Topic).difference(set(new_documents.Topic))
     pd.testing.assert_frame_equal(old_documents, new_documents)
