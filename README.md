@@ -48,7 +48,7 @@ We start by extracting topics from the well-known 20 newsgroups dataset which is
 from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
  
-docs = fetch_20newsgroups(subset='all')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 
 model = BERTopic(language="english")
 topics, probabilities = model.fit_transform(docs)

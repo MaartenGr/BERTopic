@@ -1,6 +1,6 @@
 
 ## **Version 0.4.0**
-*Release date: TBA*
+*Release date:  21 December, 2020*
 
 **Highlights**:  
 

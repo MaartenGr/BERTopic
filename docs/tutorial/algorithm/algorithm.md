@@ -50,3 +50,16 @@ Each cluster is converted to a single document instead of a set of documents.
 Then, the frequency of word `t` are extracted for each class `i` and divided by the total number of words `w`. 
 This action can now be seen as a form of regularization of frequent words in the class.
 Next, the total, unjoined, number of documents `m` is divided by the total frequency of word `t` across all classes `n`.
+
+## **Topic Coherence**
+This fourth step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
+itself. The embedding model provided by BERTopic will be used to improve the coherence of words within a topic. 
+After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
+Technically, this does not mean that this collection of words actually describes a coherent topic. In practice, we will 
+see that many of the words do describe a similar topic but some words will, in a way, overfit to the documents. For 
+example, if you have a set of documents that is written by the same person whose signature will be in the topic 
+description. 
+
+In order to improve coherence of words Maximal Marginal Relevance was used to find the words that were most coherent 
+without having too much overlap between the words itself. This results in the removal of words that do not contribute 
+to a topic.  

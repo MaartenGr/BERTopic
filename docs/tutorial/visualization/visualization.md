@@ -14,7 +14,7 @@ from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
 
 # Create topics
-docs = fetch_20newsgroups(subset='train')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 model = BERTopic()
 topics, probs = model.fit_transform(docs)
 ```
@@ -38,7 +38,7 @@ from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
 
 # Create topics
-docs = fetch_20newsgroups(subset='train')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 model = BERTopic()
 topics, probs = model.fit_transform(docs)
 ```

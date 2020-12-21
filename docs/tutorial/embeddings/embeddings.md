@@ -10,7 +10,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sentence_transformers import SentenceTransformer
 
 # Prepare embeddings
-docs = fetch_20newsgroups(subset='all')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
@@ -41,7 +41,7 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Create TF-IDF sparse matrix
-docs = fetch_20newsgroups(subset='all')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 vectorizer = TfidfVectorizer(min_df=5)
 embeddings = vectorizer.fit_transform(docs)
 

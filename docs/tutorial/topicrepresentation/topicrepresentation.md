@@ -13,7 +13,7 @@ from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
 
 # Create topics
-docs = fetch_20newsgroups(subset='train')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 model = BERTopic(n_gram_range=(2, 3), stop_words="english")
 topics, probs = model.fit_transform(docs)
 ```

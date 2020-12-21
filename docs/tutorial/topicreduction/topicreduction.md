@@ -82,7 +82,7 @@ from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
  
 # Create topics -> Typically over 50 topics
-docs = fetch_20newsgroups(subset='train')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 model = BERTopic()
 topics, probs = model.fit_transform(docs)
 
