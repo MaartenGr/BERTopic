@@ -10,24 +10,24 @@
       
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/index.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/topicrepresentation/topicrepresentation.html">
       
       
         <meta name="author" content="Maarten P. Grootendorst">
       
-      <link rel="shortcut icon" href="icon.png">
+      <link rel="shortcut icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
     
     
       
-        <title>Home - BERTopic</title>
+        <title>Topic Representation - BERTopic</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.19753c6b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.19753c6b.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.196e0c26.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.196e0c26.min.css">
         
           
           
@@ -46,7 +46,7 @@
     
     
     
-      <link rel="stylesheet" href="style.css">
+      <link rel="stylesheet" href="../../style.css">
     
     
       
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bertopic" class="md-skip">
+        <a href="#update-topic-representation-after-training" class="md-skip">
           Skip to content
         </a>
       
@@ -84,7 +84,7 @@
   <nav class="md-header-nav md-grid" aria-label="Header">
     <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-header-nav__button md-logo" aria-label="BERTopic">
       
-  <img src="icon.png" alt="logo">
+  <img src="../../icon.png" alt="logo">
 
     </a>
     <label class="md-header-nav__button md-icon" for="__drawer">
@@ -98,7 +98,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Home
+              Topic Representation
             
           </span>
         </div>
@@ -170,7 +170,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic">
       
-  <img src="icon.png" alt="logo">
+  <img src="../../icon.png" alt="logo">
 
     </a>
     BERTopic
@@ -195,63 +195,11 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Home
-        <span class="md-nav__icon md-icon"></span>
-      </label>
-    
-    <a href="index.html" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../../index.html" class="md-nav__link">
       Home
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
     
@@ -259,10 +207,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
     <label class="md-nav__link" for="nav-2">
       Guides
       <span class="md-nav__icon md-icon"></span>
@@ -281,7 +231,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorial/quickstart/quickstart.html" class="md-nav__link">
+    <a href="../quickstart/quickstart.html" class="md-nav__link">
       Getting Started
     </a>
   </li>
@@ -293,7 +243,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorial/embeddings/embeddings.html" class="md-nav__link">
+    <a href="../embeddings/embeddings.html" class="md-nav__link">
       Custom Embeddings
     </a>
   </li>
@@ -305,7 +255,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorial/visualization/visualization.html" class="md-nav__link">
+    <a href="../visualization/visualization.html" class="md-nav__link">
       Topic Visualization
     </a>
   </li>
@@ -317,7 +267,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorial/topicreduction/topicreduction.html" class="md-nav__link">
+    <a href="../topicreduction/topicreduction.html" class="md-nav__link">
       Topic Reduction
     </a>
   </li>
@@ -327,11 +277,45 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="tutorial/topicrepresentation/topicrepresentation.html" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Topic Representation
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="topicrepresentation.html" class="md-nav__link md-nav__link--active">
       Topic Representation
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#update-topic-representation-after-training" class="md-nav__link">
+    Update Topic Representation after Training
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -341,7 +325,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorial/search/search.html" class="md-nav__link">
+    <a href="../search/search.html" class="md-nav__link">
       Search Topics
     </a>
   </li>
@@ -358,7 +342,7 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorial/algorithm/algorithm.html" class="md-nav__link">
+    <a href="../algorithm/algorithm.html" class="md-nav__link">
       The Algorithm
     </a>
   </li>
@@ -390,7 +374,7 @@
 
 
   <li class="md-nav__item">
-    <a href="api/bertopic.html" class="md-nav__link">
+    <a href="../../api/bertopic.html" class="md-nav__link">
       BERTopic
     </a>
   </li>
@@ -402,7 +386,7 @@
 
 
   <li class="md-nav__item">
-    <a href="api/ctfidf.html" class="md-nav__link">
+    <a href="../../api/ctfidf.html" class="md-nav__link">
       cTFIDF
     </a>
   </li>
@@ -419,7 +403,7 @@
 
 
   <li class="md-nav__item">
-    <a href="changelog.html" class="md-nav__link">
+    <a href="../../changelog.html" class="md-nav__link">
       Changelog
     </a>
   </li>
@@ -439,8 +423,6 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -449,22 +431,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
+  <a href="#update-topic-representation-after-training" class="md-nav__link">
+    Update Topic Representation after Training
   </a>
   
 </li>
@@ -481,152 +449,63 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/tutorial/topicrepresentation/topicrepresentation.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="bertopic"><strong>BERTopic</strong><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
-<p><img src="logo.png" width="35%" height="35%" align="right" /></p>
-<p>BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
-allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
-visualizations similar to LDAvis! </p>
-<p>Corresponding medium post can be found <a href="https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&amp;sk=0b5a470c006d1842ad4c8a3057063a99">here</a>.</p>
-<h3 id="installation"><strong>Installation</strong><a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
-<p>Installation can be done using <a href="https://pypi.org/project/bertopic/">pypi</a>:</p>
-<div class="codehilite"><pre><span></span><code>pip install bertopic
-</code></pre></div>
-
-<p>To use the visualization options, install BERTopic as follows:</p>
-<div class="codehilite"><pre><span></span><code>pip install bertopic<span class="o">[</span>visualization<span class="o">]</span>
-</code></pre></div>
-
-<h3 id="usage"><strong>Usage</strong><a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
-<p>Below is an example of how to use the model. The example uses the 
-<a href="https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html">20 newsgroups</a> dataset.  </p>
-<p>You can also follow along with the Google Colab notebook <a href="https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing">here</a>.</p>
+                  <h1>Topic Representation</h1>
+                
+                <p>The topics that are extracted from BERTopic are represented by words. These words are extracted from the documents 
+occupying their topics using a class-based TF-IDF. This allows us to extract words that are interesting to a topic but 
+less so to another. The result is clearly separated clusters. </p>
+<h3 id="update-topic-representation-after-training">Update Topic Representation after Training<a class="headerlink" href="#update-topic-representation-after-training" title="Permanent link">&para;</a></h3>
+<p>When you have trained a model and viewed the topics and the words that represent them,
+you might not be satisfied with the representation. Perhaps you forgot to remove
+stop_words or you want to try out a different n_gram_range. We can use the function <code>update_topics</code> to update 
+the topic representation with new parameters for <code>c-TF-IDF</code>: </p>
 <div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
+<span class="c1"># Create topics</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 
-<p>After generating topics and their probabilities, we can access the frequent topics that were generated:</p>
-<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-<span class="n">Topic</span>   <span class="n">Count</span>
-<span class="o">-</span><span class="mi">1</span>  <span class="mi">7288</span>
-<span class="mi">49</span>  <span class="mi">3992</span>
-<span class="mi">30</span>  <span class="mi">701</span>
-<span class="mi">27</span>  <span class="mi">684</span>
-<span class="mi">11</span>  <span class="mi">568</span>
+<p>From the model created above, one of the most frequent topics is the following:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">31</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
+<span class="p">[(</span><span class="s1">&#39;clipper chip&#39;</span><span class="p">,</span> <span class="mf">0.007240771542316232</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;key escrow&#39;</span><span class="p">,</span> <span class="mf">0.004601603973377443</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;law enforcement&#39;</span><span class="p">,</span> <span class="mf">0.004277247929596332</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;intercon com&#39;</span><span class="p">,</span> <span class="mf">0.0035961920238955824</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;amanda walker&#39;</span><span class="p">,</span> <span class="mf">0.003474856425297157</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;serial number&#39;</span><span class="p">,</span> <span class="mf">0.0029876119137150358</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;com amanda&#39;</span><span class="p">,</span> <span class="mf">0.002789303096817983</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;intercon com amanda&#39;</span><span class="p">,</span> <span class="mf">0.0027386688593327084</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;amanda intercon&#39;</span><span class="p">,</span> <span class="mf">0.002585262048515583</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;amanda intercon com&#39;</span><span class="p">,</span> <span class="mf">0.002585262048515583</span><span class="p">)]</span>
 </code></pre></div>
 
-<p>-1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, <code>topic 49</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">49</span><span class="p">)</span>
-<span class="p">[(</span><span class="s1">&#39;windows&#39;</span><span class="p">,</span> <span class="mf">0.006152228076250982</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;drive&#39;</span><span class="p">,</span> <span class="mf">0.004982897610645755</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;dos&#39;</span><span class="p">,</span> <span class="mf">0.004845038866360651</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="mf">0.004140142872194834</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;disk&#39;</span><span class="p">,</span> <span class="mf">0.004131678774810884</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;mac&#39;</span><span class="p">,</span> <span class="mf">0.003624848635985097</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;memory&#39;</span><span class="p">,</span> <span class="mf">0.0034840976976789903</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;software&#39;</span><span class="p">,</span> <span class="mf">0.0034415334250699077</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="mf">0.0034239554442333257</span><span class="p">),</span>
- <span class="p">(</span><span class="s1">&#39;pc&#39;</span><span class="p">,</span> <span class="mf">0.003047105930670237</span><span class="p">)]</span>
+<p>Although there does seem to be some relation between words, it is difficult, at least for me, to intuitively understand 
+what the topic is about. Instead, let's simplify the topic representation by setting <code>n_gram_range</code> to (1, 3) to 
+also allow for single words.</p>
+<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">31</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
+<span class="p">[(</span><span class="s1">&#39;encryption&#39;</span><span class="p">,</span> <span class="mf">0.008021846079148017</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;clipper&#39;</span><span class="p">,</span> <span class="mf">0.00789642647602742</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;chip&#39;</span><span class="p">,</span> <span class="mf">0.00637127942464045</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="mf">0.006363124787175884</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;escrow&#39;</span><span class="p">,</span> <span class="mf">0.005030980365244285</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;clipper chip&#39;</span><span class="p">,</span> <span class="mf">0.0048271268437973395</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;keys&#39;</span><span class="p">,</span> <span class="mf">0.0043245812747907545</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;crypto&#39;</span><span class="p">,</span> <span class="mf">0.004311198708675516</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;intercon&#39;</span><span class="p">,</span> <span class="mf">0.0038772934659295076</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;amanda&#39;</span><span class="p">,</span> <span class="mf">0.003516026493904586</span><span class="p">)]</span>
 </code></pre></div>
 
-<details>
-<summary>Supported Languages</summary>
-
-<br>
-Use <b>"multilingual"</b> to select a model that supports 50+ languages. 
-<br><br>
-Moreover, the following <b>languages</b> are supported: <br>
-Afrikaans, Albanian, Amharic, Arabic, Armenian, Assamese,
-Azerbaijani, Basque, Belarusian, Bengali, Bengali Romanize, Bosnian,
-Breton, Bulgarian, Burmese, Burmese zawgyi font, Catalan, Chinese (Simplified),
-Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Esperanto,
-Estonian, Filipino, Finnish, French, Galician, Georgian, German, Greek,
-Gujarati, Hausa, Hebrew, Hindi, Hindi Romanize, Hungarian, Icelandic, Indonesian,
-Irish, Italian, Japanese, Javanese, Kannada, Kazakh, Khmer, Korean,
-Kurdish (Kurmanji), Kyrgyz, Lao, Latin, Latvian, Lithuanian, Macedonian,
-Malagasy, Malay, Malayalam, Marathi, Mongolian, Nepali, Norwegian,
-Oriya, Oromo, Pashto, Persian, Polish, Portuguese, Punjabi, Romanian,
-Russian, Sanskrit, Scottish Gaelic, Serbian, Sindhi, Sinhala, Slovak,
-Slovenian, Somali, Spanish, Sundanese, Swahili, Swedish, Tamil,
-Tamil Romanize, Telugu, Telugu Romanize, Thai, Turkish, Ukrainian,
-Urdu, Urdu Romanize, Uyghur, Uzbek, Vietnamese, Welsh, Western Frisian,
-Xhosa, Yiddish
-<br>
-</details>
-
-<h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Methods</th>
-<th>Code</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Fit the model</td>
-<td><code>model.fit(docs])</code></td>
-</tr>
-<tr>
-<td>Fit the model and predict documents</td>
-<td><code>model.fit_transform(docs])</code></td>
-</tr>
-<tr>
-<td>Predict new documents</td>
-<td><code>model.transform([new_doc])</code></td>
-</tr>
-<tr>
-<td>Access single topic</td>
-<td><code>model.get_topic(12)</code></td>
-</tr>
-<tr>
-<td>Access all topics</td>
-<td><code>model.get_topics()</code></td>
-</tr>
-<tr>
-<td>Get topic freq</td>
-<td><code>model.get_topic_freq()</code></td>
-</tr>
-<tr>
-<td>Visualize Topics</td>
-<td><code>model.visualize_topics()</code></td>
-</tr>
-<tr>
-<td>Visualize Topic Probability Distribution</td>
-<td><code>model.visualize_distribution(probabilities[0])</code></td>
-</tr>
-<tr>
-<td>Update topic representation</td>
-<td><code>model.update_topics(docs, topics, n_gram_range=(1, 3))</code></td>
-</tr>
-<tr>
-<td>Reduce nr of topics</td>
-<td><code>model.reduce_topics(docs, topics, probabilities, nr_topics=30)</code></td>
-</tr>
-<tr>
-<td>Find topics</td>
-<td><code>model.find_topics("vehicle")</code></td>
-</tr>
-<tr>
-<td>Save model</td>
-<td><code>model.save("my_model")</code></td>
-</tr>
-<tr>
-<td>Load model</td>
-<td><code>BERTopic.load("my_model")</code></td>
-</tr>
-</tbody>
-</table>
+<p>To me, the combination of the words above seem a bit more intuitive than the words we previously had! You can play 
+around with <code>n_gram_range</code> and <code>stop_words</code> or use your own custom <code>sklearn.feature_extraction.text.CountVectorizer</code>. </p>
                 
               
               
@@ -645,14 +524,28 @@ Xhosa, Yiddish
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
+          <a href="../topicreduction/topicreduction.html" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Topic Reduction
+              </div>
+            </div>
+          </a>
         
-          <a href="tutorial/quickstart/quickstart.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+        
+          <a href="../search/search.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Getting Started
+                Search Topics
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
@@ -683,15 +576,15 @@ Xhosa, Yiddish
       
     </div>
     
-      <script src="assets/javascripts/vendor.0ac82a11.min.js"></script>
-      <script src="assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="../../assets/javascripts/vendor.0ac82a11.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({
-          base: ".",
+          base: "../..",
           features: [],
           search: Object.assign({
-            worker: "assets/javascripts/worker/search.4ac00218.min.js"
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
