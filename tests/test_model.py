@@ -2,11 +2,14 @@ import pytest
 import numpy as np
 import pandas as pd
 from unittest import mock
-
 from sklearn.datasets import fetch_20newsgroups, make_blobs
+from sklearn.feature_extraction.text import CountVectorizer
+from sentence_transformers import SentenceTransformer
+
 from bertopic import BERTopic
 
 newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:1000]
+embedding_model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 
 
 def create_embeddings(docs):
@@ -18,25 +21,100 @@ def create_embeddings(docs):
     return blobs
 
 
-def test_extract_embeddings():
-    """ Test if only correct models are loaded """
-    with pytest.raises(OSError):
-        model = BERTopic(bert_model='not_a_model')
+def test_full():
+    model = BERTopic(language="english", verbose=True, n_neighbors=5, min_topic_size=5)
+
+    # Test fit
+    topics, probs = model.fit_transform(newsgroup_docs)
+
+    for topic in set(topics):
+        words = model.get_topic(topic)[:10]
+        assert len(words) == 10
+
+    for topic in model.get_topic_freq().Topic:
+        words = model.get_topic(topic)[:10]
+        assert len(words) == 10
+
+    assert len(model.get_topic_freq()) > 2
+    assert probs.shape == (1000, len(model.get_topic_freq())-1)
+    assert len(model.get_topics()) == len(model.get_topic_freq())
+
+    # Test transform
+    doc = "This is a new document to predict."
+    topics_test, probs_test = model.transform([doc])
+
+    assert len(probs_test) == len(model.get_topic_freq())-1
+    assert len(topics_test) == 1
+
+    # Test find topic
+    similar_topics, similarity = model.find_topics("query", top_n=2)
+    assert len(similar_topics) == 2
+    assert len(similarity) == 2
+    assert max(similarity) <= 1
+
+    # Test update topics
+    topic = model.get_topic(1)[:10]
+    model.update_topics(newsgroup_docs, topics, n_gram_range=(2, 2), stop_words="english")
+    updated_topic = model.get_topic(1)[:10]
+    model.update_topics(newsgroup_docs, topics)
+    original_topic = model.get_topic(1)[:10]
+
+    assert topic != updated_topic
+    assert topic == original_topic
+
+    # Test topic reduction
+    nr_topics = 2
+    new_topics, new_probs = model.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
+
+    assert len(model.get_topic_freq()) == nr_topics + 1
+    assert len(new_topics) == len(topics)
+    assert len(new_probs) == len(probs)
+
+
+def test_load_model():
+    """ Check if the model is correctly saved """
+    model = BERTopic(language="Dutch", embedding_model=None, n_components=12)
+    model.save("test")
+    loaded_model = BERTopic.load("test")
+    assert type(model) == type(loaded_model)
+    assert model.language == loaded_model.language
+    assert model.embedding_model == loaded_model.embedding_model
+    assert model.top_n_words == loaded_model.top_n_words
+    assert model.n_neighbors == loaded_model.n_neighbors
+    assert model.n_components == loaded_model.n_components
+
+
+def test_extract_incorrect_embeddings():
+    """ Test if errors are raised when loading incorrect model """
+    with pytest.raises(ValueError):
+        model = BERTopic(language=None, embedding_model='not_a_model')
         model._extract_embeddings(["Some document"])
 
-    # model = BERTopic(bert_model='distilbert-base-nli-mean-tokens')
-    # embeddings = model._extract_embeddings(["Some document"])
-    #
-    # assert isinstance(embeddings, np.ndarray)
-    # assert embeddings.shape == (1, 768)
+    with pytest.raises(ValueError):
+        model = BERTopic(language="Unknown language")
+        model._extract_embeddings(["Some document"])
+
+
+def test_extract_embeddings():
+    """ Test if correct model is loaded and embeddings match the sentence-transformers version """
+    docs = ["some document"]
+    model = BERTopic(language=None, embedding_model="distilbert-base-nli-stsb-mean-tokens")
+    bertopic_embeddings = model._extract_embeddings(docs)
+
+    assert isinstance(bertopic_embeddings, np.ndarray)
+    assert bertopic_embeddings.shape == (1, 768)
+
+    sentence_embeddings = embedding_model.encode(docs, show_progress_bar=False)
+    assert np.array_equal(bertopic_embeddings, sentence_embeddings)
 
 
 @pytest.mark.parametrize("embeddings,shape", [(np.random.rand(100, 68), 100),
                                               (np.random.rand(10, 768), 10),
                                               (np.random.rand(1000, 5), 1000)])
-def test_reduce_dimensionality(base_bertopic, embeddings, shape):
+def test_reduce_dimensionality(embeddings, shape):
     """ Testing whether the dimensionality is reduced to the correct shape """
-    umap_embeddings = base_bertopic._reduce_dimensionality(embeddings)
+    model = BERTopic()
+    umap_embeddings = model._reduce_dimensionality(embeddings)
     assert umap_embeddings.shape == (shape, 5)
 
 
@@ -47,7 +125,7 @@ def test_reduce_dimensionality(base_bertopic, embeddings, shape):
                           (500, 200, 2),
                           (200, 500, 4),
                           (500, 200, 4)])
-def test_cluster_embeddings(base_bertopic, samples, features, centers):
+def test_cluster_embeddings(samples, features, centers):
     """ Testing whether the clusters are correctly created and if the old and new dataframes
     are the exact same aside from the Topic column """
     embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
@@ -55,32 +133,34 @@ def test_cluster_embeddings(base_bertopic, samples, features, centers):
     old_df = pd.DataFrame({"Document": documents,
                            "ID": range(len(documents)),
                            "Topic": None})
-    new_df, _ = base_bertopic._cluster_embeddings(embeddings, old_df)
+    model = BERTopic()
+    new_df, _ = model._cluster_embeddings(embeddings, old_df)
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
     pd.testing.assert_frame_equal(old_df.drop("Topic", 1), new_df.drop("Topic", 1))
 
 
-def test_extract_topics(base_bertopic):
+def test_extract_topics():
     """ Test whether the topics are correctly extracted using c-TF-IDF """
     nr_topics = 5
     documents = pd.DataFrame({"Document": newsgroup_docs,
                               "ID": range(len(newsgroup_docs)),
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
-    base_bertopic._update_topic_size(documents)
-    c_tf_idf = base_bertopic._extract_topics(documents, topic_reduction=False)
-    freq = base_bertopic.get_topics_freq()
+    model = BERTopic()
+    model._update_topic_size(documents)
+    model._extract_topics(documents)
+    freq = model.get_topic_freq()
 
-    assert c_tf_idf.shape[0] == 5
-    assert c_tf_idf.shape[1] > 100
+    assert model.c_tf_idf.shape[0] == 5
+    assert model.c_tf_idf.shape[1] > 100
     assert isinstance(freq, pd.DataFrame)
     assert nr_topics == len(freq.Topic.unique())
     assert freq.Count.sum() == len(documents)
     assert len(freq.Topic.unique()) == len(freq)
 
 
-def test_extract_topics_custom_cv(base_bertopic_custom_cv):
+def test_extract_topics_custom_cv():
     """ Test whether the topics are correctly extracted using c-TF-IDF
     with custom CountVectorizer
     """
@@ -88,12 +168,15 @@ def test_extract_topics_custom_cv(base_bertopic_custom_cv):
     documents = pd.DataFrame({"Document": newsgroup_docs,
                               "ID": range(len(newsgroup_docs)),
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
-    base_bertopic_custom_cv._update_topic_size(documents)
-    c_tf_idf = base_bertopic_custom_cv._extract_topics(documents, topic_reduction=False)
-    freq = base_bertopic_custom_cv.get_topics_freq()
 
-    assert c_tf_idf.shape[0] == 5
-    assert c_tf_idf.shape[1] > 100
+    cv = CountVectorizer(ngram_range=(1, 2))
+    model = BERTopic(vectorizer=cv)
+    model._update_topic_size(documents)
+    model._extract_topics(documents)
+    freq = model.get_topic_freq()
+
+    assert model.c_tf_idf.shape[0] == 5
+    assert model.c_tf_idf.shape[1] > 100
     assert isinstance(freq, pd.DataFrame)
     assert nr_topics == len(freq.Topic.unique())
     assert freq.Count.sum() == len(documents)
@@ -103,91 +186,57 @@ def test_extract_topics_custom_cv(base_bertopic_custom_cv):
 @pytest.mark.parametrize("reduced_topics", [5, 10, 20, 40])
 def test_topic_reduction(reduced_topics):
     """ Test whether the topics are correctly reduced """
-    base_bertopic = BERTopic(bert_model='distilbert-base-nli-mean-tokens', verbose=False)
+    model = BERTopic()
     nr_topics = reduced_topics + 2
-    base_bertopic.nr_topics = reduced_topics
+    model.nr_topics = reduced_topics
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
-    base_bertopic._update_topic_size(old_documents)
-    c_tf_idf = base_bertopic._extract_topics(old_documents.copy(), topic_reduction=True)
-    old_freq = base_bertopic.get_topics_freq()
+    model._update_topic_size(old_documents)
+    model._extract_topics(old_documents.copy())
+    old_freq = model.get_topic_freq()
 
-    new_documents = base_bertopic._reduce_topics(old_documents.copy(), c_tf_idf)
-    new_freq = base_bertopic.get_topics_freq()
+    new_documents = model._reduce_topics(old_documents.copy())
+    new_freq = model.get_topic_freq()
 
     assert old_freq.Count.sum() == new_freq.Count.sum()
     assert len(old_freq.Topic.unique()) == len(old_freq)
     assert len(new_freq.Topic.unique()) == len(new_freq)
-    assert isinstance(base_bertopic.mapped_topics, dict)
-    assert not set(base_bertopic.get_topics_freq().Topic).difference(set(new_documents.Topic))
-    assert base_bertopic.mapped_topics
+    assert isinstance(model.mapped_topics, dict)
+    assert not set(model.get_topic_freq().Topic).difference(set(new_documents.Topic))
+    assert model.mapped_topics
 
 
-def test_topic_reduction_edge_cases(base_bertopic):
+def test_topic_reduction_edge_cases():
     """ Test whether the topics are not reduced if the reduced number
     of topics exceeds the actual number of topics found """
-
+    model = BERTopic()
     nr_topics = 5
-    base_bertopic.nr_topics = 100
+    model.nr_topics = 100
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
-    base_bertopic._update_topic_size(old_documents)
-    c_tf_idf = base_bertopic._extract_topics(old_documents, topic_reduction=True)
-    old_freq = base_bertopic.get_topics_freq()
+    model._update_topic_size(old_documents)
+    model._extract_topics(old_documents)
+    old_freq = model.get_topic_freq()
 
-    new_documents = base_bertopic._reduce_topics(old_documents, c_tf_idf)
-    new_freq = base_bertopic.get_topics_freq()
+    new_documents = model._reduce_topics(old_documents)
+    new_freq = model.get_topic_freq()
 
     assert not set(old_documents.Topic).difference(set(new_documents.Topic))
     pd.testing.assert_frame_equal(old_documents, new_documents)
     pd.testing.assert_frame_equal(old_freq, new_freq)
 
 
-def test_fit(base_bertopic):
-    """ Test whether the fit method works as intended """
-    with mock.patch("bertopic.model.BERTopic._extract_embeddings", wraps=create_embeddings) as mock_bar:
-        base_bertopic.fit(newsgroup_docs)
-
-        all_topics = base_bertopic.get_topics()
-        topic_zero = base_bertopic.get_topic(0)
-
-        prediction, probabilities = base_bertopic.transform(["This is a new document to predict"])
-
-        assert isinstance(topic_zero, list)
-        assert len(topic_zero) > 0
-        assert isinstance(topic_zero[0], tuple)
-        assert isinstance(topic_zero[0][0], str)
-        assert isinstance(topic_zero[0][1], float)
-
-        assert all_topics
-        assert isinstance(all_topics, dict)
-        assert all_topics.get(0)
-        assert len(all_topics[0]) == base_bertopic.top_n_words
-
-        assert isinstance(prediction, np.ndarray)
-        assert len(prediction) == 1
-        assert len(probabilities) == len(all_topics)
-
-
-@mock.patch("bertopic.model.BERTopic._extract_embeddings")
-def test_fit_transform(embeddings, base_bertopic):
+@mock.patch("bertopic._bertopic.BERTopic._extract_embeddings")
+def test_fit_transform(embeddings):
     """ Test whether predictions are correctly made """
     blobs, _ = make_blobs(n_samples=len(newsgroup_docs), centers=5, n_features=768, random_state=42)
     embeddings.return_value = blobs
-    predictions, probabilities = base_bertopic.fit_transform(newsgroup_docs)
+    model = BERTopic()
+    predictions, probabilities = model.fit_transform(newsgroup_docs)
 
     assert isinstance(predictions, list)
     assert len(predictions) == len(newsgroup_docs)
-    assert not set(predictions).difference(set(base_bertopic.get_topics().keys()))
+    assert not set(predictions).difference(set(model.get_topics().keys()))
     assert probabilities.shape[0] == len(newsgroup_docs)
-
-
-def test_load_model(base_bertopic):
-    """ Check if the model is correctly saved
-    TODO: Should check whether the class variables are equal
-    """
-    base_bertopic.save("test")
-    loaded_bertopic = BERTopic.load("test")
-    assert type(base_bertopic) == type(loaded_bertopic)

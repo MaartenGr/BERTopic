@@ -2,121 +2,125 @@
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
+[![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)  
 
-<img src="images/logo.png" width="35%" height="35%" align="right" />
 
 # BERTopic
 
-BERTopic is a topic modeling technique that leverages BERT embeddings and c-TF-IDF to create dense clusters
-allowing for easily interpretable topics whilst keeping important words in the topic descriptions. 
+<img src="images/logo.png" width="35%" height="35%" align="right" />
+
+BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
+allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
+visualizations similar to LDAvis! 
 
 Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99).
 
-<a name="toc"/></a>
-## Table of Contents  
-<!--ts-->
-   1. [About the Project](#about)  
-   2. [Getting Started](#gettingstarted)    
-        2.1. [Installation](#installation)    
-        2.2. [Basic Usage](#usage)  
-        2.3. [Custom Embeddings](#custom)    
-        2.4. [Visualize Topic Probabilities](#prob)       
-        2.5. [Overview](#overview)   
-   3. [Algorithm](#algorithm)  
-        3.1. [Sentence Transformer](#sentence)  
-        3.2. [UMAP + HDBSCAN](#umap)  
-        3.3. [c-TF-IDF](#ctfidf)     
-   4. [Google Colaboratory](#colab)   
-<!--te-->
- 
-<a name="about"/></a>
-## 1. About the Project
-[Back to ToC](#toc)  
-
-The initial purpose of this project was to generalize [Top2Vec](https://github.com/ddangelov/Top2Vec) such that it could be 
-used with state-of-art pre-trained transformer models. However, this proved difficult due to the different natures 
-of Doc2Vec and transformer models. Instead, I decided to come up with a different algorithm that could use BERT 
-and 🤗 transformers embeddings. The results is **BERTopic**, an algorithm for generating topics using state-of-the-art embeddings.  
- 
-
-<a name="gettingstarted"/></a>
-## 2. Getting Started
-[Back to ToC](#toc)  
-
-<a name="installation"/></a>
-###  2.1. Installation
-**[PyTorch 1.2.0](https://pytorch.org/get-started/locally/)** or higher is recommended. If the install below gives an
-error, please install pytorch first [here](https://pytorch.org/get-started/locally/). 
+## Installation
 
 Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 
-``pip install bertopic``
+```bash
+pip install bertopic
+```
 
-<a name="usage"/></a>
-###  2.2. Usage
+To use the visualization options, install BERTopic as follows:
 
-Below is an example of how to use the model. The example uses the 
-[20 newsgroups](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) dataset.  
+```bash
+pip install bertopic[visualization]
+```
+
+<details>
+<summary>Installation Errors</summary>
+
+PyTorch 1.4.0 or higher is recommended. If the install gives an
+error, please install pytorch first [here](https://pytorch.org/get-started/locally/). 
+</details>  
+
+## Getting Started
+For an in-depth overview of the features of `BERTopic` 
+you can check the full documentation [here](https://maartengr.github.io/BERTopic/) or you can follow along 
+with the Google Colab notebook [here](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing).
+
+### Quick Start
+We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
 
 ```python
 from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
  
-docs = fetch_20newsgroups(subset='all')['data']
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 
-model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+model = BERTopic(language="english")
 topics, probabilities = model.fit_transform(docs)
 ```
 
-The resulting topics can be accessed through `model.get_topic(topic)`:
+After generating topics and their probabilities, we can access the frequent topics that were generated:
 
 ```python
->>> model.get_topic(9)
-[('game', 0.005251396890032802),
- ('team', 0.00482651185323754),
- ('hockey', 0.004335032060690186),
- ('players', 0.0034782716706978963),
- ('games', 0.0032873248432630227),
- ('season', 0.003218987432255393),
- ('play', 0.0031855141725669637),
- ('year', 0.002962343114817677),
- ('nhl', 0.0029577648449943144),
- ('baseball', 0.0029245163154193524)]
-``` 
-
-You can find an overview of all models currently in BERTopic [here](https://www.sbert.net/docs/pretrained_models.html) and [here](https://docs.google.com/spreadsheets/d/14QplCdTCDwEmTqrn1LH4yrbKvdogK4oQvYO1K1aPR5M/edit#gid=0). 
-
-<a name="custom"/></a>
-###  2.3. Custom Embeddings
-If you use BERTopic as shown above, then you are forced to use `sentence-transformers` as the main
-package for which to create embeddings. However, you might have your own model or package that
-you believe is better suited for representing documents. 
-
-Fortunately, for those that want to use their own embeddings there is an option in BERTopic.
-For this example I will still be using `sentence-transformers` but the general principle holds:
-
-```python
-from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-from sentence_transformers import SentenceTransformer
-
-# Prepare embeddings
-docs = fetch_20newsgroups(subset='all')['data']
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-embeddings = sentence_model.encode(docs, show_progress_bar=False)
-
-# Create topic model
-model = BERTopic(verbose=True)
-topics, probabilities = model.fit_transform(docs, embeddings)
+>>> model.get_topic_freq().head()
+Topic	Count
+-1	7288
+49	3992
+30	701
+27	684
+11	568
 ```
 
-Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
-multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
-topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
-with different parameters. 
+-1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
+frequent topic that was generated, `topic 49`:
 
-<a name="prob"/></a>
-###  2.4. Visualize Topic Probabilities
+```python
+>>> model.get_topic(49)
+[('windows', 0.006152228076250982),
+ ('drive', 0.004982897610645755),
+ ('dos', 0.004845038866360651),
+ ('file', 0.004140142872194834),
+ ('disk', 0.004131678774810884),
+ ('mac', 0.003624848635985097),
+ ('memory', 0.0034840976976789903),
+ ('software', 0.0034415334250699077),
+ ('email', 0.0034239554442333257),
+ ('pc', 0.003047105930670237)]
+```  
+
+<details>
+<summary>Supported Languages</summary>
+
+<br>
+Use <b>"multilingual"</b> to select a model that supports 50+ languages. 
+<br><br>
+Moreover, the following <b>languages</b> are supported: <br>
+Afrikaans, Albanian, Amharic, Arabic, Armenian, Assamese,
+Azerbaijani, Basque, Belarusian, Bengali, Bengali Romanize, Bosnian,
+Breton, Bulgarian, Burmese, Burmese zawgyi font, Catalan, Chinese (Simplified),
+Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Esperanto,
+Estonian, Filipino, Finnish, French, Galician, Georgian, German, Greek,
+Gujarati, Hausa, Hebrew, Hindi, Hindi Romanize, Hungarian, Icelandic, Indonesian,
+Irish, Italian, Japanese, Javanese, Kannada, Kazakh, Khmer, Korean,
+Kurdish (Kurmanji), Kyrgyz, Lao, Latin, Latvian, Lithuanian, Macedonian,
+Malagasy, Malay, Malayalam, Marathi, Mongolian, Nepali, Norwegian,
+Oriya, Oromo, Pashto, Persian, Polish, Portuguese, Punjabi, Romanian,
+Russian, Sanskrit, Scottish Gaelic, Serbian, Sindhi, Sinhala, Slovak,
+Slovenian, Somali, Spanish, Sundanese, Swahili, Swedish, Tamil,
+Tamil Romanize, Telugu, Telugu Romanize, Thai, Turkish, Ukrainian,
+Urdu, Urdu Romanize, Uyghur, Uzbek, Vietnamese, Welsh, Western Frisian,
+Xhosa, Yiddish
+<br>
+</details>  
+
+### Visualize Topics
+After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
+understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+Instead, we can visualize the topics that were generated in a way very similar to 
+[LDAvis](https://github.com/cpsievert/LDAvis):
+
+```python
+model.visualize_topics()
+``` 
+
+<img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
+
+### Visualize Topic Probabilities
 
 The variable `probabilities` that is returned from `transform()` or `fit_transform()` can 
 be used to understand how confident BERTopic is that certain topics can be found in a document. 
@@ -129,100 +133,40 @@ model.visualize_distribution(probabilities[0])
 
 <img src="images/probabilities.png" width="75%" height="75%"/>
 
+### Embedding Models
+You can select any model from `sentence-transformers` and pass it through 
+BERTopic with `embedding_model`:
 
-**NOTE**: The distribution of the probabilities does not give an indication to 
-the distribution of the frequencies of topics across a document. It merely shows
-how confident BERTopic is that certain topics can be found in a document. 
+```python
+from bertopic import BERTopic
+model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+```
 
+You can also use previously generated embeddings by passing it through `fit_transform()`:
 
-<a name="overview"/></a>
-###  2.5. Overview
+```python
+model = BERTopic()
+topics, probabilities = model.fit_transform(docs, embeddings)
+```
 
+Click [here](https://www.sbert.net/docs/pretrained_models.html) for a list of supported sentence transformers models.  
 
-| Methods | Code  | Returns  |
-|-----------------------|---|---|
-| Access single topic   | `model.get_topic(12)`  | Tuple[Word, Score]  |   
-| Access all topics     |  `model.get_topics()` | List[Tuple[Word, Score]]  |
-| Get single topic freq |  `model.get_topic_freq(12)` | int |
-| Get all topic freq    |  `model.get_topics_freq()` | DataFrame  |
-| Fit the model    |  `model.fit(docs])` | -  |
-| Fit the model and predict documents    |  `model.fit_transform(docs])` | List[int], List[float]  |
-| Predict new documents    |  `model.transform([new_doc])` | List[int], List[float]  |
-| Visualize Topic Probability Distribution    |  `model.visualize_distribution(probabilities)` | Matplotlib.Figure  |
-| Save model    |  `model.save("my_model")` | -  |
-| Load model    |  `BERTopic.load("my_model")` | - |
+### Overview
+
+| Methods | Code  | 
+|-----------------------|---|
+| Fit the model    |  `model.fit(docs])` |
+| Fit the model and predict documents    |  `model.fit_transform(docs])` |
+| Predict new documents    |  `model.transform([new_doc])` |
+| Access single topic   | `model.get_topic(12)`  |   
+| Access all topics     |  `model.get_topics()` |
+| Get topic freq    |  `model.get_topic_freq()` |
+| Visualize Topics    |  `model.visualize_topics()` |
+| Visualize Topic Probability Distribution    |  `model.visualize_distribution(probabilities[0])` |
+| Update topic representation | `model.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Reduce nr of topics | `model.reduce_topics(docs, topics, probabilities, nr_topics=30)` |
+| Find topics | `model.find_topics("vehicle")` |
+| Save model    |  `model.save("my_model")` |
+| Load model    |  `BERTopic.load("my_model")` |
+ 
    
-**NOTE**: The embeddings itself are not preserved in the model as they are only vital for creating the clusters. 
-Therefore, it is advised to only use `fit` and then `transform` if you are looking to generalize the model to new documents.
-For existing documents, it is best to use `fit_transform` directly as it only needs to generate the document
-embeddings once.   
-
-
-<a name="algorithm"/></a>
-## 3. Algorithm
-[Back to ToC](#toc)  
-The algorithm contains, roughly, 3 stages:
-* Extract document embeddings with **Sentence Transformers**
-* Cluster document embeddings to create groups of similar documents with **UMAP** and **HDBSCAN**
-* Extract and reduce topics with **c-TF-IDF**
-
-
-<a name="sentence"/></a>
-###  3.1. Sentence Transformer
-We start by creating document embeddings from a set of documents using 
-[sentence-transformer](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
-language and are great for creating either document- or sentence-embeddings. 
-
-If you have long documents, I would advise you to split up your documents into paragraphs or sentences as a BERT-based
-model in `sentence-transformer` typically has a token limit. 
-
-<a name="umap"/></a>
-###  3.2. UMAP + HDBSCAN
-Next, in order to cluster the documents using a clustering algorithm such as HDBSCAN we first need to 
-reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.
-
-<p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png"/>
-</p>
-
-Thus, we first lower dimensionality with UMAP as it preserves local structure well after which we can 
-use HDBSCAN to cluster similar documents.  
-
-<a name="ctfidf"/></a>
-###  3.3. c-TF-IDF
-What we want to know from the clusters that we generated, is what makes one cluster, based on their content, 
-different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per topic
-instead of per document. 
-
-When you apply TF-IDF as usual on a set of documents, what you are basically doing is comparing the importance of 
-words between documents. Now, what if, we instead treat all documents in a single category (e.g., a cluster) 
-as a single document and then apply TF-IDF? The result would be importance scores for words within a cluster. 
-The more important words are within a cluster, the more it is representative of that topic. In other words, 
-if we extract the most important words per cluster, we get descriptions of **topics**! 
-
-<p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/ctfidf.png" height="50"/>
-</p>  
-
-Each cluster is converted to a single document instead of a set of documents. 
-Then, the frequency of word `t` are extracted for each class `i` and divided by the total number of words `w`. 
-This action can now be seen as a form of regularization of frequent words in the class.
-Next, the total, unjoined, number of documents `m` is divided by the total frequency of word `t` across all classes `n`.
-
-<a name="colab"/></a>
-## 4. Google Colaboratory
-[Back to ToC](#toc)  
-Since we are using transformer-based embeddings you might want to leverage gpu-acceleration
-to speed up the model. For that, I have created a tutorial 
-[Google Colab Notebook](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing)
-that you can use to run the model as shown above. 
-
-If you want to tweak the inner workings or follow along with the medium post, use [this](https://colab.research.google.com/drive/1-SOw0WHZ_ZXfNE36KUe3Z-UpAO3vdhGg?usp=sharing)
- notebook instead. 
-
-## References
-Angelov, D. (2020). [Top2Vec: Distributed Representations of Topics.](https://arxiv.org/abs/2008.09470) *arXiv preprint arXiv*:2008.09470.
-
-
-
-

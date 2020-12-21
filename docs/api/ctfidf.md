@@ -1,3 +1,3 @@
 # `c-TF-IDF`
 
-::: bertopic.ctfidf.ClassTFIDF
+::: bertopic._ctfidf.ClassTFIDF
