@@ -6,13 +6,13 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." name="description"/>
-<link href="https://maartengr.github.io/BERTopic/api/bertopic.html" rel="canonical"/>
 <meta content="Maarten P. Grootendorst" name="author"/>
+<link href="https://maartengr.github.io/BERTopic/api/bertopic.html" rel="canonical"/>
 <link href="../icon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-6.1.7" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-6.2.3" name="generator"/>
 <title>BERTopic - BERTopic</title>
-<link href="../assets/stylesheets/main.19753c6b.min.css" rel="stylesheet"/>
-<link href="../assets/stylesheets/palette.196e0c26.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/main.3b61ea93.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.39b8e14a.min.css" rel="stylesheet"/>
 <meta content="#ffffff" name="theme-color"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&amp;display=fallback" rel="stylesheet"/>
@@ -39,9 +39,20 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
 </label>
 <div class="md-header-nav__title" data-md-component="header-title">
-<div class="md-header-nav__ellipsis md-ellipsis">
-          BERTopic
-        </div>
+<div class="md-header-nav__ellipsis">
+<div class="md-header-nav__topic">
+<span class="md-ellipsis">
+            BERTopic
+          </span>
+</div>
+<div class="md-header-nav__topic">
+<span class="md-ellipsis">
+            
+              BERTopic
+            
+          </span>
+</div>
+</div>
 </div>
 <label class="md-header-nav__button md-icon" for="__search">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
@@ -1831,7 +1842,7 @@ probabilities of a single document:</p>
 <span class="sd">    """</span>
     <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_VIZ</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"In order to use this function you'll need to install "</span>
+        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"In order to use this function you'll need to install "</span>
                                   <span class="sa">f</span><span class="s2">"additional dependencies;</span><span class="se">\n</span><span class="s2">pip install bertopic[visualization]"</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">probabilities</span> <span class="o">&gt;</span> <span class="n">min_probability</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"There are no values where `min_probability` is higher than the "</span>
@@ -1910,7 +1921,7 @@ technique typically reserved for LDA.</p>
 <span class="sd">    """</span>
     <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_VIZ</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"In order to use this function you'll need to install "</span>
+        <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"In order to use this function you'll need to install "</span>
                                   <span class="sa">f</span><span class="s2">"additional dependencies;</span><span class="se">\n</span><span class="s2">pip install bertopic[visualization]"</span><span class="p">)</span>
 
     <span class="c1"># Extract topic words and their frequencies</span>
@@ -1985,14 +1996,14 @@ technique typically reserved for LDA.</p>
 </div>
 </footer>
 </div>
-<script src="../assets/javascripts/vendor.0ac82a11.min.js"></script>
-<script src="../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+<script src="../assets/javascripts/vendor.08c56446.min.js"></script>
+<script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
 <script>
         app = initialize({
           base: "..",
           features: [],
           search: Object.assign({
-            worker: "../assets/javascripts/worker/search.4ac00218.min.js"
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
