@@ -1,3 +1,9 @@
+## **Version 0.4.1**
+*Release date:  07 Januari, 2021*
+
+**Fixes**:  
+
+* Simple fix by lowering the languages variable to match the lowered input language.
 
 ## **Version 0.4.0**
 *Release date:  21 December, 2020*

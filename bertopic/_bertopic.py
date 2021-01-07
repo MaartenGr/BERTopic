@@ -889,7 +889,7 @@ class BERTopic:
             if self.language.lower() in ["English", "english", "en"]:
                 return SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
 
-            elif self.language.lower() in languages.lower():
+            elif self.language.lower() in languages:
                 return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
             elif self.language == "multilingual":
