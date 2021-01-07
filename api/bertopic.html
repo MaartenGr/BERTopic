@@ -1,399 +1,692 @@
 
-<!DOCTYPE html>
-
-<html class="no-js" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<meta content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." name="description"/>
-<meta content="Maarten P. Grootendorst" name="author"/>
-<link href="https://maartengr.github.io/BERTopic/api/bertopic.html" rel="canonical"/>
-<link href="../icon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-6.2.3" name="generator"/>
-<title>BERTopic - BERTopic</title>
-<link href="../assets/stylesheets/main.3b61ea93.min.css" rel="stylesheet"/>
-<link href="../assets/stylesheets/palette.39b8e14a.min.css" rel="stylesheet"/>
-<meta content="#ffffff" name="theme-color"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&amp;display=fallback" rel="stylesheet"/>
-<style>body,input{font-family:"Ubuntu",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Ubuntu Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
-<link href="../style.css" rel="stylesheet"/>
-</head>
-<body data-md-color-accent="blue" data-md-color-primary="white" data-md-color-scheme="" dir="ltr">
-<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
-<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
-<label class="md-overlay" for="__drawer"></label>
-<div data-md-component="skip">
-<a class="md-skip" href="#bertopic">
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/api/bertopic.html">
+      
+      <link rel="shortcut icon" href="../icon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.2.3">
+    
+    
+      
+        <title>BERTopic - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.3b61ea93.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.39b8e14a.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#ffffff">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
+        <style>body,input{font-family:"Ubuntu",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Ubuntu Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../style.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="white" data-md-color-accent="blue">
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bertopic" class="md-skip">
           Skip to content
         </a>
-</div>
-<div data-md-component="announce">
-</div>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
 <header class="md-header" data-md-component="header">
-<nav aria-label="Header" class="md-header-nav md-grid">
-<a aria-label="BERTopic" class="md-header-nav__button md-logo" href="https://maartengr.github.io/BERTopic/" title="BERTopic">
-<img alt="logo" src="../icon.png"/>
-</a>
-<label class="md-header-nav__button md-icon" for="__drawer">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
-</label>
-<div class="md-header-nav__title" data-md-component="header-title">
-<div class="md-header-nav__ellipsis">
-<div class="md-header-nav__topic">
-<span class="md-ellipsis">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-header-nav__button md-logo" aria-label="BERTopic">
+      
+  <img src="../icon.png" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      <div class="md-header-nav__ellipsis">
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             BERTopic
           </span>
-</div>
-<div class="md-header-nav__topic">
-<span class="md-ellipsis">
+        </div>
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             
               BERTopic
             
           </span>
-</div>
-</div>
-</div>
-<label class="md-header-nav__button md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
-</label>
+        </div>
+      </div>
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
 <div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="__search"></label>
-<div class="md-search__inner" role="search">
-<form class="md-search__form" name="search">
-<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
-<label class="md-search__icon md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</label>
-<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
-</button>
-</form>
-<div class="md-search__output">
-<div class="md-search__scrollwrap" data-md-scrollfix="">
-<div class="md-search-result" data-md-component="search-result">
-<div class="md-search-result__meta">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
             Initializing search
           </div>
-<ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="md-header-nav__source">
-<a class="md-source" href="https://github.com/MaartenGr/BERTopic/" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
-</div>
-<div class="md-source__repository">
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
     GitHub
   </div>
 </a>
-</div>
-</nav>
+      </div>
+    
+  </nav>
 </header>
-<div class="md-container" data-md-component="container">
-<main class="md-main" data-md-component="main">
-<div class="md-main__inner md-grid">
-<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
-<label class="md-nav__title" for="__drawer">
-<a aria-label="BERTopic" class="md-nav__button md-logo" href="https://maartengr.github.io/BERTopic/" title="BERTopic">
-<img alt="logo" src="../icon.png"/>
-</a>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic">
+      
+  <img src="../icon.png" alt="logo">
+
+    </a>
     BERTopic
   </label>
-<div class="md-nav__source">
-<a class="md-source" href="https://github.com/MaartenGr/BERTopic/" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
-</div>
-<div class="md-source__repository">
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
     GitHub
   </div>
 </a>
-</div>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../index.html">
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href="../index.html" class="md-nav__link">
       Home
     </a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" id="nav-2" type="checkbox"/>
-<label class="md-nav__link" for="nav-2">
+  </li>
+
+    
+      
+      
+      
+
+
+
+  
+  <li class="md-nav__item md-nav__item--nested">
+    
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    
+    <label class="md-nav__link" for="nav-2">
       Guides
       <span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-label="Guides" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="nav-2">
-<span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Guides" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
         Guides
       </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/quickstart/quickstart.html">
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/quickstart/quickstart.html" class="md-nav__link">
       Getting Started
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/embeddings/embeddings.html">
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/embeddings/embeddings.html" class="md-nav__link">
       Custom Embeddings
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/visualization/visualization.html">
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/visualization/visualization.html" class="md-nav__link">
       Topic Visualization
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/topicreduction/topicreduction.html">
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/topicreduction/topicreduction.html" class="md-nav__link">
       Topic Reduction
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/topicrepresentation/topicrepresentation.html">
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/topicrepresentation/topicrepresentation.html" class="md-nav__link">
       Topic Representation
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/search/search.html">
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/search/search.html" class="md-nav__link">
       Search Topics
     </a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../tutorial/algorithm/algorithm.html">
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href="../tutorial/algorithm/algorithm.html" class="md-nav__link">
       The Algorithm
     </a>
-</li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
-<label class="md-nav__link" for="nav-4">
+  </li>
+
+    
+      
+      
+      
+
+
+  
+
+
+  
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
       API
       <span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-label="API" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="nav-4">
-<span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="API" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
         API
       </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
         BERTopic
         <span class="md-nav__icon md-icon"></span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="bertopic.html">
+      </label>
+    
+    <a href="bertopic.html" class="md-nav__link md-nav__link--active">
       BERTopic
     </a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic">
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic" class="md-nav__link">
     bertopic._bertopic.BERTopic
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.__init__">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.__init__" class="md-nav__link">
     __init__()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.find_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.find_topics" class="md-nav__link">
     find_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.fit">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.fit" class="md-nav__link">
     fit()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.fit_transform">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.fit_transform" class="md-nav__link">
     fit_transform()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topic">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.get_topic" class="md-nav__link">
     get_topic()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topic_freq">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.get_topic_freq" class="md-nav__link">
     get_topic_freq()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.get_topics" class="md-nav__link">
     get_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.load">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.load" class="md-nav__link">
     load()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.reduce_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.reduce_topics" class="md-nav__link">
     reduce_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.save">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.save" class="md-nav__link">
     save()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.transform">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.transform" class="md-nav__link">
     transform()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.update_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.update_topics" class="md-nav__link">
     update_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_distribution">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.visualize_distribution" class="md-nav__link">
     visualize_distribution()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.visualize_topics" class="md-nav__link">
     visualize_topics()
   </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="ctfidf.html">
+    
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="ctfidf.html" class="md-nav__link">
       cTFIDF
     </a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../changelog.html">
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+
+  <li class="md-nav__item">
+    <a href="../changelog.html" class="md-nav__link">
       Changelog
     </a>
-</li>
-</ul>
+  </li>
+
+    
+  </ul>
 </nav>
-</div>
-</div>
-</div>
-<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic">
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic" class="md-nav__link">
     bertopic._bertopic.BERTopic
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.__init__">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.__init__" class="md-nav__link">
     __init__()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.find_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.find_topics" class="md-nav__link">
     find_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.fit">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.fit" class="md-nav__link">
     fit()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.fit_transform">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.fit_transform" class="md-nav__link">
     fit_transform()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topic">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.get_topic" class="md-nav__link">
     get_topic()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topic_freq">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.get_topic_freq" class="md-nav__link">
     get_topic_freq()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.get_topics" class="md-nav__link">
     get_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.load">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.load" class="md-nav__link">
     load()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.reduce_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.reduce_topics" class="md-nav__link">
     reduce_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.save">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.save" class="md-nav__link">
     save()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.transform">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.transform" class="md-nav__link">
     transform()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.update_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.update_topics" class="md-nav__link">
     update_topics()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_distribution">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.visualize_distribution" class="md-nav__link">
     visualize_distribution()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_topics">
+      
+        <li class="md-nav__item">
+  <a href="#bertopic._bertopic.BERTopic.visualize_topics" class="md-nav__link">
     visualize_topics()
   </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</div>
-</div>
-</div>
-<div class="md-content">
-<article class="md-content__inner md-typeset">
-<a class="md-content__button md-icon" href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/bertopic.md" title="Edit this page">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
-</a>
-<h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">¶</a></h1>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/bertopic.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
 <div class="doc doc-object doc-class">
-<h2 class="hidden-toc" href="#bertopic._bertopic.BERTopic" id="bertopic._bertopic.BERTopic" style="visibility: hidden; position: absolute;">
-<a class="headerlink" href="#bertopic._bertopic.BERTopic" title="Permanent link">¶</a></h2>
+<h2 class="hidden-toc" id="bertopic._bertopic.BERTopic" style="visibility: hidden; position: absolute;">
+        <a class="headerlink" href="#bertopic._bertopic.BERTopic" title="Permanent link">&para;</a></h2>
 <div class="doc doc-contents first">
 <p>BERTopic is a topic modeling technique that leverages BERT embeddings and
 c-TF-IDF to create dense clusters allowing for easily interpretable topics
@@ -432,13 +725,15 @@ you best.</p>
 <div class="doc doc-children">
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.__init__">
-<code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">'english'</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_n_words</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">min_topic_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stop_words</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">vectorizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">calculate_probabilities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_st_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> </code>
-<span class="doc doc-properties">
-<small class="doc doc-property doc-property-special"><code>special</code></small>
-</span>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.__init__" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">'english'</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_n_words</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">min_topic_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stop_words</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">vectorizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">calculate_probabilities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_st_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.__init__" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>BERTopic initialization</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -593,8 +888,8 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"english"</span><span class="p">,</span>
              <span class="n">embedding_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -704,10 +999,12 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.find_topics">
-<code class="highlight language-python">
-find_topics<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_term</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.find_topics" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">find_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_term</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.find_topics" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Find topics most similar to a search_term</p>
 <p>Creates an embedding for search_term and compares that with
 the topic embeddings. The most similar topics are returned
@@ -763,8 +1060,8 @@ similarity: the similarity scores from high to low</p>
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">find_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">search_term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                 <span class="n">top_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
@@ -811,10 +1108,12 @@ similarity: the similarity scores from high to low</p>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.fit">
-<code class="highlight language-python">
-fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.fit" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.fit" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -871,8 +1170,8 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -918,10 +1217,12 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.fit_transform">
-<code class="highlight language-python">
-fit_transform<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.fit_transform" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.fit_transform" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Fit the models on a collection of documents, generate topics, and return the docs with topics</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -999,8 +1300,8 @@ probabilities: The topic probability distribution</p>
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                   <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -1081,10 +1382,12 @@ probabilities: The topic probability distribution</p>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.get_topic">
-<code class="highlight language-python">
-get_topic<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Return top n words for a specific topic and their c-TF-IDF scores</p>
 <p>Usage:</p>
 <div class="codehilite">
@@ -1092,8 +1395,8 @@ get_topic<span class="p">(</span><span class="bp">self</span><span class="p">,</
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
     <span class="sd">""" Return top n words for a specific topic and their c-TF-IDF scores</span>
 
@@ -1115,10 +1418,12 @@ get_topic<span class="p">(</span><span class="bp">self</span><span class="p">,</
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.get_topic_freq">
-<code class="highlight language-python">
-get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic_freq" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic_freq" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Return the the size of topics (descending order)</p>
 <p>Usage:</p>
 <p>To extract the frequency of all topics:</p>
@@ -1132,8 +1437,8 @@ get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
     <span class="sd">""" Return the the size of topics (descending order)</span>
 
@@ -1164,10 +1469,12 @@ get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.get_topics">
-<code class="highlight language-python">
-get_topics<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topics" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topics" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Return topics with top n words and their c-TF-IDF score</p>
 <p>Usage:</p>
 <div class="codehilite">
@@ -1175,8 +1482,8 @@ get_topics<span class="p">(</span><span class="bp">self</span><span class="p">)<
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="sd">""" Return topics with top n words and their c-TF-IDF score</span>
 
@@ -1195,13 +1502,15 @@ get_topics<span class="p">(</span><span class="bp">self</span><span class="p">)<
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.load">
-<code class="highlight language-python">
-load<span class="p">(</span><span class="n">path</span><span class="p">)</span> </code>
-<span class="doc doc-properties">
-<small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
-</span>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.load" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.load" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Loads the model from the specified path</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1230,8 +1539,8 @@ load<span class="p">(</span><span class="n">path</span><span class="p">)</span> 
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">""" Loads the model from the specified path</span>
@@ -1254,10 +1563,12 @@ load<span class="p">(</span><span class="n">path</span><span class="p">)</span> 
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.reduce_topics">
-<code class="highlight language-python">
-reduce_topics<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.reduce_topics" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">reduce_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.reduce_topics" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Further reduce the number of topics to nr_topics.</p>
 <p>The number of topics is further reduced by calculating the c-TF-IDF matrix
 of the documents and then reducing them by iteratively merging the least
@@ -1345,8 +1656,8 @@ new_probabilities: Updated probabilities</p>
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">reduce_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                   <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -1407,10 +1718,12 @@ new_probabilities: Updated probabilities</p>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.save">
-<code class="highlight language-python">
-save<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.save" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.save" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Saves the model to the specified path</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1439,8 +1752,8 @@ save<span class="p">(</span><span class="bp">self</span><span class="p">,</span>
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">""" Saves the model to the specified path</span>
 
@@ -1462,10 +1775,12 @@ save<span class="p">(</span><span class="bp">self</span><span class="p">,</span>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.transform">
-<code class="highlight language-python">
-transform<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.transform" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.transform" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>After having fit a model, use transform to predict new instances</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1542,8 +1857,8 @@ probabilities: The topic probability distribution</p>
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
               <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
               <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
@@ -1617,10 +1932,12 @@ probabilities: The topic probability distribution</p>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.update_topics">
-<code class="highlight language-python">
-update_topics<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_words</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorizer</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.update_topics" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">update_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_words</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorizer</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.update_topics" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Updates the topic representation by recalculating c-TF-IDF with the new
 parameters as defined in this function.</p>
 <p>When you have trained a model and viewed the topics and the words that represent them,
@@ -1697,8 +2014,8 @@ to update the topic representation after they have been formed.</p>
 </code></pre>
 </div>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">update_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                   <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -1753,10 +2070,12 @@ to update the topic representation after they have been formed.</p>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.visualize_distribution">
-<code class="highlight language-python">
-visualize_distribution<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">min_probability</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.visualize_distribution" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">min_probability</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.visualize_distribution" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Visualize the distribution of topic probabilities</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1811,10 +2130,10 @@ probabilities of a single document:</p>
 <pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </code></pre>
 </div>
-<p><img alt="" src="../img/probabilities.png"/></p>
+<p><img alt="" src="../img/probabilities.png" /></p>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                            <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                            <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">,</span>
@@ -1903,16 +2222,18 @@ probabilities of a single document:</p>
 </div>
 <div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.visualize_topics">
-<code class="highlight language-python">
-visualize_topics<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
-<a class="headerlink" href="#bertopic._bertopic.BERTopic.visualize_topics" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+<code class="highlight language-python"><span class="n">visualize_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+      <a class="headerlink" href="#bertopic._bertopic.BERTopic.visualize_topics" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Visualize topics, their sizes, and their corresponding words</p>
 <p>This visualization is highly inspired by LDAvis, a great visualization
 technique typically reserved for LDA.</p>
 <details class="quote">
-<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">""" Visualize topics, their sizes, and their corresponding words</span>
 
@@ -1945,60 +2266,80 @@ technique typically reserved for LDA.</p>
 </div>
 </div>
 </div>
-</article>
-</div>
-</div>
-</main>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
 <footer class="md-footer">
-<div class="md-footer-nav">
-<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
-<a class="md-footer-nav__link md-footer-nav__link--prev" href="../tutorial/algorithm/algorithm.html" rel="prev">
-<div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</div>
-<div class="md-footer-nav__title">
-<div class="md-ellipsis">
-<span class="md-footer-nav__direction">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../tutorial/algorithm/algorithm.html" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
                   Previous
                 </span>
                 The Algorithm
               </div>
-</div>
-</a>
-<a class="md-footer-nav__link md-footer-nav__link--next" href="ctfidf.html" rel="next">
-<div class="md-footer-nav__title">
-<div class="md-ellipsis">
-<span class="md-footer-nav__direction">
+            </div>
+          </a>
+        
+        
+          <a href="ctfidf.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
                   Next
                 </span>
                 cTFIDF
               </div>
-</div>
-<div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
-</div>
-</a>
-</nav>
-</div>
-<div class="md-footer-meta md-typeset">
-<div class="md-footer-meta__inner md-grid">
-<div class="md-footer-copyright">
-<div class="md-footer-copyright__highlight">
-            Copyright © 2020 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2020 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
           </div>
         
         Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs
         </a>
-</div>
-</div>
-</div>
+      </div>
+      
+    </div>
+  </div>
 </footer>
-</div>
-<script src="../assets/javascripts/vendor.08c56446.min.js"></script>
-<script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
-<script>
+      
+    </div>
+    
+      <script src="../assets/javascripts/vendor.08c56446.min.js"></script>
+      <script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
         app = initialize({
           base: "..",
           features: [],
@@ -2007,5 +2348,7 @@ technique typically reserved for LDA.</p>
           }, typeof search !== "undefined" && search)
         })
       </script>
-</body>
+      
+    
+  </body>
 </html>
