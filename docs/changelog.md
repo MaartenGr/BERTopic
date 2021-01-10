@@ -1,3 +1,12 @@
+## **Version 0.4.2**
+*Release date:  10 Januari, 2021*
+
+**Fixes**:  
+
+* Selecting `embedding_model` did not work when `language` was also used. This led to the user needing 
+to set `language` to None before being able to use `embedding_model`. Fixed by using `embedding_model` when 
+`language` is used (as a default parameter).
+
 ## **Version 0.4.1**
 *Release date:  07 Januari, 2021*
 
