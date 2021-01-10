@@ -19,7 +19,7 @@ from sklearn.preprocessing import MinMaxScaler
 # BERTopic
 from ._ctfidf import ClassTFIDF
 from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
-from ._embeddings import languages, embedding_models
+from ._embeddings import languages
 from ._mmr import mmr
 
 # Additional dependencies
@@ -886,13 +886,7 @@ class BERTopic:
 
         # Select embedding model based on specific sentence transformer model
         elif self.embedding_model:
-            if self.embedding_model in embedding_models:
-                return SentenceTransformer(self.embedding_model)
-            else:
-                raise ValueError("Please select an embedding model from the following list:\n"
-                                 f"{embedding_models}\n\n"
-                                 f"For more information about the models, see:\n"
-                                 f"https://www.sbert.net/docs/pretrained_models.html")
+            return SentenceTransformer(self.embedding_model)
 
         # Select embedding model based on language
         elif self.language:
