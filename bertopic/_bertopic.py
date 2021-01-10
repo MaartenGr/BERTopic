@@ -884,6 +884,16 @@ class BERTopic:
         if self.custom_embeddings and self.allow_st_model:
             return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
+        # Select embedding model based on specific sentence transformer model
+        elif self.embedding_model:
+            if self.embedding_model in embedding_models:
+                return SentenceTransformer(self.embedding_model)
+            else:
+                raise ValueError("Please select an embedding model from the following list:\n"
+                                 f"{embedding_models}\n\n"
+                                 f"For more information about the models, see:\n"
+                                 f"https://www.sbert.net/docs/pretrained_models.html")
+
         # Select embedding model based on language
         elif self.language:
             if self.language.lower() in ["English", "english", "en"]:
@@ -900,16 +910,6 @@ class BERTopic:
                                  f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
                                  "Else, please select a language from the following list:\n"
                                  f"{languages}")
-
-        # Select embedding model based on specific sentence transformer model
-        elif self.embedding_model:
-            if self.embedding_model in embedding_models:
-                return SentenceTransformer(self.embedding_model)
-            else:
-                raise ValueError("Please select an embedding model from the following list:\n"
-                                 f"{embedding_models}\n\n"
-                                 f"For more information about the models, see:\n"
-                                 f"https://www.sbert.net/docs/pretrained_models.html")
 
         return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
