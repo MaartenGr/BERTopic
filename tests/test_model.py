@@ -87,10 +87,6 @@ def test_load_model():
 def test_extract_incorrect_embeddings():
     """ Test if errors are raised when loading incorrect model """
     with pytest.raises(ValueError):
-        model = BERTopic(language=None, embedding_model='not_a_model')
-        model._extract_embeddings(["Some document"])
-
-    with pytest.raises(ValueError):
         model = BERTopic(language="Unknown language")
         model._extract_embeddings(["Some document"])
 
@@ -98,7 +94,7 @@ def test_extract_incorrect_embeddings():
 def test_extract_embeddings():
     """ Test if correct model is loaded and embeddings match the sentence-transformers version """
     docs = ["some document"]
-    model = BERTopic(language=None, embedding_model="distilbert-base-nli-stsb-mean-tokens")
+    model = BERTopic(embedding_model="distilbert-base-nli-stsb-mean-tokens")
     bertopic_embeddings = model._extract_embeddings(docs)
 
     assert isinstance(bertopic_embeddings, np.ndarray)
