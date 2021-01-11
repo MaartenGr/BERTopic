@@ -2,7 +2,8 @@
 [![PyPI - License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/MaartenGr/VLAC/blob/master/LICENSE)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
-[![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)  
+[![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)
+[![DOI](https://zenodo.org/badge/297672263.svg)](https://zenodo.org/badge/latestdoi/297672263)
 
 
 # BERTopic
@@ -169,4 +170,17 @@ Click [here](https://www.sbert.net/docs/pretrained_models.html) for a list of su
 | Save model    |  `model.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
  
-   
+### Citation
+To cite BERTopic in your work, please use the following bibtex reference:
+
+```bibtex
+@misc{grootendorst2020bertopic,
+  author       = {Maarten Grootendorst},
+  title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
+  year         = 2020,
+  publisher    = {Zenodo},
+  version      = {v0.4.2},
+  doi          = {10.5281/zenodo.4430182},
+  url          = {https://doi.org/10.5281/zenodo.4430182}
+}
+```
