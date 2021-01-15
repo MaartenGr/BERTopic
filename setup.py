@@ -27,7 +27,7 @@ base_packages = [
 
 visualization_packages = [
     "matplotlib>=3.2.2",
-    "plotly>=4.7.0"
+    "plotly>=4.7.0,<4.14.3"
 ]
 
 dev_packages = docs_packages + test_packages + visualization_packages
@@ -39,7 +39,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="bertopic",
     packages=["bertopic"],
-    version="0.4.2",
+    version="0.4.3",
     author="Maarten Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
