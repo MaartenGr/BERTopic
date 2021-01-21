@@ -74,26 +74,26 @@ class BERTopic:
     """
     def __init__(self,
                  language: str = "english",
-                 embedding_model: str = None,
                  top_n_words: int = 10,
                  nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
                  min_topic_size: int = 10,
                  n_neighbors: int = 15,
-                 n_components: int = 5,
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
-                 vectorizer: CountVectorizer = None,
-                 calculate_probabilities: bool = True,
-                 allow_st_model: bool = True):
+                 allow_st_model: bool = True,
+                 low_memory: bool = False,
+                 embedding_model: Union[str, SentenceTransformer] = None,
+                 umap_model: umap.UMAP = None,
+                 hdbscan_model: hdbscan.HDBSCAN = None,
+                 vectorizer_model: CountVectorizer = None
+                 ):
         """BERTopic initialization
 
         Args:
             language: The main language used in your documents. For a full overview of supported languages
                       see bertopic.embeddings.languages. Select "multilingual" to load in a model that
                       support 50+ languages.
-            embedding_model: Model to use. Overview of options can be found here
-                            https://www.sbert.net/docs/pretrained_models.html
             top_n_words: The number of words per topic to extract
             nr_topics: Specifying the number of topics will reduce the initial
                        number of topics to the value specified. This reduction can take
@@ -107,19 +107,26 @@ class BERTopic:
             min_topic_size: The minimum size of the topic.
             n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
                          for manifold approximation (UMAP).
-            n_components: The dimension of the space to embed into when reducing dimensionality with UMAP.
             stop_words: Stopwords that can be used as either a list of strings, or the name of the
                         language as a string. For example: 'english' or ['the', 'and', 'I'].
                         Note that this will not be used if you pass in your own CountVectorizer.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
-            vectorizer: Pass in your own CountVectorizer from scikit-learn
-            calculate_probabilities: Whether to calculate the topic probabilities. This could slow down
-                                     extraction of topics if you have many documents (>100_000). If so,
-                                     set this to False to increase speed.
             allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
                             to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
                             Moreover, it will allow you to search for topics based on search queries.
+            low_memory: Removes the calculation of probabilities and sets UMAP low memory to True to
+                        make sure less memory is used. This also speeds up computation.
+                        NOTE: since probabilities are not calculated, you cannot use the corresponding
+                        visualization `visualize_probabilities`.
+            embedding_model: You can pass in either a string relating to one of the following models:
+                                - https://www.sbert.net/docs/pretrained_models.html
+                             Or you can use your own SentenceTransformer() model to be used instead
+                             with your own custom parameters.
+            umap_model: You can pass in a umap.UMAP model to be used instead of the default
+            hdbscan_model: You can pass in a hdbscan.HDBSCAN model to be used instead of the default
+            vectorizer: Pass in your own CountVectorizer from scikit-learn
+
 
         Usage:
 
@@ -139,31 +146,39 @@ class BERTopic:
                          allow_st_model = True)
         ```
         """
+        # Topic-based parameters
+        if top_n_words > 30:
+            raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
+        self.top_n_words = top_n_words
+        self.nr_topics = nr_topics
+        self.low_memory = low_memory
+        self.verbose = verbose
 
         # Embedding model
         self.language = language
         self.embedding_model = embedding_model
         self.allow_st_model = allow_st_model
 
-        # Topic-based parameters
-        if top_n_words > 30:
-            raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
-        self.top_n_words = top_n_words
-        self.nr_topics = nr_topics
-        self.min_topic_size = min_topic_size
-        self.calculate_probabilities = calculate_probabilities
-
-        # Umap parameters
-        self.n_neighbors = n_neighbors
-        self.n_components = n_components
-
-        # Vectorizer parameters
+        # Vectorizer
         self.stop_words = stop_words
         self.n_gram_range = n_gram_range
-        self.vectorizer = vectorizer or CountVectorizer(ngram_range=self.n_gram_range, stop_words=self.stop_words)
+        self.vectorizer = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range,
+                                                              stop_words=self.stop_words)
 
-        self.umap_model = None
-        self.cluster_model = None
+        # UMAP
+        self.n_neighbors = n_neighbors
+        self.umap = umap_model or umap.UMAP(n_neighbors=self.n_neighbors,
+                                            n_components=5,
+                                            min_dist=0.0,
+                                            metric='cosine',
+                                            low_memory=self.low_memory)
+
+        # HDBSCAN
+        self.hdbscan = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=min_topic_size,
+                                                        metric='euclidean',
+                                                        cluster_selection_method='eom',
+                                                        prediction_data=True)
+
         self.topics = None
         self.topic_sizes = None
         self.reduced_topics_mapped = None
@@ -339,11 +354,11 @@ class BERTopic:
         if not isinstance(embeddings, np.ndarray):
             embeddings = self._extract_embeddings(documents)
 
-        umap_embeddings = self.umap_model.transform(embeddings)
-        predictions, _ = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)
+        umap_embeddings = self.umap.transform(embeddings)
+        predictions, _ = hdbscan.approximate_predict(self.hdbscan, umap_embeddings)
 
-        if self.calculate_probabilities:
-            probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
+        if not self.low_memory:
+            probabilities = hdbscan.membership_vector(self.hdbscan, umap_embeddings)
             if len(documents) == 1:
                 probabilities = probabilities.flatten()
         else:
@@ -400,7 +415,7 @@ class BERTopic:
                       topics: List[int],
                       n_gram_range: Tuple[int, int] = None,
                       stop_words: str = None,
-                      vectorizer: CountVectorizer = None):
+                      vectorizer_model: CountVectorizer = None):
         """ Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
 
@@ -416,7 +431,7 @@ class BERTopic:
             stop_words: Stopwords that can be used as either a list of strings, or the name of the
                         language as a string. For example: 'english' or ['the', 'and', 'I'].
                         Note that this will not be used if you pass in your own CountVectorizer.
-            vectorizer: Pass in your own CountVectorizer from scikit-learn
+            vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
         Usage:
         ```python
@@ -439,7 +454,9 @@ class BERTopic:
         if not stop_words:
             stop_words = self.stop_words
 
-        self.vectorizer = vectorizer or CountVectorizer(ngram_range=n_gram_range, stop_words=stop_words)
+        self.vectorizer = vectorizer_model or CountVectorizer(ngram_range=n_gram_range,
+                                                              stop_words=stop_words)
+
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
         self._extract_topics(documents)
 
@@ -605,8 +622,8 @@ class BERTopic:
         if len(probabilities[probabilities > min_probability]) == 0:
             raise ValueError("There are no values where `min_probability` is higher than the "
                              "probabilities that were supplied. Lower `min_probability` to prevent this error.")
-        if not self.calculate_probabilities:
-            raise ValueError("This visualization cannot be used if you have set `calculate_probabilities` to False "
+        if self.low_memory:
+            raise ValueError("This visualization cannot be used if you have set `low_memory` to True "
                              "as it uses the topic probabilities. ")
 
         # Get values and indices equal or exceed the minimum probability
@@ -699,7 +716,7 @@ class BERTopic:
         """
         model = self._select_embedding_model()
         logger.info("Loaded embedding model")
-        embeddings = model.encode(documents, show_progress_bar=False)
+        embeddings = model.encode(documents, show_progress_bar=self.verbose)
         logger.info("Transformed documents to Embeddings")
 
         return embeddings
@@ -723,15 +740,13 @@ class BERTopic:
             umap_embeddings: The reduced embeddings
         """
         if isinstance(embeddings, csr_matrix):
-            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
-                                        n_components=self.n_components,
-                                        metric='hellinger').fit(embeddings)
+            self.umap = umap.UMAP(n_neighbors=self.n_neighbors,
+                                  n_components=5,
+                                  metric='hellinger',
+                                  low_memory=self.low_memory).fit(embeddings)
         else:
-            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
-                                        n_components=self.n_components,
-                                        min_dist=0.0,
-                                        metric='cosine').fit(embeddings)
-        umap_embeddings = self.umap_model.transform(embeddings)
+            self.umap.fit(embeddings)
+        umap_embeddings = self.umap.transform(embeddings)
         logger.info("Reduced dimensionality with UMAP")
         return umap_embeddings
 
@@ -750,14 +765,11 @@ class BERTopic:
                        and newly added Topics
             probabilities: The distribution of probabilities
         """
-        self.cluster_model = hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
-                                             metric='euclidean',
-                                             cluster_selection_method='eom',
-                                             prediction_data=True).fit(umap_embeddings)
-        documents['Topic'] = self.cluster_model.labels_
+        self.hdbscan.fit(umap_embeddings)
+        documents['Topic'] = self.hdbscan.labels_
 
-        if self.calculate_probabilities:
-            probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
+        if not self.low_memory:
+            probabilities = hdbscan.all_points_membership_vectors(self.hdbscan)
         else:
             probabilities = None
 
@@ -881,11 +893,14 @@ class BERTopic:
         # Used for fine-tuning the topic representation
         # If a custom embeddings are used, we use the multi-langual model
         # to extract word embeddings
-        if self.custom_embeddings and self.allow_st_model:
+        if isinstance(self.embedding_model, SentenceTransformer):
+            return self.embedding_model
+
+        elif self.custom_embeddings and self.allow_st_model:
             return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
         # Select embedding model based on specific sentence transformer model
-        elif self.embedding_model:
+        elif isinstance(self.embedding_model, str):
             return SentenceTransformer(self.embedding_model)
 
         # Select embedding model based on language

@@ -15,14 +15,14 @@ docs_packages = [
 base_packages = [
     "tqdm>=4.41.1",
     "numpy>=1.18.5",
-    "umap-learn>=0.4.6",
+    "umap-learn>=0.5.0",
     "hdbscan>=0.8.26",
     "pandas>=1.1.5",
     "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
     "joblib==0.17.0",
     "torch>=1.4.0",
-    "sentence-transformers>=0.3.9"
+    "sentence-transformers>=0.4.1"
 ]
 
 visualization_packages = [
