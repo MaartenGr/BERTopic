@@ -22,13 +22,22 @@ from ._utils import MyLogger, check_documents_type, check_embeddings_shape, chec
 from ._embeddings import languages
 from ._mmr import mmr
 
-# Additional dependencies
+# Visualization
 try:
     import matplotlib.pyplot as plt
     import plotly.express as px
     _HAS_VIZ = True
 except ModuleNotFoundError as e:
     _HAS_VIZ = False
+
+# Flair
+try:
+    from flair.embeddings import DocumentEmbeddings
+    from flair.data import Sentence
+    _HAS_FLAIR = True
+except ModuleNotFoundError as e:
+    DocumentEmbeddings = None
+    _HAS_FLAIR = False
 
 logger = MyLogger("WARNING")
 
@@ -83,7 +92,7 @@ class BERTopic:
                  verbose: bool = False,
                  allow_st_model: bool = True,
                  low_memory: bool = False,
-                 embedding_model: Union[str, SentenceTransformer] = None,
+                 embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings] = None,
                  umap_model: umap.UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None
@@ -121,11 +130,12 @@ class BERTopic:
                         visualization `visualize_probabilities`.
             embedding_model: You can pass in either a string relating to one of the following models:
                                 - https://www.sbert.net/docs/pretrained_models.html
-                             Or you can use your own SentenceTransformer() model to be used instead
-                             with your own custom parameters.
+                             You can use your own SentenceTransformer() model to be used instead
+                             with your own custom parameters. Moreover, it can also take in
+                             any Flair DocumentEmbedding model.
             umap_model: You can pass in a umap.UMAP model to be used instead of the default
             hdbscan_model: You can pass in a hdbscan.HDBSCAN model to be used instead of the default
-            vectorizer: Pass in your own CountVectorizer from scikit-learn
+            vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
 
         Usage:
@@ -142,7 +152,7 @@ class BERTopic:
                          n_components = 5,
                          stop_words = None,
                          verbose = True,
-                         vectorizer = None,
+                         vectorizer_model = None,
                          allow_st_model = True)
         ```
         """
@@ -282,6 +292,7 @@ class BERTopic:
 
         # Extract embeddings
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
+            self.embedding_model = self._select_embedding_model()
             embeddings = self._extract_embeddings(documents.Document)
         else:
             self.custom_embeddings = True
@@ -352,6 +363,7 @@ class BERTopic:
             documents = [documents]
 
         if not isinstance(embeddings, np.ndarray):
+            self.embedding_model = self._select_embedding_model()
             embeddings = self._extract_embeddings(documents)
 
         umap_embeddings = self.umap.transform(embeddings)
@@ -643,7 +655,6 @@ class BERTopic:
                             " ".join(label))
                 labels.append(label)
             else:
-                print(idx, probabilities[idx])
                 vals.remove(probabilities[idx])
         pos = range(len(vals))
 
@@ -703,7 +714,7 @@ class BERTopic:
         with open(path, 'rb') as file:
             return joblib.load(file)
 
-    def _extract_embeddings(self, documents: List[str]) -> np.ndarray:
+    def _extract_embeddings(self, documents: Union[List[str], str]) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
@@ -714,9 +725,16 @@ class BERTopic:
             embeddings: The extracted embeddings using the sentence transformer
                         module. Typically uses pre-trained huggingface models.
         """
-        model = self._select_embedding_model()
         logger.info("Loaded embedding model")
-        embeddings = model.encode(documents, show_progress_bar=self.verbose)
+        if isinstance(self.embedding_model, SentenceTransformer):
+            embeddings = self.embedding_model.encode(documents, show_progress_bar=self.verbose)
+        else:
+            if isinstance(documents, list):
+                sentences = [Sentence(document) for document in documents]
+            else:
+                sentences = [Sentence(documents)]
+            self.embedding_model.embed(sentences)
+            embeddings = np.array([sentence.embedding.cpu().numpy() for sentence in sentences])
         logger.info("Transformed documents to Embeddings")
 
         return embeddings
@@ -875,32 +893,32 @@ class BERTopic:
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
         if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
-            model = self._select_embedding_model()
 
             for topic, topic_words in self.topics.items():
                 words = [word[0] for word in topic_words]
-                word_embeddings = model.encode(words)
-                topic_embedding = model.encode(" ".join(words)).reshape(1, -1)
+                word_embeddings = self._extract_embeddings(words)
+                topic_embedding = self._extract_embeddings(" ".join(words)).reshape(1, -1)
+
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
                 self.topics[topic] = [(word, value) for word, value in self.topics[topic] if word in topic_words]
 
-    def _select_embedding_model(self) -> SentenceTransformer:
+    def _select_embedding_model(self) -> Union[SentenceTransformer, DocumentEmbeddings]:
         """ Select an embedding model based on language or a specific sentence transformer models.
         When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
         xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
         """
 
-        # Used for fine-tuning the topic representation
-        # If a custom embeddings are used, we use the multi-langual model
-        # to extract word embeddings
+        # Sentence Transformer embeddings
         if isinstance(self.embedding_model, SentenceTransformer):
             return self.embedding_model
 
-        elif self.custom_embeddings and self.allow_st_model:
-            return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
+        # Flair embeddings
+        elif _HAS_FLAIR and isinstance(self.embedding_model, DocumentEmbeddings):
+            return self.embedding_model
 
         # Select embedding model based on specific sentence transformer model
         elif isinstance(self.embedding_model, str):
+            self.sentence_pointer = self.embedding_model
             return SentenceTransformer(self.embedding_model)
 
         # Select embedding model based on language
@@ -919,6 +937,12 @@ class BERTopic:
                                  f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
                                  "Else, please select a language from the following list:\n"
                                  f"{languages}")
+
+        # Used for fine-tuning the topic representation
+        # If a custom embeddings are used, we use the multi-langual model
+        # to extract word embeddings
+        elif self.custom_embeddings and self.allow_st_model:
+            return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
         return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
@@ -1132,3 +1156,10 @@ class BERTopic:
             cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
         cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
         return cleaned_documents
+
+    # def __getstate__(self):
+    #     state = self.__dict__.copy()
+    #     # Don't pickle embedding model
+    #     if isinstance(self.embedding_model, SentenceTransformer):
+    #         state["embedding_model"] = None
+    #     return state

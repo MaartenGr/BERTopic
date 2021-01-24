@@ -30,6 +30,7 @@ def test_extract_topics():
                               "ID": range(len(newsgroup_docs)),
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model = BERTopic()
+    model.embedding_model = model._select_embedding_model()
     model._update_topic_size(documents)
     model._extract_topics(documents)
     freq = model.get_topic_freq()
@@ -56,6 +57,7 @@ def test_extract_topics_custom_cv():
 
     cv = CountVectorizer(ngram_range=(1, 2))
     model = BERTopic(vectorizer_model=cv)
+    model.embedding_model = model._select_embedding_model()
     model._update_topic_size(documents)
     model._extract_topics(documents)
     freq = model.get_topic_freq()
@@ -78,6 +80,7 @@ def test_topic_reduction(reduced_topics):
     """
     nr_topics = reduced_topics + 2
     model = BERTopic(nr_topics=reduced_topics)
+    model.embedding_model = model._select_embedding_model()
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
@@ -103,6 +106,7 @@ def test_topic_reduction_edge_cases():
     of topics exceeds the actual number of topics found
     """
     model = BERTopic()
+    model.embedding_model = model._select_embedding_model()
     nr_topics = 5
     model.nr_topics = 100
     old_documents = pd.DataFrame({"Document": newsgroup_docs,

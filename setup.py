@@ -30,7 +30,13 @@ visualization_packages = [
     "plotly>=4.7.0,<4.14.3"
 ]
 
-dev_packages = docs_packages + test_packages + visualization_packages
+flair_packages = [
+    "flair==0.7"
+]
+
+extra_packages = visualization_packages + flair_packages
+
+dev_packages = docs_packages + test_packages + extra_packages
 
 
 with open("README.md", "r") as fh:
@@ -67,7 +73,9 @@ setuptools.setup(
         "test": test_packages,
         "docs": docs_packages,
         "dev": dev_packages,
-        "visualization": visualization_packages
+        "visualization": visualization_packages,
+        "flair": flair_packages,
+        "all": extra_packages
     },
     python_requires='>=3.6',
 )

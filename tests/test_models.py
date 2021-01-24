@@ -21,6 +21,7 @@ from scipy.sparse.csr import csr_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.datasets import fetch_20newsgroups, make_blobs
 from sentence_transformers import SentenceTransformer
+from flair.embeddings import WordEmbeddings, DocumentPoolEmbeddings
 
 from umap import UMAP
 from hdbscan import HDBSCAN
@@ -41,6 +42,7 @@ def test_extract_embeddings(base_bertopic):
     the correct shape should be outputted. The embeddings by itself
     should not exceed certain values as a sanity check.
     """
+    base_bertopic.embedding_model = base_bertopic._select_embedding_model()
     single_embedding = base_bertopic._extract_embeddings("a document")
     multiple_embeddings = base_bertopic._extract_embeddings(["a document", "another document"])
 
@@ -62,6 +64,7 @@ def test_extract_embeddings_compare():
     """
     docs = ["some document"]
     model = BERTopic(embedding_model="distilbert-base-nli-stsb-mean-tokens")
+    model.embedding_model = model._select_embedding_model()
     bertopic_embeddings = model._extract_embeddings(docs)
 
     assert isinstance(bertopic_embeddings, np.ndarray)
@@ -75,6 +78,7 @@ def test_extract_incorrect_embeddings():
     """ Test if errors are raised when loading incorrect model """
     with pytest.raises(ValueError):
         model = BERTopic(language="Unknown language")
+        model.embedding_model = model._select_embedding_model()
         model._extract_embeddings(["Some document"])
 
 
