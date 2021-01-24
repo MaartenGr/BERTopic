@@ -65,7 +65,3 @@ def test_full_model(base_bertopic):
     assert len(base_bertopic.get_topic_freq()) == nr_topics + 1
     assert len(new_topics) == len(topics)
     assert len(new_probs) == len(probs)
-
-    # Visualization
-    base_bertopic.visualize_topics()
-    base_bertopic.visualize_distribution(new_probs[0])
