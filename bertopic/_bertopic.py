@@ -5,6 +5,7 @@ import re
 import joblib
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Dict, Union
 
@@ -293,7 +294,7 @@ class BERTopic:
         # Extract embeddings
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
             self.embedding_model = self._select_embedding_model()
-            embeddings = self._extract_embeddings(documents.Document)
+            embeddings = self._extract_embeddings(documents.Document, verbose=self.verbose)
             logger.info("Transformed documents to Embeddings")
         else:
             self.custom_embeddings = True
@@ -365,7 +366,7 @@ class BERTopic:
 
         if not isinstance(embeddings, np.ndarray):
             self.embedding_model = self._select_embedding_model()
-            embeddings = self._extract_embeddings(documents)
+            embeddings = self._extract_embeddings(documents, verbose=self.verbose)
 
         umap_embeddings = self.umap.transform(embeddings)
         predictions, _ = hdbscan.approximate_predict(self.hdbscan, umap_embeddings)
@@ -413,7 +414,7 @@ class BERTopic:
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
-        search_embedding = self._extract_embeddings([search_term]).flatten()
+        search_embedding = self._extract_embeddings([search_term], verbose=False).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
 
         # Extract topics most similar to search_term
@@ -715,12 +716,13 @@ class BERTopic:
         with open(path, 'rb') as file:
             return joblib.load(file)
 
-    def _extract_embeddings(self, documents: Union[List[str], str]) -> np.ndarray:
+    def _extract_embeddings(self, documents: Union[List[str], str], verbose: bool = None) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
+            verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
         Returns:
             embeddings: The extracted embeddings using the sentence transformer
@@ -730,10 +732,10 @@ class BERTopic:
             documents = [documents]
 
         if isinstance(self.embedding_model, SentenceTransformer):
-            embeddings = self.embedding_model.encode(documents, show_progress_bar=self.verbose)
+            embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
         elif isinstance(self.embedding_model, DocumentEmbeddings):
             embeddings = []
-            for document in documents:
+            for document in tqdm(documents, disable=not verbose):
                 try:
                     sentence = Sentence(document) if document else Sentence("an empty document")
                     self.embedding_model.embed(sentence)
@@ -837,7 +839,7 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            embeddings = self._extract_embeddings(topic_words)
+            embeddings = self._extract_embeddings(topic_words, verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -904,8 +906,8 @@ class BERTopic:
 
             for topic, topic_words in self.topics.items():
                 words = [word[0] for word in topic_words]
-                word_embeddings = self._extract_embeddings(words)
-                topic_embedding = self._extract_embeddings(" ".join(words)).reshape(1, -1)
+                word_embeddings = self._extract_embeddings(words, verbose=False)
+                topic_embedding = self._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
 
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
                 self.topics[topic] = [(word, value) for word, value in self.topics[topic] if word in topic_words]
