@@ -294,6 +294,7 @@ class BERTopic:
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
             self.embedding_model = self._select_embedding_model()
             embeddings = self._extract_embeddings(documents.Document)
+            logger.info("Transformed documents to Embeddings")
         else:
             self.custom_embeddings = True
 
@@ -728,14 +729,13 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
-        logger.info("Loaded embedding model")
         if isinstance(self.embedding_model, SentenceTransformer):
             embeddings = self.embedding_model.encode(documents, show_progress_bar=self.verbose)
         elif isinstance(self.embedding_model, DocumentEmbeddings):
             embeddings = []
             for document in documents:
                 try:
-                    sentence = Sentence(document)
+                    sentence = Sentence(document) if document else Sentence("an empty document")
                     self.embedding_model.embed(sentence)
                 except RuntimeError:
                     sentence = Sentence("an empty document")
@@ -744,8 +744,6 @@ class BERTopic:
             embeddings = np.array(embeddings)
         else:
             raise ValueError("An incorrect embedding model type was selected.")
-
-        logger.info("Transformed documents to Embeddings")
 
         return embeddings
 
