@@ -776,7 +776,7 @@ class BERTopic:
             self.umap.fit(embeddings)
         umap_embeddings = self.umap.transform(embeddings)
         logger.info("Reduced dimensionality with UMAP")
-        return umap_embeddings
+        return np.nan_to_num(umap_embeddings)
 
     def _cluster_embeddings(self,
                             umap_embeddings: np.ndarray,
