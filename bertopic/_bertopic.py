@@ -725,16 +725,26 @@ class BERTopic:
             embeddings: The extracted embeddings using the sentence transformer
                         module. Typically uses pre-trained huggingface models.
         """
+        if isinstance(documents, str):
+            documents = [documents]
+
         logger.info("Loaded embedding model")
         if isinstance(self.embedding_model, SentenceTransformer):
             embeddings = self.embedding_model.encode(documents, show_progress_bar=self.verbose)
+        elif isinstance(self.embedding_model, DocumentEmbeddings):
+            embeddings = []
+            for document in documents:
+                try:
+                    sentence = Sentence(document)
+                    self.embedding_model.embed(sentence)
+                except RuntimeError:
+                    sentence = Sentence("an empty document")
+                    self.embedding_model.embed(sentence)
+                embeddings.append(sentence.embedding.cpu().numpy())
+            embeddings = np.array(embeddings)
         else:
-            if isinstance(documents, list):
-                sentences = [Sentence(document) for document in documents]
-            else:
-                sentences = [Sentence(documents)]
-            self.embedding_model.embed(sentences)
-            embeddings = np.array([sentence.embedding.cpu().numpy() for sentence in sentences])
+            raise ValueError("An incorrect embedding model type was selected.")
+
         logger.info("Transformed documents to Embeddings")
 
         return embeddings

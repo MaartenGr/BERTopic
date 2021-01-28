@@ -46,7 +46,8 @@ def test_extract_embeddings(base_bertopic):
     single_embedding = base_bertopic._extract_embeddings("a document")
     multiple_embeddings = base_bertopic._extract_embeddings(["a document", "another document"])
 
-    assert single_embedding.shape[0] == 768
+    assert single_embedding.shape[0] == 1
+    assert single_embedding.shape[1] == 768
     assert np.min(single_embedding) > -5
     assert np.max(single_embedding) < 5
 
