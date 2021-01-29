@@ -29,19 +29,6 @@ model = BERTopic(n_neighbors=15)
 ```
 
 If you have more data, you can increase the value of this parameter as you are more likely to have more neighbors. 
- 
-#### **Dimensionality**
-The `n_components` refers to the dimension size we reduce the document embeddings to. This is necessary for HDBSCAN 
-to properly find clusters. A higher value will preserve more local structure but makes clustering more complicated 
-for HDBSCAN which can result in fewer clusters if set to high. A small value will preserve less of the local structure 
-but makes clustering easier for HDBSCAN. Similarly, this can result in fewer clusters if set to low.
-
-```python
-from bertopic import BERTopic
-model = BERTopic(n_components=5)
-```
- 
-I would recommend a value between 3 and 10 dimensions.  
 
 ## **Hierarchical Topic Reduction**
 It is not possible for HDBSCAN to specify the number of clusters you would want. To a certain extent, 

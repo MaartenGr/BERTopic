@@ -7,9 +7,10 @@ into one of the other test_XXX.py files.
 
 """
 
-from unittest import mock
-from sklearn.datasets import fetch_20newsgroups, make_blobs
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.datasets import fetch_20newsgroups
+from hdbscan import HDBSCAN
+from umap import UMAP
+from sklearn.feature_extraction.text import CountVectorizer
 from bertopic import BERTopic
 
 newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:1000]
@@ -26,16 +27,21 @@ def test_load_save_model():
     assert model.top_n_words == loaded_model.top_n_words
     assert model.n_neighbors == loaded_model.n_neighbors
 
-# There is an issue with mocking _extract_embeddings since it is now used in other places
-# @mock.patch("bertopic._bertopic.BERTopic._extract_embeddings")
-# def test_fit_transform(embeddings):
-#     """ Test whether predictions are correctly made """
-#     blobs, _ = make_blobs(n_samples=len(newsgroup_docs), centers=5, n_features=768, random_state=42)
-#     embeddings.return_value = blobs
-#     model = BERTopic()
-#     predictions, probabilities = model.fit_transform(newsgroup_docs)
-#
-#     assert isinstance(predictions, list)
-#     assert len(predictions) == len(newsgroup_docs)
-#     assert not set(predictions).difference(set(model.get_topics().keys()))
-#     assert probabilities.shape[0] == len(newsgroup_docs)
+
+def test_get_params():
+    """ Test if parameters could be extracted """
+    model = BERTopic()
+    assert model.get_params() == {'allow_st_model': True,
+                                  'embedding_model': None,
+                                  'hdbscan_model': HDBSCAN(min_cluster_size=10, prediction_data=True),
+                                  'language': 'english',
+                                  'low_memory': False,
+                                  'min_topic_size': 10,
+                                  'n_gram_range': (1, 1),
+                                  'n_neighbors': 15,
+                                  'nr_topics': None,
+                                  'stop_words': None,
+                                  'top_n_words': 10,
+                                  'umap_model': UMAP(metric='cosine', min_dist=0.0, n_components=5),
+                                  'vectorizer_model': CountVectorizer(),
+                                  'verbose': False}

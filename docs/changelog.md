@@ -1,3 +1,16 @@
+## **Version 0.5.0**
+*Release date:  XXX*
+
+**Highlights**:
+
+* Added `low_memory` parameter to reduce memory during computation (may speed-up computation, does not calculate probabilities)
+* Get parameters with `get_params()`
+* Option to use custom UMAP
+* Option to use custom HDBSAN
+* Improved verbosity (shows progress bar)
+* Use the newest version of sentence-transformers as it speeds ups encoding significantly
+* Improved testing   
+
 ## **Version 0.4.2**
 *Release date:  10 Januari, 2021*
 

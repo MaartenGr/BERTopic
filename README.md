@@ -169,6 +169,7 @@ Click [here](https://www.sbert.net/docs/pretrained_models.html) for a list of su
 | Find topics | `model.find_topics("vehicle")` |
 | Save model    |  `model.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
+| Get parameters |  `model.get_params()` |
  
 ### Citation
 To cite BERTopic in your work, please use the following bibtex reference:

@@ -111,3 +111,4 @@ Xhosa, Yiddish
 | Find topics | `model.find_topics("vehicle")` |
 | Save model    |  `model.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
+| Get parameters |  `model.get_params()` |
