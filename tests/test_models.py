@@ -161,7 +161,7 @@ def test_custom_hdbscan_cluster_embeddings(samples, features, centers):
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
     pd.testing.assert_frame_equal(old_df.drop("Topic", 1), new_df.drop("Topic", 1))
-    assert model.hdbscan.metric == "euclidean"
+    assert model.hdbscan_model.metric == "euclidean"
 
 
 def test_ctfidf(base_bertopic):
@@ -177,7 +177,7 @@ def test_ctfidf(base_bertopic):
                               "Topic": np.random.randint(-1, nr_topics, len(newsgroup_docs))})
     documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
     documents = base_bertopic._preprocess_text(documents_per_topic.Document.values)
-    count = base_bertopic.vectorizer.fit(documents)
+    count = base_bertopic.vectorizer_model.fit(documents)
     words = count.get_feature_names()
     X = count.transform(documents)
     transformer = ClassTFIDF().fit(X, n_samples=len(newsgroup_docs))
@@ -217,7 +217,7 @@ def test_ctfidf_custom_cv():
                               "Topic": np.random.randint(-1, nr_topics, len(newsgroup_docs))})
     documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
     documents = model._preprocess_text(documents_per_topic.Document.values)
-    count = model.vectorizer.fit(documents)
+    count = model.vectorizer_model.fit(documents)
     words = count.get_feature_names()
     X = count.transform(documents)
     transformer = ClassTFIDF().fit(X, n_samples=len(newsgroup_docs))

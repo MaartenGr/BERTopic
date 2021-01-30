@@ -34,11 +34,11 @@ except ModuleNotFoundError as e:
 
 # Flair
 try:
-    from flair.embeddings import DocumentEmbeddings
+    from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
     from flair.data import Sentence
     _HAS_FLAIR = True
 except ModuleNotFoundError as e:
-    DocumentEmbeddings = None
+    DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings = None, None, None
     _HAS_FLAIR = False
 
 logger = MyLogger("WARNING")
@@ -94,7 +94,7 @@ class BERTopic:
                  verbose: bool = False,
                  allow_st_model: bool = True,
                  low_memory: bool = False,
-                 embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings] = None,
+                 embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None,
                  umap_model: umap.UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None
@@ -773,7 +773,7 @@ class BERTopic:
                 except RuntimeError:
                     sentence = Sentence("an empty document")
                     self.embedding_model.embed(sentence)
-                embeddings.append(sentence.embedding.cpu().numpy())
+                embeddings.append(sentence.embedding.detach().cpu().numpy())
             embeddings = np.array(embeddings)
         else:
             raise ValueError("An incorrect embedding model type was selected.")
@@ -956,7 +956,11 @@ class BERTopic:
         if isinstance(self.embedding_model, SentenceTransformer):
             return self.embedding_model
 
-        # Flair embeddings
+        # Flair word embeddings
+        elif _HAS_FLAIR and isinstance(self.embedding_model, TokenEmbeddings):
+            return DocumentPoolEmbeddings([self.embedding_model])
+
+        # Flair document embeddings
         elif _HAS_FLAIR and isinstance(self.embedding_model, DocumentEmbeddings):
             return self.embedding_model
 
