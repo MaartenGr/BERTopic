@@ -1,6 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+import gc
 import re
 import joblib
 import inspect
@@ -11,6 +12,7 @@ from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Union, Mapping, Any
 
 # Models
+import torch
 import umap
 import hdbscan
 from sentence_transformers import SentenceTransformer
@@ -766,7 +768,7 @@ class BERTopic:
             embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
         elif isinstance(self.embedding_model, DocumentEmbeddings):
             embeddings = []
-            for document in tqdm(documents, disable=not verbose):
+            for index, document in tqdm(enumerate(documents), disable=not verbose):
                 try:
                     sentence = Sentence(document) if document else Sentence("an empty document")
                     self.embedding_model.embed(sentence)
@@ -774,6 +776,9 @@ class BERTopic:
                     sentence = Sentence("an empty document")
                     self.embedding_model.embed(sentence)
                 embeddings.append(sentence.embedding.detach().cpu().numpy())
+                if index % 64 == 0:
+                    gc.collect()
+                    torch.cuda.empty_cache()
             embeddings = np.array(embeddings)
         else:
             raise ValueError("An incorrect embedding model type was selected.")
