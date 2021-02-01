@@ -22,7 +22,7 @@ base_packages = [
     "scikit-learn>=0.22.2.post1",
     "joblib==0.17.0",
     "torch>=1.4.0",
-    "transformers>=4.0.0"
+    "transformers>=4.0.0",
     "sentence-transformers>=0.4.1"
 ]
 
