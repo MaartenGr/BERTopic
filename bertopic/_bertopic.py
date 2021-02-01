@@ -764,8 +764,11 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
+        # Infer embeddings with SentenceTransformer
         if isinstance(self.embedding_model, SentenceTransformer):
             embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
+
+        # Infer embeddings with Flair
         elif isinstance(self.embedding_model, DocumentEmbeddings):
             embeddings = []
             for index, document in tqdm(enumerate(documents), disable=not verbose):
@@ -775,11 +778,10 @@ class BERTopic:
                 except RuntimeError:
                     sentence = Sentence("an empty document")
                     self.embedding_model.embed(sentence)
-                embeddings.append(sentence.embedding.detach().cpu().numpy())
-                if index % 64 == 0:
-                    gc.collect()
-                    torch.cuda.empty_cache()
-            embeddings = np.array(embeddings)
+                embedding = sentence.embedding.detach().cpu().numpy()
+                embeddings.append(embedding)
+            embeddings = np.asarray(embeddings)
+
         else:
             raise ValueError("An incorrect embedding model type was selected.")
 
@@ -965,8 +967,11 @@ class BERTopic:
         elif _HAS_FLAIR and isinstance(self.embedding_model, TokenEmbeddings):
             return DocumentPoolEmbeddings([self.embedding_model])
 
-        # Flair document embeddings
+        # Flair document embeddings + disable fine tune to prevent CUDA OOM
+        # https://github.com/flairNLP/flair/issues/1719
         elif _HAS_FLAIR and isinstance(self.embedding_model, DocumentEmbeddings):
+            if "fine_tune" in self.embedding_model.__dict__:
+                self.embedding_model.fine_tune = False
             return self.embedding_model
 
         # Select embedding model based on specific sentence transformer model
