@@ -612,7 +612,7 @@ class BERTopic:
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
                            "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
-        self._plotly_topic_visualization(df, topic_list)
+        return self._plotly_topic_visualization(df, topic_list)
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
@@ -1191,13 +1191,13 @@ class BERTopic:
                       x0=sum(x_range) / 2, y0=y_range[0], x1=sum(x_range) / 2, y1=y_range[1],
                       line=dict(color="#CFD8DC", width=2))
         fig.add_shape(type="line",
-                      x0=x_range[0], y0=sum(y_range) / 2, x1=y_range[1], y1=sum(y_range) / 2,
+                      x0=x_range[0], y0=sum(y_range) / 2, x1=x_range[1], y1=sum(y_range) / 2,
                       line=dict(color="#9E9E9E", width=2))
         fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
         fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
         fig.data = fig.data[::-1]
 
-        fig.show()
+        return fig
 
     def _preprocess_text(self, documents: np.ndarray) -> List[str]:
         """ Basic preprocessing of text
