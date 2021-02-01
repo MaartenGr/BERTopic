@@ -31,7 +31,6 @@ visualization_packages = [
 ]
 
 flair_packages = [
-    "transformers==3.5.0",
     "flair==0.7"
 ]
 
