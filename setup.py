@@ -14,7 +14,7 @@ docs_packages = [
 
 base_packages = [
     "tqdm>=4.41.1",
-    "numpy>=1.18.5",
+    "numpy>=1.18.5,<1.20.0",
     "umap-learn>=0.4.6",
     "hdbscan>=0.8.26",
     "pandas>=1.1.5",
