@@ -1,7 +1,6 @@
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-import gc
 import re
 import joblib
 import inspect
@@ -12,7 +11,6 @@ from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Union, Mapping, Any
 
 # Models
-import torch
 import umap
 import hdbscan
 from sentence_transformers import SentenceTransformer
@@ -59,25 +57,21 @@ class BERTopic:
 
     docs = fetch_20newsgroups(subset='all')['data']
 
-    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+    model = BERTopic(verbose=True)
     topics = model.fit_transform(docs)
     ```
 
-    If you want to use your own embeddings, use it as follows:
+    If you want to use your own embedding model, use it as follows:
 
     ```python
     from bertopic import BERTopic
     from sklearn.datasets import fetch_20newsgroups
     from sentence_transformers import SentenceTransformer
 
-    # Create embeddings
     docs = fetch_20newsgroups(subset='all')['data']
     sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-    embeddings = sentence_model.encode(docs, show_progress_bar=True)
-
-    # Create topic model
-    model = BERTopic(verbose=True)
-    topics = model.fit_transform(docs, embeddings)
+    model = BERTopic(verbose=True, embedding_model=sentence_model)
+    topics = model.fit_transform(docs)
     ```
 
     Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -88,14 +82,13 @@ class BERTopic:
     def __init__(self,
                  language: str = "english",
                  top_n_words: int = 10,
-                 nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
                  min_topic_size: int = 10,
-                 n_neighbors: int = 15,
-                 stop_words: Union[str, List[str]] = None,
-                 verbose: bool = False,
+                 nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
-                 embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None,
+                 verbose: bool = False,
+                 embedding_model: Union[str, SentenceTransformer,
+                                        DocumentEmbeddings, TokenEmbeddings] = None,
                  umap_model: umap.UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None
@@ -103,57 +96,38 @@ class BERTopic:
         """BERTopic initialization
 
         Arguments:
-            language: The main language used in your documents. For a full overview of supported languages
-                      see bertopic.embeddings.languages. Select "multilingual" to load in a model that
-                      support 50+ languages.
+            language: The main language used in your documents. For a full overview of
+                      supported languages see bertopic.embeddings.languages. Select
+                      "multilingual" to load in a model that support 50+ languages.
             top_n_words: The number of words per topic to extract
-            nr_topics: Specifying the number of topics will reduce the initial
-                       number of topics to the value specified. This reduction can take
-                       a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-                       IF this is set to None, no reduction is applied. Use "auto" to automatically
-                       reduce topics that have a similarity of at least 0.9, do not maps all others.
             n_gram_range: The n-gram range for the CountVectorizer.
                           Advised to keep high values between 1 and 3.
                           More would likely lead to memory issues.
-                          Note that this will not be used if you pass in your own CountVectorizer.
-            min_topic_size: The minimum size of the topic.
-            n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
-                         for manifold approximation (UMAP).
-            stop_words: Stopwords that can be used as either a list of strings, or the name of the
-                        language as a string. For example: 'english' or ['the', 'and', 'I'].
-                        Note that this will not be used if you pass in your own CountVectorizer.
+                          NOTE: This param will not be used if you pass in your own
+                          CountVectorizer.
+            min_topic_size: The minimum size of the topic. Increasing this value will lead
+                            to a lower number of clusters/topics.
+            nr_topics: Specifying the number of topics will reduce the initial
+                       number of topics to the value specified. This reduction can take
+                       a while as each reduction in topics (-1) activates a c-TF-IDF
+                       calculation. If this is set to None, no reduction is applied. Use
+                       "auto" to automatically reduce topics that have a similarity of at
+                       least 0.9, do not maps all others.
+            low_memory: Removes the calculation of probabilities and sets UMAP low memory
+                        to True to make sure less memory is used. This may also speeds up
+                        computation.
+                        NOTE: since probabilities are not calculated, you cannot use the
+                        corresponding visualization `visualize_probabilities`.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
-            low_memory: Removes the calculation of probabilities and sets UMAP low memory to True to
-                        make sure less memory is used. This also speeds up computation.
-                        NOTE: since probabilities are not calculated, you cannot use the corresponding
-                        visualization `visualize_probabilities`.
-            embedding_model: You can pass in either a string relating to one of the following models:
-                                - https://www.sbert.net/docs/pretrained_models.html
-                             You can use your own SentenceTransformer() model to be used instead
-                             with your own custom parameters. Moreover, it can also take in
-                             any Flair DocumentEmbedding model.
-            umap_model: You can pass in a umap.UMAP model to be used instead of the default
-            hdbscan_model: You can pass in a hdbscan.HDBSCAN model to be used instead of the default
-            vectorizer_model: Pass in your own CountVectorizer from scikit-learn
-
-
-        Usage:
-
-        ```python
-        from bertopic import BERTopic
-        model = BERTopic(language = "english",
-                         embedding_model = None,
-                         top_n_words = 10,
-                         nr_topics = 30,
-                         n_gram_range = (1, 1),
-                         min_topic_size = 10,
-                         n_neighbors = 15,
-                         n_components = 5,
-                         stop_words = None,
-                         verbose = True,
-                         vectorizer_model = None)
-        ```
+            embedding_model: Use a custom embedding model. You can pass in a string related
+                             to one of the following models:
+                             https://www.sbert.net/docs/pretrained_models.html
+                             You can also pass in a SentenceTransformer() model or a Flair
+                             DocumentEmbedding model.
+            umap_model: Pass in a umap.UMAP model to be used instead of the default
+            hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
+            vectorizer_model: Pass in a CountVectorizer instead of the default
         """
         # Topic-based parameters
         if top_n_words > 30:
@@ -169,14 +143,11 @@ class BERTopic:
         self.embedding_model = embedding_model
 
         # Vectorizer
-        self.stop_words = stop_words
         self.n_gram_range = n_gram_range
-        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range,
-                                                                    stop_words=self.stop_words)
+        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
 
         # UMAP
-        self.n_neighbors = n_neighbors
-        self.umap_model = umap_model or umap.UMAP(n_neighbors=self.n_neighbors,
+        self.umap_model = umap_model or umap.UMAP(n_neighbors=15,
                                                   n_components=5,
                                                   min_dist=0.0,
                                                   metric='cosine',
@@ -431,7 +402,6 @@ class BERTopic:
                       docs: List[str],
                       topics: List[int],
                       n_gram_range: Tuple[int, int] = None,
-                      stop_words: str = None,
                       vectorizer_model: CountVectorizer = None):
         """ Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
@@ -442,12 +412,9 @@ class BERTopic:
         to update the topic representation after they have been formed.
 
         Arguments:
-            docs: The docs you used when calling either `fit` or `fit_transform`
+            docs: The documents you used when calling either `fit` or `fit_transform`
             topics: The topics that were returned when calling either `fit` or `fit_transform`
             n_gram_range: The n-gram range for the CountVectorizer.
-            stop_words: Stopwords that can be used as either a list of strings, or the name of the
-                        language as a string. For example: 'english' or ['the', 'and', 'I'].
-                        Note that this will not be used if you pass in your own CountVectorizer.
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
         Usage:
@@ -457,22 +424,18 @@ class BERTopic:
 
         # Create topics
         docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic(n_gram_range=(1, 1), stop_words=None)
+        model = BERTopic(n_gram_range=(1, 1))
         topics, probs = model.fit_transform(docs)
 
         # Update topic representation
-        model.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="english")
+        model.update_topics(docs, topics, n_gram_range=(2, 3))
         ```
         """
         check_is_fitted(self)
         if not n_gram_range:
             n_gram_range = self.n_gram_range
 
-        if not stop_words:
-            stop_words = self.stop_words
-
-        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range,
-                                                                    stop_words=stop_words)
+        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
 
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
         self._extract_topics(documents)
@@ -831,7 +794,7 @@ class BERTopic:
             umap_embeddings: The reduced embeddings
         """
         if isinstance(embeddings, csr_matrix):
-            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
+            self.umap_model = umap.UMAP(n_neighbors=15,
                                         n_components=5,
                                         metric='hellinger',
                                         low_memory=self.low_memory).fit(embeddings)
@@ -1248,12 +1211,3 @@ class BERTopic:
         parameters = sorted([p.name for p in init_signature.parameters.values()
                              if p.name != 'self' and p.kind != p.VAR_KEYWORD])
         return parameters
-
-    # def __getstate__(self):
-    #     state = self.__dict__.copy()
-    #     # Don't pickle embedding model
-    #     if isinstance(self.embedding_model, SentenceTransformer):
-    #         state["embedding_model"] = None
-    #     return state
-
-
