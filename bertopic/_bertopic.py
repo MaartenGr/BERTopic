@@ -94,7 +94,6 @@ class BERTopic:
                  n_neighbors: int = 15,
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
-                 allow_st_model: bool = True,
                  low_memory: bool = False,
                  embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None,
                  umap_model: umap.UMAP = None,
@@ -125,9 +124,6 @@ class BERTopic:
                         Note that this will not be used if you pass in your own CountVectorizer.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
-            allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
-                            to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
-                            Moreover, it will allow you to search for topics based on search queries.
             low_memory: Removes the calculation of probabilities and sets UMAP low memory to True to
                         make sure less memory is used. This also speeds up computation.
                         NOTE: since probabilities are not calculated, you cannot use the corresponding
@@ -156,8 +152,7 @@ class BERTopic:
                          n_components = 5,
                          stop_words = None,
                          verbose = True,
-                         vectorizer_model = None,
-                         allow_st_model = True)
+                         vectorizer_model = None)
         ```
         """
         # Topic-based parameters
@@ -172,7 +167,6 @@ class BERTopic:
         # Embedding model
         self.language = language if not embedding_model else None
         self.embedding_model = embedding_model
-        self.allow_st_model = allow_st_model
 
         # Vectorizer
         self.stop_words = stop_words
@@ -416,9 +410,8 @@ class BERTopic:
             similarity: the similarity scores from high to low
 
         """
-        if self.custom_embeddings and not self.allow_st_model:
-            raise Exception("This method can only be used if you set `allow_st_model` to True when "
-                            "using custom embeddings.")
+        if self.custom_embeddings:
+            raise Exception("This method can only be used if you did not use custom embeddings.")
 
         topic_list = list(self.topics.keys())
         topic_list.sort()
@@ -695,36 +688,68 @@ class BERTopic:
         if save:
             fig.savefig("probability.png", dpi=300, bbox_inches='tight')
 
-    def save(self, path: str) -> None:
+    def save(self,
+             path: str,
+             save_embedding_model: bool = True) -> None:
         """ Saves the model to the specified path
 
         Arguments:
             path: the location and name of the file you want to save
+            save_embedding_model: Whether to save the embedding model in this class
+                                  as you might have selected a local model or one that
+                                  is downloaded automatically from the cloud.
 
         Usage:
 
         ```python
         model.save("my_model")
         ```
+
+        or if you do not want the embedding_model to be saved locally:
+
+        ```python
+        model.save("my_model", save_embedding_model=False)
+        ```
         """
         with open(path, 'wb') as file:
-            joblib.dump(self, file)
+            if not save_embedding_model:
+                embedding_model = self.embedding_model
+                self.embedding_model = None
+                joblib.dump(self, file)
+                self.embedding_model = embedding_model
+            else:
+                joblib.dump(self, file)
 
     @classmethod
-    def load(cls, path: str):
+    def load(cls,
+             path: str,
+             embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None):
         """ Loads the model from the specified path
 
         Arguments:
             path: the location and name of the BERTopic file you want to load
+            embedding_model: If the embedding_model was not saved to save space or to load
+                             it in from the cloud, you can load it in by specifying it here.
 
         Usage:
 
         ```python
         BERTopic.load("my_model")
         ```
+
+        or if you did not save the embedding model:
+
+        ```python
+        BERTopic.load("my_model", embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+        ```
         """
         with open(path, 'rb') as file:
-            return joblib.load(file)
+            if embedding_model:
+                topic_model = joblib.load(file)
+                topic_model.embedding_model = embedding_model
+            else:
+                topic_model = joblib.load(file)
+            return topic_model
 
     def get_params(self, deep: bool = False) -> Mapping[str, Any]:
         """ Get parameters for this estimator.
@@ -869,7 +894,7 @@ class BERTopic:
         a sentence-transformer model to be used or there are custom embeddings but it is allowed
         to use a different multi-lingual sentence-transformer model
         """
-        if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
+        if not self.custom_embeddings:
             topic_list = list(self.topics.keys())
             topic_list.sort()
             n = self.top_n_words
@@ -940,7 +965,7 @@ class BERTopic:
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
-        if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
+        if not self.custom_embeddings:
 
             for topic, topic_words in self.topics.items():
                 words = [word[0] for word in topic_words]
@@ -996,11 +1021,8 @@ class BERTopic:
                                  "Else, please select a language from the following list:\n"
                                  f"{languages}")
 
-        # Used for fine-tuning the topic representation
-        # If a custom embeddings are used, we use the multi-lingual model
-        # to extract word embeddings
-        elif self.custom_embeddings and self.allow_st_model:
-            return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
+        elif self.custom_embeddings:
+            return None
 
         return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
