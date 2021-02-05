@@ -85,7 +85,8 @@ class BERTopic:
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None,
                  calculate_probabilities: bool = True,
-                 allow_st_model: bool = True):
+                 allow_st_model: bool = True,
+                 cluster_selection_epsilon: float = 0.0):
         """BERTopic initialization
 
         Args:
@@ -152,6 +153,7 @@ class BERTopic:
         self.nr_topics = nr_topics
         self.min_topic_size = min_topic_size
         self.calculate_probabilities = calculate_probabilities
+        self.cluster_selection_epsilon = cluster_selection_epsilon
 
         # Umap parameters
         self.n_neighbors = n_neighbors
@@ -753,7 +755,9 @@ class BERTopic:
         self.cluster_model = hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
                                              metric='euclidean',
                                              cluster_selection_method='eom',
-                                             prediction_data=True).fit(umap_embeddings)
+                                             prediction_data=True,
+                                             cluster_selection_epsilon=self.cluster_selection_epsilon
+                                             ).fit(umap_embeddings)
         documents['Topic'] = self.cluster_model.labels_
 
         # check if (doc # < 100.000) and (cluster # < 255) for feasible running time
