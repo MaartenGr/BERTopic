@@ -13,14 +13,13 @@ docs_packages = [
 
 
 base_packages = [
-    "tqdm>=4.41.1",
     "numpy==1.20.0",
-    "umap-learn>=0.4.6",
-    "hdbscan>=0.8.26",
+    "hdbscan>=0.8.27",
+    "umap-learn>=0.5.0",
     "pandas>=1.1.5",
-    "scipy>=1.3.1",
+    # "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
-    "joblib==0.17.0",
+    "tqdm>=4.41.1",
     "torch>=1.4.0",
     "sentence-transformers>=0.4.1"
 ]
