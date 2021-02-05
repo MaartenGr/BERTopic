@@ -85,7 +85,9 @@ class BERTopic:
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None,
                  allow_st_model: bool = True,
-                 cluster_selection_epsilon: float = 0.0):
+                 cluster_selection_epsilon: float = 0.0,
+                 doc_number_limit4probs: int = 100000,
+                 topic_number_limit4probs: int = 255):
         """BERTopic initialization
 
         Args:
@@ -122,6 +124,10 @@ class BERTopic:
                             Moreover, it will allow you to search for topics based on search queries.
             cluster_selection_epsilon: This controls the broadness of the topics. When this parameter increases,
                                         topics will be more broad.
+            doc_number_limit4probs: Document number limit to decide whether
+                                    calculate document-topic probability distributions.
+            topic_number_limit4probs: Cluster number limit to decide whether
+                                        calculate document-topic probability distributions.
 
         Usage:
 
@@ -155,6 +161,8 @@ class BERTopic:
         self.min_topic_size = min_topic_size
         self.calculate_probabilities = True
         self.cluster_selection_epsilon = cluster_selection_epsilon
+        self.doc_number_limit4probs = doc_number_limit4probs
+        self.topic_number_limit4probs = topic_number_limit4probs
 
         # Umap parameters
         self.n_neighbors = n_neighbors
@@ -765,14 +773,15 @@ class BERTopic:
         doc_number = len(documents.Document.values)
         topic_number = len(set(self.cluster_model.labels_))
         logger.info(f"Number of topics detected: {topic_number}")
-        self.calculate_probabilities = doc_number < 100000 and topic_number < 255
+        self.calculate_probabilities = \
+            doc_number < self.doc_number_limit4probs and topic_number < self.topic_number_limit4probs
 
         if self.calculate_probabilities:
             logger.info("Calculating doc-topic probabilities")
             probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
         else:
-            logger.info('Skipped topic probability distributions, since requires too much time for '
-                        '{} documents and {} topics.'.format(doc_number, topic_number))
+            logger.info(f"Skipped doc-topic probability distributions, since requires too much time for "
+                        f"{doc_number} documents and {topic_number} topics.")
             probabilities = None
 
         self._update_topic_size(documents)
