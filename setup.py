@@ -11,13 +11,11 @@ docs_packages = [
     "mkdocstrings>=0.8.0",
 ]
 
-
 base_packages = [
-    "numpy==1.20.0",
+    "numpy>=1.19.2",
     "hdbscan>=0.8.27",
     "umap-learn>=0.5.0",
     "pandas>=1.1.5",
-    # "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
     "torch>=1.4.0",
