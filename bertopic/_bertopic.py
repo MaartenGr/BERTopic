@@ -84,7 +84,6 @@ class BERTopic:
                  stop_words: Union[str, List[str]] = None,
                  verbose: bool = False,
                  vectorizer: CountVectorizer = None,
-                 calculate_probabilities: bool = True,
                  allow_st_model: bool = True,
                  cluster_selection_epsilon: float = 0.0):
         """BERTopic initialization
@@ -121,6 +120,8 @@ class BERTopic:
             allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
                             to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
                             Moreover, it will allow you to search for topics based on search queries.
+            cluster_selection_epsilon: This controls the broadness of the topics. When this parameter increases,
+                                        topics will be more broad.
 
         Usage:
 
@@ -152,7 +153,7 @@ class BERTopic:
         self.top_n_words = top_n_words
         self.nr_topics = nr_topics
         self.min_topic_size = min_topic_size
-        self.calculate_probabilities = calculate_probabilities
+        self.calculate_probabilities = True
         self.cluster_selection_epsilon = cluster_selection_epsilon
 
         # Umap parameters
@@ -761,12 +762,17 @@ class BERTopic:
         documents['Topic'] = self.cluster_model.labels_
 
         # check if (doc # < 100.000) and (cluster # < 255) for feasible running time
-        self.calculate_probabilities = \
-            len(documents.Document.values) < 100000 and len(set(self.cluster_model.labels_)) < 255
+        doc_number = len(documents.Document.values)
+        topic_number = len(set(self.cluster_model.labels_))
+        logger.info(f"Number of topics detected: {topic_number}")
+        self.calculate_probabilities = doc_number < 100000 and topic_number < 255
 
         if self.calculate_probabilities:
+            logger.info("Calculating doc-topic probabilities")
             probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
         else:
+            logger.info('Skipped topic probability distributions, since requires too much time for '
+                        '{} documents and {} topics.'.format(doc_number, topic_number))
             probabilities = None
 
         self._update_topic_size(documents)
