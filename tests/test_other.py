@@ -31,7 +31,6 @@ def test_get_params():
     assert not params["embedding_model"]
     assert not params["low_memory"]
     assert not params["nr_topics"]
-    assert params["n_neighbors"] == 15
     assert params["n_gram_range"] == (1, 1)
     assert params["min_topic_size"] == 10
     assert params["language"] == 'english'

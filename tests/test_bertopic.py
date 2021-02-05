@@ -50,7 +50,7 @@ def test_full_model(base_bertopic):
 
     # Test update topics
     topic = base_bertopic.get_topic(1)[:10]
-    base_bertopic.update_topics(newsgroup_docs, topics, n_gram_range=(2, 2), stop_words="english")
+    base_bertopic.update_topics(newsgroup_docs, topics, n_gram_range=(2, 2))
     updated_topic = base_bertopic.get_topic(1)[:10]
     base_bertopic.update_topics(newsgroup_docs, topics)
     original_topic = base_bertopic.get_topic(1)[:10]
