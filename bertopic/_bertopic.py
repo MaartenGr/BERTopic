@@ -756,6 +756,10 @@ class BERTopic:
                                              prediction_data=True).fit(umap_embeddings)
         documents['Topic'] = self.cluster_model.labels_
 
+        # check if (doc # < 100.000) and (cluster # < 255) for feasible running time
+        self.calculate_probabilities = \
+            len(documents.Document.values) < 100000 and len(set(self.cluster_model.labels_)) < 255
+
         if self.calculate_probabilities:
             probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
         else:
