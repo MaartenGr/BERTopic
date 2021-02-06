@@ -12,23 +12,10 @@ clusters.
 
 ```python
 from bertopic import BERTopic
-model = BERTopic(min_topic_size=10)
+topic_model = BERTopic(min_topic_size=10)
 ```
 
 You can increase this value if you have more data available or if you expect clusters to be quite large. 
-
-#### **Local Neighborhood**
-The `n_neighbors` parameter is used in `UMAP` when reducing the dimensionality. It is the size of the local 
-neighborhood used for manifold approximation. If we set this relatively high, we get a more global view of 
-the data which might reduce the number of clusters. Smaller values result in more local data being preseverd which 
-could result in more clusters.
-
-```python
-from bertopic import BERTopic
-model = BERTopic(n_neighbors=15)
-```
-
-If you have more data, you can increase the value of this parameter as you are more likely to have more neighbors. 
 
 ## **Hierarchical Topic Reduction**
 It is not possible for HDBSCAN to specify the number of clusters you would want. To a certain extent, 
@@ -44,18 +31,18 @@ of topics quite easily. We do this until we reach the value of `nr_topics`:
 
 ```python
 from bertopic import BERTopic
-model = BERTopic(nr_topics=20)
+topic_model = BERTopic(nr_topics=20)
 ```
 
 ### **Automatic Topic Reduction**
 One issue with the approach above is that it will merge topics regardless of whether they are actually very similar. They 
 are simply the most similar out of all options. This can be resolved by reducing the number of topics automatically. 
 It will reduce the number of topics, starting from the least frequent topic, as long as it exceeds a minimum 
-similarity of 0.9. To use this option, we simply set `nr_topics` to `"auto"`:
+similarity of 0.915. To use this option, we simply set `nr_topics` to `"auto"`:
 
 ```python
 from bertopic import BERTopic
-model = BERTopic(nr_topics="auto")
+topic_model = BERTopic(nr_topics="auto")
 ```
 
 ### **Topic Reduction after Training**
@@ -70,14 +57,14 @@ from sklearn.datasets import fetch_20newsgroups
  
 # Create topics -> Typically over 50 topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-model = BERTopic()
-topics, probs = model.fit_transform(docs)
+topic_model = BERTopic()
+topics, _ = topic_model.fit_transform(docs)
 
 # Further reduce topics
-new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
+new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
 ```
 
-The reasoning for putting `docs`, `topics`, and `probs` as parameters is that these values are not saved within 
-BERTopic on purpose. If you were to have a million documents, it seems very inefficient to save those in BERTopic 
+The reasoning for putting `docs` and `topics` (and optionally `probabilities`) as parameters is that these values are not saved within 
+BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic 
 instead of a dedicated database.  
 

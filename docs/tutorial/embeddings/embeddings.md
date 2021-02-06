@@ -1,4 +1,51 @@
-## **Transformer Models**
+## **Sentence Transformers**
+You can select any model from sentence-transformers [here](https://www.sbert.net/docs/pretrained_models.html) 
+and pass it through BERTopic with `embedding_model`:
+
+```python
+from bertopic import BERTopic
+topic_model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+```
+
+Or select a SentenceTransformer model with your own parameters:
+
+```python
+from bertopic import BERTopic
+from sentence_transformers import SentenceTransformer
+
+sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens", device="cuda")
+topic_model = BERTopic(embedding_model=sentence_model)
+```
+
+## **Flair**
+[Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that 
+is publicly available. Flair can be used as follows:
+
+```python
+from bertopic import BERTopic
+from flair.embeddings import TransformerDocumentEmbeddings
+
+roberta = TransformerDocumentEmbeddings('roberta-base')
+topic_model = BERTopic(embedding_model=roberta)
+```
+
+You can select any 🤗 transformers model [here](https://huggingface.co/models).
+
+Moreover, you can also use Flair to use word embeddings and pool them to create document embeddings. 
+Under the hood, Flair simply averages all word embeddings in a document. Then, we can easily 
+pass it to BERTopic in order to use those word embeddings as document embeddings: 
+
+```python
+from bertopic import BERTopic
+from flair.embeddings import WordEmbeddings, DocumentPoolEmbeddings
+
+glove_embedding = WordEmbeddings('crawl')
+document_glove_embeddings = DocumentPoolEmbeddings([glove_embedding])
+
+topic_model = BERTopic(embedding_model=document_glove_embeddings)
+```
+
+## **Custom Embeddings**
 The base models in BERTopic are both BERT-based models that work well with document similarity tasks. You documents, 
 however, might be too specific for a general pre-trained model to be used. Fortunately, you can use embedding 
 model in BERTopic in order to create document features.   
@@ -15,18 +62,12 @@ sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Create topic model
-model = BERTopic()
-topics, probabilities = model.fit_transform(docs, embeddings)
+topic_model = BERTopic()
+topics, probabilities = topic_model.fit_transform(docs, embeddings)
 ```
 
 As you can see above, we used a SentenceTransformer model to create the embedding. You could also have used 
 `🤗 transformers`, `Doc2Vec`, or any other embedding method. 
-
-Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
-multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
-topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
-with different parameters. 
-
 
 ## **TF-IDF**
 As mentioned above, any embedding technique can be used. However, when running umap, the typical distance metric is 

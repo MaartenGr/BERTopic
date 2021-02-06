@@ -11,8 +11,8 @@ from sklearn.datasets import fetch_20newsgroups
 
 # Create topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-model = BERTopic()
-topics, probs = model.fit_transform(docs)
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 After having trained our model, we can use `find_topics` to search for topics that are similar 
@@ -20,8 +20,8 @@ to an input search_term. Here, we are going to be searching for topics that clos
 search term "motor". Then, we extract the most similar topic and check the results: 
 
 ```python
->>> similar_topics, similarity = model.find_topics("motor", top_n=5)
->>> model.get_topic(similar_topics[0])
+>>> similar_topics, similarity = topic_model.find_topics("motor", top_n=5)
+>>> topic_model.get_topic(similar_topics[0])
 [('bike', 0.02275997701645559),
  ('motorcycle', 0.011391202866080292),
  ('bikes', 0.00981187573649205),

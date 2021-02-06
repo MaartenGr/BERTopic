@@ -13,13 +13,12 @@ First, we need to train our model:
 from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
 
-# Create topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-model = BERTopic()
-topics, probs = model.fit_transform(docs)
+topic_model = BERTopic()
+topics, _ = topic_model.fit_transform(docs)
 ```
 
-Then, we simply call `model.visualize_topics()` in order to visualize our topics. The resulting graph is a 
+Then, we simply call `topic_model.visualize_topics()` in order to visualize our topics. The resulting graph is a 
 plotly interactive graph which can be converted to html. 
 
 Thus, you can play around with the results below:
@@ -30,23 +29,29 @@ You can use the slider to select the topic which then lights up red. If you hove
 information is given about the topic, including size of the topic and its corresponding words.
 
 ## **Visualize Probablities**
-The variable `probabilities` that is returned from `transform()` or `fit_transform()` can be used to understand how 
-confident BERTopic is that certain topics can be found in a document.
+We can also calculate the probabilities of topics found in a document. In order to do so, we have to 
+set `calculate_probabilities` to True as calculating them can be quite computationally expensive. 
+Then, we use the variable `probabilities` that is returned from `transform()` or `fit_transform()` 
+to understand how confident BERTopic is that certain topics can be found in a document:
 
 ```python
 from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
 
-# Create topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-model = BERTopic()
-topics, probs = model.fit_transform(docs)
+topic_model = BERTopic(calculate_probabilities=True)
+topics, probabilities = topic_model.fit_transform(docs)
 ```
 
 To visualize the distributions, we simply call:
 
 ```python
-model.visualize_distribution(probabilities[0])
+topic_model.visualize_distribution(probabilities[0])
 ```
 
 <img src="probabilities.png" width="75%" height="75%"/>
+
+
+**NOTE**: The distribution of the probabilities does not give an indication to 
+the distribution of the frequencies of topics across a document. It merely shows
+how confident BERTopic is that certain topics can be found in a document.

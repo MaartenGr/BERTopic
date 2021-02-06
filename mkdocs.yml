@@ -7,22 +7,23 @@ site_author: Maarten P. Grootendorst
 use_directory_urls: false
 nav:
   - Home: index.md
+  - The Algorithm: tutorial/algorithm/algorithm.md
   - Guides:
       - Getting Started: tutorial/quickstart/quickstart.md
-      - Custom Embeddings: tutorial/embeddings/embeddings.md
+      - Embeddings: tutorial/embeddings/embeddings.md
       - Topic Visualization: tutorial/visualization/visualization.md
       - Topic Reduction: tutorial/topicreduction/topicreduction.md
       - Topic Representation: tutorial/topicrepresentation/topicrepresentation.md
       - Search Topics: tutorial/search/search.md
-  - The Algorithm: tutorial/algorithm/algorithm.md
+      - Custom Models: tutorial/models/models.md
   - API:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
+      - MMR: api/mmr.md
+  - FAQ: faq.md
   - Changelog: changelog.md
 plugins:
   - mkdocstrings:
-      setup_commands:
-        - import bertopic
       watch:
         - bertopic
   - search
@@ -36,15 +37,17 @@ theme:
     text: Ubuntu
     code: Ubuntu Mono
   favicon: icon.png
-  logo: icon.png
+  logo: icon_white.png
   feature:
     tabs: true
   palette:
-    primary: white
-    accent: blue
+    primary: black
+    accent: grey
 markdown_extensions:
   - admonition
   - codehilite
+  - markdown.extensions.codehilite:
+      guess_lang: false
   - pymdownx.inlinehilite
   - pymdownx.details
   - pymdownx.tabbed

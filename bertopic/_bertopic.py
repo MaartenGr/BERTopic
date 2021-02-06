@@ -86,12 +86,15 @@ class BERTopic:
                  min_topic_size: int = 10,
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
-                 verbose: bool = False,
-                 embedding_model: Union[str, SentenceTransformer,
-                                        DocumentEmbeddings, TokenEmbeddings] = None,
+                 calculate_probabilities: bool = False,
+                 embedding_model: Union[str,
+                                        SentenceTransformer,
+                                        DocumentEmbeddings,
+                                        TokenEmbeddings] = None,
                  umap_model: umap.UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
-                 vectorizer_model: CountVectorizer = None
+                 vectorizer_model: CountVectorizer = None,
+                 verbose: bool = False,
                  ):
         """BERTopic initialization
 
@@ -113,11 +116,14 @@ class BERTopic:
                        calculation. If this is set to None, no reduction is applied. Use
                        "auto" to automatically reduce topics that have a similarity of at
                        least 0.9, do not maps all others.
-            low_memory: Removes the calculation of probabilities and sets UMAP low memory
-                        to True to make sure less memory is used. This may also speeds up
-                        computation.
-                        NOTE: since probabilities are not calculated, you cannot use the
-                        corresponding visualization `visualize_probabilities`.
+            low_memory: Sets UMAP low memory to True to make sure less memory is used.
+            calculate_probabilities: Whether to calculate the topic probabilities. This could
+                                     slow down the extraction of topics if you have many
+                                     documents (> 100_000). Set this only to True if you
+                                     have a low amount of documents or if you do not mind
+                                     more computation time.
+                                     NOTE: since probabilities are not calculated, you cannot
+                                     use the corresponding visualization `visualize_probabilities`.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
             embedding_model: Use a custom embedding model. You can pass in a string related
@@ -133,10 +139,11 @@ class BERTopic:
         if top_n_words > 30:
             raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
         self.top_n_words = top_n_words
+        self.min_topic_size = min_topic_size
         self.nr_topics = nr_topics
         self.low_memory = low_memory
+        self.calculate_probabilities = calculate_probabilities
         self.verbose = verbose
-        self.min_topic_size = min_topic_size
 
         # Embedding model
         self.language = language if not embedding_model else None
@@ -346,7 +353,7 @@ class BERTopic:
         umap_embeddings = self.umap_model.transform(embeddings)
         predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
 
-        if not self.low_memory:
+        if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
             if len(documents) == 1:
                 probabilities = probabilities.flatten()
@@ -602,8 +609,8 @@ class BERTopic:
         if len(probabilities[probabilities > min_probability]) == 0:
             raise ValueError("There are no values where `min_probability` is higher than the "
                              "probabilities that were supplied. Lower `min_probability` to prevent this error.")
-        if self.low_memory:
-            raise ValueError("This visualization cannot be used if you have set `low_memory` to True "
+        if not self.calculate_probabilities:
+            raise ValueError("This visualization cannot be used if you have set `calculate_probabilities` to False "
                              "as it uses the topic probabilities. ")
 
         # Get values and indices equal or exceed the minimum probability
@@ -822,7 +829,7 @@ class BERTopic:
         self.hdbscan_model.fit(umap_embeddings)
         documents['Topic'] = self.hdbscan_model.labels_
 
-        if not self.low_memory:
+        if self.calculate_probabilities:
             probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
         else:
             probabilities = None

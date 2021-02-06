@@ -3,13 +3,19 @@
 
 **Highlights**:
 
-* Added `low_memory` parameter to reduce memory during computation (may speed-up computation, does not calculate probabilities)
-* Get parameters with `get_params()`
 * Option to use custom UMAP
 * Option to use custom HDBSAN
+* Added `low_memory` parameter to reduce memory during computation
 * Improved verbosity (shows progress bar)
-* Use the newest version of sentence-transformers as it speeds ups encoding significantly
-* Improved testing   
+* Improved testing
+* Use the newest version of `sentence-transformers` as it speeds ups encoding significantly
+* Add `Flair` to allow for more (custom) token/document embeddings
+* Return the figure of `visualize_topics()`
+* Expose all parameters with a single function: `get_params()`
+
+**Fixes**:  
+* To simplify the API, the parameters stop_words and n_neighbors were removed. These can still be used when a custom UMAP or CountVectorizer is used.
+* Set `calculate_probabilities` to False as a default. Calculating probabilities with HDBSCAN significantly increases computation time and memory usage. Better to remove calculating probabilities or only allow it by manually turning this on.
 
 ## **Version 0.4.2**
 *Release date:  10 Januari, 2021*
