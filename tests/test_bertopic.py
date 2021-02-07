@@ -21,6 +21,7 @@ def test_full_model(base_bertopic):
     NOTE: This does not cover all cases but merely combines it all together
     """
     # Test fit
+    base_bertopic.calculate_probabilities = True
     topics, probs = base_bertopic.fit_transform(newsgroup_docs)
 
     for topic in set(topics):
