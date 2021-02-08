@@ -10,13 +10,13 @@
       
       
       
-        <meta name="author" content="Maarten P. Grootendorst">
-      
-      
         <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/search/search.html">
       
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
       <link rel="shortcut icon" href="../../icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.2.3">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
     
     
       
@@ -24,14 +24,14 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.3b61ea93.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.19753c6b.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.39b8e14a.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.196e0c26.min.css">
         
           
           
-          <meta name="theme-color" content="#ffffff">
+          <meta name="theme-color" content="#000000">
         
       
     
@@ -39,7 +39,7 @@
     
       
         
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
         <style>body,input{font-family:"Ubuntu",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Ubuntu Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
       
@@ -60,10 +60,9 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="white" data-md-color-accent="blue">
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="black" data-md-color-accent="grey">
       
   
-    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
@@ -85,27 +84,25 @@
   <nav class="md-header-nav md-grid" aria-label="Header">
     <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-header-nav__button md-logo" aria-label="BERTopic">
       
-  <img src="../../icon.png" alt="logo">
+  <img src="../../icon_white.png" alt="logo">
 
     </a>
     <label class="md-header-nav__button md-icon" for="__drawer">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
     </label>
     <div class="md-header-nav__title" data-md-component="header-title">
-      <div class="md-header-nav__ellipsis">
-        <div class="md-header-nav__topic">
-          <span class="md-ellipsis">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
             BERTopic
           </span>
-        </div>
-        <div class="md-header-nav__topic">
-          <span class="md-ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
             
               Search Topics
             
           </span>
         </div>
-      </div>
+      
     </div>
     
       <label class="md-header-nav__button md-icon" for="__search">
@@ -164,20 +161,16 @@
         <div class="md-main__inner md-grid">
           
             
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
-
-
-
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic">
       
-  <img src="../../icon.png" alt="logo">
+  <img src="../../icon_white.png" alt="logo">
 
     </a>
     BERTopic
@@ -203,7 +196,6 @@
       
 
 
-
   <li class="md-nav__item">
     <a href="../../index.html" class="md-nav__link">
       Home
@@ -216,21 +208,29 @@
       
 
 
+  <li class="md-nav__item">
+    <a href="../algorithm/algorithm.html" class="md-nav__link">
+      The Algorithm
+    </a>
+  </li>
+
+    
+      
+      
+      
+
   
 
 
-  
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    
-      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
-    
-    <label class="md-nav__link" for="nav-2">
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
+    <label class="md-nav__link" for="nav-3">
       Guides
       <span class="md-nav__icon md-icon"></span>
     </label>
     <nav class="md-nav" aria-label="Guides" data-md-level="1">
-      <label class="md-nav__title" for="nav-2">
+      <label class="md-nav__title" for="nav-3">
         <span class="md-nav__icon md-icon"></span>
         Guides
       </label>
@@ -240,7 +240,6 @@
           
           
           
-
 
 
   <li class="md-nav__item">
@@ -255,10 +254,9 @@
           
 
 
-
   <li class="md-nav__item">
     <a href="../embeddings/embeddings.html" class="md-nav__link">
-      Custom Embeddings
+      Embeddings
     </a>
   </li>
 
@@ -266,7 +264,6 @@
           
           
           
-
 
 
   <li class="md-nav__item">
@@ -281,7 +278,6 @@
           
 
 
-
   <li class="md-nav__item">
     <a href="../topicreduction/topicreduction.html" class="md-nav__link">
       Topic Reduction
@@ -294,7 +290,6 @@
           
 
 
-
   <li class="md-nav__item">
     <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
       Topic Representation
@@ -305,7 +300,6 @@
           
           
           
-
 
   
 
@@ -349,6 +343,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../models/models.html" class="md-nav__link">
+      Custom Models
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -359,26 +365,9 @@
       
 
 
-
-  <li class="md-nav__item">
-    <a href="../algorithm/algorithm.html" class="md-nav__link">
-      The Algorithm
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-
-  
   <li class="md-nav__item md-nav__item--nested">
     
-    
-      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
-    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
     <label class="md-nav__link" for="nav-4">
       API
       <span class="md-nav__icon md-icon"></span>
@@ -396,7 +385,6 @@
           
 
 
-
   <li class="md-nav__item">
     <a href="../../api/bertopic.html" class="md-nav__link">
       BERTopic
@@ -409,10 +397,21 @@
           
 
 
-
   <li class="md-nav__item">
     <a href="../../api/ctfidf.html" class="md-nav__link">
       cTFIDF
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../api/mmr.html" class="md-nav__link">
+      MMR
     </a>
   </li>
 
@@ -426,6 +425,17 @@
       
       
 
+
+  <li class="md-nav__item">
+    <a href="../../faq.html" class="md-nav__link">
+      FAQ
+    </a>
+  </li>
+
+    
+      
+      
+      
 
 
   <li class="md-nav__item">
@@ -442,8 +452,7 @@
               </div>
             
             
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -492,15 +501,15 @@ to search for topics using search terms. First, let's create an train a BERTopic
 
 <span class="c1"># Create topics</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 
 <p>After having trained our model, we can use <code>find_topics</code> to search for topics that are similar 
 to an input search_term. Here, we are going to be searching for topics that closely relate the 
 search term "motor". Then, we extract the most similar topic and check the results: </p>
-<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">similar_topics</span><span class="p">,</span> <span class="n">similarity</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">find_topics</span><span class="p">(</span><span class="s2">&quot;motor&quot;</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">similar_topics</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">similar_topics</span><span class="p">,</span> <span class="n">similarity</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">find_topics</span><span class="p">(</span><span class="s2">&quot;motor&quot;</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">similar_topics</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="p">[(</span><span class="s1">&#39;bike&#39;</span><span class="p">,</span> <span class="mf">0.02275997701645559</span><span class="p">),</span>
  <span class="p">(</span><span class="s1">&#39;motorcycle&#39;</span><span class="p">,</span> <span class="mf">0.011391202866080292</span><span class="p">),</span>
  <span class="p">(</span><span class="s1">&#39;bikes&#39;</span><span class="p">,</span> <span class="mf">0.00981187573649205</span><span class="p">),</span>
@@ -549,13 +558,13 @@ the extracted topics are to the search term. </p>
           </a>
         
         
-          <a href="../algorithm/algorithm.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../models/models.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                The Algorithm
+                Custom Models
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
@@ -586,15 +595,15 @@ the extracted topics are to the search term. </p>
       
     </div>
     
-      <script src="../../assets/javascripts/vendor.08c56446.min.js"></script>
-      <script src="../../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="../../assets/javascripts/vendor.0ac82a11.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({
           base: "../..",
           features: [],
           search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.8c7e0a7e.min.js"
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
