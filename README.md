@@ -14,7 +14,8 @@ BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
 visualizations similar to LDAvis! 
 
-Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99).
+Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
+and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
 
 ## Installation
 
@@ -146,20 +147,20 @@ topics, _ = topic_model.fit_transform(docs, embeddings)
 
 | Methods | Code  | 
 |-----------------------|---|
-| Fit the model    |  `model.fit(docs])` |
-| Fit the model and predict documents    |  `model.fit_transform(docs])` |
-| Predict new documents    |  `model.transform([new_doc])` |
-| Access single topic   | `model.get_topic(12)`  |   
-| Access all topics     |  `model.get_topics()` |
-| Get topic freq    |  `model.get_topic_freq()` |
-| Visualize Topics    |  `model.visualize_topics()` |
-| Visualize Topic Probability Distribution    |  `model.visualize_distribution(probabilities[0])` |
-| Update topic representation | `model.update_topics(docs, topics, n_gram_range=(1, 3))` |
-| Reduce nr of topics | `model.reduce_topics(docs, topics, probabilities, nr_topics=30)` |
-| Find topics | `model.find_topics("vehicle")` |
-| Save model    |  `model.save("my_model")` |
+| Fit the model    |  `topic_model.fit(docs])` |
+| Fit the model and predict documents    |  `topic_model.fit_transform(docs])` |
+| Predict new documents    |  `topic_model.transform([new_doc])` |
+| Access single topic   | `topic_model.get_topic(12)`  |   
+| Access all topics     |  `topic_model.get_topics()` |
+| Get topic freq    |  `topic_model.get_topic_freq()` |
+| Visualize Topics    |  `topic_model.visualize_topics()` |
+| Visualize Topic Probability Distribution    |  `topic_model.visualize_distribution(probabilities[0])` |
+| Update topic representation | `topic_model.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Reduce nr of topics | `topic_model.reduce_topics(docs, topics, nr_topics=30)` |
+| Find topics | `topic_model.find_topics("vehicle")` |
+| Save model    |  `topic_model.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
-| Get parameters |  `model.get_params()` |
+| Get parameters |  `topic_model.get_params()` |
  
 ### Citation
 To cite BERTopic in your work, please use the following bibtex reference:
