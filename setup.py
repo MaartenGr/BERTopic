@@ -11,18 +11,15 @@ docs_packages = [
     "mkdocstrings>=0.8.0",
 ]
 
-
 base_packages = [
-    "tqdm>=4.41.1",
-    "numpy>=1.18.5",
-    "umap-learn>=0.4.6",
-    "hdbscan>=0.8.26",
+    "numpy>=1.19.2",
+    "hdbscan>=0.8.27",
+    "umap-learn>=0.5.0",
     "pandas>=1.1.5",
-    "scipy>=1.3.1",
     "scikit-learn>=0.22.2.post1",
-    "joblib==0.17.0",
+    "tqdm>=4.41.1",
     "torch>=1.4.0",
-    "sentence-transformers>=0.3.9"
+    "sentence-transformers>=0.4.1"
 ]
 
 visualization_packages = [
@@ -30,7 +27,13 @@ visualization_packages = [
     "plotly>=4.7.0,<4.14.3"
 ]
 
-dev_packages = docs_packages + test_packages + visualization_packages
+flair_packages = [
+    "flair==0.7"
+]
+
+extra_packages = visualization_packages + flair_packages
+
+dev_packages = docs_packages + test_packages + extra_packages
 
 
 with open("README.md", "r") as fh:
@@ -39,7 +42,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="bertopic",
     packages=["bertopic"],
-    version="0.4.3",
+    version="0.5.0",
     author="Maarten Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
@@ -67,7 +70,9 @@ setuptools.setup(
         "test": test_packages,
         "docs": docs_packages,
         "dev": dev_packages,
-        "visualization": visualization_packages
+        "visualization": visualization_packages,
+        "flair": flair_packages,
+        "all": extra_packages
     },
     python_requires='>=3.6',
 )

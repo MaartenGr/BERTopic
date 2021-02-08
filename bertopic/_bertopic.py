@@ -3,10 +3,12 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 import re
 import joblib
+import inspect
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from scipy.sparse.csr import csr_matrix
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Union, Mapping, Any
 
 # Models
 import umap
@@ -22,13 +24,22 @@ from ._utils import MyLogger, check_documents_type, check_embeddings_shape, chec
 from ._embeddings import languages
 from ._mmr import mmr
 
-# Additional dependencies
+# Visualization
 try:
     import matplotlib.pyplot as plt
     import plotly.express as px
     _HAS_VIZ = True
 except ModuleNotFoundError as e:
     _HAS_VIZ = False
+
+# Flair
+try:
+    from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
+    from flair.data import Sentence
+    _HAS_FLAIR = True
+except ModuleNotFoundError as e:
+    DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings = None, None, None
+    _HAS_FLAIR = False
 
 logger = MyLogger("WARNING")
 
@@ -46,25 +57,21 @@ class BERTopic:
 
     docs = fetch_20newsgroups(subset='all')['data']
 
-    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+    model = BERTopic(verbose=True)
     topics = model.fit_transform(docs)
     ```
 
-    If you want to use your own embeddings, use it as follows:
+    If you want to use your own embedding model, use it as follows:
 
     ```python
     from bertopic import BERTopic
     from sklearn.datasets import fetch_20newsgroups
     from sentence_transformers import SentenceTransformer
 
-    # Create embeddings
     docs = fetch_20newsgroups(subset='all')['data']
     sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-    embeddings = sentence_model.encode(docs, show_progress_bar=True)
-
-    # Create topic model
-    model = BERTopic(verbose=True)
-    topics = model.fit_transform(docs, embeddings)
+    model = BERTopic(verbose=True, embedding_model=sentence_model)
+    topics = model.fit_transform(docs)
     ```
 
     Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -74,96 +81,91 @@ class BERTopic:
     """
     def __init__(self,
                  language: str = "english",
-                 embedding_model: str = None,
                  top_n_words: int = 10,
-                 nr_topics: Union[int, str] = None,
                  n_gram_range: Tuple[int, int] = (1, 1),
                  min_topic_size: int = 10,
-                 n_neighbors: int = 15,
-                 n_components: int = 5,
-                 stop_words: Union[str, List[str]] = None,
+                 nr_topics: Union[int, str] = None,
+                 low_memory: bool = False,
+                 calculate_probabilities: bool = False,
+                 embedding_model: Union[str,
+                                        SentenceTransformer,
+                                        DocumentEmbeddings,
+                                        TokenEmbeddings] = None,
+                 umap_model: umap.UMAP = None,
+                 hdbscan_model: hdbscan.HDBSCAN = None,
+                 vectorizer_model: CountVectorizer = None,
                  verbose: bool = False,
-                 vectorizer: CountVectorizer = None,
-                 calculate_probabilities: bool = True,
-                 allow_st_model: bool = True):
+                 ):
         """BERTopic initialization
 
-        Args:
-            language: The main language used in your documents. For a full overview of supported languages
-                      see bertopic.embeddings.languages. Select "multilingual" to load in a model that
-                      support 50+ languages.
-            embedding_model: Model to use. Overview of options can be found here
-                            https://www.sbert.net/docs/pretrained_models.html
+        Arguments:
+            language: The main language used in your documents. For a full overview of
+                      supported languages see bertopic.embeddings.languages. Select
+                      "multilingual" to load in a model that support 50+ languages.
             top_n_words: The number of words per topic to extract
-            nr_topics: Specifying the number of topics will reduce the initial
-                       number of topics to the value specified. This reduction can take
-                       a while as each reduction in topics (-1) activates a c-TF-IDF calculation.
-                       IF this is set to None, no reduction is applied. Use "auto" to automatically
-                       reduce topics that have a similarity of at least 0.9, do not maps all others.
             n_gram_range: The n-gram range for the CountVectorizer.
                           Advised to keep high values between 1 and 3.
                           More would likely lead to memory issues.
-                          Note that this will not be used if you pass in your own CountVectorizer.
-            min_topic_size: The minimum size of the topic.
-            n_neighbors: The size of local neighborhood (in terms of number of neighboring sample points) used
-                         for manifold approximation (UMAP).
-            n_components: The dimension of the space to embed into when reducing dimensionality with UMAP.
-            stop_words: Stopwords that can be used as either a list of strings, or the name of the
-                        language as a string. For example: 'english' or ['the', 'and', 'I'].
-                        Note that this will not be used if you pass in your own CountVectorizer.
+                          NOTE: This param will not be used if you pass in your own
+                          CountVectorizer.
+            min_topic_size: The minimum size of the topic. Increasing this value will lead
+                            to a lower number of clusters/topics.
+            nr_topics: Specifying the number of topics will reduce the initial
+                       number of topics to the value specified. This reduction can take
+                       a while as each reduction in topics (-1) activates a c-TF-IDF
+                       calculation. If this is set to None, no reduction is applied. Use
+                       "auto" to automatically reduce topics that have a similarity of at
+                       least 0.9, do not maps all others.
+            low_memory: Sets UMAP low memory to True to make sure less memory is used.
+            calculate_probabilities: Whether to calculate the topic probabilities. This could
+                                     slow down the extraction of topics if you have many
+                                     documents (> 100_000). Set this only to True if you
+                                     have a low amount of documents or if you do not mind
+                                     more computation time.
+                                     NOTE: since probabilities are not calculated, you cannot
+                                     use the corresponding visualization `visualize_probabilities`.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
-            vectorizer: Pass in your own CountVectorizer from scikit-learn
-            calculate_probabilities: Whether to calculate the topic probabilities. This could slow down
-                                     extraction of topics if you have many documents (>100_000). If so,
-                                     set this to False to increase speed.
-            allow_st_model: This allows BERTopic to use a multi-lingual version of SentenceTransformer
-                            to be used to fine-tune the topic words extracted from the c-TF-IDF representation.
-                            Moreover, it will allow you to search for topics based on search queries.
-
-        Usage:
-
-        ```python
-        from bertopic import BERTopic
-        model = BERTopic(language = "english",
-                         embedding_model = None,
-                         top_n_words = 10,
-                         nr_topics = 30,
-                         n_gram_range = (1, 1),
-                         min_topic_size = 10,
-                         n_neighbors = 15,
-                         n_components = 5,
-                         stop_words = None,
-                         verbose = True,
-                         vectorizer = None,
-                         allow_st_model = True)
-        ```
+            embedding_model: Use a custom embedding model. You can pass in a string related
+                             to one of the following models:
+                             https://www.sbert.net/docs/pretrained_models.html
+                             You can also pass in a SentenceTransformer() model or a Flair
+                             DocumentEmbedding model.
+            umap_model: Pass in a umap.UMAP model to be used instead of the default
+            hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
+            vectorizer_model: Pass in a CountVectorizer instead of the default
         """
-
-        # Embedding model
-        self.language = language
-        self.embedding_model = embedding_model
-        self.allow_st_model = allow_st_model
-
         # Topic-based parameters
         if top_n_words > 30:
             raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
         self.top_n_words = top_n_words
-        self.nr_topics = nr_topics
         self.min_topic_size = min_topic_size
+        self.nr_topics = nr_topics
+        self.low_memory = low_memory
         self.calculate_probabilities = calculate_probabilities
+        self.verbose = verbose
 
-        # Umap parameters
-        self.n_neighbors = n_neighbors
-        self.n_components = n_components
+        # Embedding model
+        self.language = language if not embedding_model else None
+        self.embedding_model = embedding_model
 
-        # Vectorizer parameters
-        self.stop_words = stop_words
+        # Vectorizer
         self.n_gram_range = n_gram_range
-        self.vectorizer = vectorizer or CountVectorizer(ngram_range=self.n_gram_range, stop_words=self.stop_words)
+        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
 
-        self.umap_model = None
-        self.cluster_model = None
+        # UMAP
+        self.umap_model = umap_model or umap.UMAP(n_neighbors=15,
+                                                  n_components=5,
+                                                  min_dist=0.0,
+                                                  metric='cosine',
+                                                  low_memory=self.low_memory)
+
+        # HDBSCAN
+        self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
+                                                              metric='euclidean',
+                                                              cluster_selection_method='eom',
+                                                              prediction_data=True)
+
         self.topics = None
         self.topic_sizes = None
         self.reduced_topics_mapped = None
@@ -227,7 +229,10 @@ class BERTopic:
 
         Returns:
             predictions: Topic predictions for each documents
-            probabilities: The topic probability distribution
+            probabilities: The topic probability distribution which is returned by default.
+                           If `low_memory` in BERTopic is set to False, then the
+                           probabilities are not calculated to speed up computation and
+                           decrease memory usage.
 
         Usage:
 
@@ -267,7 +272,9 @@ class BERTopic:
 
         # Extract embeddings
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
-            embeddings = self._extract_embeddings(documents.Document)
+            self.embedding_model = self._select_embedding_model()
+            embeddings = self._extract_embeddings(documents.Document, verbose=self.verbose)
+            logger.info("Transformed documents to Embeddings")
         else:
             self.custom_embeddings = True
 
@@ -300,7 +307,10 @@ class BERTopic:
 
         Returns:
             predictions: Topic predictions for each documents
-            probabilities: The topic probability distribution
+            probabilities: The topic probability distribution which is returned by default.
+                           If `low_memory` in BERTopic is set to False, then the
+                           probabilities are not calculated to speed up computation and
+                           decrease memory usage.
 
         Usage:
 
@@ -337,13 +347,14 @@ class BERTopic:
             documents = [documents]
 
         if not isinstance(embeddings, np.ndarray):
-            embeddings = self._extract_embeddings(documents)
+            self.embedding_model = self._select_embedding_model()
+            embeddings = self._extract_embeddings(documents, verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        predictions, _ = hdbscan.approximate_predict(self.cluster_model, umap_embeddings)
+        predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
 
         if self.calculate_probabilities:
-            probabilities = hdbscan.membership_vector(self.cluster_model, umap_embeddings)
+            probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
             if len(documents) == 1:
                 probabilities = probabilities.flatten()
         else:
@@ -368,7 +379,7 @@ class BERTopic:
         with the topic representation it is advised to keep it
         below 5 words.
 
-        Args:
+        Arguments:
             search_term: the term you want to use to search for topics
             top_n: the number of topics to return
 
@@ -377,15 +388,14 @@ class BERTopic:
             similarity: the similarity scores from high to low
 
         """
-        if self.custom_embeddings and not self.allow_st_model:
-            raise Exception("This method can only be used if you set `allow_st_model` to True when "
-                            "using custom embeddings.")
+        if self.custom_embeddings:
+            raise Exception("This method can only be used if you did not use custom embeddings.")
 
         topic_list = list(self.topics.keys())
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
-        search_embedding = self._extract_embeddings([search_term]).flatten()
+        search_embedding = self._extract_embeddings([search_term], verbose=False).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
 
         # Extract topics most similar to search_term
@@ -399,8 +409,7 @@ class BERTopic:
                       docs: List[str],
                       topics: List[int],
                       n_gram_range: Tuple[int, int] = None,
-                      stop_words: str = None,
-                      vectorizer: CountVectorizer = None):
+                      vectorizer_model: CountVectorizer = None):
         """ Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
 
@@ -409,14 +418,11 @@ class BERTopic:
         stop_words or you want to try out a different n_gram_range. This function allows you
         to update the topic representation after they have been formed.
 
-        Args:
-            docs: The docs you used when calling either `fit` or `fit_transform`
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
             topics: The topics that were returned when calling either `fit` or `fit_transform`
             n_gram_range: The n-gram range for the CountVectorizer.
-            stop_words: Stopwords that can be used as either a list of strings, or the name of the
-                        language as a string. For example: 'english' or ['the', 'and', 'I'].
-                        Note that this will not be used if you pass in your own CountVectorizer.
-            vectorizer: Pass in your own CountVectorizer from scikit-learn
+            vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
         Usage:
         ```python
@@ -425,25 +431,23 @@ class BERTopic:
 
         # Create topics
         docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic(n_gram_range=(1, 1), stop_words=None)
+        model = BERTopic(n_gram_range=(1, 1))
         topics, probs = model.fit_transform(docs)
 
         # Update topic representation
-        model.update_topics(docs, topics, n_gram_range=(2, 3), stop_words="english")
+        model.update_topics(docs, topics, n_gram_range=(2, 3))
         ```
         """
         check_is_fitted(self)
         if not n_gram_range:
             n_gram_range = self.n_gram_range
 
-        if not stop_words:
-            stop_words = self.stop_words
+        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
 
-        self.vectorizer = vectorizer or CountVectorizer(ngram_range=n_gram_range, stop_words=stop_words)
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
         self._extract_topics(documents)
 
-    def get_topics(self) -> Dict[str, Tuple[str, float]]:
+    def get_topics(self) -> Mapping[str, Tuple[str, float]]:
         """ Return topics with top n words and their c-TF-IDF score
 
         Usage:
@@ -455,7 +459,7 @@ class BERTopic:
         check_is_fitted(self)
         return self.topics
 
-    def get_topic(self, topic: int) -> Union[Dict[str, Tuple[str, float]], bool]:
+    def get_topic(self, topic: int) -> Union[Mapping[str, Tuple[str, float]], bool]:
         """ Return top n words for a specific topic and their c-TF-IDF scores
 
         Usage:
@@ -514,8 +518,8 @@ class BERTopic:
         Arguments:
             docs: The docs you used when calling either `fit` or `fit_transform`
             topics: The topics that were returned when calling either `fit` or `fit_transform`
-            nr_topics: The number of topics you want reduced to
             probabilities: The probabilities that were returned when calling either `fit` or `fit_transform`
+            nr_topics: The number of topics you want reduced to
 
         Returns:
             new_topics: Updated topics
@@ -571,7 +575,7 @@ class BERTopic:
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
                            "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
-        self._plotly_topic_visualization(df, topic_list)
+        return self._plotly_topic_visualization(df, topic_list)
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
@@ -626,7 +630,6 @@ class BERTopic:
                             " ".join(label))
                 labels.append(label)
             else:
-                print(idx, probabilities[idx])
                 vals.remove(probabilities[idx])
         pos = range(len(vals))
 
@@ -655,56 +658,131 @@ class BERTopic:
         if save:
             fig.savefig("probability.png", dpi=300, bbox_inches='tight')
 
-    def save(self, path: str) -> None:
+    def save(self,
+             path: str,
+             save_embedding_model: bool = True) -> None:
         """ Saves the model to the specified path
 
         Arguments:
             path: the location and name of the file you want to save
+            save_embedding_model: Whether to save the embedding model in this class
+                                  as you might have selected a local model or one that
+                                  is downloaded automatically from the cloud.
 
         Usage:
 
         ```python
         model.save("my_model")
         ```
+
+        or if you do not want the embedding_model to be saved locally:
+
+        ```python
+        model.save("my_model", save_embedding_model=False)
+        ```
         """
         with open(path, 'wb') as file:
-            joblib.dump(self, file)
+            if not save_embedding_model:
+                embedding_model = self.embedding_model
+                self.embedding_model = None
+                joblib.dump(self, file)
+                self.embedding_model = embedding_model
+            else:
+                joblib.dump(self, file)
 
     @classmethod
-    def load(cls, path: str):
+    def load(cls,
+             path: str,
+             embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None):
         """ Loads the model from the specified path
 
         Arguments:
             path: the location and name of the BERTopic file you want to load
+            embedding_model: If the embedding_model was not saved to save space or to load
+                             it in from the cloud, you can load it in by specifying it here.
 
         Usage:
 
         ```python
         BERTopic.load("my_model")
         ```
+
+        or if you did not save the embedding model:
+
+        ```python
+        BERTopic.load("my_model", embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+        ```
         """
         with open(path, 'rb') as file:
-            return joblib.load(file)
+            if embedding_model:
+                topic_model = joblib.load(file)
+                topic_model.embedding_model = embedding_model
+            else:
+                topic_model = joblib.load(file)
+            return topic_model
 
-    def _extract_embeddings(self, documents: List[str]) -> np.ndarray:
+    def get_params(self, deep: bool = False) -> Mapping[str, Any]:
+        """ Get parameters for this estimator.
+
+        Adapted from:
+            https://github.com/scikit-learn/scikit-learn/blob/b3ea3ed6a/sklearn/base.py#L178
+
+        Arguments:
+            deep: bool, default=True
+                  If True, will return the parameters for this estimator and
+                  contained subobjects that are estimators.
+
+        Returns:
+            out: Parameter names mapped to their values.
+        """
+        out = dict()
+        for key in self._get_param_names():
+            value = getattr(self, key)
+            if deep and hasattr(value, 'get_params'):
+                deep_items = value.get_params().items()
+                out.update((key + '__' + k, val) for k, val in deep_items)
+            out[key] = value
+        return out
+
+    def _extract_embeddings(self, documents: Union[List[str], str], verbose: bool = None) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
+            verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
         Returns:
             embeddings: The extracted embeddings using the sentence transformer
                         module. Typically uses pre-trained huggingface models.
         """
-        model = self._select_embedding_model()
-        logger.info("Loaded embedding model")
-        embeddings = model.encode(documents, show_progress_bar=False)
-        logger.info("Transformed documents to Embeddings")
+        if isinstance(documents, str):
+            documents = [documents]
+
+        # Infer embeddings with SentenceTransformer
+        if isinstance(self.embedding_model, SentenceTransformer):
+            embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
+
+        # Infer embeddings with Flair
+        elif isinstance(self.embedding_model, DocumentEmbeddings):
+            embeddings = []
+            for index, document in tqdm(enumerate(documents), disable=not verbose):
+                try:
+                    sentence = Sentence(document) if document else Sentence("an empty document")
+                    self.embedding_model.embed(sentence)
+                except RuntimeError:
+                    sentence = Sentence("an empty document")
+                    self.embedding_model.embed(sentence)
+                embedding = sentence.embedding.detach().cpu().numpy()
+                embeddings.append(embedding)
+            embeddings = np.asarray(embeddings)
+
+        else:
+            raise ValueError("An incorrect embedding model type was selected.")
 
         return embeddings
 
-    def _map_predictions(self, predictions):
+    def _map_predictions(self, predictions: List[int]) -> List[int]:
         """ Map predictions to the correct topics if topics were reduced """
         mapped_predictions = []
         for prediction in predictions:
@@ -723,17 +801,15 @@ class BERTopic:
             umap_embeddings: The reduced embeddings
         """
         if isinstance(embeddings, csr_matrix):
-            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
-                                        n_components=self.n_components,
-                                        metric='hellinger').fit(embeddings)
+            self.umap_model = umap.UMAP(n_neighbors=15,
+                                        n_components=5,
+                                        metric='hellinger',
+                                        low_memory=self.low_memory).fit(embeddings)
         else:
-            self.umap_model = umap.UMAP(n_neighbors=self.n_neighbors,
-                                        n_components=self.n_components,
-                                        min_dist=0.0,
-                                        metric='cosine').fit(embeddings)
+            self.umap_model.fit(embeddings)
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality with UMAP")
-        return umap_embeddings
+        return np.nan_to_num(umap_embeddings)
 
     def _cluster_embeddings(self,
                             umap_embeddings: np.ndarray,
@@ -750,14 +826,11 @@ class BERTopic:
                        and newly added Topics
             probabilities: The distribution of probabilities
         """
-        self.cluster_model = hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
-                                             metric='euclidean',
-                                             cluster_selection_method='eom',
-                                             prediction_data=True).fit(umap_embeddings)
-        documents['Topic'] = self.cluster_model.labels_
+        self.hdbscan_model.fit(umap_embeddings)
+        documents['Topic'] = self.hdbscan_model.labels_
 
         if self.calculate_probabilities:
-            probabilities = hdbscan.all_points_membership_vectors(self.cluster_model)
+            probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
         else:
             probabilities = None
 
@@ -791,7 +864,7 @@ class BERTopic:
         a sentence-transformer model to be used or there are custom embeddings but it is allowed
         to use a different multi-lingual sentence-transformer model
         """
-        if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
+        if not self.custom_embeddings:
             topic_list = list(self.topics.keys())
             topic_list.sort()
             n = self.top_n_words
@@ -799,7 +872,7 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            embeddings = self._extract_embeddings(topic_words)
+            embeddings = self._extract_embeddings(topic_words, verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -827,7 +900,7 @@ class BERTopic:
             words: The names of the words to which values were given
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
-        count = self.vectorizer.fit(documents)
+        count = self.vectorizer_model.fit(documents)
         words = count.get_feature_names()
         X = count.transform(documents)
         transformer = ClassTFIDF().fit(X, n_samples=m)
@@ -836,7 +909,7 @@ class BERTopic:
 
         return c_tf_idf, words
 
-    def _update_topic_size(self, documents: pd.DataFrame) -> None:
+    def _update_topic_size(self, documents: pd.DataFrame):
         """ Calculate the topic sizes
 
         Arguments:
@@ -849,7 +922,7 @@ class BERTopic:
         """ Based on tf_idf scores per topic, extract the top n words per topic
 
         Arguments:
-        words: List of all words (sorted according to tf_idf matrix position)
+            words: List of all words (sorted according to tf_idf matrix position)
         """
 
         # Get top 30 words per topic based on c-TF-IDF score
@@ -862,30 +935,43 @@ class BERTopic:
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
-        if not self.custom_embeddings or all([self.custom_embeddings and self.allow_st_model]):
-            model = self._select_embedding_model()
+        if not self.custom_embeddings:
 
             for topic, topic_words in self.topics.items():
                 words = [word[0] for word in topic_words]
-                word_embeddings = model.encode(words)
-                topic_embedding = model.encode(" ".join(words)).reshape(1, -1)
+                word_embeddings = self._extract_embeddings(words, verbose=False)
+                topic_embedding = self._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
+
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
                 self.topics[topic] = [(word, value) for word, value in self.topics[topic] if word in topic_words]
 
-    def _select_embedding_model(self) -> SentenceTransformer:
+    def _select_embedding_model(self) -> Union[SentenceTransformer, DocumentEmbeddings]:
         """ Select an embedding model based on language or a specific sentence transformer models.
         When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
         xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
+
+        Returns:
+            model: Either a Sentence-Transformer or Flair model
         """
 
-        # Used for fine-tuning the topic representation
-        # If a custom embeddings are used, we use the multi-langual model
-        # to extract word embeddings
-        if self.custom_embeddings and self.allow_st_model:
-            return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
+        # Sentence Transformer embeddings
+        if isinstance(self.embedding_model, SentenceTransformer):
+            return self.embedding_model
+
+        # Flair word embeddings
+        elif _HAS_FLAIR and isinstance(self.embedding_model, TokenEmbeddings):
+            return DocumentPoolEmbeddings([self.embedding_model])
+
+        # Flair document embeddings + disable fine tune to prevent CUDA OOM
+        # https://github.com/flairNLP/flair/issues/1719
+        elif _HAS_FLAIR and isinstance(self.embedding_model, DocumentEmbeddings):
+            if "fine_tune" in self.embedding_model.__dict__:
+                self.embedding_model.fine_tune = False
+            return self.embedding_model
 
         # Select embedding model based on specific sentence transformer model
-        elif self.embedding_model:
+        elif isinstance(self.embedding_model, str):
+            self.sentence_pointer = self.embedding_model
             return SentenceTransformer(self.embedding_model)
 
         # Select embedding model based on language
@@ -904,6 +990,9 @@ class BERTopic:
                                  f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
                                  "Else, please select a language from the following list:\n"
                                  f"{languages}")
+
+        elif self.custom_embeddings:
+            return None
 
         return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
@@ -925,7 +1014,7 @@ class BERTopic:
 
         return documents
 
-    def _reduce_to_n_topics(self, documents):
+    def _reduce_to_n_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
         Arguments:
@@ -964,8 +1053,8 @@ class BERTopic:
 
         return documents
 
-    def _auto_reduce_topics(self, documents):
-        """ Reduce the number of topics as long as it exceeds a minimum similarity of 0.9
+    def _auto_reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
+        """ Reduce the number of topics as long as it exceeds a minimum similarity of 0.915
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
@@ -1002,7 +1091,7 @@ class BERTopic:
                 self._update_topic_size(documents)
                 has_mapped.append(topic_to_merge)
 
-        _ = self._extract_topics(documents)
+        self._extract_topics(documents)
 
         logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
 
@@ -1094,13 +1183,13 @@ class BERTopic:
                       x0=sum(x_range) / 2, y0=y_range[0], x1=sum(x_range) / 2, y1=y_range[1],
                       line=dict(color="#CFD8DC", width=2))
         fig.add_shape(type="line",
-                      x0=x_range[0], y0=sum(y_range) / 2, x1=y_range[1], y1=sum(y_range) / 2,
+                      x0=x_range[0], y0=sum(y_range) / 2, x1=x_range[1], y1=sum(y_range) / 2,
                       line=dict(color="#9E9E9E", width=2))
         fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
         fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
         fig.data = fig.data[::-1]
 
-        fig.show()
+        return fig
 
     def _preprocess_text(self, documents: np.ndarray) -> List[str]:
         """ Basic preprocessing of text
@@ -1117,3 +1206,15 @@ class BERTopic:
             cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
         cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
         return cleaned_documents
+
+    @classmethod
+    def _get_param_names(cls):
+        """Get parameter names for the estimator
+
+        Adapted from:
+            https://github.com/scikit-learn/scikit-learn/blob/b3ea3ed6a/sklearn/base.py#L178
+        """
+        init_signature = inspect.signature(cls.__init__)
+        parameters = sorted([p.name for p in init_signature.parameters.values()
+                             if p.name != 'self' and p.kind != p.VAR_KEYWORD])
+        return parameters

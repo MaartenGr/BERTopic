@@ -1,9 +1,10 @@
 
-The algorithm contains, roughly, 3 stages:   
+The algorithm contains, roughly, 4 stages:   
    
 - Extract document embeddings with **`Sentence Transformers`** or **`TF-IDF`**  
 - Cluster document embeddings to create groups of similar documents with **`UMAP`** and **`HDBSCAN`**  
-- Extract and reduce topics with **`c-TF-IDF`**  
+- Extract and reduce topics with **`c-TF-IDF`**
+- Improve coherence of words with Maximal Marginal Relevance  
 
 ##  **Create Document Embeddings**
 We start by creating document embeddings from a set of documents using 
