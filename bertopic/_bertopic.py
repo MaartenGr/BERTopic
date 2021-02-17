@@ -372,7 +372,8 @@ class BERTopic:
                          timestamps: Union[List[str],
                                            List[int]],
                          datetime_format: str = None,
-                         fine_tune: bool = True) -> pd.DataFrame:
+                         evolution_tuning: bool = True,
+                         global_tuning: bool = True) -> pd.DataFrame:
         """ Create topics over time
 
         To create the topics over time, BERTopic needs to be already fitted once.
@@ -399,7 +400,10 @@ class BERTopic:
                              Set this to None if you want to have it automatically detect the format.
                              See strftime documentation for more information on choices:
                              https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.
-            fine_tune: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
+            evolution_tuning: Fine-tune each topic representation at timestamp t by averaging its
+                              c-TF-IDF matrix with the c-TF-IDF matrix at timestamp t-1. This creates
+                              evolutionary topic representations.
+            global_tuning: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
                        with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                        topic representations that could not be found in the documents at timestamp t.
 
@@ -410,8 +414,8 @@ class BERTopic:
         check_is_fitted(self)
         check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
+        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
 
-        # Infer datetime format
         if isinstance(timestamps[0], str):
             infer_datetime_format = True if not datetime_format else False
             documents["Timestamps"] = pd.to_datetime(documents["Timestamps"],
@@ -426,30 +430,39 @@ class BERTopic:
                           "which significantly slows down the application. Consider aggregating "
                           "the timestamps to speed up inference.")
 
-        # Normalize the global c-TF-IDF representation to fine-tune the local representation
-        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
-
         # For each unique timestamp, create topic representations
         topics_over_time = []
-        for timestamp in tqdm(timestamps, disable=not self.verbose):
+        for index, timestamp in tqdm(enumerate(timestamps), disable=not self.verbose):
 
             # Calculate c-TF-IDF representation for a specific timestamp
             selection = documents.loc[documents.Timestamps == timestamp, :]
-            documents_per_topic = selection.groupby(['Topic'], as_index=False).agg(
-                {'Document': ' '.join, "Timestamps": "count"})
+            documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
+                                                                                    "Timestamps": "count"})
             c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+
+            if global_tuning or evolution_tuning:
+                c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
+
+            # Fine-tune the c-TF-IDF matrix at timestamp t by averaging it with the c-TF-IDF
+            # matrix at timestamp t-1
+            if evolution_tuning and index != 0:
+                current_topics = sorted(list(documents_per_topic.Topic.values))
+                overlapping_topics = sorted(list(set(previous_topics).intersection(set(current_topics))))
+
+                current_overlap_idx = [current_topics.index(topic) for topic in overlapping_topics]
+                previous_overlap_idx = [previous_topics.index(topic) for topic in overlapping_topics]
+
+                c_tf_idf.tolil()[current_overlap_idx] = ((c_tf_idf[current_overlap_idx] +
+                                                          previous_c_tf_idf[previous_overlap_idx]) / 2.0).tolil()
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
-            if fine_tune:
-                c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
+            if global_tuning:
                 c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
 
             # Extract the words per topic
             labels = sorted(list(documents_per_topic.Topic.unique()))
             words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels)
-
-            # Extract topic frequency and save results
             topic_frequency = pd.Series(documents_per_topic.Timestamps.values,
                                         index=documents_per_topic.Topic).to_dict()
 
@@ -459,6 +472,10 @@ class BERTopic:
                                     topic_frequency[topic],
                                     timestamp) for topic, values in words_per_topic.items()]
             topics_over_time.extend(topics_at_timestamp)
+
+            if evolution_tuning:
+                previous_topics = sorted(list(documents_per_topic.Topic.values))
+                previous_c_tf_idf = c_tf_idf.copy()
 
         return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
 
