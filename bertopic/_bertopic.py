@@ -16,7 +16,7 @@ import hdbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, normalize
 
 # BERTopic
 from ._ctfidf import ClassTFIDF
@@ -365,6 +365,102 @@ class BERTopic:
             probabilities = self._map_probabilities(probabilities)
 
         return predictions, probabilities
+
+    def topics_over_time(self,
+                         docs: List[str],
+                         topics: List[int],
+                         timestamps: Union[List[str],
+                                           List[int]],
+                         datetime_format: str = None,
+                         fine_tune: bool = True) -> pd.DataFrame:
+        """ Create topics over time
+
+        To create the topics over time, BERTopic needs to be already fitted once.
+        From the fitted models, the c-TF-IDF representations are calculate at
+        each timestamp t. Then, the c-TF-IDF representations at timestamp t are
+        averaged with the gloabl c-TF-IDF representations in order to fine-tune the
+        local representations.
+
+        NOTE:
+            Make sure to use a limited number of unique timestamps (<100) as the
+            c-TF-IDF representation will be calculated at each single unique timestamp.
+            Having a large number of unique timestamps can take some time to be calculated.
+            Moreover, there aren't many use-cased where you would like to see the difference
+            in topic representations over more than 100 different timestamps.
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            timestamps: The timestamps of each document. This can be either a list of strings or ints.
+                        If it is a list of strings, then the datetime format will be automatically
+                        inferred. If it is a list of ints, then the documents will be ordered by
+                        ascending order.
+            datetime_format: The datetime format of the timestamps if they are strings, eg “%d/%m/%Y”.
+                             Set this to None if you want to have it automatically detect the format.
+                             See strftime documentation for more information on choices:
+                             https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.
+            fine_tune: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
+                       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                       topic representations that could not be found in the documents at timestamp t.
+
+        Returns:
+            topics_over_time: A dataframe that contains the topic, words, and frequency of topic
+                              at timestamp t.
+        """
+        check_is_fitted(self)
+        check_documents_type(docs)
+        documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
+
+        # Infer datetime format
+        if isinstance(timestamps[0], str):
+            infer_datetime_format = True if not datetime_format else False
+            documents["Timestamps"] = pd.to_datetime(documents["Timestamps"],
+                                                     infer_datetime_format=infer_datetime_format,
+                                                     format=datetime_format)
+
+        # Sort documents in chronological order
+        documents = documents.sort_values("Timestamps")
+        timestamps = documents.Timestamps.unique()
+        if len(timestamps) > 100:
+            warnings.warn(f"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "
+                          "which significantly slows down the application. Consider aggregating "
+                          "the timestamps to speed up inference.")
+
+        # Normalize the global c-TF-IDF representation to fine-tune the local representation
+        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+
+        # For each unique timestamp, create topic representations
+        topics_over_time = []
+        for timestamp in tqdm(timestamps, disable=not self.verbose):
+
+            # Calculate c-TF-IDF representation for a specific timestamp
+            selection = documents.loc[documents.Timestamps == timestamp, :]
+            documents_per_topic = selection.groupby(['Topic'], as_index=False).agg(
+                {'Document': ' '.join, "Timestamps": "count"})
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+
+            # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
+            # by simply taking the average of the two
+            if fine_tune:
+                c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+
+            # Extract the words per topic
+            labels = sorted(list(documents_per_topic.Topic.unique()))
+            words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels)
+
+            # Extract topic frequency and save results
+            topic_frequency = pd.Series(documents_per_topic.Timestamps.values,
+                                        index=documents_per_topic.Topic).to_dict()
+
+            # Fill dataframe with results
+            topics_at_timestamp = [(topic,
+                                    ", ".join([words[0] for words in values][:5]),
+                                    topic_frequency[topic],
+                                    timestamp) for topic, values in words_per_topic.items()]
+            topics_over_time.extend(topics_at_timestamp)
+
+        return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
 
     def find_topics(self,
                     search_term: str,
@@ -849,7 +945,7 @@ class BERTopic:
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
-        self._extract_words_per_topic(words)
+        self.topics = self._extract_words_per_topic(words)
         self._create_topic_vectors()
 
     def _create_topic_vectors(self):
@@ -887,24 +983,32 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
             documents_per_topic: The joined documents per topic such that each topic has a single
                                  string made out of multiple documents
             m: The total number of documents (unjoined)
+            fit: Whether to fit a new vectorizer or use the fitted self.vectorizer_model
 
         Returns:
             tf_idf: The resulting matrix giving a value (importance score) for each word per topic
             words: The names of the words to which values were given
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
-        count = self.vectorizer_model.fit(documents)
-        words = count.get_feature_names()
-        X = count.transform(documents)
-        transformer = ClassTFIDF().fit(X, n_samples=m)
-        c_tf_idf = transformer.transform(X)
+
+        if fit:
+            self.vectorizer_model.fit(documents)
+
+        words = self.vectorizer_model.get_feature_names()
+        X = self.vectorizer_model.transform(documents)
+
+        if fit:
+            self.transformer = ClassTFIDF().fit(X, n_samples=m)
+
+        c_tf_idf = self.transformer.transform(X)
+
         self.topic_sim_matrix = cosine_similarity(c_tf_idf)
 
         return c_tf_idf, words
@@ -918,32 +1022,53 @@ class BERTopic:
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
         self.topic_sizes = dict(zip(sizes.Topic, sizes.Document))
 
-    def _extract_words_per_topic(self, words: List[str]):
+    def _extract_words_per_topic(self,
+                                 words: List[str],
+                                 c_tf_idf: csr_matrix = None,
+                                 labels: List[int] = None) -> Mapping[str,
+                                                                      List[Tuple[str, float]]]:
         """ Based on tf_idf scores per topic, extract the top n words per topic
+
+        If the top words per topic need to be extracted, then only the `words` parameter
+        needs to be passed. If the top words per topic in a specific timestamp, then it
+        is important to pass the timestamp-based c-TF-IDF matrix and its corresponding
+        labels.
 
         Arguments:
             words: List of all words (sorted according to tf_idf matrix position)
+            c_tf_idf: A c-TF-IDF matrix from which to calculate the top words
+            labels: A list of topic labels
+
+        Returns:
+            topics: The top words per topic
         """
+        if c_tf_idf is None:
+            c_tf_idf = self.c_tf_idf.toarray()
+        else:
+            c_tf_idf = c_tf_idf.toarray()
+
+        if labels is None:
+            labels = sorted(list(self.topic_sizes.keys()))
 
         # Get top 30 words per topic based on c-TF-IDF score
-        c_tf_idf = self.c_tf_idf.toarray()
-        labels = sorted(list(self.topic_sizes.keys()))
         indices = c_tf_idf.argsort()[:, -30:]
-        self.topics = {label: [(words[j], c_tf_idf[i][j])
-                               for j in indices[i]][::-1]
-                       for i, label in enumerate(labels)}
+        topics = {label: [(words[j], c_tf_idf[i][j])
+                          for j in indices[i]][::-1]
+                  for i, label in enumerate(labels)}
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
         if not self.custom_embeddings:
 
-            for topic, topic_words in self.topics.items():
+            for topic, topic_words in topics.items():
                 words = [word[0] for word in topic_words]
                 word_embeddings = self._extract_embeddings(words, verbose=False)
                 topic_embedding = self._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
 
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
-                self.topics[topic] = [(word, value) for word, value in self.topics[topic] if word in topic_words]
+                topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+
+        return topics
 
     def _select_embedding_model(self) -> Union[SentenceTransformer, DocumentEmbeddings]:
         """ Select an embedding model based on language or a specific sentence transformer models.

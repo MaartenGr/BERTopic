@@ -43,6 +43,13 @@ def test_full_model(base_bertopic):
     assert len(probs_test) == len(base_bertopic.get_topic_freq())-1
     assert len(topics_test) == 1
 
+    # Test topics over time
+    timestamps = [i % 10 for i in range(1000)]
+    topics_over_time = base_bertopic.topics_over_time(newsgroup_docs, topics, timestamps)
+
+    assert topics_over_time.Frequency.sum() == 1000
+    assert len(topics_over_time.Topic.unique()) == len(set(topics))
+
     # Test find topic
     similar_topics, similarity = base_bertopic.find_topics("query", top_n=2)
     assert len(similar_topics) == 2
