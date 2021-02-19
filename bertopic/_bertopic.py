@@ -587,8 +587,40 @@ class BERTopic:
         else:
             return False
 
+    def get_topic_info(self, topic: int = None) -> pd.DataFrame:
+        """ Get information about each topic including its id, frequency, and name
+
+        Arguments:
+            topic: A specific topic for which you want the frequency
+
+        Returns:
+            info: The information relating to either a single topic or all topics
+
+        Usage:
+
+        ```python
+        info_df = model.get_topic_info()
+        ```
+        """
+        check_is_fitted(self)
+
+        info = pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
+        info["Name"] = info.Topic.map(self.topic_names)
+
+        if topic:
+            info = info.loc[info.Topic == topic, :]
+
+        return info
+
     def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
         """ Return the the size of topics (descending order)
+
+        Arguments:
+            topic: A specific topic for which you want the frequency
+
+        Returns:
+            Either the frequency of a single topic or dataframe with
+            the frequencies of all topics
 
         Usage:
 
@@ -964,6 +996,9 @@ class BERTopic:
         self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
         self.topics = self._extract_words_per_topic(words)
         self._create_topic_vectors()
+        self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
+                            for key, values in
+                            self.topics.items()}
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
