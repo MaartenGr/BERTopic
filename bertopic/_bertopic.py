@@ -28,6 +28,7 @@ from ._mmr import mmr
 try:
     import matplotlib.pyplot as plt
     import plotly.express as px
+    import plotly.graph_objects as go
     _HAS_VIZ = True
 except ModuleNotFoundError as e:
     _HAS_VIZ = False
@@ -721,6 +722,89 @@ class BERTopic:
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
                            "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
         return self._plotly_topic_visualization(df, topic_list)
+
+    def visualize_topics_over_time(self,
+                                   topics_over_time: pd.DataFrame,
+                                   top_n: int = None,
+                                   topics: List[int] = None):
+        """ Visualize topics over time
+
+        Arguments:
+            topics_over_time: The topics you would like to be visualized with the
+                              corresponding topic representation
+            top_n: To visualize the most frequent topics instead of all
+            topics: Select which topics you would like to be visualized
+
+        Returns:
+            A plotly.graph_objects.Figure including all traces
+
+        Usage:
+
+        ```python
+        model.visualize_topics_over_time(topics_over_time)
+        ```
+        """
+        check_is_fitted(self)
+        if not _HAS_VIZ:
+            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
+                                      f"additional dependencies;\npip install bertopic[visualization]")
+
+        colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
+
+        # Select topics
+        if topics:
+            selected_topics = topics
+        elif top_n:
+            selected_topics = self.get_topic_freq().head(top_n + 1)[1:].Topic.values
+        else:
+            selected_topics = self.get_topic_freq().Topic.values
+
+        # Prepare data
+        topic_names = {key: value[:40] + "..." if len(value) > 40 else value for key, value in self.topic_names.items()}
+        topics_over_time["Name"] = topics_over_time.Topic.map(topic_names)
+        data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :]
+
+        # Add traces
+        fig = go.Figure()
+        for index, topic in enumerate(data.Topic.unique()):
+            trace_data = data.loc[data.Topic == topic, :]
+            topic_name = trace_data.Name.values[0]
+            words = trace_data.Words.values
+            fig.add_trace(go.Scatter(x=trace_data.Timestamp, y=trace_data.Frequency,
+                                     mode='lines',
+                                     marker_color=colors[index % 7],
+                                     hoverinfo="text",
+                                     name=topic_name,
+                                     hovertext=[f'<b>Topic {topic}</b><br>Words: {word}' for word in words]))
+
+        # Styling of the visualization
+        fig.update_xaxes(showgrid=True)
+        fig.update_yaxes(showgrid=True)
+        fig.update_layout(
+            xaxis_title="Frequency",
+            title={
+                'text': "<b>Topics over Time",
+                'y': .95,
+                'x': 0.40,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            template="simple_white",
+            width=1250,
+            height=450,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+            legend=dict(
+                title="<b>Global Topic Representation",
+            )
+        )
+        return fig
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
