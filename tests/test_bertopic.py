@@ -39,7 +39,6 @@ def test_full_model(base_bertopic):
     doc = "This is a new document to predict."
     topics_test, probs_test = base_bertopic.transform([doc])
 
-    assert len(probs_test) == len(base_bertopic.get_topic_freq())-1
     assert len(topics_test) == 1
 
     # Test topics over time
