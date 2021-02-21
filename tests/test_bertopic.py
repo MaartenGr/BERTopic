@@ -33,7 +33,6 @@ def test_full_model(base_bertopic):
         assert len(words) == 10
 
     assert len(base_bertopic.get_topic_freq()) > 2
-    assert probs.shape == (1000, len(base_bertopic.get_topic_freq())-1)
     assert len(base_bertopic.get_topics()) == len(base_bertopic.get_topic_freq())
 
     # Test transform
