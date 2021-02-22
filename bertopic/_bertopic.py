@@ -372,6 +372,7 @@ class BERTopic:
                          topics: List[int],
                          timestamps: Union[List[str],
                                            List[int]],
+                         nr_bins: int = None,
                          datetime_format: str = None,
                          evolution_tuning: bool = True,
                          global_tuning: bool = True) -> pd.DataFrame:
@@ -397,6 +398,9 @@ class BERTopic:
                         If it is a list of strings, then the datetime format will be automatically
                         inferred. If it is a list of ints, then the documents will be ordered by
                         ascending order.
+            nr_bins: The number of bins you want to create for the timestamps. The left interval will
+                     be chosen as the timestamp. An additional column will be created with the
+                     entire interval.
             datetime_format: The datetime format of the timestamps if they are strings, eg “%d/%m/%Y”.
                              Set this to None if you want to have it automatically detect the format.
                              See strftime documentation for more information on choices:
@@ -423,13 +427,17 @@ class BERTopic:
                                                      infer_datetime_format=infer_datetime_format,
                                                      format=datetime_format)
 
+        if nr_bins:
+            documents["Bins"] = pd.cut(documents.Timestamps, bins=nr_bins)
+            documents["Timestamps"] = documents.apply(lambda row: row.Bins.left, 1)
+
         # Sort documents in chronological order
         documents = documents.sort_values("Timestamps")
         timestamps = documents.Timestamps.unique()
         if len(timestamps) > 100:
             warnings.warn(f"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "
-                          "which significantly slows down the application. Consider aggregating "
-                          "the timestamps to speed up inference.")
+                          "which significantly slows down the application. Consider setting `nr_bins` "
+                          "to a value lower than 100 to speed up calculation. ")
 
         # For each unique timestamp, create topic representations
         topics_over_time = []
