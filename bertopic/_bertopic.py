@@ -789,7 +789,7 @@ class BERTopic:
         fig.update_xaxes(showgrid=True)
         fig.update_yaxes(showgrid=True)
         fig.update_layout(
-            xaxis_title="Frequency",
+            yaxis_title="Frequency",
             title={
                 'text': "<b>Topics over Time",
                 'y': .95,
