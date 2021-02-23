@@ -1377,15 +1377,17 @@ class BERTopic:
             probabilities: An array containing probabilities
 
         Returns:
-            probabilities: Updated probabilities
+            new_probabilities: Updated probabilities
 
         """
-        if isinstance(probabilities, np.ndarray):
+        new_probabilities = probabilities.copy()
+        if isinstance(new_probabilities, np.ndarray):
             for from_topic, to_topic in self.mapped_topics.items():
-                probabilities[:, to_topic] += probabilities[:, from_topic]
-                probabilities[:, from_topic] = 0
+                if to_topic != -1:
+                    new_probabilities[:, to_topic] += new_probabilities[:, from_topic]
+                new_probabilities[:, from_topic] = 0
 
-            return probabilities.round(3)
+            return new_probabilities.round(3)
         else:
             return None
 
