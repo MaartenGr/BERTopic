@@ -1383,7 +1383,7 @@ class BERTopic:
         if isinstance(probabilities, np.ndarray):
             new_probabilities = probabilities.copy()
             for from_topic, to_topic in self.mapped_topics.items():
-                if to_topic != -1:
+                if to_topic != -1 and from_topic != -1:
                     new_probabilities[:, to_topic] += new_probabilities[:, from_topic]
                 new_probabilities[:, from_topic] = 0
 
