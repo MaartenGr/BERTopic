@@ -152,8 +152,6 @@ Here, we will be using all of Donald Trump's tweet so see how he talked over cer
 import re
 import pandas as pd
 
-
-# Prepare data
 trump = pd.read_csv('https://drive.google.com/uc?export=download&id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6')
 trump.text = trump.apply(lambda row: re.sub(r"http\S+", "", row.text).lower(), 1)
 trump.text = trump.apply(lambda row: " ".join(filter(lambda x:x[0]!="@", row.text.split())), 1)
@@ -185,7 +183,7 @@ Finally, we can visualize the topics by simply calling `visualize_topics_over_ti
 model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
 ```
 
-<img src="images/dtm.gif" width="60%" height="60%" align="center" />
+<img src="images/dtm.gif" width="80%" height="80%" align="center" />
 
 
 ### Overview
