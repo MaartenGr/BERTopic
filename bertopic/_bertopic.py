@@ -57,9 +57,8 @@ class BERTopic:
     from sklearn.datasets import fetch_20newsgroups
 
     docs = fetch_20newsgroups(subset='all')['data']
-
-    model = BERTopic(verbose=True)
-    topics = model.fit_transform(docs)
+    model = BERTopic(verbose=True, calculate_probabilities=True)
+    topics, probabilities = model.fit_transform(docs)
     ```
 
     If you want to use your own embedding model, use it as follows:
@@ -72,7 +71,6 @@ class BERTopic:
     docs = fetch_20newsgroups(subset='all')['data']
     sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
     model = BERTopic(verbose=True, embedding_model=sentence_model)
-    topics = model.fit_transform(docs)
     ```
 
     Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -195,7 +193,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)
+        model = BERTopic(verbose=True).fit(docs)
         ```
 
         If you want to use your own embeddings, use it as follows:
@@ -211,7 +209,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(None, verbose=True).fit(docs, embeddings)
+        model = BERTopic(verbose=True).fit(docs, embeddings)
         ```
         """
         self.fit_transform(documents, embeddings)
@@ -243,7 +241,7 @@ class BERTopic:
 
         docs = fetch_20newsgroups(subset='all')['data']
 
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+        model = BERTopic(verbose=True)
         topics = model.fit_transform(docs)
         ```
 
@@ -260,7 +258,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(None, verbose=True)
+        model = BERTopic(verbose=True)
         topics = model.fit_transform(docs, embeddings)
         ```
         """
@@ -320,7 +318,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)
+        model = BERTopic(verbose=True).fit(docs)
         topics = model.transform(docs)
         ```
 
@@ -337,7 +335,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(None, verbose=True).fit(docs, embeddings)
+        model = BERTopic(verbose=True).fit(docs, embeddings)
         topics = model.transform(docs, embeddings)
         ```
         """
@@ -381,7 +379,7 @@ class BERTopic:
         To create the topics over time, BERTopic needs to be already fitted once.
         From the fitted models, the c-TF-IDF representations are calculate at
         each timestamp t. Then, the c-TF-IDF representations at timestamp t are
-        averaged with the gloabl c-TF-IDF representations in order to fine-tune the
+        averaged with the global c-TF-IDF representations in order to fine-tune the
         local representations.
 
         NOTE:
@@ -394,7 +392,7 @@ class BERTopic:
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             topics: The topics that were returned when calling either `fit` or `fit_transform`
-            timestamps: The timestamps of each document. This can be either a list of strings or ints.
+            timestamps: The timestamp of each document. This can be either a list of strings or ints.
                         If it is a list of strings, then the datetime format will be automatically
                         inferred. If it is a list of ints, then the documents will be ordered by
                         ascending order.
@@ -415,6 +413,18 @@ class BERTopic:
         Returns:
             topics_over_time: A dataframe that contains the topic, words, and frequency of topic
                               at timestamp t.
+
+        Usage:
+
+        The timestamps variable represent the timestamp of each document. If you have over
+        100 unique timestamps, it is advised to bin the timestamps as shown below:
+
+        ```python
+        from bertopic import BERTopic
+        model = BERTopic(verbose=True).fit(docs)
+        topics = model.transform(docs)
+        topics_over_time = model.topics_over_time(docs, topics, timestamps, nr_bins=20)
+        ```
         """
         check_is_fitted(self)
         check_documents_type(docs)
@@ -509,6 +519,17 @@ class BERTopic:
             similar_topics: the most similar topics from high to low
             similarity: the similarity scores from high to low
 
+        Usage:
+
+        You can use the underlying embedding model to find topics that
+        best represent the search term:
+
+        ```python
+        topics, similarity = model.find_topics("sports", top_n=5)
+        ```
+
+        Note that the search query is typically more accurate if the
+        search_term consists of a phrase or multiple words.
         """
         if self.custom_embeddings:
             raise Exception("This method can only be used if you did not use custom embeddings.")
@@ -547,17 +568,20 @@ class BERTopic:
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
         Usage:
+
+        In order to update the topic representation, you will need to first fit the topic
+        model and extract topics from them. Based on these, you can update the representation:
+
         ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
-
-        # Create topics
-        docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic(n_gram_range=(1, 1))
-        topics, probs = model.fit_transform(docs)
-
-        # Update topic representation
         model.update_topics(docs, topics, n_gram_range=(2, 3))
+        ```
+
+        YOu can also use a custom vectorizer to update the representation:
+
+        ```python
+        from sklearn.feature_extraction.text import CountVectorizer
+        vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english")
+        model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
         ```
         """
         check_is_fitted(self)
@@ -572,6 +596,9 @@ class BERTopic:
     def get_topics(self) -> Mapping[str, Tuple[str, float]]:
         """ Return topics with top n words and their c-TF-IDF score
 
+        Returns:
+            self.topic: The top n words per topic and the corresponding c-TF-IDF score
+
         Usage:
 
         ```python
@@ -583,6 +610,12 @@ class BERTopic:
 
     def get_topic(self, topic: int) -> Union[Mapping[str, Tuple[str, float]], bool]:
         """ Return top n words for a specific topic and their c-TF-IDF scores
+
+        Arguments:
+            topic: A specific topic for which you want its representation
+
+        Returns:
+            The top n words for a specific word and its respective c-TF-IDF scores
 
         Usage:
 
@@ -681,17 +714,17 @@ class BERTopic:
 
         Usage:
 
+        You can further reduce the topics by passing the documents with its
+        topics and probabilities (if they were calculated):
+
         ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
+        new_topics, new_probs = model.reduce_topics(docs, topics, probabilities, nr_topics=30)
+        ```
 
-        # Create topics -> Typically over 50 topics
-        docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic()
-        topics, probs = model.fit_transform(docs)
+        If probabilities were not calculated simply run the function without them:
 
-        # Further reduce topics
-        new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
+        ```python
+        new_topics, _= model.reduce_topics(docs, topics, nr_topics=30)
         ```
         """
         check_is_fitted(self)
@@ -711,6 +744,21 @@ class BERTopic:
 
         This visualization is highly inspired by LDAvis, a great visualization
         technique typically reserved for LDA.
+
+        Usage:
+
+        To visualize the topics simply run:
+
+        ```python
+        model.visualize_topics()
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = model.visualize_topics()
+        fig.write_html("path/to/file.html")
+        ```
         """
         check_is_fitted(self)
         if not _HAS_VIZ:
@@ -748,8 +796,17 @@ class BERTopic:
 
         Usage:
 
+        To visualize the topics over time, simply run:
+
         ```python
         model.visualize_topics_over_time(topics_over_time)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = model.visualize_topics_over_time(topics_over_time)
+        fig.write_html("path/to/file.html")
         ```
         """
         check_is_fitted(self)

@@ -143,6 +143,51 @@ topic_model = BERTopic()
 topics, _ = topic_model.fit_transform(docs, embeddings)
 ```
 
+### Dynamic Topic Modeling
+Dynamic topic modeling (DTM) is a collection of techniques aimed at analyzing the evolution of topics 
+over time. These methods allow you to understand how a topic is represented across different times. 
+Here, we will be using all of Donald Trump's tweet so see how he talked over certain topics over time: 
+
+```python
+import re
+import pandas as pd
+
+
+# Prepare data
+trump = pd.read_csv('https://drive.google.com/uc?export=download&id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6')
+trump.text = trump.apply(lambda row: re.sub(r"http\S+", "", row.text).lower(), 1)
+trump.text = trump.apply(lambda row: " ".join(filter(lambda x:x[0]!="@", row.text.split())), 1)
+trump.text = trump.apply(lambda row: " ".join(re.sub("[^a-zA-Z]+", " ", row.text).split()), 1)
+trump = trump.loc[(trump.isRetweet == "f") & (trump.text != ""), :]
+timestamps = trump.date.to_list()
+tweets = trump.text.to_list()
+```
+
+Then, we need to extract the global topic representations by simply creating and training a BERTopic model:
+
+```python
+from bertopic import BERTopic
+
+model = BERTopic(verbose=True)
+topics, _ = model.fit_transform(tweets)
+```
+
+From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 
+by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
+
+```python
+topics_over_time = model.topics_over_time(tweets, topics, timestamps)
+```
+
+Finally, we can visualize the topics by simply calling `visualize_topics_over_time()`: 
+
+```python
+model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+```
+
+<img src="images/dtm.gif" width="60%" height="60%" align="center" />
+
+
 ### Overview
 
 | Methods | Code  | 
@@ -153,6 +198,7 @@ topics, _ = topic_model.fit_transform(docs, embeddings)
 | Access single topic   | `topic_model.get_topic(12)`  |   
 | Access all topics     |  `topic_model.get_topics()` |
 | Get topic freq    |  `topic_model.get_topic_freq()` |
+| Get all topic information|  `topic_model.get_topic_info()` |
 | Visualize Topics    |  `topic_model.visualize_topics()` |
 | Visualize Topic Probability Distribution    |  `topic_model.visualize_distribution(probabilities[0])` |
 | Update topic representation | `topic_model.update_topics(docs, topics, n_gram_range=(1, 3))` |
@@ -161,6 +207,7 @@ topics, _ = topic_model.fit_transform(docs, embeddings)
 | Save model    |  `topic_model.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `topic_model.get_params()` |
+
  
 ### Citation
 To cite BERTopic in your work, please use the following bibtex reference:

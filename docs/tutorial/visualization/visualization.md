@@ -28,6 +28,41 @@ Thus, you can play around with the results below:
 You can use the slider to select the topic which then lights up red. If you hover over a topic, then general 
 information is given about the topic, including size of the topic and its corresponding words.
 
+## **Visualize Topics over Time**
+After creating topics over time with Dynamic Topic Modeling, we can visualize these topics by 
+leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
+of topics over time whilst giving the option of hovering over the points to show the time-specific topic representations. 
+Simply call `visualize_topics_over_time` with the newly created topics over time:
+
+
+```python
+import re
+import pandas as pd
+from bertopic import BERTopic
+
+# Prepare data
+trump = pd.read_csv('https://drive.google.com/uc?export=download&id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6')
+trump.text = trump.apply(lambda row: re.sub(r"http\S+", "", row.text).lower(), 1)
+trump.text = trump.apply(lambda row: " ".join(filter(lambda x:x[0]!="@", row.text.split())), 1)
+trump.text = trump.apply(lambda row: " ".join(re.sub("[^a-zA-Z]+", " ", row.text).split()), 1)
+trump = trump.loc[(trump.isRetweet == "f") & (trump.text != ""), :]
+timestamps = trump.date.to_list()
+tweets = trump.text.to_list()
+
+# Create topics over time
+model = BERTopic(verbose=True)
+topics, _ = model.fit_transform(tweets)
+topics_over_time = model.topics_over_time(tweets, topics, timestamps)
+```
+
+Then, we visualize some interesting topics: 
+
+```python
+model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+```
+<iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
+
+
 ## **Visualize Probablities**
 We can also calculate the probabilities of topics found in a document. In order to do so, we have to 
 set `calculate_probabilities` to True as calculating them can be quite computationally expensive. 
@@ -55,3 +90,4 @@ topic_model.visualize_distribution(probabilities[0])
 **NOTE**: The distribution of the probabilities does not give an indication to 
 the distribution of the frequencies of topics across a document. It merely shows
 how confident BERTopic is that certain topics can be found in a document.
+
