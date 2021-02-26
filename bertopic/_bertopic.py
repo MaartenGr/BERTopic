@@ -1380,8 +1380,8 @@ class BERTopic:
             new_probabilities: Updated probabilities
 
         """
-        new_probabilities = probabilities.copy()
-        if isinstance(new_probabilities, np.ndarray):
+        if isinstance(probabilities, np.ndarray):
+            new_probabilities = probabilities.copy()
             for from_topic, to_topic in self.mapped_topics.items():
                 if to_topic != -1:
                     new_probabilities[:, to_topic] += new_probabilities[:, from_topic]
