@@ -94,6 +94,7 @@ class BERTopic:
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
                  verbose: bool = False,
+                 significance = False,
                  ):
         """BERTopic initialization
 
@@ -172,6 +173,7 @@ class BERTopic:
         self.topic_embeddings = None
         self.topic_sim_matrix = None
         self.custom_embeddings = False
+        self.significance = significance
 
         if verbose:
             logger.set_level("DEBUG")
@@ -1211,6 +1213,11 @@ class BERTopic:
         c_tf_idf = self.transformer.transform(X)
 
         self.topic_sim_matrix = cosine_similarity(c_tf_idf)
+
+        #significance score calculation
+        if self.significance == True:
+            word_list_length = np.array([len(i.split()) for i in words]).reshape(len(words),1)
+            signif_score_matrix = (c_tf_idf.T * word_list_length).T
 
         return c_tf_idf, words
 
