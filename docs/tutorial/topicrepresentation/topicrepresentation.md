@@ -55,4 +55,10 @@ also allow for single words.
 
 To me, the combination of the words above seem a bit more intuitive than the words we previously had! You can play 
 around with `n_gram_range` or use your own custom `sklearn.feature_extraction.text.CountVectorizer` and pass that  
-instead. 
+instead: 
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+vectorizer_model = CountVectorizer(stop_words="English", ngram_range=(1, 5))
+topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+```
