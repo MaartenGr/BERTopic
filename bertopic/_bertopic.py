@@ -16,7 +16,7 @@ import hdbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, normalize
 
 # BERTopic
 from ._ctfidf import ClassTFIDF
@@ -28,6 +28,7 @@ from ._mmr import mmr
 try:
     import matplotlib.pyplot as plt
     import plotly.express as px
+    import plotly.graph_objects as go
     _HAS_VIZ = True
 except ModuleNotFoundError as e:
     _HAS_VIZ = False
@@ -56,9 +57,8 @@ class BERTopic:
     from sklearn.datasets import fetch_20newsgroups
 
     docs = fetch_20newsgroups(subset='all')['data']
-
-    model = BERTopic(verbose=True)
-    topics = model.fit_transform(docs)
+    model = BERTopic(verbose=True, calculate_probabilities=True)
+    topics, probabilities = model.fit_transform(docs)
     ```
 
     If you want to use your own embedding model, use it as follows:
@@ -71,7 +71,6 @@ class BERTopic:
     docs = fetch_20newsgroups(subset='all')['data']
     sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
     model = BERTopic(verbose=True, embedding_model=sentence_model)
-    topics = model.fit_transform(docs)
     ```
 
     Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -135,6 +134,7 @@ class BERTopic:
             umap_model: Pass in a umap.UMAP model to be used instead of the default
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
             vectorizer_model: Pass in a CountVectorizer instead of the default
+            significance: Flag to allow calculating a significance score
         """
         # Topic-based parameters
         if top_n_words > 30:
@@ -196,7 +196,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)
+        model = BERTopic(verbose=True).fit(docs)
         ```
 
         If you want to use your own embeddings, use it as follows:
@@ -212,7 +212,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(None, verbose=True).fit(docs, embeddings)
+        model = BERTopic(verbose=True).fit(docs, embeddings)
         ```
         """
         self.fit_transform(documents, embeddings)
@@ -244,7 +244,7 @@ class BERTopic:
 
         docs = fetch_20newsgroups(subset='all')['data']
 
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)
+        model = BERTopic(verbose=True)
         topics = model.fit_transform(docs)
         ```
 
@@ -261,7 +261,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(None, verbose=True)
+        model = BERTopic(verbose=True)
         topics = model.fit_transform(docs, embeddings)
         ```
         """
@@ -321,7 +321,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)
+        model = BERTopic(verbose=True).fit(docs)
         topics = model.transform(docs)
         ```
 
@@ -338,7 +338,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(None, verbose=True).fit(docs, embeddings)
+        model = BERTopic(verbose=True).fit(docs, embeddings)
         topics = model.transform(docs, embeddings)
         ```
         """
@@ -368,6 +368,139 @@ class BERTopic:
 
         return predictions, probabilities
 
+    def topics_over_time(self,
+                         docs: List[str],
+                         topics: List[int],
+                         timestamps: Union[List[str],
+                                           List[int]],
+                         nr_bins: int = None,
+                         datetime_format: str = None,
+                         evolution_tuning: bool = True,
+                         global_tuning: bool = True) -> pd.DataFrame:
+        """ Create topics over time
+
+        To create the topics over time, BERTopic needs to be already fitted once.
+        From the fitted models, the c-TF-IDF representations are calculate at
+        each timestamp t. Then, the c-TF-IDF representations at timestamp t are
+        averaged with the global c-TF-IDF representations in order to fine-tune the
+        local representations.
+
+        NOTE:
+            Make sure to use a limited number of unique timestamps (<100) as the
+            c-TF-IDF representation will be calculated at each single unique timestamp.
+            Having a large number of unique timestamps can take some time to be calculated.
+            Moreover, there aren't many use-cased where you would like to see the difference
+            in topic representations over more than 100 different timestamps.
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            timestamps: The timestamp of each document. This can be either a list of strings or ints.
+                        If it is a list of strings, then the datetime format will be automatically
+                        inferred. If it is a list of ints, then the documents will be ordered by
+                        ascending order.
+            nr_bins: The number of bins you want to create for the timestamps. The left interval will
+                     be chosen as the timestamp. An additional column will be created with the
+                     entire interval.
+            datetime_format: The datetime format of the timestamps if they are strings, eg “%d/%m/%Y”.
+                             Set this to None if you want to have it automatically detect the format.
+                             See strftime documentation for more information on choices:
+                             https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.
+            evolution_tuning: Fine-tune each topic representation at timestamp t by averaging its
+                              c-TF-IDF matrix with the c-TF-IDF matrix at timestamp t-1. This creates
+                              evolutionary topic representations.
+            global_tuning: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
+                       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                       topic representations that could not be found in the documents at timestamp t.
+
+        Returns:
+            topics_over_time: A dataframe that contains the topic, words, and frequency of topic
+                              at timestamp t.
+
+        Usage:
+
+        The timestamps variable represent the timestamp of each document. If you have over
+        100 unique timestamps, it is advised to bin the timestamps as shown below:
+
+        ```python
+        from bertopic import BERTopic
+        model = BERTopic(verbose=True).fit(docs)
+        topics = model.transform(docs)
+        topics_over_time = model.topics_over_time(docs, topics, timestamps, nr_bins=20)
+        ```
+        """
+        check_is_fitted(self)
+        check_documents_type(docs)
+        documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
+        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+
+        if isinstance(timestamps[0], str):
+            infer_datetime_format = True if not datetime_format else False
+            documents["Timestamps"] = pd.to_datetime(documents["Timestamps"],
+                                                     infer_datetime_format=infer_datetime_format,
+                                                     format=datetime_format)
+
+        if nr_bins:
+            documents["Bins"] = pd.cut(documents.Timestamps, bins=nr_bins)
+            documents["Timestamps"] = documents.apply(lambda row: row.Bins.left, 1)
+
+        # Sort documents in chronological order
+        documents = documents.sort_values("Timestamps")
+        timestamps = documents.Timestamps.unique()
+        if len(timestamps) > 100:
+            warnings.warn(f"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "
+                          "which significantly slows down the application. Consider setting `nr_bins` "
+                          "to a value lower than 100 to speed up calculation. ")
+
+        # For each unique timestamp, create topic representations
+        topics_over_time = []
+        for index, timestamp in tqdm(enumerate(timestamps), disable=not self.verbose):
+
+            # Calculate c-TF-IDF representation for a specific timestamp
+            selection = documents.loc[documents.Timestamps == timestamp, :]
+            documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
+                                                                                    "Timestamps": "count"})
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+
+            if global_tuning or evolution_tuning:
+                c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
+
+            # Fine-tune the c-TF-IDF matrix at timestamp t by averaging it with the c-TF-IDF
+            # matrix at timestamp t-1
+            if evolution_tuning and index != 0:
+                current_topics = sorted(list(documents_per_topic.Topic.values))
+                overlapping_topics = sorted(list(set(previous_topics).intersection(set(current_topics))))
+
+                current_overlap_idx = [current_topics.index(topic) for topic in overlapping_topics]
+                previous_overlap_idx = [previous_topics.index(topic) for topic in overlapping_topics]
+
+                c_tf_idf.tolil()[current_overlap_idx] = ((c_tf_idf[current_overlap_idx] +
+                                                          previous_c_tf_idf[previous_overlap_idx]) / 2.0).tolil()
+
+            # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
+            # by simply taking the average of the two
+            if global_tuning:
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+
+            # Extract the words per topic
+            labels = sorted(list(documents_per_topic.Topic.unique()))
+            words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels)
+            topic_frequency = pd.Series(documents_per_topic.Timestamps.values,
+                                        index=documents_per_topic.Topic).to_dict()
+
+            # Fill dataframe with results
+            topics_at_timestamp = [(topic,
+                                    ", ".join([words[0] for words in values][:5]),
+                                    topic_frequency[topic],
+                                    timestamp) for topic, values in words_per_topic.items()]
+            topics_over_time.extend(topics_at_timestamp)
+
+            if evolution_tuning:
+                previous_topics = sorted(list(documents_per_topic.Topic.values))
+                previous_c_tf_idf = c_tf_idf.copy()
+
+        return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
+
     def find_topics(self,
                     search_term: str,
                     top_n: int = 5) -> Tuple[List[int], List[float]]:
@@ -389,6 +522,17 @@ class BERTopic:
             similar_topics: the most similar topics from high to low
             similarity: the similarity scores from high to low
 
+        Usage:
+
+        You can use the underlying embedding model to find topics that
+        best represent the search term:
+
+        ```python
+        topics, similarity = model.find_topics("sports", top_n=5)
+        ```
+
+        Note that the search query is typically more accurate if the
+        search_term consists of a phrase or multiple words.
         """
         if self.custom_embeddings:
             raise Exception("This method can only be used if you did not use custom embeddings.")
@@ -427,17 +571,20 @@ class BERTopic:
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
         Usage:
+
+        In order to update the topic representation, you will need to first fit the topic
+        model and extract topics from them. Based on these, you can update the representation:
+
         ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
-
-        # Create topics
-        docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic(n_gram_range=(1, 1))
-        topics, probs = model.fit_transform(docs)
-
-        # Update topic representation
         model.update_topics(docs, topics, n_gram_range=(2, 3))
+        ```
+
+        YOu can also use a custom vectorizer to update the representation:
+
+        ```python
+        from sklearn.feature_extraction.text import CountVectorizer
+        vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english")
+        model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
         ```
         """
         check_is_fitted(self)
@@ -452,6 +599,9 @@ class BERTopic:
     def get_topics(self) -> Mapping[str, Tuple[str, float]]:
         """ Return topics with top n words and their c-TF-IDF score
 
+        Returns:
+            self.topic: The top n words per topic and the corresponding c-TF-IDF score
+
         Usage:
 
         ```python
@@ -463,6 +613,12 @@ class BERTopic:
 
     def get_topic(self, topic: int) -> Union[Mapping[str, Tuple[str, float]], bool]:
         """ Return top n words for a specific topic and their c-TF-IDF scores
+
+        Arguments:
+            topic: A specific topic for which you want its representation
+
+        Returns:
+            The top n words for a specific word and its respective c-TF-IDF scores
 
         Usage:
 
@@ -476,8 +632,40 @@ class BERTopic:
         else:
             return False
 
+    def get_topic_info(self, topic: int = None) -> pd.DataFrame:
+        """ Get information about each topic including its id, frequency, and name
+
+        Arguments:
+            topic: A specific topic for which you want the frequency
+
+        Returns:
+            info: The information relating to either a single topic or all topics
+
+        Usage:
+
+        ```python
+        info_df = model.get_topic_info()
+        ```
+        """
+        check_is_fitted(self)
+
+        info = pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
+        info["Name"] = info.Topic.map(self.topic_names)
+
+        if topic:
+            info = info.loc[info.Topic == topic, :]
+
+        return info
+
     def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
         """ Return the the size of topics (descending order)
+
+        Arguments:
+            topic: A specific topic for which you want the frequency
+
+        Returns:
+            Either the frequency of a single topic or dataframe with
+            the frequencies of all topics
 
         Usage:
 
@@ -529,17 +717,17 @@ class BERTopic:
 
         Usage:
 
+        You can further reduce the topics by passing the documents with its
+        topics and probabilities (if they were calculated):
+
         ```python
-        from bertopic import BERTopic
-        from sklearn.datasets import fetch_20newsgroups
+        new_topics, new_probs = model.reduce_topics(docs, topics, probabilities, nr_topics=30)
+        ```
 
-        # Create topics -> Typically over 50 topics
-        docs = fetch_20newsgroups(subset='train')['data']
-        model = BERTopic()
-        topics, probs = model.fit_transform(docs)
+        If probabilities were not calculated simply run the function without them:
 
-        # Further reduce topics
-        new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)
+        ```python
+        new_topics, _= model.reduce_topics(docs, topics, nr_topics=30)
         ```
         """
         check_is_fitted(self)
@@ -559,6 +747,21 @@ class BERTopic:
 
         This visualization is highly inspired by LDAvis, a great visualization
         technique typically reserved for LDA.
+
+        Usage:
+
+        To visualize the topics simply run:
+
+        ```python
+        model.visualize_topics()
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = model.visualize_topics()
+        fig.write_html("path/to/file.html")
+        ```
         """
         check_is_fitted(self)
         if not _HAS_VIZ:
@@ -578,6 +781,98 @@ class BERTopic:
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
                            "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
         return self._plotly_topic_visualization(df, topic_list)
+
+    def visualize_topics_over_time(self,
+                                   topics_over_time: pd.DataFrame,
+                                   top_n: int = None,
+                                   topics: List[int] = None):
+        """ Visualize topics over time
+
+        Arguments:
+            topics_over_time: The topics you would like to be visualized with the
+                              corresponding topic representation
+            top_n: To visualize the most frequent topics instead of all
+            topics: Select which topics you would like to be visualized
+
+        Returns:
+            A plotly.graph_objects.Figure including all traces
+
+        Usage:
+
+        To visualize the topics over time, simply run:
+
+        ```python
+        model.visualize_topics_over_time(topics_over_time)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = model.visualize_topics_over_time(topics_over_time)
+        fig.write_html("path/to/file.html")
+        ```
+        """
+        check_is_fitted(self)
+        if not _HAS_VIZ:
+            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
+                                      f"additional dependencies;\npip install bertopic[visualization]")
+
+        colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
+
+        # Select topics
+        if topics:
+            selected_topics = topics
+        elif top_n:
+            selected_topics = self.get_topic_freq().head(top_n + 1)[1:].Topic.values
+        else:
+            selected_topics = self.get_topic_freq().Topic.values
+
+        # Prepare data
+        topic_names = {key: value[:40] + "..." if len(value) > 40 else value for key, value in self.topic_names.items()}
+        topics_over_time["Name"] = topics_over_time.Topic.map(topic_names)
+        data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :]
+
+        # Add traces
+        fig = go.Figure()
+        for index, topic in enumerate(data.Topic.unique()):
+            trace_data = data.loc[data.Topic == topic, :]
+            topic_name = trace_data.Name.values[0]
+            words = trace_data.Words.values
+            fig.add_trace(go.Scatter(x=trace_data.Timestamp, y=trace_data.Frequency,
+                                     mode='lines',
+                                     marker_color=colors[index % 7],
+                                     hoverinfo="text",
+                                     name=topic_name,
+                                     hovertext=[f'<b>Topic {topic}</b><br>Words: {word}' for word in words]))
+
+        # Styling of the visualization
+        fig.update_xaxes(showgrid=True)
+        fig.update_yaxes(showgrid=True)
+        fig.update_layout(
+            yaxis_title="Frequency",
+            title={
+                'text': "<b>Topics over Time",
+                'y': .95,
+                'x': 0.40,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            template="simple_white",
+            width=1250,
+            height=450,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+            legend=dict(
+                title="<b>Global Topic Representation",
+            )
+        )
+        return fig
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
@@ -851,8 +1146,11 @@ class BERTopic:
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
-        self._extract_words_per_topic(words)
+        self.topics = self._extract_words_per_topic(words)
         self._create_topic_vectors()
+        self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
+                            for key, values in
+                            self.topics.items()}
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -889,30 +1187,38 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
             documents_per_topic: The joined documents per topic such that each topic has a single
                                  string made out of multiple documents
             m: The total number of documents (unjoined)
+            fit: Whether to fit a new vectorizer or use the fitted self.vectorizer_model
 
         Returns:
             tf_idf: The resulting matrix giving a value (importance score) for each word per topic
             words: The names of the words to which values were given
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
-        count = self.vectorizer_model.fit(documents)
-        words = count.get_feature_names()
-        X = count.transform(documents)
-        transformer = ClassTFIDF().fit(X, n_samples=m)
-        c_tf_idf = transformer.transform(X)
+
+        if fit:
+            self.vectorizer_model.fit(documents)
+
+        words = self.vectorizer_model.get_feature_names()
+        X = self.vectorizer_model.transform(documents)
+
+        if fit:
+            self.transformer = ClassTFIDF().fit(X, n_samples=m)
+
+        c_tf_idf = self.transformer.transform(X)
+
         self.topic_sim_matrix = cosine_similarity(c_tf_idf)
 
         #significance score calculation
         if self.significance == True:
             word_list_length = np.array([len(i.split()) for i in words]).reshape(len(words),1)
-            signif_score_matrix = (c_tf_idf.T * word_list_length).T
+            c_tf_idf = (c_tf_idf.T * word_list_length).T
 
         return c_tf_idf, words
 
@@ -925,32 +1231,53 @@ class BERTopic:
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
         self.topic_sizes = dict(zip(sizes.Topic, sizes.Document))
 
-    def _extract_words_per_topic(self, words: List[str]):
+    def _extract_words_per_topic(self,
+                                 words: List[str],
+                                 c_tf_idf: csr_matrix = None,
+                                 labels: List[int] = None) -> Mapping[str,
+                                                                      List[Tuple[str, float]]]:
         """ Based on tf_idf scores per topic, extract the top n words per topic
+
+        If the top words per topic need to be extracted, then only the `words` parameter
+        needs to be passed. If the top words per topic in a specific timestamp, then it
+        is important to pass the timestamp-based c-TF-IDF matrix and its corresponding
+        labels.
 
         Arguments:
             words: List of all words (sorted according to tf_idf matrix position)
+            c_tf_idf: A c-TF-IDF matrix from which to calculate the top words
+            labels: A list of topic labels
+
+        Returns:
+            topics: The top words per topic
         """
+        if c_tf_idf is None:
+            c_tf_idf = self.c_tf_idf.toarray()
+        else:
+            c_tf_idf = c_tf_idf.toarray()
+
+        if labels is None:
+            labels = sorted(list(self.topic_sizes.keys()))
 
         # Get top 30 words per topic based on c-TF-IDF score
-        c_tf_idf = self.c_tf_idf.toarray()
-        labels = sorted(list(self.topic_sizes.keys()))
         indices = c_tf_idf.argsort()[:, -30:]
-        self.topics = {label: [(words[j], c_tf_idf[i][j])
-                               for j in indices[i]][::-1]
-                       for i, label in enumerate(labels)}
+        topics = {label: [(words[j], c_tf_idf[i][j])
+                          for j in indices[i]][::-1]
+                  for i, label in enumerate(labels)}
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
         if not self.custom_embeddings:
 
-            for topic, topic_words in self.topics.items():
+            for topic, topic_words in topics.items():
                 words = [word[0] for word in topic_words]
                 word_embeddings = self._extract_embeddings(words, verbose=False)
                 topic_embedding = self._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
 
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
-                self.topics[topic] = [(word, value) for word, value in self.topics[topic] if word in topic_words]
+                topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+
+        return topics
 
     def _select_embedding_model(self) -> Union[SentenceTransformer, DocumentEmbeddings]:
         """ Select an embedding model based on language or a specific sentence transformer models.
@@ -1115,15 +1442,17 @@ class BERTopic:
             probabilities: An array containing probabilities
 
         Returns:
-            probabilities: Updated probabilities
+            new_probabilities: Updated probabilities
 
         """
         if isinstance(probabilities, np.ndarray):
+            new_probabilities = probabilities.copy()
             for from_topic, to_topic in self.mapped_topics.items():
-                probabilities[:, to_topic] += probabilities[:, from_topic]
-                probabilities[:, from_topic] = 0
+                if to_topic != -1 and from_topic != -1:
+                    new_probabilities[:, to_topic] += new_probabilities[:, from_topic]
+                new_probabilities[:, from_topic] = 0
 
-            return probabilities.round(3)
+            return new_probabilities.round(3)
         else:
             return None
 
