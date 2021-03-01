@@ -50,7 +50,7 @@ class-based TF-IDF
 Each cluster is converted to a single document instead of a set of documents. 
 Then, the frequency of word `t` are extracted for each class `i` and divided by the total number of words `w`. 
 This action can now be seen as a form of regularization of frequent words in the class.
-Next, the total, unjoined, number of documents `m` is divided by the total frequency of word `t` across all classes `n`.
+Next, the average number of words per class `m` is divided by the total frequency of word `t` across all classes `n`.
 
 ## **Topic Coherence**
 This fourth step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
