@@ -134,6 +134,7 @@ class BERTopic:
             umap_model: Pass in a umap.UMAP model to be used instead of the default
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
             vectorizer_model: Pass in a CountVectorizer instead of the default
+            significance: Flag to allow calculating a significance score
         """
         # Topic-based parameters
         if top_n_words > 30:
@@ -1217,7 +1218,7 @@ class BERTopic:
         #significance score calculation
         if self.significance == True:
             word_list_length = np.array([len(i.split()) for i in words]).reshape(len(words),1)
-            signif_score_matrix = (c_tf_idf.T * word_list_length).T
+            c_tf_idf = (c_tf_idf.T * word_list_length).T
 
         return c_tf_idf, words
 
