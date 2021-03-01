@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#version-050" class="md-skip">
+        <a href="#version-060" class="md-skip">
           Skip to content
         </a>
       
@@ -265,6 +265,18 @@
 
 
   <li class="md-nav__item">
+    <a href="tutorial/topicsovertime/topicsovertime.html" class="md-nav__link">
+      Dynamic Topic Modeling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="tutorial/visualization/visualization.html" class="md-nav__link">
       Topic Visualization
     </a>
@@ -430,6 +442,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-060" class="md-nav__link">
+    Version 0.6.0
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-050" class="md-nav__link">
     Version 0.5.0
   </a>
@@ -549,6 +568,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-060" class="md-nav__link">
+    Version 0.6.0
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-050" class="md-nav__link">
     Version 0.5.0
   </a>
@@ -658,7 +684,38 @@
                 
                   <h1>Changelog</h1>
                 
-                <h2 id="version-050"><strong>Version 0.5.0</strong><a class="headerlink" href="#version-050" title="Permanent link">&para;</a></h2>
+                <h2 id="version-060"><strong>Version 0.6.0</strong><a class="headerlink" href="#version-060" title="Permanent link">&para;</a></h2>
+<p><em>Release date:  1 March, 2021</em></p>
+<p><strong>Highlights</strong>:</p>
+<ul>
+<li>DTM: Added a basic dynamic topic modeling technique based on the global c-TF-IDF representation <ul>
+<li><code>model.topics_over_time(docs, timestamps, global_tuning=True)</code></li>
+</ul>
+</li>
+<li>DTM: Option to evolve topics based on t-1 c-TF-IDF representation which results in evolving topics over time<ul>
+<li>Only uses topics at t-1 and skips evolution if there is a gap</li>
+<li><code>model.topics_over_time(docs, timestamps, evolution_tuning=True)</code></li>
+</ul>
+</li>
+<li>DTM: Function to visualize topics over time <ul>
+<li><code>model.visualize_topics_over_time(topics_over_time)</code></li>
+</ul>
+</li>
+<li>DTM: Add binning of timestamps  <ul>
+<li><code>model.topics_over_time(docs, timestamps, nr_bins=10)</code></li>
+</ul>
+</li>
+<li>Add function get general information about topics (id, frequency, name, etc.) <ul>
+<li><code>get_topic_info()</code></li>
+</ul>
+</li>
+<li>Improved stability of c-TF-IDF by taking the average number of words across all topics instead of the number of documents</li>
+</ul>
+<p><strong>Fixes</strong>:</p>
+<ul>
+<li><code>_map_probabilities()</code> does not take into account that there is no probability of the outlier class and the probabilities are mutated instead of copied (#63, #64)</li>
+</ul>
+<h2 id="version-050"><strong>Version 0.5.0</strong><a class="headerlink" href="#version-050" title="Permanent link">&para;</a></h2>
 <p><em>Release date:  8 Februari, 2021</em></p>
 <p><strong>Highlights</strong>:</p>
 <ul>

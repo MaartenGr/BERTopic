@@ -140,6 +140,11 @@
     </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/topicsovertime/topicsovertime.html">
+      Dynamic Topic Modeling
+    </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="../tutorial/visualization/visualization.html">
       Topic Visualization
     </a>
@@ -235,6 +240,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topic_info">
+    get_topic_info()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topics">
     get_topics()
   </a>
@@ -255,6 +265,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.topics_over_time">
+    topics_over_time()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#bertopic._bertopic.BERTopic.transform">
     transform()
   </a>
@@ -272,6 +287,11 @@
 <li class="md-nav__item">
 <a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_topics">
     visualize_topics()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_topics_over_time">
+    visualize_topics_over_time()
   </a>
 </li>
 </ul>
@@ -355,6 +375,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topic_info">
+    get_topic_info()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#bertopic._bertopic.BERTopic.get_topics">
     get_topics()
   </a>
@@ -375,6 +400,11 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.topics_over_time">
+    topics_over_time()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#bertopic._bertopic.BERTopic.transform">
     transform()
   </a>
@@ -392,6 +422,11 @@
 <li class="md-nav__item">
 <a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_topics">
     visualize_topics()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#bertopic._bertopic.BERTopic.visualize_topics_over_time">
+    visualize_topics_over_time()
   </a>
 </li>
 </ul>
@@ -418,9 +453,8 @@ whilst keeping important words in the topic descriptions.</p>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">calculate_probabilities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre>
 </div>
 <p>If you want to use your own embedding model, use it as follows:</p>
@@ -432,7 +466,6 @@ whilst keeping important words in the topic descriptions.</p>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
 <span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">"distilbert-base-nli-mean-tokens"</span><span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="n">sentence_model</span><span class="p">)</span>
-<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre>
 </div>
 <p>Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -747,6 +780,15 @@ similarity: the similarity scores from high to low</p>
 </tr>
 </tbody>
 </table>
+<p>Usage:</p>
+<p>You can use the underlying embedding model to find topics that
+best represent the search term:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">topics</span><span class="p">,</span> <span class="n">similarity</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">find_topics</span><span class="p">(</span><span class="s2">"sports"</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>Note that the search query is typically more accurate if the
+search_term consists of a phrase or multiple words.</p>
 <details class="quote">
 <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
 <div class="highlight">
@@ -771,6 +813,17 @@ similarity: the similarity scores from high to low</p>
 <span class="sd">        similar_topics: the most similar topics from high to low</span>
 <span class="sd">        similarity: the similarity scores from high to low</span>
 
+<span class="sd">    Usage:</span>
+
+<span class="sd">    You can use the underlying embedding model to find topics that</span>
+<span class="sd">    best represent the search term:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    topics, similarity = model.find_topics("sports", top_n=5)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Note that the search query is typically more accurate if the</span>
+<span class="sd">    search_term consists of a phrase or multiple words.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_embeddings</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"This method can only be used if you did not use custom embeddings."</span><span class="p">)</span>
@@ -836,7 +889,7 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">"distilbert-base-nli-mean-tokens"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre>
 </div>
 <p>If you want to use your own embeddings, use it as follows:</p>
@@ -851,7 +904,7 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create topic model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre>
 </div>
 <details class="quote">
@@ -874,7 +927,7 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 <span class="sd">    from sklearn.datasets import fetch_20newsgroups</span>
 
 <span class="sd">    docs = fetch_20newsgroups(subset='all')['data']</span>
-<span class="sd">    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)</span>
+<span class="sd">    model = BERTopic(verbose=True).fit(docs)</span>
 <span class="sd">    ```</span>
 
 <span class="sd">    If you want to use your own embeddings, use it as follows:</span>
@@ -890,7 +943,7 @@ fit<span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 <span class="sd">    embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
 
 <span class="sd">    # Create topic model</span>
-<span class="sd">    model = BERTopic(None, verbose=True).fit(docs, embeddings)</span>
+<span class="sd">    model = BERTopic(verbose=True).fit(docs, embeddings)</span>
 <span class="sd">    ```</span>
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
@@ -965,7 +1018,7 @@ probabilities: The topic probability distribution which is returned by default.
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">"distilbert-base-nli-mean-tokens"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre>
 </div>
@@ -981,7 +1034,7 @@ probabilities: The topic probability distribution which is returned by default.
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create topic model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre>
 </div>
@@ -1014,7 +1067,7 @@ probabilities: The topic probability distribution which is returned by default.
 
 <span class="sd">    docs = fetch_20newsgroups(subset='all')['data']</span>
 
-<span class="sd">    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True)</span>
+<span class="sd">    model = BERTopic(verbose=True)</span>
 <span class="sd">    topics = model.fit_transform(docs)</span>
 <span class="sd">    ```</span>
 
@@ -1031,7 +1084,7 @@ probabilities: The topic probability distribution which is returned by default.
 <span class="sd">    embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
 
 <span class="sd">    # Create topic model</span>
-<span class="sd">    model = BERTopic(None, verbose=True)</span>
+<span class="sd">    model = BERTopic(verbose=True)</span>
 <span class="sd">    topics = model.fit_transform(docs, embeddings)</span>
 <span class="sd">    ```</span>
 <span class="sd">    """</span>
@@ -1157,6 +1210,44 @@ get_topic<span class="p">(</span><span class="bp">self</span><span class="p">,</
 <a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Return top n words for a specific topic and their c-TF-IDF scores</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topic</code></td>
+<td><code>int</code></td>
+<td>
+<p>A specific topic for which you want its representation</p>
+</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Union[Mapping[str, Tuple[str, float]], bool]</code></td>
+<td>
+<p>The top n words for a specific word and its respective c-TF-IDF scores</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Usage:</p>
 <div class="codehilite">
 <pre><span></span><code><span class="n">topic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
@@ -1167,6 +1258,12 @@ get_topic<span class="p">(</span><span class="bp">self</span><span class="p">,</
 <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
     <span class="sd">""" Return top n words for a specific topic and their c-TF-IDF scores</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        topic: A specific topic for which you want its representation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The top n words for a specific word and its respective c-TF-IDF scores</span>
 
 <span class="sd">    Usage:</span>
 
@@ -1191,6 +1288,45 @@ get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p
 <a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic_freq" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Return the the size of topics (descending order)</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topic</code></td>
+<td><code>int</code></td>
+<td>
+<p>A specific topic for which you want the frequency</p>
+</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Union[pandas.core.frame.DataFrame, int]</code></td>
+<td>
+<p>Either the frequency of a single topic or dataframe with
+the frequencies of all topics</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Usage:</p>
 <p>To extract the frequency of all topics:</p>
 <div class="codehilite">
@@ -1207,6 +1343,13 @@ get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p
 <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
     <span class="sd">""" Return the the size of topics (descending order)</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        topic: A specific topic for which you want the frequency</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Either the frequency of a single topic or dataframe with</span>
+<span class="sd">        the frequencies of all topics</span>
 
 <span class="sd">    Usage:</span>
 
@@ -1234,12 +1377,111 @@ get_topic_freq<span class="p">(</span><span class="bp">self</span><span class="p
 </div>
 </div>
 <div class="doc doc-object doc-method">
+<h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.get_topic_info">
+<code class="highlight language-python">
+get_topic_info<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+<a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topic_info" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p>Get information about each topic including its id, frequency, and name</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topic</code></td>
+<td><code>int</code></td>
+<td>
+<p>A specific topic for which you want the frequency</p>
+</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DataFrame</code></td>
+<td>
+<p>info: The information relating to either a single topic or all topics</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">info_df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topic_info</span><span class="p">()</span>
+</code></pre>
+</div>
+<details class="quote">
+<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">get_topic_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">""" Get information about each topic including its id, frequency, and name</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        topic: A specific topic for which you want the frequency</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        info: The information relating to either a single topic or all topics</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    info_df = model.get_topic_info()</span>
+<span class="sd">    ```</span>
+<span class="sd">    """</span>
+    <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_sizes</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'Topic'</span><span class="p">,</span> <span class="s1">'Count'</span><span class="p">])</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"Count"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">info</span><span class="p">[</span><span class="s2">"Name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic_names</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">topic</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">info</span><span class="o">.</span><span class="n">Topic</span> <span class="o">==</span> <span class="n">topic</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">info</span>
+</code></pre>
+</div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.get_topics">
 <code class="highlight language-python">
 get_topics<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
 <a class="headerlink" href="#bertopic._bertopic.BERTopic.get_topics" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Return topics with top n words and their c-TF-IDF score</p>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Mapping[str, Tuple[str, float]]</code></td>
+<td>
+<p>self.topic: The top n words per topic and the corresponding c-TF-IDF score</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p>Usage:</p>
 <div class="codehilite">
 <pre><span></span><code><span class="n">all_topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span>
@@ -1250,6 +1492,9 @@ get_topics<span class="p">(</span><span class="bp">self</span><span class="p">)<
 <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="sd">""" Return topics with top n words and their c-TF-IDF score</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        self.topic: The top n words per topic and the corresponding c-TF-IDF score</span>
 
 <span class="sd">    Usage:</span>
 
@@ -1431,17 +1676,15 @@ new_probabilities: Updated probabilities</p>
 </tbody>
 </table>
 <p>Usage:</p>
+<p>You can further reduce the topics by passing the documents with its
+topics and probabilities (if they were calculated):</p>
 <div class="codehilite">
-<pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
-
-<span class="c1"># Create topics -&gt; Typically over 50 topics</span>
-<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'train'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-
-<span class="c1"># Further reduce topics</span>
-<span class="n">new_topics</span><span class="p">,</span> <span class="n">new_probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reduce_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<pre><span></span><code><span class="n">new_topics</span><span class="p">,</span> <span class="n">new_probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reduce_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>If probabilities were not calculated simply run the function without them:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">new_topics</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reduce_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 </code></pre>
 </div>
 <details class="quote">
@@ -1476,17 +1719,17 @@ new_probabilities: Updated probabilities</p>
 
 <span class="sd">    Usage:</span>
 
+<span class="sd">    You can further reduce the topics by passing the documents with its</span>
+<span class="sd">    topics and probabilities (if they were calculated):</span>
+
 <span class="sd">    ```python</span>
-<span class="sd">    from bertopic import BERTopic</span>
-<span class="sd">    from sklearn.datasets import fetch_20newsgroups</span>
+<span class="sd">    new_topics, new_probs = model.reduce_topics(docs, topics, probabilities, nr_topics=30)</span>
+<span class="sd">    ```</span>
 
-<span class="sd">    # Create topics -&gt; Typically over 50 topics</span>
-<span class="sd">    docs = fetch_20newsgroups(subset='train')['data']</span>
-<span class="sd">    model = BERTopic()</span>
-<span class="sd">    topics, probs = model.fit_transform(docs)</span>
+<span class="sd">    If probabilities were not calculated simply run the function without them:</span>
 
-<span class="sd">    # Further reduce topics</span>
-<span class="sd">    new_topics, new_probs = model.reduce_topics(docs, topics, probs, nr_topics=30)</span>
+<span class="sd">    ```python</span>
+<span class="sd">    new_topics, _= model.reduce_topics(docs, topics, nr_topics=30)</span>
 <span class="sd">    ```</span>
 <span class="sd">    """</span>
     <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1593,6 +1836,275 @@ save<span class="p">(</span><span class="bp">self</span><span class="p">,</span>
 </div>
 </div>
 <div class="doc doc-object doc-method">
+<h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.topics_over_time">
+<code class="highlight language-python">
+topics_over_time<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datetime_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">evolution_tuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">global_tuning</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> </code>
+<a class="headerlink" href="#bertopic._bertopic.BERTopic.topics_over_time" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p>Create topics over time</p>
+<p>To create the topics over time, BERTopic needs to be already fitted once.
+From the fitted models, the c-TF-IDF representations are calculate at
+each timestamp t. Then, the c-TF-IDF representations at timestamp t are
+averaged with the global c-TF-IDF representations in order to fine-tune the
+local representations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure to use a limited number of unique timestamps (&lt;100) as the
+c-TF-IDF representation will be calculated at each single unique timestamp.
+Having a large number of unique timestamps can take some time to be calculated.
+Moreover, there aren't many use-cased where you would like to see the difference
+in topic representations over more than 100 different timestamps.</p>
+</div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs</code></td>
+<td><code>List[str]</code></td>
+<td>
+<p>The documents you used when calling either <code>fit</code> or <code>fit_transform</code></p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>topics</code></td>
+<td><code>List[int]</code></td>
+<td>
+<p>The topics that were returned when calling either <code>fit</code> or <code>fit_transform</code></p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>timestamps</code></td>
+<td><code>Union[List[str], List[int]]</code></td>
+<td>
+<p>The timestamp of each document. This can be either a list of strings or ints.
+        If it is a list of strings, then the datetime format will be automatically
+        inferred. If it is a list of ints, then the documents will be ordered by
+        ascending order.</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>nr_bins</code></td>
+<td><code>int</code></td>
+<td>
+<p>The number of bins you want to create for the timestamps. The left interval will
+     be chosen as the timestamp. An additional column will be created with the
+     entire interval.</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>datetime_format</code></td>
+<td><code>str</code></td>
+<td>
+<p>The datetime format of the timestamps if they are strings, eg “%d/%m/%Y”.
+             Set this to None if you want to have it automatically detect the format.
+             See strftime documentation for more information on choices:
+             https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>evolution_tuning</code></td>
+<td><code>bool</code></td>
+<td>
+<p>Fine-tune each topic representation at timestamp t by averaging its
+              c-TF-IDF matrix with the c-TF-IDF matrix at timestamp t-1. This creates
+              evolutionary topic representations.</p>
+</td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>global_tuning</code></td>
+<td><code>bool</code></td>
+<td>
+<p>Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
+       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+       topic representations that could not be found in the documents at timestamp t.</p>
+</td>
+<td><code>True</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DataFrame</code></td>
+<td>
+<p>topics_over_time: A dataframe that contains the topic, words, and frequency of topic
+                  at timestamp t.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<p>The timestamps variable represent the timestamp of each document. If you have over
+100 unique timestamps, it is advised to bin the timestamps as shown below:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</code></pre>
+</div>
+<details class="quote">
+<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">topics_over_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                     <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                     <span class="n">timestamps</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                       <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+                     <span class="n">nr_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">datetime_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">evolution_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">global_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">""" Create topics over time</span>
+
+<span class="sd">    To create the topics over time, BERTopic needs to be already fitted once.</span>
+<span class="sd">    From the fitted models, the c-TF-IDF representations are calculate at</span>
+<span class="sd">    each timestamp t. Then, the c-TF-IDF representations at timestamp t are</span>
+<span class="sd">    averaged with the global c-TF-IDF representations in order to fine-tune the</span>
+<span class="sd">    local representations.</span>
+
+<span class="sd">    NOTE:</span>
+<span class="sd">        Make sure to use a limited number of unique timestamps (&lt;100) as the</span>
+<span class="sd">        c-TF-IDF representation will be calculated at each single unique timestamp.</span>
+<span class="sd">        Having a large number of unique timestamps can take some time to be calculated.</span>
+<span class="sd">        Moreover, there aren't many use-cased where you would like to see the difference</span>
+<span class="sd">        in topic representations over more than 100 different timestamps.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        docs: The documents you used when calling either `fit` or `fit_transform`</span>
+<span class="sd">        topics: The topics that were returned when calling either `fit` or `fit_transform`</span>
+<span class="sd">        timestamps: The timestamp of each document. This can be either a list of strings or ints.</span>
+<span class="sd">                    If it is a list of strings, then the datetime format will be automatically</span>
+<span class="sd">                    inferred. If it is a list of ints, then the documents will be ordered by</span>
+<span class="sd">                    ascending order.</span>
+<span class="sd">        nr_bins: The number of bins you want to create for the timestamps. The left interval will</span>
+<span class="sd">                 be chosen as the timestamp. An additional column will be created with the</span>
+<span class="sd">                 entire interval.</span>
+<span class="sd">        datetime_format: The datetime format of the timestamps if they are strings, eg “%d/%m/%Y”.</span>
+<span class="sd">                         Set this to None if you want to have it automatically detect the format.</span>
+<span class="sd">                         See strftime documentation for more information on choices:</span>
+<span class="sd">                         https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.</span>
+<span class="sd">        evolution_tuning: Fine-tune each topic representation at timestamp t by averaging its</span>
+<span class="sd">                          c-TF-IDF matrix with the c-TF-IDF matrix at timestamp t-1. This creates</span>
+<span class="sd">                          evolutionary topic representations.</span>
+<span class="sd">        global_tuning: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix</span>
+<span class="sd">                   with the global c-TF-IDF matrix. Turn this off if you want to prevent words in</span>
+<span class="sd">                   topic representations that could not be found in the documents at timestamp t.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        topics_over_time: A dataframe that contains the topic, words, and frequency of topic</span>
+<span class="sd">                          at timestamp t.</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    The timestamps variable represent the timestamp of each document. If you have over</span>
+<span class="sd">    100 unique timestamps, it is advised to bin the timestamps as shown below:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    from bertopic import BERTopic</span>
+<span class="sd">    model = BERTopic(verbose=True).fit(docs)</span>
+<span class="sd">    topics = model.transform(docs)</span>
+<span class="sd">    topics_over_time = model.topics_over_time(docs, topics, timestamps, nr_bins=20)</span>
+<span class="sd">    ```</span>
+<span class="sd">    """</span>
+    <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">check_documents_type</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+    <span class="n">documents</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Document"</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">"Topic"</span><span class="p">:</span> <span class="n">topics</span><span class="p">,</span> <span class="s2">"Timestamps"</span><span class="p">:</span> <span class="n">timestamps</span><span class="p">})</span>
+    <span class="n">global_c_tf_idf</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">'l1'</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">infer_datetime_format</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">datetime_format</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="n">documents</span><span class="p">[</span><span class="s2">"Timestamps"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">documents</span><span class="p">[</span><span class="s2">"Timestamps"</span><span class="p">],</span>
+                                                 <span class="n">infer_datetime_format</span><span class="o">=</span><span class="n">infer_datetime_format</span><span class="p">,</span>
+                                                 <span class="nb">format</span><span class="o">=</span><span class="n">datetime_format</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nr_bins</span><span class="p">:</span>
+        <span class="n">documents</span><span class="p">[</span><span class="s2">"Bins"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">documents</span><span class="o">.</span><span class="n">Timestamps</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">nr_bins</span><span class="p">)</span>
+        <span class="n">documents</span><span class="p">[</span><span class="s2">"Timestamps"</span><span class="p">]</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">Bins</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Sort documents in chronological order</span>
+    <span class="n">documents</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"Timestamps"</span><span class="p">)</span>
+    <span class="n">timestamps</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">Timestamps</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "</span>
+                      <span class="s2">"which significantly slows down the application. Consider setting `nr_bins` "</span>
+                      <span class="s2">"to a value lower than 100 to speed up calculation. "</span><span class="p">)</span>
+
+    <span class="c1"># For each unique timestamp, create topic representations</span>
+    <span class="n">topics_over_time</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps</span><span class="p">),</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">):</span>
+
+        <span class="c1"># Calculate c-TF-IDF representation for a specific timestamp</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">documents</span><span class="o">.</span><span class="n">Timestamps</span> <span class="o">==</span> <span class="n">timestamp</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">documents_per_topic</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'Topic'</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">'Document'</span><span class="p">:</span> <span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">,</span>
+                                                                                <span class="s2">"Timestamps"</span><span class="p">:</span> <span class="s2">"count"</span><span class="p">})</span>
+        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_tf_idf</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">global_tuning</span> <span class="ow">or</span> <span class="n">evolution_tuning</span><span class="p">:</span>
+            <span class="n">c_tf_idf</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">'l1'</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Fine-tune the c-TF-IDF matrix at timestamp t by averaging it with the c-TF-IDF</span>
+        <span class="c1"># matrix at timestamp t-1</span>
+        <span class="k">if</span> <span class="n">evolution_tuning</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">current_topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+            <span class="n">overlapping_topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">previous_topics</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_topics</span><span class="p">))))</span>
+
+            <span class="n">current_overlap_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">current_topics</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">overlapping_topics</span><span class="p">]</span>
+            <span class="n">previous_overlap_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">previous_topics</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">overlapping_topics</span><span class="p">]</span>
+
+            <span class="n">c_tf_idf</span><span class="o">.</span><span class="n">tolil</span><span class="p">()[</span><span class="n">current_overlap_idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">c_tf_idf</span><span class="p">[</span><span class="n">current_overlap_idx</span><span class="p">]</span> <span class="o">+</span>
+                                                      <span class="n">previous_c_tf_idf</span><span class="p">[</span><span class="n">previous_overlap_idx</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">tolil</span><span class="p">()</span>
+
+        <span class="c1"># Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation</span>
+        <span class="c1"># by simply taking the average of the two</span>
+        <span class="k">if</span> <span class="n">global_tuning</span><span class="p">:</span>
+            <span class="n">c_tf_idf</span> <span class="o">=</span> <span class="p">(</span><span class="n">global_c_tf_idf</span><span class="p">[</span><span class="n">documents_per_topic</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">c_tf_idf</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+        <span class="c1"># Extract the words per topic</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+        <span class="n">words_per_topic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_words_per_topic</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">topic_frequency</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="o">.</span><span class="n">Timestamps</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                                    <span class="n">index</span><span class="o">=</span><span class="n">documents_per_topic</span><span class="o">.</span><span class="n">Topic</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+        <span class="c1"># Fill dataframe with results</span>
+        <span class="n">topics_at_timestamp</span> <span class="o">=</span> <span class="p">[(</span><span class="n">topic</span><span class="p">,</span>
+                                <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">words</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">words</span> <span class="ow">in</span> <span class="n">values</span><span class="p">][:</span><span class="mi">5</span><span class="p">]),</span>
+                                <span class="n">topic_frequency</span><span class="p">[</span><span class="n">topic</span><span class="p">],</span>
+                                <span class="n">timestamp</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">words_per_topic</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">topics_over_time</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">topics_at_timestamp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">evolution_tuning</span><span class="p">:</span>
+            <span class="n">previous_topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+            <span class="n">previous_c_tf_idf</span> <span class="o">=</span> <span class="n">c_tf_idf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"Topic"</span><span class="p">,</span> <span class="s2">"Words"</span><span class="p">,</span> <span class="s2">"Frequency"</span><span class="p">,</span> <span class="s2">"Timestamp"</span><span class="p">])</span>
+</code></pre>
+</div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
 <h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.transform">
 <code class="highlight language-python">
 transform<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
@@ -1656,7 +2168,7 @@ probabilities: The topic probability distribution which is returned by default.
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'all'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="s2">"distilbert-base-nli-mean-tokens"</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre>
 </div>
@@ -1672,7 +2184,7 @@ probabilities: The topic probability distribution which is returned by default.
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create topic model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre>
 </div>
@@ -1703,7 +2215,7 @@ probabilities: The topic probability distribution which is returned by default.
 <span class="sd">    from sklearn.datasets import fetch_20newsgroups</span>
 
 <span class="sd">    docs = fetch_20newsgroups(subset='all')['data']</span>
-<span class="sd">    model = BERTopic("distilbert-base-nli-mean-tokens", verbose=True).fit(docs)</span>
+<span class="sd">    model = BERTopic(verbose=True).fit(docs)</span>
 <span class="sd">    topics = model.transform(docs)</span>
 <span class="sd">    ```</span>
 
@@ -1720,7 +2232,7 @@ probabilities: The topic probability distribution which is returned by default.
 <span class="sd">    embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
 
 <span class="sd">    # Create topic model</span>
-<span class="sd">    model = BERTopic(None, verbose=True).fit(docs, embeddings)</span>
+<span class="sd">    model = BERTopic(verbose=True).fit(docs, embeddings)</span>
 <span class="sd">    topics = model.transform(docs, embeddings)</span>
 <span class="sd">    ```</span>
 <span class="sd">    """</span>
@@ -1812,17 +2324,17 @@ to update the topic representation after they have been formed.</p>
 </tbody>
 </table>
 <p>Usage:</p>
+<p>In order to update the topic representation, you will need to first fit the topic
+model and extract topics from them. Based on these, you can update the representation:</p>
 <div class="codehilite">
-<pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
-
-<span class="c1"># Create topics</span>
-<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">'train'</span><span class="p">)[</span><span class="s1">'data'</span><span class="p">]</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-
-<span class="c1"># Update topic representation</span>
-<span class="n">model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</code></pre>
+</div>
+<p>YOu can also use a custom vectorizer to update the representation:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s2">"english"</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
 </code></pre>
 </div>
 <details class="quote">
@@ -1848,17 +2360,20 @@ to update the topic representation after they have been formed.</p>
 <span class="sd">        vectorizer_model: Pass in your own CountVectorizer from scikit-learn</span>
 
 <span class="sd">    Usage:</span>
+
+<span class="sd">    In order to update the topic representation, you will need to first fit the topic</span>
+<span class="sd">    model and extract topics from them. Based on these, you can update the representation:</span>
+
 <span class="sd">    ```python</span>
-<span class="sd">    from bertopic import BERTopic</span>
-<span class="sd">    from sklearn.datasets import fetch_20newsgroups</span>
-
-<span class="sd">    # Create topics</span>
-<span class="sd">    docs = fetch_20newsgroups(subset='train')['data']</span>
-<span class="sd">    model = BERTopic(n_gram_range=(1, 1))</span>
-<span class="sd">    topics, probs = model.fit_transform(docs)</span>
-
-<span class="sd">    # Update topic representation</span>
 <span class="sd">    model.update_topics(docs, topics, n_gram_range=(2, 3))</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    YOu can also use a custom vectorizer to update the representation:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    from sklearn.feature_extraction.text import CountVectorizer</span>
+<span class="sd">    vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english")</span>
+<span class="sd">    model.update_topics(docs, topics, vectorizer_model=vectorizer_model)</span>
 <span class="sd">    ```</span>
 <span class="sd">    """</span>
     <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -2032,6 +2547,18 @@ visualize_topics<span class="p">(</span><span class="bp">self</span><span class=
 <p>Visualize topics, their sizes, and their corresponding words</p>
 <p>This visualization is highly inspired by LDAvis, a great visualization
 technique typically reserved for LDA.</p>
+<p>Usage:</p>
+<p>To visualize the topics simply run:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">visualize_topics</span><span class="p">()</span>
+</code></pre>
+</div>
+<p>Or if you want to save the resulting figure:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">fig</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">visualize_topics</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s2">"path/to/file.html"</span><span class="p">)</span>
+</code></pre>
+</div>
 <details class="quote">
 <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
 <div class="highlight">
@@ -2040,6 +2567,21 @@ technique typically reserved for LDA.</p>
 
 <span class="sd">    This visualization is highly inspired by LDAvis, a great visualization</span>
 <span class="sd">    technique typically reserved for LDA.</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    To visualize the topics simply run:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    model.visualize_topics()</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Or if you want to save the resulting figure:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    fig = model.visualize_topics()</span>
+<span class="sd">    fig.write_html("path/to/file.html")</span>
+<span class="sd">    ```</span>
 <span class="sd">    """</span>
     <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_VIZ</span><span class="p">:</span>
@@ -2059,6 +2601,179 @@ technique typically reserved for LDA.</p>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"x"</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">"y"</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
                        <span class="s2">"Topic"</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">"Words"</span><span class="p">:</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">"Size"</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">[</span><span class="mi">1</span><span class="p">:]})</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plotly_topic_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">topic_list</span><span class="p">)</span>
+</code></pre>
+</div>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h2 class="doc doc-heading" id="bertopic._bertopic.BERTopic.visualize_topics_over_time">
+<code class="highlight language-python">
+visualize_topics_over_time<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics_over_time</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+<a class="headerlink" href="#bertopic._bertopic.BERTopic.visualize_topics_over_time" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<p>Visualize topics over time</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topics_over_time</code></td>
+<td><code>DataFrame</code></td>
+<td>
+<p>The topics you would like to be visualized with the
+              corresponding topic representation</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>top_n</code></td>
+<td><code>int</code></td>
+<td>
+<p>To visualize the most frequent topics instead of all</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>topics</code></td>
+<td><code>List[int]</code></td>
+<td>
+<p>Select which topics you would like to be visualized</p>
+</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code></code></td>
+<td>
+<p>A plotly.graph_objects.Figure including all traces</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Usage:</p>
+<p>To visualize the topics over time, simply run:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">)</span>
+</code></pre>
+</div>
+<p>Or if you want to save the resulting figure:</p>
+<div class="codehilite">
+<pre><span></span><code><span class="n">fig</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s2">"path/to/file.html"</span><span class="p">)</span>
+</code></pre>
+</div>
+<details class="quote">
+<summary>Source code in <code>bertopic\_bertopic.py</code></summary>
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics_over_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">topics_over_time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                               <span class="n">top_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">""" Visualize topics over time</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        topics_over_time: The topics you would like to be visualized with the</span>
+<span class="sd">                          corresponding topic representation</span>
+<span class="sd">        top_n: To visualize the most frequent topics instead of all</span>
+<span class="sd">        topics: Select which topics you would like to be visualized</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A plotly.graph_objects.Figure including all traces</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    To visualize the topics over time, simply run:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    model.visualize_topics_over_time(topics_over_time)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Or if you want to save the resulting figure:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    fig = model.visualize_topics_over_time(topics_over_time)</span>
+<span class="sd">    fig.write_html("path/to/file.html")</span>
+<span class="sd">    ```</span>
+<span class="sd">    """</span>
+    <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_HAS_VIZ</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"In order to use this function you'll need to install "</span>
+                                  <span class="sa">f</span><span class="s2">"additional dependencies;</span><span class="se">\n</span><span class="s2">pip install bertopic[visualization]"</span><span class="p">)</span>
+
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"#E69F00"</span><span class="p">,</span> <span class="s2">"#56B4E9"</span><span class="p">,</span> <span class="s2">"#009E73"</span><span class="p">,</span> <span class="s2">"#F0E442"</span><span class="p">,</span> <span class="s2">"#D55E00"</span><span class="p">,</span> <span class="s2">"#0072B2"</span><span class="p">,</span> <span class="s2">"#CC79A7"</span><span class="p">]</span>
+
+    <span class="c1"># Select topics</span>
+    <span class="k">if</span> <span class="n">topics</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="n">topics</span>
+    <span class="k">elif</span> <span class="n">top_n</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">top_n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">selected_topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="c1"># Prepare data</span>
+    <span class="n">topic_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">[:</span><span class="mi">40</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"..."</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">40</span> <span class="k">else</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_names</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">topics_over_time</span><span class="p">[</span><span class="s2">"Name"</span><span class="p">]</span> <span class="o">=</span> <span class="n">topics_over_time</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">topic_names</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">topics_over_time</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">topics_over_time</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">selected_topics</span><span class="p">),</span> <span class="p">:]</span>
+
+    <span class="c1"># Add traces</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">topic</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+        <span class="n">trace_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">Topic</span> <span class="o">==</span> <span class="n">topic</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">topic_name</span> <span class="o">=</span> <span class="n">trace_data</span><span class="o">.</span><span class="n">Name</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="n">trace_data</span><span class="o">.</span><span class="n">Words</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Frequency</span><span class="p">,</span>
+                                 <span class="n">mode</span><span class="o">=</span><span class="s1">'lines'</span><span class="p">,</span>
+                                 <span class="n">marker_color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="mi">7</span><span class="p">],</span>
+                                 <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">"text"</span><span class="p">,</span>
+                                 <span class="n">name</span><span class="o">=</span><span class="n">topic_name</span><span class="p">,</span>
+                                 <span class="n">hovertext</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">'&lt;b&gt;Topic </span><span class="si">{topic}</span><span class="s1">&lt;/b&gt;&lt;br&gt;Words: </span><span class="si">{word}</span><span class="s1">'</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">]))</span>
+
+    <span class="c1"># Styling of the visualization</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">"Frequency"</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">'text'</span><span class="p">:</span> <span class="s2">"&lt;b&gt;Topics over Time"</span><span class="p">,</span>
+            <span class="s1">'y'</span><span class="p">:</span> <span class="o">.</span><span class="mi">95</span><span class="p">,</span>
+            <span class="s1">'x'</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">,</span>
+            <span class="s1">'xanchor'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">,</span>
+            <span class="s1">'yanchor'</span><span class="p">:</span> <span class="s1">'top'</span><span class="p">,</span>
+            <span class="s1">'font'</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">"Black"</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="n">template</span><span class="o">=</span><span class="s2">"simple_white"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">1250</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">450</span><span class="p">,</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">"white"</span><span class="p">,</span>
+            <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">font_family</span><span class="o">=</span><span class="s2">"Rockwell"</span>
+        <span class="p">),</span>
+        <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">"&lt;b&gt;Global Topic Representation"</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span>
 </code></pre>
 </div>
 </details>

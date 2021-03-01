@@ -267,6 +267,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+      Dynamic Topic Modeling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../visualization/visualization.html" class="md-nav__link">
       Topic Visualization
     </a>
@@ -542,7 +554,11 @@ also allow for single words.</p>
 
 <p>To me, the combination of the words above seem a bit more intuitive than the words we previously had! You can play 
 around with <code>n_gram_range</code> or use your own custom <code>sklearn.feature_extraction.text.CountVectorizer</code> and pass that<br />
-instead. </p>
+instead: </p>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;English&quot;</span><span class="p">,</span> <span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+</code></pre></div>
                 
               
               

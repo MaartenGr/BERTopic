@@ -320,6 +320,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+      Dynamic Topic Modeling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../visualization/visualization.html" class="md-nav__link">
       Topic Visualization
     </a>
@@ -576,7 +588,7 @@ class-based TF-IDF</p>
 <p>Each cluster is converted to a single document instead of a set of documents. 
 Then, the frequency of word <code>t</code> are extracted for each class <code>i</code> and divided by the total number of words <code>w</code>. 
 This action can now be seen as a form of regularization of frequent words in the class.
-Next, the total, unjoined, number of documents <code>m</code> is divided by the total frequency of word <code>t</code> across all classes <code>n</code>.</p>
+Next, the average number of words per class <code>m</code> is divided by the total frequency of word <code>t</code> across all classes <code>n</code>.</p>
 <h2 id="topic-coherence"><strong>Topic Coherence</strong><a class="headerlink" href="#topic-coherence" title="Permanent link">&para;</a></h2>
 <p>This fourth step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
 itself. The embedding model provided by BERTopic will be used to improve the coherence of words within a topic. 

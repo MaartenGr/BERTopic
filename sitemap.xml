@@ -1,59 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
      <loc>https://maartengr.github.io/BERTopic/index.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/algorithm/algorithm.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/quickstart/quickstart.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://maartengr.github.io/BERTopic/tutorial/topicsovertime/topicsovertime.html</loc>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/visualization/visualization.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/topicreduction/topicreduction.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/topicrepresentation/topicrepresentation.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/search/search.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/tutorial/models/models.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/api/bertopic.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/api/ctfidf.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/api/mmr.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/faq.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://maartengr.github.io/BERTopic/changelog.html</loc>
-     <lastmod>2021-02-08</lastmod>
+     <lastmod>2021-03-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
