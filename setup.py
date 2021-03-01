@@ -42,7 +42,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="bertopic",
     packages=["bertopic"],
-    version="0.5.0",
+    version="0.6.0",
     author="Maarten Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",

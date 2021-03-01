@@ -33,15 +33,20 @@ def test_full_model(base_bertopic):
         assert len(words) == 10
 
     assert len(base_bertopic.get_topic_freq()) > 2
-    assert probs.shape == (1000, len(base_bertopic.get_topic_freq())-1)
     assert len(base_bertopic.get_topics()) == len(base_bertopic.get_topic_freq())
 
     # Test transform
     doc = "This is a new document to predict."
     topics_test, probs_test = base_bertopic.transform([doc])
 
-    assert len(probs_test) == len(base_bertopic.get_topic_freq())-1
     assert len(topics_test) == 1
+
+    # Test topics over time
+    timestamps = [i % 10 for i in range(1000)]
+    topics_over_time = base_bertopic.topics_over_time(newsgroup_docs, topics, timestamps)
+
+    assert topics_over_time.Frequency.sum() == 1000
+    assert len(topics_over_time.Topic.unique()) == len(set(topics))
 
     # Test find topic
     similar_topics, similarity = base_bertopic.find_topics("query", top_n=2)

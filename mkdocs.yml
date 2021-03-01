@@ -11,6 +11,7 @@ nav:
   - Guides:
       - Getting Started: tutorial/quickstart/quickstart.md
       - Embeddings: tutorial/embeddings/embeddings.md
+      - Dynamic Topic Modeling: tutorial/topicsovertime/topicsovertime.md
       - Topic Visualization: tutorial/visualization/visualization.md
       - Topic Reduction: tutorial/topicreduction/topicreduction.md
       - Topic Representation: tutorial/topicrepresentation/topicrepresentation.md

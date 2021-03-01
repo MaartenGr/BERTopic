@@ -1,3 +1,25 @@
+## **Version 0.6.0**
+*Release date:  1 March, 2021*
+
+**Highlights**:
+
+* DTM: Added a basic dynamic topic modeling technique based on the global c-TF-IDF representation 
+    * `model.topics_over_time(docs, timestamps, global_tuning=True)`
+* DTM: Option to evolve topics based on t-1 c-TF-IDF representation which results in evolving topics over time
+    * Only uses topics at t-1 and skips evolution if there is a gap
+    * `model.topics_over_time(docs, timestamps, evolution_tuning=True)`
+* DTM: Function to visualize topics over time 
+    * `model.visualize_topics_over_time(topics_over_time)`
+* DTM: Add binning of timestamps  
+    * `model.topics_over_time(docs, timestamps, nr_bins=10)`
+* Add function get general information about topics (id, frequency, name, etc.) 
+    *  `get_topic_info()`
+* Improved stability of c-TF-IDF by taking the average number of words across all topics instead of the number of documents
+
+**Fixes**:
+
+*  `_map_probabilities()` does not take into account that there is no probability of the outlier class and the probabilities are mutated instead of copied (#63, #64)
+
 ## **Version 0.5.0**
 *Release date:  8 Februari, 2021*
 
