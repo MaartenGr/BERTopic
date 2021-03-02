@@ -1217,8 +1217,11 @@ class BERTopic:
 
         #significance score calculation
         if self.significance == True:
+            
+            c_tf_idf_array = c_tf_idf.toarray()
+
             word_list_length = np.array([len(i.split()) for i in words]).reshape(len(words),1)
-            c_tf_idf = (c_tf_idf.T * word_list_length).T
+            c_tf_idf = (c_tf_idf_array.T * word_list_length).T
 
         return c_tf_idf, words
 
