@@ -180,7 +180,7 @@ topics_over_time = model.topics_over_time(tweets, topics, timestamps)
 Finally, we can visualize the topics by simply calling `visualize_topics_over_time()`: 
 
 ```python
-model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+model.visualize_topics_over_time(topics_over_time, top_n=6)
 ```
 
 <img src="images/dtm.gif" width="80%" height="80%" align="center" />
