@@ -1471,8 +1471,8 @@ class BERTopic:
 
         # Update hover order
         fig.update_traces(hovertemplate="<br>".join(["<b>Topic %{customdata[2]}</b>",
-                                                     "Words: %{customdata[3]}",
-                                                     "Size: %{customdata[4]}"]))
+                                                     "Words: %{customdata[1]}",
+                                                     "Size: %{customdata[0]}"]))
 
         # Create a slider for topic selection
         steps = [dict(label=f"Topic {topic}", method="update", args=get_color(topic)) for topic in topic_list[1:]]
