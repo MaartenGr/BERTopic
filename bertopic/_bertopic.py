@@ -739,7 +739,7 @@ class BERTopic:
 
         return new_topics, new_probabilities
 
-    def visualize_topics(self, plot_size=960):
+    def visualize_topics(self):
         """ Visualize topics, their sizes, and their corresponding words
 
         This visualization is highly inspired by LDAvis, a great visualization
@@ -777,7 +777,7 @@ class BERTopic:
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
                            "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
-        return self._plotly_topic_visualization(df, topic_list, plot_size)
+        return self._plotly_topic_visualization(df, topic_list)
 
     def visualize_topics_over_time(self,
                                    topics_over_time: pd.DataFrame,
@@ -1450,8 +1450,7 @@ class BERTopic:
 
     @staticmethod
     def _plotly_topic_visualization(df: pd.DataFrame,
-                                    topic_list: List[str],
-                                    plot_size: int):
+                                    topic_list: List[str]):
         """ Create plotly-based visualization of topics with a slider for topic selection """
 
         def get_color(topic_selected):
@@ -1491,8 +1490,8 @@ class BERTopic:
                     size=22,
                     color="Black")
             },
-            width=plot_size,
-            height=plot_size,
+            width=650,
+            height=650,
             hoverlabel=dict(
                 bgcolor="white",
                 font_size=16,
