@@ -178,13 +178,16 @@ class BERTopic:
 
     def fit(self,
             documents: List[str],
-            embeddings: np.ndarray = None):
+            embeddings: np.ndarray = None,
+            y: Union[List[int], np.ndarray] = None):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
         Arguments:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            y: The target class for (semi)-supervised modeling. Use -1 if no class for a
+               specific instance is specified.
 
         Usage:
 
@@ -212,19 +215,22 @@ class BERTopic:
         model = BERTopic(verbose=True).fit(docs, embeddings)
         ```
         """
-        self.fit_transform(documents, embeddings)
+        self.fit_transform(documents, embeddings, y)
         return self
 
     def fit_transform(self,
                       documents: List[str],
-                      embeddings: np.ndarray = None) -> Tuple[List[int],
-                                                              Union[np.ndarray, None]]:
+                      embeddings: np.ndarray = None,
+                      y: Union[List[int], np.ndarray] = None) -> Tuple[List[int],
+                                                                       Union[np.ndarray, None]]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            y: The target class for (semi)-supervised modeling. Use -1 if no class for a
+               specific instance is specified.
 
         Returns:
             predictions: Topic predictions for each documents
@@ -278,7 +284,7 @@ class BERTopic:
             self.custom_embeddings = True
 
         # Reduce dimensionality with UMAP
-        umap_embeddings = self._reduce_dimensionality(embeddings)
+        umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
         documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
@@ -1085,11 +1091,14 @@ class BERTopic:
             mapped_predictions.append(prediction)
         return mapped_predictions
 
-    def _reduce_dimensionality(self, embeddings: Union[np.ndarray, csr_matrix]) -> np.ndarray:
+    def _reduce_dimensionality(self,
+                               embeddings: Union[np.ndarray, csr_matrix],
+                               y: Union[List[int], np.ndarray] = None) -> np.ndarray:
         """ Reduce dimensionality of embeddings using UMAP and train a UMAP model
 
         Arguments:
             embeddings: The extracted embeddings using the sentence transformer module.
+            y: The target class for (semi)-supervised dimensionality reduction
 
         Returns:
             umap_embeddings: The reduced embeddings
@@ -1098,9 +1107,9 @@ class BERTopic:
             self.umap_model = umap.UMAP(n_neighbors=15,
                                         n_components=5,
                                         metric='hellinger',
-                                        low_memory=self.low_memory).fit(embeddings)
+                                        low_memory=self.low_memory).fit(embeddings, y=y)
         else:
-            self.umap_model.fit(embeddings)
+            self.umap_model.fit(embeddings, y=y)
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality with UMAP")
         return np.nan_to_num(umap_embeddings)
