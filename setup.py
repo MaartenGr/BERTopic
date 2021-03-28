@@ -18,7 +18,8 @@ base_packages = [
     "pandas>=1.1.5",
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
-    "torch>=1.4.0",
+    "torch>=1.6.0,<1.8.0",
+    "transformers>=4.0.0,<5.0.0",
     "sentence-transformers>=0.4.1"
 ]
 
@@ -28,7 +29,7 @@ visualization_packages = [
 ]
 
 flair_packages = [
-    "flair==0.7"
+    "flair>=0.7"
 ]
 
 extra_packages = visualization_packages + flair_packages
