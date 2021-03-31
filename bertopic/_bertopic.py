@@ -25,15 +25,11 @@ from ._embeddings import languages
 from ._mmr import mmr
 
 # Visualization
-try:
-    import matplotlib.pyplot as plt
-    import plotly.express as px
-    import plotly.graph_objects as go
-    _HAS_VIZ = True
-except ModuleNotFoundError as e:
-    _HAS_VIZ = False
+import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 
-# Flair
+# Flair backend
 try:
     from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
     from flair.data import Sentence
@@ -767,9 +763,6 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
 
         # Extract topic words and their frequencies
         topic_list = sorted(list(self.topics.keys()))
@@ -816,10 +809,6 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
-
         colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 
         # Select topics
@@ -903,9 +892,6 @@ class BERTopic:
         ![](../img/probabilities.png)
         """
         check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
         if len(probabilities[probabilities > min_probability]) == 0:
             raise ValueError("There are no values where `min_probability` is higher than the "
                              "probabilities that were supplied. Lower `min_probability` to prevent this error.")

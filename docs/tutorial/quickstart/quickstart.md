@@ -6,21 +6,9 @@ Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 pip install bertopic
 ```
 
-To use the visualization options, install BERTopic as follows:
-
-```bash
-pip install bertopic[visualization]
-```
-
 To use Flair embeddings, install BERTopic as follows:
 ```bash
 pip install bertopic[flair]
-```
-
-To install all additional dependencies:
-
-```bash
-pip install bertopic[all]
 ```
 
 ## **Quick Start**

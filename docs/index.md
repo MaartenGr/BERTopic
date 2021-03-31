@@ -17,22 +17,10 @@ Installation can be done using [pypi](https://pypi.org/project/bertopic/):
 pip install bertopic
 ```
 
-To use the visualization options, install BERTopic as follows:
-
-```bash
-pip install bertopic[visualization]
-```
-
 To use Flair embeddings, install BERTopic as follows:
 ```bash
 pip install bertopic[flair]
 ```
-
-Finally, to install all versions:
-```bash
-pip install bertopic[all]
-```
-
 
 ###  **Usage**
 

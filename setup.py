@@ -19,10 +19,7 @@ base_packages = [
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
     "torch>=1.4.0,<1.7.1",
-    "sentence-transformers>=0.4.1"
-]
-
-visualization_packages = [
+    "sentence-transformers>=0.4.1",
     "matplotlib>=3.2.2",
     "plotly>=4.7.0,<4.14.3"
 ]
@@ -30,7 +27,7 @@ visualization_packages = [
 flair_packages = [
     "flair==0.7"
 ]
-extra_packages = visualization_packages + flair_packages
+extra_packages = flair_packages
 
 dev_packages = docs_packages + test_packages + extra_packages
 
@@ -69,7 +66,6 @@ setuptools.setup(
         "test": test_packages,
         "docs": docs_packages,
         "dev": dev_packages,
-        "visualization": visualization_packages,
         "flair": flair_packages,
         "all": extra_packages
     },
