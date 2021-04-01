@@ -1541,3 +1541,19 @@ class BERTopic:
         parameters = sorted([p.name for p in init_signature.parameters.values()
                              if p.name != 'self' and p.kind != p.VAR_KEYWORD])
         return parameters
+
+    def __str__(self):
+        """Get a string representation of the current object.
+
+        Returns:
+            str: Human readable representation of the most important model parameters.
+                 The parameters that represent models are ignored due to their
+        """
+        parameters = ""
+        for parameter, value in self.get_params().items():
+            value = str(value)
+            if "(" in value and value[0] != "(":
+                value = value.split("(")[0] + "(...)"
+            parameters += f"{parameter}={value}, "
+
+        return f"BERTopic({parameters[:-2]})"
