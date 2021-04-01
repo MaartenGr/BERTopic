@@ -27,7 +27,12 @@ base_packages = [
 flair_packages = [
     "flair==0.7"
 ]
-extra_packages = flair_packages
+
+spacy_packages = [
+    "spacy>=3.0.1"
+]
+
+extra_packages = flair_packages + spacy_packages
 
 dev_packages = docs_packages + test_packages + extra_packages
 
@@ -67,6 +72,7 @@ setuptools.setup(
         "docs": docs_packages,
         "dev": dev_packages,
         "flair": flair_packages,
+        "spacy": spacy_packages,
         "all": extra_packages
     },
     python_requires='>=3.6',

@@ -13,12 +13,13 @@ from typing import List, Tuple, Union, Mapping, Any
 # Models
 import umap
 import hdbscan
-from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler, normalize
+from sentence_transformers import SentenceTransformer
 
 # BERTopic
+from bertopic.backends import BaseEmbedder, SentenceTransformerBackend, FlairBackend, SpacyBackend
 from ._ctfidf import ClassTFIDF
 from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 from ._embeddings import languages
@@ -31,12 +32,15 @@ import plotly.graph_objects as go
 
 # Flair backend
 try:
-    from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
-    from flair.data import Sentence
-    _HAS_FLAIR = True
+    from flair.embeddings.base import Embeddings as FlairEmbeddings
 except ModuleNotFoundError as e:
-    DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings = None, None, None
-    _HAS_FLAIR = False
+    FlairEmbeddings = None
+
+# Spacy backend
+try:
+    from spacy.language import Language as SpacyEmbeddings
+except (ModuleNotFoundError, ImportError) as e:
+    SpacyEmbeddings = None
 
 logger = MyLogger("WARNING")
 
@@ -84,8 +88,8 @@ class BERTopic:
                  calculate_probabilities: bool = False,
                  embedding_model: Union[str,
                                         SentenceTransformer,
-                                        DocumentEmbeddings,
-                                        TokenEmbeddings] = None,
+                                        FlairEmbeddings,
+                                        SpacyEmbeddings] = None,
                  umap_model: umap.UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
@@ -121,11 +125,14 @@ class BERTopic:
                                      use the corresponding visualization `visualize_probabilities`.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
-            embedding_model: Use a custom embedding model. You can pass in a string related
-                             to one of the following models:
-                             https://www.sbert.net/docs/pretrained_models.html
-                             You can also pass in a SentenceTransformer() model or a Flair
-                             DocumentEmbedding model.
+            embedding_model: Use a custom embedding model.
+                             The following backends are currently supported
+                               * SentenceTransformers
+                               * Flair
+                               * Spacy
+                             You can also pass in a string that points to one of the following
+                             sentence-transformers models:
+                               * https://www.sbert.net/docs/pretrained_models.html
             umap_model: Pass in a umap.UMAP model to be used instead of the default
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
             vectorizer_model: Pass in a CountVectorizer instead of the default
@@ -979,7 +986,7 @@ class BERTopic:
     @classmethod
     def load(cls,
              path: str,
-             embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None):
+             embedding_model: Union[str, SentenceTransformer, FlairEmbeddings, SpacyEmbeddings] = None):
         """ Loads the model from the specified path
 
         Arguments:
@@ -1039,32 +1046,12 @@ class BERTopic:
             verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
         Returns:
-            embeddings: The extracted embeddings using the sentence transformer
-                        module. Typically uses pre-trained huggingface models.
+            embeddings: The extracted embeddings.
         """
         if isinstance(documents, str):
             documents = [documents]
 
-        # Infer embeddings with SentenceTransformer
-        if isinstance(self.embedding_model, SentenceTransformer):
-            embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
-
-        # Infer embeddings with Flair
-        elif isinstance(self.embedding_model, DocumentEmbeddings):
-            embeddings = []
-            for index, document in tqdm(enumerate(documents), disable=not verbose):
-                try:
-                    sentence = Sentence(document) if document else Sentence("an empty document")
-                    self.embedding_model.embed(sentence)
-                except RuntimeError:
-                    sentence = Sentence("an empty document")
-                    self.embedding_model.embed(sentence)
-                embedding = sentence.embedding.detach().cpu().numpy()
-                embeddings.append(embedding)
-            embeddings = np.asarray(embeddings)
-
-        else:
-            raise ValueError("An incorrect embedding model type was selected.")
+        embeddings = self.embedding_model.embed(documents, verbose)
 
         return embeddings
 
@@ -1266,7 +1253,7 @@ class BERTopic:
 
         return topics
 
-    def _select_embedding_model(self) -> Union[SentenceTransformer, DocumentEmbeddings]:
+    def _select_embedding_model(self) -> Union[BaseEmbedder, None]:
         """ Select an embedding model based on language or a specific sentence transformer models.
         When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
         xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
@@ -1274,48 +1261,44 @@ class BERTopic:
         Returns:
             model: Either a Sentence-Transformer or Flair model
         """
+        # BERTopic language backend
+        if isinstance(self.embedding_model, BaseEmbedder):
+            return self.embedding_model
 
         # Sentence Transformer embeddings
-        if isinstance(self.embedding_model, SentenceTransformer):
-            return self.embedding_model
+        elif isinstance(self.embedding_model, SentenceTransformer):
+            return SentenceTransformerBackend(self.embedding_model)
 
         # Flair word embeddings
-        elif _HAS_FLAIR and isinstance(self.embedding_model, TokenEmbeddings):
-            return DocumentPoolEmbeddings([self.embedding_model])
+        elif isinstance(self.embedding_model, FlairEmbeddings) and FlairEmbeddings:
+            return FlairBackend(self.embedding_model)
 
-        # Flair document embeddings + disable fine tune to prevent CUDA OOM
-        # https://github.com/flairNLP/flair/issues/1719
-        elif _HAS_FLAIR and isinstance(self.embedding_model, DocumentEmbeddings):
-            if "fine_tune" in self.embedding_model.__dict__:
-                self.embedding_model.fine_tune = False
-            return self.embedding_model
+        # Spacy embeddings
+        elif isinstance(self.embedding_model, SpacyEmbeddings) and SpacyEmbeddings:
+            return SpacyBackend(self.embedding_model)
 
-        # Select embedding model based on specific sentence transformer model
+        # Create a Sentence Transformer model based on a string
         elif isinstance(self.embedding_model, str):
             self.sentence_pointer = self.embedding_model
-            return SentenceTransformer(self.embedding_model)
+            return SentenceTransformerBackend(self.embedding_model)
 
         # Select embedding model based on language
         elif self.language:
             if self.language.lower() in ["English", "english", "en"]:
-                return SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
-
-            elif self.language.lower() in languages:
-                return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
-
-            elif self.language == "multilingual":
-                return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
-
+                return SentenceTransformerBackend("distilbert-base-nli-stsb-mean-tokens")
+            elif self.language.lower() in languages or self.language == "multilingual":
+                return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")
             else:
                 raise ValueError(f"{self.language} is currently not supported. However, you can "
                                  f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
                                  "Else, please select a language from the following list:\n"
                                  f"{languages}")
 
-        elif self.custom_embeddings:
+        # Do not select any model if custom embeddings are used and no specific model was selected
+        elif self.custom_embeddings and self.embedding_model is None:
             return None
 
-        return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
+        return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")
 
     def _reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
