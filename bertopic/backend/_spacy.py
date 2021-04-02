@@ -15,8 +15,6 @@ class SpacyBackend(BaseEmbedder):
             raise ValueError("Please select a correct Spacy model by either using a string such as 'en_core_web_md' "
                              "or create a nlp model using: `nlp = spacy.load('en_core_web_md')")
 
-        if "transformer" in self.embedding_model.component_names:
-
     def embed(self, documents, verbose):
         if "transformer" in self.embedding_model.component_names:
             set_gpu_allocator("pytorch")
