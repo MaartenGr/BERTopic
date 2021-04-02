@@ -1,5 +1,6 @@
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 import re
 import joblib
@@ -19,11 +20,11 @@ from sklearn.preprocessing import MinMaxScaler, normalize
 from sentence_transformers import SentenceTransformer
 
 # BERTopic
-from bertopic.backends import BaseEmbedder, SentenceTransformerBackend, FlairBackend, SpacyBackend
-from ._ctfidf import ClassTFIDF
-from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
-from ._embeddings import languages
-from ._mmr import mmr
+from bertopic._ctfidf import ClassTFIDF
+from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from bertopic._mmr import mmr
+from bertopic.backend import languages
+from bertopic.backend import BaseEmbedder, SentenceTransformerBackend, FlairBackend, SpacyBackend
 
 # Visualization
 import matplotlib.pyplot as plt
@@ -99,8 +100,8 @@ class BERTopic:
 
         Arguments:
             language: The main language used in your documents. For a full overview of
-                      supported languages see bertopic.embeddings.languages. Select
-                      "multilingual" to load in a model that support 50+ languages.
+                      supported languages see bertopic.backends.languages. Select
+                      "multilingual" to load in a sentence-tranformers model that supports 50+ languages.
             top_n_words: The number of words per topic to extract
             n_gram_range: The n-gram range for the CountVectorizer.
                           Advised to keep high values between 1 and 3.
@@ -1266,24 +1267,26 @@ class BERTopic:
             return self.embedding_model
 
         # Sentence Transformer embeddings
-        elif isinstance(self.embedding_model, SentenceTransformer):
+        if isinstance(self.embedding_model, SentenceTransformer):
             return SentenceTransformerBackend(self.embedding_model)
 
         # Flair word embeddings
-        elif isinstance(self.embedding_model, FlairEmbeddings) and FlairEmbeddings:
-            return FlairBackend(self.embedding_model)
+        if FlairEmbeddings:
+            if isinstance(self.embedding_model, FlairEmbeddings):
+                return FlairBackend(self.embedding_model)
 
         # Spacy embeddings
-        elif isinstance(self.embedding_model, SpacyEmbeddings) and SpacyEmbeddings:
-            return SpacyBackend(self.embedding_model)
+        if SpacyEmbeddings:
+            if isinstance(self.embedding_model, SpacyEmbeddings):
+                return SpacyBackend(self.embedding_model)
 
         # Create a Sentence Transformer model based on a string
-        elif isinstance(self.embedding_model, str):
+        if isinstance(self.embedding_model, str):
             self.sentence_pointer = self.embedding_model
             return SentenceTransformerBackend(self.embedding_model)
 
         # Select embedding model based on language
-        elif self.language:
+        if self.language:
             if self.language.lower() in ["English", "english", "en"]:
                 return SentenceTransformerBackend("distilbert-base-nli-stsb-mean-tokens")
             elif self.language.lower() in languages or self.language == "multilingual":
@@ -1295,7 +1298,7 @@ class BERTopic:
                                  f"{languages}")
 
         # Do not select any model if custom embeddings are used and no specific model was selected
-        elif self.custom_embeddings and self.embedding_model is None:
+        if self.custom_embeddings and self.embedding_model is None:
             return None
 
         return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")

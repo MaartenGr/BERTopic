@@ -21,7 +21,6 @@ from scipy.sparse.csr import csr_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.datasets import fetch_20newsgroups, make_blobs
 from sentence_transformers import SentenceTransformer
-from flair.embeddings import WordEmbeddings, DocumentPoolEmbeddings
 
 from umap import UMAP
 from hdbscan import HDBSCAN

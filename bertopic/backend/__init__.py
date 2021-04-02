@@ -1,7 +1,7 @@
-from bertopic._utils import NotInstalled
-from ._base import BaseEmbedder
-from ._sentencetransformers import SentenceTransformerBackend
+from bertopic.backend._base import BaseEmbedder
+from bertopic.backend._sentencetransformers import SentenceTransformerBackend, languages
 
+from bertopic._utils import NotInstalled
 
 try:
     from ._flair import FlairBackend
@@ -18,5 +18,6 @@ __all__ = [
     "BaseEmbedder",
     "SentenceTransformerBackend",
     "FlairBackend",
-    "SpacyBackend"
+    "SpacyBackend",
+    "languages"
 ]

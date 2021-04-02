@@ -1,4 +1,4 @@
-import setuptools
+from setuptools import setup, find_packages
 
 test_packages = [
     "pytest>=5.4.3",
@@ -12,7 +12,7 @@ docs_packages = [
 ]
 
 base_packages = [
-    "numpy>=1.19.2",
+    "numpy>=1.20.0",
     "hdbscan>=0.8.27",
     "umap-learn>=0.5.0",
     "pandas>=1.1.5",
@@ -40,16 +40,21 @@ dev_packages = docs_packages + test_packages + extra_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="bertopic",
-    packages=["bertopic"],
+    packages=find_packages(exclude=["notebooks", "docs"]),
     version="0.6.0",
-    author="Maarten Grootendorst",
+    author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/MaartenGr/BERTopic",
+    project_urls={
+        "Documentation": "https://maartengr.github.io/BERTopic/",
+        "Source Code": "https://github.com/MaartenGr/BERTopic/",
+        "Issue Tracker": "https://github.com/MaartenGr/BERTopic/issues",
+    },
     keywords="nlp bert topic modeling embeddings",
     classifiers=[
         "Programming Language :: Python",
