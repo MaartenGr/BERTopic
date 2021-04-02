@@ -1,7 +1,6 @@
 import spacy
 import numpy as np
 from tqdm import tqdm
-from thinc.api import set_gpu_allocator, require_gpu
 from ._base import BaseEmbedder
 
 
@@ -17,8 +16,14 @@ class SpacyBackend(BaseEmbedder):
 
     def embed(self, documents, verbose):
         if "transformer" in self.embedding_model.component_names:
-            embeddings = np.array([self.embedding_model(doc)._.trf_data.tensors[-1][0] for
-                                   doc in tqdm(documents, disable=not verbose)])
+            embeddings = []
+            for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
+                try:
+                    embedding = self.embedding_model(doc)._.trf_data.tensors[-1][0]
+                except:
+                    embedding = self.embedding_model("An empty document")._.trf_data.tensors[-1][0]
+                embeddings.append(embedding)
+            embeddings = np.array(embeddings)
         else:
             embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):

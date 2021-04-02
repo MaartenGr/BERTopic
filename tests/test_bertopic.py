@@ -11,7 +11,7 @@ TO DO:
 
 from sklearn.datasets import fetch_20newsgroups
 
-newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
+newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1500]
 
 
 def test_full_model(base_bertopic):
