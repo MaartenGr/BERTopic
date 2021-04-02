@@ -18,13 +18,13 @@ base_packages = [
     "pandas>=1.1.5",
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
-    "torch>=1.4.0,<1.7.1",
     "sentence-transformers>=0.4.1",
     "matplotlib>=3.2.2",
     "plotly>=4.7.0,<4.14.3"
 ]
 
 flair_packages = [
+    "torch>=1.4.0,<1.7.1",
     "flair==0.7"
 ]
 

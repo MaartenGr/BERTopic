@@ -16,14 +16,22 @@ class SpacyBackend(BaseEmbedder):
                              "or create a nlp model using: `nlp = spacy.load('en_core_web_md')")
 
         if "transformer" in self.embedding_model.component_names:
-            set_gpu_allocator("pytorch")
-            require_gpu(0)
 
     def embed(self, documents, verbose):
         if "transformer" in self.embedding_model.component_names:
+            set_gpu_allocator("pytorch")
+            require_gpu(0)
+
             embeddings = np.array([self.embedding_model(doc)._.trf_data.tensors[-1][0] for
                                    doc in tqdm(documents, disable=not verbose)])
         else:
-            embeddings = np.array([self.embedding_model(doc).vector for doc in tqdm(documents, disable=not verbose)])
+            embeddings = []
+            for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
+                try:
+                    vector = self.embedding_model(doc).vector
+                except ValueError:
+                    vector = self.embedding_model("An empty document").vector
+                embeddings.append(vector)
+            embeddings = np.array(embeddings)
 
         return embeddings
