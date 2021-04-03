@@ -32,7 +32,13 @@ spacy_packages = [
     "spacy>=3.0.1"
 ]
 
-extra_packages = flair_packages + spacy_packages
+use_packages = [
+    "tensorflow",
+    "tensorflow_hub",
+    "tensorflow_text"
+]
+
+extra_packages = flair_packages + spacy_packages + use_packages
 
 dev_packages = docs_packages + test_packages + extra_packages
 
@@ -78,6 +84,7 @@ setup(
         "dev": dev_packages,
         "flair": flair_packages,
         "spacy": spacy_packages,
+        "use": use_packages,
         "all": extra_packages
     },
     python_requires='>=3.6',
