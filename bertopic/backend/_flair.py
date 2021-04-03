@@ -1,12 +1,36 @@
-from ._base import BaseEmbedder
-from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
-from flair.data import Sentence
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
+from typing import Union, List
+from flair.data import Sentence
+from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
+
+from bertopic.backend import BaseEmbedder
 
 
 class FlairBackend(BaseEmbedder):
-    def __init__(self, embedding_model):
+    """ Flair Embedding Model
+
+    The Flair embedding model used for generating document and
+    word embeddings.
+
+    Arguments:
+        embedding_model: A Flair embedding model
+
+    Usage:
+
+    ```python
+    from bertopic.backend import FlairBackend
+    from flair.embeddings import WordEmbeddings, DocumentPoolEmbeddings
+
+    # Create a Flair Embedding model
+    glove_embedding = WordEmbeddings('crawl')
+    document_glove_embeddings = DocumentPoolEmbeddings([glove_embedding])
+
+    # Pass the Flair model to create a new backend
+    flair_embedder = FlairBackend(document_glove_embeddings)
+    ```
+    """
+    def __init__(self, embedding_model: Union[TokenEmbeddings, DocumentEmbeddings]):
         super().__init__()
 
         # Flair word embeddings
@@ -26,7 +50,20 @@ class FlairBackend(BaseEmbedder):
                              "`from flair.embeddings import TransformerDocumentEmbeddings`"
                              "`roberta = TransformerDocumentEmbeddings('roberta-base')`")
 
-    def embed(self, documents, verbose):
+    def embed(self,
+              documents: List[str],
+              verbose: bool = False) -> np.ndarray:
+        """ Embed a list of n documents/words into an n-dimensional
+        matrix of embeddings
+
+        Arguments:
+            documents: A list of documents or words to be embedded
+            verbose: Controls the verbosity of the process
+
+        Returns:
+            Document/words embeddings with shape (n, m) with `n` documents/words
+            that each have an embeddings size of `m`
+        """
         embeddings = []
         for index, document in tqdm(enumerate(documents), disable=not verbose):
             try:
