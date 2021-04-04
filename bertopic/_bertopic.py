@@ -289,7 +289,9 @@ class BERTopic:
         # Extract embeddings
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
             self.embedding_model = self._select_embedding_model()
-            embeddings = self._extract_embeddings(documents.Document, verbose=self.verbose)
+            embeddings = self._extract_embeddings(documents.Document,
+                                                  method="document",
+                                                  verbose=self.verbose)
             logger.info("Transformed documents to Embeddings")
         else:
             self.custom_embeddings = True
@@ -364,7 +366,9 @@ class BERTopic:
 
         if not isinstance(embeddings, np.ndarray):
             self.embedding_model = self._select_embedding_model()
-            embeddings = self._extract_embeddings(documents, verbose=self.verbose)
+            embeddings = self._extract_embeddings(documents,
+                                                  method="document",
+                                                  verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
         predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
@@ -555,7 +559,9 @@ class BERTopic:
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
-        search_embedding = self._extract_embeddings([search_term], verbose=False).flatten()
+        search_embedding = self._extract_embeddings([search_term],
+                                                    method="word",
+                                                    verbose=False).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
 
         # Extract topics most similar to search_term
@@ -1045,12 +1051,16 @@ class BERTopic:
             out[key] = value
         return out
 
-    def _extract_embeddings(self, documents: Union[List[str], str], verbose: bool = None) -> np.ndarray:
+    def _extract_embeddings(self,
+                            documents: Union[List[str], str],
+                            method: str = "document",
+                            verbose: bool = None) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
+            method: Whether to extract document or word-embeddings, options are "document" and "word"
             verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
         Returns:
@@ -1059,7 +1069,13 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
-        embeddings = self.embedding_model.embed(documents, verbose)
+        if method == "word":
+            embeddings = self.embedding_model.embed_words(documents, verbose)
+        elif method == "document":
+            embeddings = self.embedding_model.embed_documents(documents, verbose)
+        else:
+            raise ValueError("Wrong method for extracting document/word embeddings. "
+                             "Either choose 'word' or 'document' as the method. ")
 
         return embeddings
 
@@ -1159,7 +1175,9 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            embeddings = self._extract_embeddings(topic_words, verbose=False)
+            embeddings = self._extract_embeddings(topic_words,
+                                                  method="word",
+                                                  verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -1253,8 +1271,10 @@ class BERTopic:
 
             for topic, topic_words in topics.items():
                 words = [word[0] for word in topic_words]
-                word_embeddings = self._extract_embeddings(words, verbose=False)
-                topic_embedding = self._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
+                word_embeddings = self._extract_embeddings(words,
+                                                           method="word",
+                                                           verbose=False)
+                topic_embedding = np.mean(word_embeddings, axis=0).reshape(1, -1)
 
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
                 topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
