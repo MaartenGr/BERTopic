@@ -38,7 +38,11 @@ use_packages = [
     "tensorflow_text"
 ]
 
-extra_packages = flair_packages + spacy_packages + use_packages
+gensim_packages = [
+    "gensim>=3.6.0"
+]
+
+extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 
 dev_packages = docs_packages + test_packages + extra_packages
 
@@ -85,6 +89,7 @@ setup(
         "flair": flair_packages,
         "spacy": spacy_packages,
         "use": use_packages,
+        "gensim": gensim_packages,
         "all": extra_packages
     },
     python_requires='>=3.6',
