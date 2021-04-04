@@ -32,7 +32,7 @@ class USEBackend(BaseEmbedder):
             self.embedding_model = embedding_model
         except TypeError:
             raise ValueError("Please select a correct USE model: \n"
-                             "`import tensorflow_hub`"
+                             "`import tensorflow_hub` \n"
                              "`embedding_model = tensorflow_hub.load(path_to_model)`")
 
     def embed(self,

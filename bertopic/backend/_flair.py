@@ -47,7 +47,7 @@ class FlairBackend(BaseEmbedder):
         else:
             raise ValueError("Please select a correct Flair model by either using preparing a token or document "
                              "embedding model: \n"
-                             "`from flair.embeddings import TransformerDocumentEmbeddings`"
+                             "`from flair.embeddings import TransformerDocumentEmbeddings` \n"
                              "`roberta = TransformerDocumentEmbeddings('roberta-base')`")
 
     def embed(self,

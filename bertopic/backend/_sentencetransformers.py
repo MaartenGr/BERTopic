@@ -41,6 +41,10 @@ class SentenceTransformerBackend(BaseEmbedder):
             self.embedding_model = embedding_model
         elif isinstance(embedding_model, str):
             self.embedding_model = SentenceTransformer(embedding_model)
+        else:
+            raise ValueError("Please select a correct SentenceTransformers model: \n"
+                             "`from sentence_transformers import SentenceTransformer` \n"
+                             "`model = SentenceTransformer('distilbert-base-nli-stsb-mean-tokens')`")
 
     def embed(self,
               documents: List[str],
