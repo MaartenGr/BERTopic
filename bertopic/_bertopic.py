@@ -23,8 +23,8 @@ from sentence_transformers import SentenceTransformer
 from bertopic._ctfidf import ClassTFIDF
 from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 from bertopic._mmr import mmr
-from bertopic.backend import languages
-from bertopic.backend import BaseEmbedder, SentenceTransformerBackend, FlairBackend, SpacyBackend
+from bertopic.backend import (languages, BaseEmbedder, SentenceTransformerBackend,
+                              FlairBackend, SpacyBackend, USEBackend, GensimBackend)
 
 # Visualization
 import matplotlib.pyplot as plt
@@ -42,6 +42,12 @@ try:
     from spacy.language import Language as SpacyEmbeddings
 except (ModuleNotFoundError, ImportError) as e:
     SpacyEmbeddings = None
+
+# Gensim backend
+try:
+    from gensim.models.keyedvectors import Word2VecKeyedVectors as GensimEmbeddings
+except (ModuleNotFoundError, ImportError) as e:
+    GensimEmbeddings = None
 
 logger = MyLogger("WARNING")
 
@@ -90,7 +96,8 @@ class BERTopic:
                  embedding_model: Union[str,
                                         SentenceTransformer,
                                         FlairEmbeddings,
-                                        SpacyEmbeddings] = None,
+                                        SpacyEmbeddings,
+                                        GensimEmbeddings] = None,
                  umap_model: umap.UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
@@ -1279,6 +1286,15 @@ class BERTopic:
         if SpacyEmbeddings:
             if isinstance(self.embedding_model, SpacyEmbeddings):
                 return SpacyBackend(self.embedding_model)
+
+        # Gensim embeddings
+        if GensimEmbeddings:
+            if isinstance(self.embedding_model, GensimEmbeddings):
+                return GensimBackend(self.embedding_model)
+
+        # USE embeddings
+        if "tensorflow" and "saved_model" in str(type(self.embedding_model)):
+            return USEBackend(self.embedding_model)
 
         # Create a Sentence Transformer model based on a string
         if isinstance(self.embedding_model, str):

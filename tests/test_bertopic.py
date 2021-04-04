@@ -11,7 +11,7 @@ TO DO:
 
 from sklearn.datasets import fetch_20newsgroups
 
-newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
+newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:2000]
 
 
 def test_full_model(base_bertopic):
@@ -42,10 +42,10 @@ def test_full_model(base_bertopic):
     assert len(topics_test) == 1
 
     # Test topics over time
-    timestamps = [i % 10 for i in range(1000)]
+    timestamps = [i % 10 for i in range(2000)]
     topics_over_time = base_bertopic.topics_over_time(newsgroup_docs, topics, timestamps)
 
-    assert topics_over_time.Frequency.sum() == 1000
+    assert topics_over_time.Frequency.sum() == 2000
     assert len(topics_over_time.Topic.unique()) == len(set(topics))
 
     # Test find topic
