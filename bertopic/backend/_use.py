@@ -50,5 +50,5 @@ class USEBackend(BaseEmbedder):
             that each have an embeddings size of `m`
         """
         embeddings = np.array([self.embedding_model([doc]).cpu().numpy()[0]
-                               for doc in tqdm(documents, verbose=not verbose)])
+                               for doc in tqdm(documents, disable=not verbose)])
         return embeddings
