@@ -12,42 +12,22 @@ from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Union, Mapping, Any
 
 # Models
-import umap
 import hdbscan
+from umap import UMAP
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler, normalize
-from sentence_transformers import SentenceTransformer
 
 # BERTopic
 from bertopic._ctfidf import ClassTFIDF
 from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 from bertopic._mmr import mmr
-from bertopic.backend import (languages, BaseEmbedder, SentenceTransformerBackend,
-                              FlairBackend, SpacyBackend, USEBackend, GensimBackend)
+from bertopic.backend._utils import select_backend
 
 # Visualization
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
-
-# Flair backend
-try:
-    from flair.embeddings.base import Embeddings as FlairEmbeddings
-except ModuleNotFoundError as e:
-    FlairEmbeddings = None
-
-# Spacy backend
-try:
-    from spacy.language import Language as SpacyEmbeddings
-except (ModuleNotFoundError, ImportError) as e:
-    SpacyEmbeddings = None
-
-# Gensim backend
-try:
-    from gensim.models.keyedvectors import Word2VecKeyedVectors as GensimEmbeddings
-except (ModuleNotFoundError, ImportError) as e:
-    GensimEmbeddings = None
 
 logger = MyLogger("WARNING")
 
@@ -93,12 +73,8 @@ class BERTopic:
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
                  calculate_probabilities: bool = False,
-                 embedding_model: Union[str,
-                                        SentenceTransformer,
-                                        FlairEmbeddings,
-                                        SpacyEmbeddings,
-                                        GensimEmbeddings] = None,
-                 umap_model: umap.UMAP = None,
+                 embedding_model = None,
+                 umap_model: UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
                  verbose: bool = False,
@@ -138,10 +114,12 @@ class BERTopic:
                                * SentenceTransformers
                                * Flair
                                * Spacy
+                               * Gensim
+                               * USE (TF-Hub)
                              You can also pass in a string that points to one of the following
                              sentence-transformers models:
                                * https://www.sbert.net/docs/pretrained_models.html
-            umap_model: Pass in a umap.UMAP model to be used instead of the default
+            umap_model: Pass in a UMAP model to be used instead of the default
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
             vectorizer_model: Pass in a CountVectorizer instead of the default
         """
@@ -164,11 +142,11 @@ class BERTopic:
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
 
         # UMAP
-        self.umap_model = umap_model or umap.UMAP(n_neighbors=15,
-                                                  n_components=5,
-                                                  min_dist=0.0,
-                                                  metric='cosine',
-                                                  low_memory=self.low_memory)
+        self.umap_model = umap_model or UMAP(n_neighbors=15,
+                                             n_components=5,
+                                             min_dist=0.0,
+                                             metric='cosine',
+                                             low_memory=self.low_memory)
 
         # HDBSCAN
         self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
@@ -182,7 +160,6 @@ class BERTopic:
         self.mapped_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
-        self.custom_embeddings = False
 
         if verbose:
             logger.set_level("DEBUG")
@@ -287,14 +264,17 @@ class BERTopic:
                                   "Topic": None})
 
         # Extract embeddings
-        if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
-            self.embedding_model = self._select_embedding_model()
+        if embeddings is None:
+            self.embedding_model = select_backend(self.embedding_model,
+                                                  language=self.language)
             embeddings = self._extract_embeddings(documents.Document,
                                                   method="document",
                                                   verbose=self.verbose)
             logger.info("Transformed documents to Embeddings")
         else:
-            self.custom_embeddings = True
+            if self.embedding_model is not None:
+                self.embedding_model = select_backend(self.embedding_model,
+                                                      language=self.language)
 
         # Reduce dimensionality with UMAP
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
@@ -364,8 +344,7 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
-        if not isinstance(embeddings, np.ndarray):
-            self.embedding_model = self._select_embedding_model()
+        if embeddings is None:
             embeddings = self._extract_embeddings(documents,
                                                   method="document",
                                                   verbose=self.verbose)
@@ -552,7 +531,7 @@ class BERTopic:
         Note that the search query is typically more accurate if the
         search_term consists of a phrase or multiple words.
         """
-        if self.custom_embeddings:
+        if self.embedding_model is None:
             raise Exception("This method can only be used if you did not use custom embeddings.")
 
         topic_list = list(self.topics.keys())
@@ -792,7 +771,7 @@ class BERTopic:
 
         # Embed c-TF-IDF into 2D
         embeddings = MinMaxScaler().fit_transform(self.c_tf_idf.toarray())
-        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
@@ -1000,7 +979,7 @@ class BERTopic:
     @classmethod
     def load(cls,
              path: str,
-             embedding_model: Union[str, SentenceTransformer, FlairEmbeddings, SpacyEmbeddings] = None):
+             embedding_model = None):
         """ Loads the model from the specified path
 
         Arguments:
@@ -1101,10 +1080,10 @@ class BERTopic:
             umap_embeddings: The reduced embeddings
         """
         if isinstance(embeddings, csr_matrix):
-            self.umap_model = umap.UMAP(n_neighbors=15,
-                                        n_components=5,
-                                        metric='hellinger',
-                                        low_memory=self.low_memory).fit(embeddings, y=y)
+            self.umap_model = UMAP(n_neighbors=15,
+                                   n_components=5,
+                                   metric='hellinger',
+                                   low_memory=self.low_memory).fit(embeddings, y=y)
         else:
             self.umap_model.fit(embeddings, y=y)
         umap_embeddings = self.umap_model.transform(embeddings)
@@ -1167,7 +1146,7 @@ class BERTopic:
         a sentence-transformer model to be used or there are custom embeddings but it is allowed
         to use a different multi-lingual sentence-transformer model
         """
-        if not self.custom_embeddings:
+        if self.embedding_model is not None:
             topic_list = list(self.topics.keys())
             topic_list.sort()
             n = self.top_n_words
@@ -1267,7 +1246,7 @@ class BERTopic:
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
-        if not self.custom_embeddings:
+        if self.embedding_model is not None:
 
             for topic, topic_words in topics.items():
                 words = [word[0] for word in topic_words]
@@ -1280,64 +1259,6 @@ class BERTopic:
                 topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
 
         return topics
-
-    def _select_embedding_model(self) -> Union[BaseEmbedder, None]:
-        """ Select an embedding model based on language or a specific sentence transformer models.
-        When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
-        xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
-
-        Returns:
-            model: Either a Sentence-Transformer or Flair model
-        """
-        # BERTopic language backend
-        if isinstance(self.embedding_model, BaseEmbedder):
-            return self.embedding_model
-
-        # Sentence Transformer embeddings
-        if isinstance(self.embedding_model, SentenceTransformer):
-            return SentenceTransformerBackend(self.embedding_model)
-
-        # Flair word embeddings
-        if FlairEmbeddings:
-            if isinstance(self.embedding_model, FlairEmbeddings):
-                return FlairBackend(self.embedding_model)
-
-        # Spacy embeddings
-        if SpacyEmbeddings:
-            if isinstance(self.embedding_model, SpacyEmbeddings):
-                return SpacyBackend(self.embedding_model)
-
-        # Gensim embeddings
-        if GensimEmbeddings:
-            if isinstance(self.embedding_model, GensimEmbeddings):
-                return GensimBackend(self.embedding_model)
-
-        # USE embeddings
-        if "tensorflow" and "saved_model" in str(type(self.embedding_model)):
-            return USEBackend(self.embedding_model)
-
-        # Create a Sentence Transformer model based on a string
-        if isinstance(self.embedding_model, str):
-            self.sentence_pointer = self.embedding_model
-            return SentenceTransformerBackend(self.embedding_model)
-
-        # Select embedding model based on language
-        if self.language:
-            if self.language.lower() in ["English", "english", "en"]:
-                return SentenceTransformerBackend("distilbert-base-nli-stsb-mean-tokens")
-            elif self.language.lower() in languages or self.language == "multilingual":
-                return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")
-            else:
-                raise ValueError(f"{self.language} is currently not supported. However, you can "
-                                 f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
-                                 "Else, please select a language from the following list:\n"
-                                 f"{languages}")
-
-        # Do not select any model if custom embeddings are used and no specific model was selected
-        if self.custom_embeddings and self.embedding_model is None:
-            return None
-
-        return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")
 
     def _reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics

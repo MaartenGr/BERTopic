@@ -1,4 +1,5 @@
 from bertopic.backend._base import BaseEmbedder
+from bertopic.backend._word_doc import WordDocEmbedder
 from bertopic.backend._sentencetransformers import SentenceTransformerBackend, languages
 
 from bertopic._utils import NotInstalled
@@ -25,6 +26,7 @@ except (ModuleNotFoundError, ImportError) as e:
 
 __all__ = [
     "BaseEmbedder",
+    "WordDocEmbedder",
     "SentenceTransformerBackend",
     "FlairBackend",
     "SpacyBackend",

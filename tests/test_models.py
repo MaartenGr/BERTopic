@@ -27,7 +27,7 @@ from hdbscan import HDBSCAN
 from bertopic import BERTopic
 from bertopic._mmr import mmr
 from bertopic._ctfidf import ClassTFIDF
-
+from bertopic.backend._utils import select_backend
 
 newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
 embedding_model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
@@ -41,7 +41,7 @@ def test_extract_embeddings(base_bertopic):
     the correct shape should be outputted. The embeddings by itself
     should not exceed certain values as a sanity check.
     """
-    base_bertopic.embedding_model = base_bertopic._select_embedding_model()
+    base_bertopic.embedding_model = select_backend("distilbert-base-nli-stsb-mean-tokens")
     single_embedding = base_bertopic._extract_embeddings("a document")
     multiple_embeddings = base_bertopic._extract_embeddings(["a document", "another document"])
 
@@ -64,7 +64,7 @@ def test_extract_embeddings_compare():
     """
     docs = ["some document"]
     model = BERTopic(embedding_model="distilbert-base-nli-stsb-mean-tokens")
-    model.embedding_model = model._select_embedding_model()
+    model.embedding_model = select_backend("distilbert-base-nli-stsb-mean-tokens")
     bertopic_embeddings = model._extract_embeddings(docs)
 
     assert isinstance(bertopic_embeddings, np.ndarray)
@@ -78,8 +78,7 @@ def test_extract_incorrect_embeddings():
     """ Test if errors are raised when loading incorrect model """
     with pytest.raises(ValueError):
         model = BERTopic(language="Unknown language")
-        model.embedding_model = model._select_embedding_model()
-        model._extract_embeddings(["Some document"])
+        model.fit(["some document"])
 
 
 @pytest.mark.parametrize("embeddings,shape", [(np.random.rand(100, 68), 100),
