@@ -1253,7 +1253,7 @@ class BERTopic:
                 word_embeddings = self._extract_embeddings(words,
                                                            method="word",
                                                            verbose=False)
-                topic_embedding = np.mean(word_embeddings, axis=0).reshape(1, -1)
+                topic_embedding = self._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(1, -1)
 
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
                 topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
