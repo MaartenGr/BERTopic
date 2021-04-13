@@ -1,5 +1,21 @@
-from bertopic.backend._base import BaseEmbedder
-from bertopic.backend._sentencetransformers import SentenceTransformerBackend, languages
+from ._base import BaseEmbedder
+from ._sentencetransformers import SentenceTransformerBackend
+
+languages = ['afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese',
+             'azerbaijani', 'basque', 'belarusian', 'bengali', 'bengali romanize',
+             'bosnian', 'breton', 'bulgarian', 'burmese', 'burmese zawgyi font', 'catalan',
+             'chinese (simplified)', 'chinese (traditional)', 'croatian', 'czech', 'danish',
+             'dutch', 'english', 'esperanto', 'estonian', 'filipino', 'finnish', 'french',
+             'galician', 'georgian', 'german', 'greek', 'gujarati', 'hausa', 'hebrew', 'hindi',
+             'hindi romanize', 'hungarian', 'icelandic', 'indonesian', 'irish', 'italian', 'japanese',
+             'javanese', 'kannada', 'kazakh', 'khmer', 'korean', 'kurdish (kurmanji)', 'kyrgyz',
+             'lao', 'latin', 'latvian', 'lithuanian', 'macedonian', 'malagasy', 'malay', 'malayalam',
+             'marathi', 'mongolian', 'nepali', 'norwegian', 'oriya', 'oromo', 'pashto', 'persian',
+             'polish', 'portuguese', 'punjabi', 'romanian', 'russian', 'sanskrit', 'scottish gaelic',
+             'serbian', 'sindhi', 'sinhala', 'slovak', 'slovenian', 'somali', 'spanish', 'sundanese',
+             'swahili', 'swedish', 'tamil', 'tamil romanize', 'telugu', 'telugu romanize', 'thai',
+             'turkish', 'ukrainian', 'urdu', 'urdu romanize', 'uyghur', 'uzbek', 'vietnamese',
+             'welsh', 'western frisian', 'xhosa', 'yiddish']
 
 
 def select_backend(embedding_model,
@@ -14,10 +30,6 @@ def select_backend(embedding_model,
     # BERTopic language backend
     if isinstance(embedding_model, BaseEmbedder):
         return embedding_model
-
-    # Sentence Transformer embeddings
-    if "sentence_transformers" in str(type(embedding_model)):
-        return SentenceTransformerBackend(embedding_model)
 
     # Flair word embeddings
     if "flair" in str(type(embedding_model)):
@@ -38,6 +50,10 @@ def select_backend(embedding_model,
     if "tensorflow" and "saved_model" in str(type(embedding_model)):
         from bertopic.backend._use import USEBackend
         return USEBackend(embedding_model)
+
+    # Sentence Transformer embeddings
+    if "sentence_transformers" in str(type(embedding_model)):
+        return SentenceTransformerBackend(embedding_model)
 
     # Create a Sentence Transformer model based on a string
     if isinstance(embedding_model, str):
