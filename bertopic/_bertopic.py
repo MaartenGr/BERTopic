@@ -1012,7 +1012,7 @@ class BERTopic:
         tokens = [tokenizer_(doc) for doc in cleaned_documents]
         dictionary = corpora.Dictionary(tokens)
         corpus = [dictionary.doc2bow(token) for token in tokens]
-        topic_words_ = [[words for words, _ in self.get_topic(topic)] for topic in range(len(set(topics))-1)]
+        topic_words_ = set([[words for words, _ in self.get_topic(topic)] for topic in range(len(set(topics))-1)])
 
         coherence_model = CoherenceModel(topics=topic_words_, 
                                          texts=tokens,
