@@ -33,7 +33,17 @@ pip install bertopic[flair]
 ## Getting Started
 For an in-depth overview of the features of `BERTopic` 
 you can check the full documentation [here](https://maartengr.github.io/BERTopic/) or you can follow along 
-with the Google Colab notebook [here](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing).
+with one of the examples below:
+
+| Name  | Link  |
+|---|---|
+| Topic Modeling with BERTopic  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing)  |
+| (Custom) Embedding Models in BERTopic  | TBA |
+| Advanced Customization in BERTopic  | TBA  |
+| (semi-)Supervised Topic Modeling with BERTopic  | TBA  |
+| Dynamic Topic Modeling with Trump's Tweets  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1un8ooI-7ZNlRoK0maVkYhmNRl0XGK88f?usp=sharing)  |
+
+
 
 ### Quick Start
 We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:

@@ -431,6 +431,9 @@ class BERTopic:
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
 
+        all_topics = sorted(list(documents.Topic.unique()))
+        all_topics_indices = {topic: index for index, topic in enumerate(all_topics)}
+
         if isinstance(timestamps[0], str):
             infer_datetime_format = True if not datetime_format else False
             documents["Timestamps"] = pd.to_datetime(documents["Timestamps"],
@@ -477,7 +480,8 @@ class BERTopic:
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
             if global_tuning:
-                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+                selected_topics = [all_topics_indices[topic] for topic in documents_per_topic.Topic.values]
+                c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
             # Extract the words per topic
             labels = sorted(list(documents_per_topic.Topic.unique()))

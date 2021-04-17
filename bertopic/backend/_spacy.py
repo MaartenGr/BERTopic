@@ -83,7 +83,7 @@ class SpacyBackend(BaseEmbedder):
                 except:
                     embedding = self.embedding_model("An empty document")._.trf_data.tensors[-1][0]
                 embeddings.append(embedding)
-            embeddings = np.array(embeddings)
+            embeddings = np.vstack(embeddings)
 
         # Extract embeddings from a general spacy model
         else:
@@ -94,6 +94,6 @@ class SpacyBackend(BaseEmbedder):
                 except ValueError:
                     vector = self.embedding_model("An empty document").vector
                 embeddings.append(vector)
-            embeddings = np.array(embeddings)
+            embeddings = np.vstack(embeddings)
 
         return embeddings
