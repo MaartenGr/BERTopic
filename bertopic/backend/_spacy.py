@@ -79,11 +79,11 @@ class SpacyBackend(BaseEmbedder):
             embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
                 try:
-                    embedding = self.embedding_model(doc)._.trf_data.tensors[-1][0]
+                    embedding = self.embedding_model(doc)._.trf_data.tensors[-1][0].tolist()
                 except:
-                    embedding = self.embedding_model("An empty document")._.trf_data.tensors[-1][0]
+                    embedding = self.embedding_model("An empty document")._.trf_data.tensors[-1][0].tolist()
                 embeddings.append(embedding)
-            embeddings = np.vstack(embeddings)
+            embeddings = np.array(embeddings)
 
         # Extract embeddings from a general spacy model
         else:
@@ -94,6 +94,6 @@ class SpacyBackend(BaseEmbedder):
                 except ValueError:
                     vector = self.embedding_model("An empty document").vector
                 embeddings.append(vector)
-            embeddings = np.vstack(embeddings)
+            embeddings = np.array(embeddings)
 
         return embeddings
