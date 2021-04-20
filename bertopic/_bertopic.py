@@ -25,7 +25,6 @@ from bertopic._mmr import mmr
 from bertopic.backend._utils import select_backend
 
 # Visualization
-import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -744,7 +743,7 @@ class BERTopic:
 
         return new_topics, new_probabilities
 
-    def visualize_topics(self):
+    def visualize_topics(self) -> go.Figure:
         """ Visualize topics, their sizes, and their corresponding words
 
         This visualization is highly inspired by LDAvis, a great visualization
@@ -784,7 +783,7 @@ class BERTopic:
     def visualize_topics_over_time(self,
                                    topics_over_time: pd.DataFrame,
                                    top_n: int = None,
-                                   topics: List[int] = None):
+                                   topics: List[int] = None) -> go.Figure:
         """ Visualize topics over time
 
         Arguments:
@@ -871,17 +870,13 @@ class BERTopic:
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
-                               min_probability: float = 0.015,
-                               figsize: tuple = (10, 5),
-                               save: bool = False):
+                               min_probability: float = 0.015) -> go.Figure:
         """ Visualize the distribution of topic probabilities
 
         Arguments:
             probabilities: An array of probability scores
             min_probability: The minimum probability score to visualize.
                              All others are ignored.
-            figsize: The size of the figure
-            save: Whether to save the resulting graph to probility.png
 
         Usage:
 
@@ -892,7 +887,12 @@ class BERTopic:
         topic_model.visualize_distribution(probabilities[0])
         ```
 
-        ![](../img/probabilities.png)
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_distribution(probabilities[0])
+        fig.write_html("path/to/file.html")
+        ```
         """
         check_is_fitted(self)
         if len(probabilities[probabilities > min_probability]) == 0:
@@ -909,43 +909,49 @@ class BERTopic:
         # Create labels
         labels = []
         for idx in labels_idx:
-            label = []
             words = self.get_topic(idx)
             if words:
-                for word in words[:5]:
-                    label.append(word[0])
-                label = str(r"$\bf{Topic }$ " +
-                            r"$\bf{" + str(idx) + ":}$ " +
-                            " ".join(label))
+                label = [word[0] for word in words[:5]]
+                label = f"<b>Topic {idx}</b>: {'_'.join(label)}"
+                label = label[:40] + "..." if len(label) > 40 else label
                 labels.append(label)
             else:
                 vals.remove(probabilities[idx])
-        pos = range(len(vals))
 
-        # Create figure
-        fig, ax = plt.subplots(figsize=figsize)
-        plt.hlines(y=pos, xmin=0, xmax=vals, color='#333F4B', alpha=0.2, linewidth=15)
-        plt.hlines(y=np.argmax(vals), xmin=0, xmax=max(vals), color='#333F4B', alpha=1, linewidth=15)
+        # Create Figure
+        fig = go.Figure(go.Bar(
+            x=vals,
+            y=labels,
+            marker=dict(
+                color='#C8D2D7',
+                line=dict(
+                    color='#6E8484',
+                    width=1),
+            ),
+            orientation='h')
+        )
 
-        # Set ticks and labels
-        ax.tick_params(axis='both', which='major', labelsize=12)
-        ax.set_xlabel('Probability', fontsize=15, fontweight='black', color='#333F4B')
-        ax.set_ylabel('')
-        plt.yticks(pos, labels)
-        fig.text(0, 1, 'Topic Probability Distribution', fontsize=15, fontweight='black', color='#333F4B')
+        fig.update_layout(
+            xaxis_title="Probability",
+            title={
+                'text': "<b>Topic Probability Distribution",
+                'y': .95,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            template="simple_white",
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+        )
 
-        # Update spine style
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.spines['left'].set_bounds(pos[0], pos[-1])
-        ax.spines['bottom'].set_bounds(0, max(vals))
-        ax.spines['bottom'].set_position(('axes', -0.02))
-        ax.spines['left'].set_position(('axes', 0.02))
-
-        fig.tight_layout()
-
-        if save:
-            fig.savefig("probability.png", dpi=300, bbox_inches='tight')
+        return fig
 
     def save(self,
              path: str,
