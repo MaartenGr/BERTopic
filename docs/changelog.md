@@ -1,3 +1,35 @@
+## **Version 0.7.0**
+*Release date:  23 April, 2021*
+The pull request for version 0.7. Thus far, the two main features will be **(semi-)supervised topic modeling** 
+and several **backends** to use instead of Flair and SentenceTransformers!
+
+**Highlights**:
+
+* (semi-)supervised topic modeling by leveraging supervised options in UMAP
+    * `model.fit(docs, y=target_classes)`
+* Bakends:
+  * Added Spacy, Gensim, USE (TFHub)
+  * Use a different backend for document embeddings and word embeddings
+  * Create your own backends with `bertopic.backend.BaseEmbedder`
+  * Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) for an overview of all new backends
+* Several tutorials were updated and added:
+
+| Name  | Link  |
+|---|---|
+| Topic Modeling with BERTopic  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing)  |
+| (Custom) Embedding Models in BERTopic  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/18arPPe50szvcCp_Y6xS56H2tY0m-RLqv?usp=sharing) |
+| Advanced Customization in BERTopic  |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ClTYut039t-LDtlcd-oQAdXWgcsSGTw9?usp=sharing) |
+| (semi-)Supervised Topic Modeling with BERTopic  |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1bxizKzv5vfxJEB29sntU__ZC7PBSIPaQ?usp=sharing)  |
+| Dynamic Topic Modeling with Trump's Tweets  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1un8ooI-7ZNlRoK0maVkYhmNRl0XGK88f?usp=sharing)  |
+
+**Fixes**:  
+
+* Fixed issues with Torch req
+* Prevent saving term frequency matrix in CTFIDF class
+* Fixed DTM not working when reducing topics (#96)
+* Moved visualization dependencies to base BERTopic
+    * `pip install bertopic[visualization]` becomes `pip install bertopic`
+
 ## **Version 0.6.0**
 *Release date:  1 March, 2021*
 

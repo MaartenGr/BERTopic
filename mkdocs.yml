@@ -10,13 +10,13 @@ nav:
   - The Algorithm: tutorial/algorithm/algorithm.md
   - Guides:
       - Getting Started: tutorial/quickstart/quickstart.md
-      - Embeddings: tutorial/embeddings/embeddings.md
-      - Dynamic Topic Modeling: tutorial/topicsovertime/topicsovertime.md
+      - Embedding Models: tutorial/embeddings/embeddings.md
       - Topic Visualization: tutorial/visualization/visualization.md
       - Topic Reduction: tutorial/topicreduction/topicreduction.md
       - Topic Representation: tutorial/topicrepresentation/topicrepresentation.md
       - Search Topics: tutorial/search/search.md
-      - Custom Models: tutorial/models/models.md
+      - Custom Sub-Models: tutorial/models/models.md
+      - Dynamic Topic Modeling: tutorial/topicsovertime/topicsovertime.md
   - API:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
@@ -45,14 +45,7 @@ theme:
     primary: black
     accent: grey
 markdown_extensions:
-  - admonition
-  - codehilite
-  - markdown.extensions.codehilite:
-      guess_lang: false
-  - pymdownx.inlinehilite
-  - pymdownx.details
-  - pymdownx.tabbed
-  - pymdownx.highlight:
-      use_pygments: true
+  - pymdownx.highlight
+  - pymdownx.superfences
   - toc:
       permalink: true

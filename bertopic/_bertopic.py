@@ -44,8 +44,8 @@ class BERTopic:
     from sklearn.datasets import fetch_20newsgroups
 
     docs = fetch_20newsgroups(subset='all')['data']
-    model = BERTopic(verbose=True, calculate_probabilities=True)
-    topics, probabilities = model.fit_transform(docs)
+    topic_model = BERTopic(calculate_probabilities=True)
+    topics, probabilities = topic_model.fit_transform(docs)
     ```
 
     If you want to use your own embedding model, use it as follows:
@@ -57,7 +57,7 @@ class BERTopic:
 
     docs = fetch_20newsgroups(subset='all')['data']
     sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-    model = BERTopic(verbose=True, embedding_model=sentence_model)
+    topic_model = BERTopic(embedding_model=sentence_model)
     ```
 
     Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -184,7 +184,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic(verbose=True).fit(docs)
+        topic_model = BERTopic().fit(docs)
         ```
 
         If you want to use your own embeddings, use it as follows:
@@ -200,7 +200,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(verbose=True).fit(docs, embeddings)
+        topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
         self.fit_transform(documents, embeddings, y)
@@ -223,7 +223,7 @@ class BERTopic:
         Returns:
             predictions: Topic predictions for each documents
             probabilities: The topic probability distribution which is returned by default.
-                           If `low_memory` in BERTopic is set to False, then the
+                           If `calculate_probabilities` in BERTopic is set to False, then the
                            probabilities are not calculated to speed up computation and
                            decrease memory usage.
 
@@ -234,9 +234,8 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-
-        model = BERTopic(verbose=True)
-        topics = model.fit_transform(docs)
+        topic_model = BERTopic(calculate_probabilities=True)
+        topics, probs = topic_model.fit_transform(docs)
         ```
 
         If you want to use your own embeddings, use it as follows:
@@ -252,8 +251,8 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(verbose=True)
-        topics = model.fit_transform(docs, embeddings)
+        topic_model = BERTopic(calculate_probabilities=True)
+        topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
         check_documents_type(documents)
@@ -306,7 +305,7 @@ class BERTopic:
         Returns:
             predictions: Topic predictions for each documents
             probabilities: The topic probability distribution which is returned by default.
-                           If `low_memory` in BERTopic is set to False, then the
+                           If `calculate_probabilities` in BERTopic is set to False, then the
                            probabilities are not calculated to speed up computation and
                            decrease memory usage.
 
@@ -317,8 +316,8 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic(verbose=True).fit(docs)
-        topics = model.transform(docs)
+        topic_model = BERTopic().fit(docs)
+        topics, _ = topic_model.transform(docs)
         ```
 
         If you want to use your own embeddings:
@@ -334,8 +333,8 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(verbose=True).fit(docs, embeddings)
-        topics = model.transform(docs, embeddings)
+        topic_model = BERTopic().fit(docs, embeddings)
+        topics, _ = topic_model.transform(docs, embeddings)
         ```
         """
         check_is_fitted(self)
@@ -421,9 +420,9 @@ class BERTopic:
 
         ```python
         from bertopic import BERTopic
-        model = BERTopic(verbose=True).fit(docs)
-        topics = model.transform(docs)
-        topics_over_time = model.topics_over_time(docs, topics, timestamps, nr_bins=20)
+        topic_model = BERTopic()
+        topics, _ = topic_model.fit_transform(docs)
+        topics_over_time = topic_model.topics_over_time(docs, topics, timestamps, nr_bins=20)
         ```
         """
         check_is_fitted(self)
@@ -529,7 +528,7 @@ class BERTopic:
         best represent the search term:
 
         ```python
-        topics, similarity = model.find_topics("sports", top_n=5)
+        topics, similarity = topic_model.find_topics("sports", top_n=5)
         ```
 
         Note that the search query is typically more accurate if the
@@ -579,7 +578,7 @@ class BERTopic:
         model and extract topics from them. Based on these, you can update the representation:
 
         ```python
-        model.update_topics(docs, topics, n_gram_range=(2, 3))
+        topic_model.update_topics(docs, topics, n_gram_range=(2, 3))
         ```
 
         YOu can also use a custom vectorizer to update the representation:
@@ -587,7 +586,7 @@ class BERTopic:
         ```python
         from sklearn.feature_extraction.text import CountVectorizer
         vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english")
-        model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+        topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
         ```
         """
         check_is_fitted(self)
@@ -608,7 +607,7 @@ class BERTopic:
         Usage:
 
         ```python
-        all_topics = model.get_topics()
+        all_topics = topic_model.get_topics()
         ```
         """
         check_is_fitted(self)
@@ -626,7 +625,7 @@ class BERTopic:
         Usage:
 
         ```python
-        topic = model.get_topic(12)
+        topic = topic_model.get_topic(12)
         ```
         """
         check_is_fitted(self)
@@ -647,7 +646,7 @@ class BERTopic:
         Usage:
 
         ```python
-        info_df = model.get_topic_info()
+        info_df = topic_model.get_topic_info()
         ```
         """
         check_is_fitted(self)
@@ -675,13 +674,13 @@ class BERTopic:
         To extract the frequency of all topics:
 
         ```python
-        frequency = model.get_topic_freq()
+        frequency = topic_model.get_topic_freq()
         ```
 
         To get the frequency of a single topic:
 
         ```python
-        frequency = model.get_topic_freq(12)
+        frequency = topic_model.get_topic_freq(12)
         ```
         """
         check_is_fitted(self)
@@ -724,13 +723,13 @@ class BERTopic:
         topics and probabilities (if they were calculated):
 
         ```python
-        new_topics, new_probs = model.reduce_topics(docs, topics, probabilities, nr_topics=30)
+        new_topics, new_probs = topic_model.reduce_topics(docs, topics, probabilities, nr_topics=30)
         ```
 
         If probabilities were not calculated simply run the function without them:
 
         ```python
-        new_topics, _= model.reduce_topics(docs, topics, nr_topics=30)
+        new_topics, _= topic_model.reduce_topics(docs, topics, nr_topics=30)
         ```
         """
         check_is_fitted(self)
@@ -756,13 +755,13 @@ class BERTopic:
         To visualize the topics simply run:
 
         ```python
-        model.visualize_topics()
+        topic_model.visualize_topics()
         ```
 
         Or if you want to save the resulting figure:
 
         ```python
-        fig = model.visualize_topics()
+        fig = topic_model.visualize_topics()
         fig.write_html("path/to/file.html")
         ```
         """
@@ -802,13 +801,13 @@ class BERTopic:
         To visualize the topics over time, simply run:
 
         ```python
-        model.visualize_topics_over_time(topics_over_time)
+        topic_model.visualize_topics_over_time(topics_over_time)
         ```
 
         Or if you want to save the resulting figure:
 
         ```python
-        fig = model.visualize_topics_over_time(topics_over_time)
+        fig = topic_model.visualize_topics_over_time(topics_over_time)
         fig.write_html("path/to/file.html")
         ```
         """
@@ -890,7 +889,7 @@ class BERTopic:
         probabilities of a single document:
 
         ```python
-        model.visualize_distribution(probabilities[0])
+        topic_model.visualize_distribution(probabilities[0])
         ```
 
         ![](../img/probabilities.png)
@@ -962,13 +961,13 @@ class BERTopic:
         Usage:
 
         ```python
-        model.save("my_model")
+        topic_model.save("my_model")
         ```
 
         or if you do not want the embedding_model to be saved locally:
 
         ```python
-        model.save("my_model", save_embedding_model=False)
+        topic_model.save("my_model", save_embedding_model=False)
         ```
         """
         with open(path, 'wb') as file:

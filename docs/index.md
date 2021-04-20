@@ -9,25 +9,33 @@ visualizations similar to LDAvis!
 Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
 
-###  **Installation**
+## **Installation**
 
-Installation can be done using [pypi](https://pypi.org/project/bertopic/):
+Installation, with sentence-transformers, can be done using [pypi](https://pypi.org/project/bertopic/):
 
 ```bash
 pip install bertopic
 ```
 
+You may want to install more depending on the transformers and language backends that you will be using. 
+The possible installations are: 
+
 To use Flair embeddings, install BERTopic as follows:
 ```bash
 pip install bertopic[flair]
+pip install bertopic[gensim]
+pip install bertopic[spacy]
+pip install bertopic[use]
 ```
 
-###  **Usage**
+To install all backends:
 
-Below is an example of how to use the model. The example uses the 
-[20 newsgroups](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) dataset.  
+```bash
+pip install bertopic[all]
+```
 
-You can also follow along with the Google Colab notebook [here](https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing).
+## **Quick Start**
+We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
 
 ```python
 from bertopic import BERTopic
@@ -42,20 +50,22 @@ topics, _ = topic_model.fit_transform(docs)
 After generating topics and their probabilities, we can access the frequent topics that were generated:
 
 ```python
->>> topic_model.get_topic_freq().head()
-Topic	Count
--1	7288
-49	3992
-30	701
-27	684
-11	568
+>>> topic_model.get_topic_info()
+
+Topic	Count	Name
+-1	4630	-1_can_your_will_any
+49	693	49_windows_drive_dos_file
+32	466	32_jesus_bible_christian_faith
+2	441	2_space_launch_orbit_lunar
+22	381	22_key_encryption_keys_encrypted
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, `topic 49`:
+frequent topic that was generated, topic 49:
 
 ```python
 >>> topic_model.get_topic(49)
+
 [('windows', 0.006152228076250982),
  ('drive', 0.004982897610645755),
  ('dos', 0.004845038866360651),
@@ -68,28 +78,33 @@ frequent topic that was generated, `topic 49`:
  ('pc', 0.003047105930670237)]
 ```  
 
-**NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages.
+**NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
-### Overview
+
+## **Overview**
+For quick access to common function, here is an overview of BERTopic's main methods:
 
 | Methods | Code  | 
 |-----------------------|---|
-| Fit the model    |  `topic_model.fit(docs])` |
-| Fit the model and predict documents    |  `topic_model.fit_transform(docs])` |
-| Predict new documents    |  `topic_model.transform([new_doc])` |
-| Access single topic   | `topic_model.get_topic(12)`  |   
-| Access all topics     |  `topic_model.get_topics()` |
-| Get topic freq    |  `topic_model.get_topic_freq()` |
-| Visualize Topics    |  `topic_model.visualize_topics()` |
-| Visualize Topic Probability Distribution    |  `topic_model.visualize_distribution(probabilities[0])` |
-| Update topic representation | `topic_model.update_topics(docs, topics, n_gram_range=(1, 3))` |
-| Reduce nr of topics | `topic_model.reduce_topics(docs, topics, nr_topics=30)` |
-| Find topics | `topic_model.find_topics("vehicle")` |
-| Save model    |  `topic_model.save("my_model")` |
+| Fit the model    |  `BERTopic().fit(docs)` |
+| Fit the model and predict documents    |  `BERTopic().fit_transform(docs)` |
+| Predict new documents    |  `BERTopic().transform([new_doc])` |
+| Access single topic   | `BERTopic().get_topic(topic=12)`  |   
+| Access all topics     |  `BERTopic().get_topics()` |
+| Get topic freq    |  `BERTopic().get_topic_freq()` |
+| Get all topic information|  `BERTopic().get_topic_info()` |
+| Dynamic Topic Modeling | `BERTopic().topics_over_time(docs, topics, timestamps)` |
+| Visualize Topics    |  `BERTopic().visualize_topics()` |
+| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probabilities[0])` |
+| Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
+| Update topic representation | `BERTopic().update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Reduce nr of topics | `BERTopic().reduce_topics(docs, topics, nr_topics=30)` |
+| Find topics | `BERTopic().find_topics("vehicle")` |
+| Save model    |  `BERTopic().save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
-| Get parameters |  `topic_model.get_params()` |
+| Get parameters |  `BERTopic().get_params()` |
  
-### Citation
+## **Citation**
 To cite BERTopic in your work, please use the following bibtex reference:
 
 ```bibtex
