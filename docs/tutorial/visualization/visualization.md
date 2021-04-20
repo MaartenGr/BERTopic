@@ -84,7 +84,7 @@ To visualize the distributions, we simply call:
 topic_model.visualize_distribution(probabilities[0])
 ```
 
-<img src="probabilities.png" width="75%" height="75%"/>
+<iframe src="probabilities.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
 
 **NOTE**: The distribution of the probabilities does not give an indication to 

@@ -54,6 +54,15 @@ def test_full_model(base_bertopic):
     assert len(similarity) == 2
     assert max(similarity) <= 1
 
+    # Test topic reduction
+    nr_topics = len(set(topics))
+    nr_topics = 2 if nr_topics < 2 else nr_topics
+    new_topics, new_probs = base_bertopic.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
+
+    assert len(base_bertopic.get_topic_freq()) == nr_topics + 1
+    assert len(new_topics) == len(topics)
+    assert len(new_probs) == len(probs)
+
     # Test update topics
     topic = base_bertopic.get_topic(1)[:10]
     base_bertopic.update_topics(newsgroup_docs, topics, n_gram_range=(2, 2))
@@ -64,10 +73,4 @@ def test_full_model(base_bertopic):
     assert topic != updated_topic
     assert topic == original_topic
 
-    # Test topic reduction
-    nr_topics = 2
-    new_topics, new_probs = base_bertopic.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
 
-    assert len(base_bertopic.get_topic_freq()) == nr_topics + 1
-    assert len(new_topics) == len(topics)
-    assert len(new_probs) == len(probs)
