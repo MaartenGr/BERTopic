@@ -53,11 +53,11 @@ After generating topics and their probabilities, we can access the frequent topi
 >>> topic_model.get_topic_info()
 
 Topic	Count	Name
--1	4630	-1_can_your_will_any
-49	693	49_windows_drive_dos_file
-32	466	32_jesus_bible_christian_faith
-2	441	2_space_launch_orbit_lunar
-22	381	22_key_encryption_keys_encrypted
+-1	    4630	-1_can_your_will_any
+49	    693	    49_windows_drive_dos_file
+32	    466	    32_jesus_bible_christian_faith
+2	    441	    2_space_launch_orbit_lunar
+22	    381	    22_key_encryption_keys_encrypted
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 

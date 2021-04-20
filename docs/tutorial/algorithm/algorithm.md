@@ -1,26 +1,32 @@
+<img src="algorithm.png" width="100%" height="100%"/>
 
-The algorithm contains, roughly, 4 stages:   
-   
-- Extract document embeddings with **`Sentence Transformers`** or **`TF-IDF`**  
-- Cluster document embeddings to create groups of similar documents with **`UMAP`** and **`HDBSCAN`**  
-- Extract and reduce topics with **`c-TF-IDF`**
-- Improve coherence of words with Maximal Marginal Relevance  
-
-##  **Create Document Embeddings**
+The algorithm contains, roughly, 3 stages:   
+     
+1. **Embed documents**
+    * Extract document embeddings with BERT or any other embedding technique
+2. **Cluster Documents**
+    * UMAP to reduce dimensionality of embeddings
+    * HDBSCAN to cluster reduced embeddings and create clusters of semantically similar documents
+3. **Create topic representation**  
+    * Extract and reduce topics with c-TF-IDF
+    * Improve coherence of words with Maximal Marginal Relevance  
+    
+##  **Embed documents**
 We start by creating document embeddings from a set of documents using 
 [sentence-transformers](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
 language and are great for creating either document- or sentence-embeddings. 
 
 In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:
-* "distilbert-base-nli-stsb-mean-tokens"
-* "xlm-r-bert-base-nli-stsb-mean-tokens"
+
+* `"distilbert-base-nli-stsb-mean-tokens"`
+* `"xlm-r-bert-base-nli-stsb-mean-tokens"`
 
 The first is an English BERT-based model trained specifically for semantic similarity tasks which works quite 
 well for most use-cases. The second model is very similar to the first with one major difference is that the 
 `xlm` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
 you select any language other than English.
 
-##  **Cluster Document Embeddings**
+##  **Cluster Documents**
 Next, in order to cluster the documents using a clustering algorithm such as HDBSCAN we first need to 
 reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.
 
@@ -31,7 +37,7 @@ reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.
 Thus, we first lower dimensionality with UMAP as it preserves local structure well after which we can 
 use HDBSCAN to cluster similar documents.  
 
-##  **Extract Topics**
+##  **Create topic representation**
 What we want to know from the clusters that we generated, is what makes one cluster, based on their content, 
 different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per topic
 instead of per document. 
@@ -52,8 +58,8 @@ Then, the frequency of word `t` are extracted for each class `i` and divided by 
 This action can now be seen as a form of regularization of frequent words in the class.
 Next, the average number of words per class `m` is divided by the total frequency of word `t` across all classes `n`.
 
-## **Topic Coherence**
-This fourth step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
+### **Topic Coherence**  
+This step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
 itself. The embedding model provided by BERTopic will be used to improve the coherence of words within a topic. 
 After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
 Technically, this does not mean that this collection of words actually describes a coherent topic. In practice, we will 

@@ -1,17 +1,18 @@
 ## **Version 0.7.0**
-*Release date:  23 April, 2021*
-The pull request for version 0.7. Thus far, the two main features will be **(semi-)supervised topic modeling** 
+*Release date:  23 April, 2021*  
+
+The two main features are **(semi-)supervised topic modeling** 
 and several **backends** to use instead of Flair and SentenceTransformers!
 
 **Highlights**:
 
 * (semi-)supervised topic modeling by leveraging supervised options in UMAP
     * `model.fit(docs, y=target_classes)`
-* Bakends:
-  * Added Spacy, Gensim, USE (TFHub)
-  * Use a different backend for document embeddings and word embeddings
-  * Create your own backends with `bertopic.backend.BaseEmbedder`
-  * Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) for an overview of all new backends
+* Backends:
+    * Added Spacy, Gensim, USE (TFHub)
+    * Use a different backend for document embeddings and word embeddings
+    * Create your own backends with `bertopic.backend.BaseEmbedder`
+    * Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) for an overview of all new backends
 * Several tutorials were updated and added:
 
 | Name  | Link  |
@@ -26,7 +27,7 @@ and several **backends** to use instead of Flair and SentenceTransformers!
 
 * Fixed issues with Torch req
 * Prevent saving term frequency matrix in CTFIDF class
-* Fixed DTM not working when reducing topics (#96)
+* Fixed DTM not working when reducing topics ([#96](https://github.com/MaartenGr/BERTopic/issues/96))
 * Moved visualization dependencies to base BERTopic
     * `pip install bertopic[visualization]` becomes `pip install bertopic`
 

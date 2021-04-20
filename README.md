@@ -28,7 +28,6 @@ pip install bertopic
 You may want to install more depending on the transformers and language backends that you will be using. 
 The possible installations are: 
 
-To use Flair embeddings, install BERTopic as follows:
 ```bash
 pip install bertopic[flair]
 pip install bertopic[gensim]
@@ -71,7 +70,7 @@ topic_model = BERTopic()
 topics, _ = topic_model.fit_transform(docs)
 ```
 
-After generating topics and their probabilities, we can access the frequent topics that were generated:
+After generating topics, we can access the frequent topics that were generated:
 
 ```python
 >>> topic_model.get_topic_info()
