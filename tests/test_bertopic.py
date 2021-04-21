@@ -56,7 +56,7 @@ def test_full_model(base_bertopic):
 
     # Test topic reduction
     nr_topics = len(set(topics))
-    nr_topics = 2 if nr_topics < 2 else nr_topics
+    nr_topics = 2 if nr_topics < 2 else nr_topics - 1
     new_topics, new_probs = base_bertopic.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
 
     assert len(base_bertopic.get_topic_freq()) == nr_topics + 1
