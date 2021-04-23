@@ -30,6 +30,13 @@ and several **backends** to use instead of Flair and SentenceTransformers!
 * Fixed DTM not working when reducing topics ([#96](https://github.com/MaartenGr/BERTopic/issues/96))
 * Moved visualization dependencies to base BERTopic
     * `pip install bertopic[visualization]` becomes `pip install bertopic`
+* Allow precomputed embeddings in bertopic.find_topics() ([#79](https://github.com/MaartenGr/BERTopic/issues/79)):
+ 
+```python
+model = BERTopic(embedding_model=my_embedding_model)
+model.fit(docs, my_precomputed_embeddings)
+model.find_topics(search_term)
+```
 
 ## **Version 0.6.0**
 *Release date:  1 March, 2021*
