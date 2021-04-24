@@ -84,7 +84,7 @@ frequent topic that was generated, topic 49:
 ## **Overview**
 For quick access to common function, here is an overview of BERTopic's main methods:
 
-| Methods | Code  | 
+| Method | Code  | 
 |-----------------------|---|
 | Fit the model    |  `BERTopic().fit(docs)` |
 | Fit the model and predict documents    |  `BERTopic().fit_transform(docs)` |
@@ -93,10 +93,12 @@ For quick access to common function, here is an overview of BERTopic's main meth
 | Access all topics     |  `BERTopic().get_topics()` |
 | Get topic freq    |  `BERTopic().get_topic_freq()` |
 | Get all topic information|  `BERTopic().get_topic_info()` |
+| Get topics per class | `BERTopic().topics_per_class(docs, topics, classes)` |
 | Dynamic Topic Modeling | `BERTopic().topics_over_time(docs, topics, timestamps)` |
 | Visualize Topics    |  `BERTopic().visualize_topics()` |
-| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probabilities[0])` |
+| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probs[0])` |
 | Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
+| Visualize Topics per Class | `BERTopic().visualize_topics_per_class(topics_per_class)` | 
 | Update topic representation | `BERTopic().update_topics(docs, topics, n_gram_range=(1, 3))` |
 | Reduce nr of topics | `BERTopic().reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `BERTopic().find_topics("vehicle")` |

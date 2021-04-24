@@ -1,5 +1,5 @@
 ## **Version 0.7.0**
-*Release date:  23 April, 2021*  
+*Release date:  26 April, 2021*  
 
 The two main features are **(semi-)supervised topic modeling** 
 and several **backends** to use instead of Flair and SentenceTransformers!
@@ -13,6 +13,9 @@ and several **backends** to use instead of Flair and SentenceTransformers!
     * Use a different backend for document embeddings and word embeddings
     * Create your own backends with `bertopic.backend.BaseEmbedder`
     * Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) for an overview of all new backends
+* Calculate and visualize topics per class
+    * Calculate: `topics_per_class = topic_model.topics_per_class(docs, topics, classes)`
+    * Visualize: `topic_model.visualize_topics_per_class(topics_per_class)`
 * Several tutorials were updated and added:
 
 | Name  | Link  |

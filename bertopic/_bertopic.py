@@ -500,6 +500,82 @@ class BERTopic:
 
         return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
 
+    def topics_per_class(self,
+                         docs: List[str],
+                         topics: List[int],
+                         classes: Union[List[int], List[str]],
+                         global_tuning: bool = True) -> pd.DataFrame:
+        """ Create topics per class
+
+        To create the topics per class, BERTopic needs to be already fitted once.
+        From the fitted models, the c-TF-IDF representations are calculate at
+        each class c. Then, the c-TF-IDF representations at class c are
+        averaged with the global c-TF-IDF representations in order to fine-tune the
+        local representations. This can be turned off if the pure representation is
+        needed.
+
+        NOTE:
+            Make sure to use a limited number of unique classes (<100) as the
+            c-TF-IDF representation will be calculated at each single unique class.
+            Having a large number of unique classes can take some time to be calculated.
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            classes: The class of each document. This can be either a list of strings or ints.
+            global_tuning: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
+                       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                       topic representations that could not be found in the documents at timestamp t.
+
+        Returns:
+            topics_per_class: A dataframe that contains the topic, words, and frequency of topics
+                              for each class.
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, _ = topic_model.fit_transform(docs)
+        topics_per_class = topic_model.topics_per_class(docs, topics, classes)
+        ```
+        """
+        documents = pd.DataFrame({"Document": docs, "Topic": topics, "Class": classes})
+        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+
+        # For each unique timestamp, create topic representations
+        topics_per_class = []
+        for index, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
+
+            # Calculate c-TF-IDF representation for a specific timestamp
+            selection = documents.loc[documents.Class == class_, :]
+            documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
+                                                                                    "Class": "count"})
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+
+            # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
+            # by simply taking the average of the two
+            if global_tuning:
+                c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+
+            # Extract the words per topic
+            labels = sorted(list(documents_per_topic.Topic.unique()))
+            words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels)
+            topic_frequency = pd.Series(documents_per_topic.Class.values,
+                                        index=documents_per_topic.Topic).to_dict()
+
+            # Fill dataframe with results
+            topics_at_class = [(topic,
+                                ", ".join([words[0] for words in values][:5]),
+                                topic_frequency[topic],
+                                class_) for topic, values in words_per_topic.items()]
+            topics_per_class.extend(topics_at_class)
+
+        topics_per_class = pd.DataFrame(topics_per_class, columns=["Topic", "Words", "Frequency", "Class"])
+
+        return topics_per_class
+
     def find_topics(self,
                     search_term: str,
                     top_n: int = 5) -> Tuple[List[int], List[float]]:
@@ -800,6 +876,7 @@ class BERTopic:
         To visualize the topics over time, simply run:
 
         ```python
+        topics_over_time = topic_model.topics_over_time(docs, topics, timestamps)
         topic_model.visualize_topics_over_time(topics_over_time)
         ```
 
@@ -857,6 +934,101 @@ class BERTopic:
             template="simple_white",
             width=1250,
             height=450,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+            legend=dict(
+                title="<b>Global Topic Representation",
+            )
+        )
+        return fig
+
+    def visualize_topics_per_class(self,
+                                   topics_per_class: pd.DataFrame,
+                                   top_n: int = 10,
+                                   topics: List[int] = None):
+        """ Visualize topics per class
+
+        Arguments:
+            topics_per_class: The topics you would like to be visualized with the
+                              corresponding topic representation
+            top_n: To visualize the most frequent topics instead of all
+            topics: Select which topics you would like to be visualized
+
+        Returns:
+            A plotly.graph_objects.Figure including all traces
+
+        Usage:
+
+        To visualize the topics per class, simply run:
+
+        ```python
+        topics_per_class = topic_model.topics_per_class(docs, topics, classes)
+        topic_model.visualize_topics_per_class(topics_per_class)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_topics_per_class(topics_per_class)
+        fig.write_html("path/to/file.html")
+        ```
+        """
+        colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
+
+        # Select topics
+        if topics:
+            selected_topics = topics
+        elif top_n:
+            selected_topics = self.get_topic_freq().head(top_n + 1)[1:].Topic.values
+        else:
+            selected_topics = self.get_topic_freq().Topic.values
+
+        # Prepare data
+        topic_names = {key: value[:40] + "..." if len(value) > 40 else value for key, value in self.topic_names.items()}
+        topics_per_class["Name"] = topics_per_class.Topic.map(topic_names)
+        data = topics_per_class.loc[topics_per_class.Topic.isin(selected_topics), :]
+
+        # Add traces
+        fig = go.Figure()
+        for index, topic in enumerate(selected_topics):
+            if index == 0:
+                visible = True
+            else:
+                visible = "legendonly"
+            trace_data = data.loc[data.Topic == topic, :]
+            topic_name = trace_data.Name.values[0]
+            words = trace_data.Words.values
+            fig.add_trace(go.Bar(y=trace_data.Class,
+                                 x=trace_data.Frequency,
+                                 visible=visible,
+                                 marker_color=colors[index % 7],
+                                 hoverinfo="text",
+                                 name=topic_name,
+                                 orientation="h",
+                                 hovertext=[f'<b>Topic {topic}</b><br>Words: {word}' for word in words]))
+
+        # Styling of the visualization
+        fig.update_xaxes(showgrid=True)
+        fig.update_yaxes(showgrid=True)
+        fig.update_layout(
+            xaxis_title="Frequency",
+            yaxis_title="Class",
+            title={
+                'text': "<b>Topics per Class",
+                'y': .95,
+                'x': 0.40,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            template="simple_white",
+            width=1250,
+            height=900,
             hoverlabel=dict(
                 bgcolor="white",
                 font_size=16,
