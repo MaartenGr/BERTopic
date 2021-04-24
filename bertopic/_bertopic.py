@@ -1003,10 +1003,10 @@ class BERTopic:
 
         cleaned_documents = self._preprocess_text(documents)
         vectorizer_ = self._vectorizer_model
-        tokenizer_ = vectorizer_.build_tokenizer()
+        analyzer_ = vectorizer_.build_analyzer()
 
         words = vectorizer_.get_feature_names()
-        tokens = [tokenizer_(doc) for doc in cleaned_documents]
+        tokens = [analyzer_(doc) for doc in cleaned_documents]
         dictionary = corpora.Dictionary(tokens)
         corpus = [dictionary.doc2bow(token) for token in tokens]
         topic_words_ = set([[words for words, _ in self.get_topic(topic)] for topic in range(len(set(topics))-1)])
