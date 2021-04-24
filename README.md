@@ -190,8 +190,8 @@ model.visualize_topics_over_time(topics_over_time, top_n=6)
 
 | Methods | Code  | 
 |-----------------------|---|
-| Fit the model    |  `topic_model.fit(docs])` |
-| Fit the model and predict documents    |  `topic_model.fit_transform(docs])` |
+| Fit the model    |  `topic_model.fit([docs])` |
+| Fit the model and predict documents    |  `topic_model.fit_transform([docs])` |
 | Predict new documents    |  `topic_model.transform([new_doc])` |
 | Access single topic   | `topic_model.get_topic(12)`  |   
 | Access all topics     |  `topic_model.get_topics()` |
