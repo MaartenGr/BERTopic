@@ -14,7 +14,7 @@ BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
 visualizations similar to LDAvis! 
 
-Corresponding medium post can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
+Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
 
 ## Installation

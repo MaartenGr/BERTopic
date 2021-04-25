@@ -16,6 +16,8 @@ nav:
       - Topic Representation: tutorial/topicrepresentation/topicrepresentation.md
       - Search Topics: tutorial/search/search.md
       - Custom Sub-Models: tutorial/models/models.md
+      - Topics per Class: tutorial/topicsperclass/topicsperclass.md
+      - (semi)-Supervised Topic Modeling: tutorial/supervised/supervised.md
       - Dynamic Topic Modeling: tutorial/topicsovertime/topicsovertime.md
   - API:
       - BERTopic: api/bertopic.md
@@ -28,7 +30,7 @@ plugins:
       watch:
         - bertopic
   - search
-copyright: Copyright &copy; 2020 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+copyright: Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
 theme:
   custom_dir: images/
   name: material
@@ -45,7 +47,7 @@ theme:
     primary: black
     accent: grey
 markdown_extensions:
-  - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.highlight:
+  - pymdownx.superfences:
   - toc:
       permalink: true
