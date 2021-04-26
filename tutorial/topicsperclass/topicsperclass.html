@@ -13,14 +13,14 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/models/models.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/topicsperclass/topicsperclass.html">
       
       <link rel="icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
     
     
       
-        <title>Custom Sub-Models - BERTopic</title>
+        <title>Topics per Class - BERTopic</title>
       
     
     
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Custom Sub-Models
+              Topics per Class
             
           </span>
         </div>
@@ -325,6 +325,18 @@
             
   
   
+  
+    <li class="md-nav__item">
+      <a href="../models/models.html" class="md-nav__link">
+        Custom Sub-Models
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
     
   
   
@@ -333,22 +345,10 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
-      <a href="models.html" class="md-nav__link md-nav__link--active">
-        Custom Sub-Models
-      </a>
-      
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+      <a href="topicsperclass.html" class="md-nav__link md-nav__link--active">
         Topics per Class
       </a>
+      
     </li>
   
 
@@ -491,37 +491,51 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/tutorial/models/models.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/tutorial/topicsperclass/topicsperclass.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Custom Sub-Models</h1>
+                  <h1>Topics per Class</h1>
                 
-                <p>There are three models underpinning BERTopic that are most important in creating the topics, 
-namely UMAP, HDBSCAN, and CountVectorizer. The parameters of these models have been carefully 
-selected to give the best results. However, there is no one-size-fits-all solution using these 
-default parameters.</p>
-<p>Therefore, BERTopic allows you to pass in any custom UMAP, HDBSCAN, and/or CountVectorizer 
-with the parameters that best suit your use-case. For example, you might want to change the 
-minimum document frequency in CountVectorizer or use a different distance metric in HDBSCAN or UMAP. </p>
-<p>To do this, simply create the instances of these models and initialize BERTopic with them:</p>
+                <p>In some cases, you might be interested in how certain topics are represented over certain categories. Perhaps 
+there are specific groups of users for which you want to see how they talk about certain topics. </p>
+<p>Instead of running the topic model per class, we can simply create a topic model and then extract, for each topic, 
+its representation per class. This allows you to see how certain topics, calculated over all documents, are represented 
+for certain subgroups. </p>
+<p>To do so, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of 
+documents. </p>
+<p>First, let's prepare the data:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">umap</span> <span class="kn">import</span> <span class="n">UMAP</span>
-<span class="kn">from</span> <span class="nn">hdbscan</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
-<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
-<span class="c1"># Prepare custom models</span>
-<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> 
-                        <span class="n">cluster_selection_method</span><span class="o">=</span><span class="s1">&#39;eom&#39;</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
-<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
-
-<span class="c1"># Pass the custom models to BERTopic</span>
-<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span> 
-                       <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">,</span> 
-                       <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+<span class="n">targets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span>
+<span class="n">target_names</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">]</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]]</span>
 </code></pre></div>
+<p>Next, we want to extract the topics across all documents without taking the categories into account:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>Now that we have created our global topic model, let us calculate the topic representations across each category:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topics_per_class</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_per_class</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>classes</code> variable contains the class for each document. Then, we simply visualize these topics per class:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="n">topics_per_class</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<iframe src="topics_per_class.html" style="width:1000px; height: 1100px; border: 0px;""></iframe>
+
+<p>You can hover over the bars to see the topic representation per class.</p>
+<p>As you can see in the visualization above, the topics <code>93_homosexual_homosexuality_sex</code> and <code>58_bike_bikes_motorcycle</code> 
+are somewhat distributed over all classes. </p>
+<p>You can see that the topic representation between rec.motorcycles and rec.autos in <code>58_bike_bikes_motorcycle</code> clearly 
+differs from one another. It seems that BERTopic has tried to combine those two categories into a single topic. However, 
+since they do contain two separate topics, the topic representation in those two categories differ. </p>
+<p>We see something similar for <code>93_homosexual_homosexuality_sex</code>, where the topic is distributed among several categories 
+and is represented slightly different. </p>
+<p>Thus, you can see that although in certain categories the topic is similar, the way the topic is represented can differ.   </p>
                 
               
               
@@ -540,7 +554,7 @@ minimum document frequency in CountVectorizer or use a different distance metric
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../search/search.html" class="md-footer__link md-footer__link--prev" rel="prev">
+        <a href="../models/models.html" class="md-footer__link md-footer__link--prev" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -549,19 +563,19 @@ minimum document frequency in CountVectorizer or use a different distance metric
               <span class="md-footer__direction">
                 Previous
               </span>
-              Search Topics
+              Custom Sub-Models
             </div>
           </div>
         </a>
       
       
-        <a href="../topicsperclass/topicsperclass.html" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../supervised/supervised.html" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Topics per Class
+              (semi)-Supervised Topic Modeling
             </div>
           </div>
           <div class="md-footer__button md-icon">

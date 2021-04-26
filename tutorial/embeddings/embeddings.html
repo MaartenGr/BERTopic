@@ -10,24 +10,24 @@
       
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html">
-      
-      
         <meta name="author" content="Maarten P. Grootendorst">
       
-      <link rel="shortcut icon" href="../../icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html">
+      
+      <link rel="icon" href="../../icon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
     
     
       
-        <title>Embeddings - BERTopic</title>
+        <title>Embedding Models - BERTopic</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.19753c6b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.9299cb39.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.196e0c26.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
         
           
           
@@ -39,12 +39,14 @@
     
       
         
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
-        <style>body,input{font-family:"Ubuntu",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Ubuntu Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+        <style>:root{--md-text-font-family:"Ubuntu";--md-code-font-family:"Ubuntu Mono"}</style>
       
     
     
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="../../style.css">
     
@@ -61,15 +63,17 @@
     
     
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="black" data-md-color-accent="grey">
-      
   
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
         
-        <a href="#sentence-transformers" class="md-skip">
+        <a href="#embedding-models" class="md-skip">
           Skip to content
         </a>
       
@@ -78,35 +82,37 @@
       
     </div>
     
-      
-
-<header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid" aria-label="Header">
-    <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-header-nav__button md-logo" aria-label="BERTopic">
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
   <img src="../../icon_white.png" alt="logo">
 
     </a>
-    <label class="md-header-nav__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
     </label>
-    <div class="md-header-nav__title" data-md-component="header-title">
-      
-        <div class="md-header-nav__ellipsis">
-          <span class="md-header-nav__topic md-ellipsis">
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
             BERTopic
           </span>
-          <span class="md-header-nav__topic md-ellipsis">
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
-              Embeddings
+              Embedding Models
             
           </span>
         </div>
-      
+      </div>
     </div>
     
-      <label class="md-header-nav__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
       </label>
       
 <div class="md-search" data-md-component="search" role="dialog">
@@ -115,11 +121,11 @@
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
       </button>
     </form>
     <div class="md-search__output">
@@ -136,12 +142,12 @@
 </div>
     
     
-      <div class="md-header-nav__source">
+      <div class="md-header__source">
         
-<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source">
+<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -161,14 +167,16 @@
         <div class="md-main__inner md-grid">
           
             
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
 
+
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic">
+    <a href="../.." title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
   <img src="../../icon_white.png" alt="logo">
 
@@ -178,10 +186,10 @@
   
     <div class="md-nav__source">
       
-<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source">
+<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -195,24 +203,15 @@
       
       
 
-
-  <li class="md-nav__item">
-    <a href="../../index.html" class="md-nav__link">
-      Home
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../algorithm/algorithm.html" class="md-nav__link">
-      The Algorithm
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
 
     
       
@@ -220,66 +219,88 @@
       
 
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../algorithm/algorithm.html" class="md-nav__link">
+        The Algorithm
+      </a>
+    </li>
+  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
-    <label class="md-nav__link" for="nav-3">
-      Guides
-      <span class="md-nav__icon md-icon"></span>
-    </label>
-    <nav class="md-nav" aria-label="Guides" data-md-level="1">
-      <label class="md-nav__title" for="nav-3">
-        <span class="md-nav__icon md-icon"></span>
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
         Guides
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../quickstart/quickstart.html" class="md-nav__link">
-      Getting Started
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Embeddings
         <span class="md-nav__icon md-icon"></span>
       </label>
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/quickstart.html" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
     
-    <a href="embeddings.html" class="md-nav__link md-nav__link--active">
-      Embeddings
-    </a>
-    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
       
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Embedding Models
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="embeddings.html" class="md-nav__link md-nav__link--active">
+        Embedding Models
+      </a>
+      
+        
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#sentence-transformers" class="md-nav__link">
@@ -296,186 +317,277 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#custom-embeddings" class="md-nav__link">
-    Custom Embeddings
+  <a href="#spacy" class="md-nav__link">
+    Spacy
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#universal-sentence-encoder-use" class="md-nav__link">
+    Universal Sentence Encoder (USE)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gensim" class="md-nav__link">
+    Gensim
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    Customization
+  </a>
+  
+    <nav class="md-nav" aria-label="Customization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#word-document-embeddings" class="md-nav__link">
+    Word + Document Embeddings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-backend" class="md-nav__link">
+    Custom Backend
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-embeddings" class="md-nav__link">
+    Custom Embeddings
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Embeddings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#tf-idf" class="md-nav__link">
     TF-IDF
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
     </ul>
   
 </nav>
-    
-  </li>
+      
+    </li>
+  
 
-        
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualization.html" class="md-nav__link">
+        Topic Visualization
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicreduction/topicreduction.html" class="md-nav__link">
+        Topic Reduction
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        Topic Representation
+      </a>
+    </li>
+  
 
-
-  <li class="md-nav__item">
-    <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
-      Dynamic Topic Modeling
-    </a>
-  </li>
-
-        
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../search/search.html" class="md-nav__link">
+        Search Topics
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/models.html" class="md-nav__link">
+        Custom Sub-Models
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
 
-
-  <li class="md-nav__item">
-    <a href="../visualization/visualization.html" class="md-nav__link">
-      Topic Visualization
-    </a>
-  </li>
-
-        
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supervised/supervised.html" class="md-nav__link">
+        (semi)-Supervised Topic Modeling
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+        Dynamic Topic Modeling
+      </a>
+    </li>
+  
+
           
-
-
-  <li class="md-nav__item">
-    <a href="../topicreduction/topicreduction.html" class="md-nav__link">
-      Topic Reduction
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
-      Topic Representation
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../search/search.html" class="md-nav__link">
-      Search Topics
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../models/models.html" class="md-nav__link">
-      Custom Models
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
+        </ul>
+      </nav>
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item md-nav__item--nested">
+  
+  
+  
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
-    <label class="md-nav__link" for="nav-4">
-      API
-      <span class="md-nav__icon md-icon"></span>
-    </label>
-    <nav class="md-nav" aria-label="API" data-md-level="1">
-      <label class="md-nav__title" for="nav-4">
-        <span class="md-nav__icon md-icon"></span>
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
         API
+        <span class="md-nav__icon md-icon"></span>
       </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/bertopic.html" class="md-nav__link">
+        BERTopic
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
 
-
-  <li class="md-nav__item">
-    <a href="../../api/bertopic.html" class="md-nav__link">
-      BERTopic
-    </a>
-  </li>
-
-        
           
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../api/ctfidf.html" class="md-nav__link">
-      cTFIDF
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../api/mmr.html" class="md-nav__link">
-      MMR
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
+        </ul>
+      </nav>
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item">
-    <a href="../../faq.html" class="md-nav__link">
-      FAQ
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq.html" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item">
-    <a href="../../changelog.html" class="md-nav__link">
-      Changelog
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog.html" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
 
     
   </ul>
@@ -485,19 +597,22 @@
               </div>
             
             
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#sentence-transformers" class="md-nav__link">
@@ -514,16 +629,70 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#custom-embeddings" class="md-nav__link">
-    Custom Embeddings
+  <a href="#spacy" class="md-nav__link">
+    Spacy
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#universal-sentence-encoder-use" class="md-nav__link">
+    Universal Sentence Encoder (USE)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gensim" class="md-nav__link">
+    Gensim
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    Customization
+  </a>
+  
+    <nav class="md-nav" aria-label="Customization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#word-document-embeddings" class="md-nav__link">
+    Word + Document Embeddings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-backend" class="md-nav__link">
+    Custom Backend
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-embeddings" class="md-nav__link">
+    Custom Embeddings
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Embeddings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#tf-idf" class="md-nav__link">
     TF-IDF
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -535,7 +704,7 @@
               </div>
             
           
-          <div class="md-content">
+          <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
                 
@@ -544,53 +713,138 @@
                   </a>
                 
                 
-                  <h1>Embeddings</h1>
-                
-                <h2 id="sentence-transformers"><strong>Sentence Transformers</strong><a class="headerlink" href="#sentence-transformers" title="Permanent link">&para;</a></h2>
+                <h1 id="embedding-models">Embedding Models<a class="headerlink" href="#embedding-models" title="Permanent link">&para;</a></h1>
+<p>In this tutorial we will be going through the embedding models that can be used in BERTopic. Having the option to choose embedding models allow you to leverage pre-trained embeddings that suit your use-case. Moreover, it helps creating a topic when you have little data to your availability.</p>
+<h3 id="sentence-transformers"><strong>Sentence Transformers</strong><a class="headerlink" href="#sentence-transformers" title="Permanent link">&para;</a></h3>
 <p>You can select any model from sentence-transformers <a href="https://www.sbert.net/docs/pretrained_models.html">here</a> 
 and pass it through BERTopic with <code>embedding_model</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;xlm-r-bert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
 </code></pre></div>
-
 <p>Or select a SentenceTransformer model with your own parameters:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
 
 <span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">sentence_model</span><span class="p">)</span>
 </code></pre></div>
-
-<h2 id="flair"><strong>Flair</strong><a class="headerlink" href="#flair" title="Permanent link">&para;</a></h2>
+<h3 id="flair"><strong>Flair</strong><a class="headerlink" href="#flair" title="Permanent link">&para;</a></h3>
 <p><a href="https://github.com/flairNLP/flair">Flair</a> allows you to choose almost any embedding model that 
 is publicly available. Flair can be used as follows:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">flair.embeddings</span> <span class="kn">import</span> <span class="n">TransformerDocumentEmbeddings</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flair.embeddings</span> <span class="kn">import</span> <span class="n">TransformerDocumentEmbeddings</span>
 
 <span class="n">roberta</span> <span class="o">=</span> <span class="n">TransformerDocumentEmbeddings</span><span class="p">(</span><span class="s1">&#39;roberta-base&#39;</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">roberta</span><span class="p">)</span>
 </code></pre></div>
-
 <p>You can select any 🤗 transformers model <a href="https://huggingface.co/models">here</a>.</p>
 <p>Moreover, you can also use Flair to use word embeddings and pool them to create document embeddings. 
 Under the hood, Flair simply averages all word embeddings in a document. Then, we can easily 
 pass it to BERTopic in order to use those word embeddings as document embeddings: </p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">flair.embeddings</span> <span class="kn">import</span> <span class="n">WordEmbeddings</span><span class="p">,</span> <span class="n">DocumentPoolEmbeddings</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">flair.embeddings</span> <span class="kn">import</span> <span class="n">WordEmbeddings</span><span class="p">,</span> <span class="n">DocumentPoolEmbeddings</span>
 
 <span class="n">glove_embedding</span> <span class="o">=</span> <span class="n">WordEmbeddings</span><span class="p">(</span><span class="s1">&#39;crawl&#39;</span><span class="p">)</span>
 <span class="n">document_glove_embeddings</span> <span class="o">=</span> <span class="n">DocumentPoolEmbeddings</span><span class="p">([</span><span class="n">glove_embedding</span><span class="p">])</span>
 
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">document_glove_embeddings</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="spacy"><strong>Spacy</strong><a class="headerlink" href="#spacy" title="Permanent link">&para;</a></h3>
+<p><a href="https://github.com/explosion/spaCy">Spacy</a> is an amazing framework for processing text. There are 
+many models available across many languages for modeling text. </p>
+<p>allows you to choose almost any embedding model that 
+is publicly available. Flair can be used as follows:</p>
+<p>To use Spacy's non-transformer models in BERTopic:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">spacy</span>
 
-<h2 id="custom-embeddings"><strong>Custom Embeddings</strong><a class="headerlink" href="#custom-embeddings" title="Permanent link">&para;</a></h2>
-<p>The base models in BERTopic are both BERT-based models that work well with document similarity tasks. You documents, 
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;en_core_web_md&quot;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tagger&#39;</span><span class="p">,</span> <span class="s1">&#39;parser&#39;</span><span class="p">,</span> <span class="s1">&#39;ner&#39;</span><span class="p">,</span> <span class="s1">&#39;attribute_ruler&#39;</span><span class="p">,</span> <span class="s1">&#39;lemmatizer&#39;</span><span class="p">])</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">nlp</span><span class="p">)</span>
+</code></pre></div>
+<p>Using spacy-transformer models:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">spacy</span>
+
+<span class="n">spacy</span><span class="o">.</span><span class="n">prefer_gpu</span><span class="p">()</span>
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;en_core_web_trf&quot;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tagger&#39;</span><span class="p">,</span> <span class="s1">&#39;parser&#39;</span><span class="p">,</span> <span class="s1">&#39;ner&#39;</span><span class="p">,</span> <span class="s1">&#39;attribute_ruler&#39;</span><span class="p">,</span> <span class="s1">&#39;lemmatizer&#39;</span><span class="p">])</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">nlp</span><span class="p">)</span>
+</code></pre></div>
+<p>If you run into memory issues with spacy-transformer models, try:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">spacy</span>
+<span class="kn">from</span> <span class="nn">thinc.api</span> <span class="kn">import</span> <span class="n">set_gpu_allocator</span><span class="p">,</span> <span class="n">require_gpu</span>
+
+<span class="n">nlp</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;en_core_web_trf&quot;</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tagger&#39;</span><span class="p">,</span> <span class="s1">&#39;parser&#39;</span><span class="p">,</span> <span class="s1">&#39;ner&#39;</span><span class="p">,</span> <span class="s1">&#39;attribute_ruler&#39;</span><span class="p">,</span> <span class="s1">&#39;lemmatizer&#39;</span><span class="p">])</span>
+<span class="n">set_gpu_allocator</span><span class="p">(</span><span class="s2">&quot;pytorch&quot;</span><span class="p">)</span>
+<span class="n">require_gpu</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">nlp</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="universal-sentence-encoder-use"><strong>Universal Sentence Encoder (USE)</strong><a class="headerlink" href="#universal-sentence-encoder-use" title="Permanent link">&para;</a></h3>
+<p>The Universal Sentence Encoder encodes text into high dimensional vectors that are used here 
+for embedding the documents. The model is trained and optimized for greater-than-word length text, 
+such as sentences, phrases or short paragraphs.</p>
+<p>Using USE in BERTopic is rather straightforward:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">tensorflow_hub</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">tensorflow_hub</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;https://tfhub.dev/google/universal-sentence-encoder/4&quot;</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="gensim"><strong>Gensim</strong><a class="headerlink" href="#gensim" title="Permanent link">&para;</a></h3>
+<p>For Gensim, BERTopic supports its <code>gensim.downloader</code> module. Here, we can download any model word embedding model 
+to be used in BERTopic. Note that Gensim is primarily used for Word Embedding models. This works typically 
+best for short documents since the word embeddings are pooled.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">gensim.downloader</span> <span class="k">as</span> <span class="nn">api</span>
+<span class="n">ft</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;fasttext-wiki-news-subwords-300&#39;</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">ft</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="customization"><strong>Customization</strong><a class="headerlink" href="#customization" title="Permanent link">&para;</a></h2>
+<p>Over the last years, many new embedding models have been released that could be interesting to use as a 
+backend in BERTopic. It is not always feasible to implement them all as there are simply too many to follow.</p>
+<p>In order to still allow to use those embeddings, BERTopic knows several ways to add these embeddings while still 
+allowing for full functionality of BERTopic.</p>
+<p>Moreover, there are several customization options that allow for a bit more control over which embedding to use when.</p>
+<h3 id="word-document-embeddings"><strong>Word + Document Embeddings</strong><a class="headerlink" href="#word-document-embeddings" title="Permanent link">&para;</a></h3>
+<p>You might want to be using different language models for creating document- and word-embeddings. For example, 
+while SentenceTransformers might be great in embedding sentences and documents, you might prefer to use 
+FastText to create the word embeddings.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic.backend</span> <span class="kn">import</span> <span class="n">WordDocEmbedder</span>
+<span class="kn">import</span> <span class="nn">gensim.downloader</span> <span class="k">as</span> <span class="nn">api</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Word embedding model</span>
+<span class="n">ft</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;fasttext-wiki-news-subwords-300&#39;</span><span class="p">)</span>
+
+<span class="c1"># Document embedding model</span>
+<span class="n">distilbert</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a model that uses both language models and pass it through BERTopic</span>
+<span class="n">word_doc_embedder</span> <span class="o">=</span> <span class="n">WordDocEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">distilbert</span><span class="p">,</span> <span class="n">word_embedding_model</span><span class="o">=</span><span class="n">ft</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">word_doc_embedder</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-backend"><strong>Custom Backend</strong><a class="headerlink" href="#custom-backend" title="Permanent link">&para;</a></h3>
+<p>If your backend or model cannot be found in the ones currently available, you can use the <code>bertopic.backend.BaseEmbedder</code> class to 
+create your own backend. Below, you will find an example of creating a SentenceTransformer backend for BERTopic:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic.backend</span> <span class="kn">import</span> <span class="n">BaseEmbedder</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="k">class</span> <span class="nc">CustomEmbedder</span><span class="p">(</span><span class="n">BaseEmbedder</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embedding_model</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_model</span> <span class="o">=</span> <span class="n">embedding_model</span>
+
+    <span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">embeddings</span> 
+
+<span class="c1"># Create custom backend</span>
+<span class="n">distilbert</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">custom_embedder</span> <span class="o">=</span> <span class="n">CustomEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">distilbert</span><span class="p">)</span>
+
+<span class="c1"># Pass custom backend to bertopic</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">custom_embedder</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-embeddings"><strong>Custom Embeddings</strong><a class="headerlink" href="#custom-embeddings" title="Permanent link">&para;</a></h3>
+<p>The base models in BERTopic are BERT-based models that work well with document similarity tasks. Your documents, 
 however, might be too specific for a general pre-trained model to be used. Fortunately, you can use embedding 
 model in BERTopic in order to create document features.   </p>
-<p>You only need to prepare the document embeddings yourself and pass them through <code>fit_transform</code> of BERTopic:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<p>You only need to prepare the document embeddings yourself and pass them through <code>fit_transform</code> of BERTopic:
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 <span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
 
 <span class="c1"># Prepare embeddings</span>
@@ -598,20 +852,18 @@ model in BERTopic in order to create document features.   </p>
 <span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<span class="c1"># Create topic model</span>
+<span class="c1"># Create topic model and use the custom embeddings</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
-</code></pre></div>
-
+<span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div></p>
 <p>As you can see above, we used a SentenceTransformer model to create the embedding. You could also have used 
 <code>🤗 transformers</code>, <code>Doc2Vec</code>, or any other embedding method. </p>
-<h2 id="tf-idf"><strong>TF-IDF</strong><a class="headerlink" href="#tf-idf" title="Permanent link">&para;</a></h2>
+<h4 id="tf-idf"><strong>TF-IDF</strong><a class="headerlink" href="#tf-idf" title="Permanent link">&para;</a></h4>
 <p>As mentioned above, any embedding technique can be used. However, when running umap, the typical distance metric is 
 <code>cosine</code> which does not work quite well for a TF-IDF matrix. Instead, BERTopic will recognize that a sparse matrix 
 is passed and use <code>hellinger</code> instead which works quite well for the similarity between probability distributions. </p>
 <p>We simply create a TF-IDF matrix and use them as embeddings in our <code>fit_transform</code> method:</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 <span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">TfidfVectorizer</span>
 
 <span class="c1"># Create TF-IDF sparse matrix</span>
@@ -620,10 +872,9 @@ is passed and use <code>hellinger</code> instead which works quite well for the 
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 
 <span class="c1"># </span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
 </code></pre></div>
-
 <p>Here, you will probably notice that creating the embeddings is quite fast whereas <code>fit_transform</code> is quite slow. 
 This is to be expected as reducing dimensionality of a large sparse matrix takes some time. The inverse of using 
 transformer embeddings is true: creating the embeddings is slow whereas <code>fit_transform</code> is quite fast. </p>
@@ -638,58 +889,58 @@ transformer embeddings is true: creating the embeddings is slow whereas <code>fi
             </article>
           </div>
         </div>
+        
       </main>
       
         
 <footer class="md-footer">
   
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
-        
-          <a href="../quickstart/quickstart.html" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../quickstart/quickstart.html" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Getting Started
             </div>
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                Getting Started
-              </div>
+          </div>
+        </a>
+      
+      
+        <a href="../visualization/visualization.html" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Topic Visualization
             </div>
-          </a>
-        
-        
-          <a href="../topicsovertime/topicsovertime.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                Dynamic Topic Modeling
-              </div>
-            </div>
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-footer-copyright">
         
           <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2020 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+            Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
           </div>
         
         Made with
         <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs
         </a>
+        
       </div>
       
     </div>
@@ -697,19 +948,13 @@ transformer embeddings is true: creating the embeddings is slow whereas <code>fi
 </footer>
       
     </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
     
-      <script src="../../assets/javascripts/vendor.0ac82a11.min.js"></script>
-      <script src="../../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
-      
-      <script>
-        app = initialize({
-          base: "../..",
-          features: [],
-          search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
-          }, typeof search !== "undefined" && search)
-        })
-      </script>
+    
+      <script src="../../assets/javascripts/bundle.7353b375.min.js"></script>
       
     
   </body>

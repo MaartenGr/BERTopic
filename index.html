@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/index.html">
-      
-      
         <meta name="author" content="Maarten P. Grootendorst">
       
-      <link rel="shortcut icon" href="icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/index.html">
+      
+      <link rel="icon" href="icon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
     
     
       
@@ -24,10 +24,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.19753c6b.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.9299cb39.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.196e0c26.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.ef6f36e2.min.css">
         
           
           
@@ -39,12 +39,14 @@
     
       
         
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
-        <style>body,input{font-family:"Ubuntu",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Ubuntu Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+        <style>:root{--md-text-font-family:"Ubuntu";--md-code-font-family:"Ubuntu Mono"}</style>
       
     
     
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
     
       <link rel="stylesheet" href="style.css">
     
@@ -61,8 +63,10 @@
     
     
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="black" data-md-color-accent="grey">
-      
   
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
@@ -78,35 +82,37 @@
       
     </div>
     
-      
-
-<header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid" aria-label="Header">
-    <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-header-nav__button md-logo" aria-label="BERTopic">
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
   <img src="icon_white.png" alt="logo">
 
     </a>
-    <label class="md-header-nav__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
     </label>
-    <div class="md-header-nav__title" data-md-component="header-title">
-      
-        <div class="md-header-nav__ellipsis">
-          <span class="md-header-nav__topic md-ellipsis">
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
             BERTopic
           </span>
-          <span class="md-header-nav__topic md-ellipsis">
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
             
               Home
             
           </span>
         </div>
-      
+      </div>
     </div>
     
-      <label class="md-header-nav__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
       </label>
       
 <div class="md-search" data-md-component="search" role="dialog">
@@ -115,11 +121,11 @@
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
       </button>
     </form>
     <div class="md-search__output">
@@ -136,12 +142,12 @@
 </div>
     
     
-      <div class="md-header-nav__source">
+      <div class="md-header__source">
         
-<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source">
+<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -161,14 +167,16 @@
         <div class="md-main__inner md-grid">
           
             
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
 
+
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="https://maartengr.github.io/BERTopic/" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic">
+    <a href="." title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
   <img src="icon_white.png" alt="logo">
 
@@ -178,10 +186,10 @@
   
     <div class="md-nav__source">
       
-<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source">
+<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -196,25 +204,27 @@
       
 
   
-
-
-  <li class="md-nav__item md-nav__item--active">
+  
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
       
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="index.html" class="md-nav__link md-nav__link--active">
         Home
-        <span class="md-nav__icon md-icon"></span>
-      </label>
-    
-    <a href="index.html" class="md-nav__link md-nav__link--active">
-      Home
-    </a>
-    
+      </a>
       
+        
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -225,7 +235,7 @@
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
@@ -235,8 +245,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
+  <a href="#quick-start" class="md-nav__link">
+    Quick Start
   </a>
   
 </li>
@@ -258,226 +268,270 @@
     </ul>
   
 </nav>
-    
-  </li>
+      
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item">
-    <a href="tutorial/algorithm/algorithm.html" class="md-nav__link">
-      The Algorithm
-    </a>
-  </li>
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/algorithm/algorithm.html" class="md-nav__link">
+        The Algorithm
+      </a>
+    </li>
+  
 
     
       
       
       
 
-
-  <li class="md-nav__item md-nav__item--nested">
+  
+  
+  
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
-    <label class="md-nav__link" for="nav-3">
-      Guides
-      <span class="md-nav__icon md-icon"></span>
-    </label>
-    <nav class="md-nav" aria-label="Guides" data-md-level="1">
-      <label class="md-nav__title" for="nav-3">
-        <span class="md-nav__icon md-icon"></span>
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
         Guides
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/quickstart/quickstart.html" class="md-nav__link">
-      Getting Started
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/embeddings/embeddings.html" class="md-nav__link">
-      Embeddings
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/topicsovertime/topicsovertime.html" class="md-nav__link">
-      Dynamic Topic Modeling
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/visualization/visualization.html" class="md-nav__link">
-      Topic Visualization
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/topicreduction/topicreduction.html" class="md-nav__link">
-      Topic Reduction
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/topicrepresentation/topicrepresentation.html" class="md-nav__link">
-      Topic Representation
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/search/search.html" class="md-nav__link">
-      Search Topics
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="tutorial/models/models.html" class="md-nav__link">
-      Custom Models
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
-    <label class="md-nav__link" for="nav-4">
-      API
-      <span class="md-nav__icon md-icon"></span>
-    </label>
-    <nav class="md-nav" aria-label="API" data-md-level="1">
-      <label class="md-nav__title" for="nav-4">
         <span class="md-nav__icon md-icon"></span>
-        API
       </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/quickstart/quickstart.html" class="md-nav__link">
+        Getting Started
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/embeddings/embeddings.html" class="md-nav__link">
+        Embedding Models
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/visualization/visualization.html" class="md-nav__link">
+        Topic Visualization
+      </a>
+    </li>
+  
 
-
-  <li class="md-nav__item">
-    <a href="api/bertopic.html" class="md-nav__link">
-      BERTopic
-    </a>
-  </li>
-
-        
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/topicreduction/topicreduction.html" class="md-nav__link">
+        Topic Reduction
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        Topic Representation
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/search/search.html" class="md-nav__link">
+        Search Topics
+      </a>
+    </li>
+  
 
-
-  <li class="md-nav__item">
-    <a href="api/ctfidf.html" class="md-nav__link">
-      cTFIDF
-    </a>
-  </li>
-
-        
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/models/models.html" class="md-nav__link">
+        Custom Sub-Models
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/topicsperclass/topicsperclass.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
+
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/supervised/supervised.html" class="md-nav__link">
+        (semi)-Supervised Topic Modeling
+      </a>
+    </li>
+  
 
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/topicsovertime/topicsovertime.html" class="md-nav__link">
+        Dynamic Topic Modeling
+      </a>
+    </li>
+  
 
-  <li class="md-nav__item">
-    <a href="api/mmr.html" class="md-nav__link">
-      MMR
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
+          
+        </ul>
+      </nav>
+    </li>
+  
 
     
       
       
       
 
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        API
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/bertopic.html" class="md-nav__link">
+        BERTopic
+      </a>
+    </li>
+  
 
-  <li class="md-nav__item">
-    <a href="faq.html" class="md-nav__link">
-      FAQ
-    </a>
-  </li>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
 
     
       
       
       
 
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="faq.html" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
 
-  <li class="md-nav__item">
-    <a href="changelog.html" class="md-nav__link">
-      Changelog
-    </a>
-  </li>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="changelog.html" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
 
     
   </ul>
@@ -487,7 +541,8 @@
               </div>
             
             
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -501,7 +556,7 @@
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
@@ -511,8 +566,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
+  <a href="#quick-start" class="md-nav__link">
+    Quick Start
   </a>
   
 </li>
@@ -539,7 +594,7 @@
               </div>
             
           
-          <div class="md-content">
+          <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
                 
@@ -553,30 +608,26 @@
 <p>BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
 visualizations similar to LDAvis! </p>
-<p>Corresponding medium post can be found <a href="https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&amp;sk=0b5a470c006d1842ad4c8a3057063a99">here</a> 
+<p>Corresponding medium posts can be found <a href="https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&amp;sk=0b5a470c006d1842ad4c8a3057063a99">here</a> 
 and <a href="https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4">here</a>.</p>
-<h3 id="installation"><strong>Installation</strong><a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
-<p>Installation can be done using <a href="https://pypi.org/project/bertopic/">pypi</a>:</p>
-<div class="codehilite"><pre><span></span><code>pip install bertopic
+<h2 id="installation"><strong>Installation</strong><a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>Installation, with sentence-transformers, can be done using <a href="https://pypi.org/project/bertopic/">pypi</a>:</p>
+<div class="highlight"><pre><span></span><code>pip install bertopic
 </code></pre></div>
-
-<p>To use the visualization options, install BERTopic as follows:</p>
-<div class="codehilite"><pre><span></span><code>pip install bertopic<span class="o">[</span>visualization<span class="o">]</span>
+<p>You may want to install more depending on the transformers and language backends that you will be using. 
+The possible installations are: </p>
+<p>To use Flair embeddings, install BERTopic as follows:
+<div class="highlight"><pre><span></span><code>pip install bertopic<span class="o">[</span>flair<span class="o">]</span>
+pip install bertopic<span class="o">[</span>gensim<span class="o">]</span>
+pip install bertopic<span class="o">[</span>spacy<span class="o">]</span>
+pip install bertopic<span class="o">[</span>use<span class="o">]</span>
+</code></pre></div></p>
+<p>To install all backends:</p>
+<div class="highlight"><pre><span></span><code>pip install bertopic<span class="o">[</span>all<span class="o">]</span>
 </code></pre></div>
-
-<p>To use Flair embeddings, install BERTopic as follows:</p>
-<div class="codehilite"><pre><span></span><code>pip install bertopic<span class="o">[</span>flair<span class="o">]</span>
-</code></pre></div>
-
-<p>Finally, to install all versions:</p>
-<div class="codehilite"><pre><span></span><code>pip install bertopic<span class="o">[</span>all<span class="o">]</span>
-</code></pre></div>
-
-<h3 id="usage"><strong>Usage</strong><a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
-<p>Below is an example of how to use the model. The example uses the 
-<a href="https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html">20 newsgroups</a> dataset.  </p>
-<p>You can also follow along with the Google Colab notebook <a href="https://colab.research.google.com/drive/1FieRA9fLdkQEGDIMYl0I3MCjSUKVF8C-?usp=sharing">here</a>.</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<h2 id="quick-start"><strong>Quick Start</strong><a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<p>We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
@@ -584,20 +635,20 @@ and <a href="https://towardsdatascience.com/interactive-topic-modeling-with-bert
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
 <span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
-
 <p>After generating topics and their probabilities, we can access the frequent topics that were generated:</p>
-<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-<span class="n">Topic</span>   <span class="n">Count</span>
-<span class="o">-</span><span class="mi">1</span>  <span class="mi">7288</span>
-<span class="mi">49</span>  <span class="mi">3992</span>
-<span class="mi">30</span>  <span class="mi">701</span>
-<span class="mi">27</span>  <span class="mi">684</span>
-<span class="mi">11</span>  <span class="mi">568</span>
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_info</span><span class="p">()</span>
 
+<span class="n">Topic</span>   <span class="n">Count</span>   <span class="n">Name</span>
+<span class="o">-</span><span class="mi">1</span>      <span class="mi">4630</span>    <span class="o">-</span><span class="mi">1</span><span class="n">_can_your_will_any</span>
+<span class="mi">49</span>      <span class="mi">693</span>     <span class="mi">49</span><span class="n">_windows_drive_dos_file</span>
+<span class="mi">32</span>      <span class="mi">466</span>     <span class="mi">32</span><span class="n">_jesus_bible_christian_faith</span>
+<span class="mi">2</span>       <span class="mi">441</span>     <span class="mi">2</span><span class="n">_space_launch_orbit_lunar</span>
+<span class="mi">22</span>      <span class="mi">381</span>     <span class="mi">22</span><span class="n">_key_encryption_keys_encrypted</span>
+</code></pre></div>
 <p>-1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, <code>topic 49</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">49</span><span class="p">)</span>
+frequent topic that was generated, topic 49:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">49</span><span class="p">)</span>
+
 <span class="p">[(</span><span class="s1">&#39;windows&#39;</span><span class="p">,</span> <span class="mf">0.006152228076250982</span><span class="p">),</span>
  <span class="p">(</span><span class="s1">&#39;drive&#39;</span><span class="p">,</span> <span class="mf">0.004982897610645755</span><span class="p">),</span>
  <span class="p">(</span><span class="s1">&#39;dos&#39;</span><span class="p">,</span> <span class="mf">0.004845038866360651</span><span class="p">),</span>
@@ -609,64 +660,84 @@ frequent topic that was generated, <code>topic 49</code>:</p>
  <span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="mf">0.0034239554442333257</span><span class="p">),</span>
  <span class="p">(</span><span class="s1">&#39;pc&#39;</span><span class="p">,</span> <span class="mf">0.003047105930670237</span><span class="p">)]</span>
 </code></pre></div>
-
-<p><strong>NOTE</strong>: Use <code>BERTopic(language="multilingual")</code> to select a model that supports 50+ languages.</p>
-<h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
+<p><strong>NOTE</strong>: Use <code>BERTopic(language="multilingual")</code> to select a model that supports 50+ languages. </p>
+<h2 id="overview"><strong>Overview</strong><a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>For quick access to common function, here is an overview of BERTopic's main methods:</p>
 <table>
 <thead>
 <tr>
-<th>Methods</th>
+<th>Method</th>
 <th>Code</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Fit the model</td>
-<td><code>topic_model.fit(docs])</code></td>
+<td><code>BERTopic().fit(docs)</code></td>
 </tr>
 <tr>
 <td>Fit the model and predict documents</td>
-<td><code>topic_model.fit_transform(docs])</code></td>
+<td><code>BERTopic().fit_transform(docs)</code></td>
 </tr>
 <tr>
 <td>Predict new documents</td>
-<td><code>topic_model.transform([new_doc])</code></td>
+<td><code>BERTopic().transform([new_doc])</code></td>
 </tr>
 <tr>
 <td>Access single topic</td>
-<td><code>topic_model.get_topic(12)</code></td>
+<td><code>BERTopic().get_topic(topic=12)</code></td>
 </tr>
 <tr>
 <td>Access all topics</td>
-<td><code>topic_model.get_topics()</code></td>
+<td><code>BERTopic().get_topics()</code></td>
 </tr>
 <tr>
 <td>Get topic freq</td>
-<td><code>topic_model.get_topic_freq()</code></td>
+<td><code>BERTopic().get_topic_freq()</code></td>
+</tr>
+<tr>
+<td>Get all topic information</td>
+<td><code>BERTopic().get_topic_info()</code></td>
+</tr>
+<tr>
+<td>Get topics per class</td>
+<td><code>BERTopic().topics_per_class(docs, topics, classes)</code></td>
+</tr>
+<tr>
+<td>Dynamic Topic Modeling</td>
+<td><code>BERTopic().topics_over_time(docs, topics, timestamps)</code></td>
 </tr>
 <tr>
 <td>Visualize Topics</td>
-<td><code>topic_model.visualize_topics()</code></td>
+<td><code>BERTopic().visualize_topics()</code></td>
 </tr>
 <tr>
 <td>Visualize Topic Probability Distribution</td>
-<td><code>topic_model.visualize_distribution(probabilities[0])</code></td>
+<td><code>BERTopic().visualize_distribution(probs[0])</code></td>
+</tr>
+<tr>
+<td>Visualize Topics over Time</td>
+<td><code>BERTopic().visualize_topics_over_time(topics_over_time)</code></td>
+</tr>
+<tr>
+<td>Visualize Topics per Class</td>
+<td><code>BERTopic().visualize_topics_per_class(topics_per_class)</code></td>
 </tr>
 <tr>
 <td>Update topic representation</td>
-<td><code>topic_model.update_topics(docs, topics, n_gram_range=(1, 3))</code></td>
+<td><code>BERTopic().update_topics(docs, topics, n_gram_range=(1, 3))</code></td>
 </tr>
 <tr>
 <td>Reduce nr of topics</td>
-<td><code>topic_model.reduce_topics(docs, topics, nr_topics=30)</code></td>
+<td><code>BERTopic().reduce_topics(docs, topics, nr_topics=30)</code></td>
 </tr>
 <tr>
 <td>Find topics</td>
-<td><code>topic_model.find_topics("vehicle")</code></td>
+<td><code>BERTopic().find_topics("vehicle")</code></td>
 </tr>
 <tr>
 <td>Save model</td>
-<td><code>topic_model.save("my_model")</code></td>
+<td><code>BERTopic().save("my_model")</code></td>
 </tr>
 <tr>
 <td>Load model</td>
@@ -674,13 +745,13 @@ frequent topic that was generated, <code>topic 49</code>:</p>
 </tr>
 <tr>
 <td>Get parameters</td>
-<td><code>topic_model.get_params()</code></td>
+<td><code>BERTopic().get_params()</code></td>
 </tr>
 </tbody>
 </table>
-<h3 id="citation">Citation<a class="headerlink" href="#citation" title="Permanent link">&para;</a></h3>
+<h2 id="citation"><strong>Citation</strong><a class="headerlink" href="#citation" title="Permanent link">&para;</a></h2>
 <p>To cite BERTopic in your work, please use the following bibtex reference:</p>
-<div class="codehilite"><pre><span></span><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">grootendorst2020bertopic</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="nc">@misc</span><span class="p">{</span><span class="nl">grootendorst2020bertopic</span><span class="p">,</span>
   <span class="na">author</span>       <span class="p">=</span> <span class="s">{Maarten Grootendorst}</span><span class="p">,</span>
   <span class="na">title</span>        <span class="p">=</span> <span class="s">{BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.}</span><span class="p">,</span>
   <span class="na">year</span>         <span class="p">=</span> <span class="m">2020</span><span class="p">,</span>
@@ -700,44 +771,44 @@ frequent topic that was generated, <code>topic 49</code>:</p>
             </article>
           </div>
         </div>
+        
       </main>
       
         
 <footer class="md-footer">
   
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
-        
-        
-          <a href="tutorial/algorithm/algorithm.html" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                The Algorithm
-              </div>
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+      
+        <a href="tutorial/algorithm/algorithm.html" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              The Algorithm
             </div>
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-footer-copyright">
         
           <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2020 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+            Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
           </div>
         
         Made with
         <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs
         </a>
+        
       </div>
       
     </div>
@@ -745,19 +816,13 @@ frequent topic that was generated, <code>topic 49</code>:</p>
 </footer>
       
     </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
     
-      <script src="assets/javascripts/vendor.0ac82a11.min.js"></script>
-      <script src="assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
-      
-      <script>
-        app = initialize({
-          base: ".",
-          features: [],
-          search: Object.assign({
-            worker: "assets/javascripts/worker/search.4ac00218.min.js"
-          }, typeof search !== "undefined" && search)
-        })
-      </script>
+    
+      <script src="assets/javascripts/bundle.7353b375.min.js"></script>
       
     
   </body>

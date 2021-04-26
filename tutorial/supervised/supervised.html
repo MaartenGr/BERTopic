@@ -13,14 +13,14 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/models/models.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/supervised/supervised.html">
       
       <link rel="icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
     
     
       
-        <title>Custom Sub-Models - BERTopic</title>
+        <title>(semi)-Supervised Topic Modeling - BERTopic</title>
       
     
     
@@ -72,6 +72,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#semi-supervised-topic-modeling" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -97,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Custom Sub-Models
+              (semi)-Supervised Topic Modeling
             
           </span>
         </div>
@@ -325,18 +330,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      <a href="models.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../models/models.html" class="md-nav__link">
         Custom Sub-Models
       </a>
-      
     </li>
   
 
@@ -356,11 +354,52 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../supervised/supervised.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          (semi)-Supervised Topic Modeling
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="supervised.html" class="md-nav__link md-nav__link--active">
         (semi)-Supervised Topic Modeling
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#semi-supervised-topic-modeling" class="md-nav__link">
+    Semi-supervised Topic Modeling
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supervised-topic-modeling" class="md-nav__link">
+    Supervised Topic Modeling
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -486,42 +525,121 @@
               </div>
             
             
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#semi-supervised-topic-modeling" class="md-nav__link">
+    Semi-supervised Topic Modeling
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supervised-topic-modeling" class="md-nav__link">
+    Supervised Topic Modeling
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/tutorial/models/models.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/tutorial/supervised/supervised.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Custom Sub-Models</h1>
+                  <h1>(semi)-Supervised Topic Modeling</h1>
                 
-                <p>There are three models underpinning BERTopic that are most important in creating the topics, 
-namely UMAP, HDBSCAN, and CountVectorizer. The parameters of these models have been carefully 
-selected to give the best results. However, there is no one-size-fits-all solution using these 
-default parameters.</p>
-<p>Therefore, BERTopic allows you to pass in any custom UMAP, HDBSCAN, and/or CountVectorizer 
-with the parameters that best suit your use-case. For example, you might want to change the 
-minimum document frequency in CountVectorizer or use a different distance metric in HDBSCAN or UMAP. </p>
-<p>To do this, simply create the instances of these models and initialize BERTopic with them:</p>
+                <p>In this tutorial, we will be looking at a new feature of BERTopic, namely (semi)-supervised topic modeling! 
+This allows us to steer the dimensionality reduction of the embeddings into a space that closely follows any labels you might already have. 
+In other words, we use a semi-supervised UMAP instance to reduce the dimensionality of embeddings before clustering the documents 
+with HDBSCAN. </p>
+<p>First, let us prepare the data needed for our topic model:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">umap</span> <span class="kn">import</span> <span class="n">UMAP</span>
-<span class="kn">from</span> <span class="nn">hdbscan</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
-<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
-<span class="c1"># Prepare custom models</span>
-<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> 
-                        <span class="n">cluster_selection_method</span><span class="o">=</span><span class="s1">&#39;eom&#39;</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span>
-<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
-
-<span class="c1"># Pass the custom models to BERTopic</span>
-<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span> 
-                       <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">,</span> 
-                       <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+<span class="n">categories</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span>
+<span class="n">category_names</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">]</span>
 </code></pre></div>
+<p>We are using the popular 20 Newsgroups dataset which contains roughly 18000 newsgroups posts that each is 
+assigned to one of 20 categories. Using this dataset we can try to extract its corresponding topic model whilst 
+taking its underlying categories into account. These categories are here the variable <code>targets</code>.</p>
+<p>Each document can be put into one of the following categories:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">category_names</span>
+
+<span class="p">[</span><span class="s1">&#39;alt.atheism&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;comp.graphics&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;comp.os.ms-windows.misc&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;comp.sys.ibm.pc.hardware&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;comp.sys.mac.hardware&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;comp.windows.x&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;misc.forsale&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;rec.autos&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;rec.motorcycles&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;rec.sport.baseball&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;rec.sport.hockey&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sci.crypt&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sci.electronics&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sci.med&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sci.space&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;soc.religion.christian&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;talk.politics.guns&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;talk.politics.mideast&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;talk.politics.misc&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;talk.religion.misc&#39;</span><span class="p">]</span> 
+</code></pre></div>
+<h2 id="semi-supervised-topic-modeling"><strong>Semi-supervised Topic Modeling</strong><a class="headerlink" href="#semi-supervised-topic-modeling" title="Permanent link">&para;</a></h2>
+<p>In semi-supervised topic modeling, we only have some labels for our documents. The documents for which we do have labels 
+are used to somewhat guide BERTopic to the extraction of topics for those labels. The documents for which we do not have 
+labels are assigned a -1. For this example, imagine we only the labels of categories that are related to computers 
+and we want to create a topic model using semi-supervised modeling: </p>
+<div class="highlight"><pre><span></span><code><span class="n">labels_to_add</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;comp.graphics&#39;</span><span class="p">,</span> <span class="s1">&#39;comp.os.ms-windows.misc&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;comp.sys.ibm.pc.hardware&#39;</span><span class="p">,</span> <span class="s1">&#39;comp.sys.mac.hardware&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;comp.windows.x&#39;</span><span class="p">,]</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">category_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels_to_add</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">indices</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">]</span>
+</code></pre></div>
+<p>The <code>y</code> variable contains many -1 values since we do not know the all the categories. </p>
+<p>Next, we use those newly constructed labels to again BERTopic semi-supervised:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</code></pre></div>
+<p>And that is it! By defining certain classes for our documents, we can steer the topic modeling towards modeling the 
+pre-defined categories. </p>
+<h2 id="supervised-topic-modeling"><strong>Supervised Topic Modeling</strong><a class="headerlink" href="#supervised-topic-modeling" title="Permanent link">&para;</a></h2>
+<p>In supervised topic modeling, we have labels for all our documents. This can be pre-defined topics or simply documents<br />
+that you feel belong together regardless of their content. BERTopic will nudge the creation of topics towards these categories 
+using the pre-defined labels. </p>
+<p>To perform supervised topic modeling, we simply use all categories:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">categories</span><span class="p">)</span>
+</code></pre></div>
+<p>The topic model will be much more attuned to the categories that were defined previously. However, this does not mean 
+that only topics for these categories will be found. BERTopic is likely to find more specific topics in those you 
+have already defined. This allows you to discover previously unknown topics!</p>
                 
               
               
@@ -540,7 +658,7 @@ minimum document frequency in CountVectorizer or use a different distance metric
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../search/search.html" class="md-footer__link md-footer__link--prev" rel="prev">
+        <a href="../topicsperclass/topicsperclass.html" class="md-footer__link md-footer__link--prev" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -549,19 +667,19 @@ minimum document frequency in CountVectorizer or use a different distance metric
               <span class="md-footer__direction">
                 Previous
               </span>
-              Search Topics
+              Topics per Class
             </div>
           </div>
         </a>
       
       
-        <a href="../topicsperclass/topicsperclass.html" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../topicsovertime/topicsovertime.html" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Topics per Class
+              Dynamic Topic Modeling
             </div>
           </div>
           <div class="md-footer__button md-icon">
