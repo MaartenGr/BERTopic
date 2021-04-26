@@ -1,6 +1,6 @@
 The topics that are extracted from BERTopic are represented by words. These words are extracted from the documents 
 occupying their topics using a class-based TF-IDF. This allows us to extract words that are interesting to a topic but 
-less so to another. The result is clearly separated clusters. 
+less so to another. 
 
 ### Update Topic Representation after Training
 When you have trained a model and viewed the topics and the words that represent them,

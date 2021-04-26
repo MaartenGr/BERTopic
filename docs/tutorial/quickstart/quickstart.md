@@ -1,23 +1,22 @@
 ## **Installation**
 
-Installation can be done using [pypi](https://pypi.org/project/bertopic/):
+Installation, with sentence-transformers, can be done using [pypi](https://pypi.org/project/bertopic/):
 
 ```bash
 pip install bertopic
 ```
 
-To use the visualization options, install BERTopic as follows:
+You may want to install more depending on the transformers and language backends that you will be using. 
+The possible installations are: 
 
-```bash
-pip install bertopic[visualization]
-```
-
-To use Flair embeddings, install BERTopic as follows:
 ```bash
 pip install bertopic[flair]
+pip install bertopic[gensim]
+pip install bertopic[spacy]
+pip install bertopic[use]
 ```
 
-To install all additional dependencies:
+To install all backends:
 
 ```bash
 pip install bertopic[all]
@@ -25,7 +24,6 @@ pip install bertopic[all]
 
 ## **Quick Start**
 We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
-
 
 ```python
 from bertopic import BERTopic
@@ -37,23 +35,25 @@ topic_model = BERTopic()
 topics, _ = topic_model.fit_transform(docs)
 ```
 
-After generating topics and their probabilities, we can access the frequent topics that were generated:
+After generating topics, we can access the frequent topics that were generated:
 
 ```python
->>> topic_model.get_topic_freq().head()
-Topic	Count
--1	7288
-49	3992
-30	701
-27	684
-11	568
+>>> topic_model.get_topic_info()
+
+Topic	Count	Name
+-1	    4630	-1_can_your_will_any
+49	    693	    49_windows_drive_dos_file
+32	    466	    32_jesus_bible_christian_faith
+2	    441	    2_space_launch_orbit_lunar
+22	    381	    22_key_encryption_keys_encrypted
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, `topic 49`:
+frequent topic that was generated, topic 49:
 
 ```python
 >>> topic_model.get_topic(49)
+
 [('windows', 0.006152228076250982),
  ('drive', 0.004982897610645755),
  ('dos', 0.004845038866360651),
@@ -66,7 +66,7 @@ frequent topic that was generated, `topic 49`:
  ('pc', 0.003047105930670237)]
 ```  
 
-**NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages.
+**NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
 ## **Visualize Topics**
 After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
@@ -80,63 +80,17 @@ topic_model.visualize_topics()
 
 <iframe src="viz.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
-## **Embedding Models**
-The parameter `embedding_model` takes in a string pointing to a sentence-transformers model, 
-a SentenceTransformer, or a Flair DocumentEmbedding model. 
-
-### **Sentence-Transformers**  
-You can select any model from `sentence-transformers` [here](https://www.sbert.net/docs/pretrained_models.html) 
-and pass it through BERTopic with `embedding_model`:
-
-```python
-from bertopic import BERTopic
-topic_model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
-```
-
-Or select a SentenceTransformer model with your own parameters:
-
-```python
-from bertopic import BERTopic
-from sentence_transformers import SentenceTransformer
-
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens", device="cpu")
-topic_model = BERTopic(embedding_model=sentence_model)
-```
-
-### **Flair**
-[Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that 
-is publicly available. Flair can be used as follows:
-
-```python
-from bertopic import BERTopic
-from flair.embeddings import TransformerDocumentEmbeddings
-
-roberta = TransformerDocumentEmbeddings('roberta-base')
-topic_model = BERTopic(embedding_model=roberta)
-```
-
-You can select any 🤗 transformers model [here](https://huggingface.co/models).
-
-### **Custom Embeddings**    
-You can also use previously generated embeddings by passing it through `fit_transform()`:
-
-```python
-from bertopic import BERTopic
-topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs, embeddings)
-```
-
 ## **Save/Load BERTopic model**
 We can easily save a trained BERTopic model by calling `save`:
 ```python
 from bertopic import BERTopic
-model = BERTopic()
-model.save("my_model")
+topic_model = BERTopic()
+topic_model.save("my_model")
 ```
 
 Then, we can load the model in one line:
 ```python
-loaded_model = BERTopic.load("my_model")
+topic_model = BERTopic.load("my_model")
 ```
 
 If you do not want to save the embedding model because it is loaded from the cloud, simply run 
