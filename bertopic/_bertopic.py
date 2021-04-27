@@ -354,6 +354,7 @@ class BERTopic:
 
         umap_embeddings = self.umap_model.transform(embeddings)
         #predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        print('plssss work till here')
         predictions = self.hdbscan_model.fit_predict(umap_embeddings)
 
         if self.calculate_probabilities:
