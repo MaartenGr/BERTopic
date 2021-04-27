@@ -284,6 +284,7 @@ class BERTopic:
         umap_embeddings = self._reduce_dimensionality(embeddings)
 
         # Cluster UMAP embeddings with HDBSCAN
+        print('umap donee')
         documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
 
         # Extract topics by calculating c-TF-IDF
