@@ -13,6 +13,7 @@ from typing import List, Tuple, Union, Mapping, Any
 # Models
 import umap
 import hdbscan
+from sklearn.cluster import OPTICS, cluster_optics_dbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -141,7 +142,7 @@ class BERTopic:
         self.min_topic_size = min_topic_size
         self.nr_topics = nr_topics
         self.low_memory = low_memory
-        self.calculate_probabilities = calculate_probabilities
+        self.calculate_probabilities = False # calculate_probabilities :::change back if does not work
         self.verbose = verbose
 
         # Embedding model
@@ -160,10 +161,12 @@ class BERTopic:
                                                   low_memory=self.low_memory)
 
         # HDBSCAN
-        self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
+        '''self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
                                                               metric='euclidean',
                                                               cluster_selection_method='eom',
-                                                              prediction_data=True)
+                                                              prediction_data=True)'''
+        
+        self.hdbscan_model = hdbscan_model or OPTICS(min_samples=5, xi=.05, min_cluster_size=self.min_topic_size, metric='cosine')
 
         self.topics = None
         self.topic_sizes = None
@@ -350,7 +353,8 @@ class BERTopic:
             embeddings = self._extract_embeddings(documents, verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        #predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        predictions = self.hdbscan_model.fit_predict(umap_embeddings)
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
@@ -1129,7 +1133,7 @@ class BERTopic:
             probabilities = None
 
         self._update_topic_size(documents)
-        logger.info("Clustered UMAP embeddings with HDBSCAN")
+        logger.info("Clustered UMAP embeddings with OPTICS")
         return documents, probabilities
 
     def _extract_topics(self, documents: pd.DataFrame):
