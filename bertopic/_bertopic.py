@@ -1,3 +1,4 @@
+import math
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -9,11 +10,11 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Union, Mapping, Any
+from nltk.tokenize import word_tokenize
 
 # Models
 import umap
 import hdbscan
-from sklearn.cluster import OPTICS, cluster_optics_dbscan
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -142,7 +143,7 @@ class BERTopic:
         self.min_topic_size = min_topic_size
         self.nr_topics = nr_topics
         self.low_memory = low_memory
-        self.calculate_probabilities = False # calculate_probabilities :::change back if does not work
+        self.calculate_probabilities = calculate_probabilities
         self.verbose = verbose
 
         # Embedding model
@@ -161,12 +162,10 @@ class BERTopic:
                                                   low_memory=self.low_memory)
 
         # HDBSCAN
-        '''self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
+        self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
                                                               metric='euclidean',
                                                               cluster_selection_method='eom',
-                                                              prediction_data=True)'''
-        
-        self.hdbscan_model = hdbscan_model or OPTICS(min_samples=5, xi=.05, min_cluster_size=self.min_topic_size, metric='cosine')
+                                                              prediction_data=True)
 
         self.topics = None
         self.topic_sizes = None
@@ -218,10 +217,19 @@ class BERTopic:
         self.fit_transform(documents, embeddings)
         return self
 
+    @classmethod
+    def _get_doc_freq(cls, documents, l, m):
+        count = 0
+        for d in documents:
+            d = word_tokenize(d)
+            if l in d and m in d:
+                count += 1
+        return count
+
     def fit_transform(self,
                       documents: List[str],
                       embeddings: np.ndarray = None) -> Tuple[List[int],
-                                                              Union[np.ndarray, None]]:
+                                                              Union[np.ndarray, None], List[int]]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
@@ -268,6 +276,8 @@ class BERTopic:
         check_documents_type(documents)
         check_embeddings_shape(embeddings, documents)
 
+        doc_org = documents
+
         documents = pd.DataFrame({"Document": documents,
                                   "ID": range(len(documents)),
                                   "Topic": None})
@@ -284,8 +294,9 @@ class BERTopic:
         umap_embeddings = self._reduce_dimensionality(embeddings)
 
         # Cluster UMAP embeddings with HDBSCAN
-        print('umap donee')
         documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
+
+        docs_df = documents
 
         # Extract topics by calculating c-TF-IDF
         self._extract_topics(documents)
@@ -296,7 +307,52 @@ class BERTopic:
 
         predictions = documents.Topic.to_list()
 
-        return predictions, probabilities
+        # Documents per topic as a list
+        docs_df = docs_df.drop(["ID"], axis=1)
+
+        documents_per_topic_l = docs_df.groupby('Topic')['Document'].apply(list)
+
+
+        # Get a matrix of term/token counts: X.
+        documents_per_topic = docs_df.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
+
+        docs = self._preprocess_text(documents_per_topic.Document.values)
+        self.vectorizer_model.fit(docs)
+        words = self.vectorizer_model.get_feature_names()
+        # print("WORDS", words)
+        # print("length", len(words))
+        X = self.vectorizer_model.transform(docs)
+        # print("TERM COUNTS MATRIX", X)
+        # print("shape: ", X.shape)
+
+        M = self.top_n_words
+
+        # topic_to_docs = {}
+        # for i in range(len(predictions)):
+        #     try:
+        #         topic_to_docs[predictions[i]].append(i)
+        #     except KeyError:
+        #         topic_to_docs[predictions[i]] = [i]
+
+        # denom = np.squeeze(np.asarray(X.sum(axis=0)))
+        # print("DOCUMENT FREQUENCY: ", denom)
+        # print("shape: ", denom.shape)
+
+        coherence = []
+        for t in self.get_topics():
+            c = 0
+            for m in range(1, M-1):
+                for l in range(0, m):
+                    # denom = self._get_doc_freq(doc_org, topic_to_docs[t], self.get_topic(t)[l][0])
+                    denom = np.squeeze(np.asarray(X.sum(axis=0)))[words.index(self.get_topic(t)[l][0])]
+                    if denom != 0:
+                        numer = self._get_doc_freq(documents_per_topic_l[t], self.get_topic(t)[l][0], self.get_topic(t)[m][0])
+                        c += math.log((numer + 1) / denom)
+                    else:
+                        c += - math.inf
+                        raise Exception("Top word was not found in any document.")
+            coherence.append(c)
+        return predictions, probabilities, coherence
 
     def transform(self,
                   documents: Union[str, List[str]],
@@ -354,9 +410,7 @@ class BERTopic:
             embeddings = self._extract_embeddings(documents, verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        #predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
-        print('plssss work till here')
-        predictions = self.hdbscan_model.fit_predict(umap_embeddings)
+        predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
@@ -1135,7 +1189,7 @@ class BERTopic:
             probabilities = None
 
         self._update_topic_size(documents)
-        logger.info("Clustered UMAP embeddings with OPTICS")
+        logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
     def _extract_topics(self, documents: pd.DataFrame):
