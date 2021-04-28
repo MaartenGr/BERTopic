@@ -11,7 +11,7 @@ TO DO:
 
 from sklearn.datasets import fetch_20newsgroups
 
-newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
+newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:2000]
 
 
 def test_full_model(base_bertopic):
@@ -42,10 +42,10 @@ def test_full_model(base_bertopic):
     assert len(topics_test) == 1
 
     # Test topics over time
-    timestamps = [i % 10 for i in range(1000)]
+    timestamps = [i % 10 for i in range(2000)]
     topics_over_time = base_bertopic.topics_over_time(newsgroup_docs, topics, timestamps)
 
-    assert topics_over_time.Frequency.sum() == 1000
+    assert topics_over_time.Frequency.sum() == 2000
     assert len(topics_over_time.Topic.unique()) == len(set(topics))
 
     # Test find topic
@@ -53,6 +53,15 @@ def test_full_model(base_bertopic):
     assert len(similar_topics) == 2
     assert len(similarity) == 2
     assert max(similarity) <= 1
+
+    # Test topic reduction
+    nr_topics = len(set(topics))
+    nr_topics = 2 if nr_topics < 2 else nr_topics - 1
+    new_topics, new_probs = base_bertopic.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
+
+    assert len(base_bertopic.get_topic_freq()) == nr_topics + 1
+    assert len(new_topics) == len(topics)
+    assert len(new_probs) == len(probs)
 
     # Test update topics
     topic = base_bertopic.get_topic(1)[:10]
@@ -64,10 +73,4 @@ def test_full_model(base_bertopic):
     assert topic != updated_topic
     assert topic == original_topic
 
-    # Test topic reduction
-    nr_topics = 2
-    new_topics, new_probs = base_bertopic.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
 
-    assert len(base_bertopic.get_topic_freq()) == nr_topics + 1
-    assert len(new_topics) == len(topics)
-    assert len(new_probs) == len(probs)

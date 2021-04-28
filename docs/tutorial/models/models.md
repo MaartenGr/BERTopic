@@ -1,4 +1,3 @@
-## **Custom Models**
 There are three models underpinning BERTopic that are most important in creating the topics, 
 namely UMAP, HDBSCAN, and CountVectorizer. The parameters of these models have been carefully 
 selected to give the best results. However, there is no one-size-fits-all solution using these 
@@ -17,7 +16,8 @@ from hdbscan import HDBSCAN
 from sklearn.feature_extraction.text import CountVectorizer
 
 # Prepare custom models
-hdbscan_model = HDBSCAN(min_cluster_size=10, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+hdbscan_model = HDBSCAN(min_cluster_size=10, metric='euclidean', 
+                        cluster_selection_method='eom', prediction_data=True)
 umap_model = UMAP(n_neighbors=15, n_components=10, min_dist=0.0, metric='cosine')
 vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english")
 

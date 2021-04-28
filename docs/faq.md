@@ -87,4 +87,14 @@ No. By using document embeddings there is typically no need to preprocess the da
 are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
 have data that contains a lot of noise, for example HTML-tags, then it would be best to remove them. HTML-tags 
 typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
-topic modeling to HTML-code to extract topics of code, then it becomes important. 
+topic modeling to HTML-code to extract topics of code, then it becomes important.
+
+## **Why does it take so long to import BERTopic?**
+The main culprit here seems to be UMAP. After running thorough tests with [Tuna](https://github.com/nschloe/tuna) we 
+can see that most of the resources when importing BERTopic can be dedicated to UMAP:   
+
+<img src="img/tuna.png" />
+
+Unfortunately, there currently is no fix for this issue. The most recent ticket regarding this 
+issue can be found [here](https://github.com/lmcinnes/umap/issues/631).
+ 

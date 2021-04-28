@@ -62,6 +62,37 @@ model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91]
 ```
 <iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
+## **Visualize Topics per Class**
+You might want to extract and visualize the topic representation per class. For example, if you have 
+specific groups of users that might approach topics differently, then extracting them would help understanding 
+how these users talk about certain topics. In other words, this is simply creating a topic representation for 
+certain classes that you might have in your data. 
+
+First, we need to train our model:
+
+```python
+from bertopic import BERTopic
+from sklearn.datasets import fetch_20newsgroups
+
+# Prepare data and classes
+data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+docs = data["data"]
+classes = [data["target_names"][i] for i in data["target"]]
+
+# Create topic model and calculate topics per class
+topic_model = BERTopic()
+topics, _ = topic_model.fit_transform(docs)
+topics_per_class = topic_model.topics_per_class(docs, topics, classes=classes)
+```
+
+Then, we visualize the topic representation of major topics per class: 
+
+```python
+topic_model.visualize_topics_per_class(topics_per_class)
+```
+
+<iframe src="topics_per_class.html" style="width:1300px; height: 1000px; border: 0px;""></iframe>
+
 
 ## **Visualize Probablities**
 We can also calculate the probabilities of topics found in a document. In order to do so, we have to 
@@ -84,7 +115,7 @@ To visualize the distributions, we simply call:
 topic_model.visualize_distribution(probabilities[0])
 ```
 
-<img src="probabilities.png" width="75%" height="75%"/>
+<iframe src="probabilities.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
 
 **NOTE**: The distribution of the probabilities does not give an indication to 

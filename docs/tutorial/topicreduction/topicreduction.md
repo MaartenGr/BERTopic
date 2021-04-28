@@ -57,11 +57,11 @@ from sklearn.datasets import fetch_20newsgroups
  
 # Create topics -> Typically over 50 topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs)
+topic_model = BERTopic(calculate_probabilities=True)
+topics, probs = topic_model.fit_transform(docs)
 
 # Further reduce topics
-new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
+new_topics, new_probs = topic_model.reduce_topics(docs, topics, probabilities=probs, nr_topics=30)
 ```
 
 The reasoning for putting `docs` and `topics` (and optionally `probabilities`) as parameters is that these values are not saved within 

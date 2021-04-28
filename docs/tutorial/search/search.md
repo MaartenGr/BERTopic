@@ -1,5 +1,3 @@
-
-### **Search Topics**
 After having created a BERTopic model, you might end up with over a hundred topics. Searching through those 
 can be quite cumbersome especially if you are searching for a specific topic. Fortunately, BERTopic allows you 
 to search for topics using search terms. First, let's create an train a BERTopic model:
@@ -12,7 +10,7 @@ from sklearn.datasets import fetch_20newsgroups
 # Create topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 topic_model = BERTopic()
-topics, probs = topic_model.fit_transform(docs)
+topics, _ = topic_model.fit_transform(docs)
 ```
 
 After having trained our model, we can use `find_topics` to search for topics that are similar 

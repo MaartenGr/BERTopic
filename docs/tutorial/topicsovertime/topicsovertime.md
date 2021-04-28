@@ -37,7 +37,6 @@ re-tweets for this use-case:
 import re
 import pandas as pd
 
-
 # Prepare data
 trump = pd.read_csv('https://drive.google.com/uc?export=download&id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6')
 trump.text = trump.apply(lambda row: re.sub(r"http\S+", "", row.text).lower(), 1)
@@ -53,8 +52,8 @@ Then, we need to extract the global topic representations by simply creating and
 ```python
 from bertopic import BERTopic
 
-model = BERTopic(verbose=True)
-topics, _ = model.fit_transform(tweets)
+topic_model = BERTopic(verbose=True)
+topics, _ = topic_model.fit_transform(tweets)
 ```
 
 From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 
@@ -76,8 +75,8 @@ you do not want the representations to be influenced by the global representatio
 evolved over time:
 
 ```python
-topics_over_time = model.topics_over_time(tweets, topics, timestamps, 
-                                          global_tuning=True, evolution_tuning=True)
+topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, 
+                                                global_tuning=True, evolution_tuning=True)
 ```
 
 ### **Bins**
@@ -87,7 +86,7 @@ timestamps below 50. To do this, you can simply set the number of bins that are 
 topic representations. The timestamps will be taken and put into equal-sized bins:
 
 ```python
-topics_over_time = model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
+topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
 ```
 
 ### **Datetime format**
@@ -96,7 +95,8 @@ which datetime format your strings have. Unfortunately, this will not always wor
 We can use `datetime_format` to pass the format the timestamps have: 
 
 ```python
-topics_over_time = model.topics_over_time(tweets, topics, timestamps, datetime_format="%b%M")
+topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, 
+                                                datetime_format="%b%M")
 ```
 
 ## **Visualization**
@@ -106,7 +106,7 @@ of topics over time whilst giving the option of hovering over the points to show
 Simply call `visualize_topics_over_time` with the newly created topics over time:
 
 ```python
-model.visualize_topics_over_time(topics_over_time, top_n=20)
+topic_model.visualize_topics_over_time(topics_over_time, top_n=20)
 ```
 
 I used `top_n` to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
@@ -115,7 +115,7 @@ leaving `top_n` empty, there is a chance that hundreds of lines will fill the pl
 You can also use `topics` to show specific topics:
 
 ```python
-model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+topic_model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
 ```
 
 <iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe> 

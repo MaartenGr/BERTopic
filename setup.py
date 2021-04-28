@@ -1,4 +1,4 @@
-import setuptools
+from setuptools import setup, find_packages
 
 test_packages = [
     "pytest>=5.4.3",
@@ -12,26 +12,36 @@ docs_packages = [
 ]
 
 base_packages = [
-    "numpy>=1.19.2",
+    "numpy>=1.20.0",
     "hdbscan>=0.8.27",
     "umap-learn>=0.5.0",
     "pandas>=1.1.5",
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
-    "torch>=1.4.0",
-    "sentence-transformers>=0.4.1"
-]
-
-visualization_packages = [
-    "matplotlib>=3.2.2",
+    "sentence-transformers>=0.4.1",
     "plotly>=4.7.0,<4.14.3"
 ]
 
 flair_packages = [
+    "torch>=1.4.0,<1.7.1",
     "flair==0.7"
 ]
 
-extra_packages = visualization_packages + flair_packages
+spacy_packages = [
+    "spacy>=3.0.1"
+]
+
+use_packages = [
+    "tensorflow",
+    "tensorflow_hub",
+    "tensorflow_text"
+]
+
+gensim_packages = [
+    "gensim>=3.6.0"
+]
+
+extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 
 dev_packages = docs_packages + test_packages + extra_packages
 
@@ -39,16 +49,21 @@ dev_packages = docs_packages + test_packages + extra_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+setup(
     name="bertopic",
-    packages=["bertopic"],
-    version="0.6.0",
-    author="Maarten Grootendorst",
+    packages=find_packages(exclude=["notebooks", "docs"]),
+    version="0.7.0",
+    author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/MaartenGr/BERTopic",
+    project_urls={
+        "Documentation": "https://maartengr.github.io/BERTopic/",
+        "Source Code": "https://github.com/MaartenGr/BERTopic/",
+        "Issue Tracker": "https://github.com/MaartenGr/BERTopic/issues",
+    },
     keywords="nlp bert topic modeling embeddings",
     classifiers=[
         "Programming Language :: Python",
@@ -70,8 +85,10 @@ setuptools.setup(
         "test": test_packages,
         "docs": docs_packages,
         "dev": dev_packages,
-        "visualization": visualization_packages,
         "flair": flair_packages,
+        "spacy": spacy_packages,
+        "use": use_packages,
+        "gensim": gensim_packages,
         "all": extra_packages
     },
     python_requires='>=3.6',

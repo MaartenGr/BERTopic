@@ -1,6 +1,7 @@
 import math
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 import re
 import joblib
@@ -13,37 +14,23 @@ from typing import List, Tuple, Union, Mapping, Any
 from nltk.tokenize import word_tokenize
 
 # Models
-import umap
 import hdbscan
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 from sentence_transformers import SentenceTransformer
+from umap import UMAP
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler, normalize
 
 # BERTopic
-from ._ctfidf import ClassTFIDF
-from ._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
-from ._embeddings import languages
-from ._mmr import mmr
+from bertopic._ctfidf import ClassTFIDF
+from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from bertopic._mmr import mmr
+from bertopic.backend._utils import select_backend
 
 # Visualization
-try:
-    import matplotlib.pyplot as plt
-    import plotly.express as px
-    import plotly.graph_objects as go
-    _HAS_VIZ = True
-except ModuleNotFoundError as e:
-    _HAS_VIZ = False
-
-# Flair
-try:
-    from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
-    from flair.data import Sentence
-    _HAS_FLAIR = True
-except ModuleNotFoundError as e:
-    DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings = None, None, None
-    _HAS_FLAIR = False
+import plotly.express as px
+import plotly.graph_objects as go
 
 logger = MyLogger("WARNING")
 
@@ -60,8 +47,8 @@ class BERTopic:
     from sklearn.datasets import fetch_20newsgroups
 
     docs = fetch_20newsgroups(subset='all')['data']
-    model = BERTopic(verbose=True, calculate_probabilities=True)
-    topics, probabilities = model.fit_transform(docs)
+    topic_model = BERTopic(calculate_probabilities=True)
+    topics, probabilities = topic_model.fit_transform(docs)
     ```
 
     If you want to use your own embedding model, use it as follows:
@@ -73,7 +60,7 @@ class BERTopic:
 
     docs = fetch_20newsgroups(subset='all')['data']
     sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
-    model = BERTopic(verbose=True, embedding_model=sentence_model)
+    topic_model = BERTopic(embedding_model=sentence_model)
     ```
 
     Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -89,11 +76,8 @@ class BERTopic:
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
                  calculate_probabilities: bool = False,
-                 embedding_model: Union[str,
-                                        SentenceTransformer,
-                                        DocumentEmbeddings,
-                                        TokenEmbeddings] = None,
-                 umap_model: umap.UMAP = None,
+                 embedding_model = None,
+                 umap_model: UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
                  verbose: bool = False,
@@ -102,8 +86,8 @@ class BERTopic:
 
         Arguments:
             language: The main language used in your documents. For a full overview of
-                      supported languages see bertopic.embeddings.languages. Select
-                      "multilingual" to load in a model that support 50+ languages.
+                      supported languages see bertopic.backends.languages. Select
+                      "multilingual" to load in a sentence-tranformers model that supports 50+ languages.
             top_n_words: The number of words per topic to extract
             n_gram_range: The n-gram range for the CountVectorizer.
                           Advised to keep high values between 1 and 3.
@@ -128,12 +112,17 @@ class BERTopic:
                                      use the corresponding visualization `visualize_probabilities`.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
-            embedding_model: Use a custom embedding model. You can pass in a string related
-                             to one of the following models:
-                             https://www.sbert.net/docs/pretrained_models.html
-                             You can also pass in a SentenceTransformer() model or a Flair
-                             DocumentEmbedding model.
-            umap_model: Pass in a umap.UMAP model to be used instead of the default
+            embedding_model: Use a custom embedding model.
+                             The following backends are currently supported
+                               * SentenceTransformers
+                               * Flair
+                               * Spacy
+                               * Gensim
+                               * USE (TF-Hub)
+                             You can also pass in a string that points to one of the following
+                             sentence-transformers models:
+                               * https://www.sbert.net/docs/pretrained_models.html
+            umap_model: Pass in a UMAP model to be used instead of the default
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
             vectorizer_model: Pass in a CountVectorizer instead of the default
         """
@@ -156,11 +145,11 @@ class BERTopic:
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
 
         # UMAP
-        self.umap_model = umap_model or umap.UMAP(n_neighbors=15,
-                                                  n_components=5,
-                                                  min_dist=0.0,
-                                                  metric='cosine',
-                                                  low_memory=self.low_memory)
+        self.umap_model = umap_model or UMAP(n_neighbors=15,
+                                             n_components=5,
+                                             min_dist=0.0,
+                                             metric='cosine',
+                                             low_memory=self.low_memory)
 
         # HDBSCAN
         # self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
@@ -178,20 +167,22 @@ class BERTopic:
         self.mapped_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
-        self.custom_embeddings = False
 
         if verbose:
             logger.set_level("DEBUG")
 
     def fit(self,
             documents: List[str],
-            embeddings: np.ndarray = None):
+            embeddings: np.ndarray = None,
+            y: Union[List[int], np.ndarray] = None):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
         Arguments:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            y: The target class for (semi)-supervised modeling. Use -1 if no class for a
+               specific instance is specified.
 
         Usage:
 
@@ -200,7 +191,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic(verbose=True).fit(docs)
+        topic_model = BERTopic().fit(docs)
         ```
 
         If you want to use your own embeddings, use it as follows:
@@ -216,10 +207,10 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(verbose=True).fit(docs, embeddings)
+        topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
-        self.fit_transform(documents, embeddings)
+        self.fit_transform(documents, embeddings, y)
         return self
 
     @classmethod
@@ -241,11 +232,13 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            y: The target class for (semi)-supervised modeling. Use -1 if no class for a
+               specific instance is specified.
 
         Returns:
             predictions: Topic predictions for each documents
             probabilities: The topic probability distribution which is returned by default.
-                           If `low_memory` in BERTopic is set to False, then the
+                           If `calculate_probabilities` in BERTopic is set to False, then the
                            probabilities are not calculated to speed up computation and
                            decrease memory usage.
 
@@ -256,9 +249,8 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-
-        model = BERTopic(verbose=True)
-        topics = model.fit_transform(docs)
+        topic_model = BERTopic(calculate_probabilities=True)
+        topics, probs = topic_model.fit_transform(docs)
         ```
 
         If you want to use your own embeddings, use it as follows:
@@ -274,8 +266,8 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(verbose=True)
-        topics = model.fit_transform(docs, embeddings)
+        topic_model = BERTopic(calculate_probabilities=True)
+        topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
         check_documents_type(documents)
@@ -288,15 +280,20 @@ class BERTopic:
                                   "Topic": None})
 
         # Extract embeddings
-        if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
-            self.embedding_model = self._select_embedding_model()
-            embeddings = self._extract_embeddings(documents.Document, verbose=self.verbose)
+        if embeddings is None:
+            self.embedding_model = select_backend(self.embedding_model,
+                                                  language=self.language)
+            embeddings = self._extract_embeddings(documents.Document,
+                                                  method="document",
+                                                  verbose=self.verbose)
             logger.info("Transformed documents to Embeddings")
         else:
-            self.custom_embeddings = True
+            if self.embedding_model is not None:
+                self.embedding_model = select_backend(self.embedding_model,
+                                                      language=self.language)
 
         # Reduce dimensionality with UMAP
-        umap_embeddings = self._reduce_dimensionality(embeddings)
+        umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
         print('umap donee')
@@ -373,7 +370,7 @@ class BERTopic:
         Returns:
             predictions: Topic predictions for each documents
             probabilities: The topic probability distribution which is returned by default.
-                           If `low_memory` in BERTopic is set to False, then the
+                           If `calculate_probabilities` in BERTopic is set to False, then the
                            probabilities are not calculated to speed up computation and
                            decrease memory usage.
 
@@ -384,8 +381,8 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        model = BERTopic(verbose=True).fit(docs)
-        topics = model.transform(docs)
+        topic_model = BERTopic().fit(docs)
+        topics, _ = topic_model.transform(docs)
         ```
 
         If you want to use your own embeddings:
@@ -401,8 +398,8 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        model = BERTopic(verbose=True).fit(docs, embeddings)
-        topics = model.transform(docs, embeddings)
+        topic_model = BERTopic().fit(docs, embeddings)
+        topics, _ = topic_model.transform(docs, embeddings)
         ```
         """
         check_is_fitted(self)
@@ -411,9 +408,10 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
-        if not isinstance(embeddings, np.ndarray):
-            self.embedding_model = self._select_embedding_model()
-            embeddings = self._extract_embeddings(documents, verbose=self.verbose)
+        if embeddings is None:
+            embeddings = self._extract_embeddings(documents,
+                                                  method="document",
+                                                  verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
         # predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
@@ -489,15 +487,18 @@ class BERTopic:
 
         ```python
         from bertopic import BERTopic
-        model = BERTopic(verbose=True).fit(docs)
-        topics = model.transform(docs)
-        topics_over_time = model.topics_over_time(docs, topics, timestamps, nr_bins=20)
+        topic_model = BERTopic()
+        topics, _ = topic_model.fit_transform(docs)
+        topics_over_time = topic_model.topics_over_time(docs, topics, timestamps, nr_bins=20)
         ```
         """
         check_is_fitted(self)
         check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+
+        all_topics = sorted(list(documents.Topic.unique()))
+        all_topics_indices = {topic: index for index, topic in enumerate(all_topics)}
 
         if isinstance(timestamps[0], str):
             infer_datetime_format = True if not datetime_format else False
@@ -545,7 +546,8 @@ class BERTopic:
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
             if global_tuning:
-                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+                selected_topics = [all_topics_indices[topic] for topic in documents_per_topic.Topic.values]
+                c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
             # Extract the words per topic
             labels = sorted(list(documents_per_topic.Topic.unique()))
@@ -565,6 +567,82 @@ class BERTopic:
                 previous_c_tf_idf = c_tf_idf.copy()
 
         return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
+
+    def topics_per_class(self,
+                         docs: List[str],
+                         topics: List[int],
+                         classes: Union[List[int], List[str]],
+                         global_tuning: bool = True) -> pd.DataFrame:
+        """ Create topics per class
+
+        To create the topics per class, BERTopic needs to be already fitted once.
+        From the fitted models, the c-TF-IDF representations are calculate at
+        each class c. Then, the c-TF-IDF representations at class c are
+        averaged with the global c-TF-IDF representations in order to fine-tune the
+        local representations. This can be turned off if the pure representation is
+        needed.
+
+        NOTE:
+            Make sure to use a limited number of unique classes (<100) as the
+            c-TF-IDF representation will be calculated at each single unique class.
+            Having a large number of unique classes can take some time to be calculated.
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            classes: The class of each document. This can be either a list of strings or ints.
+            global_tuning: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
+                       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                       topic representations that could not be found in the documents at timestamp t.
+
+        Returns:
+            topics_per_class: A dataframe that contains the topic, words, and frequency of topics
+                              for each class.
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, _ = topic_model.fit_transform(docs)
+        topics_per_class = topic_model.topics_per_class(docs, topics, classes)
+        ```
+        """
+        documents = pd.DataFrame({"Document": docs, "Topic": topics, "Class": classes})
+        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+
+        # For each unique timestamp, create topic representations
+        topics_per_class = []
+        for index, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
+
+            # Calculate c-TF-IDF representation for a specific timestamp
+            selection = documents.loc[documents.Class == class_, :]
+            documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
+                                                                                    "Class": "count"})
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+
+            # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
+            # by simply taking the average of the two
+            if global_tuning:
+                c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+
+            # Extract the words per topic
+            labels = sorted(list(documents_per_topic.Topic.unique()))
+            words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels)
+            topic_frequency = pd.Series(documents_per_topic.Class.values,
+                                        index=documents_per_topic.Topic).to_dict()
+
+            # Fill dataframe with results
+            topics_at_class = [(topic,
+                                ", ".join([words[0] for words in values][:5]),
+                                topic_frequency[topic],
+                                class_) for topic, values in words_per_topic.items()]
+            topics_per_class.extend(topics_at_class)
+
+        topics_per_class = pd.DataFrame(topics_per_class, columns=["Topic", "Words", "Frequency", "Class"])
+
+        return topics_per_class
 
     def find_topics(self,
                     search_term: str,
@@ -593,20 +671,22 @@ class BERTopic:
         best represent the search term:
 
         ```python
-        topics, similarity = model.find_topics("sports", top_n=5)
+        topics, similarity = topic_model.find_topics("sports", top_n=5)
         ```
 
         Note that the search query is typically more accurate if the
         search_term consists of a phrase or multiple words.
         """
-        if self.custom_embeddings:
+        if self.embedding_model is None:
             raise Exception("This method can only be used if you did not use custom embeddings.")
 
         topic_list = list(self.topics.keys())
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
-        search_embedding = self._extract_embeddings([search_term], verbose=False).flatten()
+        search_embedding = self._extract_embeddings([search_term],
+                                                    method="word",
+                                                    verbose=False).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
 
         # Extract topics most similar to search_term
@@ -641,7 +721,7 @@ class BERTopic:
         model and extract topics from them. Based on these, you can update the representation:
 
         ```python
-        model.update_topics(docs, topics, n_gram_range=(2, 3))
+        topic_model.update_topics(docs, topics, n_gram_range=(2, 3))
         ```
 
         YOu can also use a custom vectorizer to update the representation:
@@ -649,7 +729,7 @@ class BERTopic:
         ```python
         from sklearn.feature_extraction.text import CountVectorizer
         vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english")
-        model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+        topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
         ```
         """
         check_is_fitted(self)
@@ -670,7 +750,7 @@ class BERTopic:
         Usage:
 
         ```python
-        all_topics = model.get_topics()
+        all_topics = topic_model.get_topics()
         ```
         """
         check_is_fitted(self)
@@ -688,7 +768,7 @@ class BERTopic:
         Usage:
 
         ```python
-        topic = model.get_topic(12)
+        topic = topic_model.get_topic(12)
         ```
         """
         check_is_fitted(self)
@@ -709,7 +789,7 @@ class BERTopic:
         Usage:
 
         ```python
-        info_df = model.get_topic_info()
+        info_df = topic_model.get_topic_info()
         ```
         """
         check_is_fitted(self)
@@ -737,13 +817,13 @@ class BERTopic:
         To extract the frequency of all topics:
 
         ```python
-        frequency = model.get_topic_freq()
+        frequency = topic_model.get_topic_freq()
         ```
 
         To get the frequency of a single topic:
 
         ```python
-        frequency = model.get_topic_freq(12)
+        frequency = topic_model.get_topic_freq(12)
         ```
         """
         check_is_fitted(self)
@@ -786,13 +866,13 @@ class BERTopic:
         topics and probabilities (if they were calculated):
 
         ```python
-        new_topics, new_probs = model.reduce_topics(docs, topics, probabilities, nr_topics=30)
+        new_topics, new_probs = topic_model.reduce_topics(docs, topics, probabilities, nr_topics=30)
         ```
 
         If probabilities were not calculated simply run the function without them:
 
         ```python
-        new_topics, _= model.reduce_topics(docs, topics, nr_topics=30)
+        new_topics, _= topic_model.reduce_topics(docs, topics, nr_topics=30)
         ```
         """
         check_is_fitted(self)
@@ -807,7 +887,7 @@ class BERTopic:
 
         return new_topics, new_probabilities
 
-    def visualize_topics(self):
+    def visualize_topics(self) -> go.Figure:
         """ Visualize topics, their sizes, and their corresponding words
 
         This visualization is highly inspired by LDAvis, a great visualization
@@ -818,20 +898,17 @@ class BERTopic:
         To visualize the topics simply run:
 
         ```python
-        model.visualize_topics()
+        topic_model.visualize_topics()
         ```
 
         Or if you want to save the resulting figure:
 
         ```python
-        fig = model.visualize_topics()
+        fig = topic_model.visualize_topics()
         fig.write_html("path/to/file.html")
         ```
         """
         check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
 
         # Extract topic words and their frequencies
         topic_list = sorted(list(self.topics.keys()))
@@ -840,7 +917,7 @@ class BERTopic:
 
         # Embed c-TF-IDF into 2D
         embeddings = MinMaxScaler().fit_transform(self.c_tf_idf.toarray())
-        embeddings = umap.UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 
         # Visualize with plotly
         df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
@@ -850,7 +927,7 @@ class BERTopic:
     def visualize_topics_over_time(self,
                                    topics_over_time: pd.DataFrame,
                                    top_n: int = None,
-                                   topics: List[int] = None):
+                                   topics: List[int] = None) -> go.Figure:
         """ Visualize topics over time
 
         Arguments:
@@ -867,21 +944,18 @@ class BERTopic:
         To visualize the topics over time, simply run:
 
         ```python
-        model.visualize_topics_over_time(topics_over_time)
+        topics_over_time = topic_model.topics_over_time(docs, topics, timestamps)
+        topic_model.visualize_topics_over_time(topics_over_time)
         ```
 
         Or if you want to save the resulting figure:
 
         ```python
-        fig = model.visualize_topics_over_time(topics_over_time)
+        fig = topic_model.visualize_topics_over_time(topics_over_time)
         fig.write_html("path/to/file.html")
         ```
         """
         check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
-
         colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 
         # Select topics
@@ -939,19 +1013,110 @@ class BERTopic:
         )
         return fig
 
+    def visualize_topics_per_class(self,
+                                   topics_per_class: pd.DataFrame,
+                                   top_n: int = 10,
+                                   topics: List[int] = None):
+        """ Visualize topics per class
+
+        Arguments:
+            topics_per_class: The topics you would like to be visualized with the
+                              corresponding topic representation
+            top_n: To visualize the most frequent topics instead of all
+            topics: Select which topics you would like to be visualized
+
+        Returns:
+            A plotly.graph_objects.Figure including all traces
+
+        Usage:
+
+        To visualize the topics per class, simply run:
+
+        ```python
+        topics_per_class = topic_model.topics_per_class(docs, topics, classes)
+        topic_model.visualize_topics_per_class(topics_per_class)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_topics_per_class(topics_per_class)
+        fig.write_html("path/to/file.html")
+        ```
+        """
+        colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
+
+        # Select topics
+        if topics:
+            selected_topics = topics
+        elif top_n:
+            selected_topics = self.get_topic_freq().head(top_n + 1)[1:].Topic.values
+        else:
+            selected_topics = self.get_topic_freq().Topic.values
+
+        # Prepare data
+        topic_names = {key: value[:40] + "..." if len(value) > 40 else value for key, value in self.topic_names.items()}
+        topics_per_class["Name"] = topics_per_class.Topic.map(topic_names)
+        data = topics_per_class.loc[topics_per_class.Topic.isin(selected_topics), :]
+
+        # Add traces
+        fig = go.Figure()
+        for index, topic in enumerate(selected_topics):
+            if index == 0:
+                visible = True
+            else:
+                visible = "legendonly"
+            trace_data = data.loc[data.Topic == topic, :]
+            topic_name = trace_data.Name.values[0]
+            words = trace_data.Words.values
+            fig.add_trace(go.Bar(y=trace_data.Class,
+                                 x=trace_data.Frequency,
+                                 visible=visible,
+                                 marker_color=colors[index % 7],
+                                 hoverinfo="text",
+                                 name=topic_name,
+                                 orientation="h",
+                                 hovertext=[f'<b>Topic {topic}</b><br>Words: {word}' for word in words]))
+
+        # Styling of the visualization
+        fig.update_xaxes(showgrid=True)
+        fig.update_yaxes(showgrid=True)
+        fig.update_layout(
+            xaxis_title="Frequency",
+            yaxis_title="Class",
+            title={
+                'text': "<b>Topics per Class",
+                'y': .95,
+                'x': 0.40,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            template="simple_white",
+            width=1250,
+            height=900,
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+            legend=dict(
+                title="<b>Global Topic Representation",
+            )
+        )
+        return fig
+
     def visualize_distribution(self,
                                probabilities: np.ndarray,
-                               min_probability: float = 0.015,
-                               figsize: tuple = (10, 5),
-                               save: bool = False):
+                               min_probability: float = 0.015) -> go.Figure:
         """ Visualize the distribution of topic probabilities
 
         Arguments:
             probabilities: An array of probability scores
             min_probability: The minimum probability score to visualize.
                              All others are ignored.
-            figsize: The size of the figure
-            save: Whether to save the resulting graph to probility.png
 
         Usage:
 
@@ -959,15 +1124,17 @@ class BERTopic:
         probabilities of a single document:
 
         ```python
-        model.visualize_distribution(probabilities[0])
+        topic_model.visualize_distribution(probabilities[0])
         ```
 
-        ![](../img/probabilities.png)
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_distribution(probabilities[0])
+        fig.write_html("path/to/file.html")
+        ```
         """
         check_is_fitted(self)
-        if not _HAS_VIZ:
-            raise ModuleNotFoundError(f"In order to use this function you'll need to install "
-                                      f"additional dependencies;\npip install bertopic[visualization]")
         if len(probabilities[probabilities > min_probability]) == 0:
             raise ValueError("There are no values where `min_probability` is higher than the "
                              "probabilities that were supplied. Lower `min_probability` to prevent this error.")
@@ -982,43 +1149,49 @@ class BERTopic:
         # Create labels
         labels = []
         for idx in labels_idx:
-            label = []
             words = self.get_topic(idx)
             if words:
-                for word in words[:5]:
-                    label.append(word[0])
-                label = str(r"$\bf{Topic }$ " +
-                            r"$\bf{" + str(idx) + ":}$ " +
-                            " ".join(label))
+                label = [word[0] for word in words[:5]]
+                label = f"<b>Topic {idx}</b>: {'_'.join(label)}"
+                label = label[:40] + "..." if len(label) > 40 else label
                 labels.append(label)
             else:
                 vals.remove(probabilities[idx])
-        pos = range(len(vals))
 
-        # Create figure
-        fig, ax = plt.subplots(figsize=figsize)
-        plt.hlines(y=pos, xmin=0, xmax=vals, color='#333F4B', alpha=0.2, linewidth=15)
-        plt.hlines(y=np.argmax(vals), xmin=0, xmax=max(vals), color='#333F4B', alpha=1, linewidth=15)
+        # Create Figure
+        fig = go.Figure(go.Bar(
+            x=vals,
+            y=labels,
+            marker=dict(
+                color='#C8D2D7',
+                line=dict(
+                    color='#6E8484',
+                    width=1),
+            ),
+            orientation='h')
+        )
 
-        # Set ticks and labels
-        ax.tick_params(axis='both', which='major', labelsize=12)
-        ax.set_xlabel('Probability', fontsize=15, fontweight='black', color='#333F4B')
-        ax.set_ylabel('')
-        plt.yticks(pos, labels)
-        fig.text(0, 1, 'Topic Probability Distribution', fontsize=15, fontweight='black', color='#333F4B')
+        fig.update_layout(
+            xaxis_title="Probability",
+            title={
+                'text': "<b>Topic Probability Distribution",
+                'y': .95,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top',
+                'font': dict(
+                    size=22,
+                    color="Black")
+            },
+            template="simple_white",
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=16,
+                font_family="Rockwell"
+            ),
+        )
 
-        # Update spine style
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.spines['left'].set_bounds(pos[0], pos[-1])
-        ax.spines['bottom'].set_bounds(0, max(vals))
-        ax.spines['bottom'].set_position(('axes', -0.02))
-        ax.spines['left'].set_position(('axes', 0.02))
-
-        fig.tight_layout()
-
-        if save:
-            fig.savefig("probability.png", dpi=300, bbox_inches='tight')
+        return fig
 
     def save(self,
              path: str,
@@ -1034,13 +1207,13 @@ class BERTopic:
         Usage:
 
         ```python
-        model.save("my_model")
+        topic_model.save("my_model")
         ```
 
         or if you do not want the embedding_model to be saved locally:
 
         ```python
-        model.save("my_model", save_embedding_model=False)
+        topic_model.save("my_model", save_embedding_model=False)
         ```
         """
         with open(path, 'wb') as file:
@@ -1055,7 +1228,7 @@ class BERTopic:
     @classmethod
     def load(cls,
              path: str,
-             embedding_model: Union[str, SentenceTransformer, DocumentEmbeddings, TokenEmbeddings] = None):
+             embedding_model = None):
         """ Loads the model from the specified path
 
         Arguments:
@@ -1106,41 +1279,31 @@ class BERTopic:
             out[key] = value
         return out
 
-    def _extract_embeddings(self, documents: Union[List[str], str], verbose: bool = None) -> np.ndarray:
+    def _extract_embeddings(self,
+                            documents: Union[List[str], str],
+                            method: str = "document",
+                            verbose: bool = None) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
+            method: Whether to extract document or word-embeddings, options are "document" and "word"
             verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
         Returns:
-            embeddings: The extracted embeddings using the sentence transformer
-                        module. Typically uses pre-trained huggingface models.
+            embeddings: The extracted embeddings.
         """
         if isinstance(documents, str):
             documents = [documents]
 
-        # Infer embeddings with SentenceTransformer
-        if isinstance(self.embedding_model, SentenceTransformer):
-            embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
-
-        # Infer embeddings with Flair
-        elif isinstance(self.embedding_model, DocumentEmbeddings):
-            embeddings = []
-            for index, document in tqdm(enumerate(documents), disable=not verbose):
-                try:
-                    sentence = Sentence(document) if document else Sentence("an empty document")
-                    self.embedding_model.embed(sentence)
-                except RuntimeError:
-                    sentence = Sentence("an empty document")
-                    self.embedding_model.embed(sentence)
-                embedding = sentence.embedding.detach().cpu().numpy()
-                embeddings.append(embedding)
-            embeddings = np.asarray(embeddings)
-
+        if method == "word":
+            embeddings = self.embedding_model.embed_words(documents, verbose)
+        elif method == "document":
+            embeddings = self.embedding_model.embed_documents(documents, verbose)
         else:
-            raise ValueError("An incorrect embedding model type was selected.")
+            raise ValueError("Wrong method for extracting document/word embeddings. "
+                             "Either choose 'word' or 'document' as the method. ")
 
         return embeddings
 
@@ -1153,22 +1316,25 @@ class BERTopic:
             mapped_predictions.append(prediction)
         return mapped_predictions
 
-    def _reduce_dimensionality(self, embeddings: Union[np.ndarray, csr_matrix]) -> np.ndarray:
+    def _reduce_dimensionality(self,
+                               embeddings: Union[np.ndarray, csr_matrix],
+                               y: Union[List[int], np.ndarray] = None) -> np.ndarray:
         """ Reduce dimensionality of embeddings using UMAP and train a UMAP model
 
         Arguments:
             embeddings: The extracted embeddings using the sentence transformer module.
+            y: The target class for (semi)-supervised dimensionality reduction
 
         Returns:
             umap_embeddings: The reduced embeddings
         """
         if isinstance(embeddings, csr_matrix):
-            self.umap_model = umap.UMAP(n_neighbors=15,
-                                        n_components=5,
-                                        metric='hellinger',
-                                        low_memory=self.low_memory).fit(embeddings)
+            self.umap_model = UMAP(n_neighbors=15,
+                                   n_components=5,
+                                   metric='hellinger',
+                                   low_memory=self.low_memory).fit(embeddings, y=y)
         else:
-            self.umap_model.fit(embeddings)
+            self.umap_model.fit(embeddings, y=y)
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality with UMAP")
         return np.nan_to_num(umap_embeddings)
@@ -1229,7 +1395,7 @@ class BERTopic:
         a sentence-transformer model to be used or there are custom embeddings but it is allowed
         to use a different multi-lingual sentence-transformer model
         """
-        if not self.custom_embeddings:
+        if self.embedding_model is not None:
             topic_list = list(self.topics.keys())
             topic_list.sort()
             n = self.top_n_words
@@ -1237,7 +1403,9 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            embeddings = self._extract_embeddings(topic_words, verbose=False)
+            embeddings = self._extract_embeddings(topic_words,
+                                                  method="word",
+                                                  verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -1327,68 +1495,19 @@ class BERTopic:
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
-        if not self.custom_embeddings:
+        if self.embedding_model is not None:
 
             for topic, topic_words in topics.items():
                 words = [word[0] for word in topic_words]
-                word_embeddings = self._extract_embeddings(words, verbose=False)
-                topic_embedding = self._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
+                word_embeddings = self._extract_embeddings(words,
+                                                           method="word",
+                                                           verbose=False)
+                topic_embedding = self._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(1, -1)
 
                 topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
                 topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
 
         return topics
-
-    def _select_embedding_model(self) -> Union[SentenceTransformer, DocumentEmbeddings]:
-        """ Select an embedding model based on language or a specific sentence transformer models.
-        When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
-        xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
-
-        Returns:
-            model: Either a Sentence-Transformer or Flair model
-        """
-
-        # Sentence Transformer embeddings
-        if isinstance(self.embedding_model, SentenceTransformer):
-            return self.embedding_model
-
-        # Flair word embeddings
-        elif _HAS_FLAIR and isinstance(self.embedding_model, TokenEmbeddings):
-            return DocumentPoolEmbeddings([self.embedding_model])
-
-        # Flair document embeddings + disable fine tune to prevent CUDA OOM
-        # https://github.com/flairNLP/flair/issues/1719
-        elif _HAS_FLAIR and isinstance(self.embedding_model, DocumentEmbeddings):
-            if "fine_tune" in self.embedding_model.__dict__:
-                self.embedding_model.fine_tune = False
-            return self.embedding_model
-
-        # Select embedding model based on specific sentence transformer model
-        elif isinstance(self.embedding_model, str):
-            self.sentence_pointer = self.embedding_model
-            return SentenceTransformer(self.embedding_model)
-
-        # Select embedding model based on language
-        elif self.language:
-            if self.language.lower() in ["English", "english", "en"]:
-                return SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
-
-            elif self.language.lower() in languages:
-                return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
-
-            elif self.language == "multilingual":
-                return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
-
-            else:
-                raise ValueError(f"{self.language} is currently not supported. However, you can "
-                                 f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
-                                 "Else, please select a language from the following list:\n"
-                                 f"{languages}")
-
-        elif self.custom_embeddings:
-            return None
-
-        return SentenceTransformer("xlm-r-bert-base-nli-stsb-mean-tokens")
 
     def _reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
@@ -1614,3 +1733,19 @@ class BERTopic:
         parameters = sorted([p.name for p in init_signature.parameters.values()
                              if p.name != 'self' and p.kind != p.VAR_KEYWORD])
         return parameters
+
+    def __str__(self):
+        """Get a string representation of the current object.
+
+        Returns:
+            str: Human readable representation of the most important model parameters.
+                 The parameters that represent models are ignored due to their
+        """
+        parameters = ""
+        for parameter, value in self.get_params().items():
+            value = str(value)
+            if "(" in value and value[0] != "(":
+                value = value.split("(")[0] + "(...)"
+            parameters += f"{parameter}={value}, "
+
+        return f"BERTopic({parameters[:-2]})"
