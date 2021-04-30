@@ -1,5 +1,5 @@
 ## **Why are the results not consistent between runs?**
-Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
+Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code
 multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
 topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
 with different parameters. 
