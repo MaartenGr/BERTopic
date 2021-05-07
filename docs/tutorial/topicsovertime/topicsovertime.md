@@ -70,7 +70,7 @@ to quickly calculate the topics over time.
 There are a few parameters that are of interest which will be discussed below. 
 
 ### **Tuning**
-Both `global_tuning` and `evolutionary_tuning` as set to True as a default, but can easily be changed. Perhaps 
+Both `global_tuning` and `evolutionary_tuning` are set to True as a default, but can easily be changed. Perhaps 
 you do not want the representations to be influenced by the global representation and merely see how they 
 evolved over time:
 
