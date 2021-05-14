@@ -1,0 +1,115 @@
+import numpy as np
+from typing import List
+import plotly.graph_objects as go
+
+
+def visualize_term_rank(topic_model,
+                        topics: List[int] = None,
+                        log_scale: bool = False,
+                        width: int = 800,
+                        height: int = 500) -> go.Figure:
+    """ Visualize the ranks of all terms across all topics
+
+    Each topic is represented by a set of words. These words, however,
+    do not all equally represent the topic. This visualization shows
+    how many words are needed to represent a topic and at which point
+    the beneficial effect of adding words starts to decline.
+
+    Arguments:
+        topic_model: A fitted BERTopic instance.
+        topics: A selection of topics to visualize. These will be colored
+                red where all others will be colored black.
+        log_scale: Whether to represent the ranking on a log scale
+        width: The width of the figure.
+        height: The height of the figure.
+
+    Returns:
+        fig: A plotly figure
+
+    Usage:
+
+    To visualize the ranks of all words across
+    all topics simply run:
+
+    ```python
+    topic_model.visualize_word_rank()
+    ```
+
+    Or if you want to save the resulting figure:
+
+    ```python
+    fig = topic_model.visualize_word_rank()
+    fig.write_html("path/to/file.html")
+    ```
+
+    Reference:
+
+    This visualization was heavily inspired by the
+    "Term Probability Decline" visualization found in an
+    analysis by the amazing [tmtoolkit](https://tmtoolkit.readthedocs.io/).
+    Reference to that specific analysis can be found
+    [here](https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html).
+    """
+
+    topics = [] if topics is None else topics
+
+    topic_ids = topic_model.get_topic_info().Topic.unique().tolist()
+    topic_words = [topic_model.get_topic(topic) for topic in topic_ids]
+
+    values = np.array([[value[1] for value in values] for values in topic_words])
+    indices = np.array([[value + 1 for value in range(len(values))] for values in topic_words])
+
+    # Create figure
+    lines = []
+    for topic, x, y in zip(topic_ids, indices, values):
+        if not any(y > 1.5):
+            # labels
+            label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
+            label = label[:50]
+
+            # line parameters
+            color = "red" if topic in topics else "black"
+            opacity = 1 if topic in topics else .1
+            y = np.log10(y, out=y, where=y > 0) if log_scale else y
+
+            line = go.Scatter(x=x, y=y,
+                              name="",
+                              hovertext=label,
+                              mode="lines+lines",
+                              opacity=opacity,
+                              line=dict(color=color, width=1.5))
+            lines.append(line)
+
+    fig = go.Figure(data=lines)
+
+    # Stylize layout
+    fig.update_xaxes(range=[0, len(indices[0])], tick0=1, dtick=2)
+    fig.update_layout(
+        showlegend=False,
+        template="plotly_white",
+        title={
+            'text': "<b>Term score decline per Topic</b>",
+            'y': .9,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'font': dict(
+                size=22,
+                color="Black")
+        },
+        width=width,
+        height=height,
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=16,
+            font_family="Rockwell"
+        ),
+    )
+
+    fig.update_xaxes(title_text='Term Rank')
+    if log_scale:
+        fig.update_yaxes(title_text='c-TF-IDF score (log scale)')
+    else:
+        fig.update_yaxes(title_text='c-TF-IDF score')
+
+    return fig

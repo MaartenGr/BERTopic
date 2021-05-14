@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from scipy.sparse.csr import csr_matrix
-from scipy.cluster.hierarchy import fcluster, linkage
 from typing import List, Tuple, Union, Mapping, Any
 
 # Models
@@ -17,7 +16,7 @@ import hdbscan
 from umap import UMAP
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import MinMaxScaler, normalize
+from sklearn.preprocessing import normalize
 
 # BERTopic
 from bertopic._ctfidf import ClassTFIDF
@@ -27,10 +26,7 @@ from bertopic.backend._utils import select_backend
 from bertopic import plotting
 
 # Visualization
-import plotly.express as px
 import plotly.graph_objects as go
-import plotly.figure_factory as ff
-from plotly.subplots import make_subplots
 
 logger = MyLogger("WARNING")
 
@@ -88,7 +84,9 @@ class BERTopic:
             language: The main language used in your documents. For a full overview of
                       supported languages see bertopic.backends.languages. Select
                       "multilingual" to load in a sentence-tranformers model that supports 50+ languages.
-            top_n_words: The number of words per topic to extract
+            top_n_words: The number of words per topic to extract. Setting this
+                         too high can negatively impact topic embeddings as topics
+                         are typically best represented by at most 10 words.
             n_gram_range: The n-gram range for the CountVectorizer.
                           Advised to keep high values between 1 and 3.
                           More would likely lead to memory issues.
@@ -858,6 +856,59 @@ class BERTopic:
                                          top_n_topics=top_n_topics,
                                          width=width,
                                          height=height)
+
+    def visualize_term_rank(self,
+                            topics: List[int] = None,
+                            log_scale: bool = False,
+                            width: int = 800,
+                            height: int = 500) -> go.Figure:
+        """ Visualize the ranks of all terms across all topics
+
+        Each topic is represented by a set of words. These words, however,
+        do not all equally represent the topic. This visualization shows
+        how many words are needed to represent a topic and at which point
+        the beneficial effect of adding words starts to decline.
+
+        Arguments:
+            topics: A selection of topics to visualize. These will be colored
+                    red where all others will be colored black.
+            log_scale: Whether to represent the ranking on a log scale
+            width: The width of the figure.
+            height: The height of the figure.
+
+        Returns:
+            fig: A plotly figure
+
+        Usage:
+
+        To visualize the ranks of all words across
+        all topics simply run:
+
+        ```python
+        topic_model.visualize_word_rank()
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_word_rank()
+        fig.write_html("path/to/file.html")
+        ```
+
+        Reference:
+
+        This visualization was heavily inspired by the
+        "Term Probability Decline" visualization found in an
+        analysis by the amazing [tmtoolkit](https://tmtoolkit.readthedocs.io/).
+        Reference to that specific analysis can be found
+        [here](https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html).
+        """
+        check_is_fitted(self)
+        return plotting.visualize_term_rank(self,
+                                            topics=topics,
+                                            log_scale=log_scale,
+                                            width=width,
+                                            height=height)
 
     def visualize_topics_over_time(self,
                                    topics_over_time: pd.DataFrame,
