@@ -4,7 +4,7 @@ selected to give the best results. However, there is no one-size-fits-all soluti
 default parameters.
 
 Therefore, BERTopic allows you to pass in any custom UMAP, HDBSCAN, and/or CountVectorizer 
-with the parameters that best suit your use-case. For example, you might want to change the 
+with the parameters that best suit your use case. For example, you might want to change the 
 minimum document frequency in CountVectorizer or use a different distance metric in HDBSCAN or UMAP. 
 
 To do this, simply create the instances of these models and initialize BERTopic with them:

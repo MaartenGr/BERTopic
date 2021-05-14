@@ -23,7 +23,7 @@ pip install bertopic[all]
 ```
 
 ## **Quick Start**
-We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
+We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of English documents:
 
 ```python
 from bertopic import BERTopic
@@ -70,7 +70,7 @@ frequent topic that was generated, topic 49:
 
 ## **Visualize Topics**
 After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
-understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
 Instead, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis):
 

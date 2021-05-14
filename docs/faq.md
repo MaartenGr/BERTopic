@@ -1,18 +1,18 @@
 ## **Why are the results not consistent between runs?**
-Due to the stochastisch nature of UMAP, the results from BERTopic might differ even if you run the same code
-multiple times. Using your own embeddings allows you to try out BERTopic several times until you find the 
+Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code
+multiple times. Using custom embeddings allows you to try out BERTopic several times until you find the 
 topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
 with different parameters. 
 
 ## **Which embedding model works best for which language?**
-Unfortunately, there is not a definitive list on the best models for each language, this highly depends 
+Unfortunately, there is not a definitive list of the best models for each language, this highly depends 
 on your data, the model, and your specific use-case. However, the default model in BERTopic 
 (`"distilbert-base-nli-stsb-mean-tokens"`) works great for **English** documents. In contrast, for **multi-lingual** 
 documents or any other language, `"xlm-r-bert-base-nli-stsb-mean-tokens""` has shown great performance.  
 
 **SentenceTransformers**  
 [SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html) work typically quite well 
-and are the preferred models to use. They are great in generating document embeddings and have several 
+and are the preferred models to use. They are great at generating document embeddings and have several 
 multi-lingual versions available.  
 
 **🤗 transformers**  
@@ -32,7 +32,7 @@ a bit slower, but consuming significantly less memory. Moreover, calculating the
 is quite computationally consuming and might impact memory. Setting `calculate_probabilities` to False 
 could similarly help. 
 
-If the problem still persists, then this could be an issue related to your available memory. Processing 
+If the problem persists, then this could be an issue related to your available memory. The processing of  
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  
 
 ## **I have only a few topics, how do I increase them?**
@@ -85,12 +85,12 @@ aspects of BERtopic.
 ## **Should I preprocess the data?**
 No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
 are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
-have data that contains a lot of noise, for example HTML-tags, then it would be best to remove them. HTML-tags 
+have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
 typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
 topic modeling to HTML-code to extract topics of code, then it becomes important.
 
 ## **Why does it take so long to import BERTopic?**
-The main culprit here seems to be UMAP. After running thorough tests with [Tuna](https://github.com/nschloe/tuna) we 
+The main culprit here seems to be UMAP. After running tests with [Tuna](https://github.com/nschloe/tuna) we 
 can see that most of the resources when importing BERTopic can be dedicated to UMAP:   
 
 <img src="img/tuna.png" />

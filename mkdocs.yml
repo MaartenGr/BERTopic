@@ -23,6 +23,17 @@ nav:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
       - MMR: api/mmr.md
+      - Backends:
+        - Base: api/backends/base.md
+        - Word Doc: api/backends/word_doc.md
+      - Plotting:
+        - Barchart: api/plotting/barchart.md
+        - Distribution: api/plotting/distribution.md
+        - Heatmap: api/plotting/heatmap.md
+        - Hierarchy: api/plotting/hierarchy.md
+        - Topics: api/plotting/topics.md
+        - DTM: api/plotting/dtm.md
+        - Topics per Class: api/plotting/topics_per_class.md
   - FAQ: faq.md
   - Changelog: changelog.md
 plugins:

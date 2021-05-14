@@ -103,8 +103,8 @@ frequent topic that was generated, topic 49:
 **NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
 ## Visualize Topics
-After having trained our BERTopic model, we can iteratively go through perhaps a hundred topic to get a good 
-understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+After having trained our BERTopic model, we can iteratively go through hundreds of topics to get a good 
+understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
 Instead, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis):
 
@@ -205,7 +205,7 @@ topic_model.visualize_topics_over_time(topics_over_time, top_n=6)
 <img src="images/dtm.gif" width="80%" height="80%" align="center" />
 
 ## Overview
-For quick access to common function, here is an overview of BERTopic's main methods:
+For quick access to common functions, here is an overview of BERTopic's main methods:
 
 | Method | Code  | 
 |-----------------------|---|

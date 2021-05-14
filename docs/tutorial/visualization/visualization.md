@@ -1,5 +1,5 @@
 ## **Visualize Topics**
-After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
+After having trained our `BERTopic` model, we can iteratively go through hundreds of topics to get a good 
 understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
 Instead, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis). 
@@ -19,14 +19,14 @@ topics, _ = topic_model.fit_transform(docs)
 ```
 
 Then, we simply call `topic_model.visualize_topics()` in order to visualize our topics. The resulting graph is a 
-plotly interactive graph which can be converted to html. 
+plotly interactive graph which can be converted to HTML. 
 
 Thus, you can play around with the results below:
 
 <iframe src="viz.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
 You can use the slider to select the topic which then lights up red. If you hover over a topic, then general 
-information is given about the topic, including size of the topic and its corresponding words.
+information is given about the topic, including the size of the topic and its corresponding words.
 
 ## **Visualize Topics over Time**
 After creating topics over time with Dynamic Topic Modeling, we can visualize these topics by 

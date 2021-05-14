@@ -48,9 +48,9 @@ are somewhat distributed over all classes.
  
 You can see that the topic representation between rec.motorcycles and rec.autos in `58_bike_bikes_motorcycle` clearly 
 differs from one another. It seems that BERTopic has tried to combine those two categories into a single topic. However, 
-since they do contain two separate topics, the topic representation in those two categories differ. 
+since they do contain two separate topics, the topic representation in those two categories differs. 
 
 We see something similar for `93_homosexual_homosexuality_sex`, where the topic is distributed among several categories 
-and is represented slightly different. 
+and is represented slightly differently. 
 
 Thus, you can see that although in certain categories the topic is similar, the way the topic is represented can differ.   

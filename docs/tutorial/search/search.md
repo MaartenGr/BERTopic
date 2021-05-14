@@ -1,6 +1,6 @@
 After having created a BERTopic model, you might end up with over a hundred topics. Searching through those 
 can be quite cumbersome especially if you are searching for a specific topic. Fortunately, BERTopic allows you 
-to search for topics using search terms. First, let's create an train a BERTopic model:
+to search for topics using search terms. First, let's create and train a BERTopic model:
 
 
 ```python
@@ -33,6 +33,6 @@ search term "motor". Then, we extract the most similar topic and check the resul
 ```
 
 It definitely seems that a topic was found that closely matches with "motor". The topic seems to be motorcycle 
-related and therefore matches with out "motor" input. You can use the `similarity` variable to see how similar 
+related and therefore matches with our "motor" input. You can use the `similarity` variable to see how similar 
 the extracted topics are to the search term. 
  

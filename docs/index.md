@@ -2,7 +2,7 @@
 
 <img src="logo.png" width="35%" height="35%" align="right" />
 
-BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
+BERTopic is a topic modeling technique that leverages transformers and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
 visualizations similar to LDAvis! 
 
@@ -82,7 +82,7 @@ frequent topic that was generated, topic 49:
 
 
 ## **Overview**
-For quick access to common function, here is an overview of BERTopic's main methods:
+For quick access to common functions, here is an overview of BERTopic's main methods:
 
 | Method | Code  | 
 |-----------------------|---|

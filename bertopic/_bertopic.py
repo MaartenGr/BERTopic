@@ -356,8 +356,6 @@ class BERTopic:
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
-            if len(documents) == 1:
-                probabilities = probabilities.flatten()
         else:
             probabilities = None
 
