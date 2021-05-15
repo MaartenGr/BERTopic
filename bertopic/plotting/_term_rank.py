@@ -70,6 +70,8 @@ def visualize_term_rank(topic_model,
             # line parameters
             color = "red" if topic in topics else "black"
             opacity = 1 if topic in topics else .1
+            if any(y == 0):
+                y[y == 0] = min(values[values > 0])
             y = np.log10(y, out=y, where=y > 0) if log_scale else y
 
             line = go.Scatter(x=x, y=y,

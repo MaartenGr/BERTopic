@@ -74,8 +74,8 @@ def visualize_heatmap(topic_model,
         mapping = {cluster: [] for cluster in clusters}
         for index, cluster in enumerate(clusters):
             mapping[cluster].append(index - 1)
-        topics = [cluster for cluster in mapping.values()]
-        topics = [topic for cluster in topics for topic in cluster]
+        mapping = [cluster for cluster in mapping.values()]
+        topics = [topics[topic + 1] for cluster in mapping for topic in cluster]
 
     # Select embeddings
     all_topics = sorted(list(topic_model.get_topics().keys()))
