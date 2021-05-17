@@ -1286,7 +1286,7 @@ class BERTopic:
         """ Map predictions to the correct topics if topics were reduced """
         mapped_predictions = []
         for prediction in predictions:
-            while self.mapped_topics.get(prediction):
+            while prediction in self.mapped_topics:
                 prediction = self.mapped_topics[prediction]
             mapped_predictions.append(prediction)
         return mapped_predictions
