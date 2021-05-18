@@ -157,7 +157,6 @@ class BERTopic:
 
         self.topics = None
         self.topic_sizes = None
-        self.reduced_topics_mapped = None
         self.mapped_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
@@ -282,13 +281,17 @@ class BERTopic:
         # Cluster UMAP embeddings with HDBSCAN
         documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
 
+        # Sort and Map Topic IDs by their frequency
+        if not self.nr_topics:
+            documents = self._sort_mappings_by_frequency(documents)
+
         # Extract topics by calculating c-TF-IDF
         self._extract_topics(documents)
 
+        # Reduce topics
         if self.nr_topics:
             documents = self._reduce_topics(documents)
             probabilities = self._map_probabilities(probabilities)
-
         predictions = documents.Topic.to_list()
 
         return predictions, probabilities
@@ -704,7 +707,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        if self.topics.get(topic):
+        if topic in self.topics:
             return self.topics[topic]
         else:
             return False
@@ -1203,7 +1206,7 @@ class BERTopic:
     @classmethod
     def load(cls,
              path: str,
-             embedding_model = None):
+             embedding_model=None):
         """ Loads the model from the specified path
 
         Arguments:
@@ -1284,12 +1287,13 @@ class BERTopic:
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
         """ Map predictions to the correct topics if topics were reduced """
-        mapped_predictions = []
-        for prediction in predictions:
-            while prediction in self.mapped_topics:
-                prediction = self.mapped_topics[prediction]
-            mapped_predictions.append(prediction)
-        return mapped_predictions
+        if self.mapped_topics:
+            return [self.mapped_topics[prediction]
+                    if prediction in self.mapped_topics
+                    else prediction
+                    for prediction in predictions]
+        else:
+            return predictions
 
     def _reduce_dimensionality(self,
                                embeddings: Union[np.ndarray, csr_matrix],
@@ -1477,9 +1481,12 @@ class BERTopic:
                 word_embeddings = self._extract_embeddings(words,
                                                            method="word",
                                                            verbose=False)
-                topic_embedding = self._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(1, -1)
+                topic_embedding = self._extract_embeddings(" ".join(words),
+                                                           method="word",
+                                                           verbose=False).reshape(1, -1)
 
-                topic_words = mmr(topic_embedding, word_embeddings, words, top_n=self.top_n_words, diversity=0)
+                topic_words = mmr(topic_embedding, word_embeddings, words,
+                                  top_n=self.top_n_words, diversity=0)
                 topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
 
         return topics
@@ -1494,7 +1501,12 @@ class BERTopic:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
         if isinstance(self.nr_topics, int):
-            documents = self._reduce_to_n_topics(documents)
+            initial_nr_topics = len(self.get_topics())
+            if initial_nr_topics < self.nr_topics:
+                logger.info(f"Since {initial_nr_topics} were found, "
+                            f"they could not be reduced... to {self.nr_topics}")
+            else:
+                documents = self._reduce_to_n_topics(documents)
         elif isinstance(self.nr_topics, str):
             documents = self._auto_reduce_topics(documents)
         else:
@@ -1511,27 +1523,44 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        if not self.mapped_topics:
-            self.mapped_topics = {}
         initial_nr_topics = len(self.get_topics())
+        if not self.mapped_topics:
+            self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
 
         # Create topic similarity matrix
-        similarities = cosine_similarity(self.c_tf_idf)
+        if self.topic_embeddings is not None:
+            similarities = cosine_similarity(np.array(self.topic_embeddings))
+        else:
+            similarities = cosine_similarity(self.c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
+        # Find most similar topic to least common topic
+        mapped_topics = {}
         while len(self.get_topic_freq()) > self.nr_topics + 1:
-            # Find most similar topic to least common topic
             topic_to_merge = self.get_topic_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
             similarities[:, topic_to_merge + 1] = -1
 
             # Update Topic labels
             documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
-            self.mapped_topics[topic_to_merge] = topic_to_merge_into
-
-            # Update new topic content
+            mapped_topics[topic_to_merge] = topic_to_merge_into
             self._update_topic_size(documents)
 
+        # Instead of mapping a -> b and then b -> c,
+        # directly map a -> c
+        for topic_from, _ in mapped_topics.items():
+            topic_to = topic_from
+            while topic_to in mapped_topics:
+                topic_to = mapped_topics[topic_to]
+            mapped_topics[topic_from] = topic_to
+
+        # Update mapped topics with new clusters
+        self.mapped_topics = {og_topic: mapped_topics[topic]
+                              if topic in mapped_topics
+                              else topic
+                              for og_topic, topic in self.mapped_topics.items()}
+
+        documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
 
         if initial_nr_topics <= self.nr_topics:
@@ -1550,39 +1579,80 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        initial_nr_topics = len(self.get_topics())
-        has_mapped = []
         if not self.mapped_topics:
-            self.mapped_topics = {}
+            self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
 
-        # Create topic similarity matrix
-        similarities = cosine_similarity(self.c_tf_idf)
-        np.fill_diagonal(similarities, 0)
+        unique_topics = sorted(list(documents.Topic.unique()))[1:]
+        max_topic = unique_topics[-1]
 
-        # Do not map the top 10% most frequent topics
-        not_mapped = int(np.ceil(len(self.get_topic_freq()) * 0.1))
-        to_map = self.get_topic_freq().Topic.values[not_mapped:][::-1]
+        # Find similar topics
+        if self.topic_embeddings is not None:
+            embeddings = np.array(self.topic_embeddings)
+        else:
+            embeddings = self.c_tf_idf
+        norm_data = normalize(embeddings, norm='l2')
+        predictions = hdbscan.HDBSCAN(min_cluster_size=2,
+                                      metric='euclidean',
+                                      cluster_selection_method='eom',
+                                      prediction_data=True).fit_predict(norm_data[1:])
 
-        for topic_to_merge in to_map:
-            # Find most similar topic to least common topic
-            similarity = np.max(similarities[topic_to_merge + 1])
-            topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
+        # Map similar topics
+        mapped_topics = {unique_topics[index]: prediction + max_topic
+                         for index, prediction in enumerate(predictions)
+                         if prediction != -1}
+        documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
 
-            # Only map topics if they have a high similarity
-            if (similarity > 0.915) & (topic_to_merge_into not in has_mapped):
-                # Update Topic labels
-                documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
-                self.mapped_topics[topic_to_merge] = topic_to_merge_into
-                similarities[:, topic_to_merge + 1] = -1
-
-                # Update new topic content
-                self._update_topic_size(documents)
-                has_mapped.append(topic_to_merge)
-
+        # Update mapped topics with new clusters
+        self.mapped_topics = {og_topic: mapped_topics[topic]
+                              if topic in mapped_topics
+                              else topic
+                              for og_topic, topic in self.mapped_topics.items()}
+        documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
 
-        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
+        return documents
 
+    def _sort_mappings_by_frequency(self, documents: pd.DataFrame) -> pd.DataFrame:
+        """ Reorder mappings by their frequency.
+
+        For example, if topic 88 was mapped to topic
+        5 and topic 5 turns out to be the largest topic,
+        then topic 5 will be topic 0. The second largest,
+        will be topic 1, etc.
+
+        If there are no mappings since no reduction of topics
+        took place, then the topics will simply be ordered
+        by their frequency and will get the topic ids based
+        on that order.
+
+        This means that -1 will remain the outlier class, and
+        that the rest of the topics will be in descending order
+        of ids and frequency.
+
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs and Topics
+
+        Returns:
+            documents: Updated dataframe with documents and the mapped
+                       and re-ordered topic ids
+        """
+
+        self._update_topic_size(documents)
+
+        if not self.mapped_topics:
+            self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
+
+        # Map topics based on frequency
+        sorted_topics = {topic: index - 1 for index, topic
+                         in enumerate(self.topic_sizes.keys())}
+        self.mapped_topics = {og_topic: sorted_topics[topic]
+                              if topic in sorted_topics
+                              else topic
+                              for og_topic, topic in self.mapped_topics.items()}
+
+        # Map documents
+        documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
+        self._update_topic_size(documents)
         return documents
 
     def _map_probabilities(self, probabilities: Union[np.ndarray, None]) -> Union[np.ndarray, None]:
