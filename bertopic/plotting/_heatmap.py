@@ -66,25 +66,28 @@ def visualize_heatmap(topic_model,
         if n_clusters >= len(set(topics)):
             raise ValueError("Make sure to set `n_clusters` lower than "
                              "the total number of unique topics.")
+
+        embeddings = embeddings[[topic + 1 for topic in topics]]
         distance_matrix = cosine_similarity(embeddings)
         Z = linkage(distance_matrix, 'ward')
         clusters = fcluster(Z, t=n_clusters, criterion='maxclust')
 
         # Extract new order of topics
         mapping = {cluster: [] for cluster in clusters}
-        for index, cluster in enumerate(clusters):
-            mapping[cluster].append(index - 1)
+        for topic, cluster in zip(topics, clusters):
+            mapping[cluster].append(topic)
         mapping = [cluster for cluster in mapping.values()]
-        topics = [topics[topic + 1] for cluster in mapping for topic in cluster]
+        sorted_topics = [topic for cluster in mapping for topic in cluster]
+    else:
+        sorted_topics = topics
 
     # Select embeddings
-    all_topics = sorted(list(topic_model.get_topics().keys()))
-    indices = np.array([all_topics.index(topic) for topic in topics])
+    indices = np.array([topics.index(topic) for topic in sorted_topics])
     embeddings = embeddings[indices]
     distance_matrix = cosine_similarity(embeddings)
 
     # Create nicer labels
-    new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in topics]
+    new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]
     new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
     new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 
