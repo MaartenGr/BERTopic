@@ -28,6 +28,69 @@ Thus, you can play around with the results below:
 You can use the slider to select the topic which then lights up red. If you hover over a topic, then general 
 information is given about the topic, including the size of the topic and its corresponding words.
 
+
+## **Visualize Topic Hierarchy**
+The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
+structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how 
+they relate to one another. This might help selecting an appropriate `nr_topics` when reducing the number 
+of topics that you have created. To visualize this hierarchy, simply call `topic_model.visualize_hierarchy()`:
+
+<iframe src="hierarchy.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
+
+Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to 
+auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
+the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected. 
+
+## **Visualize Terms**
+We can visualize the selected terms for a few topics by creating bar charts out of the c-TF-IDF scores 
+for each topic representation. Insights can be gained from the relative c-TF-IDF scores between and within 
+topics. Moreover, you can easily compare topic representations to each other. 
+To visualize this hierarchy, simply call `topic_model.visualize_barchart()`:
+
+<iframe src="bar_chart.html" style="width:1100px; height: 660px; border: 0px;""></iframe>
+
+
+## **Visualize Topic Similarity**
+Having generated topic embeddings, through both c-TF-IDF and embeddings, we can create a similarity 
+matrix by simply applying cosine similarities through those topic embeddings. The result will be a 
+matrix indicating how similar certain topics are to each other. 
+To visualize the heatmap, simply call `topic_model.visualize_heatmap()`:
+ 
+<iframe src="heatmap.html" style="width:1000px; height: 720px; border: 0px;""></iframe>
+
+Note that you can set `n_clusters` in `visualize_heatmap` to order the topics by their similarity. 
+This will result in blocks being formed in the heatmap indicating which clusters of topics are 
+similar to each other. This step is very much recommended as it will make reading the heatmap easier.      
+
+
+## **Visualize Term Score Decline**
+Topics are represented by a number of words starting with the best representative word. 
+Each word is represented by a c-TF-IDF score. The higher the score, the more representative a word 
+to the topic is. Since the topic words are sorted by their c-TF-IDF score, the scores slowly decline 
+with each word that is added. At some point adding words to the topic representation only marginally 
+increases the total c-TF-IDF score and would not be beneficial for its representation. 
+
+To visualize this effect, we can plot the c-TF-IDF scores for each topic by the term rank of each word. 
+In other words, the position of the words (term rank), where the words with 
+the highest c-TF-IDF score will have a rank of 1, will be put on the x-axis. Whereas the y-axis 
+will be populated by the c-TF-IDF scores. The result is a visualization that shows you the decline 
+of c-TF-IDF score when adding words to the topic representation. It allows you, using the elbow method, 
+the select the best number of words in a topic. 
+
+To visualize the c-TF-IDF score decline, simply call `topic_model.visualize_term_rank()`:
+
+<iframe src="term_rank.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
+
+To enable the log scale on the y-axis for a better view of individual topics, 
+simply call `topic_model.visualize_term_rank(log_scale=True)`:
+
+<iframe src="term_rank_log.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
+
+This visualization was heavily inspired by the "Term Probability Decline" visualization found in an 
+analysis by the amazing [tmtoolkit](https://tmtoolkit.readthedocs.io/).
+Reference to that specific analysis can be found 
+[here](https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html). 
+
 ## **Visualize Topics over Time**
 After creating topics over time with Dynamic Topic Modeling, we can visualize these topics by 
 leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
@@ -91,7 +154,7 @@ Then, we visualize the topic representation of major topics per class:
 topic_model.visualize_topics_per_class(topics_per_class)
 ```
 
-<iframe src="topics_per_class.html" style="width:1300px; height: 1000px; border: 0px;""></iframe>
+<iframe src="topics_per_class.html" style="width:1400px; height: 1000px; border: 0px;""></iframe>
 
 
 ## **Visualize Probablities**
@@ -115,7 +178,7 @@ To visualize the distributions, we simply call:
 topic_model.visualize_distribution(probabilities[0])
 ```
 
-<iframe src="probabilities.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
+<iframe src="probabilities.html" style="width:1000px; height: 500px; border: 0px;""></iframe>
 
 
 **NOTE**: The distribution of the probabilities does not give an indication to 

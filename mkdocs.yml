@@ -31,6 +31,7 @@ nav:
         - Distribution: api/plotting/distribution.md
         - Heatmap: api/plotting/heatmap.md
         - Hierarchy: api/plotting/hierarchy.md
+        - Term Scores: api/plotting/term.md
         - Topics: api/plotting/topics.md
         - DTM: api/plotting/dtm.md
         - Topics per Class: api/plotting/topics_per_class.md
