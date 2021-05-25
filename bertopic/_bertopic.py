@@ -817,6 +817,8 @@ class BERTopic:
         # Reduce number of topics
         self._extract_topics(documents)
         documents = self._reduce_topics(documents)
+
+        # Extract topics and map probabilities
         new_topics = documents.Topic.to_list()
         new_probabilities = self._map_probabilities(probabilities)
 
@@ -1500,18 +1502,17 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        initial_nr_topics = len(self.get_topics())
+
         if isinstance(self.nr_topics, int):
-            initial_nr_topics = len(self.get_topics())
-            if initial_nr_topics < self.nr_topics:
-                logger.info(f"Since {initial_nr_topics} were found, "
-                            f"they could not be reduced... to {self.nr_topics}")
-            else:
+            if self.nr_topics < initial_nr_topics:
                 documents = self._reduce_to_n_topics(documents)
         elif isinstance(self.nr_topics, str):
             documents = self._auto_reduce_topics(documents)
         else:
             raise ValueError("nr_topics needs to be an int or 'auto'! ")
 
+        logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
         return documents
 
     def _reduce_to_n_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
@@ -1523,7 +1524,6 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        initial_nr_topics = len(self.get_topics())
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
 
@@ -1562,12 +1562,7 @@ class BERTopic:
 
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
-
-        if initial_nr_topics <= self.nr_topics:
-            logger.info(f"Since {initial_nr_topics} were found, they could not be reduced to {self.nr_topics}")
-        else:
-            logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
-
+        self._update_topic_size(documents)
         return documents
 
     def _auto_reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
@@ -1609,7 +1604,7 @@ class BERTopic:
                               for og_topic, topic in self.mapped_topics.items()}
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
-
+        self._update_topic_size(documents)
         return documents
 
     def _sort_mappings_by_frequency(self, documents: pd.DataFrame) -> pd.DataFrame:
