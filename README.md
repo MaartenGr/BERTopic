@@ -76,17 +76,17 @@ After generating topics, we can access the frequent topics that were generated:
 
 Topic	Count	Name
 -1	4630	-1_can_your_will_any
-49	693	49_windows_drive_dos_file
-32	466	32_jesus_bible_christian_faith
+0	693	49_windows_drive_dos_file
+1	466	32_jesus_bible_christian_faith
 2	441	2_space_launch_orbit_lunar
-22	381	22_key_encryption_keys_encrypted
+3	381	22_key_encryption_keys_encrypted
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, topic 49:
+frequent topic that was generated, topic 0:
 
 ```python
->>> topic_model.get_topic(49)
+>>> topic_model.get_topic(0)
 
 [('windows', 0.006152228076250982),
  ('drive', 0.004982897610645755),
@@ -199,7 +199,7 @@ topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps)
 Finally, we can visualize the topics by simply calling `visualize_topics_over_time()`: 
 
 ```python
-topic_model.visualize_topics_over_time(topics_over_time, top_n=6)
+topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=6)
 ```
 
 <img src="images/dtm.gif" width="80%" height="80%" align="center" />
@@ -218,16 +218,25 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Get all topic information|  `BERTopic().get_topic_info()` |
 | Get topics per class | `BERTopic().topics_per_class(docs, topics, classes)` |
 | Dynamic Topic Modeling | `BERTopic().topics_over_time(docs, topics, timestamps)` |
-| Visualize Topics    |  `BERTopic().visualize_topics()` |
-| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probs[0])` |
-| Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
-| Visualize Topics per Class | `BERTopic().visualize_topics_per_class(topics_per_class)` | 
 | Update topic representation | `BERTopic().update_topics(docs, topics, n_gram_range=(1, 3))` |
 | Reduce nr of topics | `BERTopic().reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `BERTopic().find_topics("vehicle")` |
 | Save model    |  `BERTopic().save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `BERTopic().get_params()` |
+
+For an overview of BERTopic's visualization methods:
+
+| Method | Code  | 
+|-----------------------|---|
+| Visualize Topics    |  `BERTopic().visualize_topics()` |
+| Visualize Topic Hierarchy    |  `BERTopic().visualize_hierarchy()` |
+| Visualize Topic Terms    |  `BERTopic().visualize_barchart()` |
+| Visualize Topic Similarity  |  `BERTopic().visualize_heatmap()` |
+| Visualize Term Score Decline  |  `BERTopic().visualize_term_rank()` |
+| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probs[0])` |
+| Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
+| Visualize Topics per Class | `BERTopic().visualize_topics_per_class(topics_per_class)` | 
 
 ## Citation
 To cite BERTopic in your work, please use the following bibtex reference:

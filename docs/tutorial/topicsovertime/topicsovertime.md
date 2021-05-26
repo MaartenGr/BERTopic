@@ -106,16 +106,16 @@ of topics over time whilst giving the option of hovering over the points to show
 Simply call `visualize_topics_over_time` with the newly created topics over time:
 
 ```python
-topic_model.visualize_topics_over_time(topics_over_time, top_n=20)
+topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=20)
 ```
 
-I used `top_n` to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
-leaving `top_n` empty, there is a chance that hundreds of lines will fill the plot. 
+I used `top_n_topics` to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
+leaving `top_n_topics` empty, there is a chance that hundreds of lines will fill the plot. 
 
 You can also use `topics` to show specific topics:
 
 ```python
-topic_model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+topic_model.visualize_topics_over_time(topics_over_time, topics=[9, 10, 72, 83, 87, 91])
 ```
 
 <iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe> 

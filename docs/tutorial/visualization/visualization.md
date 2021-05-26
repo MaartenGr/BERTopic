@@ -121,7 +121,7 @@ topics_over_time = model.topics_over_time(tweets, topics, timestamps)
 Then, we visualize some interesting topics: 
 
 ```python
-model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+model.visualize_topics_over_time(topics_over_time, topics=[9, 10, 72, 83, 87, 91])
 ```
 <iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 

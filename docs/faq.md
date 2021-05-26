@@ -10,6 +10,9 @@ on your data, the model, and your specific use-case. However, the default model 
 (`"distilbert-base-nli-stsb-mean-tokens"`) works great for **English** documents. In contrast, for **multi-lingual** 
 documents or any other language, `"xlm-r-bert-base-nli-stsb-mean-tokens""` has shown great performance.  
 
+Having said that, I have been getting great performance from the new `stsb-mpnet-base-v2` model in sentence-transformers 
+and I would advise trying it out for **English** documents.
+ 
 **SentenceTransformers**  
 [SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html) work typically quite well 
 and are the preferred models to use. They are great at generating document embeddings and have several 
@@ -25,6 +28,10 @@ You can speed up BERTopic by either generating your embeddings beforehand, which
 setting `calculate_probabilities` to False. Calculating the probabilities is quite expensive and can 
 significantly increase the computation time. Thus, only use it if you do not mind waiting a bit before 
 the model is done running or if you have less than 50_000 documents. 
+
+Also, make sure to use a GPU when extracting the sentence/document embeddings. Transformer models 
+typically require a GPU and using only a CPU can slow down computation time quite a lot. 
+However, if you do not have access to a GPU, looking into quantization might help. 
 
 ## **I am facing memory issues. Help!**
 To prevent any memory issues, it is advised to set `low_memory` to True. This will result in UMAP being 
