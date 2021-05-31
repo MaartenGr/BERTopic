@@ -193,7 +193,7 @@ From these topics, we are going to generate the topic representations at each ti
 by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps)
+topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
 ```
 
 Finally, we can visualize the topics by simply calling `visualize_topics_over_time()`: 
