@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/topicsovertime/topicsovertime.html">
       
       <link rel="icon" href="../../icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.6">
     
     
       
@@ -24,10 +24,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.9299cb39.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.875de78c.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.f1a3b89f.min.css">
         
           
           
@@ -374,6 +374,7 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+      
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Dynamic Topic Modeling
           <span class="md-nav__icon md-icon"></span>
@@ -385,6 +386,7 @@
       
         
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
   
@@ -529,6 +531,180 @@
   
 
           
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_4" type="checkbox" id="__nav_4_4" >
+      
+      <label class="md-nav__link" for="__nav_4_4">
+        Backends
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Backends" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_4">
+          <span class="md-nav__icon md-icon"></span>
+          Backends
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/word_doc.html" class="md-nav__link">
+        Word Doc
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+      
+      <label class="md-nav__link" for="__nav_4_5">
+        Plotting
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Plotting" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_5">
+          <span class="md-nav__icon md-icon"></span>
+          Plotting
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/barchart.html" class="md-nav__link">
+        Barchart
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/distribution.html" class="md-nav__link">
+        Distribution
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/heatmap.html" class="md-nav__link">
+        Heatmap
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchy
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/term.html" class="md-nav__link">
+        Term Scores
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics.html" class="md-nav__link">
+        Topics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics_per_class.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -578,6 +754,7 @@
                   <div class="md-sidebar__inner">
                     
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
   
@@ -670,11 +847,11 @@
                 <h2 id="dynamic-topic-modeling"><strong>Dynamic Topic Modeling</strong><a class="headerlink" href="#dynamic-topic-modeling" title="Permanent link">&para;</a></h2>
 <p>Dynamic topic modeling (DTM) is a collection of techniques aimed at analyzing the evolution of topics 
 over time. These methods allow you to understand how a topic is represented across different times. 
-For example, in 1995 people may talked differently about environmental awareness than those in 2015. Although the 
+For example, in 1995 people may talk differently about environmental awareness than those in 2015. Although the 
 topic itself remains the same, environmental awareness, the exact representation of that topic might differ. </p>
 <p>BERTopic allows for DTM by calculating the topic representation at each timestep without the need to 
 run the entire model several times. To do this, we first need to fit BERTopic as if there were no temporal 
-aspect in the data. Thus, a general topic model will be created. We use the global representation as the main 
+aspect in the data. Thus, a general topic model will be created. We use the global representation as to the main 
 topics that can be found at, most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF 
 representation. This will result in a specific topic representation at each timestep without the need to create 
 clusters from embeddings as they were already created.</p>
@@ -716,12 +893,12 @@ re-tweets for this use-case: </p>
 by simply calling <code>topics_over_time</code> and pass in his tweets, the corresponding timestamps, and the related topics:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">)</span>
 </code></pre></div>
-<p>And that is it! Aside from what you are always need for BERTopic, you now only need to add <code>topics</code> and <code>timestamps</code> 
+<p>And that is it! Aside from what you always need for BERTopic, you now only need to add <code>topics</code> and <code>timestamps</code> 
 to quickly calculate the topics over time. </p>
 <h2 id="parameters"><strong>Parameters</strong><a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <p>There are a few parameters that are of interest which will be discussed below. </p>
 <h3 id="tuning"><strong>Tuning</strong><a class="headerlink" href="#tuning" title="Permanent link">&para;</a></h3>
-<p>Both <code>global_tuning</code> and <code>evolutionary_tuning</code> as set to True as a default, but can easily be changed. Perhaps 
+<p>Both <code>global_tuning</code> and <code>evolutionary_tuning</code> are set to True as a default, but can easily be changed. Perhaps 
 you do not want the representations to be influenced by the global representation and merely see how they 
 evolved over time:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> 
@@ -746,12 +923,12 @@ We can use <code>datetime_format</code> to pass the format the timestamps have: 
 A nice way of doing so is leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
 of topics over time whilst giving the option of hovering over the points to show the time-specific topic representations. 
 Simply call <code>visualize_topics_over_time</code> with the newly created topics over time:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">top_n</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </code></pre></div>
-<p>I used <code>top_n</code> to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
-leaving <code>top_n</code> empty, there is a chance that hundreds of lines will fill the plot. </p>
+<p>I used <code>top_n_topics</code> to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
+leaving <code>top_n_topics</code> empty, there is a chance that hundreds of lines will fill the plot. </p>
 <p>You can also use <code>topics</code> to show specific topics:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">topcs</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">91</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">91</span><span class="p">])</span>
 </code></pre></div>
 <iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
                 
@@ -826,10 +1003,10 @@ leaving <code>top_n</code> empty, there is a chance that hundreds of lines will 
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.d351de03.min.js", "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.7353b375.min.js"></script>
+      <script src="../../assets/javascripts/bundle.34eae1b6.min.js"></script>
       
     
   </body>

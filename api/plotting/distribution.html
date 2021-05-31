@@ -13,14 +13,14 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/algorithm/algorithm.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/api/plotting/distribution.html">
       
       <link rel="icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.6">
     
     
       
-        <title>The Algorithm - BERTopic</title>
+        <title>Distribution - BERTopic</title>
       
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#embed-documents" class="md-skip">
+        <a href="#distribution" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              The Algorithm
+              Distribution
             
           </span>
         </div>
@@ -220,74 +220,11 @@
 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          The Algorithm
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="algorithm.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../tutorial/algorithm/algorithm.html" class="md-nav__link">
         The Algorithm
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#embed-documents" class="md-nav__link">
-    Embed documents
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cluster-documents" class="md-nav__link">
-    Cluster Documents
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-topic-representation" class="md-nav__link">
-    Create topic representation
-  </a>
-  
-    <nav class="md-nav" aria-label="Create topic representation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#topic-coherence" class="md-nav__link">
-    Topic Coherence
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -321,7 +258,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../quickstart/quickstart.html" class="md-nav__link">
+      <a href="../../tutorial/quickstart/quickstart.html" class="md-nav__link">
         Getting Started
       </a>
     </li>
@@ -333,7 +270,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../embeddings/embeddings.html" class="md-nav__link">
+      <a href="../../tutorial/embeddings/embeddings.html" class="md-nav__link">
         Embedding Models
       </a>
     </li>
@@ -345,7 +282,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../visualization/visualization.html" class="md-nav__link">
+      <a href="../../tutorial/visualization/visualization.html" class="md-nav__link">
         Topic Visualization
       </a>
     </li>
@@ -357,7 +294,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../topicreduction/topicreduction.html" class="md-nav__link">
+      <a href="../../tutorial/topicreduction/topicreduction.html" class="md-nav__link">
         Topic Reduction
       </a>
     </li>
@@ -369,7 +306,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
+      <a href="../../tutorial/topicrepresentation/topicrepresentation.html" class="md-nav__link">
         Topic Representation
       </a>
     </li>
@@ -381,7 +318,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../search/search.html" class="md-nav__link">
+      <a href="../../tutorial/search/search.html" class="md-nav__link">
         Search Topics
       </a>
     </li>
@@ -393,7 +330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../models/models.html" class="md-nav__link">
+      <a href="../../tutorial/models/models.html" class="md-nav__link">
         Custom Sub-Models
       </a>
     </li>
@@ -405,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+      <a href="../../tutorial/topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
     </li>
@@ -417,7 +354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../supervised/supervised.html" class="md-nav__link">
+      <a href="../../tutorial/supervised/supervised.html" class="md-nav__link">
         (semi)-Supervised Topic Modeling
       </a>
     </li>
@@ -429,7 +366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+      <a href="../../tutorial/topicsovertime/topicsovertime.html" class="md-nav__link">
         Dynamic Topic Modeling
       </a>
     </li>
@@ -448,12 +385,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
       
       <label class="md-nav__link" for="__nav_4">
         API
@@ -471,7 +410,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/bertopic.html" class="md-nav__link">
+      <a href="../bertopic.html" class="md-nav__link">
         BERTopic
       </a>
     </li>
@@ -483,7 +422,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/ctfidf.html" class="md-nav__link">
+      <a href="../ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
     </li>
@@ -495,7 +434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/mmr.html" class="md-nav__link">
+      <a href="../mmr.html" class="md-nav__link">
         MMR
       </a>
     </li>
@@ -528,7 +467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/backends/base.html" class="md-nav__link">
+      <a href="../backends/base.html" class="md-nav__link">
         Base
       </a>
     </li>
@@ -540,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/backends/word_doc.html" class="md-nav__link">
+      <a href="../backends/word_doc.html" class="md-nav__link">
         Word Doc
       </a>
     </li>
@@ -556,12 +495,14 @@
             
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" checked>
       
       <label class="md-nav__link" for="__nav_4_5">
         Plotting
@@ -579,7 +520,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/barchart.html" class="md-nav__link">
+      <a href="barchart.html" class="md-nav__link">
         Barchart
       </a>
     </li>
@@ -589,11 +530,51 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../api/plotting/distribution.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Distribution
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="distribution.html" class="md-nav__link md-nav__link--active">
         Distribution
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bertopic.plotting._distribution.visualize_distribution" class="md-nav__link">
+    bertopic.plotting._distribution.visualize_distribution
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -603,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/heatmap.html" class="md-nav__link">
+      <a href="heatmap.html" class="md-nav__link">
         Heatmap
       </a>
     </li>
@@ -615,7 +596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+      <a href="hierarchy.html" class="md-nav__link">
         Hierarchy
       </a>
     </li>
@@ -627,7 +608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/term.html" class="md-nav__link">
+      <a href="term.html" class="md-nav__link">
         Term Scores
       </a>
     </li>
@@ -639,7 +620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/topics.html" class="md-nav__link">
+      <a href="topics.html" class="md-nav__link">
         Topics
       </a>
     </li>
@@ -651,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+      <a href="dtm.html" class="md-nav__link">
         DTM
       </a>
     </li>
@@ -663,7 +644,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/topics_per_class.html" class="md-nav__link">
+      <a href="topics_per_class.html" class="md-nav__link">
         Topics per Class
       </a>
     </li>
@@ -728,6 +709,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -736,36 +719,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#embed-documents" class="md-nav__link">
-    Embed documents
+  <a href="#bertopic.plotting._distribution.visualize_distribution" class="md-nav__link">
+    bertopic.plotting._distribution.visualize_distribution
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#cluster-documents" class="md-nav__link">
-    Cluster Documents
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-topic-representation" class="md-nav__link">
-    Create topic representation
-  </a>
-  
-    <nav class="md-nav" aria-label="Create topic representation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#topic-coherence" class="md-nav__link">
-    Topic Coherence
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -781,82 +737,171 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/tutorial/algorithm/algorithm.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/plotting/distribution.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>The Algorithm</h1>
-                
-                <p><img src="algorithm.png" width="100%" height="100%"/></p>
-<p>The algorithm contains, roughly, 3 stages:   </p>
-<ol>
-<li><strong>Embed documents</strong><ul>
-<li>Extract document embeddings with BERT or any other embedding technique</li>
-</ul>
-</li>
-<li><strong>Cluster Documents</strong><ul>
-<li>UMAP to reduce the dimensionality of embeddings</li>
-<li>HDBSCAN to cluster reduced embeddings and create clusters of semantically similar documents</li>
-</ul>
-</li>
-<li><strong>Create topic representation</strong>  <ul>
-<li>Extract and reduce topics with c-TF-IDF</li>
-<li>Improve coherence of words with Maximal Marginal Relevance  </li>
-</ul>
-</li>
-</ol>
-<h2 id="embed-documents"><strong>Embed documents</strong><a class="headerlink" href="#embed-documents" title="Permanent link">&para;</a></h2>
-<p>We start by creating document embeddings from a set of documents using 
-<a href="https://github.com/UKPLab/sentence-transformers">sentence-transformers</a>. These models are pre-trained for many 
-language and are great for creating either document- or sentence-embeddings. </p>
-<p>In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:</p>
-<ul>
-<li><code>"distilbert-base-nli-stsb-mean-tokens"</code></li>
-<li><code>"xlm-r-bert-base-nli-stsb-mean-tokens"</code></li>
-</ul>
-<p>The first is an English BERT-based model trained specifically for semantic similarity tasks which work quite 
-well for most use-cases. The second model is very similar to the first with one major difference is that the 
-<code>xlm</code> models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
-you select any language other than English.</p>
-<h2 id="cluster-documents"><strong>Cluster Documents</strong><a class="headerlink" href="#cluster-documents" title="Permanent link">&para;</a></h2>
-<p>Next, in order to cluster the documents using a clustering algorithm such as HDBSCAN we first need to 
-reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.</p>
-<p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png" width="50%" height="50%"/>
-</p>
+                <h1 id="distribution"><code>Distribution</code><a class="headerlink" href="#distribution" title="Permanent link">&para;</a></h1>
 
-<p>Thus, we first lower dimensionality with UMAP as it preserves local structure well after which we can 
-use HDBSCAN to cluster similar documents.  </p>
-<h2 id="create-topic-representation"><strong>Create topic representation</strong><a class="headerlink" href="#create-topic-representation" title="Permanent link">&para;</a></h2>
-<p>What we want to know from the clusters that we generated, is what makes one cluster, based on its content, 
-different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per topic
-instead of per document. </p>
-<p>When you apply TF-IDF as usual on a set of documents, what you are doing is comparing the importance of 
-words between documents. Now, what if, we instead treat all documents in a single category (e.g., a cluster) 
-as a single document and then apply TF-IDF? The result would be importance scores for words within a cluster. 
-The more important words are within a cluster, the more it is representative of that topic. In other words, 
-if we extract the most important words per cluster, we get descriptions of <strong>topics</strong>! This model is called 
-class-based TF-IDF</p>
-<p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/ctfidf.png" height="50"/>
-</p>
 
-<p>Each cluster is converted to a single document instead of a set of documents. 
-Then, the frequency of word <code>t</code> are extracted for each class <code>i</code> and divided by the total number of words <code>w</code>. 
-This action can now be seen as a form of regularization of frequent words in the class.
-Next, the average number of words per class <code>m</code> is divided by the total frequency of word <code>t</code> across all classes <code>n</code>.</p>
-<h3 id="topic-coherence"><strong>Topic Coherence</strong><a class="headerlink" href="#topic-coherence" title="Permanent link">&para;</a></h3>
-<p>This step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
-itself. The embedding model provided by BERTopic will be used to improve the coherence of words within a topic. 
-After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
-Technically, this does not mean that this collection of words describes a coherent topic. In practice, we will 
-see that many of the words do describe a similar topic but some words will, in a way, overfit the documents. For 
-example, if you have a set of documents that are written by the same person whose signature will be in the topic 
-description. </p>
-<p>To improve the coherence of words, Maximal Marginal Relevance was used to find the most coherent words 
-without having too much overlap between the words themselves. This results in the removal of words that do not contribute 
-to a topic.  </p>
+  <div class="doc doc-object doc-function">
+
+<a id="bertopic.plotting._distribution.visualize_distribution"></a>
+    <div class="doc doc-contents first">
+
+      <p>Visualize the distribution of topic probabilities</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>topic_model</code></td>
+        <td><code></code></td>
+        <td><p>A fitted BERTopic instance.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>probabilities</code></td>
+        <td><code>ndarray</code></td>
+        <td><p>An array of probability scores</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>min_probability</code></td>
+        <td><code>float</code></td>
+        <td><p>The minimum probability score to visualize.
+             All others are ignored.</p></td>
+        <td><code>0.015</code></td>
+      </tr>
+      <tr>
+        <td><code>width</code></td>
+        <td><code>int</code></td>
+        <td><p>The width of the figure.</p></td>
+        <td><code>800</code></td>
+      </tr>
+      <tr>
+        <td><code>height</code></td>
+        <td><code>int</code></td>
+        <td><p>The height of the figure.</p></td>
+        <td><code>600</code></td>
+      </tr>
+  </tbody>
+</table>      <p>Usage:</p>
+<p>Make sure to fit the model before and only input the
+probabilities of a single document:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<p>Or if you want to save the resulting figure:</p>
+<div class="highlight"><pre><span></span><code><span class="n">fig</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s2">&quot;path/to/file.html&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+        <details class="quote">
+          <summary>Source code in <code>bertopic\plotting\_distribution.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
+                           <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                           <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">,</span>
+                           <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
+                           <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        topic_model: A fitted BERTopic instance.</span>
+<span class="sd">        probabilities: An array of probability scores</span>
+<span class="sd">        min_probability: The minimum probability score to visualize.</span>
+<span class="sd">                         All others are ignored.</span>
+<span class="sd">        width: The width of the figure.</span>
+<span class="sd">        height: The height of the figure.</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    Make sure to fit the model before and only input the</span>
+<span class="sd">    probabilities of a single document:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    topic_model.visualize_distribution(probabilities[0])</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Or if you want to save the resulting figure:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    fig = topic_model.visualize_distribution(probabilities[0])</span>
+<span class="sd">    fig.write_html(&quot;path/to/file.html&quot;)</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">probabilities</span> <span class="o">&gt;</span> <span class="n">min_probability</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;There are no values where `min_probability` is higher than the &quot;</span>
+                         <span class="s2">&quot;probabilities that were supplied. Lower `min_probability` to prevent this error.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">calculate_probabilities</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This visualization cannot be used if you have set `calculate_probabilities` to False &quot;</span>
+                         <span class="s2">&quot;as it uses the topic probabilities. &quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get values and indices equal or exceed the minimum probability</span>
+    <span class="n">labels_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&gt;=</span> <span class="n">min_probability</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">labels_idx</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="c1"># Create labels</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">labels_idx</span><span class="p">:</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">words</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">[:</span><span class="mi">5</span><span class="p">]]</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&lt;b&gt;Topic </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&lt;/b&gt;: </span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="p">[:</span><span class="mi">40</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">40</span> <span class="k">else</span> <span class="n">label</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+
+    <span class="c1"># Create Figure</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">vals</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#C8D2D7&#39;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6E8484&#39;</span><span class="p">,</span>
+                <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Probability&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s2">&quot;&lt;b&gt;Topic Probability Distribution&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mf">.95</span><span class="p">,</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+        <span class="p">},</span>
+        <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+            <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
                 
               
               
@@ -875,7 +920,7 @@ to a topic.  </p>
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../../index.html" class="md-footer__link md-footer__link--prev" rel="prev">
+        <a href="barchart.html" class="md-footer__link md-footer__link--prev" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -884,19 +929,19 @@ to a topic.  </p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Home
+              Barchart
             </div>
           </div>
         </a>
       
       
-        <a href="../quickstart/quickstart.html" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="heatmap.html" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Getting Started
+              Heatmap
             </div>
           </div>
           <div class="md-footer__button md-icon">
