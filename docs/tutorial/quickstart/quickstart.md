@@ -23,7 +23,7 @@ pip install bertopic[all]
 ```
 
 ## **Quick Start**
-We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
+We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of English documents:
 
 ```python
 from bertopic import BERTopic
@@ -42,17 +42,17 @@ After generating topics, we can access the frequent topics that were generated:
 
 Topic	Count	Name
 -1	    4630	-1_can_your_will_any
-49	    693	    49_windows_drive_dos_file
-32	    466	    32_jesus_bible_christian_faith
+0	    693	    49_windows_drive_dos_file
+1	    466	    32_jesus_bible_christian_faith
 2	    441	    2_space_launch_orbit_lunar
-22	    381	    22_key_encryption_keys_encrypted
+3	    381	    22_key_encryption_keys_encrypted
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, topic 49:
+frequent topic that was generated, topic 0:
 
 ```python
->>> topic_model.get_topic(49)
+>>> topic_model.get_topic(0)
 
 [('windows', 0.006152228076250982),
  ('drive', 0.004982897610645755),
@@ -70,7 +70,7 @@ frequent topic that was generated, topic 49:
 
 ## **Visualize Topics**
 After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
-understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
 Instead, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis):
 

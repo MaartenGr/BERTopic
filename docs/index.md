@@ -2,7 +2,7 @@
 
 <img src="logo.png" width="35%" height="35%" align="right" />
 
-BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
+BERTopic is a topic modeling technique that leverages transformers and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
 visualizations similar to LDAvis! 
 
@@ -54,17 +54,17 @@ After generating topics and their probabilities, we can access the frequent topi
 
 Topic	Count	Name
 -1	    4630	-1_can_your_will_any
-49	    693	    49_windows_drive_dos_file
-32	    466	    32_jesus_bible_christian_faith
+0	    693	    49_windows_drive_dos_file
+1	    466	    32_jesus_bible_christian_faith
 2	    441	    2_space_launch_orbit_lunar
-22	    381	    22_key_encryption_keys_encrypted
+3	    381	    22_key_encryption_keys_encrypted
 ```
 
 -1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, topic 49:
+frequent topic that was generated, topic 0:
 
 ```python
->>> topic_model.get_topic(49)
+>>> topic_model.get_topic(0)
 
 [('windows', 0.006152228076250982),
  ('drive', 0.004982897610645755),
@@ -82,7 +82,7 @@ frequent topic that was generated, topic 49:
 
 
 ## **Overview**
-For quick access to common function, here is an overview of BERTopic's main methods:
+For quick access to common functions, here is an overview of BERTopic's main methods:
 
 | Method | Code  | 
 |-----------------------|---|
@@ -95,16 +95,25 @@ For quick access to common function, here is an overview of BERTopic's main meth
 | Get all topic information|  `BERTopic().get_topic_info()` |
 | Get topics per class | `BERTopic().topics_per_class(docs, topics, classes)` |
 | Dynamic Topic Modeling | `BERTopic().topics_over_time(docs, topics, timestamps)` |
-| Visualize Topics    |  `BERTopic().visualize_topics()` |
-| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probs[0])` |
-| Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
-| Visualize Topics per Class | `BERTopic().visualize_topics_per_class(topics_per_class)` | 
 | Update topic representation | `BERTopic().update_topics(docs, topics, n_gram_range=(1, 3))` |
 | Reduce nr of topics | `BERTopic().reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `BERTopic().find_topics("vehicle")` |
 | Save model    |  `BERTopic().save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `BERTopic().get_params()` |
+
+For an overview of BERTopic's visualization methods:
+
+| Method | Code  | 
+|-----------------------|---|
+| Visualize Topics    |  `BERTopic().visualize_topics()` |
+| Visualize Topic Hierarchy    |  `BERTopic().visualize_hierarchy()` |
+| Visualize Topic Terms    |  `BERTopic().visualize_barchart()` |
+| Visualize Topic Similarity  |  `BERTopic().visualize_heatmap()` |
+| Visualize Term Score Decline  |  `BERTopic().visualize_term_rank()` |
+| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probs[0])` |
+| Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
+| Visualize Topics per Class | `BERTopic().visualize_topics_per_class(topics_per_class)` | 
  
 ## **Citation**
 To cite BERTopic in your work, please use the following bibtex reference:
@@ -115,8 +124,8 @@ To cite BERTopic in your work, please use the following bibtex reference:
   title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
   year         = 2020,
   publisher    = {Zenodo},
-  version      = {v0.5.0},
-  doi          = {10.5281/zenodo.4430182},
-  url          = {https://doi.org/10.5281/zenodo.4430182}
+  version      = {v0.7.0},
+  doi          = {10.5281/zenodo.4381785},
+  url          = {https://doi.org/10.5281/zenodo.4381785}
 }
 ```

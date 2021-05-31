@@ -82,10 +82,13 @@ def test_topic_reduction(reduced_topics):
     nr_topics = reduced_topics + 2
     model = BERTopic(nr_topics=reduced_topics)
     model.embedding_model = select_backend("distilbert-base-nli-stsb-mean-tokens")
+    topics = np.random.randint(-1, nr_topics-1, len(newsgroup_docs))
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
-                                  "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
+                                  "Topic": topics})
+    model.hdbscan_model.labels_ = topics
     model._update_topic_size(old_documents)
+    old_documents = model._sort_mappings_by_frequency(old_documents)
     model._extract_topics(old_documents.copy())
     old_freq = model.get_topic_freq()
 
@@ -106,13 +109,15 @@ def test_topic_reduction_edge_cases():
     Test whether the topics are not reduced if the reduced number
     of topics exceeds the actual number of topics found
     """
+    nr_topics = 5
+    topics = np.random.randint(-1, nr_topics - 1, len(newsgroup_docs))
     model = BERTopic()
     model.embedding_model = select_backend("distilbert-base-nli-stsb-mean-tokens")
-    nr_topics = 5
     model.nr_topics = 100
+    model.hdbscan_model.labels_ = topics
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
-                                  "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
+                                  "Topic": topics})
     model._update_topic_size(old_documents)
     model._extract_topics(old_documents)
     old_freq = model.get_topic_freq()

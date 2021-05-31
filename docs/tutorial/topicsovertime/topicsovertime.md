@@ -1,12 +1,12 @@
 ## **Dynamic Topic Modeling**
 Dynamic topic modeling (DTM) is a collection of techniques aimed at analyzing the evolution of topics 
 over time. These methods allow you to understand how a topic is represented across different times. 
-For example, in 1995 people may talked differently about environmental awareness than those in 2015. Although the 
+For example, in 1995 people may talk differently about environmental awareness than those in 2015. Although the 
 topic itself remains the same, environmental awareness, the exact representation of that topic might differ. 
 
 BERTopic allows for DTM by calculating the topic representation at each timestep without the need to 
 run the entire model several times. To do this, we first need to fit BERTopic as if there were no temporal 
-aspect in the data. Thus, a general topic model will be created. We use the global representation as the main 
+aspect in the data. Thus, a general topic model will be created. We use the global representation as to the main 
 topics that can be found at, most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF 
 representation. This will result in a specific topic representation at each timestep without the need to create 
 clusters from embeddings as they were already created.
@@ -63,14 +63,14 @@ by simply calling `topics_over_time` and pass in his tweets, the corresponding t
 topics_over_time = model.topics_over_time(tweets, topics, timestamps)
 ```
 
-And that is it! Aside from what you are always need for BERTopic, you now only need to add `topics` and `timestamps` 
+And that is it! Aside from what you always need for BERTopic, you now only need to add `topics` and `timestamps` 
 to quickly calculate the topics over time. 
 
 ## **Parameters**
 There are a few parameters that are of interest which will be discussed below. 
 
 ### **Tuning**
-Both `global_tuning` and `evolutionary_tuning` as set to True as a default, but can easily be changed. Perhaps 
+Both `global_tuning` and `evolutionary_tuning` are set to True as a default, but can easily be changed. Perhaps 
 you do not want the representations to be influenced by the global representation and merely see how they 
 evolved over time:
 
@@ -106,16 +106,16 @@ of topics over time whilst giving the option of hovering over the points to show
 Simply call `visualize_topics_over_time` with the newly created topics over time:
 
 ```python
-topic_model.visualize_topics_over_time(topics_over_time, top_n=20)
+topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=20)
 ```
 
-I used `top_n` to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
-leaving `top_n` empty, there is a chance that hundreds of lines will fill the plot. 
+I used `top_n_topics` to only show the top 20 most frequent topics. If I were to visualize all topics, which is possible by 
+leaving `top_n_topics` empty, there is a chance that hundreds of lines will fill the plot. 
 
 You can also use `topics` to show specific topics:
 
 ```python
-topic_model.visualize_topics_over_time(topics_over_time, topcs=[9, 10, 72, 83, 87, 91])
+topic_model.visualize_topics_over_time(topics_over_time, topics=[9, 10, 72, 83, 87, 91])
 ```
 
 <iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe> 

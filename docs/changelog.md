@@ -1,3 +1,23 @@
+## **Version 0.8.0**
+*Release date:  31 May, 2021*
+
+**Highlights**:  
+
+* Additional visualizations:
+    * Topic Hierarchy: `topic_model.visualize_hierarchy()` 
+    * Topic Similarity Heatmap: `topic_model.visualize_heatmap()` 
+    * Topic Representation Barchart: `topic_model.visualize_barchart()` 
+    * Term Score Decline: `topic_model.visualize_term_rank()` 
+* Created `bertopic.plotting` library to easily extend visualizations
+* Improved automatic topic reduction by using HDBSCAN to detect similar topics
+* Sort topic ids by their frequency. -1 is the outlier class and contains typically the most documents. After that 0 is the largest  topic, 1 the second largest, etc. 
+     
+**Fixes**:   
+
+* Fix typo [#113](https://github.com/MaartenGr/BERTopic/pull/113), [#117](https://github.com/MaartenGr/BERTopic/pull/117)
+* Fix [#121](https://github.com/MaartenGr/BERTopic/issues/121) by removing [these](https://github.com/MaartenGr/BERTopic/blob/5c6cf22776fafaaff728370781a5d33727d3dc8f/bertopic/_bertopic.py#L359-L360) two lines
+* Fix mapping of topics after reduction (it now excludes 0) ([#103](https://github.com/MaartenGr/BERTopic/issues/103))
+  
 ## **Version 0.7.0**
 *Release date:  26 April, 2021*  
 

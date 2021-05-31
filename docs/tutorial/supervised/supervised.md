@@ -59,7 +59,7 @@ indices = [category_names.index(label) for label in labels_to_add]
 y = [label if label in indices else -1 for label in categories]
 ``` 
 
-The `y` variable contains many -1 values since we do not know the all the categories. 
+The `y` variable contains many -1 values since we do not know all the categories. 
 
 Next, we use those newly constructed labels to again BERTopic semi-supervised:
 
