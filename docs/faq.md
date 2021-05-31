@@ -11,10 +11,11 @@ on your data, the model, and your specific use-case. However, the default model 
 documents or any other language, `"xlm-r-bert-base-nli-stsb-mean-tokens""` has shown great performance.  
 
 Having said that, I have been getting great performance from the new `stsb-mpnet-base-v2` model in sentence-transformers 
-and I would advise trying it out for **English** documents.
- 
+and I would advise trying it out for **English** documents. If you want to use a model that is a 
+bit faster, then I would advise using `paraphrase-MiniLM-L6-v2` instead. 
+
 **SentenceTransformers**  
-[SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html) work typically quite well 
+[SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models) work typically quite well 
 and are the preferred models to use. They are great at generating document embeddings and have several 
 multi-lingual versions available.  
 
