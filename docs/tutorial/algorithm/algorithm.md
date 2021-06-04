@@ -18,8 +18,8 @@ language and are great for creating either document- or sentence-embeddings.
 
 In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:
 
-* `"distilbert-base-nli-stsb-mean-tokens"`
-* `"xlm-r-bert-base-nli-stsb-mean-tokens"`
+* `"paraphrase-mpnet-base-v2"`
+* `"paraphrase-multilingual-mpnet-base-v2"`
 
 The first is an English BERT-based model trained specifically for semantic similarity tasks which work quite 
 well for most use-cases. The second model is very similar to the first with one major difference is that the 
