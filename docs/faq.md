@@ -7,8 +7,8 @@ with different parameters.
 ## **Which embedding model works best for which language?**
 Unfortunately, there is not a definitive list of the best models for each language, this highly depends 
 on your data, the model, and your specific use-case. However, the default model in BERTopic 
-(`"paraphrase-mpnet-base-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
-documents or any other language, `"paraphrase-multilingual-mpnet-base-v2""` has shown great performance.  
+(`"paraphrase-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
+documents or any other language, `"paraphrase-multilingual-MiniLM-L12-v2""` has shown great performance.  
 
 If you want to use a model that is a bit faster, then I would advise using `paraphrase-MiniLM-L6-v2` instead. 
 
