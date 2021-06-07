@@ -53,7 +53,7 @@ with one of the examples below:
 | Advanced Customization in BERTopic  |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ClTYut039t-LDtlcd-oQAdXWgcsSGTw9?usp=sharing) |
 | (semi-)Supervised Topic Modeling with BERTopic  |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1bxizKzv5vfxJEB29sntU__ZC7PBSIPaQ?usp=sharing)  |
 | Dynamic Topic Modeling with Trump's Tweets  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1un8ooI-7ZNlRoK0maVkYhmNRl0XGK88f?usp=sharing)  |
-
+| Topic Modeling arXiv Abstracts | [![Kaggle](https://img.shields.io/static/v1?style=for-the-badge&message=Kaggle&color=222222&logo=Kaggle&logoColor=20BEFF&label=)](https://www.kaggle.com/maartengr/topic-modeling-arxiv-abstract-with-bertopic) |
 
 
 ## Quick Start
@@ -131,7 +131,7 @@ You can select any model from sentence-transformers [here](https://www.sbert.net
 and pass it to BERTopic:
 
 ```python
-topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v22")
+topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
 ```
 
 Or select a SentenceTransformer model with your own parameters:
