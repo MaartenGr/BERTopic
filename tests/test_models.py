@@ -30,7 +30,7 @@ from bertopic._ctfidf import ClassTFIDF
 from bertopic.backend._utils import select_backend
 
 newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
-embedding_model = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
+embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
 
 def test_extract_embeddings(base_bertopic):
@@ -41,17 +41,17 @@ def test_extract_embeddings(base_bertopic):
     the correct shape should be outputted. The embeddings by itself
     should not exceed certain values as a sanity check.
     """
-    base_bertopic.embedding_model = select_backend("distilbert-base-nli-stsb-mean-tokens")
+    base_bertopic.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
     single_embedding = base_bertopic._extract_embeddings("a document")
     multiple_embeddings = base_bertopic._extract_embeddings(["a document", "another document"])
 
     assert single_embedding.shape[0] == 1
-    assert single_embedding.shape[1] == 768
+    assert single_embedding.shape[1] == 384
     assert np.min(single_embedding) > -5
     assert np.max(single_embedding) < 5
 
     assert multiple_embeddings.shape[0] == 2
-    assert multiple_embeddings.shape[1] == 768
+    assert multiple_embeddings.shape[1] == 384
     assert np.min(multiple_embeddings) > -5
     assert np.max(multiple_embeddings) < 5
 
@@ -63,12 +63,12 @@ def test_extract_embeddings_compare():
     whether BERTopic embeddings match the sentence-transformers embeddings.
     """
     docs = ["some document"]
-    model = BERTopic(embedding_model="distilbert-base-nli-stsb-mean-tokens")
-    model.embedding_model = select_backend("distilbert-base-nli-stsb-mean-tokens")
+    model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
+    model.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
     bertopic_embeddings = model._extract_embeddings(docs)
 
     assert isinstance(bertopic_embeddings, np.ndarray)
-    assert bertopic_embeddings.shape == (1, 768)
+    assert bertopic_embeddings.shape == (1, 384)
 
     sentence_embeddings = embedding_model.encode(docs, show_progress_bar=False)
     assert np.array_equal(bertopic_embeddings, sentence_embeddings)
