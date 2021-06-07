@@ -1225,7 +1225,7 @@ class BERTopic:
         or if you did not save the embedding model:
 
         ```python
-        BERTopic.load("my_model", embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+        BERTopic.load("my_model", embedding_model="paraphrase-MiniLM-L6-v2")
         ```
         """
         with open(path, 'rb') as file:
