@@ -42,6 +42,12 @@ def visualize_term_rank(topic_model,
     fig.write_html("path/to/file.html")
     ```
 
+    <iframe src="../../tutorial/visualization/term_rank.html"
+    style="width:1000px; height: 530px; border: 0px;""></iframe>
+
+    <iframe src="../../tutorial/visualization/term_rank_log.html"
+    style="width:1000px; height: 530px; border: 0px;""></iframe>
+
     Reference:
 
     This visualization was heavily inspired by the

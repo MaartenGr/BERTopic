@@ -38,6 +38,8 @@ def visualize_topics_over_time(topic_model,
     fig = topic_model.visualize_topics_over_time(topics_over_time)
     fig.write_html("path/to/file.html")
     ```
+    <iframe src="../../tutorial/visualization/trump.html"
+    style="width:1000px; height: 680px; border: 0px;""></iframe>
     """
     colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 

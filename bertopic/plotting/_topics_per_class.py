@@ -38,6 +38,8 @@ def visualize_topics_per_class(topic_model,
     fig = topic_model.visualize_topics_per_class(topics_per_class)
     fig.write_html("path/to/file.html")
     ```
+    <iframe src="../../tutorial/visualization/topics_per_class.html"
+    style="width:1400px; height: 1000px; border: 0px;""></iframe>
     """
     colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 
