@@ -21,8 +21,8 @@ languages = ['afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese
 def select_backend(embedding_model,
                    language: str = None) -> BaseEmbedder:
     """ Select an embedding model based on language or a specific sentence transformer models.
-    When selecting a language, we choose distilbert-base-nli-stsb-mean-tokens for English and
-    xlm-r-bert-base-nli-stsb-mean-tokens for all other languages as it support 100+ languages.
+    When selecting a language, we choose paraphrase-MiniLM-L6-v2 for English and
+    paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
 
     Returns:
         model: Either a Sentence-Transformer or Flair model
@@ -62,13 +62,13 @@ def select_backend(embedding_model,
     # Select embedding model based on language
     if language:
         if language.lower() in ["English", "english", "en"]:
-            return SentenceTransformerBackend("distilbert-base-nli-stsb-mean-tokens")
+            return SentenceTransformerBackend("paraphrase-MiniLM-L6-v2")
         elif language.lower() in languages or language == "multilingual":
-            return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")
+            return SentenceTransformerBackend("paraphrase-multilingual-MiniLM-L12-v2")
         else:
             raise ValueError(f"{language} is currently not supported. However, you can "
                              f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
                              "Else, please select a language from the following list:\n"
                              f"{languages}")
 
-    return SentenceTransformerBackend("xlm-r-bert-base-nli-stsb-mean-tokens")
+    return SentenceTransformerBackend("paraphrase-MiniLM-L6-v2")

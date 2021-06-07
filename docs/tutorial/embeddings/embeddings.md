@@ -9,7 +9,7 @@ and pass it through BERTopic with `embedding_model`:
 
 ```python
 from bertopic import BERTopic
-topic_model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
 ```
 
 Or select a SentenceTransformer model with your parameters:
@@ -17,7 +17,7 @@ Or select a SentenceTransformer model with your parameters:
 ```python
 from sentence_transformers import SentenceTransformer
 
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens", device="cuda")
+sentence_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 topic_model = BERTopic(embedding_model=sentence_model)
 ```
 

@@ -7,12 +7,10 @@ with different parameters.
 ## **Which embedding model works best for which language?**
 Unfortunately, there is not a definitive list of the best models for each language, this highly depends 
 on your data, the model, and your specific use-case. However, the default model in BERTopic 
-(`"distilbert-base-nli-stsb-mean-tokens"`) works great for **English** documents. In contrast, for **multi-lingual** 
-documents or any other language, `"xlm-r-bert-base-nli-stsb-mean-tokens""` has shown great performance.  
+(`"paraphrase-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
+documents or any other language, `"paraphrase-multilingual-MiniLM-L12-v2""` has shown great performance.  
 
-Having said that, I have been getting great performance from the new `stsb-mpnet-base-v2` model in sentence-transformers 
-and I would advise trying it out for **English** documents. If you want to use a model that is a 
-bit faster, then I would advise using `paraphrase-MiniLM-L6-v2` instead. 
+If you want to use a model that provides a higher quality, but takes more compute time, then I would advise using `paraphrase-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead. 
 
 **SentenceTransformers**  
 [SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models) work typically quite well 

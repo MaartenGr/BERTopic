@@ -131,7 +131,7 @@ You can select any model from sentence-transformers [here](https://www.sbert.net
 and pass it to BERTopic:
 
 ```python
-topic_model = BERTopic(embedding_model="xlm-r-bert-base-nli-stsb-mean-tokens")
+topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v22")
 ```
 
 Or select a SentenceTransformer model with your own parameters:
@@ -139,7 +139,7 @@ Or select a SentenceTransformer model with your own parameters:
 ```python
 from sentence_transformers import SentenceTransformer
 
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens", device="cpu")
+sentence_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 topic_model = BERTopic(embedding_model=sentence_model)
 ```
 
