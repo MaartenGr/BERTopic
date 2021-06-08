@@ -16,6 +16,7 @@ For better performance, please use the following models:
 **Fixes**:   
 
 * Improved unit testing for more stability
+* Set transformers version for Flair
 
 ## **Version 0.8.0**
 *Release date:  31 May, 2021*
