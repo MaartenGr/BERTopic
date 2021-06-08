@@ -9,7 +9,8 @@
     * Both models show not only great performance but are much faster!  
 * Add interactive visualizations to the `plotting` API documentation
   
-For better performance, please use the following models:
+For better performance, please use the following models:  
+
 * English: `"paraphrase-mpnet-base-v2"`
 * Non-English or multi-lingual: `"paraphrase-multilingual-mpnet-base-v2"`
 
