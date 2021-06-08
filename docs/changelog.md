@@ -1,3 +1,24 @@
+## **Version 0.8.1**
+*Release date:  08 June, 2021*
+
+**Highlights**:  
+
+* Improved models:
+    * For English documents the default is now: `"paraphrase-MiniLM-L6-v2"` 
+    * For Non-English or multi-lingual documents the default is now: `"paraphrase-multilingual-MiniLM-L12-v2"` 
+    * Both models show not only great performance but are much faster!  
+* Add interactive visualizations to the `plotting` API documentation
+  
+For better performance, please use the following models:  
+
+* English: `"paraphrase-mpnet-base-v2"`
+* Non-English or multi-lingual: `"paraphrase-multilingual-mpnet-base-v2"`
+
+**Fixes**:   
+
+* Improved unit testing for more stability
+* Set transformers version for Flair
+
 ## **Version 0.8.0**
 *Release date:  31 May, 2021*
 

@@ -135,10 +135,10 @@ from sentence_transformers import SentenceTransformer
 ft = api.load('fasttext-wiki-news-subwords-300')
 
 # Document embedding model
-distilbert = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
+embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
 # Create a model that uses both language models and pass it through BERTopic
-word_doc_embedder = WordDocEmbedder(embedding_model=distilbert, word_embedding_model=ft)
+word_doc_embedder = WordDocEmbedder(embedding_model=embedding_model, word_embedding_model=ft)
 topic_model = BERTopic(embedding_model=word_doc_embedder)
 ```
 
@@ -160,8 +160,8 @@ class CustomEmbedder(BaseEmbedder):
         return embeddings 
 
 # Create custom backend
-distilbert = SentenceTransformer("distilbert-base-nli-stsb-mean-tokens")
-custom_embedder = CustomEmbedder(embedding_model=distilbert)
+embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+custom_embedder = CustomEmbedder(embedding_model=embedding_model)
 
 # Pass custom backend to bertopic
 topic_model = BERTopic(embedding_model=custom_embedder)
@@ -179,7 +179,7 @@ from sentence_transformers import SentenceTransformer
 
 # Prepare embeddings
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-sentence_model = SentenceTransformer("distilbert-base-nli-mean-tokens")
+sentence_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Create topic model and use the custom embeddings

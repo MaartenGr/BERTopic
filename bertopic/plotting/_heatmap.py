@@ -45,6 +45,8 @@ def visualize_heatmap(topic_model,
     fig = topic_model.visualize_heatmap()
     fig.write_html("path/to/file.html")
     ```
+    <iframe src="../../tutorial/visualization/heatmap.html"
+    style="width:1000px; height: 720px; border: 0px;""></iframe>
     """
 
     # Select topic embeddings
