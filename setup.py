@@ -23,6 +23,7 @@ base_packages = [
 ]
 
 flair_packages = [
+    "numpy<1.20.0",
     "torch>=1.5.0,<1.8.0",
     "transformers>=4.0.0",
     "flair==0.8"
