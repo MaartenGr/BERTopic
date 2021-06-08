@@ -23,8 +23,9 @@ base_packages = [
 ]
 
 flair_packages = [
-    "torch>=1.4.0,<1.7.1",
-    "flair==0.7"
+    "torch>=1.5.0,<1.8.0",
+    "transformers>=4.0.0",
+    "flair==0.8"
 ]
 
 spacy_packages = [
@@ -52,7 +53,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.8.0",
+    version="0.8.1",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
