@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html">
       
       <link rel="icon" href="../../icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.6">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.2">
     
     
       
@@ -24,10 +24,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.875de78c.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f955dcd.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.f1a3b89f.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
         
           
           
@@ -898,12 +898,12 @@ Moreover, it helps to create a topic when you have little data available.</p>
 <p>You can select any model from sentence-transformers <a href="https://www.sbert.net/docs/pretrained_models.html">here</a> 
 and pass it through BERTopic with <code>embedding_model</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;xlm-r-bert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Or select a SentenceTransformer model with your parameters:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
 
-<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">sentence_model</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="flair"><strong>Flair</strong><a class="headerlink" href="#flair" title="Permanent link">&para;</a></h3>
@@ -990,10 +990,10 @@ FastText to create the word embeddings.</p>
 <span class="n">ft</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;fasttext-wiki-news-subwords-300&#39;</span><span class="p">)</span>
 
 <span class="c1"># Document embedding model</span>
-<span class="n">distilbert</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 
 <span class="c1"># Create a model that uses both language models and pass it through BERTopic</span>
-<span class="n">word_doc_embedder</span> <span class="o">=</span> <span class="n">WordDocEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">distilbert</span><span class="p">,</span> <span class="n">word_embedding_model</span><span class="o">=</span><span class="n">ft</span><span class="p">)</span>
+<span class="n">word_doc_embedder</span> <span class="o">=</span> <span class="n">WordDocEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">,</span> <span class="n">word_embedding_model</span><span class="o">=</span><span class="n">ft</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">word_doc_embedder</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="custom-backend"><strong>Custom Backend</strong><a class="headerlink" href="#custom-backend" title="Permanent link">&para;</a></h3>
@@ -1012,8 +1012,8 @@ create your backend. Below, you will find an example of creating a SentenceTrans
         <span class="k">return</span> <span class="n">embeddings</span> 
 
 <span class="c1"># Create custom backend</span>
-<span class="n">distilbert</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
-<span class="n">custom_embedder</span> <span class="o">=</span> <span class="n">CustomEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">distilbert</span><span class="p">)</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
+<span class="n">custom_embedder</span> <span class="o">=</span> <span class="n">CustomEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
 
 <span class="c1"># Pass custom backend to bertopic</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">custom_embedder</span><span class="p">)</span>
@@ -1028,7 +1028,7 @@ model in BERTopic to create document features.   </p>
 
 <span class="c1"># Prepare embeddings</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Create topic model and use the custom embeddings</span>
@@ -1130,10 +1130,10 @@ transformer embeddings is true: creating the embeddings is slow whereas <code>fi
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.d351de03.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.34eae1b6.min.js"></script>
+      <script src="../../assets/javascripts/bundle.4ea5477f.min.js"></script>
       
     
   </body>

@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://maartengr.github.io/BERTopic/api/bertopic.html">
       
       <link rel="icon" href="../icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.6">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.2">
     
     
       
@@ -24,10 +24,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.875de78c.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f955dcd.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.f1a3b89f.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ef6f36e2.min.css">
         
           
           
@@ -1115,7 +1115,7 @@ whilst keeping important words in the topic descriptions.</p>
 <span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
 
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">sentence_model</span><span class="p">)</span>
 </code></pre></div>
 <p>Due to the stochastisch nature of UMAP, the results from BERTopic might differ
@@ -1624,7 +1624,7 @@ specific instance is specified.</p></td>
 
 <span class="c1"># Create embeddings</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create topic model</span>
@@ -1665,7 +1665,7 @@ specific instance is specified.</p></td>
 
 <span class="sd">    # Create embeddings</span>
 <span class="sd">    docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
-<span class="sd">    sentence_model = SentenceTransformer(&quot;distilbert-base-nli-mean-tokens&quot;)</span>
+<span class="sd">    sentence_model = SentenceTransformer(&quot;paraphrase-MiniLM-L6-v2&quot;)</span>
 <span class="sd">    embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
 
 <span class="sd">    # Create topic model</span>
@@ -1762,7 +1762,7 @@ probabilities: The topic probability distribution which is returned by default.
 
 <span class="c1"># Create embeddings</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create topic model</span>
@@ -1813,7 +1813,7 @@ probabilities: The topic probability distribution which is returned by default.
 
 <span class="sd">    # Create embeddings</span>
 <span class="sd">    docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
-<span class="sd">    sentence_model = SentenceTransformer(&quot;distilbert-base-nli-mean-tokens&quot;)</span>
+<span class="sd">    sentence_model = SentenceTransformer(&quot;paraphrase-MiniLM-L6-v2&quot;)</span>
 <span class="sd">    embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
 
 <span class="sd">    # Create topic model</span>
@@ -2317,7 +2317,7 @@ the frequencies of all topics</p></td>
 <div class="highlight"><pre><span></span><code><span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>or if you did not save the embedding model:</p>
-<div class="highlight"><pre><span></span><code><span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;xlm-r-bert-base-nli-stsb-mean-tokens&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_model&quot;</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 </code></pre></div>
 
         <details class="quote">
@@ -2342,7 +2342,7 @@ the frequencies of all topics</p></td>
 <span class="sd">    or if you did not save the embedding model:</span>
 
 <span class="sd">    ```python</span>
-<span class="sd">    BERTopic.load(&quot;my_model&quot;, embedding_model=&quot;xlm-r-bert-base-nli-stsb-mean-tokens&quot;)</span>
+<span class="sd">    BERTopic.load(&quot;my_model&quot;, embedding_model=&quot;paraphrase-MiniLM-L6-v2&quot;)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
@@ -3101,7 +3101,7 @@ probabilities: The topic probability distribution which is returned by default.
 
 <span class="c1"># Create embeddings</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;distilbert-base-nli-mean-tokens&quot;</span><span class="p">)</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-MiniLM-L6-v2&quot;</span><span class="p">)</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">sentence_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Create topic model</span>
@@ -3148,7 +3148,7 @@ probabilities: The topic probability distribution which is returned by default.
 
 <span class="sd">    # Create embeddings</span>
 <span class="sd">    docs = fetch_20newsgroups(subset=&#39;all&#39;)[&#39;data&#39;]</span>
-<span class="sd">    sentence_model = SentenceTransformer(&quot;distilbert-base-nli-mean-tokens&quot;)</span>
+<span class="sd">    sentence_model = SentenceTransformer(&quot;paraphrase-MiniLM-L6-v2&quot;)</span>
 <span class="sd">    embeddings = sentence_model.encode(docs, show_progress_bar=True)</span>
 
 <span class="sd">    # Create topic model</span>
@@ -4430,10 +4430,10 @@ technique typically reserved for LDA.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.d351de03.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.34eae1b6.min.js"></script>
+      <script src="../assets/javascripts/bundle.4ea5477f.min.js"></script>
       
     
   </body>
