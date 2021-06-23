@@ -13,7 +13,7 @@ from typing import List, Tuple, Union, Mapping, Any
 
 # Models
 import hdbscan
-from umap import UMAP
+import umap.umap_ as UMAP
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
