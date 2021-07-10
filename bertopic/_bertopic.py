@@ -1231,7 +1231,7 @@ class BERTopic:
         with open(path, 'rb') as file:
             if embedding_model:
                 topic_model = joblib.load(file)
-                topic_model.embedding_model = embedding_model
+                topic_model.embedding_model = select_backend(embedding_model)
             else:
                 topic_model = joblib.load(file)
             return topic_model
