@@ -291,7 +291,8 @@ class BERTopic:
         # Reduce topics
         if self.nr_topics:
             documents = self._reduce_topics(documents)
-            probabilities = self._map_probabilities(probabilities)
+
+        probabilities = self._map_probabilities(probabilities)
         predictions = documents.Topic.to_list()
 
         return predictions, probabilities
