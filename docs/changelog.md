@@ -1,6 +1,9 @@
 ## **Version 0.9**
 *Release date:  XX July, 2021*
 
+**Fixes**:
+* Fixed issue with loading embedding model
+* Improve and fix accuracy of probabilities
 
 ## **Version 0.8.1**
 *Release date:  08 June, 2021*
