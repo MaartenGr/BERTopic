@@ -85,7 +85,6 @@ def visualize_hierarchy(topic_model,
 
     # Stylize layout
     fig.update_layout(
-        plot_bgcolor='#ECEFF1',
         template="plotly_white",
         title={
             'text': "<b>Hierarchical Clustering",
@@ -111,7 +110,11 @@ def visualize_hierarchy(topic_model,
     if orientation == "left":
         fig.update_layout(yaxis=dict(tickmode="array",
                                      ticktext=new_labels))
+        fig.update_xaxes(showgrid=True)
+
     else:
         fig.update_layout(xaxis=dict(tickmode="array",
                                      ticktext=new_labels))
+        fig.update_yaxes(showgrid=True)
+
     return fig

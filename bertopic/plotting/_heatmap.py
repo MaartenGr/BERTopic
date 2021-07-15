@@ -101,6 +101,7 @@ def visualize_heatmap(topic_model,
                     )
 
     fig.update_layout(
+        template="plotly_white",
         title={
             'text': "<b>Similarity Matrix",
             'y': .95,

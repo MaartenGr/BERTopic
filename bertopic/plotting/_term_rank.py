@@ -93,8 +93,8 @@ def visualize_term_rank(topic_model,
     # Stylize layout
     fig.update_xaxes(range=[0, len(indices[0])], tick0=1, dtick=2)
     fig.update_layout(
-        showlegend=False,
         template="plotly_white",
+        showlegend=False,
         title={
             'text': "<b>Term score decline per Topic</b>",
             'y': .9,

@@ -72,6 +72,7 @@ def visualize_distribution(topic_model,
     )
 
     fig.update_layout(
+        template="plotly_white",
         xaxis_title="Probability",
         title={
             'text': "<b>Topic Probability Distribution",
@@ -83,7 +84,6 @@ def visualize_distribution(topic_model,
                 size=22,
                 color="Black")
         },
-        template="simple_white",
         width=width,
         height=height,
         hoverlabel=dict(

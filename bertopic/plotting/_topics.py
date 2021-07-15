@@ -101,6 +101,7 @@ def _plotly_topic_visualization(df: pd.DataFrame,
 
     # Stylize layout
     fig.update_layout(
+        template="plotly_white",
         title={
             'text': "<b>Intertopic Distance Map",
             'y': .95,

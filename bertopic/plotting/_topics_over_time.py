@@ -41,7 +41,7 @@ def visualize_topics_over_time(topic_model,
     <iframe src="../../tutorial/visualization/trump.html"
     style="width:1000px; height: 680px; border: 0px;""></iframe>
     """
-    colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
+    # colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 
     # Select topics
     if topics:
@@ -65,7 +65,7 @@ def visualize_topics_over_time(topic_model,
         words = trace_data.Words.values
         fig.add_trace(go.Scatter(x=trace_data.Timestamp, y=trace_data.Frequency,
                                  mode='lines',
-                                 marker_color=colors[index % 7],
+                                #  marker_color=colors[index % 7],
                                  hoverinfo="text",
                                  name=topic_name,
                                  hovertext=[f'<b>Topic {topic}</b><br>Words: {word}' for word in words]))
@@ -74,6 +74,7 @@ def visualize_topics_over_time(topic_model,
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
     fig.update_layout(
+        template="plotly_white",
         yaxis_title="Frequency",
         title={
             'text': "<b>Topics over Time",
@@ -85,7 +86,6 @@ def visualize_topics_over_time(topic_model,
                 size=22,
                 color="Black")
         },
-        template="simple_white",
         width=width,
         height=height,
         hoverlabel=dict(

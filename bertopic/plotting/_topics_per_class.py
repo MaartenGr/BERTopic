@@ -80,6 +80,7 @@ def visualize_topics_per_class(topic_model,
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
     fig.update_layout(
+        template="plotly_white",
         xaxis_title="Frequency",
         yaxis_title="Class",
         title={
@@ -92,7 +93,6 @@ def visualize_topics_per_class(topic_model,
                 size=22,
                 color="Black")
         },
-        template="simple_white",
         width=width,
         height=height,
         hoverlabel=dict(
