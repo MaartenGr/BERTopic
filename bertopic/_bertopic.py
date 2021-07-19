@@ -20,7 +20,8 @@ from sklearn.preprocessing import normalize
 
 # BERTopic
 from bertopic._ctfidf import ClassTFIDF
-from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from bertopic._utils import (MyLogger, check_documents_type, check_embeddings_shape,
+                             check_is_fitted, check_if_seeds)
 from bertopic._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic import plotting
@@ -72,7 +73,8 @@ class BERTopic:
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
                  calculate_probabilities: bool = False,
-                 embedding_model = None,
+                 seed_topic_list: List[List[str]] = None,
+                 embedding_model=None,
                  umap_model: UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
@@ -108,6 +110,7 @@ class BERTopic:
                                      more computation time.
                                      NOTE: since probabilities are not calculated, you cannot
                                      use the corresponding visualization `visualize_probabilities`.
+            seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
             embedding_model: Use a custom embedding model.
@@ -133,6 +136,7 @@ class BERTopic:
         self.low_memory = low_memory
         self.calculate_probabilities = calculate_probabilities
         self.verbose = verbose
+        self.seed_topic_list = seed_topic_list
 
         # Embedding model
         self.language = language if not embedding_model else None
@@ -276,6 +280,8 @@ class BERTopic:
                                                       language=self.language)
 
         # Reduce dimensionality with UMAP
+        if self.seed_topic_list is not None:
+            y = self._guided_topic_modeling(embeddings)
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
@@ -1347,6 +1353,37 @@ class BERTopic:
         self._update_topic_size(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
+
+    def _guided_topic_modeling(self, embeddings: np.ndarray) -> List[int]:
+        """ Apply Guided Topic Modeling
+
+        We transform the seeded topics to embeddings using the
+        same embedder as used for generating document embeddings.
+
+        Then, we apply cosine similarity between the embeddings
+        and set labels for documents that are more similar to
+        one of the topics, then the average document.
+
+        If a document is more similar to the average document
+        than any of the topics, it gets the -1 label and is
+        thereby not included in UMAP.
+
+        Arguments:
+            embeddings: The document embeddings
+
+        Returns
+            y: The labels for each seeded topic
+        """
+        # Create embeddings from the seeded topics
+        seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
+        seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
+        seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
+
+        # Label documents that are most similar to one of the seeded topics
+        sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
+        y = [np.argmax(sim_matrix[index]) for index in range(sim_matrix.shape[0])]
+        y = [val if val != len(seed_topic_list) else -1 for val in y]
+        return y
 
     def _extract_topics(self, documents: pd.DataFrame):
         """ Extract topics from the clusters using a class-based TF-IDF
