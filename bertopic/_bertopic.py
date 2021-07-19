@@ -1459,8 +1459,14 @@ class BERTopic:
         words = self.vectorizer_model.get_feature_names()
         X = self.vectorizer_model.transform(documents)
 
+        if self.seed_topic_list:
+            seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
+            multiplier = np.array([1.2 if word in seed_topic_list else 1 for word in words])
+        else:
+            multiplier = None
+
         if fit:
-            self.transformer = ClassTFIDF().fit(X, n_samples=m)
+            self.transformer = ClassTFIDF().fit(X, n_samples=m, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
 

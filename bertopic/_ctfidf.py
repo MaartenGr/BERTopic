@@ -21,7 +21,7 @@ class ClassTFIDF(TfidfTransformer):
     def __init__(self, *args, **kwargs):
         super(ClassTFIDF, self).__init__(*args, **kwargs)
 
-    def fit(self, X: sp.csr_matrix, n_samples: int):
+    def fit(self, X: sp.csr_matrix, n_samples: int, multiplier: np.ndarray = None):
         """Learn the idf vector (global term weights).
 
         Arguments:
@@ -38,6 +38,8 @@ class ClassTFIDF(TfidfTransformer):
             df = np.squeeze(np.asarray(X.sum(axis=0)))
             avg_nr_samples = int(X.sum(axis=1).mean())
             idf = np.log(avg_nr_samples / df)
+            if multiplier is not None:
+                idf = idf * multiplier
             self._idf_diag = sp.diags(idf, offsets=0,
                                       shape=(n_features, n_features),
                                       format='csr',
