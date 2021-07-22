@@ -102,13 +102,14 @@ class BERTopic:
                        "auto" to automatically reduce topics that have a similarity of at
                        least 0.9, do not maps all others.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
-            calculate_probabilities: Whether to calculate the topic probabilities. This could
-                                     slow down the extraction of topics if you have many
-                                     documents (> 100_000). Set this only to True if you
-                                     have a low amount of documents or if you do not mind
-                                     more computation time.
-                                     NOTE: since probabilities are not calculated, you cannot
-                                     use the corresponding visualization `visualize_probabilities`.
+            calculate_probabilities: Whether to calculate the probabilities of all topics
+                                     per document instead of the probability of the assigned
+                                     topic per document. This could slow down the extraction
+                                     of topics if you have many documents (> 100_000). Set this
+                                     only to True if you have a low amount of documents or if
+                                     you do not mind more computation time.
+                                     NOTE: If false you cannot use the corresponding
+                                     visualization method `visualize_probabilities`.
             seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
@@ -359,7 +360,7 @@ class BERTopic:
                                                   verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
@@ -1343,11 +1344,10 @@ class BERTopic:
         """
         self.hdbscan_model.fit(umap_embeddings)
         documents['Topic'] = self.hdbscan_model.labels_
+        probabilities = self.hdbscan_model.probabilities_
 
         if self.calculate_probabilities:
             probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
-        else:
-            probabilities = None
 
         self._update_topic_size(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
@@ -1609,7 +1609,7 @@ class BERTopic:
         return documents
 
     def _auto_reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
-        """ Reduce the number of topics as long as it exceeds a minimum similarity of 0.915
+        """ Reduce the number of topics automatically using HDBSCAN
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
@@ -1705,15 +1705,16 @@ class BERTopic:
         Returns:
             mapped_probabilities: Updated probabilities
         """
-        if isinstance(probabilities, np.ndarray):
+        # Map array of probabilities (probability for assigned topic per document)
+        if len(probabilities.shape) == 2:
             mapped_probabilities = np.zeros((probabilities.shape[0],
                                              len(set(self.mapped_topics.values()))-1))
             for from_topic, to_topic in self.mapped_topics.items():
                 if to_topic != -1 and from_topic != -1:
                     mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
             return mapped_probabilities
-        else:
-            return None
+
+        return probabilities
 
     def _preprocess_text(self, documents: np.ndarray) -> List[str]:
         """ Basic preprocessing of text
