@@ -162,8 +162,10 @@ class BERTopic:
         self.topics = None
         self.topic_sizes = None
         self.mapped_topics = None
+        self.merged_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
+        self.representative_docs = None
 
         if verbose:
             logger.set_level("DEBUG")
@@ -298,6 +300,7 @@ class BERTopic:
         if self.nr_topics:
             documents = self._reduce_topics(documents)
 
+        self._map_representative_docs()
         probabilities = self._map_probabilities(probabilities)
         predictions = documents.Topic.to_list()
 
@@ -774,6 +777,36 @@ class BERTopic:
         else:
             return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count",
                                                                                                   ascending=False)
+
+    def get_representative_docs(self, topic: int) -> List[str]:
+        """ Extract representative documents per topic
+
+        Arguments:
+            topic: A specific topic for which you want
+                   the representative documents
+
+        Returns:
+            Representative documents of the chosen topic
+
+        Usage:
+
+        To extract the representative docs of all topics:
+
+        ```python
+        representative_docs = topic_model.get_representative_docs()
+        ```
+
+        To get the representative docs of a single topic:
+
+        ```python
+        representative_docs = topic_model.get_representative_docs(12)
+        ```
+        """
+        check_is_fitted(self)
+        if isinstance(topic, int):
+            return self.representative_docs[topic]
+        else:
+            return self.representative_docs
 
     def reduce_topics(self,
                       docs: List[str],
@@ -1350,6 +1383,7 @@ class BERTopic:
             probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
 
         self._update_topic_size(documents)
+        self._save_representative_docs(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
@@ -1400,6 +1434,60 @@ class BERTopic:
         self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                             for key, values in
                             self.topics.items()}
+
+    def _save_representative_docs(self, documents: pd.DataFrame):
+        """ Save the most representative docs (3) per topic
+
+        The most representative docs are extracted by taking
+        the documents that have the highest probability of belonging
+        to a topic. Typically, there are many documents that have
+        the same probability of 1. Currently, no distinction between
+        those are model and 3 random documents will be selected.
+
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs
+        """
+        probs = self.hdbscan_model.probabilities_
+        representative_doc_ids = pd.DataFrame({"Topics": documents["Topic"],
+                                               "Probs": probs,
+                                               "ID": range(len(probs))})
+        representative_doc_ids = (representative_doc_ids
+                                  .sort_values("Probs", ascending=False)
+                                  .groupby('Topics')
+                                  .head(3)
+                                  .reset_index(drop=True)
+                                  .sort_values("Topics")
+                                  .groupby("Topics")["ID"]
+                                  .apply(list)
+                                  .to_dict())
+        self.representative_docs = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
+                                    for topic, doc_ids in
+                                    representative_doc_ids.items()}
+
+    def _map_representative_docs(self):
+        """ Map the representative docs per topic to the correct topics
+
+        If topics were reduced, remove documents from topics that were
+        merged into larger topics as we assume that the documents from
+        larger topics are better representative of the entire merged
+        topic.
+        """
+        representative_docs = self.representative_docs.copy()
+
+        # Remove topics that were merged as the most frequent
+        # topic or the the topics they were merged into contain
+        # better representative documents
+        if self.merged_topics:
+            for topic_to_remove in self.merged_topics:
+                del representative_docs[topic_to_remove]
+
+        # Update the representative documents
+        updated_representative_docs = {}
+        for old_topic, docs in representative_docs.items():
+            new_topic = self.mapped_topics[old_topic]
+            updated_representative_docs[new_topic] = docs
+
+        self.representative_docs = updated_representative_docs
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -1567,8 +1655,13 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        # Track the mapping of topics
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
+
+        # Track which topics where originally merged
+        if not self.merged_topics:
+            self.merged_topics = []
 
         # Create topic similarity matrix
         if self.topic_embeddings is not None:
@@ -1583,6 +1676,7 @@ class BERTopic:
             topic_to_merge = self.get_topic_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
             similarities[:, topic_to_merge + 1] = -1
+            self.merged_topics.append(topic_to_merge)
 
             # Update Topic labels
             documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
@@ -1617,8 +1711,13 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        # Track the mapping of topics
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
+
+        # Track which topics where originally merged
+        if not self.merged_topics:
+            self.merged_topics = []
 
         unique_topics = sorted(list(documents.Topic.unique()))[1:]
         max_topic = unique_topics[-1]
@@ -1639,6 +1738,13 @@ class BERTopic:
                          for index, prediction in enumerate(predictions)
                          if prediction != -1}
         documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
+
+        # Track merged topic
+        df = pd.DataFrame({"Topic": mapped_topics.keys(), "Group": mapped_topics.values()})
+        df["Size"] = df["Topic"].map(self.topic_sizes)
+        mask = df.groupby(['Topic'])['Size'].transform('max')
+        df = df[~(df['Size'] == mask)]
+        self.merged_topic = df.Topic.values.tolist()
 
         # Update mapped topics with new clusters
         self.mapped_topics = {og_topic: mapped_topics[topic]
