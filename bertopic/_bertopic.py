@@ -282,8 +282,8 @@ class BERTopic:
                                                       language=self.language)
 
         # Reduce dimensionality with UMAP
-        if self.seed_topic_list is not None:
-            y = self._guided_topic_modeling(embeddings)
+        if self.seed_topic_list is not None and self.embedding_model is not None:
+            y, embeddings = self._guided_topic_modeling(embeddings)
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
@@ -1387,7 +1387,7 @@ class BERTopic:
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
-    def _guided_topic_modeling(self, embeddings: np.ndarray) -> List[int]:
+    def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
         """ Apply Guided Topic Modeling
 
         We transform the seeded topics to embeddings using the
@@ -1406,6 +1406,7 @@ class BERTopic:
 
         Returns
             y: The labels for each seeded topic
+            embeddings: Updated embeddings
         """
         # Create embeddings from the seeded topics
         seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
@@ -1416,7 +1417,13 @@ class BERTopic:
         sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
         y = [np.argmax(sim_matrix[index]) for index in range(sim_matrix.shape[0])]
         y = [val if val != len(seed_topic_list) else -1 for val in y]
-        return y
+
+        # Average the document embeddings related to the seeded topics with the
+        # embedding of the seeded topic to force the documents in a cluster
+        for seed_topic in range(len(seed_topic_list)):
+            indices = [index for index, topic in enumerate(y) if topic == seed_topic]
+            embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
+        return y, embeddings
 
     def _extract_topics(self, documents: pd.DataFrame):
         """ Extract topics from the clusters using a class-based TF-IDF
