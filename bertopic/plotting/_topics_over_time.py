@@ -1,12 +1,14 @@
 import pandas as pd
 from typing import List
 import plotly.graph_objects as go
+from sklearn.preprocessing import normalize
 
 
 def visualize_topics_over_time(topic_model,
                                topics_over_time: pd.DataFrame,
                                top_n_topics: int = None,
                                topics: List[int] = None,
+                               normalize_frequency: bool = False,
                                width: int = 1250,
                                height: int = 450) -> go.Figure:
     """ Visualize topics over time
@@ -17,6 +19,7 @@ def visualize_topics_over_time(topic_model,
                           corresponding topic representation
         top_n_topics: To visualize the most frequent topics instead of all
         topics: Select which topics you would like to be visualized
+        normalize_frequency: Whether to normalize each topic's frequency individually
         width: The width of the figure.
         height: The height of the figure.
 
@@ -63,7 +66,11 @@ def visualize_topics_over_time(topic_model,
         trace_data = data.loc[data.Topic == topic, :]
         topic_name = trace_data.Name.values[0]
         words = trace_data.Words.values
-        fig.add_trace(go.Scatter(x=trace_data.Timestamp, y=trace_data.Frequency,
+        if normalize_frequency:
+            y = normalize(trace_data.Frequency.values.reshape(1, -1))[0]
+        else:
+            y = trace_data.Frequency
+        fig.add_trace(go.Scatter(x=trace_data.Timestamp, y=y,
                                  mode='lines',
                                  marker_color=colors[index % 7],
                                  hoverinfo="text",
@@ -74,7 +81,7 @@ def visualize_topics_over_time(topic_model,
     fig.update_xaxes(showgrid=True)
     fig.update_yaxes(showgrid=True)
     fig.update_layout(
-        yaxis_title="Frequency",
+        yaxis_title="Normalized Frequency" if normalize_frequency else "Frequency",
         title={
             'text': "<b>Topics over Time",
             'y': .95,
