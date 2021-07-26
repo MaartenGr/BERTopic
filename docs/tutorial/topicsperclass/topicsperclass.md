@@ -25,7 +25,7 @@ Next, we want to extract the topics across all documents without taking the cate
 
 ```python
 topic_model = BERTopic(verbose=True)
-topics, _ = topic_model.fit_transform(docs)
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 Now that we have created our global topic model, let us calculate the topic representations across each category:

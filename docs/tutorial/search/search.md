@@ -10,7 +10,7 @@ from sklearn.datasets import fetch_20newsgroups
 # Create topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs)
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 After having trained our model, we can use `find_topics` to search for topics that are similar 

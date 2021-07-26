@@ -66,7 +66,7 @@ from sklearn.datasets import fetch_20newsgroups
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 
 topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs)
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 After generating topics, we can access the frequent topics that were generated:
@@ -161,7 +161,7 @@ You can also use previously generated embeddings by passing it to `fit_transform
 
 ```python
 topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs, embeddings)
+topics, probs = topic_model.fit_transform(docs, embeddings)
 ```
 
 ## Dynamic Topic Modeling
@@ -186,7 +186,7 @@ Then, we need to extract the global topic representations by simply creating and
 
 ```python
 topic_model = BERTopic(verbose=True)
-topics, _ = topic_model.fit_transform(tweets)
+topics, probs = topic_model.fit_transform(tweets)
 ```
 
 From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 

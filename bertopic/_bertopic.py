@@ -43,7 +43,7 @@ class BERTopic:
     from sklearn.datasets import fetch_20newsgroups
 
     docs = fetch_20newsgroups(subset='all')['data']
-    topic_model = BERTopic(calculate_probabilities=True)
+    topic_model = BERTopic()
     topics, probabilities = topic_model.fit_transform(docs)
     ```
 
@@ -228,10 +228,11 @@ class BERTopic:
 
         Returns:
             predictions: Topic predictions for each documents
-            probabilities: The topic probability distribution which is returned by default.
-                           If `calculate_probabilities` in BERTopic is set to False, then the
-                           probabilities are not calculated to speed up computation and
-                           decrease memory usage.
+            probabilities: The probability of the assigned topic per document.
+                           If `calculate_probabilities` in BERTopic is set to True, then
+                           it calculates the probabilities of all topics across all documents
+                           instead of only the assigned topic. This, however, slows down
+                           computation and may increase memory usage.
 
         Usage:
 
@@ -240,7 +241,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        topic_model = BERTopic(calculate_probabilities=True)
+        topic_model = BERTopic()
         topics, probs = topic_model.fit_transform(docs)
         ```
 
@@ -257,7 +258,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        topic_model = BERTopic(calculate_probabilities=True)
+        topic_model = BERTopic()
         topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
@@ -331,7 +332,7 @@ class BERTopic:
 
         docs = fetch_20newsgroups(subset='all')['data']
         topic_model = BERTopic().fit(docs)
-        topics, _ = topic_model.transform(docs)
+        topics, probs = topic_model.transform(docs)
         ```
 
         If you want to use your own embeddings:
@@ -348,7 +349,7 @@ class BERTopic:
 
         # Create topic model
         topic_model = BERTopic().fit(docs, embeddings)
-        topics, _ = topic_model.transform(docs, embeddings)
+        topics, probs = topic_model.transform(docs, embeddings)
         ```
         """
         check_is_fitted(self)
@@ -433,7 +434,7 @@ class BERTopic:
         ```python
         from bertopic import BERTopic
         topic_model = BERTopic()
-        topics, _ = topic_model.fit_transform(docs)
+        topics, probs = topic_model.fit_transform(docs)
         topics_over_time = topic_model.topics_over_time(docs, topics, timestamps, nr_bins=20)
         ```
         """
@@ -549,7 +550,7 @@ class BERTopic:
         ```python
         from bertopic import BERTopic
         topic_model = BERTopic()
-        topics, _ = topic_model.fit_transform(docs)
+        topics, probs = topic_model.fit_transform(docs)
         topics_per_class = topic_model.topics_per_class(docs, topics, classes)
         ```
         """
@@ -847,7 +848,7 @@ class BERTopic:
         If probabilities were not calculated simply run the function without them:
 
         ```python
-        new_topics, _= topic_model.reduce_topics(docs, topics, nr_topics=30)
+        new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
         ```
         """
         check_is_fitted(self)

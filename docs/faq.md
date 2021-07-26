@@ -56,8 +56,8 @@ Third, although this does not happen very often, there simply aren't that many t
 in your documents. You can often see this when you have many `-1` topics, which is actually not a topic 
 but a category of outliers.  
 
-## **Why are the probabilities not calculated?**
-Although it is possible to calculate the probabilities, the process of doing so is quite computationally 
+## **How do I calculate the probabilities of all topics in a document?**
+Although it is possible to calculate all the probabilities, the process of doing so is quite computationally 
 inefficient and might significantly increase the computation time. To prevent this, the probabilities are 
 not calculated as a default. In order to calculate, you will have to set `calculate_probabilities` to True:
 

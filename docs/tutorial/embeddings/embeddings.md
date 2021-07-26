@@ -184,7 +184,7 @@ embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Create topic model and use the custom embeddings
 topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs, embeddings)
+topics, probs = topic_model.fit_transform(docs, embeddings)
 ```
 
 As you can see above, we used a SentenceTransformer model to create the embedding. You could also have used 
@@ -208,7 +208,7 @@ embeddings = vectorizer.fit_transform(docs)
 
 # 
 topic_model = BERTopic(stop_words="english")
-topics, _ = topic_model.fit_transform(docs, embeddings)
+topics, probs = topic_model.fit_transform(docs, embeddings)
 ```
 
 Here, you will probably notice that creating the embeddings is quite fast whereas `fit_transform` is quite slow. 
