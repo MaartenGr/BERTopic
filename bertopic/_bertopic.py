@@ -1446,30 +1446,38 @@ class BERTopic:
         """ Save the most representative docs (3) per topic
 
         The most representative docs are extracted by taking
-        the documents that have the highest probability of belonging
-        to a topic. Typically, there are many documents that have
-        the same probability of 1. Currently, no distinction between
-        those are model and 3 random documents will be selected.
+        the exemplars from the HDBSCAN-generated clusters.
+
+        Full instructions can be found here:
+            https://hdbscan.readthedocs.io/en/latest/soft_clustering_explanation.html
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
         """
-        probs = self.hdbscan_model.probabilities_
-        representative_doc_ids = pd.DataFrame({"Topics": documents["Topic"],
-                                               "Probs": probs,
-                                               "ID": range(len(probs))})
-        representative_doc_ids = (representative_doc_ids
-                                  .sort_values("Probs", ascending=False)
-                                  .groupby('Topics')
-                                  .head(3)
-                                  .reset_index(drop=True)
-                                  .sort_values("Topics")
-                                  .groupby("Topics")["ID"]
-                                  .apply(list)
-                                  .to_dict())
+        # Prepare the condensed tree and luf clusters beneath a given cluster
+        condensed_tree = self.hdbscan_model.condensed_tree_
+        raw_tree = condensed_tree._raw_tree
+        clusters = condensed_tree._select_clusters()
+        cluster_tree = raw_tree[raw_tree['child_size'] > 1]
+
+        #  Find the points with maximum lambda value in each leaf
+        representative_docs = {}
+        for topic in documents['Topic'].unique():
+            if topic != -1:
+                leaves = hdbscan.plots._recurse_leaf_dfs(cluster_tree, clusters[topic])
+
+                result = np.array([])
+                for leaf in leaves:
+                    max_lambda = raw_tree['lambda_val'][raw_tree['parent'] == leaf].max()
+                    points = raw_tree['child'][(raw_tree['parent'] == leaf) & (raw_tree['lambda_val'] == max_lambda)]
+                    result = np.hstack((result, points))
+
+                representative_docs[topic] = list(np.random.choice(result, 3, replace=False).astype(int))
+
+        # Convert indices to documents
         self.representative_docs = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
                                     for topic, doc_ids in
-                                    representative_doc_ids.items()}
+                                    representative_docs.items()}
 
     def _map_representative_docs(self):
         """ Map the representative docs per topic to the correct topics
