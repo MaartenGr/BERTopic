@@ -1828,7 +1828,7 @@ class BERTopic:
             mapped_probabilities: Updated probabilities
         """
         # Map array of probabilities (probability for assigned topic per document)
-        if len(probabilities.shape) == 2:
+        if len(probabilities.shape) == 2 and self.get_topic(-1):
             mapped_probabilities = np.zeros((probabilities.shape[0],
                                              len(set(self.mapped_topics.values()))-1))
             for from_topic, to_topic in self.mapped_topics.items():
