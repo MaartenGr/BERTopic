@@ -1491,7 +1491,7 @@ class BERTopic:
         representative_docs = self.representative_docs.copy()
 
         # Remove topics that were merged as the most frequent
-        # topic or the the topics they were merged into contain
+        # topic or the topics they were merged into contain as they contain
         # better representative documents
         if self.merged_topics:
             for topic_to_remove in self.merged_topics:
@@ -1796,15 +1796,15 @@ class BERTopic:
             documents: Updated dataframe with documents and the mapped
                        and re-ordered topic ids
         """
-
         self._update_topic_size(documents)
 
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
 
         # Map topics based on frequency
-        sorted_topics = {topic: index - 1 for index, topic
-                         in enumerate(self.topic_sizes.keys())}
+        df = pd.DataFrame(self.topic_sizes.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
+        df = df[df.Old_Topic != -1]
+        sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
         self.mapped_topics = {og_topic: sorted_topics[topic]
                               if topic in sorted_topics
                               else topic
