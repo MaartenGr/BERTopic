@@ -19,6 +19,7 @@ nav:
       - Topics per Class: tutorial/topicsperclass/topicsperclass.md
       - (semi)-Supervised Topic Modeling: tutorial/supervised/supervised.md
       - Dynamic Topic Modeling: tutorial/topicsovertime/topicsovertime.md
+      - Guided Topic Modeling: tutorial/guided/guided.md
   - API:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
