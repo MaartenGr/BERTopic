@@ -1,9 +1,9 @@
 ## **Version 0.9**
-*Release date:  XX July, 2021*
+*Release date:  9 August, 2021*
 
 **Highlights**:  
 
-* Implemented a **Guided BERTopic** -> Use seeds to steer the Topic Modeling
+* Implemented a [**Guided BERTopic**](https://maartengr.github.io/BERTopic/tutorial/guided/guided.html) -> Use seeds to steer the Topic Modeling
 * Get the most representative documents per topic: `topic_model.get_representative_docs(topic=1)`
     * This allows users to see which documents are good representations of a topic and better understand the topics that were created
 * Added `normalize_frequency` parameter to `visualize_topics_per_class` and `visualize_topics_over_time` in order to better compare the relative topic frequencies between topics
