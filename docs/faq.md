@@ -72,6 +72,27 @@ Third, although this does not happen very often, there simply aren't that many t
 in your documents. You can often see this when you have many `-1` topics, which is actually not a topic 
 but a category of outliers.  
 
+## **I have too many topics, how do I decrease them?**  
+If you have a large dataset, then it is possible to generate thousands of topics. Especially with large 
+datasets, there is a good chance they actually contain many small topics. In practice, you might want 
+a few hundred topics at most in order to interpret them nicely. 
+
+There are a few ways of increasing the number of generated topics: 
+
+First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) 
+to make sure that those small clusters will not be generated. This is a HDBSCAN parameter that 
+specifies what the minimum number of documents are needed in a cluster. More documents in a cluster 
+means less topics will be generated. 
+
+Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). 
+This also prevents those micro clusters to be generated as it will needs quite a number of neighboring 
+documents to create a cluster. 
+
+Third, we can set `nr_topics` to a value that seems logical to the user. Do note that topics are forced 
+to merge together which might result in a lower quality of topics. In practice, I would advise using 
+`nr_topic="auto"` as that will merge topics together that are very similar. Dissimilar topics will 
+therefore remain separated. 
+
 ## **How do I calculate the probabilities of all topics in a document?**
 Although it is possible to calculate all the probabilities, the process of doing so is quite computationally 
 inefficient and might significantly increase the computation time. To prevent this, the probabilities are 
