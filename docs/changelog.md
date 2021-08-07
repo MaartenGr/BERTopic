@@ -1,3 +1,52 @@
+## **Version 0.9**
+*Release date:  9 August, 2021*
+
+**Highlights**:  
+
+* Implemented a [**Guided BERTopic**](https://maartengr.github.io/BERTopic/tutorial/guided/guided.html) -> Use seeds to steer the Topic Modeling
+* Get the most representative documents per topic: `topic_model.get_representative_docs(topic=1)`
+    * This allows users to see which documents are good representations of a topic and better understand the topics that were created
+* Added `normalize_frequency` parameter to `visualize_topics_per_class` and `visualize_topics_over_time` in order to better compare the relative topic frequencies between topics
+* Return flat probabilities as default, only calculate the probabilities of all topics per document if `calculate_probabilities` is True
+* Added several FAQs
+
+**Fixes**:  
+
+* Fix loading pre-trained BERTopic model
+* Fix mapping of probabilities
+* Fix [#190](https://github.com/MaartenGr/BERTopic/issues/190)
+
+
+**Guided BERTopic**:    
+
+Guided BERTopic works in two ways: 
+
+First, we create embeddings for each seeded topics by joining them and passing them through the document embedder. 
+These embeddings will be compared with the existing document embeddings through cosine similarity and assigned a label. 
+If the document is most similar to a seeded topic, then it will get that topic's label. 
+If it is most similar to the average document embedding, it will get the -1 label. 
+These labels are then passed through UMAP to create a semi-supervised approach that should nudge the topic creation to the seeded topics. 
+
+Second, we take all words in `seed_topic_list` and assign them a multiplier larger than 1. 
+Those multipliers will be used to increase the IDF values of the words across all topics thereby increasing 
+the likelihood that a seeded topic word will appear in a topic. This does, however, also increase the chance of an 
+irrelevant topic having unrelated words. In practice, this should not be an issue since the IDF value is likely to 
+remain low regardless of the multiplier. The multiplier is now a fixed value but may change to something more elegant, 
+like taking the distribution of IDF values and its position into account when defining the multiplier. 
+
+```python
+seed_topic_list = [["company", "billion", "quarter", "shrs", "earnings"],
+                   ["acquisition", "procurement", "merge"],
+                   ["exchange", "currency", "trading", "rate", "euro"],
+                   ["grain", "wheat", "corn"],
+                   ["coffee", "cocoa"],
+                   ["natural", "gas", "oil", "fuel", "products", "petrol"]]
+
+topic_model = BERTopic(seed_topic_list=seed_topic_list)
+topics, probs = topic_model.fit_transform(docs)
+```
+
+
 ## **Version 0.8.1**
 *Release date:  08 June, 2021*
 

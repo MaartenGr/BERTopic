@@ -43,7 +43,7 @@ class BERTopic:
     from sklearn.datasets import fetch_20newsgroups
 
     docs = fetch_20newsgroups(subset='all')['data']
-    topic_model = BERTopic(calculate_probabilities=True)
+    topic_model = BERTopic()
     topics, probabilities = topic_model.fit_transform(docs)
     ```
 
@@ -72,7 +72,8 @@ class BERTopic:
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
                  calculate_probabilities: bool = False,
-                 embedding_model = None,
+                 seed_topic_list: List[List[str]] = None,
+                 embedding_model=None,
                  umap_model: UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
@@ -101,13 +102,15 @@ class BERTopic:
                        "auto" to automatically reduce topics that have a similarity of at
                        least 0.9, do not maps all others.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
-            calculate_probabilities: Whether to calculate the topic probabilities. This could
-                                     slow down the extraction of topics if you have many
-                                     documents (> 100_000). Set this only to True if you
-                                     have a low amount of documents or if you do not mind
-                                     more computation time.
-                                     NOTE: since probabilities are not calculated, you cannot
-                                     use the corresponding visualization `visualize_probabilities`.
+            calculate_probabilities: Whether to calculate the probabilities of all topics
+                                     per document instead of the probability of the assigned
+                                     topic per document. This could slow down the extraction
+                                     of topics if you have many documents (> 100_000). Set this
+                                     only to True if you have a low amount of documents or if
+                                     you do not mind more computation time.
+                                     NOTE: If false you cannot use the corresponding
+                                     visualization method `visualize_probabilities`.
+            seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
             embedding_model: Use a custom embedding model.
@@ -133,6 +136,7 @@ class BERTopic:
         self.low_memory = low_memory
         self.calculate_probabilities = calculate_probabilities
         self.verbose = verbose
+        self.seed_topic_list = seed_topic_list
 
         # Embedding model
         self.language = language if not embedding_model else None
@@ -158,8 +162,10 @@ class BERTopic:
         self.topics = None
         self.topic_sizes = None
         self.mapped_topics = None
+        self.merged_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
+        self.representative_docs = None
 
         if verbose:
             logger.set_level("DEBUG")
@@ -222,10 +228,11 @@ class BERTopic:
 
         Returns:
             predictions: Topic predictions for each documents
-            probabilities: The topic probability distribution which is returned by default.
-                           If `calculate_probabilities` in BERTopic is set to False, then the
-                           probabilities are not calculated to speed up computation and
-                           decrease memory usage.
+            probabilities: The probability of the assigned topic per document.
+                           If `calculate_probabilities` in BERTopic is set to True, then
+                           it calculates the probabilities of all topics across all documents
+                           instead of only the assigned topic. This, however, slows down
+                           computation and may increase memory usage.
 
         Usage:
 
@@ -234,7 +241,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         docs = fetch_20newsgroups(subset='all')['data']
-        topic_model = BERTopic(calculate_probabilities=True)
+        topic_model = BERTopic()
         topics, probs = topic_model.fit_transform(docs)
         ```
 
@@ -251,7 +258,7 @@ class BERTopic:
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
-        topic_model = BERTopic(calculate_probabilities=True)
+        topic_model = BERTopic()
         topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
@@ -276,6 +283,8 @@ class BERTopic:
                                                       language=self.language)
 
         # Reduce dimensionality with UMAP
+        if self.seed_topic_list is not None and self.embedding_model is not None:
+            y, embeddings = self._guided_topic_modeling(embeddings)
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster UMAP embeddings with HDBSCAN
@@ -291,7 +300,9 @@ class BERTopic:
         # Reduce topics
         if self.nr_topics:
             documents = self._reduce_topics(documents)
-            probabilities = self._map_probabilities(probabilities)
+
+        self._map_representative_docs()
+        probabilities = self._map_probabilities(probabilities)
         predictions = documents.Topic.to_list()
 
         return predictions, probabilities
@@ -321,7 +332,7 @@ class BERTopic:
 
         docs = fetch_20newsgroups(subset='all')['data']
         topic_model = BERTopic().fit(docs)
-        topics, _ = topic_model.transform(docs)
+        topics, probs = topic_model.transform(docs)
         ```
 
         If you want to use your own embeddings:
@@ -338,7 +349,7 @@ class BERTopic:
 
         # Create topic model
         topic_model = BERTopic().fit(docs, embeddings)
-        topics, _ = topic_model.transform(docs, embeddings)
+        topics, probs = topic_model.transform(docs, embeddings)
         ```
         """
         check_is_fitted(self)
@@ -353,7 +364,7 @@ class BERTopic:
                                                   verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        predictions, _ = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
@@ -423,7 +434,7 @@ class BERTopic:
         ```python
         from bertopic import BERTopic
         topic_model = BERTopic()
-        topics, _ = topic_model.fit_transform(docs)
+        topics, probs = topic_model.fit_transform(docs)
         topics_over_time = topic_model.topics_over_time(docs, topics, timestamps, nr_bins=20)
         ```
         """
@@ -539,7 +550,7 @@ class BERTopic:
         ```python
         from bertopic import BERTopic
         topic_model = BERTopic()
-        topics, _ = topic_model.fit_transform(docs)
+        topics, probs = topic_model.fit_transform(docs)
         topics_per_class = topic_model.topics_per_class(docs, topics, classes)
         ```
         """
@@ -768,6 +779,36 @@ class BERTopic:
             return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count",
                                                                                                   ascending=False)
 
+    def get_representative_docs(self, topic: int) -> List[str]:
+        """ Extract representative documents per topic
+
+        Arguments:
+            topic: A specific topic for which you want
+                   the representative documents
+
+        Returns:
+            Representative documents of the chosen topic
+
+        Usage:
+
+        To extract the representative docs of all topics:
+
+        ```python
+        representative_docs = topic_model.get_representative_docs()
+        ```
+
+        To get the representative docs of a single topic:
+
+        ```python
+        representative_docs = topic_model.get_representative_docs(12)
+        ```
+        """
+        check_is_fitted(self)
+        if isinstance(topic, int):
+            return self.representative_docs[topic]
+        else:
+            return self.representative_docs
+
     def reduce_topics(self,
                       docs: List[str],
                       topics: List[int],
@@ -807,7 +848,7 @@ class BERTopic:
         If probabilities were not calculated simply run the function without them:
 
         ```python
-        new_topics, _= topic_model.reduce_topics(docs, topics, nr_topics=30)
+        new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
         ```
         """
         check_is_fitted(self)
@@ -1231,7 +1272,7 @@ class BERTopic:
         with open(path, 'rb') as file:
             if embedding_model:
                 topic_model = joblib.load(file)
-                topic_model.embedding_model = embedding_model
+                topic_model.embedding_model = select_backend(embedding_model)
             else:
                 topic_model = joblib.load(file)
             return topic_model
@@ -1337,15 +1378,53 @@ class BERTopic:
         """
         self.hdbscan_model.fit(umap_embeddings)
         documents['Topic'] = self.hdbscan_model.labels_
+        probabilities = self.hdbscan_model.probabilities_
 
         if self.calculate_probabilities:
             probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
-        else:
-            probabilities = None
 
         self._update_topic_size(documents)
+        self._save_representative_docs(documents)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
+
+    def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
+        """ Apply Guided Topic Modeling
+
+        We transform the seeded topics to embeddings using the
+        same embedder as used for generating document embeddings.
+
+        Then, we apply cosine similarity between the embeddings
+        and set labels for documents that are more similar to
+        one of the topics, then the average document.
+
+        If a document is more similar to the average document
+        than any of the topics, it gets the -1 label and is
+        thereby not included in UMAP.
+
+        Arguments:
+            embeddings: The document embeddings
+
+        Returns
+            y: The labels for each seeded topic
+            embeddings: Updated embeddings
+        """
+        # Create embeddings from the seeded topics
+        seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
+        seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
+        seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
+
+        # Label documents that are most similar to one of the seeded topics
+        sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
+        y = [np.argmax(sim_matrix[index]) for index in range(sim_matrix.shape[0])]
+        y = [val if val != len(seed_topic_list) else -1 for val in y]
+
+        # Average the document embeddings related to the seeded topics with the
+        # embedding of the seeded topic to force the documents in a cluster
+        for seed_topic in range(len(seed_topic_list)):
+            indices = [index for index, topic in enumerate(y) if topic == seed_topic]
+            embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
+        return y, embeddings
 
     def _extract_topics(self, documents: pd.DataFrame):
         """ Extract topics from the clusters using a class-based TF-IDF
@@ -1363,6 +1442,68 @@ class BERTopic:
         self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                             for key, values in
                             self.topics.items()}
+
+    def _save_representative_docs(self, documents: pd.DataFrame):
+        """ Save the most representative docs (3) per topic
+
+        The most representative docs are extracted by taking
+        the exemplars from the HDBSCAN-generated clusters.
+
+        Full instructions can be found here:
+            https://hdbscan.readthedocs.io/en/latest/soft_clustering_explanation.html
+
+        Arguments:
+            documents: Dataframe with documents and their corresponding IDs
+        """
+        # Prepare the condensed tree and luf clusters beneath a given cluster
+        condensed_tree = self.hdbscan_model.condensed_tree_
+        raw_tree = condensed_tree._raw_tree
+        clusters = condensed_tree._select_clusters()
+        cluster_tree = raw_tree[raw_tree['child_size'] > 1]
+
+        #  Find the points with maximum lambda value in each leaf
+        representative_docs = {}
+        for topic in documents['Topic'].unique():
+            if topic != -1:
+                leaves = hdbscan.plots._recurse_leaf_dfs(cluster_tree, clusters[topic])
+
+                result = np.array([])
+                for leaf in leaves:
+                    max_lambda = raw_tree['lambda_val'][raw_tree['parent'] == leaf].max()
+                    points = raw_tree['child'][(raw_tree['parent'] == leaf) & (raw_tree['lambda_val'] == max_lambda)]
+                    result = np.hstack((result, points))
+
+                representative_docs[topic] = list(np.random.choice(result, 3, replace=False).astype(int))
+
+        # Convert indices to documents
+        self.representative_docs = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
+                                    for topic, doc_ids in
+                                    representative_docs.items()}
+
+    def _map_representative_docs(self):
+        """ Map the representative docs per topic to the correct topics
+
+        If topics were reduced, remove documents from topics that were
+        merged into larger topics as we assume that the documents from
+        larger topics are better representative of the entire merged
+        topic.
+        """
+        representative_docs = self.representative_docs.copy()
+
+        # Remove topics that were merged as the most frequent
+        # topic or the topics they were merged into contain as they contain
+        # better representative documents
+        if self.merged_topics:
+            for topic_to_remove in self.merged_topics:
+                del representative_docs[topic_to_remove]
+
+        # Update the representative documents
+        updated_representative_docs = {}
+        for old_topic, docs in representative_docs.items():
+            new_topic = self.mapped_topics[old_topic]
+            updated_representative_docs[new_topic] = docs
+
+        self.representative_docs = updated_representative_docs
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -1422,8 +1563,14 @@ class BERTopic:
         words = self.vectorizer_model.get_feature_names()
         X = self.vectorizer_model.transform(documents)
 
+        if self.seed_topic_list:
+            seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
+            multiplier = np.array([1.2 if word in seed_topic_list else 1 for word in words])
+        else:
+            multiplier = None
+
         if fit:
-            self.transformer = ClassTFIDF().fit(X, n_samples=m)
+            self.transformer = ClassTFIDF().fit(X, n_samples=m, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
 
@@ -1524,8 +1671,13 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        # Track the mapping of topics
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
+
+        # Track which topics where originally merged
+        if not self.merged_topics:
+            self.merged_topics = []
 
         # Create topic similarity matrix
         if self.topic_embeddings is not None:
@@ -1540,6 +1692,7 @@ class BERTopic:
             topic_to_merge = self.get_topic_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
             similarities[:, topic_to_merge + 1] = -1
+            self.merged_topics.append(topic_to_merge)
 
             # Update Topic labels
             documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
@@ -1566,7 +1719,7 @@ class BERTopic:
         return documents
 
     def _auto_reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
-        """ Reduce the number of topics as long as it exceeds a minimum similarity of 0.915
+        """ Reduce the number of topics automatically using HDBSCAN
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
@@ -1574,8 +1727,13 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        # Track the mapping of topics
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
+
+        # Track which topics where originally merged
+        if not self.merged_topics:
+            self.merged_topics = []
 
         unique_topics = sorted(list(documents.Topic.unique()))[1:]
         max_topic = unique_topics[-1]
@@ -1596,6 +1754,13 @@ class BERTopic:
                          for index, prediction in enumerate(predictions)
                          if prediction != -1}
         documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
+
+        # Track merged topic
+        df = pd.DataFrame({"Topic": mapped_topics.keys(), "Group": mapped_topics.values()})
+        df["Size"] = df["Topic"].map(self.topic_sizes)
+        mask = df.groupby(['Topic'])['Size'].transform('max')
+        df = df[~(df['Size'] == mask)]
+        self.merged_topic = df.Topic.values.tolist()
 
         # Update mapped topics with new clusters
         self.mapped_topics = {og_topic: mapped_topics[topic]
@@ -1631,15 +1796,15 @@ class BERTopic:
             documents: Updated dataframe with documents and the mapped
                        and re-ordered topic ids
         """
-
         self._update_topic_size(documents)
 
         if not self.mapped_topics:
             self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
 
         # Map topics based on frequency
-        sorted_topics = {topic: index - 1 for index, topic
-                         in enumerate(self.topic_sizes.keys())}
+        df = pd.DataFrame(self.topic_sizes.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
+        df = df[df.Old_Topic != -1]
+        sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
         self.mapped_topics = {og_topic: sorted_topics[topic]
                               if topic in sorted_topics
                               else topic
@@ -1659,21 +1824,19 @@ class BERTopic:
 
         Arguments:
             probabilities: An array containing probabilities
-
         Returns:
-            new_probabilities: Updated probabilities
-
+            mapped_probabilities: Updated probabilities
         """
-        if isinstance(probabilities, np.ndarray):
-            new_probabilities = probabilities.copy()
+        # Map array of probabilities (probability for assigned topic per document)
+        if len(probabilities.shape) == 2 and self.get_topic(-1):
+            mapped_probabilities = np.zeros((probabilities.shape[0],
+                                             len(set(self.mapped_topics.values()))-1))
             for from_topic, to_topic in self.mapped_topics.items():
                 if to_topic != -1 and from_topic != -1:
-                    new_probabilities[:, to_topic] += new_probabilities[:, from_topic]
-                new_probabilities[:, from_topic] = 0
+                    mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
+            return mapped_probabilities
 
-            return new_probabilities.round(3)
-        else:
-            return None
+        return probabilities
 
     def _preprocess_text(self, documents: np.ndarray) -> List[str]:
         """ Basic preprocessing of text

@@ -10,8 +10,12 @@
 <img src="images/logo.png" width="35%" height="35%" align="right" />
 
 BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
-allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
-visualizations similar to LDAvis! 
+allowing for easily interpretable topics whilst keeping important words in the topic descriptions.
+
+BERTopic supports 
+[**guided**](https://maartengr.github.io/BERTopic/tutorial/guided/guided.html), 
+(semi-) [**supervised**](https://maartengr.github.io/BERTopic/tutorial/supervised/supervised.html), 
+and [**dynamic**](https://maartengr.github.io/BERTopic/tutorial/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
 
 Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
@@ -66,7 +70,7 @@ from sklearn.datasets import fetch_20newsgroups
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 
 topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs)
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 After generating topics, we can access the frequent topics that were generated:
@@ -114,7 +118,6 @@ topic_model.visualize_topics()
 
 <img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
 
-
 ## Embedding Models
 BERTopic supports many embedding models that can be used to embed the documents and words:
 * Sentence-Transformers
@@ -123,29 +126,16 @@ BERTopic supports many embedding models that can be used to embed the documents 
 * Gensim
 * USE
 
-Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) 
-for a full overview of all supported embedding models. 
-
-### Sentence-Transformers  
-You can select any model from sentence-transformers [here](https://www.sbert.net/docs/pretrained_models.html) 
-and pass it to BERTopic:
+[**Sentence-Transformers**]() is typically used as it has shown great results embedding documents 
+meant for semantic similarity. Simply select any from their documentation 
+[here](https://www.sbert.net/docs/pretrained_models.html) and pass it to BERTopic:
 
 ```python
 topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
 ```
 
-Or select a SentenceTransformer model with your own parameters:
-
-```python
-from sentence_transformers import SentenceTransformer
-
-sentence_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
-topic_model = BERTopic(embedding_model=sentence_model)
-```
-
-### Flair  
-[Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that 
-is publicly available. Flair can be used as follows:
+[**Flair**](https://github.com/flairNLP/flair) allows you to choose almost any 🤗 transformers model. Simply 
+select any from [here](https://huggingface.co/models) and pass it to BERTopic:
 
 ```python
 from flair.embeddings import TransformerDocumentEmbeddings
@@ -154,20 +144,13 @@ roberta = TransformerDocumentEmbeddings('roberta-base')
 topic_model = BERTopic(embedding_model=roberta)
 ```
 
-You can select any 🤗 transformers model [here](https://huggingface.co/models).
-
-**Custom Embeddings**    
-You can also use previously generated embeddings by passing it to `fit_transform()`:
-
-```python
-topic_model = BERTopic()
-topics, _ = topic_model.fit_transform(docs, embeddings)
-```
+Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) 
+for a full overview of all supported embedding models. 
 
 ## Dynamic Topic Modeling
 Dynamic topic modeling (DTM) is a collection of techniques aimed at analyzing the evolution of topics 
-over time. These methods allow you to understand how a topic is represented across different times. 
-Here, we will be using all of Donald Trump's tweet so see how he talked over certain topics over time: 
+over time. These methods allow you to understand how a topic is represented over time. 
+Here, we will be using all of Donald Trump's tweet to see how he talked over certain topics over time: 
 
 ```python
 import re
@@ -186,7 +169,7 @@ Then, we need to extract the global topic representations by simply creating and
 
 ```python
 topic_model = BERTopic(verbose=True)
-topics, _ = topic_model.fit_transform(tweets)
+topics, probs = topic_model.fit_transform(tweets)
 ```
 
 From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 

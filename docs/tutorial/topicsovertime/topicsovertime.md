@@ -53,7 +53,7 @@ Then, we need to extract the global topic representations by simply creating and
 from bertopic import BERTopic
 
 topic_model = BERTopic(verbose=True)
-topics, _ = topic_model.fit_transform(tweets)
+topics, probs = topic_model.fit_transform(tweets)
 ```
 
 From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 

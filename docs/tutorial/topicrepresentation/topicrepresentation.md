@@ -15,7 +15,7 @@ from sklearn.datasets import fetch_20newsgroups
 # Create topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 topic_model = BERTopic(n_gram_range=(2, 3))
-topics, _ = topic_model.fit_transform(docs)
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 From the model created above, one of the most frequent topics is the following:

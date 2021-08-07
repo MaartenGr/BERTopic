@@ -33,10 +33,26 @@ typically require a GPU and using only a CPU can slow down computation time quit
 However, if you do not have access to a GPU, looking into quantization might help. 
 
 ## **I am facing memory issues. Help!**
-To prevent any memory issues, it is advised to set `low_memory` to True. This will result in UMAP being 
-a bit slower, but consuming significantly less memory. Moreover, calculating the probabilities of topics 
-is quite computationally consuming and might impact memory. Setting `calculate_probabilities` to False 
-could similarly help. 
+There are several ways to perform computation with large datasets. 
+First, you can set `low_memory` to True when instantiating BERTopic. 
+This may prevent blowing up the memory in UMAP. 
+
+Second, setting `calculate_probabilities` to False when instantiating BERTopic prevents a huge document-topic 
+probability matrix from being created. Moreover, HDBSCAN is quite slow when it tries to calculate probabilities on large datasets. 
+
+Third, you can set the minimum frequency of words in the CountVectorizer class to reduce the size of the resulting 
+sparse c-TF-IDF matrix. You can do this as follows:
+
+```python
+from bertopic import BERTopic
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words="english", min_df=10)
+topic_model = BERTopic(vectorizer_model=vectorizer_model)
+```
+
+The [min_df](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html) 
+parameter is used to indicate the minimum frequency of words. Setting this value larger than 1 can significantly reduce memory.
 
 If the problem persists, then this could be an issue related to your available memory. The processing of  
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  
@@ -56,8 +72,29 @@ Third, although this does not happen very often, there simply aren't that many t
 in your documents. You can often see this when you have many `-1` topics, which is actually not a topic 
 but a category of outliers.  
 
-## **Why are the probabilities not calculated?**
-Although it is possible to calculate the probabilities, the process of doing so is quite computationally 
+## **I have too many topics, how do I decrease them?**  
+If you have a large dataset, then it is possible to generate thousands of topics. Especially with large 
+datasets, there is a good chance they actually contain many small topics. In practice, you might want 
+a few hundred topics at most in order to interpret them nicely. 
+
+There are a few ways of increasing the number of generated topics: 
+
+First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) 
+to make sure that those small clusters will not be generated. This is a HDBSCAN parameter that 
+specifies what the minimum number of documents are needed in a cluster. More documents in a cluster 
+means less topics will be generated. 
+
+Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). 
+This also prevents those micro clusters to be generated as it will needs quite a number of neighboring 
+documents to create a cluster. 
+
+Third, we can set `nr_topics` to a value that seems logical to the user. Do note that topics are forced 
+to merge together which might result in a lower quality of topics. In practice, I would advise using 
+`nr_topic="auto"` as that will merge topics together that are very similar. Dissimilar topics will 
+therefore remain separated. 
+
+## **How do I calculate the probabilities of all topics in a document?**
+Although it is possible to calculate all the probabilities, the process of doing so is quite computationally 
 inefficient and might significantly increase the computation time. To prevent this, the probabilities are 
 not calculated as a default. In order to calculate, you will have to set `calculate_probabilities` to True:
 
@@ -81,6 +118,26 @@ I would suggest doing one of the following:
 * Use the above step also with numpy as it is part of the issue
 * Install BERTopic in a fresh environment using these steps. 
 
+## **How can I run BERTopic without an internet connection?**  
+The great thing about using sentence-transformers is that it searches automatically for an embedding model locally. 
+If it cannot find one, it will download the pre-trained model from its servers. 
+Make sure that you set the correct path for sentence-transformers to work. You can find a bit more about that 
+[here](https://github.com/UKPLab/sentence-transformers/issues/888). 
+
+You can download the corresponding model [here](https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/v0.2/)
+and unzip it. Then, simply use the following to create your embedding model:
+
+```python
+from sentence_transformers import SentenceTransformer
+embedding_model = SentenceTransformer('path/to/unzipped/model')
+```
+
+Then, pass it to BERTopic:
+
+```python
+from bertopic import BERTopic
+topic_model = BERTopic(embedding_model=embedding_model)
+```
 
 ## **Can I use the GPU to speed up the model?**
 Yes and no. The GPU is automatically used when you use a SentenceTransformer or Flair embedding model. Using a CPU 
@@ -88,12 +145,28 @@ would then definitely slow things down. However, UMAP and HDBSCAN are not GPU-ac
 the near future. For now, a GPU does help tremendously for extracting embeddings but does not speed up all 
 aspects of BERtopic.   
 
-## **Should I preprocess the data?**
-No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
-are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
-have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
-typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
-topic modeling to HTML-code to extract topics of code, then it becomes important.
+## **How can I use BERTopic with Chinese documents?**  
+Currently, CountVectorizer tokenizes text by splitting whitespace which does not work for Chinese. 
+In order to get it to work, you will have to create a custom `CountVectorizer` with `jieba`:
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+import jieba
+
+def tokenize_zh(text):
+    words = jieba.lcut(text)
+    return words
+
+vectorizer = CountVectorizer(tokenizer=tokenize_zh)
+```
+
+Next, we pass our custom vectorizer to BERTopic and create our topic model:
+
+```python
+from bertopic import BERTopic
+topic_model = BERTopic(embedding_model=model, verbose=True, vectorizer_model=vectorizer)
+topics, _ = topic_model.fit_transform(docs, embeddings=embeddings)
+```
 
 ## **Why does it take so long to import BERTopic?**
 The main culprit here seems to be UMAP. After running tests with [Tuna](https://github.com/nschloe/tuna) we 
@@ -103,4 +176,10 @@ can see that most of the resources when importing BERTopic can be dedicated to U
 
 Unfortunately, there currently is no fix for this issue. The most recent ticket regarding this 
 issue can be found [here](https://github.com/lmcinnes/umap/issues/631).
- 
+
+## **Should I preprocess the data?**
+No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
+are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
+have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
+typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
+topic modeling to HTML-code to extract topics of code, then it becomes important.
