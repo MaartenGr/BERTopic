@@ -373,6 +373,18 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/guided/guided.html" class="md-nav__link">
+        Guided Topic Modeling
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -789,6 +801,12 @@
         <td><code>None</code></td>
       </tr>
       <tr>
+        <td><code>normalize_frequency</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to normalize each topic's frequency individually</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
         <td><code>width</code></td>
         <td><code>int</code></td>
         <td><p>The width of the figure.</p></td>
@@ -834,6 +852,7 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
                                <span class="n">topics_per_class</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                                <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                                <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">normalize_frequency</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
@@ -844,6 +863,7 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
 <span class="sd">                          corresponding topic representation</span>
 <span class="sd">        top_n_topics: To visualize the most frequent topics instead of all</span>
 <span class="sd">        topics: Select which topics you would like to be visualized</span>
+<span class="sd">        normalize_frequency: Whether to normalize each topic&#39;s frequency individually</span>
 <span class="sd">        width: The width of the figure.</span>
 <span class="sd">        height: The height of the figure.</span>
 
@@ -894,8 +914,12 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
         <span class="n">trace_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">Topic</span> <span class="o">==</span> <span class="n">topic</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">topic_name</span> <span class="o">=</span> <span class="n">trace_data</span><span class="o">.</span><span class="n">Name</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">words</span> <span class="o">=</span> <span class="n">trace_data</span><span class="o">.</span><span class="n">Words</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="n">normalize_frequency</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Frequency</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">trace_data</span><span class="o">.</span><span class="n">Frequency</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Class</span><span class="p">,</span>
-                             <span class="n">x</span><span class="o">=</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Frequency</span><span class="p">,</span>
+                             <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
                              <span class="n">visible</span><span class="o">=</span><span class="n">visible</span><span class="p">,</span>
                              <span class="n">marker_color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="mi">7</span><span class="p">],</span>
                              <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
@@ -907,7 +931,7 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
-        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Frequency&quot;</span><span class="p">,</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Normalized Frequency&quot;</span> <span class="k">if</span> <span class="n">normalize_frequency</span> <span class="k">else</span> <span class="s2">&quot;Frequency&quot;</span><span class="p">,</span>
         <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Class&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
             <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s2">&quot;&lt;b&gt;Topics per Class&quot;</span><span class="p">,</span>

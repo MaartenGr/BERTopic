@@ -373,6 +373,18 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/guided/guided.html" class="md-nav__link">
+        Guided Topic Modeling
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -691,8 +703,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-are-the-probabilities-not-calculated" class="md-nav__link">
-    Why are the probabilities not calculated?
+  <a href="#i-have-too-many-topics-how-do-i-decrease-them" class="md-nav__link">
+    I have too many topics, how do I decrease them?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-i-calculate-the-probabilities-of-all-topics-in-a-document" class="md-nav__link">
+    How do I calculate the probabilities of all topics in a document?
   </a>
   
 </li>
@@ -705,6 +724,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-can-i-run-bertopic-without-an-internet-connection" class="md-nav__link">
+    How can I run BERTopic without an internet connection?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#can-i-use-the-gpu-to-speed-up-the-model" class="md-nav__link">
     Can I use the GPU to speed up the model?
   </a>
@@ -712,8 +738,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#should-i-preprocess-the-data" class="md-nav__link">
-    Should I preprocess the data?
+  <a href="#how-can-i-use-bertopic-with-chinese-documents" class="md-nav__link">
+    How can I use BERTopic with Chinese documents?
   </a>
   
 </li>
@@ -721,6 +747,13 @@
         <li class="md-nav__item">
   <a href="#why-does-it-take-so-long-to-import-bertopic" class="md-nav__link">
     Why does it take so long to import BERTopic?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#should-i-preprocess-the-data" class="md-nav__link">
+    Should I preprocess the data?
   </a>
   
 </li>
@@ -807,8 +840,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-are-the-probabilities-not-calculated" class="md-nav__link">
-    Why are the probabilities not calculated?
+  <a href="#i-have-too-many-topics-how-do-i-decrease-them" class="md-nav__link">
+    I have too many topics, how do I decrease them?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-i-calculate-the-probabilities-of-all-topics-in-a-document" class="md-nav__link">
+    How do I calculate the probabilities of all topics in a document?
   </a>
   
 </li>
@@ -821,6 +861,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-can-i-run-bertopic-without-an-internet-connection" class="md-nav__link">
+    How can I run BERTopic without an internet connection?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#can-i-use-the-gpu-to-speed-up-the-model" class="md-nav__link">
     Can I use the GPU to speed up the model?
   </a>
@@ -828,8 +875,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#should-i-preprocess-the-data" class="md-nav__link">
-    Should I preprocess the data?
+  <a href="#how-can-i-use-bertopic-with-chinese-documents" class="md-nav__link">
+    How can I use BERTopic with Chinese documents?
   </a>
   
 </li>
@@ -837,6 +884,13 @@
         <li class="md-nav__item">
   <a href="#why-does-it-take-so-long-to-import-bertopic" class="md-nav__link">
     Why does it take so long to import BERTopic?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#should-i-preprocess-the-data" class="md-nav__link">
+    Should I preprocess the data?
   </a>
   
 </li>
@@ -888,10 +942,21 @@ the model is done running or if you have less than 50_000 documents. </p>
 typically require a GPU and using only a CPU can slow down computation time quite a lot. 
 However, if you do not have access to a GPU, looking into quantization might help. </p>
 <h2 id="i-am-facing-memory-issues-help"><strong>I am facing memory issues. Help!</strong><a class="headerlink" href="#i-am-facing-memory-issues-help" title="Permanent link">&para;</a></h2>
-<p>To prevent any memory issues, it is advised to set <code>low_memory</code> to True. This will result in UMAP being 
-a bit slower, but consuming significantly less memory. Moreover, calculating the probabilities of topics 
-is quite computationally consuming and might impact memory. Setting <code>calculate_probabilities</code> to False 
-could similarly help. </p>
+<p>There are several ways to perform computation with large datasets. 
+First, you can set <code>low_memory</code> to True when instantiating BERTopic. 
+This may prevent blowing up the memory in UMAP. </p>
+<p>Second, setting <code>calculate_probabilities</code> to False when instantiating BERTopic prevents a huge document-topic 
+probability matrix from being created. Moreover, HDBSCAN is quite slow when it tries to calculate probabilities on large datasets. </p>
+<p>Third, you can set the minimum frequency of words in the CountVectorizer class to reduce the size of the resulting 
+sparse c-TF-IDF matrix. You can do this as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">,</span> <span class="n">min_df</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+</code></pre></div>
+<p>The <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">min_df</a> 
+parameter is used to indicate the minimum frequency of words. Setting this value larger than 1 can significantly reduce memory.</p>
 <p>If the problem persists, then this could be an issue related to your available memory. The processing of<br />
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  </p>
 <h2 id="i-have-only-a-few-topics-how-do-i-increase-them"><strong>I have only a few topics, how do I increase them?</strong><a class="headerlink" href="#i-have-only-a-few-topics-how-do-i-increase-them" title="Permanent link">&para;</a></h2>
@@ -905,8 +970,24 @@ You could also decrease the <code>n_neighbors</code> parameter used in <code>UMA
 <p>Third, although this does not happen very often, there simply aren't that many topics to be found 
 in your documents. You can often see this when you have many <code>-1</code> topics, which is actually not a topic 
 but a category of outliers.  </p>
-<h2 id="why-are-the-probabilities-not-calculated"><strong>Why are the probabilities not calculated?</strong><a class="headerlink" href="#why-are-the-probabilities-not-calculated" title="Permanent link">&para;</a></h2>
-<p>Although it is possible to calculate the probabilities, the process of doing so is quite computationally 
+<h2 id="i-have-too-many-topics-how-do-i-decrease-them"><strong>I have too many topics, how do I decrease them?</strong><a class="headerlink" href="#i-have-too-many-topics-how-do-i-decrease-them" title="Permanent link">&para;</a></h2>
+<p>If you have a large dataset, then it is possible to generate thousands of topics. Especially with large 
+datasets, there is a good chance they actually contain many small topics. In practice, you might want 
+a few hundred topics at most in order to interpret them nicely. </p>
+<p>There are a few ways of increasing the number of generated topics: </p>
+<p>First, we can set the <code>min_topic_size</code> in the BERTopic initialization much higher (e.g., 300) 
+to make sure that those small clusters will not be generated. This is a HDBSCAN parameter that 
+specifies what the minimum number of documents are needed in a cluster. More documents in a cluster 
+means less topics will be generated. </p>
+<p>Second, you can create a custom UMAP model and set <code>n_neighbors</code> much higher than the default 15 (e.g., 200). 
+This also prevents those micro clusters to be generated as it will needs quite a number of neighboring 
+documents to create a cluster. </p>
+<p>Third, we can set <code>nr_topics</code> to a value that seems logical to the user. Do note that topics are forced 
+to merge together which might result in a lower quality of topics. In practice, I would advise using 
+<code>nr_topic="auto"</code> as that will merge topics together that are very similar. Dissimilar topics will 
+therefore remain separated. </p>
+<h2 id="how-do-i-calculate-the-probabilities-of-all-topics-in-a-document"><strong>How do I calculate the probabilities of all topics in a document?</strong><a class="headerlink" href="#how-do-i-calculate-the-probabilities-of-all-topics-in-a-document" title="Permanent link">&para;</a></h2>
+<p>Although it is possible to calculate all the probabilities, the process of doing so is quite computationally 
 inefficient and might significantly increase the computation time. To prevent this, the probabilities are 
 not calculated as a default. In order to calculate, you will have to set <code>calculate_probabilities</code> to True:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
@@ -925,23 +1006,54 @@ to compilation issues and pypi.   </p>
 <li>Use the above step also with numpy as it is part of the issue</li>
 <li>Install BERTopic in a fresh environment using these steps. </li>
 </ul>
+<h2 id="how-can-i-run-bertopic-without-an-internet-connection"><strong>How can I run BERTopic without an internet connection?</strong><a class="headerlink" href="#how-can-i-run-bertopic-without-an-internet-connection" title="Permanent link">&para;</a></h2>
+<p>The great thing about using sentence-transformers is that it searches automatically for an embedding model locally. 
+If it cannot find one, it will download the pre-trained model from its servers. 
+Make sure that you set the correct path for sentence-transformers to work. You can find a bit more about that 
+<a href="https://github.com/UKPLab/sentence-transformers/issues/888">here</a>. </p>
+<p>You can download the corresponding model <a href="https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/v0.2/">here</a>
+and unzip it. Then, simply use the following to create your embedding model:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s1">&#39;path/to/unzipped/model&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Then, pass it to BERTopic:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="can-i-use-the-gpu-to-speed-up-the-model"><strong>Can I use the GPU to speed up the model?</strong><a class="headerlink" href="#can-i-use-the-gpu-to-speed-up-the-model" title="Permanent link">&para;</a></h2>
 <p>Yes and no. The GPU is automatically used when you use a SentenceTransformer or Flair embedding model. Using a CPU 
 would then definitely slow things down. However, UMAP and HDBSCAN are not GPU-accelerated and are likely not so in 
 the near future. For now, a GPU does help tremendously for extracting embeddings but does not speed up all 
 aspects of BERtopic.   </p>
-<h2 id="should-i-preprocess-the-data"><strong>Should I preprocess the data?</strong><a class="headerlink" href="#should-i-preprocess-the-data" title="Permanent link">&para;</a></h2>
-<p>No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
-are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
-have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
-typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
-topic modeling to HTML-code to extract topics of code, then it becomes important.</p>
+<h2 id="how-can-i-use-bertopic-with-chinese-documents"><strong>How can I use BERTopic with Chinese documents?</strong><a class="headerlink" href="#how-can-i-use-bertopic-with-chinese-documents" title="Permanent link">&para;</a></h2>
+<p>Currently, CountVectorizer tokenizes text by splitting whitespace which does not work for Chinese. 
+In order to get it to work, you will have to create a custom <code>CountVectorizer</code> with <code>jieba</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="kn">import</span> <span class="nn">jieba</span>
+
+<span class="k">def</span> <span class="nf">tokenize_zh</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">jieba</span><span class="o">.</span><span class="n">lcut</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">words</span>
+
+<span class="n">vectorizer</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenize_zh</span><span class="p">)</span>
+</code></pre></div>
+<p>Next, we pass our custom vectorizer to BERTopic and create our topic model:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="why-does-it-take-so-long-to-import-bertopic"><strong>Why does it take so long to import BERTopic?</strong><a class="headerlink" href="#why-does-it-take-so-long-to-import-bertopic" title="Permanent link">&para;</a></h2>
 <p>The main culprit here seems to be UMAP. After running tests with <a href="https://github.com/nschloe/tuna">Tuna</a> we 
 can see that most of the resources when importing BERTopic can be dedicated to UMAP:   </p>
 <p><img src="img/tuna.png" /></p>
 <p>Unfortunately, there currently is no fix for this issue. The most recent ticket regarding this 
 issue can be found <a href="https://github.com/lmcinnes/umap/issues/631">here</a>.</p>
+<h2 id="should-i-preprocess-the-data"><strong>Should I preprocess the data?</strong><a class="headerlink" href="#should-i-preprocess-the-data" title="Permanent link">&para;</a></h2>
+<p>No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
+are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
+have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
+typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
+topic modeling to HTML-code to extract topics of code, then it becomes important.</p>
                 
               
               

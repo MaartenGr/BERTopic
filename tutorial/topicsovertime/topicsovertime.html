@@ -465,6 +465,18 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guided/guided.html" class="md-nav__link">
+        Guided Topic Modeling
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -887,7 +899,7 @@ re-tweets for this use-case: </p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">tweets</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">tweets</span><span class="p">)</span>
 </code></pre></div>
 <p>From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 
 by simply calling <code>topics_over_time</code> and pass in his tweets, the corresponding timestamps, and the related topics:</p>
@@ -964,13 +976,13 @@ leaving <code>top_n_topics</code> empty, there is a chance that hundreds of line
         </a>
       
       
-        <a href="../../api/bertopic.html" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../guided/guided.html" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              BERTopic
+              Guided Topic Modeling
             </div>
           </div>
           <div class="md-footer__button md-icon">

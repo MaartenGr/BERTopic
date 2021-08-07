@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#version-081" class="md-skip">
+        <a href="#version-09" class="md-skip">
           Skip to content
         </a>
       
@@ -368,6 +368,18 @@
     <li class="md-nav__item">
       <a href="tutorial/topicsovertime/topicsovertime.html" class="md-nav__link">
         Dynamic Topic Modeling
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorial/guided/guided.html" class="md-nav__link">
+        Guided Topic Modeling
       </a>
     </li>
   
@@ -671,6 +683,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-09" class="md-nav__link">
+    Version 0.9
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-081" class="md-nav__link">
     Version 0.8.1
   </a>
@@ -821,6 +840,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-09" class="md-nav__link">
+    Version 0.9
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-081" class="md-nav__link">
     Version 0.8.1
   </a>
@@ -958,7 +984,49 @@
                 
                   <h1>Changelog</h1>
                 
-                <h2 id="version-081"><strong>Version 0.8.1</strong><a class="headerlink" href="#version-081" title="Permanent link">&para;</a></h2>
+                <h2 id="version-09"><strong>Version 0.9</strong><a class="headerlink" href="#version-09" title="Permanent link">&para;</a></h2>
+<p><em>Release date:  9 August, 2021</em></p>
+<p><strong>Highlights</strong>:  </p>
+<ul>
+<li>Implemented a <a href="https://maartengr.github.io/BERTopic/tutorial/guided/guided.html"><strong>Guided BERTopic</strong></a> -&gt; Use seeds to steer the Topic Modeling</li>
+<li>Get the most representative documents per topic: <code>topic_model.get_representative_docs(topic=1)</code><ul>
+<li>This allows users to see which documents are good representations of a topic and better understand the topics that were created</li>
+</ul>
+</li>
+<li>Added <code>normalize_frequency</code> parameter to <code>visualize_topics_per_class</code> and <code>visualize_topics_over_time</code> in order to better compare the relative topic frequencies between topics</li>
+<li>Return flat probabilities as default, only calculate the probabilities of all topics per document if <code>calculate_probabilities</code> is True</li>
+<li>Added several FAQs</li>
+</ul>
+<p><strong>Fixes</strong>:  </p>
+<ul>
+<li>Fix loading pre-trained BERTopic model</li>
+<li>Fix mapping of probabilities</li>
+<li>Fix <a href="https://github.com/MaartenGr/BERTopic/issues/190">#190</a></li>
+</ul>
+<p><strong>Guided BERTopic</strong>:    </p>
+<p>Guided BERTopic works in two ways: </p>
+<p>First, we create embeddings for each seeded topics by joining them and passing them through the document embedder. 
+These embeddings will be compared with the existing document embeddings through cosine similarity and assigned a label. 
+If the document is most similar to a seeded topic, then it will get that topic's label. 
+If it is most similar to the average document embedding, it will get the -1 label. 
+These labels are then passed through UMAP to create a semi-supervised approach that should nudge the topic creation to the seeded topics. </p>
+<p>Second, we take all words in <code>seed_topic_list</code> and assign them a multiplier larger than 1. 
+Those multipliers will be used to increase the IDF values of the words across all topics thereby increasing 
+the likelihood that a seeded topic word will appear in a topic. This does, however, also increase the chance of an 
+irrelevant topic having unrelated words. In practice, this should not be an issue since the IDF value is likely to 
+remain low regardless of the multiplier. The multiplier is now a fixed value but may change to something more elegant, 
+like taking the distribution of IDF values and its position into account when defining the multiplier. </p>
+<div class="highlight"><pre><span></span><code><span class="n">seed_topic_list</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;company&quot;</span><span class="p">,</span> <span class="s2">&quot;billion&quot;</span><span class="p">,</span> <span class="s2">&quot;quarter&quot;</span><span class="p">,</span> <span class="s2">&quot;shrs&quot;</span><span class="p">,</span> <span class="s2">&quot;earnings&quot;</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s2">&quot;acquisition&quot;</span><span class="p">,</span> <span class="s2">&quot;procurement&quot;</span><span class="p">,</span> <span class="s2">&quot;merge&quot;</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s2">&quot;exchange&quot;</span><span class="p">,</span> <span class="s2">&quot;currency&quot;</span><span class="p">,</span> <span class="s2">&quot;trading&quot;</span><span class="p">,</span> <span class="s2">&quot;rate&quot;</span><span class="p">,</span> <span class="s2">&quot;euro&quot;</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s2">&quot;grain&quot;</span><span class="p">,</span> <span class="s2">&quot;wheat&quot;</span><span class="p">,</span> <span class="s2">&quot;corn&quot;</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s2">&quot;coffee&quot;</span><span class="p">,</span> <span class="s2">&quot;cocoa&quot;</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s2">&quot;natural&quot;</span><span class="p">,</span> <span class="s2">&quot;gas&quot;</span><span class="p">,</span> <span class="s2">&quot;oil&quot;</span><span class="p">,</span> <span class="s2">&quot;fuel&quot;</span><span class="p">,</span> <span class="s2">&quot;products&quot;</span><span class="p">,</span> <span class="s2">&quot;petrol&quot;</span><span class="p">]]</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">seed_topic_list</span><span class="o">=</span><span class="n">seed_topic_list</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="version-081"><strong>Version 0.8.1</strong><a class="headerlink" href="#version-081" title="Permanent link">&para;</a></h2>
 <p><em>Release date:  08 June, 2021</em></p>
 <p><strong>Highlights</strong>:  </p>
 <ul>
