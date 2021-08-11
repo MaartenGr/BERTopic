@@ -50,9 +50,6 @@ topic_model = BERTopic(embedding_model=document_glove_embeddings)
 ### **Spacy**
 [Spacy](https://github.com/explosion/spaCy) is an amazing framework for processing text. There are 
 many models available across many languages for modeling text. 
- 
- allows you to choose almost any embedding model that 
-is publicly available. Flair can be used as follows:
 
 To use Spacy's non-transformer models in BERTopic:
 
