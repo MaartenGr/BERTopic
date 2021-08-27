@@ -89,8 +89,7 @@ setup(
         "flair": flair_packages,
         "spacy": spacy_packages,
         "use": use_packages,
-        "gensim": gensim_packages,
-        "all": extra_packages
+        "gensim": gensim_packages
     },
     python_requires='>=3.6',
 )

@@ -856,8 +856,9 @@ class BERTopic:
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
 
         # Reduce number of topics
-        self._extract_topics(documents)
         documents = self._reduce_topics(documents)
+        self.merged_topics = None
+        self._map_representative_docs()
 
         # Extract topics and map probabilities
         new_topics = documents.Topic.to_list()
@@ -1491,7 +1492,7 @@ class BERTopic:
         representative_docs = self.representative_docs.copy()
 
         # Remove topics that were merged as the most frequent
-        # topic or the topics they were merged into contain as they contain
+        # topic or the topics they were merged into as they contain
         # better representative documents
         if self.merged_topics:
             for topic_to_remove in self.merged_topics:
@@ -1828,13 +1829,14 @@ class BERTopic:
             mapped_probabilities: Updated probabilities
         """
         # Map array of probabilities (probability for assigned topic per document)
-        if len(probabilities.shape) == 2 and self.get_topic(-1):
-            mapped_probabilities = np.zeros((probabilities.shape[0],
-                                             len(set(self.mapped_topics.values()))-1))
-            for from_topic, to_topic in self.mapped_topics.items():
-                if to_topic != -1 and from_topic != -1:
-                    mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
-            return mapped_probabilities
+        if probabilities is not None:
+            if len(probabilities.shape) == 2 and self.get_topic(-1):
+                mapped_probabilities = np.zeros((probabilities.shape[0],
+                                                 len(set(self.mapped_topics.values()))-1))
+                for from_topic, to_topic in self.mapped_topics.items():
+                    if to_topic != -1 and from_topic != -1:
+                        mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
+                return mapped_probabilities
 
         return probabilities
 
