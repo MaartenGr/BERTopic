@@ -35,7 +35,7 @@ def visualize_distribution(topic_model,
     <iframe src="../../tutorial/visualization/probabilities.html"
     style="width:1000px; height: 500px; border: 0px;""></iframe>
     """
-    if len(probabilities.shape) != 2:
+    if len(probabilities.shape) != 1:
         raise ValueError("This visualization cannot be used if you have set `calculate_probabilities` to False "
                          "as it uses the topic probabilities of all topics. ")
     if len(probabilities[probabilities > min_probability]) == 0:
