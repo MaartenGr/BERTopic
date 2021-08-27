@@ -1742,7 +1742,7 @@ class BERTopic:
         if self.topic_embeddings is not None:
             embeddings = np.array(self.topic_embeddings)
         else:
-            embeddings = self.c_tf_idf
+            embeddings = self.c_tf_idf.toarray()
         norm_data = normalize(embeddings, norm='l2')
         predictions = hdbscan.HDBSCAN(min_cluster_size=2,
                                       metric='euclidean',
