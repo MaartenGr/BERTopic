@@ -961,6 +961,7 @@ class BERTopic:
                                    topics_over_time: pd.DataFrame,
                                    top_n_topics: int = None,
                                    topics: List[int] = None,
+                                   normalize_frequency: bool = False,
                                    width: int = 1250,
                                    height: int = 450) -> go.Figure:
         """ Visualize topics over time
@@ -970,6 +971,7 @@ class BERTopic:
                               corresponding topic representation
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
+            normalize_frequency: Whether to normalize each topic's frequency individually
             width: The width of the figure.
             height: The height of the figure.
 
@@ -997,6 +999,7 @@ class BERTopic:
                                                    topics_over_time=topics_over_time,
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
+                                                   normalize_frequency=normalize_frequency,
                                                    width=width,
                                                    height=height)
 
@@ -1004,6 +1007,7 @@ class BERTopic:
                                    topics_per_class: pd.DataFrame,
                                    top_n_topics: int = 10,
                                    topics: List[int] = None,
+                                   normalize_frequency: bool = False,
                                    width: int = 1250,
                                    height: int = 900) -> go.Figure:
         """ Visualize topics per class
@@ -1013,6 +1017,7 @@ class BERTopic:
                               corresponding topic representation
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
+            normalize_frequency: Whether to normalize each topic's frequency individually
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1040,6 +1045,7 @@ class BERTopic:
                                                    topics_per_class=topics_per_class,
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
+                                                   normalize_frequency=normalize_frequency,
                                                    width=width,
                                                    height=height)
 
