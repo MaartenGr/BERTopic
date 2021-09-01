@@ -856,8 +856,9 @@ class BERTopic:
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
 
         # Reduce number of topics
-        self._extract_topics(documents)
         documents = self._reduce_topics(documents)
+        self.merged_topics = None
+        self._map_representative_docs()
 
         # Extract topics and map probabilities
         new_topics = documents.Topic.to_list()
@@ -960,6 +961,7 @@ class BERTopic:
                                    topics_over_time: pd.DataFrame,
                                    top_n_topics: int = None,
                                    topics: List[int] = None,
+                                   normalize_frequency: bool = False,
                                    width: int = 1250,
                                    height: int = 450) -> go.Figure:
         """ Visualize topics over time
@@ -969,6 +971,7 @@ class BERTopic:
                               corresponding topic representation
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
+            normalize_frequency: Whether to normalize each topic's frequency individually
             width: The width of the figure.
             height: The height of the figure.
 
@@ -996,6 +999,7 @@ class BERTopic:
                                                    topics_over_time=topics_over_time,
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
+                                                   normalize_frequency=normalize_frequency,
                                                    width=width,
                                                    height=height)
 
@@ -1003,6 +1007,7 @@ class BERTopic:
                                    topics_per_class: pd.DataFrame,
                                    top_n_topics: int = 10,
                                    topics: List[int] = None,
+                                   normalize_frequency: bool = False,
                                    width: int = 1250,
                                    height: int = 900) -> go.Figure:
         """ Visualize topics per class
@@ -1012,6 +1017,7 @@ class BERTopic:
                               corresponding topic representation
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
+            normalize_frequency: Whether to normalize each topic's frequency individually
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1039,6 +1045,7 @@ class BERTopic:
                                                    topics_per_class=topics_per_class,
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
+                                                   normalize_frequency=normalize_frequency,
                                                    width=width,
                                                    height=height)
 
@@ -1491,7 +1498,7 @@ class BERTopic:
         representative_docs = self.representative_docs.copy()
 
         # Remove topics that were merged as the most frequent
-        # topic or the topics they were merged into contain as they contain
+        # topic or the topics they were merged into as they contain
         # better representative documents
         if self.merged_topics:
             for topic_to_remove in self.merged_topics:
@@ -1742,7 +1749,7 @@ class BERTopic:
         if self.topic_embeddings is not None:
             embeddings = np.array(self.topic_embeddings)
         else:
-            embeddings = self.c_tf_idf
+            embeddings = self.c_tf_idf.toarray()
         norm_data = normalize(embeddings, norm='l2')
         predictions = hdbscan.HDBSCAN(min_cluster_size=2,
                                       metric='euclidean',
@@ -1828,13 +1835,14 @@ class BERTopic:
             mapped_probabilities: Updated probabilities
         """
         # Map array of probabilities (probability for assigned topic per document)
-        if len(probabilities.shape) == 2 and self.get_topic(-1):
-            mapped_probabilities = np.zeros((probabilities.shape[0],
-                                             len(set(self.mapped_topics.values()))-1))
-            for from_topic, to_topic in self.mapped_topics.items():
-                if to_topic != -1 and from_topic != -1:
-                    mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
-            return mapped_probabilities
+        if probabilities is not None:
+            if len(probabilities.shape) == 2 and self.get_topic(-1):
+                mapped_probabilities = np.zeros((probabilities.shape[0],
+                                                 len(set(self.mapped_topics.values()))-1))
+                for from_topic, to_topic in self.mapped_topics.items():
+                    if to_topic != -1 and from_topic != -1:
+                        mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
+                return mapped_probabilities
 
         return probabilities
 

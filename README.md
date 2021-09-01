@@ -38,13 +38,6 @@ pip install bertopic[spacy]
 pip install bertopic[use]
 ```
 
-To install all backends:
-
-```bash
-pip install bertopic[all]
-```
-
-
 ## Getting Started
 For an in-depth overview of the features of BERTopic 
 you can check the full documentation [here](https://maartengr.github.io/BERTopic/) or you can follow along 
