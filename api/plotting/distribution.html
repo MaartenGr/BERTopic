@@ -854,7 +854,7 @@ style="width:1000px; height: 500px; border: 0px;""></iframe>
 <span class="sd">    &lt;iframe src=&quot;../../tutorial/visualization/probabilities.html&quot;</span>
 <span class="sd">    style=&quot;width:1000px; height: 500px; border: 0px;&quot;&quot;&gt;&lt;/iframe&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This visualization cannot be used if you have set `calculate_probabilities` to False &quot;</span>
                          <span class="s2">&quot;as it uses the topic probabilities of all topics. &quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">probabilities</span> <span class="o">&gt;</span> <span class="n">min_probability</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

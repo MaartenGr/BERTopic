@@ -2632,8 +2632,9 @@ topics and probabilities (if they were calculated):</p>
     <span class="n">documents</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;Document&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topics</span><span class="p">})</span>
 
     <span class="c1"># Reduce number of topics</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_extract_topics</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
     <span class="n">documents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reduce_topics</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">merged_topics</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_map_representative_docs</span><span class="p">()</span>
 
     <span class="c1"># Extract topics and map probabilities</span>
     <span class="n">new_topics</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
@@ -4228,7 +4229,7 @@ technique typically reserved for LDA.</p>
 
 
 <h2 id="bertopic._bertopic.BERTopic.visualize_topics_over_time" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics_over_time</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1250</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">450</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics_over_time</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalize_frequency</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1250</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">450</span><span class="p">)</span></code>
 
 
 <a href="#bertopic._bertopic.BERTopic.visualize_topics_over_time" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -4266,6 +4267,12 @@ technique typically reserved for LDA.</p>
         <td><code>List[int]</code></td>
         <td><p>Select which topics you would like to be visualized</p></td>
         <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>normalize_frequency</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to normalize each topic's frequency individually</p></td>
+        <td><code>False</code></td>
       </tr>
       <tr>
         <td><code>width</code></td>
@@ -4311,6 +4318,7 @@ technique typically reserved for LDA.</p>
                                <span class="n">topics_over_time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                                <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">normalize_frequency</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">450</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Visualize topics over time</span>
@@ -4320,6 +4328,7 @@ technique typically reserved for LDA.</p>
 <span class="sd">                          corresponding topic representation</span>
 <span class="sd">        top_n_topics: To visualize the most frequent topics instead of all</span>
 <span class="sd">        topics: Select which topics you would like to be visualized</span>
+<span class="sd">        normalize_frequency: Whether to normalize each topic&#39;s frequency individually</span>
 <span class="sd">        width: The width of the figure.</span>
 <span class="sd">        height: The height of the figure.</span>
 
@@ -4347,6 +4356,7 @@ technique typically reserved for LDA.</p>
                                                <span class="n">topics_over_time</span><span class="o">=</span><span class="n">topics_over_time</span><span class="p">,</span>
                                                <span class="n">top_n_topics</span><span class="o">=</span><span class="n">top_n_topics</span><span class="p">,</span>
                                                <span class="n">topics</span><span class="o">=</span><span class="n">topics</span><span class="p">,</span>
+                                               <span class="n">normalize_frequency</span><span class="o">=</span><span class="n">normalize_frequency</span><span class="p">,</span>
                                                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
                                                <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span>
 </code></pre></div>
@@ -4362,7 +4372,7 @@ technique typically reserved for LDA.</p>
 
 
 <h2 id="bertopic._bertopic.BERTopic.visualize_topics_per_class" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics_per_class</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1250</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">900</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics_per_class</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalize_frequency</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1250</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">900</span><span class="p">)</span></code>
 
 
 <a href="#bertopic._bertopic.BERTopic.visualize_topics_per_class" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -4400,6 +4410,12 @@ technique typically reserved for LDA.</p>
         <td><code>List[int]</code></td>
         <td><p>Select which topics you would like to be visualized</p></td>
         <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>normalize_frequency</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to normalize each topic's frequency individually</p></td>
+        <td><code>False</code></td>
       </tr>
       <tr>
         <td><code>width</code></td>
@@ -4445,6 +4461,7 @@ technique typically reserved for LDA.</p>
                                <span class="n">topics_per_class</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                                <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                                <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">normalize_frequency</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
@@ -4454,6 +4471,7 @@ technique typically reserved for LDA.</p>
 <span class="sd">                          corresponding topic representation</span>
 <span class="sd">        top_n_topics: To visualize the most frequent topics instead of all</span>
 <span class="sd">        topics: Select which topics you would like to be visualized</span>
+<span class="sd">        normalize_frequency: Whether to normalize each topic&#39;s frequency individually</span>
 <span class="sd">        width: The width of the figure.</span>
 <span class="sd">        height: The height of the figure.</span>
 
@@ -4481,6 +4499,7 @@ technique typically reserved for LDA.</p>
                                                <span class="n">topics_per_class</span><span class="o">=</span><span class="n">topics_per_class</span><span class="p">,</span>
                                                <span class="n">top_n_topics</span><span class="o">=</span><span class="n">top_n_topics</span><span class="p">,</span>
                                                <span class="n">topics</span><span class="o">=</span><span class="n">topics</span><span class="p">,</span>
+                                               <span class="n">normalize_frequency</span><span class="o">=</span><span class="n">normalize_frequency</span><span class="p">,</span>
                                                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
                                                <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span>
 </code></pre></div>
