@@ -1,3 +1,16 @@
+## **Version 0.9.1**
+*Release date:  1 September, 2021*
+
+A release focused on fixing several issues:
+
+**Fixes**:  
+
+* Fix TypeError when auto-reducing topics ([#210](https://github.com/MaartenGr/BERTopic/issues/210)) 
+* Fix mapping representative docs when reducing topics ([#208](https://github.com/MaartenGr/BERTopic/issues/208))
+* Fix visualization issues with probabilities ([#205](https://github.com/MaartenGr/BERTopic/issues/205))
+* Fix missing `normalize_frequency` param in plots ([#213](https://github.com/MaartenGr/BERTopic/issues/208))
+  
+
 ## **Version 0.9**
 *Release date:  9 August, 2021*
 
