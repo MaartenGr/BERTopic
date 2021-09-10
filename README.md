@@ -119,7 +119,7 @@ BERTopic supports many embedding models that can be used to embed the documents 
 * Gensim
 * USE
 
-[**Sentence-Transformers**]() is typically used as it has shown great results embedding documents 
+[**Sentence-Transformers**](https://github.com/UKPLab/sentence-transformers) is typically used as it has shown great results embedding documents 
 meant for semantic similarity. Simply select any from their documentation 
 [here](https://www.sbert.net/docs/pretrained_models.html) and pass it to BERTopic:
 
