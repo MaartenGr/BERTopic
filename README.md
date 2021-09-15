@@ -124,7 +124,7 @@ meant for semantic similarity. Simply select any from their documentation
 [here](https://www.sbert.net/docs/pretrained_models.html) and pass it to BERTopic:
 
 ```python
-topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
+topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2")
 ```
 
 [**Flair**](https://github.com/flairNLP/flair) allows you to choose almost any 🤗 transformers model. Simply 

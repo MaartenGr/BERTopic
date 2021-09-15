@@ -30,7 +30,7 @@ from bertopic._ctfidf import ClassTFIDF
 from bertopic.backend._utils import select_backend
 
 newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
-embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def test_extract_embeddings(base_bertopic):
@@ -41,7 +41,7 @@ def test_extract_embeddings(base_bertopic):
     the correct shape should be outputted. The embeddings by itself
     should not exceed certain values as a sanity check.
     """
-    base_bertopic.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
+    base_bertopic.embedding_model = select_backend("all-MiniLM-L6-v2")
     single_embedding = base_bertopic._extract_embeddings("a document")
     multiple_embeddings = base_bertopic._extract_embeddings(["a document", "another document"])
 
@@ -63,8 +63,8 @@ def test_extract_embeddings_compare():
     whether BERTopic embeddings match the sentence-transformers embeddings.
     """
     docs = ["some document"]
-    model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
-    model.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
+    model = BERTopic(embedding_model="all-MiniLM-L6-v2")
+    model.embedding_model = select_backend("all-MiniLM-L6-v2")
     bertopic_embeddings = model._extract_embeddings(docs)
 
     assert isinstance(bertopic_embeddings, np.ndarray)

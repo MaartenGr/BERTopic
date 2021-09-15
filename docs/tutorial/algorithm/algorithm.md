@@ -18,7 +18,7 @@ language and are great for creating either document- or sentence-embeddings.
 
 In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:
 
-* `"paraphrase-MiniLM-L6-v2"`
+* `"all-MiniLM-L6-v2"`
 * `"paraphrase-multilingual-MiniLM-L12-v2"`
 
 The first is an English BERT-based model trained specifically for semantic similarity tasks which work quite 
