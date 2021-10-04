@@ -13,6 +13,8 @@ import pandas as pd
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 
+import bertopic._bertopic
+from bertopic._bertopic import TopicMapper
 from bertopic.backend._utils import select_backend
 from bertopic import BERTopic
 
@@ -87,6 +89,7 @@ def test_topic_reduction(reduced_topics):
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": topics})
     model.hdbscan_model.labels_ = topics
+    model.topic_mapper = TopicMapper(model.hdbscan_model)
     model._update_topic_size(old_documents)
     old_documents = model._sort_mappings_by_frequency(old_documents)
     model._extract_topics(old_documents.copy())

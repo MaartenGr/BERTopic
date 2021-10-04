@@ -160,6 +160,7 @@ class BERTopic:
                                                               prediction_data=True)
 
         self.topics = None
+        self.topic_mapper = None
         self.topic_sizes = None
         self.mapped_topics = None
         self.merged_topics = None
@@ -301,8 +302,8 @@ class BERTopic:
         if self.nr_topics:
             documents = self._reduce_topics(documents)
 
-        self._map_representative_docs()
-        probabilities = self._map_probabilities(probabilities)
+        self._map_representative_docs(original_topics=True)
+        probabilities = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
         return predictions, probabilities
@@ -1392,6 +1393,7 @@ class BERTopic:
 
         self._update_topic_size(documents)
         self._save_representative_docs(documents)
+        self.topic_mapper = TopicMapper(self.hdbscan_model)
         logger.info("Clustered UMAP embeddings with HDBSCAN")
         return documents, probabilities
 
@@ -1487,28 +1489,28 @@ class BERTopic:
                                     for topic, doc_ids in
                                     representative_docs.items()}
 
-    def _map_representative_docs(self):
+    def _map_representative_docs(self, original_topics: bool = False):
         """ Map the representative docs per topic to the correct topics
 
         If topics were reduced, remove documents from topics that were
         merged into larger topics as we assume that the documents from
         larger topics are better representative of the entire merged
         topic.
+
+        Args:
+            original_topics: Whether we want to map from the
+                             original topics to the most recent topics
+                             or from the second-most recent topics.
         """
+        mappings = self.topic_mapper.get_mappings(original_topics)
         representative_docs = self.representative_docs.copy()
 
-        # Remove topics that were merged as the most frequent
-        # topic or the topics they were merged into as they contain
-        # better representative documents
-        if self.merged_topics:
-            for topic_to_remove in self.merged_topics:
-                del representative_docs[topic_to_remove]
-
         # Update the representative documents
-        updated_representative_docs = {}
+        updated_representative_docs = {mappings[old_topic]: []
+                                       for old_topic, _ in representative_docs.items()}
         for old_topic, docs in representative_docs.items():
-            new_topic = self.mapped_topics[old_topic]
-            updated_representative_docs[new_topic] = docs
+            new_topic = mappings[old_topic]
+            updated_representative_docs[new_topic].extend(docs)
 
         self.representative_docs = updated_representative_docs
 
@@ -1678,10 +1680,6 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        # Track the mapping of topics
-        if not self.mapped_topics:
-            self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
-
         # Track which topics where originally merged
         if not self.merged_topics:
             self.merged_topics = []
@@ -1694,6 +1692,7 @@ class BERTopic:
         np.fill_diagonal(similarities, 0)
 
         # Find most similar topic to least common topic
+        topics = documents.Topic.tolist().copy()
         mapped_topics = {}
         while len(self.get_topic_freq()) > self.nr_topics + 1:
             topic_to_merge = self.get_topic_freq().iloc[-1].Topic
@@ -1706,20 +1705,11 @@ class BERTopic:
             mapped_topics[topic_to_merge] = topic_to_merge_into
             self._update_topic_size(documents)
 
-        # Instead of mapping a -> b and then b -> c,
-        # directly map a -> c
-        for topic_from, _ in mapped_topics.items():
-            topic_to = topic_from
-            while topic_to in mapped_topics:
-                topic_to = mapped_topics[topic_to]
-            mapped_topics[topic_from] = topic_to
+        # Map topics
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
+        self.topic_mapper.add_mappings(mapped_topics)
 
-        # Update mapped topics with new clusters
-        self.mapped_topics = {og_topic: mapped_topics[topic]
-                              if topic in mapped_topics
-                              else topic
-                              for og_topic, topic in self.mapped_topics.items()}
-
+        # Update representations
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
         self._update_topic_size(documents)
@@ -1734,14 +1724,7 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        # Track the mapping of topics
-        if not self.mapped_topics:
-            self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
-
-        # Track which topics where originally merged
-        if not self.merged_topics:
-            self.merged_topics = []
-
+        topics = documents.Topic.tolist().copy()
         unique_topics = sorted(list(documents.Topic.unique()))[1:]
         max_topic = unique_topics[-1]
 
@@ -1761,19 +1744,10 @@ class BERTopic:
                          for index, prediction in enumerate(predictions)
                          if prediction != -1}
         documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
 
-        # Track merged topic
-        df = pd.DataFrame({"Topic": mapped_topics.keys(), "Group": mapped_topics.values()})
-        df["Size"] = df["Topic"].map(self.topic_sizes)
-        mask = df.groupby(['Topic'])['Size'].transform('max')
-        df = df[~(df['Size'] == mask)]
-        self.merged_topic = df.Topic.values.tolist()
-
-        # Update mapped topics with new clusters
-        self.mapped_topics = {og_topic: mapped_topics[topic]
-                              if topic in mapped_topics
-                              else topic
-                              for og_topic, topic in self.mapped_topics.items()}
+        # Update documents and topics
+        self.topic_mapper.add_mappings(mapped_topics)
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
         self._update_topic_size(documents)
@@ -1812,17 +1786,16 @@ class BERTopic:
         df = pd.DataFrame(self.topic_sizes.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
         df = df[df.Old_Topic != -1]
         sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
-        self.mapped_topics = {og_topic: sorted_topics[topic]
-                              if topic in sorted_topics
-                              else topic
-                              for og_topic, topic in self.mapped_topics.items()}
+        self.topic_mapper.add_mappings(sorted_topics)
 
         # Map documents
         documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
         self._update_topic_size(documents)
         return documents
 
-    def _map_probabilities(self, probabilities: Union[np.ndarray, None]) -> Union[np.ndarray, None]:
+    def _map_probabilities(self,
+                           probabilities: Union[np.ndarray, None],
+                           original_topics: bool = False) -> Union[np.ndarray, None]:
         """ Map the probabilities to the reduced topics.
         This is achieved by adding the probabilities together
         of all topics that were mapped to the same topic. Then,
@@ -1831,17 +1804,24 @@ class BERTopic:
 
         Arguments:
             probabilities: An array containing probabilities
+            original_topics: Whether we want to map from the
+                             original topics to the most recent topics
+                             or from the second-most recent topics.
+
         Returns:
             mapped_probabilities: Updated probabilities
         """
+        mappings = self.topic_mapper.get_mappings(original_topics)
+
         # Map array of probabilities (probability for assigned topic per document)
         if probabilities is not None:
             if len(probabilities.shape) == 2 and self.get_topic(-1):
                 mapped_probabilities = np.zeros((probabilities.shape[0],
-                                                 len(set(self.mapped_topics.values()))-1))
-                for from_topic, to_topic in self.mapped_topics.items():
+                                                 len(set(mappings.values())) - 1))
+                for from_topic, to_topic in mappings.items():
                     if to_topic != -1 and from_topic != -1:
                         mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
+
                 return mapped_probabilities
 
         return probabilities
@@ -1889,3 +1869,75 @@ class BERTopic:
             parameters += f"{parameter}={value}, "
 
         return f"BERTopic({parameters[:-2]})"
+
+
+class TopicMapper:
+    """ Keep track of Topic Mappings
+
+    The number of topics can be reduced
+    by merging them together. This mapping
+    needs to be tracked in BERTopic as new
+    predictions need to be mapped to the new
+    topics.
+
+    These mappings are tracked in the `self.mappings`
+    variable where each set of topic are stacked horizontally.
+    For example, the most recent topics can be found in the
+    last column. To get a mapping, simply take the two columns
+    of topics.
+
+    In other words, it is represented as graph:
+    Topic 1 --> Topic 11 --> Topic 4 --> etc.
+
+    """
+    def __init__(self, hdbscan_model: hdbscan.HDBSCAN):
+        """ Initalization of Topic Mapper
+
+        Args:
+            hdbscan_model: The trained HDBSCAN-model which
+                           is used to extract the topics from
+        """
+        self.base_topics = np.array(sorted(list(set(hdbscan_model.labels_))))
+        topics = self.base_topics.copy().reshape(-1, 1)
+        self.mappings = np.hstack([topics.copy(), topics.copy()]).tolist()
+
+    def get_mappings(self, original_topics: bool = True) -> Mapping[int, int]:
+        """ Get mappings from either the original topics or
+        the second-most recent topics to the current topics
+
+        Args:
+            original_topics: Whether we want to map from the
+                             original topics to the most recent topics
+                             or from the second-most recent topics.
+
+        Returns:
+            mappings: The mappings from old topics to new topics
+
+        Usage:
+
+        To get mappings, simply call:
+        ```python
+        mapper = TopicMapper(hdbscan_model)
+        mappings = mapper.get_mappings(original_topics=False)
+        ```
+        """
+        if original_topics:
+            mappings = np.array(self.mappings)[:, [0, -1]]
+            mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
+        else:
+            mappings = np.array(self.mappings)[:, [-3, -1]]
+            mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
+        return mappings
+
+    def add_mappings(self, mappings: Mapping[int, int]):
+        """ Add new column(s) of topic mappings
+
+        Args:
+            mappings: The mappings to add
+        """
+        for topics in self.mappings:
+            topic = topics[-1]
+            if topic in mappings:
+                topics.append(mappings[topic])
+            else:
+                topics.append(-1)
