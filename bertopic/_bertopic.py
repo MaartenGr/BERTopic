@@ -1617,18 +1617,25 @@ class BERTopic:
             topics: The top words per topic
         """
         if c_tf_idf is None:
-            c_tf_idf = self.c_tf_idf.toarray()
-        else:
-            c_tf_idf = c_tf_idf.toarray()
+            c_tf_idf = self.c_tf_idf
 
         if labels is None:
             labels = sorted(list(self.topic_sizes.keys()))
 
+        # Get the top 30 indices and values per row in a sparse c-TF-IDF matrix
+        indices = self._top_n_idx_sparse(c_tf_idf, 30)
+        scores = self._top_n_values_sparse(c_tf_idf, indices)
+        sorted_indices = np.argsort(scores, 1)
+        indices = np.take_along_axis(indices, sorted_indices, axis=1)
+        scores = np.take_along_axis(scores, sorted_indices, axis=1)
+
         # Get top 30 words per topic based on c-TF-IDF score
-        indices = c_tf_idf.argsort()[:, -30:]
-        topics = {label: [(words[j], c_tf_idf[i][j])
-                          for j in indices[i]][::-1]
-                  for i, label in enumerate(labels)}
+        topics = {label: [(words[word_index], score)
+                          if word_index and score > 0
+                          else ("", 0.00001)
+                          for word_index, score in zip(indices[index][::-1], scores[index][::-1])
+                          ]
+                  for index, label in enumerate(labels)}
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
@@ -1642,10 +1649,10 @@ class BERTopic:
                 topic_embedding = self._extract_embeddings(" ".join(words),
                                                            method="word",
                                                            verbose=False).reshape(1, -1)
-
                 topic_words = mmr(topic_embedding, word_embeddings, words,
                                   top_n=self.top_n_words, diversity=0)
                 topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+        topics = {label: values[:self.top_n_words] for label, values in topics.items()}
 
         return topics
 
@@ -1841,6 +1848,45 @@ class BERTopic:
             cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
         cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
         return cleaned_documents
+
+    @staticmethod
+    def _top_n_idx_sparse(matrix: csr_matrix, n: int) -> np.ndarray:
+        """ Return indices of top n values in each row of a sparse matrix
+
+        Retrieved from:
+            https://stackoverflow.com/questions/49207275/finding-the-top-n-values-in-a-row-of-a-scipy-sparse-matrix
+
+        Args:
+            matrix: The sparse matrix from which to get the top n indices per row
+            n: The number of highest values to extract from each row
+
+        Returns:
+            indices: The top n indices per row
+        """
+        indices = []
+        for le, ri in zip(matrix.indptr[:-1], matrix.indptr[1:]):
+            n_row_pick = min(n, ri - le)
+            values = matrix.indices[le + np.argpartition(matrix.data[le:ri], -n_row_pick)[-n_row_pick:]]
+            values = [values[index] if len(values) >= index + 1 else None for index in range(n)]
+            indices.append(values)
+        return np.array(indices)
+
+    @staticmethod
+    def _top_n_values_sparse(matrix: csr_matrix, indices: np.ndarray) -> np.ndarray:
+        """ Return the top n values for each row in a sparse matrix
+
+        Args:
+            matrix: The sparse matrix from which to get the top n indices per row
+            indices: The top n indices per row
+
+        Returns:
+            top_values: The top n scores per row
+        """
+        top_values = []
+        for row, values in enumerate(indices):
+            scores = np.array([matrix[row, value] if value is not None else 0 for value in values])
+            top_values.append(scores)
+        return np.array(top_values)
 
     @classmethod
     def _get_param_names(cls):
