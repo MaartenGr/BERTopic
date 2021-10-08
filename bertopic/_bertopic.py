@@ -933,13 +933,13 @@ class BERTopic:
         all topics simply run:
 
         ```python
-        topic_model.visualize_word_rank()
+        topic_model.visualize_term_rank()
         ```
 
         Or if you want to save the resulting figure:
 
         ```python
-        fig = topic_model.visualize_word_rank()
+        fig = topic_model.visualize_term_rank()
         fig.write_html("path/to/file.html")
         ```
 
