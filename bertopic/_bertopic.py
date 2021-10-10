@@ -1467,7 +1467,7 @@ class BERTopic:
         # Prepare the condensed tree and luf clusters beneath a given cluster
         condensed_tree = self.hdbscan_model.condensed_tree_
         raw_tree = condensed_tree._raw_tree
-        clusters = condensed_tree._select_clusters()
+        clusters = sorted(condensed_tree._select_clusters())
         cluster_tree = raw_tree[raw_tree['child_size'] > 1]
 
         #  Find the points with maximum lambda value in each leaf
