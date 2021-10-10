@@ -111,6 +111,20 @@ topic_model.visualize_topics()
 
 <img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
 
+We can create an overview of the most frequent topics in a way that they are easily interpretable. 
+Horizontal barcharts typically convey information rather well and allow for an intuitive representation 
+of the topics: 
+
+```python
+topic_model.visualize_barchart()
+``` 
+
+<img src="images/topics.png" width="60%" height="60%" align="center" />
+
+
+Find all possible visualizations with interactive examples in the documentation 
+[here](https://maartengr.github.io/BERTopic/tutorial/visualization/visualization.html). 
+
 ## Embedding Models
 BERTopic supports many embedding models that can be used to embed the documents and words:
 * Sentence-Transformers
