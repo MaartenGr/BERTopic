@@ -119,7 +119,7 @@ of the topics:
 topic_model.visualize_barchart()
 ``` 
 
-<img src="images/topics.png" width="60%" height="60%" align="center" />
+<img src="images/topics.png" width="70%" height="70%" align="center" />
 
 
 Find all possible visualizations with interactive examples in the documentation 
