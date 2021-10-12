@@ -162,7 +162,6 @@ class BERTopic:
         self.topics = None
         self.topic_mapper = None
         self.topic_sizes = None
-        self.mapped_topics = None
         self.merged_topics = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
@@ -372,10 +371,8 @@ class BERTopic:
         else:
             probabilities = None
 
-        if self.mapped_topics:
-            predictions = self._map_predictions(predictions)
-            probabilities = self._map_probabilities(probabilities)
-
+        probabilities = self._map_probabilities(probabilities, original_topics=True)
+        predictions = self._map_predictions(predictions)
         return predictions, probabilities
 
     def topics_over_time(self,
@@ -1338,13 +1335,12 @@ class BERTopic:
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
         """ Map predictions to the correct topics if topics were reduced """
-        if self.mapped_topics:
-            return [self.mapped_topics[prediction]
-                    if prediction in self.mapped_topics
-                    else prediction
-                    for prediction in predictions]
-        else:
-            return predictions
+        mappings = self.topic_mapper.get_mappings(original_topics=True)
+        mapped_predictions = [mappings[prediction]
+                              if prediction in mappings
+                              else -1
+                              for prediction in predictions]
+        return mapped_predictions
 
     def _reduce_dimensionality(self,
                                embeddings: Union[np.ndarray, csr_matrix],
@@ -1785,9 +1781,6 @@ class BERTopic:
                        and re-ordered topic ids
         """
         self._update_topic_size(documents)
-
-        if not self.mapped_topics:
-            self.mapped_topics = {topic: topic for topic in set(self.hdbscan_model.labels_)}
 
         # Map topics based on frequency
         df = pd.DataFrame(self.topic_sizes.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
