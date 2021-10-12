@@ -101,9 +101,7 @@ def test_topic_reduction(reduced_topics):
     assert old_freq.Count.sum() == new_freq.Count.sum()
     assert len(old_freq.Topic.unique()) == len(old_freq)
     assert len(new_freq.Topic.unique()) == len(new_freq)
-    assert isinstance(model.mapped_topics, dict)
     assert not set(model.get_topic_freq().Topic).difference(set(new_documents.Topic))
-    assert model.mapped_topics
 
 
 def test_topic_reduction_edge_cases():
