@@ -9,7 +9,7 @@ and pass it through BERTopic with `embedding_model`:
 
 ```python
 from bertopic import BERTopic
-topic_model = BERTopic(embedding_model="paraphrase-MiniLM-L6-v2")
+topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2")
 ```
 
 Or select a SentenceTransformer model with your parameters:
@@ -17,7 +17,7 @@ Or select a SentenceTransformer model with your parameters:
 ```python
 from sentence_transformers import SentenceTransformer
 
-sentence_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
 topic_model = BERTopic(embedding_model=sentence_model)
 ```
 
@@ -51,9 +51,6 @@ topic_model = BERTopic(embedding_model=document_glove_embeddings)
 [Spacy](https://github.com/explosion/spaCy) is an amazing framework for processing text. There are 
 many models available across many languages for modeling text. 
  
- allows you to choose almost any embedding model that 
-is publicly available. Flair can be used as follows:
-
 To use Spacy's non-transformer models in BERTopic:
 
 ```python
@@ -135,7 +132,7 @@ from sentence_transformers import SentenceTransformer
 ft = api.load('fasttext-wiki-news-subwords-300')
 
 # Document embedding model
-embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Create a model that uses both language models and pass it through BERTopic
 word_doc_embedder = WordDocEmbedder(embedding_model=embedding_model, word_embedding_model=ft)
@@ -160,7 +157,7 @@ class CustomEmbedder(BaseEmbedder):
         return embeddings 
 
 # Create custom backend
-embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 custom_embedder = CustomEmbedder(embedding_model=embedding_model)
 
 # Pass custom backend to bertopic
@@ -179,7 +176,7 @@ from sentence_transformers import SentenceTransformer
 
 # Prepare embeddings
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-sentence_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Create topic model and use the custom embeddings

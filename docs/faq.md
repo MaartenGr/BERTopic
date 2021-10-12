@@ -7,10 +7,10 @@ with different parameters.
 ## **Which embedding model works best for which language?**
 Unfortunately, there is not a definitive list of the best models for each language, this highly depends 
 on your data, the model, and your specific use-case. However, the default model in BERTopic 
-(`"paraphrase-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
+(`"all-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
 documents or any other language, `"paraphrase-multilingual-MiniLM-L12-v2""` has shown great performance.  
 
-If you want to use a model that provides a higher quality, but takes more compute time, then I would advise using `paraphrase-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead. 
+If you want to use a model that provides a higher quality, but takes more compute time, then I would advise using `all-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead. 
 
 **SentenceTransformers**  
 [SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models) work typically quite well 
@@ -53,6 +53,11 @@ topic_model = BERTopic(vectorizer_model=vectorizer_model)
 
 The [min_df](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html) 
 parameter is used to indicate the minimum frequency of words. Setting this value larger than 1 can significantly reduce memory.
+
+Fourth, there is an update in HDBSCAN that prevents some issues with memory on very large datasets (millions of rows) 
+that can currently only be installed through their master branch:
+
+`pip install --upgrade git+https://github.com/scikit-learn-contrib/hdbscan`
 
 If the problem persists, then this could be an issue related to your available memory. The processing of  
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  

@@ -21,7 +21,7 @@ languages = ['afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese
 def select_backend(embedding_model,
                    language: str = None) -> BaseEmbedder:
     """ Select an embedding model based on language or a specific sentence transformer models.
-    When selecting a language, we choose paraphrase-MiniLM-L6-v2 for English and
+    When selecting a language, we choose all-MiniLM-L6-v2 for English and
     paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
 
     Returns:
@@ -62,7 +62,7 @@ def select_backend(embedding_model,
     # Select embedding model based on language
     if language:
         if language.lower() in ["English", "english", "en"]:
-            return SentenceTransformerBackend("paraphrase-MiniLM-L6-v2")
+            return SentenceTransformerBackend("all-MiniLM-L6-v2")
         elif language.lower() in languages or language == "multilingual":
             return SentenceTransformerBackend("paraphrase-multilingual-MiniLM-L12-v2")
         else:
@@ -71,4 +71,4 @@ def select_backend(embedding_model,
                              "Else, please select a language from the following list:\n"
                              f"{languages}")
 
-    return SentenceTransformerBackend("paraphrase-MiniLM-L6-v2")
+    return SentenceTransformerBackend("all-MiniLM-L6-v2")

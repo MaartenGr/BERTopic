@@ -13,6 +13,8 @@ import pandas as pd
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 
+import bertopic._bertopic
+from bertopic._bertopic import TopicMapper
 from bertopic.backend._utils import select_backend
 from bertopic import BERTopic
 
@@ -31,7 +33,7 @@ def test_extract_topics():
                               "ID": range(len(newsgroup_docs)),
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
     model = BERTopic()
-    model.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
+    model.embedding_model = select_backend("all-MiniLM-L6-v2")
     model._update_topic_size(documents)
     model._extract_topics(documents)
     freq = model.get_topic_freq()
@@ -58,7 +60,7 @@ def test_extract_topics_custom_cv():
 
     cv = CountVectorizer(ngram_range=(1, 2))
     model = BERTopic(vectorizer_model=cv)
-    model.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
+    model.embedding_model = select_backend("all-MiniLM-L6-v2")
     model._update_topic_size(documents)
     model._extract_topics(documents)
     freq = model.get_topic_freq()
@@ -81,12 +83,13 @@ def test_topic_reduction(reduced_topics):
     """
     nr_topics = reduced_topics + 2
     model = BERTopic(nr_topics=reduced_topics)
-    model.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
+    model.embedding_model = select_backend("all-MiniLM-L6-v2")
     topics = np.random.randint(-1, nr_topics-1, len(newsgroup_docs))
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": topics})
     model.hdbscan_model.labels_ = topics
+    model.topic_mapper = TopicMapper(model.hdbscan_model)
     model._update_topic_size(old_documents)
     old_documents = model._sort_mappings_by_frequency(old_documents)
     model._extract_topics(old_documents.copy())
@@ -112,7 +115,7 @@ def test_topic_reduction_edge_cases():
     nr_topics = 5
     topics = np.random.randint(-1, nr_topics - 1, len(newsgroup_docs))
     model = BERTopic()
-    model.embedding_model = select_backend("paraphrase-MiniLM-L6-v2")
+    model.embedding_model = select_backend("all-MiniLM-L6-v2")
     model.nr_topics = 100
     model.hdbscan_model.labels_ = topics
     old_documents = pd.DataFrame({"Document": newsgroup_docs,

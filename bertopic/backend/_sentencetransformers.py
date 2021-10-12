@@ -22,7 +22,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     ```python
     from bertopic.backend import SentenceTransformerBackend
 
-    sentence_model = SentenceTransformerBackend("paraphrase-MiniLM-L6-v2")
+    sentence_model = SentenceTransformerBackend("all-MiniLM-L6-v2")
     ```
 
     or  you can instantiate a model yourself:
@@ -30,7 +30,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     from bertopic.backend import SentenceTransformerBackend
     from sentence_transformers import SentenceTransformer
 
-    embedding_model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     sentence_model = SentenceTransformerBackend(embedding_model)
     ```
     """
@@ -44,7 +44,7 @@ class SentenceTransformerBackend(BaseEmbedder):
         else:
             raise ValueError("Please select a correct SentenceTransformers model: \n"
                              "`from sentence_transformers import SentenceTransformer` \n"
-                             "`model = SentenceTransformer('paraphrase-MiniLM-L6-v2')`")
+                             "`model = SentenceTransformer('all-MiniLM-L6-v2')`")
 
     def embed(self,
               documents: List[str],
