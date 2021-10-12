@@ -1,3 +1,8 @@
+## **Version 0.9.3**
+*Release date:  13 October, 2021*
+
+A quickfix for [#282](https://github.com/MaartenGr/BERTopic/issues/282) since it is related to `.transform()`
+
 ## **Version 0.9.2**
 *Release date:  12 October, 2021*
 
