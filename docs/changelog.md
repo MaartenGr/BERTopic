@@ -1,3 +1,25 @@
+## **Version 0.9.2**
+*Release date:  12 October, 2021*
+
+A release focused on algorithmic optimization and fixing several issues:
+
+**Highlights**:  
+  
+* Update the non-multilingual paraphrase-* models to the all-* models due to improved [performance](https://www.sbert.net/docs/pretrained_models.html)
+* Reduce necessary RAM in c-TF-IDF top 30 word [extraction](https://stackoverflow.com/questions/49207275/finding-the-top-n-values-in-a-row-of-a-scipy-sparse-matrix)
+
+**Fixes**:  
+
+* Fix topic mapping
+    * When reducing the number of topics, these need to be mapped to the correct input/output which had some issues in the previous version
+    * A new class was created as a way to track these mappings regardless of how many times they were executed
+    * In other words, you can iteratively reduce the number of topics after training the model without the need to continuously train the model
+* Fix typo in embeddings page ([#200](https://github.com/MaartenGr/BERTopic/issues/200)) 
+* Fix link in README ([#233](https://github.com/MaartenGr/BERTopic/issues/233))
+* Fix documentation `.visualize_term_rank()` ([#253](https://github.com/MaartenGr/BERTopic/issues/253)) 
+* Fix getting correct representative docs ([#258](https://github.com/MaartenGr/BERTopic/issues/258))
+* Update [memory FAQ](https://maartengr.github.io/BERTopic/faq.html#i-am-facing-memory-issues-help) with [HDBSCAN pr](https://github.com/MaartenGr/BERTopic/issues/151)
+
 ## **Version 0.9.1**
 *Release date:  1 September, 2021*
 
@@ -61,7 +83,7 @@ topics, probs = topic_model.fit_transform(docs)
 
 
 ## **Version 0.8.1**
-*Release date:  08 June, 2021*
+*Release date:  8 June, 2021*
 
 **Highlights**:  
 

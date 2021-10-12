@@ -54,6 +54,11 @@ topic_model = BERTopic(vectorizer_model=vectorizer_model)
 The [min_df](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html) 
 parameter is used to indicate the minimum frequency of words. Setting this value larger than 1 can significantly reduce memory.
 
+Fourth, there is an update in HDBSCAN that prevents some issues with memory on very large datasets (millions of rows) 
+that can currently only be installed through their master branch:
+
+`pip install --upgrade git+https://github.com/scikit-learn-contrib/hdbscan`
+
 If the problem persists, then this could be an issue related to your available memory. The processing of  
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  
 
