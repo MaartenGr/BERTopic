@@ -777,7 +777,7 @@ class BERTopic:
             return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count",
                                                                                                   ascending=False)
 
-    def get_representative_docs(self, topic: int) -> List[str]:
+    def get_representative_docs(self, topic: int = None) -> List[str]:
         """ Extract representative documents per topic
 
         Arguments:
