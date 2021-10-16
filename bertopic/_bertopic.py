@@ -1,6 +1,12 @@
+import yaml
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
+
+try:
+    yaml._warnings_enabled["YAMLLoadWarning"] = False
+except (KeyError, AttributeError, TypeError) as e:
+    pass
 
 import re
 import joblib
