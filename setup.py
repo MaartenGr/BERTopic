@@ -1,4 +1,3 @@
-from importlib.util import find_spec
 from setuptools import setup, find_packages
 
 test_packages = [
@@ -45,6 +44,7 @@ gensim_packages = [
 ]
 
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
+
 dev_packages = docs_packages + test_packages + extra_packages
 
 with open("README.md", "r") as fh:
