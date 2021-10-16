@@ -20,7 +20,8 @@ base_packages = [
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
     "sentence-transformers>=0.4.1",
-    "plotly>=4.7.0,<4.14.3"
+    "plotly>=4.7.0,<4.14.3",
+    "pyyaml<6.0"
 ]
 
 flair_packages = [
@@ -45,10 +46,6 @@ gensim_packages = [
 
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 dev_packages = docs_packages + test_packages + extra_packages
-
-if find_spec("distributed"):
-    base_packages.append("distributed>=2.4.0,<2021.9.1")
-
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
