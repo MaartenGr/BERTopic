@@ -1,3 +1,14 @@
+## **Version 0.9.3**
+*Release date:  17 October, 2021*
+
+* Fix [#282](https://github.com/MaartenGr/BERTopic/issues/282)
+    * As it turns out the old implementation of topic mapping was still found in the `transform` function
+* Fix [#285](https://github.com/MaartenGr/BERTopic/issues/285)
+    * Fix getting all representative docs
+* Fix [#288](https://github.com/MaartenGr/BERTopic/issues/288)
+    * A recent issue with the package `pyyaml` that can be found in Google Colab
+
+
 ## **Version 0.9.2**
 *Release date:  12 October, 2021*
 
