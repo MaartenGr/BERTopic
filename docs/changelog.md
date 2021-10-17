@@ -1,9 +1,5 @@
 ## **Version 0.9.3**
-*Release date:  13 October, 2021*
-
-A quickfix for [#282](https://github.com/MaartenGr/BERTopic/issues/282) and 
-[#285](https://github.com/MaartenGr/BERTopic/issues/285) since the former is related to `.transform()`
-
+*Release date:  17 October, 2021*
 
 * Fix [#282](https://github.com/MaartenGr/BERTopic/issues/282)
     * As it turns out the old implementation of topic mapping was still found in the `transform` function
