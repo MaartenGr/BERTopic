@@ -1227,11 +1227,13 @@ class BERTopic:
 
     def save(self,
              path: str,
+             compression: str = None,
              save_embedding_model: bool = True) -> None:
         """ Saves the model to the specified path
 
         Arguments:
             path: the location and name of the file you want to save
+            compression: Compress the file with "lzma" (slow, very efficient) or "zlib" (fast, efficient). Defaults to None.
             save_embedding_model: Whether to save the embedding model in this class
                                   as you might have selected a local model or one that
                                   is downloaded automatically from the cloud.
@@ -1247,15 +1249,20 @@ class BERTopic:
         ```python
         topic_model.save("my_model", save_embedding_model=False)
         ```
+        
+        if you want lzma compression:
+        ```python
+        topic_model.save("my_model", compression="lzma")
+        ```
         """
         with open(path, 'wb') as file:
             if not save_embedding_model:
                 embedding_model = self.embedding_model
                 self.embedding_model = None
-                joblib.dump(self, file)
+                joblib.dump(self, file, compress=compression)
                 self.embedding_model = embedding_model
             else:
-                joblib.dump(self, file)
+                joblib.dump(self, file, compress=compression)
 
     @classmethod
     def load(cls,
