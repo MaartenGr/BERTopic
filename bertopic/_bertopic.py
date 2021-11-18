@@ -78,6 +78,7 @@ class BERTopic:
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
                  calculate_probabilities: bool = False,
+                 diversity: float = None,
                  seed_topic_list: List[List[str]] = None,
                  embedding_model=None,
                  umap_model: UMAP = None,
@@ -116,6 +117,9 @@ class BERTopic:
                                      you do not mind more computation time.
                                      NOTE: If false you cannot use the corresponding
                                      visualization method `visualize_probabilities`.
+            diversity: Whether to use MMR to diversify the resulting topic representations.
+                       If set to None, MMR will not be used. Accepted values lie between 
+                       0 and 1 with 0 being not at all diverse and 1 being very diverse. 
             seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
@@ -141,6 +145,7 @@ class BERTopic:
         self.nr_topics = nr_topics
         self.low_memory = low_memory
         self.calculate_probabilities = calculate_probabilities
+        self.diversity = diversity
         self.verbose = verbose
         self.seed_topic_list = seed_topic_list
 
@@ -1641,19 +1646,20 @@ class BERTopic:
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
-        if self.embedding_model is not None:
+        if self.diversity is not None:
+            if self.embedding_model is not None:
 
-            for topic, topic_words in topics.items():
-                words = [word[0] for word in topic_words]
-                word_embeddings = self._extract_embeddings(words,
-                                                           method="word",
-                                                           verbose=False)
-                topic_embedding = self._extract_embeddings(" ".join(words),
-                                                           method="word",
-                                                           verbose=False).reshape(1, -1)
-                topic_words = mmr(topic_embedding, word_embeddings, words,
-                                  top_n=self.top_n_words, diversity=0)
-                topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+                for topic, topic_words in topics.items():
+                    words = [word[0] for word in topic_words]
+                    word_embeddings = self._extract_embeddings(words,
+                                                            method="word",
+                                                            verbose=False)
+                    topic_embedding = self._extract_embeddings(" ".join(words),
+                                                            method="word",
+                                                            verbose=False).reshape(1, -1)
+                    topic_words = mmr(topic_embedding, word_embeddings, words,
+                                    top_n=self.top_n_words, diversity=self.diversity)
+                    topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
         topics = {label: values[:self.top_n_words] for label, values in topics.items()}
 
         return topics
