@@ -1700,10 +1700,7 @@ class BERTopic:
             self.merged_topics = []
 
         # Create topic similarity matrix
-        if self.topic_embeddings is not None:
-            similarities = cosine_similarity(np.array(self.topic_embeddings))
-        else:
-            similarities = cosine_similarity(self.c_tf_idf)
+        similarities = cosine_similarity(self.c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
         # Find most similar topic to least common topic
