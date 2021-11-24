@@ -7,10 +7,9 @@ from plotly.subplots import make_subplots
 
 def visualize_barchart(topic_model,
                        topics: List[int] = None,
-                       top_n_topics: int = 6,
+                       top_n_topics: int = 8,
                        n_words: int = 5,
-                       width: int = 800,
-                       height: int = 600) -> go.Figure:
+                       columns: int = 4) -> go.Figure:
     """ Visualize a barchart of selected topics
 
     Arguments:
@@ -18,8 +17,7 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
-        width: The width of the figure.
-        height: The height of the figure.
+        columns: Number of columns to plot.
 
     Returns:
         fig: A plotly figure
@@ -52,13 +50,13 @@ def visualize_barchart(topic_model,
 
     # Initialize figure
     subplot_titles = [f"Topic {topic}" for topic in topics]
-    columns = 3
+    columns = 4
     rows = int(np.ceil(len(topics) / columns))
     fig = make_subplots(rows=rows,
                         cols=columns,
                         shared_xaxes=True,
                         horizontal_spacing=.15,
-                        vertical_spacing=.15,
+                        vertical_spacing=.2/rows,
                         subplot_titles=subplot_titles)
 
     # Add barchart for each topic
@@ -86,24 +84,24 @@ def visualize_barchart(topic_model,
         showlegend=False,
         title={
             'text': "<b>Topic Word Scores",
-            'y': .95,
-            'x': .15,
-            'xanchor': 'center',
-            'yanchor': 'top',
             'font': dict(
                 size=22,
                 color="Black")
         },
-        width=width,
-        height=height,
+        width=220*columns,
+        autosize=False,
+        height=200+25*top_n_topics,
+        uniformtext={"mode": "show", "minsize": 8},
+        margin_t=100,
         hoverlabel=dict(
             bgcolor="white",
             font_size=16,
             font_family="Rockwell"
         ),
     )
-
-    fig.update_xaxes(showgrid=True)
-    fig.update_yaxes(showgrid=True)
+    
+    fig.update_xaxes(showgrid=True,automargin=True,showticklabels=False)
+    fig.update_yaxes(showgrid=True,automargin=True,nticks=n_words)
 
     return fig
+  
