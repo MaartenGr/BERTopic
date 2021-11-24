@@ -9,6 +9,8 @@ def visualize_barchart(topic_model,
                        topics: List[int] = None,
                        top_n_topics: int = 8,
                        n_words: int = 5,
+                       title: str = 'Topic Word Scores',
+                       normalize: bool = True,
                        columns: int = 4) -> go.Figure:
     """ Visualize a barchart of selected topics
 
@@ -18,6 +20,8 @@ def visualize_barchart(topic_model,
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
         columns: Number of columns to plot.
+        normalize: Sets x-axis max value to highest score (True, default) or 1 (False).
+        title: Sets title of plot.
 
     Returns:
         fig: A plotly figure
@@ -62,16 +66,17 @@ def visualize_barchart(topic_model,
     # Add barchart for each topic
     row = 1
     column = 1
+    max_score = []
     for topic in topics:
         words = [word + "  " for word, _ in topic_model.get_topic(topic)][:n_words][::-1]
         scores = [score for _, score in topic_model.get_topic(topic)][:n_words][::-1]
-
+        if normalize==True:
+          max_score.append(max(scores))
         fig.add_trace(
             go.Bar(x=scores,
                    y=words,
                    orientation='h'),
             row=row, col=column)
-
         if column == columns:
             column = 1
             row += 1
@@ -83,7 +88,7 @@ def visualize_barchart(topic_model,
         template="plotly_white",
         showlegend=False,
         title={
-            'text': "<b>Topic Word Scores",
+            'text': f"<b>{title}",
             'font': dict(
                 size=22,
                 color="Black")
@@ -99,9 +104,15 @@ def visualize_barchart(topic_model,
             font_family="Rockwell"
         ),
     )
-    
-    fig.update_xaxes(showgrid=True,automargin=True,showticklabels=False)
+
+    fig.update_xaxes(showgrid=True,automargin=True,showticklabels=False,fixedrange=True)
     fig.update_yaxes(showgrid=True,automargin=True,nticks=n_words)
 
+    ticksize = 5
+    if normalize==True:
+        fig.update_xaxes(range=[0,max(max_score)], dtick=max(max_score)/ticksize)
+    else:
+        fig.update_xaxes(range=[0,1], dtick=1/ticksize)
+
     return fig
-  
+
