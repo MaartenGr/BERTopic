@@ -11,8 +11,9 @@ def visualize_hierarchy(topic_model,
                         orientation: str = "left",
                         topics: List[int] = None,
                         top_n_topics: int = None,
-                        width: int = 1000,
-                        height: int = 600) -> go.Figure:
+                        title: str = "Hierarchical Clustering",
+                        width: int = 500,
+                        height: int = 500) -> go.Figure:
     """ Visualize a hierarchical structure of the topics
 
     A ward linkage function is used to perform the
@@ -25,8 +26,9 @@ def visualize_hierarchy(topic_model,
                      Either 'left' or 'bottom'
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
-        width: The width of the figure.
-        height: The height of the figure.
+        width: The width of the figure. Ignored if orientation is "bottom".
+        height: The height of the figure. Ignored if orientation is "left".
+        title: Sets title of output diagram.
 
     Returns:
         fig: A plotly figure
@@ -88,30 +90,29 @@ def visualize_hierarchy(topic_model,
         plot_bgcolor='#ECEFF1',
         template="plotly_white",
         title={
-            'text': "<b>Hierarchical Clustering",
-            'y': .95,
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top',
+            'text': f"<b>{title}",
             'font': dict(
                 size=22,
                 color="Black")
         },
-        width=width,
-        height=height,
+        autosize=False,
+        margin_t=100,
         hoverlabel=dict(
             bgcolor="white",
             font_size=16,
             font_family="Rockwell"
         ),
-
+    
     )
-
     # Stylize orientation
     if orientation == "left":
         fig.update_layout(yaxis=dict(tickmode="array",
-                                     ticktext=new_labels))
+                                     ticktext=new_labels),
+                         width=width,
+                         height=200+15*top_n_topics)
     else:
         fig.update_layout(xaxis=dict(tickmode="array",
-                                     ticktext=new_labels))
+                                     ticktext=new_labels),
+                         width=200+20*top_n_topics,
+                         height=height)
     return fig
