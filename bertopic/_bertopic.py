@@ -13,7 +13,7 @@ import joblib
 import inspect
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Union, Mapping, Any
 
