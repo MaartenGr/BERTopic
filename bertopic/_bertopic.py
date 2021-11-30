@@ -558,12 +558,13 @@ class BERTopic:
         topics_per_class = topic_model.topics_per_class(docs, topics, classes)
         ```
         """
+        does_contains_outlier_topic = -1 in topics
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Class": classes})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
 
         # For each unique timestamp, create topic representations
         topics_per_class = []
-        for index, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
+        for _, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
 
             # Calculate c-TF-IDF representation for a specific timestamp
             selection = documents.loc[documents.Class == class_, :]
@@ -575,7 +576,10 @@ class BERTopic:
             # by simply taking the average of the two
             if global_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
-                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+                idx = documents_per_topic.Topic.values + 1\
+                    if does_contains_outlier_topic\
+                        else does_contains_outlier_topic
+                c_tf_idf = (global_c_tf_idf[idx] + c_tf_idf) / 2.0
 
             # Extract the words per topic
             labels = sorted(list(documents_per_topic.Topic.unique()))
