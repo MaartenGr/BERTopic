@@ -578,7 +578,7 @@ class BERTopic:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
                 idx = documents_per_topic.Topic.values + 1\
                     if does_contains_outlier_topic\
-                        else does_contains_outlier_topic
+                        else documents_per_topic.Topic.values
                 c_tf_idf = (global_c_tf_idf[idx] + c_tf_idf) / 2.0
 
             # Extract the words per topic
