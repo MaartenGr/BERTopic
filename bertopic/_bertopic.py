@@ -106,8 +106,7 @@ class BERTopic:
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
                        calculation. If this is set to None, no reduction is applied. Use
-                       "auto" to automatically reduce topics that have a similarity of at
-                       least 0.9, do not maps all others.
+                       "auto" to automatically reduce topics using HDBSCAN.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
             calculate_probabilities: Whether to calculate the probabilities of all topics
                                      per document instead of the probability of the assigned

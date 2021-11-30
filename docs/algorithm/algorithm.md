@@ -1,4 +1,4 @@
-<img src="algorithm.png" width="100%" height="100%"/>
+<img src="../img/algorithm.png" width="80%" height="80%"/>
 
 The algorithm contains, roughly, 3 stages:   
      
@@ -9,38 +9,35 @@ The algorithm contains, roughly, 3 stages:
     * HDBSCAN to cluster reduced embeddings and create clusters of semantically similar documents
 3. **Create topic representation**  
     * Extract and reduce topics with c-TF-IDF
-    * Improve coherence of words with Maximal Marginal Relevance  
+    * Improve coherence and diversity of words with Maximal Marginal Relevance  
     
 ##  **Embed documents**
 We start by creating document embeddings from a set of documents using 
 [sentence-transformers](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
-language and are great for creating either document- or sentence-embeddings. 
+languages and are great for creating either document- or sentence-embeddings. 
 
 In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:
 
 * `"all-MiniLM-L6-v2"`
 * `"paraphrase-multilingual-MiniLM-L12-v2"`
 
-The first is an English BERT-based model trained specifically for semantic similarity tasks which work quite 
+The first is an English language model trained specifically for semantic similarity tasks which work quite 
 well for most use-cases. The second model is very similar to the first with one major difference is that the 
-`xlm` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
+`multilingual` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
 you select any language other than English.
 
 ##  **Cluster Documents**
-Next, in order to cluster the documents using a clustering algorithm such as HDBSCAN we first need to 
-reduce its dimensionality as HDBCAN is prone to the curse of dimensionality.
 
-<p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/clusters.png" width="50%" height="50%"/>
-</p>
+Typically, clustering algorithms have difficulty clustering data in high dimensional space. Before we are 
+going to cluster our documents, we first need to reduce the dimensionality of the embeddings that we generated. 
 
-Thus, we first lower dimensionality with UMAP as it preserves local structure well after which we can 
-use HDBSCAN to cluster similar documents.  
+To do so, we use UMAP as it preserves both the local and global structure of embeddings quite well. Then, 
+we use HDBSCAN  to cluster the reduced embeddings as it allows us to identify outliers. 
 
 ##  **Create topic representation**
 What we want to know from the clusters that we generated, is what makes one cluster, based on its content, 
-different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per topic
-instead of per document. 
+different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per cluster 
+of documents instead of per individual document. 
 
 When you apply TF-IDF as usual on a set of documents, what you are doing is comparing the importance of 
 words between documents. Now, what if, we instead treat all documents in a single category (e.g., a cluster) 
@@ -50,17 +47,19 @@ if we extract the most important words per cluster, we get descriptions of **top
 class-based TF-IDF
 
 <p align="center">
-<img src="https://github.com/MaartenGr/BERTopic/raw/master/images/ctfidf.png" height="50"/>
+<img src="../img/ctfidf.png" />
 </p>  
 
-Each cluster is converted to a single document instead of a set of documents. 
-Then, the frequency of word `t` are extracted for each class `i` and divided by the total number of words `w`. 
-This action can now be seen as a form of regularization of frequent words in the class.
-Next, the average number of words per class `m` is divided by the total frequency of word `t` across all classes `n`.
+Each cluster is converted to a single document instead of a set of documents. Then, we extract the frequency 
+of word `x` in class `c`, where `c` refers to the cluster we created before. This results in our class-based 
+ `tf` representation. 
 
-### **Topic Coherence**  
-This step is executed if you do not use custom embeddings but generate the document embeddings within BERTopic 
-itself. The embedding model provided by BERTopic will be used to improve the coherence of words within a topic. 
+Then, we take take the logarithm of the average number of words per class `A` divided by the frequency 
+of word `x` across all classes. This results in our class-based `idf` representation. 
+
+Like with the classic TF-IDF, we then multiply `tf` with `idf` to get the importance score per word in each class. 
+
+### **Maximal Marginal Relevance Coherence**  
 After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
 Technically, this does not mean that this collection of words describes a coherent topic. In practice, we will 
 see that many of the words do describe a similar topic but some words will, in a way, overfit the documents. For 
@@ -70,3 +69,7 @@ description.
 To improve the coherence of words, Maximal Marginal Relevance was used to find the most coherent words 
 without having too much overlap between the words themselves. This results in the removal of words that do not contribute 
 to a topic.  
+
+You can also use this technique to diversify the words generated in the topic representation. At times, many variations 
+of the same word can end up in the topic representation. To reduce the number of synonyms, we can increase the diversity 
+among words whilst still being similar to the topic representation. 

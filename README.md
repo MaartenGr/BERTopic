@@ -54,7 +54,7 @@ with one of the examples below:
 
 
 ## Quick Start
-We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
+We start by extracting topics from the well-known 20 newsgroups dataset containing English documents:
 
 ```python
 from bertopic import BERTopic
@@ -66,7 +66,7 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 ```
 
-After generating topics, we can access the frequent topics that were generated:
+After generating topics and their probabilities, we can access the frequent topics that were generated:
 
 ```python
 >>> topic_model.get_topic_info()
@@ -238,7 +238,7 @@ To cite BERTopic in your work, please use the following bibtex reference:
   title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
   year         = 2020,
   publisher    = {Zenodo},
-  version      = {v0.9.2},
+  version      = {v0.9.3},
   doi          = {10.5281/zenodo.4381785},
   url          = {https://doi.org/10.5281/zenodo.4381785}
 }
