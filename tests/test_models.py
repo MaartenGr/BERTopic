@@ -178,7 +178,7 @@ def test_ctfidf(base_bertopic):
     count = base_bertopic.vectorizer_model.fit(documents)
     words = count.get_feature_names()
     X = count.transform(documents)
-    transformer = ClassTFIDF().fit(X, n_samples=len(newsgroup_docs))
+    transformer = ClassTFIDF().fit(X)
     c_tf_idf = transformer.transform(X)
 
     assert len(words) > 1000
@@ -218,7 +218,7 @@ def test_ctfidf_custom_cv():
     count = model.vectorizer_model.fit(documents)
     words = count.get_feature_names()
     X = count.transform(documents)
-    transformer = ClassTFIDF().fit(X, n_samples=len(newsgroup_docs))
+    transformer = ClassTFIDF().fit(X)
     c_tf_idf = transformer.transform(X)
 
     assert len(words) > 1000

@@ -480,7 +480,7 @@ class BERTopic:
             selection = documents.loc[documents.Timestamps == timestamp, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Timestamps": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
 
             if global_tuning or evolution_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
@@ -573,7 +573,7 @@ class BERTopic:
             selection = documents.loc[documents.Class == class_, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Class": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
@@ -1451,7 +1451,7 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
-        self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
+        self.c_tf_idf, words = self._c_tf_idf(documents_per_topic)
         self.topics = self._extract_words_per_topic(words)
         self._create_topic_vectors()
         self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
@@ -1557,7 +1557,7 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
@@ -1585,7 +1585,7 @@ class BERTopic:
             multiplier = None
 
         if fit:
-            self.transformer = ClassTFIDF().fit(X, n_samples=m, multiplier=multiplier)
+            self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
 
