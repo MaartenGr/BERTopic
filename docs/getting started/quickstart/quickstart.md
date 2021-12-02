@@ -16,12 +16,6 @@ pip install bertopic[spacy]
 pip install bertopic[use]
 ```
 
-To install all backends:
-
-```bash
-pip install bertopic[all]
-```
-
 ## **Quick Start**
 We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of English documents:
 
@@ -66,10 +60,11 @@ frequent topic that was generated, topic 0:
  ('pc', 0.003047105930670237)]
 ```  
 
-**NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
+!!! Tip "Tip!"
+    Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
 ## **Visualize Topics**
-After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topic to get a good 
+After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topics to get a good 
 understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
 Instead, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis):
@@ -93,6 +88,7 @@ Then, we can load the model in one line:
 topic_model = BERTopic.load("my_model")
 ```
 
-If you do not want to save the embedding model because it is loaded from the cloud, simply run 
-`model.save("my_model", save_embedding_model=False)` instead. Then, you can load in the model 
-with `BERTopic.load("my_model", embedding_model="whatever_model_you_used")`. 
+!!! Tip "Tip!"
+    If you do not want to save the embedding model because it is loaded from the cloud, simply run 
+    `model.save("my_model", save_embedding_model=False)` instead. Then, you can load in the model 
+    with `BERTopic.load("my_model", embedding_model="whatever_model_you_used")`. 

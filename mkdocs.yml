@@ -18,6 +18,7 @@ nav:
       - Topic Representation: getting started/topicrepresentation/topicrepresentation.md
       - Search Topics: getting started/search/search.md
       - Customization:
+        - Custom Embedding Models: getting started/custom_embeddings/embeddings.md
         - Custom Sub-Models: getting started/models/models.md
         - Parameter tuning: getting started/parameter tuning/parametertuning.md
       - Variations:
@@ -77,7 +78,11 @@ theme:
         icon: material/weather-night
         name: Switch to light mode
 markdown_extensions:
+  - admonition
+  - pymdownx.details
   - pymdownx.highlight:
   - pymdownx.superfences:
+  - pymdownx.tabbed:
+      alternate_style: true 
   - toc:
       permalink: true

@@ -2,7 +2,7 @@ The topics that are extracted from BERTopic are represented by words. These word
 occupying their topics using a class-based TF-IDF. This allows us to extract words that are interesting to a topic but 
 less so to another. 
 
-### Update Topic Representation after Training
+### **Update Topic Representation after Training**
 When you have trained a model and viewed the topics and the words that represent them,
 you might not be satisfied with the representation. Perhaps you forgot to remove
 stop_words or you want to try out a different n_gram_range. We can use the function `update_topics` to update 

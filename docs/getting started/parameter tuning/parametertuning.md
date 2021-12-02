@@ -6,15 +6,7 @@ such as HDBSCAN and UMAP.
 
 ## **BERTopic**
 
-In this section, we will go through most important hyperparameters in BERTopic that you can change directly when instantiating BERTopic:
-
-* language
-* top_n_words
-* n_gram_range
-* min_topic_size
-* nr_topics
-* low_memory
-* calculate_probabilities
+When instantiating BERTopic, there are a number of hyperparameters that you can directly adjust that could significantly improve the performance of your topic model. In this section, we will go through the most impactful parameters in BERTopic and directions on how to optimize them. 
 
 ### **language**
 The `language` parameter is used to simplify the selection of models for those who are not familiar with sentence-transformers models. 
@@ -63,13 +55,6 @@ from umap import UMAP
 umap_model = UMAP(n_neighbors=15, n_components=10, metric='cosine', low_memory=False)
 topic_model = BERTopic(umap_model=umap_model).fit(docs)
 ```
-
-Here, there are a few parameters that are interesting to us:
-
-* n_neighbors
-* n_components
-* metric
-* low_memory
 
 ### **n_neighbors**
 `n_neighbors` is the numer of neighboring sample points used when making the manifold approximation. Increasing this value typically results in a 

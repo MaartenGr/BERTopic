@@ -11,7 +11,7 @@ The algorithm contains, roughly, 3 stages:
     * Extract and reduce topics with c-TF-IDF
     * Improve coherence and diversity of words with Maximal Marginal Relevance  
     
-##  **Embed documents**
+##  **1. Embed documents**
 We start by creating document embeddings from a set of documents using 
 [sentence-transformers](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
 languages and are great for creating either document- or sentence-embeddings. 
@@ -26,7 +26,7 @@ well for most use-cases. The second model is very similar to the first with one 
 `multilingual` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
 you select any language other than English.
 
-##  **Cluster Documents**
+##  **2. Cluster Documents**
 
 Typically, clustering algorithms have difficulty clustering data in high dimensional space. Before we are 
 going to cluster our documents, we first need to reduce the dimensionality of the embeddings that we generated. 
@@ -34,7 +34,7 @@ going to cluster our documents, we first need to reduce the dimensionality of th
 To do so, we use UMAP as it preserves both the local and global structure of embeddings quite well. Then, 
 we use HDBSCAN  to cluster the reduced embeddings as it allows us to identify outliers. 
 
-##  **Create topic representation**
+##  **3. Create topic representation**
 What we want to know from the clusters that we generated, is what makes one cluster, based on its content, 
 different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per cluster 
 of documents instead of per individual document. 
@@ -60,7 +60,7 @@ This results in our class-based `idf` representation.
 
 Like with the classic TF-IDF, we then multiply `tf` with `idf` to get the importance score per word in each class. 
 
-### **Maximal Marginal Relevance Coherence**  
+## **(Optional) Maximal Marginal Relevance Coherence**  
 After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
 Technically, this does not mean that this collection of words describes a coherent topic. In practice, we will 
 see that many of the words do describe a similar topic but some words will, in a way, overfit the documents. For 

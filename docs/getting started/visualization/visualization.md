@@ -1,3 +1,7 @@
+Visualizing BERTopic and its derivatives is important in understanding the model, how it works, but more importantly, where it works. 
+Since topic modeling can be quite a subjective field it is difficult for users to validate their models. Looking at the topics and seeing 
+if they make sense is an important factor in eliviating this issue. 
+
 ## **Visualize Topics**
 After having trained our `BERTopic` model, we can iteratively go through hundreds of topics to get a good 
 understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
@@ -37,9 +41,10 @@ of topics that you have created. To visualize this hierarchy, simply call `topic
 
 <iframe src="hierarchy.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
-Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to 
-auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
-the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected. 
+!!! note
+    Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to 
+    auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
+    the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected. 
 
 ## **Visualize Terms**
 We can visualize the selected terms for a few topics by creating bar charts out of the c-TF-IDF scores 
@@ -181,7 +186,8 @@ topic_model.visualize_distribution(probabilities[0])
 <iframe src="probabilities.html" style="width:1000px; height: 500px; border: 0px;""></iframe>
 
 
-**NOTE**: The distribution of the probabilities does not give an indication to 
-the distribution of the frequencies of topics across a document. It merely shows
-how confident BERTopic is that certain topics can be found in a document.
+!!! note
+    The distribution of the probabilities does not give an indication to 
+    the distribution of the frequencies of topics across a document. It merely shows
+    how confident BERTopic is that certain topics can be found in a document.
 

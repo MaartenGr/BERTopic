@@ -1,4 +1,3 @@
-## **Dynamic Topic Modeling**
 Dynamic topic modeling (DTM) is a collection of techniques aimed at analyzing the evolution of topics 
 over time. These methods allow you to understand how a topic is represented across different times. 
 For example, in 1995 people may talk differently about environmental awareness than those in 2015. Although the 
@@ -24,7 +23,7 @@ the representations to evolve over time.
 
 Both fine-tuning methods are set to `True` as a default and allow for interesting representations to be created. 
    
-### **Example**
+## **Example**
 To demonstrate DTM in BERTopic, we first need to prepare our data. A good example of where DTM is useful is topic 
 modeling on Twitter data. We can analyze how certain people have talked about certain topics in the years 
 they have been on Twitter. Due to the controversial nature of his tweets, we are going to be using all 
