@@ -54,8 +54,9 @@ Each cluster is converted to a single document instead of a set of documents. Th
 of word `x` in class `c`, where `c` refers to the cluster we created before. This results in our class-based 
  `tf` representation. 
 
-Then, we take take the logarithm of the average number of words per class `A` divided by the frequency 
-of word `x` across all classes. This results in our class-based `idf` representation. 
+Then, we take take the logarithm of one plus the average number of words per class `A` divided by the frequency 
+of word `x` across all classes. We add plus one within the logarithm to force values to be positive. 
+This results in our class-based `idf` representation. 
 
 Like with the classic TF-IDF, we then multiply `tf` with `idf` to get the importance score per word in each class. 
 
