@@ -32,7 +32,7 @@ def visualize_distribution(topic_model,
     fig = topic_model.visualize_distribution(probabilities[0])
     fig.write_html("path/to/file.html")
     ```
-    <iframe src="../../tutorial/visualization/probabilities.html"
+    <iframe src="../../getting_started/visualization/probabilities.html"
     style="width:1000px; height: 500px; border: 0px;""></iframe>
     """
     if len(probabilities.shape) != 1:

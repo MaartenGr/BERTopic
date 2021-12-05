@@ -13,9 +13,9 @@ BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions.
 
 BERTopic supports 
-[**guided**](https://maartengr.github.io/BERTopic/tutorial/guided/guided.html), 
-(semi-) [**supervised**](https://maartengr.github.io/BERTopic/tutorial/supervised/supervised.html), 
-and [**dynamic**](https://maartengr.github.io/BERTopic/tutorial/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
+[**guided**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html), 
+(semi-) [**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
+and [**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
 
 Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
@@ -123,7 +123,7 @@ topic_model.visualize_barchart()
 
 
 Find all possible visualizations with interactive examples in the documentation 
-[here](https://maartengr.github.io/BERTopic/tutorial/visualization/visualization.html). 
+[here](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html). 
 
 ## Embedding Models
 BERTopic supports many embedding models that can be used to embed the documents and words:
@@ -151,7 +151,7 @@ roberta = TransformerDocumentEmbeddings('roberta-base')
 topic_model = BERTopic(embedding_model=roberta)
 ```
 
-Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) 
+Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) 
 for a full overview of all supported embedding models. 
 
 ## Dynamic Topic Modeling
@@ -238,7 +238,7 @@ To cite BERTopic in your work, please use the following bibtex reference:
   title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
   year         = 2020,
   publisher    = {Zenodo},
-  version      = {v0.9.3},
+  version      = {v0.9.4},
   doi          = {10.5281/zenodo.4381785},
   url          = {https://doi.org/10.5281/zenodo.4381785}
 }

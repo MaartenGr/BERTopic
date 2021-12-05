@@ -39,7 +39,7 @@ def visualize_barchart(topic_model,
     fig = topic_model.visualize_barchart()
     fig.write_html("path/to/file.html")
     ```
-    <iframe src="../../tutorial/visualization/bar_chart.html"
+    <iframe src="../../getting_started/visualization/bar_chart.html"
     style="width:1100px; height: 660px; border: 0px;""></iframe>
     """
     # Select topics based on top_n and topics args

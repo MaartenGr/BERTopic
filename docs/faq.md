@@ -4,7 +4,19 @@ multiple times. Using custom embeddings allows you to try out BERTopic several t
 topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
 with different parameters. 
 
-## **Which embedding model works best for which language?**
+If you want to reproduce the results, at the expense of [performance](https://umap-learn.readthedocs.io/en/latest/reproducibility.html), you can set a `random_state` in UMAP to prevent 
+any stochastic behavior:
+
+```python
+from bertopic import BERTopic
+from umap import UMAP
+
+umap_model = UMAP(n_neighbors=15, n_components=5, 
+                  min_dist=0.0, metric='cosine', random_state=42)
+topic_model = BERTopic(umap_model=umap_model)
+```
+
+## **Which embedding model should I choose?**
 Unfortunately, there is not a definitive list of the best models for each language, this highly depends 
 on your data, the model, and your specific use-case. However, the default model in BERTopic 
 (`"all-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
@@ -22,8 +34,33 @@ BERTopic allows you to use any 🤗 transformers model. These models  are typica
 a word/sentence level but can easily be pooled using Flair (see Guides/Embeddings). If you have a 
 specific language for which you want to generate embeddings, you can choose the model [here](https://huggingface.co/models).
 
+## **How do I reduce topic outliers?**
+There are two ways in reducing outliers. 
+
+First, the amount of datapoint classified as outliers is handled by the `min_samples` parameters in HDBSCAN. This value is automatically set to the 
+same value of `min_cluster_size`. However, you can set it indepedently if you want to reduce the number of generated outliers. Lowering this value will 
+result in less noise being generated. 
+
+```python
+from bertopic import BERTopic
+from hdbscan import HDBSCAN
+
+hdbscan_model = HDBSCAN(min_cluster_size=10, metric='euclidean', 
+                        cluster_selection_method='eom', prediction_data=True, min_samples=5)
+topic_model = BERTopic(hdbscan_model=hdbscan_model)
+```
+
+!!! note "Note"
+    Although this will lower outliers found in the data, this might force outliers to be put into topics where they do not belong. So make 
+    sure to strike a balance between keeping noise and reducing outliers. 
+
+Second, after training our BERTopic model, we can assign outliers to topics. By setting `calculate_probabilities=True`, we calculate the probability 
+of a document belonging to any topic. That way, we can select, for each document, the topic with the the highest probability. Thus, although we do 
+generate an outlier class in our BERTopic model, we can assign documents to an actual topic. 
+
+
 ## **How can I speed up BERTopic?**
-You can speed up BERTopic by either generating your embeddings beforehand, which is not advised, or by 
+You can speed up BERTopic by either generating your embeddings beforehand or by 
 setting `calculate_probabilities` to False. Calculating the probabilities is quite expensive and can 
 significantly increase the computation time. Thus, only use it if you do not mind waiting a bit before 
 the model is done running or if you have less than 50_000 documents. 
@@ -59,21 +96,21 @@ that can currently only be installed through their master branch:
 
 `pip install --upgrade git+https://github.com/scikit-learn-contrib/hdbscan`
 
-If the problem persists, then this could be an issue related to your available memory. The processing of  
+If the problem persists, then this could be an issue related to your available memory. The processing of 
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  
 
 ## **I have only a few topics, how do I increase them?**
-There are several reasons why your topic model results in only a few topics. 
+There are several reasons why your topic model may result in only a few topics:
 
-First, you might only have a few documents (~1000). This makes it very difficult to properly 
+* First, you might only have a few documents (~1000). This makes it very difficult to properly 
 extract topics due to the little amount of data available. Increasing the number of documents 
 might solve your issues. 
 
-Second, `min_topic_size` might be simply too large for your number of documents. If you decrease 
+* Second, `min_topic_size` might be simply too large for your number of documents. If you decrease 
 the minimum size of topics, then you are much more likely to increase the number of topics generated.
 You could also decrease the `n_neighbors` parameter used in `UMAP` if this does not work. 
 
-Third, although this does not happen very often, there simply aren't that many topics to be found 
+* Third, although this does not happen very often, there simply aren't that many topics to be found 
 in your documents. You can often see this when you have many `-1` topics, which is actually not a topic 
 but a category of outliers.  
 
@@ -84,16 +121,16 @@ a few hundred topics at most in order to interpret them nicely.
 
 There are a few ways of increasing the number of generated topics: 
 
-First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) 
+* First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) 
 to make sure that those small clusters will not be generated. This is a HDBSCAN parameter that 
 specifies what the minimum number of documents are needed in a cluster. More documents in a cluster 
 means less topics will be generated. 
 
-Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). 
+* Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). 
 This also prevents those micro clusters to be generated as it will needs quite a number of neighboring 
 documents to create a cluster. 
 
-Third, we can set `nr_topics` to a value that seems logical to the user. Do note that topics are forced 
+* Third, we can set `nr_topics` to a value that seems logical to the user. Do note that topics are forced 
 to merge together which might result in a lower quality of topics. In practice, I would advise using 
 `nr_topic="auto"` as that will merge topics together that are very similar. Dissimilar topics will 
 therefore remain separated. 

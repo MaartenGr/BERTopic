@@ -39,7 +39,7 @@ def visualize_topics(topic_model,
     fig = topic_model.visualize_topics()
     fig.write_html("path/to/file.html")
     ```
-    <iframe src="../../tutorial/visualization/viz.html"
+    <iframe src="../../getting_started/visualization/viz.html"
     style="width:1000px; height: 680px; border: 0px;""></iframe>
     """
     # Select topics based on top_n and topics args
