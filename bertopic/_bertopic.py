@@ -374,10 +374,14 @@ class BERTopic:
                                                   verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
+        logger.info("Reduced dimensionality with UMAP")
+
         predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        logger.info("Predicted clusters with HDBSCAN")
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
+            logger.info("Calculated probabilities with HDBSCAN")
         else:
             probabilities = None
 
