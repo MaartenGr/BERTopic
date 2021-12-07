@@ -881,8 +881,8 @@ class BERTopic:
     def visualize_topics(self,
                          topics: List[int] = None,
                          top_n_topics: int = None,
-                         width: int = 650,
-                         height: int = 650) -> go.Figure:
+                         width: int = 250,
+                         height: int = 250) -> go.Figure:
         """ Visualize topics, their sizes, and their corresponding words
 
         This visualization is highly inspired by LDAvis, a great visualization
