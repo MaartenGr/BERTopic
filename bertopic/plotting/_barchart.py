@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 from typing import List
 
@@ -9,8 +10,8 @@ def visualize_barchart(topic_model,
                        topics: List[int] = None,
                        top_n_topics: int = 6,
                        n_words: int = 5,
-                       width: int = 800,
-                       height: int = 600) -> go.Figure:
+                       width: int = 250,
+                       height: int = 250) -> go.Figure:
     """ Visualize a barchart of selected topics
 
     Arguments:
@@ -18,8 +19,8 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
-        width: The width of the figure.
-        height: The height of the figure.
+        width: The width of each figure.
+        height: The height of each figure.
 
     Returns:
         fig: A plotly figure
@@ -42,6 +43,8 @@ def visualize_barchart(topic_model,
     <iframe src="../../getting_started/visualization/bar_chart.html"
     style="width:1100px; height: 660px; border: 0px;""></iframe>
     """
+    colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
+
     # Select topics based on top_n and topics args
     if topics is not None:
         topics = list(topics)
@@ -52,13 +55,13 @@ def visualize_barchart(topic_model,
 
     # Initialize figure
     subplot_titles = [f"Topic {topic}" for topic in topics]
-    columns = 3
+    columns = 4
     rows = int(np.ceil(len(topics) / columns))
     fig = make_subplots(rows=rows,
                         cols=columns,
-                        shared_xaxes=True,
-                        horizontal_spacing=.15,
-                        vertical_spacing=.15,
+                        shared_xaxes=False,
+                        horizontal_spacing=.1,
+                        vertical_spacing=.4 / rows if rows > 1 else 0,
                         subplot_titles=subplot_titles)
 
     # Add barchart for each topic
@@ -71,7 +74,8 @@ def visualize_barchart(topic_model,
         fig.add_trace(
             go.Bar(x=scores,
                    y=words,
-                   orientation='h'),
+                   orientation='h',
+                   marker_color=next(colors)),
             row=row, col=column)
 
         if column == columns:
@@ -86,7 +90,6 @@ def visualize_barchart(topic_model,
         showlegend=False,
         title={
             'text': "<b>Topic Word Scores",
-            'y': .95,
             'x': .15,
             'xanchor': 'center',
             'yanchor': 'top',
@@ -94,8 +97,8 @@ def visualize_barchart(topic_model,
                 size=22,
                 color="Black")
         },
-        width=width,
-        height=height,
+        width=width*4,
+        height=height*rows if rows > 1 else height * 1.3,
         hoverlabel=dict(
             bgcolor="white",
             font_size=16,
