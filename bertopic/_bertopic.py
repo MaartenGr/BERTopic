@@ -881,8 +881,8 @@ class BERTopic:
     def visualize_topics(self,
                          topics: List[int] = None,
                          top_n_topics: int = None,
-                         width: int = 250,
-                         height: int = 250) -> go.Figure:
+                         width: int = 650,
+                         height: int = 650) -> go.Figure:
         """ Visualize topics, their sizes, and their corresponding words
 
         This visualization is highly inspired by LDAvis, a great visualization
@@ -1195,16 +1195,16 @@ class BERTopic:
                            topics: List[int] = None,
                            top_n_topics: int = 6,
                            n_words: int = 5,
-                           width: int = 800,
-                           height: int = 600) -> go.Figure:
+                           width: int = 250,
+                           height: int = 250) -> go.Figure:
         """ Visualize a barchart of selected topics
 
         Arguments:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
-            width: The width of the figure.
-            height: The height of the figure.
+            width: The width of each figure.
+            height: The height of each figure.
 
         Returns:
             fig: A plotly figure
