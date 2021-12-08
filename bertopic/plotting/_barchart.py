@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 
 def visualize_barchart(topic_model,
                        topics: List[int] = None,
-                       top_n_topics: int = 6,
+                       top_n_topics: int = 8,
                        n_words: int = 5,
                        width: int = 250,
                        height: int = 250) -> go.Figure:
@@ -90,7 +90,7 @@ def visualize_barchart(topic_model,
         showlegend=False,
         title={
             'text': "<b>Topic Word Scores",
-            'x': .15,
+            'x': .5,
             'xanchor': 'center',
             'yanchor': 'top',
             'font': dict(

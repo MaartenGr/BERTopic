@@ -1193,7 +1193,7 @@ class BERTopic:
 
     def visualize_barchart(self,
                            topics: List[int] = None,
-                           top_n_topics: int = 6,
+                           top_n_topics: int = 8,
                            n_words: int = 5,
                            width: int = 250,
                            height: int = 250) -> go.Figure:
