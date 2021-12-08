@@ -25,8 +25,8 @@ def visualize_hierarchy(topic_model,
                      Either 'left' or 'bottom'
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
-        width: The width of the figure.
-        height: The height of the figure.
+        width: The width of the figure. Only works if orientation is set to 'left'
+        height: The height of the figure. Only works if orientation is set to 'bottom'
 
     Returns:
         fig: A plotly figure
@@ -89,7 +89,6 @@ def visualize_hierarchy(topic_model,
         template="plotly_white",
         title={
             'text': "<b>Hierarchical Clustering",
-            'y': .95,
             'x': 0.5,
             'xanchor': 'center',
             'yanchor': 'top',
@@ -97,21 +96,28 @@ def visualize_hierarchy(topic_model,
                 size=22,
                 color="Black")
         },
-        width=width,
-        height=height,
         hoverlabel=dict(
             bgcolor="white",
             font_size=16,
             font_family="Rockwell"
         ),
-
     )
 
     # Stylize orientation
     if orientation == "left":
-        fig.update_layout(yaxis=dict(tickmode="array",
+        fig.update_layout(height=200+(15*len(topics)),
+                          width=width,
+                          yaxis=dict(tickmode="array",
                                      ticktext=new_labels))
+        
+        # Fix empty space on the bottom of the graph
+        y_max = max([trace['y'].max()+5 for trace in fig['data']])
+        y_min = min([trace['y'].min()-5 for trace in fig['data']])
+        fig.update_layout(yaxis=dict(range=[y_min, y_max]))
+
     else:
-        fig.update_layout(xaxis=dict(tickmode="array",
+        fig.update_layout(width=200+(15*len(topics)),
+                          height=height,
+                          xaxis=dict(tickmode="array",
                                      ticktext=new_labels))
     return fig

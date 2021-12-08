@@ -9,10 +9,11 @@ A number of fixes, documentation updates, and small features:
     * This also means that the topic embeddings could be improved or do not work properly with certain language models
     * Perhaps this could be improved by averaging out the exemplars but that still would not fully represent a topic
     * c-TF-IDF seems to hold the most information with respect to the topics
-* Drop python 3.7 ([#333](https://github.com/MaartenGr/BERTopic/issues/333))
+* Added property to c-TF-IDF that all IDF values should be positive ([#351](https://github.com/MaartenGr/BERTopic/issues/351))
+* Improve stability of `.visualize_barchart()` and `.visualize_hierarchy()`
 * Major documentation overhaul (mkdocs, tutorials, FAQ, images, etc. ) ([#330](https://github.com/MaartenGr/BERTopic/issues/330))
-* Add property to c-TF-IDF that all IDF values should be positive ([#351](https://github.com/MaartenGr/BERTopic/issues/351))
-    
+* Drop python 3.7 ([#333](https://github.com/MaartenGr/BERTopic/issues/333))
+
 ## **Version 0.9.3**
 *Release date:  17 October, 2021*
 

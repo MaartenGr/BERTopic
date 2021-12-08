@@ -1115,8 +1115,8 @@ class BERTopic:
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
-            width: The width of the figure.
-            height: The height of the figure.
+            width: The width of the figure. Only works if orientation is set to 'left'
+            height: The height of the figure. Only works if orientation is set to 'bottom'
 
         Returns:
             fig: A plotly figure
