@@ -1,0 +1,1372 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html">
+      
+      <link rel="icon" href="../../icon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.0.1">
+    
+    
+      
+        <title>Topic Visualization - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.816931ca.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.9204c3b2.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>function __md_scope(e,t,_){return new URL(_||(t===localStorage?"../..":"../.."),location).pathname+"."+e}function __md_get(e,t=localStorage,_){return JSON.parse(t.getItem(__md_scope(e,t,_)))}function __md_set(e,t,_=localStorage,o){try{_.setItem(__md_scope(e,_,o),JSON.stringify(t))}catch(e){}}</script>
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#visualize-topics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../icon_white.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BERTopic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Topic Visualization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../index.html" class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../algorithm/algorithm.html" class="md-tabs__link">
+      The Algorithm
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart/quickstart.html" class="md-tabs__link md-tabs__link--active">
+        Getting Started
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../faq.html" class="md-tabs__link">
+      FAQ
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/bertopic.html" class="md-tabs__link">
+        API
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../changelog.html" class="md-tabs__link">
+      Changelog
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../icon_white.png" alt="logo">
+
+    </a>
+    BERTopic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithm/algorithm.html" class="md-nav__link">
+        The Algorithm
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/quickstart.html" class="md-nav__link">
+        Quickstart
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embeddings/embeddings.html" class="md-nav__link">
+        Embedding Models
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Topic Visualization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="visualization.html" class="md-nav__link md-nav__link--active">
+        Topic Visualization
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics" class="md-nav__link">
+    Visualize Topics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topic-hierarchy" class="md-nav__link">
+    Visualize Topic Hierarchy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-terms" class="md-nav__link">
+    Visualize Terms
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topic-similarity" class="md-nav__link">
+    Visualize Topic Similarity
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-term-score-decline" class="md-nav__link">
+    Visualize Term Score Decline
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics-over-time" class="md-nav__link">
+    Visualize Topics over Time
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics-per-class" class="md-nav__link">
+    Visualize Topics per Class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-probablities" class="md-nav__link">
+    Visualize Probablities
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicreduction/topicreduction.html" class="md-nav__link">
+        Topic Reduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        Topic Representation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../search/search.html" class="md-nav__link">
+        Search Topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_7" type="checkbox" id="__nav_3_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_7">
+          Customization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Customization" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_7">
+          <span class="md-nav__icon md-icon"></span>
+          Customization
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom_embeddings/embeddings.html" class="md-nav__link">
+        Custom Embedding Models
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/models.html" class="md-nav__link">
+        Custom Sub-Models
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter%20tuning/parametertuning.html" class="md-nav__link">
+        Parameter tuning
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_8" type="checkbox" id="__nav_3_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_8">
+          Variations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Variations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_8">
+          <span class="md-nav__icon md-icon"></span>
+          Variations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supervised/supervised.html" class="md-nav__link">
+        (semi)-Supervised Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+        Dynamic Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guided/guided.html" class="md-nav__link">
+        Guided Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq.html" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="API" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/bertopic.html" class="md-nav__link">
+        BERTopic
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_4">
+          Backends
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backends" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_4">
+          <span class="md-nav__icon md-icon"></span>
+          Backends
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/word_doc.html" class="md-nav__link">
+        Word Doc
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_5">
+          Plotting
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Plotting" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_5">
+          <span class="md-nav__icon md-icon"></span>
+          Plotting
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/barchart.html" class="md-nav__link">
+        Barchart
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/distribution.html" class="md-nav__link">
+        Distribution
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/heatmap.html" class="md-nav__link">
+        Heatmap
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/term.html" class="md-nav__link">
+        Term Scores
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics.html" class="md-nav__link">
+        Topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics_per_class.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog.html" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics" class="md-nav__link">
+    Visualize Topics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topic-hierarchy" class="md-nav__link">
+    Visualize Topic Hierarchy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-terms" class="md-nav__link">
+    Visualize Terms
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topic-similarity" class="md-nav__link">
+    Visualize Topic Similarity
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-term-score-decline" class="md-nav__link">
+    Visualize Term Score Decline
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics-over-time" class="md-nav__link">
+    Visualize Topics over Time
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics-per-class" class="md-nav__link">
+    Visualize Topics per Class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-probablities" class="md-nav__link">
+    Visualize Probablities
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/visualization/visualization.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+  <h1>Topic Visualization</h1>
+
+<p>Visualizing BERTopic and its derivatives is important in understanding the model, how it works, but more importantly, where it works. 
+Since topic modeling can be quite a subjective field it is difficult for users to validate their models. Looking at the topics and seeing 
+if they make sense is an important factor in eliviating this issue. </p>
+<h2 id="visualize-topics"><strong>Visualize Topics</strong><a class="headerlink" href="#visualize-topics" title="Permanent link">&para;</a></h2>
+<p>After having trained our <code>BERTopic</code> model, we can iteratively go through hundreds of topics to get a good 
+understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+Instead, we can visualize the topics that were generated in a way very similar to 
+<a href="https://github.com/cpsievert/LDAvis">LDAvis</a>. </p>
+<p>We embed our c-TF-IDF representation of the topics in 2D using Umap and then visualize the two dimensions using 
+plotly such that we can create an interactive view.</p>
+<p>First, we need to train our model:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>Then, we simply call <code>topic_model.visualize_topics()</code> in order to visualize our topics. The resulting graph is a 
+plotly interactive graph which can be converted to HTML. </p>
+<p>Thus, you can play around with the results below:</p>
+<iframe src="viz.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
+
+<p>You can use the slider to select the topic which then lights up red. If you hover over a topic, then general 
+information is given about the topic, including the size of the topic and its corresponding words.</p>
+<h2 id="visualize-topic-hierarchy"><strong>Visualize Topic Hierarchy</strong><a class="headerlink" href="#visualize-topic-hierarchy" title="Permanent link">&para;</a></h2>
+<p>The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
+structure of the topics, we can use <code>scipy.cluster.hierarchy</code> to create clusters and visualize how 
+they relate to one another. This might help selecting an appropriate <code>nr_topics</code> when reducing the number 
+of topics that you have created. To visualize this hierarchy, simply call <code>topic_model.visualize_hierarchy()</code>:</p>
+<iframe src="hierarchy.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do note that this is not the actual procedure of <code>.reduce_topics()</code> when <code>nr_topics</code> is set to 
+auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
+the actual procedure of <code>.reduce_topics()</code> when any number of <code>nr_topics</code> is selected. </p>
+</div>
+<h2 id="visualize-terms"><strong>Visualize Terms</strong><a class="headerlink" href="#visualize-terms" title="Permanent link">&para;</a></h2>
+<p>We can visualize the selected terms for a few topics by creating bar charts out of the c-TF-IDF scores 
+for each topic representation. Insights can be gained from the relative c-TF-IDF scores between and within 
+topics. Moreover, you can easily compare topic representations to each other. 
+To visualize this hierarchy, simply call <code>topic_model.visualize_barchart()</code>:</p>
+<iframe src="bar_chart.html" style="width:1100px; height: 660px; border: 0px;""></iframe>
+
+<h2 id="visualize-topic-similarity"><strong>Visualize Topic Similarity</strong><a class="headerlink" href="#visualize-topic-similarity" title="Permanent link">&para;</a></h2>
+<p>Having generated topic embeddings, through both c-TF-IDF and embeddings, we can create a similarity 
+matrix by simply applying cosine similarities through those topic embeddings. The result will be a 
+matrix indicating how similar certain topics are to each other. 
+To visualize the heatmap, simply call <code>topic_model.visualize_heatmap()</code>:</p>
+<iframe src="heatmap.html" style="width:1000px; height: 720px; border: 0px;""></iframe>
+
+<p>Note that you can set <code>n_clusters</code> in <code>visualize_heatmap</code> to order the topics by their similarity. 
+This will result in blocks being formed in the heatmap indicating which clusters of topics are 
+similar to each other. This step is very much recommended as it will make reading the heatmap easier.      </p>
+<h2 id="visualize-term-score-decline"><strong>Visualize Term Score Decline</strong><a class="headerlink" href="#visualize-term-score-decline" title="Permanent link">&para;</a></h2>
+<p>Topics are represented by a number of words starting with the best representative word. 
+Each word is represented by a c-TF-IDF score. The higher the score, the more representative a word 
+to the topic is. Since the topic words are sorted by their c-TF-IDF score, the scores slowly decline 
+with each word that is added. At some point adding words to the topic representation only marginally 
+increases the total c-TF-IDF score and would not be beneficial for its representation. </p>
+<p>To visualize this effect, we can plot the c-TF-IDF scores for each topic by the term rank of each word. 
+In other words, the position of the words (term rank), where the words with 
+the highest c-TF-IDF score will have a rank of 1, will be put on the x-axis. Whereas the y-axis 
+will be populated by the c-TF-IDF scores. The result is a visualization that shows you the decline 
+of c-TF-IDF score when adding words to the topic representation. It allows you, using the elbow method, 
+the select the best number of words in a topic. </p>
+<p>To visualize the c-TF-IDF score decline, simply call <code>topic_model.visualize_term_rank()</code>:</p>
+<iframe src="term_rank.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
+
+<p>To enable the log scale on the y-axis for a better view of individual topics, 
+simply call <code>topic_model.visualize_term_rank(log_scale=True)</code>:</p>
+<iframe src="term_rank_log.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
+
+<p>This visualization was heavily inspired by the "Term Probability Decline" visualization found in an 
+analysis by the amazing <a href="https://tmtoolkit.readthedocs.io/">tmtoolkit</a>.
+Reference to that specific analysis can be found 
+<a href="https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html">here</a>. </p>
+<h2 id="visualize-topics-over-time"><strong>Visualize Topics over Time</strong><a class="headerlink" href="#visualize-topics-over-time" title="Permanent link">&para;</a></h2>
+<p>After creating topics over time with Dynamic Topic Modeling, we can visualize these topics by 
+leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
+of topics over time whilst giving the option of hovering over the points to show the time-specific topic representations. 
+Simply call <code>visualize_topics_over_time</code> with the newly created topics over time:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="c1"># Prepare data</span>
+<span class="n">trump</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://drive.google.com/uc?export=download&amp;id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6&#39;</span><span class="p">)</span>
+<span class="n">trump</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">trump</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;http\S+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">trump</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">trump</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="s2">&quot;@&quot;</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())),</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">trump</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">trump</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^a-zA-Z]+&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">trump</span> <span class="o">=</span> <span class="n">trump</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">trump</span><span class="o">.</span><span class="n">isRetweet</span> <span class="o">==</span> <span class="s2">&quot;f&quot;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">trump</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="p">:]</span>
+<span class="n">timestamps</span> <span class="o">=</span> <span class="n">trump</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="n">tweets</span> <span class="o">=</span> <span class="n">trump</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+
+<span class="c1"># Create topics over time</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">tweets</span><span class="p">)</span>
+<span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">)</span>
+</code></pre></div>
+<p>Then, we visualize some interesting topics: </p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">91</span><span class="p">])</span>
+</code></pre></div>
+<iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
+
+<h2 id="visualize-topics-per-class"><strong>Visualize Topics per Class</strong><a class="headerlink" href="#visualize-topics-per-class" title="Permanent link">&para;</a></h2>
+<p>You might want to extract and visualize the topic representation per class. For example, if you have 
+specific groups of users that might approach topics differently, then extracting them would help understanding 
+how these users talk about certain topics. In other words, this is simply creating a topic representation for 
+certain classes that you might have in your data. </p>
+<p>First, we need to train our model:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="c1"># Prepare data and classes</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]]</span>
+
+<span class="c1"># Create topic model and calculate topics per class</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">topics_per_class</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_per_class</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+</code></pre></div>
+<p>Then, we visualize the topic representation of major topics per class: </p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="n">topics_per_class</span><span class="p">)</span>
+</code></pre></div>
+<iframe src="topics_per_class.html" style="width:1400px; height: 1000px; border: 0px;""></iframe>
+
+<h2 id="visualize-probablities"><strong>Visualize Probablities</strong><a class="headerlink" href="#visualize-probablities" title="Permanent link">&para;</a></h2>
+<p>We can also calculate the probabilities of topics found in a document. In order to do so, we have to 
+set <code>calculate_probabilities</code> to True as calculating them can be quite computationally expensive. 
+Then, we use the variable <code>probabilities</code> that is returned from <code>transform()</code> or <code>fit_transform()</code> 
+to understand how confident BERTopic is that certain topics can be found in a document:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">calculate_probabilities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>To visualize the distributions, we simply call:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</code></pre></div>
+<iframe src="probabilities.html" style="width:1000px; height: 500px; border: 0px;""></iframe>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The distribution of the probabilities does not give an indication to 
+the distribution of the frequencies of topics across a document. It merely shows
+how confident BERTopic is that certain topics can be found in a document.</p>
+</div>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../embeddings/embeddings.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Embedding Models" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Embedding Models
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../topicreduction/topicreduction.html" class="md-footer__link md-footer__link--next" aria-label="Next: Topic Reduction" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Topic Reduction
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.01824240.min.js"}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a87c2adc.min.js"></script>
+      
+    
+  </body>
+</html>

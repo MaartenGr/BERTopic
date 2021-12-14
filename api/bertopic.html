@@ -9,14 +9,13 @@
         <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
       
       
-      
         <meta name="author" content="Maarten P. Grootendorst">
       
       
         <link rel="canonical" href="https://maartengr.github.io/BERTopic/api/bertopic.html">
       
       <link rel="icon" href="../icon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.2">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.0.1">
     
     
       
@@ -24,14 +23,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.6f955dcd.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.816931ca.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ef6f36e2.min.css">
-        
-          
-          
-          <meta name="theme-color" content="#000000">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.9204c3b2.min.css">
         
       
     
@@ -41,17 +36,19 @@
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,400i,700%7CUbuntu+Mono&display=fallback">
-        <style>:root{--md-text-font-family:"Ubuntu";--md-code-font-family:"Ubuntu Mono"}</style>
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
       
-    
     
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../style.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
+    <script>function __md_scope(e,t,_){return new URL(_||(t===localStorage?"..":".."),location).pathname+"."+e}function __md_get(e,t=localStorage,_){return JSON.parse(t.getItem(__md_scope(e,t,_)))}function __md_set(e,t,_=localStorage,o){try{_.setItem(__md_scope(e,_,o),JSON.stringify(t))}catch(e){}}</script>
     
       
+
+
     
     
   </head>
@@ -59,13 +56,16 @@
   
     
     
+      
     
     
     
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="black" data-md-color-accent="grey">
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
   
     
-    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -82,9 +82,12 @@
       
     </div>
     
-      <header class="md-header" data-md-component="header">
+    
+      
+
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+    <a href="../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
   <img src="../icon_white.png" alt="logo">
 
@@ -109,24 +112,49 @@
       </div>
     </div>
     
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31z"/></svg>
+            </label>
+          
+        
+      </form>
+    
     
     
       <label class="md-header__button md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
       </label>
-      
-<div class="md-search" data-md-component="search" role="dialog">
+      <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-      </button>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -143,8 +171,7 @@
     
     
       <div class="md-header__source">
-        
-<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -156,11 +183,105 @@
       </div>
     
   </nav>
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../index.html" class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../algorithm/algorithm.html" class="md-tabs__link">
+      The Algorithm
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting_started/quickstart/quickstart.html" class="md-tabs__link">
+        Getting Started
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../faq.html" class="md-tabs__link">
+      FAQ
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="bertopic.html" class="md-tabs__link md-tabs__link--active">
+        API
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../changelog.html" class="md-tabs__link">
+      Changelog
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -173,10 +294,12 @@
                   <div class="md-sidebar__inner">
                     
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+    <a href="../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
   <img src="../icon_white.png" alt="logo">
 
@@ -185,8 +308,7 @@
   </label>
   
     <div class="md-nav__source">
-      
-<a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/MaartenGr/BERTopic/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -222,7 +344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/algorithm/algorithm.html" class="md-nav__link">
+      <a href="../algorithm/algorithm.html" class="md-nav__link">
         The Algorithm
       </a>
     </li>
@@ -242,151 +364,290 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
       
-      <label class="md-nav__link" for="__nav_3">
-        Guides
-        <span class="md-nav__icon md-icon"></span>
-      </label>
-      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
-          Guides
+          Getting Started
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/quickstart/quickstart.html" class="md-nav__link">
-        Getting Started
+      <a href="../getting_started/quickstart/quickstart.html" class="md-nav__link">
+        Quickstart
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/embeddings/embeddings.html" class="md-nav__link">
+      <a href="../getting_started/embeddings/embeddings.html" class="md-nav__link">
         Embedding Models
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/visualization/visualization.html" class="md-nav__link">
+      <a href="../getting_started/visualization/visualization.html" class="md-nav__link">
         Topic Visualization
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/topicreduction/topicreduction.html" class="md-nav__link">
+      <a href="../getting_started/topicreduction/topicreduction.html" class="md-nav__link">
         Topic Reduction
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/topicrepresentation/topicrepresentation.html" class="md-nav__link">
+      <a href="../getting_started/topicrepresentation/topicrepresentation.html" class="md-nav__link">
         Topic Representation
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/search/search.html" class="md-nav__link">
+      <a href="../getting_started/search/search.html" class="md-nav__link">
         Search Topics
       </a>
     </li>
   
 
+            
           
             
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_7" type="checkbox" id="__nav_3_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_7">
+          Customization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Customization" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_7">
+          <span class="md-nav__icon md-icon"></span>
+          Customization
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/models/models.html" class="md-nav__link">
+      <a href="../getting_started/custom_embeddings/embeddings.html" class="md-nav__link">
+        Custom Embedding Models
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/models/models.html" class="md-nav__link">
         Custom Sub-Models
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/topicsperclass/topicsperclass.html" class="md-nav__link">
+      <a href="../getting_started/parameter%20tuning/parametertuning.html" class="md-nav__link">
+        Parameter tuning
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_8" type="checkbox" id="__nav_3_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_8">
+          Variations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Variations" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_8">
+          <span class="md-nav__icon md-icon"></span>
+          Variations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/supervised/supervised.html" class="md-nav__link">
+      <a href="../getting_started/supervised/supervised.html" class="md-nav__link">
         (semi)-Supervised Topic Modeling
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/topicsovertime/topicsovertime.html" class="md-nav__link">
+      <a href="../getting_started/topicsovertime/topicsovertime.html" class="md-nav__link">
         Dynamic Topic Modeling
       </a>
     </li>
   
 
+            
           
             
+              
   
   
   
     <li class="md-nav__item">
-      <a href="../tutorial/guided/guided.html" class="md-nav__link">
+      <a href="../getting_started/guided/guided.html" class="md-nav__link">
         Guided Topic Modeling
       </a>
     </li>
   
 
+            
           
         </ul>
       </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq.html" class="md-nav__link">
+        FAQ
+      </a>
     </li>
   
 
@@ -404,20 +665,25 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
       
-      <label class="md-nav__link" for="__nav_4">
-        API
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="API" data-md-level="1">
-        <label class="md-nav__title" for="__nav_4">
+        <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
           API
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
     
@@ -441,6 +707,7 @@
       </a>
       
         
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -650,8 +917,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -662,8 +931,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -674,29 +945,38 @@
     </li>
   
 
+            
           
             
+              
   
   
   
     
-    <li class="md-nav__item md-nav__item--nested">
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_4" type="checkbox" id="__nav_4_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
       
-      <label class="md-nav__link" for="__nav_4_4">
-        Backends
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_4">
+          Backends
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Backends" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_4">
+        <label class="md-nav__title" for="__nav_5_4">
           <span class="md-nav__icon md-icon"></span>
           Backends
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -707,8 +987,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -719,35 +1001,45 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
     </li>
   
 
+            
           
             
+              
   
   
   
     
-    <li class="md-nav__item md-nav__item--nested">
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
       
-      <label class="md-nav__link" for="__nav_4_5">
-        Plotting
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_5">
+          Plotting
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Plotting" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_5">
+        <label class="md-nav__title" for="__nav_5_5">
           <span class="md-nav__icon md-icon"></span>
           Plotting
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -758,8 +1050,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -770,8 +1064,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -782,8 +1078,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -794,8 +1092,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -806,8 +1106,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -818,8 +1120,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -830,8 +1134,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -842,30 +1148,17 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
     </li>
   
 
+            
           
         </ul>
       </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq.html" class="md-nav__link">
-        FAQ
-      </a>
     </li>
   
 
@@ -897,6 +1190,7 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -1111,12 +1405,12 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/bertopic.md" title="Edit this page" class="md-content__button md-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
-                  </a>
-                
-                
-                <h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
+<a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/bertopic.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+<h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
 
 
   <div class="doc doc-object doc-class">
@@ -1167,7 +1461,7 @@ you best.</p>
 
 
 <h2 id="bertopic._bertopic.BERTopic.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">&#39;english&#39;</span><span class="p">,</span> <span class="n">top_n_words</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">min_topic_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">calculate_probabilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed_topic_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">umap_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hdbscan_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">&#39;english&#39;</span><span class="p">,</span> <span class="n">top_n_words</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_gram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">min_topic_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">calculate_probabilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">diversity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed_topic_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">umap_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hdbscan_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -1230,8 +1524,7 @@ you best.</p>
        number of topics to the value specified. This reduction can take
        a while as each reduction in topics (-1) activates a c-TF-IDF
        calculation. If this is set to None, no reduction is applied. Use
-       "auto" to automatically reduce topics that have a similarity of at
-       least 0.9, do not maps all others.</p></td>
+       "auto" to automatically reduce topics using HDBSCAN.</p></td>
         <td><code>None</code></td>
       </tr>
       <tr>
@@ -1254,6 +1547,14 @@ you best.</p>
         <td><code>False</code></td>
       </tr>
       <tr>
+        <td><code>diversity</code></td>
+        <td><code>float</code></td>
+        <td><p>Whether to use MMR to diversify the resulting topic representations.
+       If set to None, MMR will not be used. Accepted values lie between 
+       0 and 1 with 0 being not at all diverse and 1 being very diverse. </p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
         <td><code>seed_topic_list</code></td>
         <td><code>List[List[str]]</code></td>
         <td><p>A list of seed words per topic to converge around</p></td>
@@ -1268,7 +1569,7 @@ you best.</p>
       </tr>
       <tr>
         <td><code>embedding_model</code></td>
-        <td><code></code></td>
+        <td></td>
         <td><p>Use a custom embedding model.
              The following backends are currently supported
                * SentenceTransformers
@@ -1311,6 +1612,7 @@ you best.</p>
              <span class="n">nr_topics</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">low_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">calculate_probabilities</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">seed_topic_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">umap_model</span><span class="p">:</span> <span class="n">UMAP</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1338,8 +1640,7 @@ you best.</p>
 <span class="sd">                   number of topics to the value specified. This reduction can take</span>
 <span class="sd">                   a while as each reduction in topics (-1) activates a c-TF-IDF</span>
 <span class="sd">                   calculation. If this is set to None, no reduction is applied. Use</span>
-<span class="sd">                   &quot;auto&quot; to automatically reduce topics that have a similarity of at</span>
-<span class="sd">                   least 0.9, do not maps all others.</span>
+<span class="sd">                   &quot;auto&quot; to automatically reduce topics using HDBSCAN.</span>
 <span class="sd">        low_memory: Sets UMAP low memory to True to make sure less memory is used.</span>
 <span class="sd">        calculate_probabilities: Whether to calculate the probabilities of all topics</span>
 <span class="sd">                                 per document instead of the probability of the assigned</span>
@@ -1349,6 +1650,9 @@ you best.</p>
 <span class="sd">                                 you do not mind more computation time.</span>
 <span class="sd">                                 NOTE: If false you cannot use the corresponding</span>
 <span class="sd">                                 visualization method `visualize_probabilities`.</span>
+<span class="sd">        diversity: Whether to use MMR to diversify the resulting topic representations.</span>
+<span class="sd">                   If set to None, MMR will not be used. Accepted values lie between </span>
+<span class="sd">                   0 and 1 with 0 being not at all diverse and 1 being very diverse. </span>
 <span class="sd">        seed_topic_list: A list of seed words per topic to converge around</span>
 <span class="sd">        verbose: Changes the verbosity of the model, Set to True if you want</span>
 <span class="sd">                 to track the stages of the model.</span>
@@ -1374,6 +1678,7 @@ you best.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">nr_topics</span> <span class="o">=</span> <span class="n">nr_topics</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">low_memory</span> <span class="o">=</span> <span class="n">low_memory</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">calculate_probabilities</span> <span class="o">=</span> <span class="n">calculate_probabilities</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span> <span class="o">=</span> <span class="n">diversity</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">seed_topic_list</span> <span class="o">=</span> <span class="n">seed_topic_list</span>
 
@@ -1529,8 +1834,8 @@ below 5 words.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Tuple[List[int], List[float]]</code></td>
-      <td><p>similar_topics: the most similar topics from high to low
+      <td><code>similar_topics</code></td>
+      <td><p>the most similar topics from high to low
 similarity: the similarity scores from high to low</p></td>
     </tr>
   </tbody>
@@ -1778,8 +2083,8 @@ specific instance is specified.</p></td>
   </thead>
   <tbody>
     <tr>
-      <td><code>Tuple[List[int], Optional[numpy.ndarray]]</code></td>
-      <td><p>predictions: Topic predictions for each documents
+      <td><code>predictions</code></td>
+      <td><p>Topic predictions for each documents
 probabilities: The probability of the assigned topic per document.
                If <code>calculate_probabilities</code> in BERTopic is set to True, then
                it calculates the probabilities of all topics across all documents
@@ -1961,8 +2266,8 @@ probabilities: The probability of the assigned topic per document.
   </thead>
   <tbody>
     <tr>
-      <td><code>Mapping[str, Any]</code></td>
-      <td><p>out: Parameter names mapped to their values.</p></td>
+      <td><code>out</code></td>
+      <td><p>Parameter names mapped to their values.</p></td>
     </tr>
   </tbody>
 </table>
@@ -2313,8 +2618,8 @@ the frequencies of all topics</p></td>
   </thead>
   <tbody>
     <tr>
-      <td><code>DataFrame</code></td>
-      <td><p>info: The information relating to either a single topic or all topics</p></td>
+      <td><code>info</code></td>
+      <td><p>The information relating to either a single topic or all topics</p></td>
     </tr>
   </tbody>
 </table>      <p>Usage:</p>
@@ -2379,8 +2684,8 @@ the frequencies of all topics</p></td>
   </thead>
   <tbody>
     <tr>
-      <td><code>Mapping[str, Tuple[str, float]]</code></td>
-      <td><p>self.topic: The top n words per topic and the corresponding c-TF-IDF score</p></td>
+      <td><code>self.topic</code></td>
+      <td><p>The top n words per topic and the corresponding c-TF-IDF score</p></td>
     </tr>
   </tbody>
 </table>      <p>Usage:</p>
@@ -2447,7 +2752,7 @@ the frequencies of all topics</p></td>
       </tr>
       <tr>
         <td><code>embedding_model</code></td>
-        <td><code></code></td>
+        <td></td>
         <td><p>If the embedding_model was not saved to save space or to load
              it in from the cloud, you can load it in by specifying it here.</p></td>
         <td><code>None</code></td>
@@ -2569,8 +2874,8 @@ instead of a dedicated database.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Tuple[List[int], numpy.ndarray]</code></td>
-      <td><p>new_topics: Updated topics
+      <td><code>new_topics</code></td>
+      <td><p>Updated topics
 new_probabilities: Updated probabilities</p></td>
     </tr>
   </tbody>
@@ -2755,12 +3060,14 @@ From the fitted models, the c-TF-IDF representations are calculate at
 each timestamp t. Then, the c-TF-IDF representations at timestamp t are
 averaged with the global c-TF-IDF representations in order to fine-tune the
 local representations.</p>
-<p>!!! note
-    Make sure to use a limited number of unique timestamps (&lt;100) as the
-    c-TF-IDF representation will be calculated at each single unique timestamp.
-    Having a large number of unique timestamps can take some time to be calculated.
-    Moreover, there aren't many use-cased where you would like to see the difference
-    in topic representations over more than 100 different timestamps.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure to use a limited number of unique timestamps (&lt;100) as the
+c-TF-IDF representation will be calculated at each single unique timestamp.
+Having a large number of unique timestamps can take some time to be calculated.
+Moreover, there aren't many use-cased where you would like to see the difference
+in topic representations over more than 100 different timestamps.</p>
+</div>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2839,8 +3146,8 @@ local representations.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>DataFrame</code></td>
-      <td><p>topics_over_time: A dataframe that contains the topic, words, and frequency of topic
+      <td><code>topics_over_time</code></td>
+      <td><p>A dataframe that contains the topic, words, and frequency of topic
                   at timestamp t.</p></td>
     </tr>
   </tbody>
@@ -2950,7 +3257,7 @@ local representations.</p>
         <span class="n">selection</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">documents</span><span class="o">.</span><span class="n">Timestamps</span> <span class="o">==</span> <span class="n">timestamp</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">documents_per_topic</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Topic&#39;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;Document&#39;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">,</span>
                                                                                 <span class="s2">&quot;Timestamps&quot;</span><span class="p">:</span> <span class="s2">&quot;count&quot;</span><span class="p">})</span>
-        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_tf_idf</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_tf_idf</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">global_tuning</span> <span class="ow">or</span> <span class="n">evolution_tuning</span><span class="p">:</span>
             <span class="n">c_tf_idf</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -3018,10 +3325,12 @@ each class c. Then, the c-TF-IDF representations at class c are
 averaged with the global c-TF-IDF representations in order to fine-tune the
 local representations. This can be turned off if the pure representation is
 needed.</p>
-<p>!!! note
-    Make sure to use a limited number of unique classes (&lt;100) as the
-    c-TF-IDF representation will be calculated at each single unique class.
-    Having a large number of unique classes can take some time to be calculated.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure to use a limited number of unique classes (&lt;100) as the
+c-TF-IDF representation will be calculated at each single unique class.
+Having a large number of unique classes can take some time to be calculated.</p>
+</div>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -3072,8 +3381,8 @@ needed.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>DataFrame</code></td>
-      <td><p>topics_per_class: A dataframe that contains the topic, words, and frequency of topics
+      <td><code>topics_per_class</code></td>
+      <td><p>A dataframe that contains the topic, words, and frequency of topics
                   for each class.</p></td>
     </tr>
   </tbody>
@@ -3137,7 +3446,7 @@ needed.</p>
         <span class="n">selection</span> <span class="o">=</span> <span class="n">documents</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">documents</span><span class="o">.</span><span class="n">Class</span> <span class="o">==</span> <span class="n">class_</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">documents_per_topic</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;Topic&#39;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;Document&#39;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">,</span>
                                                                                 <span class="s2">&quot;Class&quot;</span><span class="p">:</span> <span class="s2">&quot;count&quot;</span><span class="p">})</span>
-        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_tf_idf</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">words</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c_tf_idf</span><span class="p">(</span><span class="n">documents_per_topic</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation</span>
         <span class="c1"># by simply taking the average of the two</span>
@@ -3219,8 +3528,8 @@ needed.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Tuple[List[int], numpy.ndarray]</code></td>
-      <td><p>predictions: Topic predictions for each documents
+      <td><code>predictions</code></td>
+      <td><p>Topic predictions for each documents
 probabilities: The topic probability distribution which is returned by default.
                If <code>calculate_probabilities</code> in BERTopic is set to False, then the
                probabilities are not calculated to speed up computation and
@@ -3309,10 +3618,14 @@ probabilities: The topic probability distribution which is returned by default.
                                               <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="n">umap_embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">umap_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reduced dimensionality with UMAP&quot;</span><span class="p">)</span>
+
     <span class="n">predictions</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">approximate_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hdbscan_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Predicted clusters with HDBSCAN&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_probabilities</span><span class="p">:</span>
         <span class="n">probabilities</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">membership_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hdbscan_model</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calculated probabilities with HDBSCAN&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">probabilities</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -3452,7 +3765,7 @@ model and extract topics from them. Based on these, you can update the represent
 
 
 <h2 id="bertopic._bertopic.BERTopic.visualize_barchart" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">visualize_barchart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_words</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">visualize_barchart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n_words</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">250</span><span class="p">)</span></code>
 
 
 <a href="#bertopic._bertopic.BERTopic.visualize_barchart" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -3482,7 +3795,7 @@ model and extract topics from them. Based on these, you can update the represent
         <td><code>top_n_topics</code></td>
         <td><code>int</code></td>
         <td><p>Only select the top n most frequent topics.</p></td>
-        <td><code>6</code></td>
+        <td><code>8</code></td>
       </tr>
       <tr>
         <td><code>n_words</code></td>
@@ -3493,14 +3806,14 @@ model and extract topics from them. Based on these, you can update the represent
       <tr>
         <td><code>width</code></td>
         <td><code>int</code></td>
-        <td><p>The width of the figure.</p></td>
-        <td><code>800</code></td>
+        <td><p>The width of each figure.</p></td>
+        <td><code>250</code></td>
       </tr>
       <tr>
         <td><code>height</code></td>
         <td><code>int</code></td>
-        <td><p>The height of the figure.</p></td>
-        <td><code>600</code></td>
+        <td><p>The height of each figure.</p></td>
+        <td><code>250</code></td>
       </tr>
   </tbody>
 </table>
@@ -3514,8 +3827,8 @@ model and extract topics from them. Based on these, you can update the represent
   </thead>
   <tbody>
     <tr>
-      <td><code>Figure</code></td>
-      <td><p>fig: A plotly figure</p></td>
+      <td><code>fig</code></td>
+      <td><p>A plotly figure</p></td>
     </tr>
   </tbody>
 </table>      <p>Usage:</p>
@@ -3532,18 +3845,18 @@ simply run:</p>
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_barchart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                       <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+                       <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
                        <span class="n">n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-                       <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
-                       <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+                       <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+                       <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Visualize a barchart of selected topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topics: A selection of topics to visualize.</span>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics.</span>
 <span class="sd">        n_words: Number of words to show in a topic</span>
-<span class="sd">        width: The width of the figure.</span>
-<span class="sd">        height: The height of the figure.</span>
+<span class="sd">        width: The width of each figure.</span>
+<span class="sd">        height: The height of each figure.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        fig: A plotly figure</span>
@@ -3756,8 +4069,8 @@ a heatmap is created showing the similarity between topics.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Figure</code></td>
-      <td><p>fig: A plotly figure</p></td>
+      <td><code>fig</code></td>
+      <td><p>A plotly figure</p></td>
     </tr>
   </tbody>
 </table>      <p>Usage:</p>
@@ -3875,13 +4188,13 @@ matrix between topic embeddings.</p>
       <tr>
         <td><code>width</code></td>
         <td><code>int</code></td>
-        <td><p>The width of the figure.</p></td>
+        <td><p>The width of the figure. Only works if orientation is set to 'left'</p></td>
         <td><code>1000</code></td>
       </tr>
       <tr>
         <td><code>height</code></td>
         <td><code>int</code></td>
-        <td><p>The height of the figure.</p></td>
+        <td><p>The height of the figure. Only works if orientation is set to 'bottom'</p></td>
         <td><code>600</code></td>
       </tr>
   </tbody>
@@ -3896,8 +4209,8 @@ matrix between topic embeddings.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Figure</code></td>
-      <td><p>fig: A plotly figure</p></td>
+      <td><code>fig</code></td>
+      <td><p>A plotly figure</p></td>
     </tr>
   </tbody>
 </table>      <p>Usage:</p>
@@ -3929,8 +4242,8 @@ topics simply run:</p>
 <span class="sd">                     Either &#39;left&#39; or &#39;bottom&#39;</span>
 <span class="sd">        topics: A selection of topics to visualize</span>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics</span>
-<span class="sd">        width: The width of the figure.</span>
-<span class="sd">        height: The height of the figure.</span>
+<span class="sd">        width: The width of the figure. Only works if orientation is set to &#39;left&#39;</span>
+<span class="sd">        height: The height of the figure. Only works if orientation is set to &#39;bottom&#39;</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        fig: A plotly figure</span>
@@ -4032,8 +4345,8 @@ the beneficial effect of adding words starts to decline.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Figure</code></td>
-      <td><p>fig: A plotly figure</p></td>
+      <td><code>fig</code></td>
+      <td><p>A plotly figure</p></td>
     </tr>
   </tbody>
 </table>      <p>Usage:</p>
@@ -4515,11 +4828,6 @@ technique typically reserved for LDA.</p>
     </div>
 
   </div>
-                
-              
-              
-                
-
 
               
             </article>
@@ -4528,12 +4836,12 @@ technique typically reserved for LDA.</p>
         
       </main>
       
-        
-<footer class="md-footer">
+        <footer class="md-footer">
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../tutorial/guided/guided.html" class="md-footer__link md-footer__link--prev" rel="prev">
+        
+        <a href="../faq.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: FAQ" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -4542,13 +4850,14 @@ technique typically reserved for LDA.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Guided Topic Modeling
+              FAQ
             </div>
           </div>
         </a>
       
       
-        <a href="ctfidf.html" class="md-footer__link md-footer__link--next" rel="next">
+        
+        <a href="ctfidf.html" class="md-footer__link md-footer__link--next" aria-label="Next: cTFIDF" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
@@ -4566,18 +4875,19 @@ technique typically reserved for LDA.</p>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
-          </div>
-        
-        Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-          Material for MkDocs
-        </a>
-        
-      </div>
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
       
     </div>
   </div>
@@ -4587,10 +4897,10 @@ technique typically reserved for LDA.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.01824240.min.js"}</script>
     
     
-      <script src="../assets/javascripts/bundle.4ea5477f.min.js"></script>
+      <script src="../assets/javascripts/bundle.a87c2adc.min.js"></script>
       
     
   </body>

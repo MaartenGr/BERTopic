@@ -12,21 +12,21 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/api/plotting/topics.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html">
       
-      <link rel="icon" href="../../icon.png">
+      <link rel="icon" href="../icon.png">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.0.1">
     
     
       
-        <title>Topics - BERTopic</title>
+        <title>The Algorithm - BERTopic</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.816931ca.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.816931ca.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.9204c3b2.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.9204c3b2.min.css">
         
       
     
@@ -40,11 +40,11 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>function __md_scope(e,t,_){return new URL(_||(t===localStorage?"../..":"../.."),location).pathname+"."+e}function __md_get(e,t=localStorage,_){return JSON.parse(t.getItem(__md_scope(e,t,_)))}function __md_set(e,t,_=localStorage,o){try{_.setItem(__md_scope(e,_,o),JSON.stringify(t))}catch(e){}}</script>
+    <script>function __md_scope(e,t,_){return new URL(_||(t===localStorage?"..":".."),location).pathname+"."+e}function __md_get(e,t=localStorage,_){return JSON.parse(t.getItem(__md_scope(e,t,_)))}function __md_set(e,t,_=localStorage,o){try{_.setItem(__md_scope(e,_,o),JSON.stringify(t))}catch(e){}}</script>
     
       
 
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#topics" class="md-skip">
+        <a href="#1-embed-documents" class="md-skip">
           Skip to content
         </a>
       
@@ -87,9 +87,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+    <a href="../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
-  <img src="../../icon_white.png" alt="logo">
+  <img src="../icon_white.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Topics
+              The Algorithm
             
           </span>
         </div>
@@ -202,7 +202,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="../../index.html" class="md-tabs__link">
+    <a href="../index.html" class="md-tabs__link">
       Home
     </a>
   </li>
@@ -211,10 +211,12 @@
         
   
   
+    
+  
 
 
   <li class="md-tabs__item">
-    <a href="../../algorithm/algorithm.html" class="md-tabs__link">
+    <a href="algorithm.html" class="md-tabs__link md-tabs__link--active">
       The Algorithm
     </a>
   </li>
@@ -229,7 +231,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../getting_started/quickstart/quickstart.html" class="md-tabs__link">
+      <a href="../getting_started/quickstart/quickstart.html" class="md-tabs__link">
         Getting Started
       </a>
     </li>
@@ -242,7 +244,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="../../faq.html" class="md-tabs__link">
+    <a href="../faq.html" class="md-tabs__link">
       FAQ
     </a>
   </li>
@@ -251,15 +253,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../bertopic.html" class="md-tabs__link md-tabs__link--active">
+      <a href="../api/bertopic.html" class="md-tabs__link">
         API
       </a>
     </li>
@@ -272,7 +272,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="../../changelog.html" class="md-tabs__link">
+    <a href="../changelog.html" class="md-tabs__link">
       Changelog
     </a>
   </li>
@@ -299,9 +299,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+    <a href="../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
-  <img src="../../icon_white.png" alt="logo">
+  <img src="../icon_white.png" alt="logo">
 
     </a>
     BERTopic
@@ -329,7 +329,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../index.html" class="md-nav__link">
+      <a href="../index.html" class="md-nav__link">
         Home
       </a>
     </li>
@@ -342,11 +342,69 @@
 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../algorithm/algorithm.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          The Algorithm
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="algorithm.html" class="md-nav__link md-nav__link--active">
         The Algorithm
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-embed-documents" class="md-nav__link">
+    1. Embed documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-cluster-documents" class="md-nav__link">
+    2. Cluster Documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-create-topic-representation" class="md-nav__link">
+    3. Create topic representation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-maximal-marginal-relevance-coherence" class="md-nav__link">
+    (Optional) Maximal Marginal Relevance Coherence
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -385,7 +443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/quickstart/quickstart.html" class="md-nav__link">
+      <a href="../getting_started/quickstart/quickstart.html" class="md-nav__link">
         Quickstart
       </a>
     </li>
@@ -399,7 +457,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/embeddings/embeddings.html" class="md-nav__link">
+      <a href="../getting_started/embeddings/embeddings.html" class="md-nav__link">
         Embedding Models
       </a>
     </li>
@@ -413,7 +471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/visualization/visualization.html" class="md-nav__link">
+      <a href="../getting_started/visualization/visualization.html" class="md-nav__link">
         Topic Visualization
       </a>
     </li>
@@ -427,7 +485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/topicreduction/topicreduction.html" class="md-nav__link">
+      <a href="../getting_started/topicreduction/topicreduction.html" class="md-nav__link">
         Topic Reduction
       </a>
     </li>
@@ -441,7 +499,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/topicrepresentation/topicrepresentation.html" class="md-nav__link">
+      <a href="../getting_started/topicrepresentation/topicrepresentation.html" class="md-nav__link">
         Topic Representation
       </a>
     </li>
@@ -455,7 +513,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/search/search.html" class="md-nav__link">
+      <a href="../getting_started/search/search.html" class="md-nav__link">
         Search Topics
       </a>
     </li>
@@ -497,7 +555,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/custom_embeddings/embeddings.html" class="md-nav__link">
+      <a href="../getting_started/custom_embeddings/embeddings.html" class="md-nav__link">
         Custom Embedding Models
       </a>
     </li>
@@ -511,7 +569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/models/models.html" class="md-nav__link">
+      <a href="../getting_started/models/models.html" class="md-nav__link">
         Custom Sub-Models
       </a>
     </li>
@@ -525,7 +583,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/parameter%20tuning/parametertuning.html" class="md-nav__link">
+      <a href="../getting_started/parameter%20tuning/parametertuning.html" class="md-nav__link">
         Parameter tuning
       </a>
     </li>
@@ -574,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/topicsperclass/topicsperclass.html" class="md-nav__link">
+      <a href="../getting_started/topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
     </li>
@@ -588,7 +646,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/supervised/supervised.html" class="md-nav__link">
+      <a href="../getting_started/supervised/supervised.html" class="md-nav__link">
         (semi)-Supervised Topic Modeling
       </a>
     </li>
@@ -602,7 +660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/topicsovertime/topicsovertime.html" class="md-nav__link">
+      <a href="../getting_started/topicsovertime/topicsovertime.html" class="md-nav__link">
         Dynamic Topic Modeling
       </a>
     </li>
@@ -616,7 +674,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/guided/guided.html" class="md-nav__link">
+      <a href="../getting_started/guided/guided.html" class="md-nav__link">
         Guided Topic Modeling
       </a>
     </li>
@@ -645,7 +703,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../faq.html" class="md-nav__link">
+      <a href="../faq.html" class="md-nav__link">
         FAQ
       </a>
     </li>
@@ -658,14 +716,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
       
       
       
@@ -688,7 +744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../bertopic.html" class="md-nav__link">
+      <a href="../api/bertopic.html" class="md-nav__link">
         BERTopic
       </a>
     </li>
@@ -702,7 +758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ctfidf.html" class="md-nav__link">
+      <a href="../api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
     </li>
@@ -716,7 +772,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mmr.html" class="md-nav__link">
+      <a href="../api/mmr.html" class="md-nav__link">
         MMR
       </a>
     </li>
@@ -758,7 +814,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../backends/base.html" class="md-nav__link">
+      <a href="../api/backends/base.html" class="md-nav__link">
         Base
       </a>
     </li>
@@ -772,7 +828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../backends/word_doc.html" class="md-nav__link">
+      <a href="../api/backends/word_doc.html" class="md-nav__link">
         Word Doc
       </a>
     </li>
@@ -791,16 +847,14 @@
               
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
       
       
       
@@ -823,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="barchart.html" class="md-nav__link">
+      <a href="../api/plotting/barchart.html" class="md-nav__link">
         Barchart
       </a>
     </li>
@@ -837,7 +891,7 @@
   
   
     <li class="md-nav__item">
-      <a href="distribution.html" class="md-nav__link">
+      <a href="../api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
     </li>
@@ -851,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="heatmap.html" class="md-nav__link">
+      <a href="../api/plotting/heatmap.html" class="md-nav__link">
         Heatmap
       </a>
     </li>
@@ -865,7 +919,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hierarchy.html" class="md-nav__link">
+      <a href="../api/plotting/hierarchy.html" class="md-nav__link">
         Hierarchy
       </a>
     </li>
@@ -879,7 +933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="term.html" class="md-nav__link">
+      <a href="../api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
     </li>
@@ -891,52 +945,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Topics
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="topics.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../api/plotting/topics.html" class="md-nav__link">
         Topics
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#bertopic.plotting._topics.visualize_topics" class="md-nav__link">
-    bertopic.plotting._topics.visualize_topics
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -948,7 +961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="dtm.html" class="md-nav__link">
+      <a href="../api/plotting/dtm.html" class="md-nav__link">
         DTM
       </a>
     </li>
@@ -962,7 +975,7 @@
   
   
     <li class="md-nav__item">
-      <a href="topics_per_class.html" class="md-nav__link">
+      <a href="../api/plotting/topics_per_class.html" class="md-nav__link">
         Topics per Class
       </a>
     </li>
@@ -991,7 +1004,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../changelog.html" class="md-nav__link">
+      <a href="../changelog.html" class="md-nav__link">
         Changelog
       </a>
     </li>
@@ -1015,8 +1028,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1025,8 +1036,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bertopic.plotting._topics.visualize_topics" class="md-nav__link">
-    bertopic.plotting._topics.visualize_topics
+  <a href="#1-embed-documents" class="md-nav__link">
+    1. Embed documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-cluster-documents" class="md-nav__link">
+    2. Cluster Documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-create-topic-representation" class="md-nav__link">
+    3. Create topic representation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-maximal-marginal-relevance-coherence" class="md-nav__link">
+    (Optional) Maximal Marginal Relevance Coherence
   </a>
   
 </li>
@@ -1043,141 +1075,82 @@
             <article class="md-content__inner md-typeset">
               
                 
-<a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/plotting/topics.md" title="Edit this page" class="md-content__button md-icon">
+<a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/algorithm/algorithm.md" title="Edit this page" class="md-content__button md-icon">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
 </a>
 
 
-<h1 id="topics"><code>Topics</code><a class="headerlink" href="#topics" title="Permanent link">&para;</a></h1>
+  <h1>The Algorithm</h1>
 
+<p><img src="../img/algorithm.png" width="80%" height="80%"/></p>
+<p>The algorithm contains, roughly, 3 stages:   </p>
+<ol>
+<li><strong>Embed documents</strong><ul>
+<li>Extract document embeddings with BERT or any other embedding technique</li>
+</ul>
+</li>
+<li><strong>Cluster Documents</strong><ul>
+<li>UMAP to reduce the dimensionality of embeddings</li>
+<li>HDBSCAN to cluster reduced embeddings and create clusters of semantically similar documents</li>
+</ul>
+</li>
+<li><strong>Create topic representation</strong>  <ul>
+<li>Extract and reduce topics with c-TF-IDF</li>
+<li>Improve coherence and diversity of words with Maximal Marginal Relevance  </li>
+</ul>
+</li>
+</ol>
+<h2 id="1-embed-documents"><strong>1. Embed documents</strong><a class="headerlink" href="#1-embed-documents" title="Permanent link">&para;</a></h2>
+<p>We start by creating document embeddings from a set of documents using 
+<a href="https://github.com/UKPLab/sentence-transformers">sentence-transformers</a>. These models are pre-trained for many 
+languages and are great for creating either document- or sentence-embeddings. </p>
+<p>In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:</p>
+<ul>
+<li><code>"all-MiniLM-L6-v2"</code></li>
+<li><code>"paraphrase-multilingual-MiniLM-L12-v2"</code></li>
+</ul>
+<p>The first is an English language model trained specifically for semantic similarity tasks which work quite 
+well for most use-cases. The second model is very similar to the first with one major difference is that the 
+<code>multilingual</code> models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
+you select any language other than English.</p>
+<h2 id="2-cluster-documents"><strong>2. Cluster Documents</strong><a class="headerlink" href="#2-cluster-documents" title="Permanent link">&para;</a></h2>
+<p>Typically, clustering algorithms have difficulty clustering data in high dimensional space. Before we are 
+going to cluster our documents, we first need to reduce the dimensionality of the embeddings that we generated. </p>
+<p>To do so, we use UMAP as it preserves both the local and global structure of embeddings quite well. Then, 
+we use HDBSCAN  to cluster the reduced embeddings as it allows us to identify outliers. </p>
+<h2 id="3-create-topic-representation"><strong>3. Create topic representation</strong><a class="headerlink" href="#3-create-topic-representation" title="Permanent link">&para;</a></h2>
+<p>What we want to know from the clusters that we generated, is what makes one cluster, based on its content, 
+different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per cluster 
+of documents instead of per individual document. </p>
+<p>When you apply TF-IDF as usual on a set of documents, what you are doing is comparing the importance of 
+words between documents. Now, what if, we instead treat all documents in a single category (e.g., a cluster) 
+as a single document and then apply TF-IDF? The result would be importance scores for words within a cluster. 
+The more important words are within a cluster, the more it is representative of that topic. In other words, 
+if we extract the most important words per cluster, we get descriptions of <strong>topics</strong>! This model is called 
+class-based TF-IDF</p>
+<p align="center">
+<img src="../img/ctfidf.png" />
+</p>
 
-  <div class="doc doc-object doc-function">
-
-<a id="bertopic.plotting._topics.visualize_topics"></a>
-    <div class="doc doc-contents first">
-
-      <p>Visualize topics, their sizes, and their corresponding words</p>
-<p>This visualization is highly inspired by LDAvis, a great visualization
-technique typically reserved for LDA.</p>
-
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>topic_model</code></td>
-        <td></td>
-        <td><p>A fitted BERTopic instance.</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>topics</code></td>
-        <td><code>List[int]</code></td>
-        <td><p>A selection of topics to visualize</p></td>
-        <td><code>None</code></td>
-      </tr>
-      <tr>
-        <td><code>top_n_topics</code></td>
-        <td><code>int</code></td>
-        <td><p>Only select the top n most frequent topics</p></td>
-        <td><code>None</code></td>
-      </tr>
-      <tr>
-        <td><code>width</code></td>
-        <td><code>int</code></td>
-        <td><p>The width of the figure.</p></td>
-        <td><code>650</code></td>
-      </tr>
-      <tr>
-        <td><code>height</code></td>
-        <td><code>int</code></td>
-        <td><p>The height of the figure.</p></td>
-        <td><code>650</code></td>
-      </tr>
-  </tbody>
-</table>      <p>Usage:</p>
-<p>To visualize the topics simply run:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics</span><span class="p">()</span>
-</code></pre></div>
-<p>Or if you want to save the resulting figure:</p>
-<div class="highlight"><pre><span></span><code><span class="n">fig</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics</span><span class="p">()</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s2">&quot;path/to/file.html&quot;</span><span class="p">)</span>
-</code></pre></div>
-<iframe src="../../getting_started/visualization/viz.html"
-style="width:1000px; height: 680px; border: 0px;""></iframe>
-
-        <details class="quote">
-          <summary>Source code in <code>bertopic\plotting\_topics.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                     <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
-                     <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize topics, their sizes, and their corresponding words</span>
-
-<span class="sd">    This visualization is highly inspired by LDAvis, a great visualization</span>
-<span class="sd">    technique typically reserved for LDA.</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        topic_model: A fitted BERTopic instance.</span>
-<span class="sd">        topics: A selection of topics to visualize</span>
-<span class="sd">        top_n_topics: Only select the top n most frequent topics</span>
-<span class="sd">        width: The width of the figure.</span>
-<span class="sd">        height: The height of the figure.</span>
-
-<span class="sd">    Usage:</span>
-
-<span class="sd">    To visualize the topics simply run:</span>
-
-<span class="sd">    ```python</span>
-<span class="sd">    topic_model.visualize_topics()</span>
-<span class="sd">    ```</span>
-
-<span class="sd">    Or if you want to save the resulting figure:</span>
-
-<span class="sd">    ```python</span>
-<span class="sd">    fig = topic_model.visualize_topics()</span>
-<span class="sd">    fig.write_html(&quot;path/to/file.html&quot;)</span>
-<span class="sd">    ```</span>
-<span class="sd">    &lt;iframe src=&quot;../../getting_started/visualization/viz.html&quot;</span>
-<span class="sd">    style=&quot;width:1000px; height: 680px; border: 0px;&quot;&quot;&gt;&lt;/iframe&gt;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Select topics based on top_n and topics args</span>
-    <span class="k">if</span> <span class="n">topics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">topics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">top_n_topics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">to_list</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="n">top_n_topics</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-
-    <span class="c1"># Extract topic words and their frequencies</span>
-    <span class="n">topic_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
-    <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_sizes</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topic_list</span><span class="p">]</span>
-    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]])</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topic_list</span><span class="p">]</span>
-
-    <span class="c1"># Embed c-TF-IDF into 2D</span>
-    <span class="n">all_topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">all_topics</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">])</span>
-    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf</span><span class="o">.</span><span class="n">toarray</span><span class="p">()[</span><span class="n">indices</span><span class="p">]</span>
-    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
-    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;hellinger&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
-
-    <span class="c1"># Visualize with plotly</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
-                       <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">&quot;Words&quot;</span><span class="p">:</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">&quot;Size&quot;</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">[</span><span class="mi">1</span><span class="p">:]})</span>
-    <span class="k">return</span> <span class="n">_plotly_topic_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">topic_list</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
+<p>Each cluster is converted to a single document instead of a set of documents. Then, we extract the frequency 
+of word <code>x</code> in class <code>c</code>, where <code>c</code> refers to the cluster we created before. This results in our class-based 
+ <code>tf</code> representation. </p>
+<p>Then, we take take the logarithm of one plus the average number of words per class <code>A</code> divided by the frequency 
+of word <code>x</code> across all classes. We add plus one within the logarithm to force values to be positive. 
+This results in our class-based <code>idf</code> representation. </p>
+<p>Like with the classic TF-IDF, we then multiply <code>tf</code> with <code>idf</code> to get the importance score per word in each class. </p>
+<h2 id="optional-maximal-marginal-relevance-coherence"><strong>(Optional) Maximal Marginal Relevance Coherence</strong><a class="headerlink" href="#optional-maximal-marginal-relevance-coherence" title="Permanent link">&para;</a></h2>
+<p>After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
+Technically, this does not mean that this collection of words describes a coherent topic. In practice, we will 
+see that many of the words do describe a similar topic but some words will, in a way, overfit the documents. For 
+example, if you have a set of documents that are written by the same person whose signature will be in the topic 
+description. </p>
+<p>To improve the coherence of words, Maximal Marginal Relevance was used to find the most coherent words 
+without having too much overlap between the words themselves. This results in the removal of words that do not contribute 
+to a topic.  </p>
+<p>You can also use this technique to diversify the words generated in the topic representation. At times, many variations 
+of the same word can end up in the topic representation. To reduce the number of synonyms, we can increase the diversity 
+among words whilst still being similar to the topic representation. </p>
 
               
             </article>
@@ -1191,7 +1164,7 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="term.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Term Scores" rel="prev">
+        <a href="../index.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Home" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1200,20 +1173,20 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Term Scores
+              Home
             </div>
           </div>
         </a>
       
       
         
-        <a href="dtm.html" class="md-footer__link md-footer__link--next" aria-label="Next: DTM" rel="next">
+        <a href="../getting_started/quickstart/quickstart.html" class="md-footer__link md-footer__link--next" aria-label="Next: Quickstart" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              DTM
+              Quickstart
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -1247,10 +1220,10 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.01824240.min.js"}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.01824240.min.js"}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a87c2adc.min.js"></script>
+      <script src="../assets/javascripts/bundle.a87c2adc.min.js"></script>
       
     
   </body>
