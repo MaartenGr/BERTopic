@@ -1,18 +1,18 @@
 ## **Version 0.9.4**
-*Release date: XXXXX, 2021*
+*Release date: 14 December, 2021*
 
 A number of fixes, documentation updates, and small features:
 
 * Expose diversity parameter
-    * Use `diversity=0.1` to change how diverse the words in a topic representation are (ranges from 0 to 1)
+    * Use `BERTopic(diversity=0.1)` to change how diverse the words in a topic representation are (ranges from 0 to 1)
 * Improve stability of topic reduction by only computing the cosine similarity within c-TF-IDF and not the topic embeddings
-    * This also means that the topic embeddings could be improved or do not work properly with certain language models
-    * Perhaps this could be improved by averaging out the exemplars but that still would not fully represent a topic
-    * c-TF-IDF seems to hold the most information with respect to the topics
 * Added property to c-TF-IDF that all IDF values should be positive ([#351](https://github.com/MaartenGr/BERTopic/issues/351))
 * Improve stability of `.visualize_barchart()` and `.visualize_hierarchy()`
-* Major documentation overhaul (mkdocs, tutorials, FAQ, images, etc. ) ([#330](https://github.com/MaartenGr/BERTopic/issues/330))
-* Drop python 3.7 ([#333](https://github.com/MaartenGr/BERTopic/issues/333))
+* Major [documentation](https://maartengr.github.io/BERTopic/) overhaul (mkdocs, tutorials, FAQ, images, etc. ) ([#330](https://github.com/MaartenGr/BERTopic/issues/330))
+* Drop python 3.6 ([#333](https://github.com/MaartenGr/BERTopic/issues/333))
+* Relax plotly dependency ([#88](https://github.com/MaartenGr/BERTopic/issues/88))
+* Additional logging for `.transform` ([#356](https://github.com/MaartenGr/BERTopic/issues/356))
+
 
 ## **Version 0.9.3**
 *Release date:  17 October, 2021*
