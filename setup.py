@@ -19,7 +19,7 @@ base_packages = [
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
     "sentence-transformers>=0.4.1",
-    "plotly>=4.7.0,<4.14.3",
+    "plotly>=4.7.0",
     "pyyaml<6.0"
 ]
 
