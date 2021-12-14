@@ -87,13 +87,13 @@ def _plotly_topic_visualization(df: pd.DataFrame,
 
     # Plot topics
     fig = px.scatter(df, x="x", y="y", size="Size", size_max=40, template="simple_white", labels={"x": "", "y": ""},
-                     hover_data={"x": False, "y": False, "Topic": True, "Words": True, "Size": True})
+                     hover_data={"Topic": True, "Words": True, "Size": True, "x": False, "y": False})
     fig.update_traces(marker=dict(color="#B0BEC5", line=dict(width=2, color='DarkSlateGrey')))
 
     # Update hover order
-    fig.update_traces(hovertemplate="<br>".join(["<b>Topic %{customdata[2]}</b>",
-                                                 "Words: %{customdata[3]}",
-                                                 "Size: %{customdata[4]}"]))
+    fig.update_traces(hovertemplate="<br>".join(["<b>Topic %{customdata[0]}</b>",
+                                                 "Words: %{customdata[1]}",
+                                                 "Size: %{customdata[2]}"]))
 
     # Create a slider for topic selection
     steps = [dict(label=f"Topic {topic}", method="update", args=get_color(topic)) for topic in topic_list[1:]]
