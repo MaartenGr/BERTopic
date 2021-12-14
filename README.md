@@ -1,4 +1,4 @@
-[![PyPI - Python](https://img.shields.io/badge/python-v3.6+-blue.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - Python](https://img.shields.io/badge/python-v3.7+-blue.svg)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/workflow/status/MaartenGr/BERTopic/Code%20Checks/master)](https://pypi.org/project/bertopic/)
 [![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
@@ -13,9 +13,9 @@ BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions.
 
 BERTopic supports 
-[**guided**](https://maartengr.github.io/BERTopic/tutorial/guided/guided.html), 
-(semi-) [**supervised**](https://maartengr.github.io/BERTopic/tutorial/supervised/supervised.html), 
-and [**dynamic**](https://maartengr.github.io/BERTopic/tutorial/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
+[**guided**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html), 
+(semi-) [**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
+and [**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
 
 Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
@@ -54,7 +54,7 @@ with one of the examples below:
 
 
 ## Quick Start
-We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
+We start by extracting topics from the well-known 20 newsgroups dataset containing English documents:
 
 ```python
 from bertopic import BERTopic
@@ -66,7 +66,7 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 ```
 
-After generating topics, we can access the frequent topics that were generated:
+After generating topics and their probabilities, we can access the frequent topics that were generated:
 
 ```python
 >>> topic_model.get_topic_info()
@@ -123,7 +123,7 @@ topic_model.visualize_barchart()
 
 
 Find all possible visualizations with interactive examples in the documentation 
-[here](https://maartengr.github.io/BERTopic/tutorial/visualization/visualization.html). 
+[here](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html). 
 
 ## Embedding Models
 BERTopic supports many embedding models that can be used to embed the documents and words:
@@ -151,7 +151,7 @@ roberta = TransformerDocumentEmbeddings('roberta-base')
 topic_model = BERTopic(embedding_model=roberta)
 ```
 
-Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) 
+Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) 
 for a full overview of all supported embedding models. 
 
 ## Dynamic Topic Modeling
@@ -238,7 +238,7 @@ To cite BERTopic in your work, please use the following bibtex reference:
   title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
   year         = 2020,
   publisher    = {Zenodo},
-  version      = {v0.9.2},
+  version      = {v0.9.4},
   doi          = {10.5281/zenodo.4381785},
   url          = {https://doi.org/10.5281/zenodo.4381785}
 }

@@ -1,3 +1,19 @@
+## **Version 0.9.4**
+*Release date: 14 December, 2021*
+
+A number of fixes, documentation updates, and small features:
+
+* Expose diversity parameter
+    * Use `BERTopic(diversity=0.1)` to change how diverse the words in a topic representation are (ranges from 0 to 1)
+* Improve stability of topic reduction by only computing the cosine similarity within c-TF-IDF and not the topic embeddings
+* Added property to c-TF-IDF that all IDF values should be positive ([#351](https://github.com/MaartenGr/BERTopic/issues/351))
+* Improve stability of `.visualize_barchart()` and `.visualize_hierarchy()`
+* Major [documentation](https://maartengr.github.io/BERTopic/) overhaul (mkdocs, tutorials, FAQ, images, etc. ) ([#330](https://github.com/MaartenGr/BERTopic/issues/330))
+* Drop python 3.6 ([#333](https://github.com/MaartenGr/BERTopic/issues/333))
+* Relax plotly dependency ([#88](https://github.com/MaartenGr/BERTopic/issues/88))
+* Additional logging for `.transform` ([#356](https://github.com/MaartenGr/BERTopic/issues/356))
+
+
 ## **Version 0.9.3**
 *Release date:  17 October, 2021*
 
@@ -49,7 +65,7 @@ A release focused on fixing several issues:
 
 **Highlights**:  
 
-* Implemented a [**Guided BERTopic**](https://maartengr.github.io/BERTopic/tutorial/guided/guided.html) -> Use seeds to steer the Topic Modeling
+* Implemented a [**Guided BERTopic**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) -> Use seeds to steer the Topic Modeling
 * Get the most representative documents per topic: `topic_model.get_representative_docs(topic=1)`
     * This allows users to see which documents are good representations of a topic and better understand the topics that were created
 * Added `normalize_frequency` parameter to `visualize_topics_per_class` and `visualize_topics_over_time` in order to better compare the relative topic frequencies between topics
@@ -148,7 +164,7 @@ and several **backends** to use instead of Flair and SentenceTransformers!
     * Added Spacy, Gensim, USE (TFHub)
     * Use a different backend for document embeddings and word embeddings
     * Create your own backends with `bertopic.backend.BaseEmbedder`
-    * Click [here](https://maartengr.github.io/BERTopic/tutorial/embeddings/embeddings.html) for an overview of all new backends
+    * Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) for an overview of all new backends
 * Calculate and visualize topics per class
     * Calculate: `topics_per_class = topic_model.topics_per_class(docs, topics, classes)`
     * Visualize: `topic_model.visualize_topics_per_class(topics_per_class)`

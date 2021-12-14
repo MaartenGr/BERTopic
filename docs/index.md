@@ -1,10 +1,14 @@
-# **BERTopic**
+# BERTopic
 
-<img src="logo.png" width="35%" height="35%" align="right" />
+<img src="logo.png" width="30%" height="30%" align="right" />
 
-BERTopic is a topic modeling technique that leverages transformers and c-TF-IDF to create dense clusters
-allowing for easily interpretable topics whilst keeping important words in the topic descriptions. It even supports 
-visualizations similar to LDAvis! 
+BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
+allowing for easily interpretable topics whilst keeping important words in the topic descriptions.
+
+BERTopic supports 
+[**guided**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html), 
+(semi-) [**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
+and [**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
 
 Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4).
@@ -20,7 +24,6 @@ pip install bertopic
 You may want to install more depending on the transformers and language backends that you will be using. 
 The possible installations are: 
 
-To use Flair embeddings, install BERTopic as follows:
 ```bash
 pip install bertopic[flair]
 pip install bertopic[gensim]
@@ -28,14 +31,8 @@ pip install bertopic[spacy]
 pip install bertopic[use]
 ```
 
-To install all backends:
-
-```bash
-pip install bertopic[all]
-```
-
 ## **Quick Start**
-We start by extracting topics from the well-known 20 newsgroups dataset which is comprised of english documents:
+We start by extracting topics from the well-known 20 newsgroups dataset containing English documents:
 
 ```python
 from bertopic import BERTopic
@@ -86,35 +83,37 @@ For quick access to common functions, here is an overview of BERTopic's main met
 
 | Method | Code  | 
 |-----------------------|---|
-| Fit the model    |  `BERTopic().fit(docs)` |
-| Fit the model and predict documents    |  `BERTopic().fit_transform(docs)` |
-| Predict new documents    |  `BERTopic().transform([new_doc])` |
-| Access single topic   | `BERTopic().get_topic(topic=12)`  |   
-| Access all topics     |  `BERTopic().get_topics()` |
-| Get topic freq    |  `BERTopic().get_topic_freq()` |
-| Get all topic information|  `BERTopic().get_topic_info()` |
-| Get topics per class | `BERTopic().topics_per_class(docs, topics, classes)` |
-| Dynamic Topic Modeling | `BERTopic().topics_over_time(docs, topics, timestamps)` |
-| Update topic representation | `BERTopic().update_topics(docs, topics, n_gram_range=(1, 3))` |
-| Reduce nr of topics | `BERTopic().reduce_topics(docs, topics, nr_topics=30)` |
-| Find topics | `BERTopic().find_topics("vehicle")` |
-| Save model    |  `BERTopic().save("my_model")` |
+| Fit the model    |  `.fit(docs)` |
+| Fit the model and predict documents  |  `.fit_transform(docs)` |
+| Predict new documents    |  `.transform([new_doc])` |
+| Access single topic   | `.get_topic(topic=12)`  |   
+| Access all topics     |  `.get_topics()` |
+| Get topic freq    |  `.get_topic_freq()` |
+| Get all topic information|  `.get_topic_info()` |
+| Get representative docs per topic |  `.get_representative_docs()` |
+| Get topics per class | `.topics_per_class(docs, topics, classes)` |
+| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
+| Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
+| Find topics | `.find_topics("vehicle")` |
+| Save model    |  `.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
-| Get parameters |  `BERTopic().get_params()` |
+| Get parameters |  `.get_params()` |
 
 For an overview of BERTopic's visualization methods:
 
 | Method | Code  | 
 |-----------------------|---|
-| Visualize Topics    |  `BERTopic().visualize_topics()` |
-| Visualize Topic Hierarchy    |  `BERTopic().visualize_hierarchy()` |
-| Visualize Topic Terms    |  `BERTopic().visualize_barchart()` |
-| Visualize Topic Similarity  |  `BERTopic().visualize_heatmap()` |
-| Visualize Term Score Decline  |  `BERTopic().visualize_term_rank()` |
-| Visualize Topic Probability Distribution    |  `BERTopic().visualize_distribution(probs[0])` |
-| Visualize Topics over Time   |  `BERTopic().visualize_topics_over_time(topics_over_time)` |
-| Visualize Topics per Class | `BERTopic().visualize_topics_per_class(topics_per_class)` | 
- 
+| Visualize Topics    |  `.visualize_topics()` |
+| Visualize Topic Hierarchy    |  `.visualize_hierarchy()` |
+| Visualize Topic Terms    |  `.visualize_barchart()` |
+| Visualize Topic Similarity  |  `.visualize_heatmap()` |
+| Visualize Term Score Decline  |  `.visualize_term_rank()` |
+| Visualize Topic Probability Distribution    |  `.visualize_distribution(probs[0])` |
+| Visualize Topics over Time   |  `.visualize_topics_over_time(topics_over_time)` |
+| Visualize Topics per Class | `.visualize_topics_per_class(topics_per_class)` | 
+
+  
 ## **Citation**
 To cite BERTopic in your work, please use the following bibtex reference:
 
@@ -124,7 +123,7 @@ To cite BERTopic in your work, please use the following bibtex reference:
   title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
   year         = 2020,
   publisher    = {Zenodo},
-  version      = {v0.7.0},
+  version      = {v0.9.4},
   doi          = {10.5281/zenodo.4381785},
   url          = {https://doi.org/10.5281/zenodo.4381785}
 }

@@ -78,6 +78,7 @@ class BERTopic:
                  nr_topics: Union[int, str] = None,
                  low_memory: bool = False,
                  calculate_probabilities: bool = False,
+                 diversity: float = None,
                  seed_topic_list: List[List[str]] = None,
                  embedding_model=None,
                  umap_model: UMAP = None,
@@ -105,8 +106,7 @@ class BERTopic:
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
                        calculation. If this is set to None, no reduction is applied. Use
-                       "auto" to automatically reduce topics that have a similarity of at
-                       least 0.9, do not maps all others.
+                       "auto" to automatically reduce topics using HDBSCAN.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
             calculate_probabilities: Whether to calculate the probabilities of all topics
                                      per document instead of the probability of the assigned
@@ -116,6 +116,9 @@ class BERTopic:
                                      you do not mind more computation time.
                                      NOTE: If false you cannot use the corresponding
                                      visualization method `visualize_probabilities`.
+            diversity: Whether to use MMR to diversify the resulting topic representations.
+                       If set to None, MMR will not be used. Accepted values lie between 
+                       0 and 1 with 0 being not at all diverse and 1 being very diverse. 
             seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
@@ -141,6 +144,7 @@ class BERTopic:
         self.nr_topics = nr_topics
         self.low_memory = low_memory
         self.calculate_probabilities = calculate_probabilities
+        self.diversity = diversity
         self.verbose = verbose
         self.seed_topic_list = seed_topic_list
 
@@ -370,10 +374,14 @@ class BERTopic:
                                                   verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
+        logger.info("Reduced dimensionality with UMAP")
+
         predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+        logger.info("Predicted clusters with HDBSCAN")
 
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
+            logger.info("Calculated probabilities with HDBSCAN")
         else:
             probabilities = None
 
@@ -476,7 +484,7 @@ class BERTopic:
             selection = documents.loc[documents.Timestamps == timestamp, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Timestamps": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
 
             if global_tuning or evolution_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
@@ -569,7 +577,7 @@ class BERTopic:
             selection = documents.loc[documents.Class == class_, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Class": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(selection), fit=False)
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
@@ -1107,8 +1115,8 @@ class BERTopic:
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
-            width: The width of the figure.
-            height: The height of the figure.
+            width: The width of the figure. Only works if orientation is set to 'left'
+            height: The height of the figure. Only works if orientation is set to 'bottom'
 
         Returns:
             fig: A plotly figure
@@ -1185,18 +1193,18 @@ class BERTopic:
 
     def visualize_barchart(self,
                            topics: List[int] = None,
-                           top_n_topics: int = 6,
+                           top_n_topics: int = 8,
                            n_words: int = 5,
-                           width: int = 800,
-                           height: int = 600) -> go.Figure:
+                           width: int = 250,
+                           height: int = 250) -> go.Figure:
         """ Visualize a barchart of selected topics
 
         Arguments:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
-            width: The width of the figure.
-            height: The height of the figure.
+            width: The width of each figure.
+            height: The height of each figure.
 
         Returns:
             fig: A plotly figure
@@ -1447,7 +1455,7 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
-        self.c_tf_idf, words = self._c_tf_idf(documents_per_topic, m=len(documents))
+        self.c_tf_idf, words = self._c_tf_idf(documents_per_topic)
         self.topics = self._extract_words_per_topic(words)
         self._create_topic_vectors()
         self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
@@ -1553,7 +1561,7 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, m: int, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
@@ -1581,7 +1589,7 @@ class BERTopic:
             multiplier = None
 
         if fit:
-            self.transformer = ClassTFIDF().fit(X, n_samples=m, multiplier=multiplier)
+            self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
 
@@ -1641,19 +1649,20 @@ class BERTopic:
 
         # Extract word embeddings for the top 30 words per topic and compare it
         # with the topic embedding to keep only the words most similar to the topic embedding
-        if self.embedding_model is not None:
+        if self.diversity is not None:
+            if self.embedding_model is not None:
 
-            for topic, topic_words in topics.items():
-                words = [word[0] for word in topic_words]
-                word_embeddings = self._extract_embeddings(words,
-                                                           method="word",
-                                                           verbose=False)
-                topic_embedding = self._extract_embeddings(" ".join(words),
-                                                           method="word",
-                                                           verbose=False).reshape(1, -1)
-                topic_words = mmr(topic_embedding, word_embeddings, words,
-                                  top_n=self.top_n_words, diversity=0)
-                topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+                for topic, topic_words in topics.items():
+                    words = [word[0] for word in topic_words]
+                    word_embeddings = self._extract_embeddings(words,
+                                                            method="word",
+                                                            verbose=False)
+                    topic_embedding = self._extract_embeddings(" ".join(words),
+                                                            method="word",
+                                                            verbose=False).reshape(1, -1)
+                    topic_words = mmr(topic_embedding, word_embeddings, words,
+                                    top_n=self.top_n_words, diversity=self.diversity)
+                    topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
         topics = {label: values[:self.top_n_words] for label, values in topics.items()}
 
         return topics
@@ -1694,10 +1703,7 @@ class BERTopic:
             self.merged_topics = []
 
         # Create topic similarity matrix
-        if self.topic_embeddings is not None:
-            similarities = cosine_similarity(np.array(self.topic_embeddings))
-        else:
-            similarities = cosine_similarity(self.c_tf_idf)
+        similarities = cosine_similarity(self.c_tf_idf)
         np.fill_diagonal(similarities, 0)
 
         # Find most similar topic to least common topic

@@ -1,25 +1,32 @@
 site_name: BERTopic
-extra_css: [style.css]
 repo_url: https://github.com/MaartenGr/BERTopic
 site_url: https://maartengr.github.io/BERTopic/
 site_description: Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.
 site_author: Maarten P. Grootendorst
 use_directory_urls: false
+extra_css:
+  - stylesheets/extra.css
+
 nav:
   - Home: index.md
-  - The Algorithm: tutorial/algorithm/algorithm.md
-  - Guides:
-      - Getting Started: tutorial/quickstart/quickstart.md
-      - Embedding Models: tutorial/embeddings/embeddings.md
-      - Topic Visualization: tutorial/visualization/visualization.md
-      - Topic Reduction: tutorial/topicreduction/topicreduction.md
-      - Topic Representation: tutorial/topicrepresentation/topicrepresentation.md
-      - Search Topics: tutorial/search/search.md
-      - Custom Sub-Models: tutorial/models/models.md
-      - Topics per Class: tutorial/topicsperclass/topicsperclass.md
-      - (semi)-Supervised Topic Modeling: tutorial/supervised/supervised.md
-      - Dynamic Topic Modeling: tutorial/topicsovertime/topicsovertime.md
-      - Guided Topic Modeling: tutorial/guided/guided.md
+  - The Algorithm: algorithm/algorithm.md
+  - Getting Started:
+      - getting_started/quickstart/quickstart.md
+      - Embedding Models: getting_started/embeddings/embeddings.md
+      - Topic Visualization: getting_started/visualization/visualization.md
+      - Topic Reduction: getting_started/topicreduction/topicreduction.md
+      - Topic Representation: getting_started/topicrepresentation/topicrepresentation.md
+      - Search Topics: getting_started/search/search.md
+      - Customization:
+        - Custom Embedding Models: getting_started/custom_embeddings/embeddings.md
+        - Custom Sub-Models: getting_started/models/models.md
+        - Parameter tuning: getting_started/parameter tuning/parametertuning.md
+      - Variations:
+        - Topics per Class: getting_started/topicsperclass/topicsperclass.md
+        - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
+        - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
+        - Guided Topic Modeling: getting_started/guided/guided.md
+  - FAQ: faq.md
   - API:
       - BERTopic: api/bertopic.md
       - cTFIDF: api/ctfidf.md
@@ -36,7 +43,6 @@ nav:
         - Topics: api/plotting/topics.md
         - DTM: api/plotting/dtm.md
         - Topics per Class: api/plotting/topics_per_class.md
-  - FAQ: faq.md
   - Changelog: changelog.md
 plugins:
   - mkdocstrings:
@@ -56,11 +62,26 @@ theme:
   logo: icon_white.png
   feature:
     tabs: true
-  palette:
-    primary: black
-    accent: grey
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.instant
+  palette: # 
+
+    - scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate # 
+
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
 markdown_extensions:
-  - pymdownx.highlight:
-  - pymdownx.superfences:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
   - toc:
       permalink: true
+

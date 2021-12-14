@@ -1,24 +1,4 @@
-In `BERTopic`, there are several arguments that might be helpful if you tend to end up with too many or too few 
-topics. 
-
-## **Topic Parameters**
-The arguments discussed here all relate to the clustering step of BERTopic. 
-
-#### **Minimum topic size**
-The `min_topic_size` parameter is actually used in `HDBSCAN`. It tells HDBSCAN what the minimum size of a cluster 
-should be before it is accepted as a cluster. When you set this parameter very high, you will get very few clusters 
-as they all need to be high. In contrast, if you set this too low you might end with too many extremely specific 
-clusters. 
-
-```python
-from bertopic import BERTopic
-topic_model = BERTopic(min_topic_size=10)
-```
-
-You can increase this value if you have more data available or if you expect clusters to be quite large. 
-
-## **Hierarchical Topic Reduction**
-HDBSCAN can't specify the number of clusters you would want. To a certain extent, 
+BERTopic uses HDSCAN for clustering the data and it cannot specify the number of clusters you would want. To a certain extent, 
 this is an advantage, as we can trust HDBSCAN to be better in finding the number of clusters than we are.
 Instead, we can try to reduce the number of topics that have been created. Below, you will find three methods of doing 
 so. 
@@ -57,11 +37,11 @@ from sklearn.datasets import fetch_20newsgroups
  
 # Create topics -> Typically over 50 topics
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-topic_model = BERTopic(calculate_probabilities=True)
+topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
 # Further reduce topics
-new_topics, new_probs = topic_model.reduce_topics(docs, topics, probabilities=probs, nr_topics=30)
+new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
 ```
 
 The reasoning for putting `docs` and `topics` (and optionally `probabilities`) as parameters is that these values are not saved within 

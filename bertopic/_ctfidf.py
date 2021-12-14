@@ -21,12 +21,12 @@ class ClassTFIDF(TfidfTransformer):
     def __init__(self, *args, **kwargs):
         super(ClassTFIDF, self).__init__(*args, **kwargs)
 
-    def fit(self, X: sp.csr_matrix, n_samples: int, multiplier: np.ndarray = None):
+    def fit(self, X: sp.csr_matrix, multiplier: np.ndarray = None):
         """Learn the idf vector (global term weights).
 
         Arguments:
             X: A matrix of term/token counts.
-            n_samples: Number of total documents
+            multiplier: A multiplier for increasing/decreasing certain IDF scores
         """
         X = check_array(X, accept_sparse=('csr', 'csc'))
         if not sp.issparse(X):
@@ -35,11 +35,21 @@ class ClassTFIDF(TfidfTransformer):
 
         if self.use_idf:
             _, n_features = X.shape
+
+            # Calculate the frequency of words across all classes
             df = np.squeeze(np.asarray(X.sum(axis=0)))
+
+            # Calculate the average number of samples as regularization
             avg_nr_samples = int(X.sum(axis=1).mean())
-            idf = np.log(avg_nr_samples / df)
+
+            # Divide the average number of samples by the word frequency
+            # +1 is added to force values to be positive
+            idf = np.log((avg_nr_samples / df)+1)
+
+            # Multiplier to increase/decrease certain idf scores
             if multiplier is not None:
                 idf = idf * multiplier
+
             self._idf_diag = sp.diags(idf, offsets=0,
                                       shape=(n_features, n_features),
                                       format='csr',
@@ -47,7 +57,7 @@ class ClassTFIDF(TfidfTransformer):
 
         return self
 
-    def transform(self, X: sp.csr_matrix, copy=True):
+    def transform(self, X: sp.csr_matrix):
         """Transform a count-based matrix to c-TF-IDF
 
         Arguments:

@@ -36,3 +36,5 @@ It definitely seems that a topic was found that closely matches with "motor". Th
 related and therefore matches with our "motor" input. You can use the `similarity` variable to see how similar 
 the extracted topics are to the search term. 
  
+!!! note
+    You can only use this method if an embedding model was supplied to BERTopic using `embedding_model`. 

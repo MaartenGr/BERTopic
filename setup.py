@@ -19,7 +19,7 @@ base_packages = [
     "scikit-learn>=0.22.2.post1",
     "tqdm>=4.41.1",
     "sentence-transformers>=0.4.1",
-    "plotly>=4.7.0,<4.14.3",
+    "plotly>=4.7.0",
     "pyyaml<6.0"
 ]
 
@@ -53,7 +53,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.9.3",
+    version="0.9.4",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
@@ -78,7 +78,7 @@ setup(
         "Operating System :: Unix",
         "Operating System :: MacOS",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.8",
     ],
     install_requires=base_packages,
@@ -91,5 +91,5 @@ setup(
         "use": use_packages,
         "gensim": gensim_packages
     },
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )

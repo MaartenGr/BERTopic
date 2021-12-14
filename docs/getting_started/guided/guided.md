@@ -1,4 +1,3 @@
-## **Guided Topic Modeling**  
 Guided Topic Modeling or Seeded Topic Modeling is a collection of techniques that guides the topic modeling approach 
 by setting a number of seed topics in which the model will converge to. These techniques allow the user to set a 
 pre-defined number of topic representations that are sure to be in documents. For example, take an IT-business 
