@@ -12,7 +12,8 @@ def visualize_hierarchy(topic_model,
                         topics: List[int] = None,
                         top_n_topics: int = None,
                         width: int = 1000,
-                        height: int = 600) -> go.Figure:
+                        height: int = 600,
+                        optimal_ordering: bool = False) -> go.Figure:
     """ Visualize a hierarchical structure of the topics
 
     A ward linkage function is used to perform the
@@ -27,7 +28,12 @@ def visualize_hierarchy(topic_model,
         top_n_topics: Only select the top n most frequent topics
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
-
+        optimal_ordering : bool, optional
+            If True, the linkage matrix will be reordered so that the distance
+            between successive leaves is minimal. This results in a more intuitive
+            tree structure when the data are visualized. defaults to False, because
+            this algorithm can be slow, particularly on large datasets. See
+            also the `linkage` function fun `scipy`.
     Returns:
         fig: A plotly figure
 
@@ -73,7 +79,8 @@ def visualize_hierarchy(topic_model,
     distance_matrix = 1 - cosine_similarity(embeddings)
     fig = ff.create_dendrogram(distance_matrix,
                                orientation=orientation,
-                               linkagefun=lambda x: linkage(x, "ward"),
+                               linkagefun=lambda x: linkage(x, "ward",
+                                                            optimal_ordering=optimal_ordering),
                                color_threshold=1)
 
     # Create nicer labels
@@ -105,18 +112,18 @@ def visualize_hierarchy(topic_model,
 
     # Stylize orientation
     if orientation == "left":
-        fig.update_layout(height=200+(15*len(topics)),
+        fig.update_layout(height=200 + (15 * len(topics)),
                           width=width,
                           yaxis=dict(tickmode="array",
                                      ticktext=new_labels))
-        
+
         # Fix empty space on the bottom of the graph
-        y_max = max([trace['y'].max()+5 for trace in fig['data']])
-        y_min = min([trace['y'].min()-5 for trace in fig['data']])
+        y_max = max([trace['y'].max() + 5 for trace in fig['data']])
+        y_min = min([trace['y'].min() - 5 for trace in fig['data']])
         fig.update_layout(yaxis=dict(range=[y_min, y_max]))
 
     else:
-        fig.update_layout(width=200+(15*len(topics)),
+        fig.update_layout(width=200 + (15 * len(topics)),
                           height=height,
                           xaxis=dict(tickmode="array",
                                      ticktext=new_labels))
