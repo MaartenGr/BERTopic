@@ -5,3 +5,5 @@ requires = [
   "cython",
   "oldest-supported-numpy"
 ]
+
+build-backend = "setuptools.build_meta:__legacy__"
