@@ -1103,7 +1103,8 @@ class BERTopic:
                             topics: List[int] = None,
                             top_n_topics: int = None,
                             width: int = 1000,
-                            height: int = 600) -> go.Figure:
+                            height: int = 600,
+                            optimal_ordering: bool = False) -> go.Figure:
         """ Visualize a hierarchical structure of the topics
 
         A ward linkage function is used to perform the
@@ -1117,7 +1118,11 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
-
+            optimal_ordering: bool, optional. If True, the linkage matrix will be reordered so that the distance
+                between successive leaves is minimal. This results in a more intuitive
+                tree structure when the data are visualized. defaults to False, because
+                this algorithm can be slow, particularly on large datasets. See
+                also the `linkage` function fun `scipy`.
         Returns:
             fig: A plotly figure
 
@@ -1143,7 +1148,8 @@ class BERTopic:
                                             topics=topics,
                                             top_n_topics=top_n_topics,
                                             width=width,
-                                            height=height)
+                                            height=height,
+                                            optimal_ordering=optimal_ordering)
 
     def visualize_heatmap(self,
                           topics: List[int] = None,

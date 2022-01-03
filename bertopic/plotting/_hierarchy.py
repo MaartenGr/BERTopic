@@ -28,8 +28,7 @@ def visualize_hierarchy(topic_model,
         top_n_topics: Only select the top n most frequent topics
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
-        optimal_ordering : bool, optional
-            If True, the linkage matrix will be reordered so that the distance
+        optimal_ordering: bool, optional. If True, the linkage matrix will be reordered so that the distance
             between successive leaves is minimal. This results in a more intuitive
             tree structure when the data are visualized. defaults to False, because
             this algorithm can be slow, particularly on large datasets. See
