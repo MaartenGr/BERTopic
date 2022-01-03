@@ -1,0 +1,4 @@
+include *.md
+include LICENSE
+include pyproject.toml
+recursive-include bertopic *.py *.pyx *.pxd *.c
