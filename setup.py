@@ -12,7 +12,7 @@ docs_packages = [
 ]
 
 base_packages = [
-    "numpy>=1.20.3",
+    "numpy>1.20.3",
     "hdbscan>=0.8.27",
     "umap-learn>=0.5.0",
     "pandas>=1.1.5",
