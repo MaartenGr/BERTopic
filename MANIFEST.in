@@ -1,2 +1,10 @@
 include README.md
 include LICENSE
+
+exclude Makefile
+exclude mkdocs.yml
+
+recursive-exclude docs *
+recursive-exclude images *
+recursive-exclude notebooks *
+recursive-exclude tests *
