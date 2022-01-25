@@ -21,7 +21,7 @@ def visualize_term_rank(topic_model,
         topics: A selection of topics to visualize. These will be colored
                 red where all others will be colored black.
         log_scale: Whether to represent the ranking on a log scale
-        labels: Custom labels to use. _Include_ the -1 topic!
+        labels: Custom labels to use.
         width: The width of the figure.
         height: The height of the figure.
 
