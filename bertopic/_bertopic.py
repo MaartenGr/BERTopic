@@ -1102,6 +1102,7 @@ class BERTopic:
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
+                            color_threshold: float = 1,
                             width: int = 1000,
                             height: int = 600) -> go.Figure:
         """ Visualize a hierarchical structure of the topics
@@ -1115,6 +1116,7 @@ class BERTopic:
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
+            color_threshold: Adjust dendrogram link coloring threshold.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
 
@@ -1142,6 +1144,7 @@ class BERTopic:
                                             orientation=orientation,
                                             topics=topics,
                                             top_n_topics=top_n_topics,
+                                            color_threshold=color_threshold,
                                             width=width,
                                             height=height)
 
