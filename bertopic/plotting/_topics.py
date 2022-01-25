@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 def visualize_topics(topic_model,
                      topics: List[int] = None,
                      top_n_topics: int = None,
+                     labels: List[str] = None,
                      width: int = 650,
                      height: int = 650) -> go.Figure:
     """ Visualize topics, their sizes, and their corresponding words
@@ -22,6 +23,7 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        labels: Custom labels to use. _Include_ topic -1.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -51,7 +53,10 @@ def visualize_topics(topic_model,
         topics = sorted(list(topic_model.get_topics().keys()))
 
     # Extract topic words and their frequencies
-    topic_list = sorted(topics)
+    if labels:
+      topic_list = labels
+    else:
+      topic_list = sorted(topics)
     frequencies = [topic_model.topic_sizes[topic] for topic in topic_list]
     words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]
 
