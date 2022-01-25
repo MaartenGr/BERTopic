@@ -20,7 +20,7 @@ def visualize_topics_over_time(topic_model,
                           corresponding topic representation
         top_n_topics: To visualize the most frequent topics instead of all
         topics: Select which topics you would like to be visualized
-        labels: List of custom labels. Do not include topic -1.
+        labels: List of custom labels.
         normalize_frequency: Whether to normalize each topic's frequency individually
         width: The width of the figure.
         height: The height of the figure.
@@ -67,7 +67,7 @@ def visualize_topics_over_time(topic_model,
     for index, topic in enumerate(data.Topic.unique()):
         trace_data = data.loc[data.Topic == topic, :]
         if labels:
-          topic_name = f"{topic}: {labels[topic]}"
+          topic_name = f"{topic}: {labels[1:][topic]}"
         else:
           topic_name = trace_data.Name.values[0]
         words = trace_data.Words.values
