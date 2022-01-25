@@ -8,6 +8,7 @@ def visualize_topics_per_class(topic_model,
                                topics_per_class: pd.DataFrame,
                                top_n_topics: int = 10,
                                topics: List[int] = None,
+                               labels: List[str] = None,
                                normalize_frequency: bool = False,
                                width: int = 1250,
                                height: int = 900) -> go.Figure:
@@ -19,6 +20,7 @@ def visualize_topics_per_class(topic_model,
                           corresponding topic representation
         top_n_topics: To visualize the most frequent topics instead of all
         topics: Select which topics you would like to be visualized
+        labels: List of custom labels. Do not include topic -1.
         normalize_frequency: Whether to normalize each topic's frequency individually
         width: The width of the figure.
         height: The height of the figure.
@@ -68,7 +70,10 @@ def visualize_topics_per_class(topic_model,
         else:
             visible = "legendonly"
         trace_data = data.loc[data.Topic == topic, :]
-        topic_name = trace_data.Name.values[0]
+        if labels:
+          topic_name = f"{topic}: {labels[topic]}"
+        else:
+          topic_name = trace_data.Name.values[0]
         words = trace_data.Words.values
         if normalize_frequency:
             x = normalize(trace_data.Frequency.values.reshape(1, -1))[0]
