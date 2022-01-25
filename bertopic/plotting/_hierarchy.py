@@ -12,7 +12,6 @@ def visualize_hierarchy(topic_model,
                         topics: List[int] = None,
                         top_n_topics: int = None,
                         labels: List[str] = None,
-                        color_threshold: float = 1,
                         width: int = 1000,
                         height: int = 600) -> go.Figure:
     """ Visualize a hierarchical structure of the topics
@@ -26,7 +25,6 @@ def visualize_hierarchy(topic_model,
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
         labels: List of topic labels.
-        color_threshold: 
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
     Returns:
@@ -70,7 +68,7 @@ def visualize_hierarchy(topic_model,
     fig = ff.create_dendrogram(distance_matrix,
                                orientation=orientation,
                                linkagefun=lambda x: linkage(x, "ward"),
-                               color_threshold=color_threshold)
+                               color_threshold=1)
 
     # Create nicer labels
     axis = "yaxis" if orientation == "left" else "xaxis"
