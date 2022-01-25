@@ -881,7 +881,6 @@ class BERTopic:
     def visualize_topics(self,
                          topics: List[int] = None,
                          top_n_topics: int = None,
-                         labels: List[str] = None,
                          width: int = 650,
                          height: int = 650) -> go.Figure:
         """ Visualize topics, their sizes, and their corresponding words
@@ -892,7 +891,6 @@ class BERTopic:
         Arguments:
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
-            labels: List of custom labels to use.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -915,14 +913,12 @@ class BERTopic:
         return plotting.visualize_topics(self,
                                          topics=topics,
                                          top_n_topics=top_n_topics,
-                                         labels=labels,
                                          width=width,
                                          height=height)
 
     def visualize_term_rank(self,
                             topics: List[int] = None,
                             log_scale: bool = False,
-                            labels: List[str] = None,
                             width: int = 800,
                             height: int = 500) -> go.Figure:
         """ Visualize the ranks of all terms across all topics
@@ -936,7 +932,6 @@ class BERTopic:
             topics: A selection of topics to visualize. These will be colored
                     red where all others will be colored black.
             log_scale: Whether to represent the ranking on a log scale
-            labels: List of custom labels to use.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -971,7 +966,6 @@ class BERTopic:
         return plotting.visualize_term_rank(self,
                                             topics=topics,
                                             log_scale=log_scale,
-                                            labels=labels,
                                             width=width,
                                             height=height)
 
@@ -979,7 +973,6 @@ class BERTopic:
                                    topics_over_time: pd.DataFrame,
                                    top_n_topics: int = None,
                                    topics: List[int] = None,
-                                   labels: List[str] = None,
                                    normalize_frequency: bool = False,
                                    width: int = 1250,
                                    height: int = 450) -> go.Figure:
@@ -990,7 +983,6 @@ class BERTopic:
                               corresponding topic representation
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
-            labels: List of custom labels to use.
             normalize_frequency: Whether to normalize each topic's frequency individually
             width: The width of the figure.
             height: The height of the figure.
@@ -1019,7 +1011,6 @@ class BERTopic:
                                                    topics_over_time=topics_over_time,
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
-                                                   labels=labels,
                                                    normalize_frequency=normalize_frequency,
                                                    width=width,
                                                    height=height)
@@ -1028,7 +1019,6 @@ class BERTopic:
                                    topics_per_class: pd.DataFrame,
                                    top_n_topics: int = 10,
                                    topics: List[int] = None,
-                                   labels: List[str] = None,
                                    normalize_frequency: bool = False,
                                    width: int = 1250,
                                    height: int = 900) -> go.Figure:
@@ -1039,7 +1029,6 @@ class BERTopic:
                               corresponding topic representation
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
-            labels: List of custom labels to use.
             normalize_frequency: Whether to normalize each topic's frequency individually
             width: The width of the figure.
             height: The height of the figure.
@@ -1068,7 +1057,6 @@ class BERTopic:
                                                    topics_per_class=topics_per_class,
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
-                                                   labels=labels,
                                                    normalize_frequency=normalize_frequency,
                                                    width=width,
                                                    height=height)
@@ -1076,7 +1064,6 @@ class BERTopic:
     def visualize_distribution(self,
                                probabilities: np.ndarray,
                                min_probability: float = 0.015,
-                               labels: List[str] = None,
                                width: int = 800,
                                height: int = 600) -> go.Figure:
         """ Visualize the distribution of topic probabilities
@@ -1085,7 +1072,6 @@ class BERTopic:
             probabilities: An array of probability scores
             min_probability: The minimum probability score to visualize.
                              All others are ignored.
-            labels: List of custom labels to use.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1109,7 +1095,6 @@ class BERTopic:
         return plotting.visualize_distribution(self,
                                                probabilities=probabilities,
                                                min_probability=min_probability,
-                                               labels=labels,
                                                width=width,
                                                height=height)
 
@@ -1117,7 +1102,6 @@ class BERTopic:
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
-                            labels: List[str] = None,
                             width: int = 1000,
                             height: int = 600) -> go.Figure:
         """ Visualize a hierarchical structure of the topics
@@ -1131,7 +1115,6 @@ class BERTopic:
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
-            labels: List of custom labels to use.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
 
@@ -1159,7 +1142,6 @@ class BERTopic:
                                             orientation=orientation,
                                             topics=topics,
                                             top_n_topics=top_n_topics,
-                                            labels=labels,
                                             width=width,
                                             height=height)
 
@@ -1167,7 +1149,6 @@ class BERTopic:
                           topics: List[int] = None,
                           top_n_topics: int = None,
                           n_clusters: int = None,
-                          labels: List[str] = None,
                           width: int = 800,
                           height: int = 800) -> go.Figure:
         """ Visualize a heatmap of the topic's similarity matrix
@@ -1180,7 +1161,6 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
-            labels: List of custom labels to use.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1208,7 +1188,6 @@ class BERTopic:
                                           topics=topics,
                                           top_n_topics=top_n_topics,
                                           n_clusters=n_clusters,
-                                          labels=labels,
                                           width=width,
                                           height=height)
 
@@ -1216,7 +1195,6 @@ class BERTopic:
                            topics: List[int] = None,
                            top_n_topics: int = 8,
                            n_words: int = 5,
-                           labels: List[str] = None,
                            width: int = 250,
                            height: int = 250) -> go.Figure:
         """ Visualize a barchart of selected topics
@@ -1225,7 +1203,6 @@ class BERTopic:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
-            labels: List of custom labels to use.
             width: The width of each figure.
             height: The height of each figure.
 
@@ -1253,10 +1230,56 @@ class BERTopic:
                                            topics=topics,
                                            top_n_topics=top_n_topics,
                                            n_words=n_words,
-                                           labels=labels,
                                            width=width,
                                            height=height)
 
+    def export_for_labeling(self,
+                           path: str = None):
+        """ Exports the model to excel for labeling
+
+        Arguments:
+            path: the location and name of the file you want to save
+            
+        Usage:
+
+        ```python
+        topic_model.export_for_labeling("bertopic_labels.xlsx")
+        ```
+        """
+        topics_df = pd.DataFrame()
+        for topic in self.topics:
+          words = []
+          texts0 = []
+          texts1 = []
+          if topic==-1:
+            texts0.append("")
+            texts1.append("")
+          else:
+            texts0.append(topic_model.get_representative_docs(topic)[0])
+            texts1.append(topic_model.get_representative_docs(topic)[1])
+          for word in topic_model.get_topic(topic):
+            words.append(word[0])
+          words = (', '.join([word for word in words]))
+          label = ["" for x in range(len(topics))]
+          data = pd.DataFrame([['', words, texts0, texts1]], columns=["Labels", "Words", "Representative doc 0", "Representative doc 1"])
+          topics_df = pd.concat([topics_df,data])
+        topics_df.to_excel(file) 
+        
+    def import_labels(self,
+                           path: str = None:
+        """ Exports the model to excel for labeling
+
+        Arguments:
+            path: the location and name of the xlsx file you want to load labels from.
+            
+        Usage:
+
+        ```python
+        labels = topic_model.import_labels("bertopic_labels.xlsx")
+        ```
+        """
+        return pd.read_excel(path)['Labels'][1:].tolist()
+        
     def save(self,
              path: str,
              save_embedding_model: bool = True) -> None:
