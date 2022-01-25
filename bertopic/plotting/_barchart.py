@@ -20,7 +20,7 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
-        labels: Use custom labels as titles. Don't include -1 topic.
+        labels: Use custom labels as titles.
         width: The width of each figure.
         height: The height of each figure.
 
@@ -57,7 +57,7 @@ def visualize_barchart(topic_model,
 
     # Initialize figure
     if labels:
-      subplot_titles = [f"{idx}: {label}" for idx, label in enumerate(labels)]
+      subplot_titles = [f"{topic}: {labels[topic]}" for topic in topics][1:]
     else:
       subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
