@@ -10,6 +10,7 @@ def visualize_barchart(topic_model,
                        topics: List[int] = None,
                        top_n_topics: int = 8,
                        n_words: int = 5,
+                       labels: List[str] = None,
                        width: int = 250,
                        height: int = 250) -> go.Figure:
     """ Visualize a barchart of selected topics
@@ -19,6 +20,7 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
+        labels: Use custom labels as titles. Don't include -1 topic.
         width: The width of each figure.
         height: The height of each figure.
 
@@ -54,7 +56,10 @@ def visualize_barchart(topic_model,
         topics = topic_model.get_topic_freq().Topic.to_list()[1:7]
 
     # Initialize figure
-    subplot_titles = [f"Topic {topic}" for topic in topics]
+    if labels:
+      subplot_titles = [f"{idx}: {label}" for idx, label in enumerate(labels)]
+    else:
+      subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
     rows = int(np.ceil(len(topics) / columns))
     fig = make_subplots(rows=rows,
