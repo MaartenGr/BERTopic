@@ -87,7 +87,6 @@ def visualize_hierarchy(topic_model,
 
     # Stylize layout
     fig.update_layout(
-        plot_bgcolor='#ECEFF1',
         template="plotly_white",
         title={
             'text': "<b>Hierarchical Clustering",
@@ -104,22 +103,29 @@ def visualize_hierarchy(topic_model,
             font_family="Rockwell"
         ),
     )
-
+    fig.update_xaxes(ticks="")
+    fig.update_yaxes(ticks="")
+    ticksize = 0
     # Stylize orientation
     if orientation == "left":
         fig.update_layout(height=200+(15*len(topics)),
                           width=width,
                           yaxis=dict(tickmode="array",
                                      ticktext=new_labels))
+        fig.update_xaxes(ticks="")
+        fig.update_yaxes(ticks="")
         
         # Fix empty space on the bottom of the graph
         y_max = max([trace['y'].max()+5 for trace in fig['data']])
         y_min = min([trace['y'].min()-5 for trace in fig['data']])
-        fig.update_layout(yaxis=dict(range=[y_min, y_max]))
+        fig.update_layout(yaxis=dict(range=[y_min, y_max]),
+                          xaxis=dict(visible= False, showticklabels = False))
 
     else:
         fig.update_layout(width=200+(15*len(topics)),
                           height=height,
                           xaxis=dict(tickmode="array",
-                                     ticktext=new_labels))
+                                     ticktext=new_labels),
+                          yaxis=dict(visible= False,
+                                     showticklabels = False))
     return fig
