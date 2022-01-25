@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 
 def visualize_distribution(topic_model,
                            probabilities: np.ndarray,
+                           labels: List[str] = None,
                            min_probability: float = 0.015,
                            width: int = 800,
                            height: int = 600) -> go.Figure:
@@ -12,6 +13,7 @@ def visualize_distribution(topic_model,
     Arguments:
         topic_model: A fitted BERTopic instance.
         probabilities: An array of probability scores
+        labels: List of custom labels to use. Do not include -1 topic.
         min_probability: The minimum probability score to visualize.
                          All others are ignored.
         width: The width of the figure.
@@ -50,16 +52,20 @@ def visualize_distribution(topic_model,
     vals = probabilities[labels_idx].tolist()
 
     # Create labels
-    labels = []
-    for idx in labels_idx:
-        words = topic_model.get_topic(idx)
-        if words:
-            label = [word[0] for word in words[:5]]
-            label = f"<b>Topic {idx}</b>: {'_'.join(label)}"
-            label = label[:40] + "..." if len(label) > 40 else label
-            labels.append(label)
-        else:
-            vals.remove(probabilities[idx])
+    if labels:
+      for idx in labels_idx:
+        labels = [f"{idx}: {labels[idx]}" for idx in labels_idx]
+    else:
+      labels = []
+      for idx in labels_idx:
+          words = topic_model.get_topic(idx)
+          if words:
+              label = [word[0] for word in words[:5]]
+              label = f"<b>Topic {idx}</b>: {'_'.join(label)}"
+              label = label[:40] + "..." if len(label) > 40 else label
+              labels.append(label)
+          else:
+              vals.remove(probabilities[idx])
 
     # Create Figure
     fig = go.Figure(go.Bar(
