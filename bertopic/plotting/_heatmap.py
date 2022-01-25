@@ -11,6 +11,7 @@ def visualize_heatmap(topic_model,
                       topics: List[int] = None,
                       top_n_topics: int = None,
                       n_clusters: int = None,
+                      labels: List[str] = None,
                       width: int = 800,
                       height: int = 800) -> go.Figure:
     """ Visualize a heatmap of the topic's similarity matrix
@@ -24,6 +25,7 @@ def visualize_heatmap(topic_model,
         top_n_topics: Only select the top n most frequent topics.
         n_clusters: Create n clusters and order the similarity
                     matrix by those clusters.
+        labels: List of custom labels to use. Don't include -1 topic.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -89,9 +91,12 @@ def visualize_heatmap(topic_model,
     distance_matrix = cosine_similarity(embeddings)
 
     # Create nicer labels
-    new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]
-    new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
-    new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
+    if labels:
+      new_labels = [f"{topic}: {labels[topic]}" for topic in sorted_topics]
+    else:
+      new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]
+      new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+      new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 
     fig = px.imshow(distance_matrix,
                     labels=dict(color="Similarity Score"),
