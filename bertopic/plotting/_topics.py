@@ -23,7 +23,7 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
-        labels: Custom labels to use. _Include_ topic -1.
+        labels: Custom labels to use.
         width: The width of the figure.
         height: The height of the figure.
 
