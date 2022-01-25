@@ -11,37 +11,33 @@ def visualize_hierarchy(topic_model,
                         orientation: str = "left",
                         topics: List[int] = None,
                         top_n_topics: int = None,
+                        labels: List[str] = None,
+                        color_threshold: float = 1,
                         width: int = 1000,
                         height: int = 600) -> go.Figure:
     """ Visualize a hierarchical structure of the topics
-
     A ward linkage function is used to perform the
     hierarchical clustering based on the cosine distance
     matrix between topic embeddings.
-
     Arguments:
         topic_model: A fitted BERTopic instance.
         orientation: The orientation of the figure.
                      Either 'left' or 'bottom'
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        labels: List of topic labels. Do not include topic -1.
+        color_threshold: 
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
-
     Returns:
         fig: A plotly figure
-
     Usage:
-
     To visualize the hierarchical structure of
     topics simply run:
-
     ```python
     topic_model.visualize_hierarchy()
     ```
-
     Or if you want to save the resulting figure:
-
     ```python
     fig = topic_model.visualize_hierarchy()
     fig.write_html("path/to/file.html")
@@ -74,14 +70,17 @@ def visualize_hierarchy(topic_model,
     fig = ff.create_dendrogram(distance_matrix,
                                orientation=orientation,
                                linkagefun=lambda x: linkage(x, "ward"),
-                               color_threshold=1)
+                               color_threshold=color_threshold)
 
     # Create nicer labels
     axis = "yaxis" if orientation == "left" else "xaxis"
-    new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
-                  for x in fig.layout[axis]["ticktext"]]
-    new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
-    new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
+    if labels:
+      new_labels = [f"{x}: {labels[int(x)]}" for x in fig.layout[axis]["ticktext"]]
+    else:
+      new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
+                    for x in fig.layout[axis]["ticktext"]]
+      new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+      new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 
     # Stylize layout
     fig.update_layout(
