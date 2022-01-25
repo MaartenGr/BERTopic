@@ -1260,7 +1260,6 @@ class BERTopic:
           for word in topic_model.get_topic(topic):
             words.append(word[0])
           words = (', '.join([word for word in words]))
-          label = ["" for x in range(len(topics))]
           data = pd.DataFrame([['', words, texts0, texts1]], columns=["Labels", "Words", "Representative doc 0", "Representative doc 1"])
           topics_df = pd.concat([topics_df,data])
         topics_df.to_excel(file) 
