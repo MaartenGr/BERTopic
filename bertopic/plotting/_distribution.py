@@ -13,7 +13,7 @@ def visualize_distribution(topic_model,
     Arguments:
         topic_model: A fitted BERTopic instance.
         probabilities: An array of probability scores
-        labels: List of custom labels to use. Do not include -1 topic.
+        labels: List of custom labels to use.
         min_probability: The minimum probability score to visualize.
                          All others are ignored.
         width: The width of the figure.
@@ -53,8 +53,14 @@ def visualize_distribution(topic_model,
 
     # Create labels
     if labels:
+      custom_labels = []
       for idx in labels_idx:
-        labels = [f"{idx}: {labels[idx]}" for idx in labels_idx]
+        words = topic_model.get_topic(idx)
+          if words:
+            custom_labels.append(f"{idx}: {labels[idx]})
+          else:
+            vals.remove(probabilities[idx])
+      labels = custom_labels           
     else:
       labels = []
       for idx in labels_idx:
