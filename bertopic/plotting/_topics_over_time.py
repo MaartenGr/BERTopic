@@ -67,7 +67,7 @@ def visualize_topics_over_time(topic_model,
     for index, topic in enumerate(data.Topic.unique()):
         trace_data = data.loc[data.Topic == topic, :]
         if labels:
-          topic_name = labels[topic]
+          topic_name = f"{topic}: {labels[topic]}"
         else:
           topic_name = trace_data.Name.values[0]
         words = trace_data.Words.values
