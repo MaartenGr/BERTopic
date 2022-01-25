@@ -53,10 +53,8 @@ def visualize_topics(topic_model,
         topics = sorted(list(topic_model.get_topics().keys()))
 
     # Extract topic words and their frequencies
-    if labels:
-      topic_list = labels
-    else:
-      topic_list = sorted(topics)
+
+    topic_list = sorted(topics)
     frequencies = [topic_model.topic_sizes[topic] for topic in topic_list]
     words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]
 
@@ -67,9 +65,13 @@ def visualize_topics(topic_model,
     embeddings = MinMaxScaler().fit_transform(embeddings)
     embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 
+    if labels:
+      topic_labels = f"{topic_list[1:]}: {labels}"
+    else:
+      topic_labels = topic_list[1:]
     # Visualize with plotly
     df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
-                       "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
+                       "Topic": topic_labels, "Words": words[1:], "Size": frequencies[1:]})
     return _plotly_topic_visualization(df, topic_list, width, height)
 
 
