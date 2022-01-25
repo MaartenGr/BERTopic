@@ -25,7 +25,7 @@ def visualize_heatmap(topic_model,
         top_n_topics: Only select the top n most frequent topics.
         n_clusters: Create n clusters and order the similarity
                     matrix by those clusters.
-        labels: List of custom labels to use. Don't include -1 topic.
+        labels: List of custom labels to use.
         width: The width of the figure.
         height: The height of the figure.
 
