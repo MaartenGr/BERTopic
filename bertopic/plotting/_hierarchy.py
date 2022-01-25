@@ -25,7 +25,7 @@ def visualize_hierarchy(topic_model,
                      Either 'left' or 'bottom'
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
-        labels: List of topic labels. Do not include topic -1.
+        labels: List of topic labels.
         color_threshold: 
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
@@ -75,7 +75,7 @@ def visualize_hierarchy(topic_model,
     # Create nicer labels
     axis = "yaxis" if orientation == "left" else "xaxis"
     if labels:
-      new_labels = [f"{x}: {labels[int(x)]}" for x in fig.layout[axis]["ticktext"]]
+      new_labels = [f"{x}: {labels[1:][int(x)]}" for x in fig.layout[axis]["ticktext"]]
     else:
       new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
                     for x in fig.layout[axis]["ticktext"]]
