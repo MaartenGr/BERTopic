@@ -66,7 +66,7 @@ def visualize_topics(topic_model,
     embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 
     if labels:
-      topic_labels = f"{topic_list[1:]}: {labels}"
+      topic_labels = [f"{topic_list[1:]}: {label}" for label in labels[1:]
     else:
       topic_labels = topic_list[1:]
     # Visualize with plotly
