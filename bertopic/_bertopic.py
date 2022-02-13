@@ -484,7 +484,7 @@ class BERTopic:
             selection = documents.loc[documents.Timestamps == timestamp, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Timestamps": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic)
 
             if global_tuning or evolution_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
@@ -577,7 +577,7 @@ class BERTopic:
             selection = documents.loc[documents.Class == class_, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Class": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
+            c_tf_idf, words = self._c_tf_idf(documents_per_topic)
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
@@ -1561,14 +1561,13 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
             documents_per_topic: The joined documents per topic such that each topic has a single
                                  string made out of multiple documents
             m: The total number of documents (unjoined)
-            fit: Whether to fit a new vectorizer or use the fitted self.vectorizer_model
 
         Returns:
             tf_idf: The resulting matrix giving a value (importance score) for each word per topic
@@ -1576,11 +1575,10 @@ class BERTopic:
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
 
-        if fit:
-            self.vectorizer_model.fit(documents)
+        fitted_vectorizer = self.vectorizer_model.fit(documents)
 
-        words = self.vectorizer_model.get_feature_names()
-        X = self.vectorizer_model.transform(documents)
+        words = fitted_vectorizer.get_feature_names_out()
+        X = fitted_vectorizer.transform(documents)
 
         if self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
