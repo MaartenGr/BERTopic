@@ -1590,7 +1590,7 @@ class BERTopic:
             vectorizer_ = clone(self.vectorizer_model)
             vectorizer_.fit(documents)
 
-        words = vectorizer_.get_feature_names()
+        words = vectorizer_.get_feature_names_out()
         X = vectorizer_.transform(documents)
 
         if self.seed_topic_list:
