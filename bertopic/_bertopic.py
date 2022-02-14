@@ -582,7 +582,7 @@ class BERTopic:
             selection = documents.loc[documents.Class == class_, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Class": "count"})
-            c_tf_idf, words, c_tf_idf_model = self._c_tf_idf(documents_per_topic, vectorizer_ = vectorizer_, c_tf_idf_ = c_tf_idf_model)
+            c_tf_idf, words, c_tf_idf_model = self._c_tf_idf(documents_per_topic, vectorizer_ = vectorizer_model, c_tf_idf_ = c_tf_idf_model)
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
