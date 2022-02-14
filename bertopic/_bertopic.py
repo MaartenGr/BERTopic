@@ -1589,7 +1589,6 @@ class BERTopic:
 
         self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
 
-        c_tf_idf = self.transformer.transform(X)
 
         self.topic_sim_matrix = cosine_similarity(c_tf_idf)
 
