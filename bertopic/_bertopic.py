@@ -1566,7 +1566,8 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, **models) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, 
+                  **fitted_models: "vectorizer_=CountVectorizer.fit() c_tf_idf_=ClassTFIDF().fit()") -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
@@ -1584,8 +1585,8 @@ class BERTopic:
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
 
-        if "vectorizer_" in models:
-            vectorizer_ = models["vectorizer_"]
+        if "vectorizer_" in fitted_models:
+            vectorizer_ = fitted_models["vectorizer_"]
         else:
             vectorizer_ = clone(self.vectorizer_model)
             vectorizer_.fit(documents)
@@ -1599,15 +1600,15 @@ class BERTopic:
         else:
             multiplier = None
 
-        if "c_tf_idf_" in models and models['c_tf_idf_'] != 0:
-            c_tf_idf_ = models["c_tf_idf_"]
+        if "c_tf_idf_" in fitted_models and fitted_models['c_tf_idf_'] != 0:
+            c_tf_idf_ = fitted_models["c_tf_idf_"]
         else:
             c_tf_idf_ = ClassTFIDF().fit(X, multiplier=multiplier)
 
         c_tf_idf = c_tf_idf_.transform(X)
 
         self.topic_sim_matrix = cosine_similarity(c_tf_idf)
-        if models not {}:
+        if fitted_models not {}:
             return c_tf_idf, words, c_tf_idf_
         else:
             return c_tf_idf, words
