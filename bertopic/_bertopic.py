@@ -455,7 +455,7 @@ class BERTopic:
         check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
-        vectorizer_model = clone(self.vectorizer_model).fit(documents)
+        vectorizer_model = clone(self.vectorizer_model).fit(docs)
         c_tf_idf_model = 0 # gets fitted later
 
         all_topics = sorted(list(documents.Topic.unique()))
@@ -571,7 +571,7 @@ class BERTopic:
         """
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Class": classes})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
-        vectorizer_model = clone(self.vectorizer_model).fit(documents)
+        vectorizer_model = clone(self.vectorizer_model).fit(docs)
         c_tf_idf_model = 0 # gets fitted later
         
         # For each unique timestamp, create topic representations
