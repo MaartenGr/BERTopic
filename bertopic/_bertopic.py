@@ -1587,8 +1587,7 @@ class BERTopic:
         else:
             multiplier = None
 
-        if fit:
-            self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
+        self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
 
