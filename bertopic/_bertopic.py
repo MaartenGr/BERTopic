@@ -455,6 +455,8 @@ class BERTopic:
         check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Timestamps": timestamps})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+        vectorizer_model = clone(self.vectorizer_model).fit(documents)
+        c_tf_idf_model = 0 # gets fitted later
 
         all_topics = sorted(list(documents.Topic.unique()))
         all_topics_indices = {topic: index for index, topic in enumerate(all_topics)}
@@ -485,7 +487,7 @@ class BERTopic:
             selection = documents.loc[documents.Timestamps == timestamp, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Timestamps": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic)
+            c_tf_idf, words, c_tf_idf_model  = self._c_tf_idf(documents_per_topic, vectorizer_ = vectorizer_model, c_tf_idf_ = c_tf_idf_model)
 
             if global_tuning or evolution_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
@@ -569,7 +571,9 @@ class BERTopic:
         """
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "Class": classes})
         global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
-
+        vectorizer_model = clone(self.vectorizer_model).fit(documents)
+        c_tf_idf_model = 0 # gets fitted later
+        
         # For each unique timestamp, create topic representations
         topics_per_class = []
         for index, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
@@ -578,7 +582,7 @@ class BERTopic:
             selection = documents.loc[documents.Class == class_, :]
             documents_per_topic = selection.groupby(['Topic'], as_index=False).agg({'Document': ' '.join,
                                                                                     "Class": "count"})
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic)
+            c_tf_idf, words, c_tf_idf_model = self._c_tf_idf(documents_per_topic, vectorizer_ = vectorizer_, c_tf_idf_ = c_tf_idf_model)
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
@@ -1562,24 +1566,32 @@ class BERTopic:
 
             self.topic_embeddings = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, **models) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
             documents_per_topic: The joined documents per topic such that each topic has a single
                                  string made out of multiple documents
             m: The total number of documents (unjoined)
+            return_fitted: Also return fitted vectorizer and c_tf_idf 
+            vectorizer_: A pre-fitted CountVectorizer instance. Optional.
+            c_tf_idf_: A pre-fitted c_tf_idf instance. Optional.
 
         Returns:
             tf_idf: The resulting matrix giving a value (importance score) for each word per topic
             words: The names of the words to which values were given
+            c_tf_idf_: The fitted c_tf_idf instance (If **models is not empty)
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
 
-        fitted_vectorizer = clone(self.vectorizer_model).fit(documents)
+        if "vectorizer_" in models:
+            vectorizer_ = models["vectorizer_"]
+        else:
+            vectorizer_ = clone(self.vectorizer_model)
+            vectorizer_.fit(documents)
 
-        words = fitted_vectorizer.get_feature_names_out()
-        X = fitted_vectorizer.transform(documents)
+        words = vectorizer_.get_feature_names()
+        X = vectorizer_.transform(documents)
 
         if self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
@@ -1587,12 +1599,18 @@ class BERTopic:
         else:
             multiplier = None
 
-        self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
+        if "c_tf_idf_" in models and models['c_tf_idf_'] != 0:
+            c_tf_idf_ = models["c_tf_idf_"]
+        else:
+            c_tf_idf_ = ClassTFIDF().fit(X, multiplier=multiplier)
 
+        c_tf_idf = c_tf_idf_.transform(X)
 
         self.topic_sim_matrix = cosine_similarity(c_tf_idf)
-
-        return c_tf_idf, words
+        if models not {}:
+            return c_tf_idf, words, c_tf_idf_
+        else:
+            return c_tf_idf, words
 
     def _update_topic_size(self, documents: pd.DataFrame):
         """ Calculate the topic sizes
