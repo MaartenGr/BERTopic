@@ -21,6 +21,7 @@ from typing import List, Tuple, Union, Mapping, Any
 import hdbscan
 from umap import UMAP
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.base import clone
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
 
@@ -1575,7 +1576,7 @@ class BERTopic:
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
 
-        fitted_vectorizer = self.vectorizer_model.fit(documents)
+        fitted_vectorizer = clone(self.vectorizer_model).fit(documents)
 
         words = fitted_vectorizer.get_feature_names_out()
         X = fitted_vectorizer.transform(documents)
