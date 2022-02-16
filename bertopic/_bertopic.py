@@ -17,6 +17,9 @@ from tqdm import tqdm
 from scipy.sparse.csr import csr_matrix
 from typing import List, Tuple, Union, Mapping, Any
 
+# For compressing BERTopic attributes
+import zlib, pickle
+
 # Models
 import hdbscan
 from umap import UMAP
@@ -71,6 +74,17 @@ class BERTopic:
     try out BERTopic several times until you find the topics that suit
     you best.
     """
+    # When objects are stored in BERTopic, compress them. Decompress on retrieval.
+    def __getattr__(self, value):
+        value = object.__getattr__(value)
+        value = zlib.decompress(value)
+        value = pickle.loads(value)
+        return value
+    def __setattr__(self, key, value):
+        value = pickle.dumps(value)
+        value = zlib.compress(value)
+        object.__setattr__(key, value)
+            
     def __init__(self,
                  language: str = "english",
                  top_n_words: int = 10,
