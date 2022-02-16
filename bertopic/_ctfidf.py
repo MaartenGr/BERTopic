@@ -18,8 +18,8 @@ class ClassTFIDF(TfidfTransformer):
     Next, the total, unjoined, number of documents across all classes **m** is divided by the total
     sum of word **i** across all classes.
     """
-    def __init__(self, *args, **kwargs):
-        super(ClassTFIDF, self).__init__(*args, **kwargs)
+    def __init__(self):
+        super(ClassTFIDF, self).__init__()
 
     def fit(self, X: sp.csr_matrix, multiplier: np.ndarray = None):
         """Learn the idf vector (global term weights).
