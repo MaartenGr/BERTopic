@@ -1,6 +1,6 @@
 Visualizing BERTopic and its derivatives is important in understanding the model, how it works, but more importantly, where it works. 
 Since topic modeling can be quite a subjective field it is difficult for users to validate their models. Looking at the topics and seeing 
-if they make sense is an important factor in eliviating this issue. 
+if they make sense is an important factor in alleviating this issue. 
 
 ## **Visualize Topics**
 After having trained our `BERTopic` model, we can iteratively go through hundreds of topics to get a good 
