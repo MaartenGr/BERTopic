@@ -382,8 +382,6 @@ class BERTopic:
         if self.calculate_probabilities:
             probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
             logger.info("Calculated probabilities with HDBSCAN")
-        else:
-            probabilities = None
 
         probabilities = self._map_probabilities(probabilities, original_topics=True)
         predictions = self._map_predictions(predictions)
