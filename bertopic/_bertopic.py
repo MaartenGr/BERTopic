@@ -1255,6 +1255,11 @@ class BERTopic:
         ```
         """
         with open(path, 'wb') as file:
+
+            # This prevents the vectorizer from being too large in size if `min_df` was
+            # set to a value higher than 1
+            self.vectorizer_model.stop_words_ = None
+
             if not save_embedding_model:
                 embedding_model = self.embedding_model
                 self.embedding_model = None
