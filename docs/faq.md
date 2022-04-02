@@ -48,6 +48,7 @@ from hdbscan import HDBSCAN
 hdbscan_model = HDBSCAN(min_cluster_size=10, metric='euclidean', 
                         cluster_selection_method='eom', prediction_data=True, min_samples=5)
 topic_model = BERTopic(hdbscan_model=hdbscan_model)
+topics, probs = topic_model.fit_transform(docs)
 ```
 
 !!! note "Note"
@@ -58,6 +59,18 @@ Second, after training our BERTopic model, we can assign outliers to topics. By 
 of a document belonging to any topic. That way, we can select, for each document, the topic with the the highest probability. Thus, although we do 
 generate an outlier class in our BERTopic model, we can assign documents to an actual topic. 
 
+To do this, we can set a probability threshold and assign each document to a topic based on their probabilities:
+
+```python
+import numpy as np
+probability_threshold = 0.01
+new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for prob in probs]
+```
+
+!!! note "Note"
+    The topics assigned using the above method can result in topics different from using `.fit_transform()`. This is expected
+    behavior as HDBSCAN is merely trying to imitate soft clustering after fitting the model and it is not a core component
+    of assigning points to clusters. 
 
 ## **How can I speed up BERTopic?**
 You can speed up BERTopic by either generating your embeddings beforehand or by 
