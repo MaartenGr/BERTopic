@@ -18,6 +18,7 @@ nav:
       - Topic Representation: getting_started/topicrepresentation/topicrepresentation.md
       - Search Topics: getting_started/search/search.md
       - Customization:
+        - CountVectorizer: getting_started/countvectorizer/countvectorizer.md
         - Custom Embedding Models: getting_started/custom_embeddings/embeddings.md
         - Custom Sub-Models: getting_started/models/models.md
         - Parameter tuning: getting_started/parameter tuning/parametertuning.md
