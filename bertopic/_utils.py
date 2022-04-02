@@ -53,10 +53,13 @@ def check_embeddings_shape(embeddings, docs):
 
 def check_is_fitted(model):
     """ Checks if the model was fitted by verifying the presence of self.matches
+
     Arguments:
         model: BERTopic instance for which the check is performed.
+
     Returns:
         None
+
     Raises:
         ValueError: If the matches were not found.
     """

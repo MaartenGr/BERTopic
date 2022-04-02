@@ -1505,7 +1505,7 @@ class BERTopic:
         larger topics are better representative of the entire merged
         topic.
 
-        Args:
+        Arguments:
             original_topics: Whether we want to map from the
                              original topics to the most recent topics
                              or from the second-most recent topics.
@@ -1859,7 +1859,7 @@ class BERTopic:
         Retrieved from:
             https://stackoverflow.com/questions/49207275/finding-the-top-n-values-in-a-row-of-a-scipy-sparse-matrix
 
-        Args:
+        Arguments:
             matrix: The sparse matrix from which to get the top n indices per row
             n: The number of highest values to extract from each row
 
@@ -1878,7 +1878,7 @@ class BERTopic:
     def _top_n_values_sparse(matrix: csr_matrix, indices: np.ndarray) -> np.ndarray:
         """ Return the top n values for each row in a sparse matrix
 
-        Args:
+        Arguments:
             matrix: The sparse matrix from which to get the top n indices per row
             indices: The top n indices per row
 
@@ -1942,7 +1942,7 @@ class TopicMapper:
     def __init__(self, hdbscan_model: hdbscan.HDBSCAN):
         """ Initalization of Topic Mapper
 
-        Args:
+        Arguments:
             hdbscan_model: The trained HDBSCAN-model which
                            is used to extract the topics from
         """
@@ -1954,7 +1954,7 @@ class TopicMapper:
         """ Get mappings from either the original topics or
         the second-most recent topics to the current topics
 
-        Args:
+        Arguments:
             original_topics: Whether we want to map from the
                              original topics to the most recent topics
                              or from the second-most recent topics.
@@ -1981,7 +1981,7 @@ class TopicMapper:
     def add_mappings(self, mappings: Mapping[int, int]):
         """ Add new column(s) of topic mappings
 
-        Args:
+        Arguments:
             mappings: The mappings to add
         """
         for topics in self.mappings:
