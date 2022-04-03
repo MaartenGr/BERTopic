@@ -40,7 +40,7 @@ use_packages = [
 ]
 
 gensim_packages = [
-    "gensim>=3.6.0"
+    "gensim>=4.0.0"
 ]
 
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
