@@ -56,12 +56,14 @@ def visualize_heatmap(topic_model,
         embeddings = topic_model.c_tf_idf
 
     # Select topics based on top_n and topics args
+    freq_df = topic_model.get_topic_freq()
+    freq_df = freq_df.loc[freq_df.Topic != -1, :]
     if topics is not None:
         topics = list(topics)
     elif top_n_topics is not None:
-        topics = sorted(topic_model.get_topic_freq().Topic.to_list()[1:top_n_topics + 1])
+        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
     else:
-        topics = sorted(list(topic_model.get_topics().keys()))
+        topics = sorted(freq_df.Topic.to_list())
 
     # Order heatmap by similar clusters of topics
     if n_clusters:

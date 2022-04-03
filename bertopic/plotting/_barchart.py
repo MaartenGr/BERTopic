@@ -46,12 +46,14 @@ def visualize_barchart(topic_model,
     colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
 
     # Select topics based on top_n and topics args
+    freq_df = topic_model.get_topic_freq()
+    freq_df = freq_df.loc[freq_df.Topic != -1, :]
     if topics is not None:
         topics = list(topics)
     elif top_n_topics is not None:
-        topics = topic_model.get_topic_freq().Topic.to_list()[1:top_n_topics + 1]
+        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
     else:
-        topics = topic_model.get_topic_freq().Topic.to_list()[1:7]
+        topics = sorted(freq_df.Topic.to_list()[0:6])
 
     # Initialize figure
     subplot_titles = [f"Topic {topic}" for topic in topics]
