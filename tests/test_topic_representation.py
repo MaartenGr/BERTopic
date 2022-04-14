@@ -8,12 +8,13 @@ This includes the following features:
 """
 
 import pytest
+from hdbscan import HDBSCAN
 import numpy as np
 import pandas as pd
+from sklearn.cluster import KMeans
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 
-import bertopic._bertopic
 from bertopic._bertopic import TopicMapper
 from bertopic.backend._utils import select_backend
 from bertopic import BERTopic
@@ -21,7 +22,12 @@ from bertopic import BERTopic
 newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:1000]
 
 
-def test_extract_topics():
+hdbscan_model = HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+kmeans_model = KMeans(n_clusters=10)
+
+
+@pytest.mark.parametrize("cluster_model", [hdbscan_model, kmeans_model])
+def test_extract_topics(cluster_model):
     """ Test Topic Extraction
 
     Test whether topics could be extracted using c-TF-IDF.
@@ -32,7 +38,7 @@ def test_extract_topics():
     documents = pd.DataFrame({"Document": newsgroup_docs,
                               "ID": range(len(newsgroup_docs)),
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
-    model = BERTopic()
+    model = BERTopic(hdbscan_model=cluster_model)
     model.embedding_model = select_backend("all-MiniLM-L6-v2")
     model._update_topic_size(documents)
     model._extract_topics(documents)
@@ -46,7 +52,8 @@ def test_extract_topics():
     assert len(freq.Topic.unique()) == len(freq)
 
 
-def test_extract_topics_custom_cv():
+@pytest.mark.parametrize("cluster_model", [hdbscan_model, kmeans_model])
+def test_extract_topics_custom_cv(cluster_model):
     """ Test Topic Extraction with custom Countvectorizer
 
     Test whether topics could be extracted using c-TF-IDF.
@@ -59,7 +66,7 @@ def test_extract_topics_custom_cv():
                               "Topic": np.random.randint(-1, nr_topics-1, len(newsgroup_docs))})
 
     cv = CountVectorizer(ngram_range=(1, 2))
-    model = BERTopic(vectorizer_model=cv)
+    model = BERTopic(vectorizer_model=cv, hdbscan_model=cluster_model)
     model.embedding_model = select_backend("all-MiniLM-L6-v2")
     model._update_topic_size(documents)
     model._extract_topics(documents)
@@ -73,8 +80,9 @@ def test_extract_topics_custom_cv():
     assert len(freq.Topic.unique()) == len(freq)
 
 
+@pytest.mark.parametrize("cluster_model", [hdbscan_model, kmeans_model])
 @pytest.mark.parametrize("reduced_topics", [1, 2, 4, 10])
-def test_topic_reduction(reduced_topics):
+def test_topic_reduction(cluster_model, reduced_topics):
     """ Test Topic Reduction
 
     The the reduction of topics after having generated
@@ -82,7 +90,7 @@ def test_topic_reduction(reduced_topics):
     manually as the training takes quite a while.
     """
     nr_topics = reduced_topics + 2
-    model = BERTopic(nr_topics=reduced_topics)
+    model = BERTopic(nr_topics=reduced_topics, hdbscan_model=cluster_model)
     model.embedding_model = select_backend("all-MiniLM-L6-v2")
     topics = np.random.randint(-1, nr_topics-1, len(newsgroup_docs))
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
@@ -104,7 +112,8 @@ def test_topic_reduction(reduced_topics):
     assert not set(model.get_topic_freq().Topic).difference(set(new_documents.Topic))
 
 
-def test_topic_reduction_edge_cases():
+@pytest.mark.parametrize("cluster_model", [hdbscan_model, kmeans_model])
+def test_topic_reduction_edge_cases(cluster_model):
     """ Test Topic Reduction Large Nr Topics
 
     Test whether the topics are not reduced if the reduced number
@@ -112,7 +121,7 @@ def test_topic_reduction_edge_cases():
     """
     nr_topics = 5
     topics = np.random.randint(-1, nr_topics - 1, len(newsgroup_docs))
-    model = BERTopic()
+    model = BERTopic(hdbscan_model=cluster_model)
     model.embedding_model = select_backend("all-MiniLM-L6-v2")
     model.nr_topics = 100
     model.hdbscan_model.labels_ = topics

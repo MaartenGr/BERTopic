@@ -20,6 +20,8 @@ import pandas as pd
 from scipy.sparse.csr import csr_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.datasets import fetch_20newsgroups, make_blobs
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 from sentence_transformers import SentenceTransformer
 
 from umap import UMAP
@@ -81,10 +83,11 @@ def test_extract_incorrect_embeddings():
         model.fit(["some document"])
 
 
+@pytest.mark.parametrize("dim_model", [UMAP, PCA])
 @pytest.mark.parametrize("embeddings,shape", [(np.random.rand(100, 68), 100),
                                               (np.random.rand(10, 768), 10),
                                               (np.random.rand(1000, 5), 1000)])
-def test_umap_reduce_dimensionality(embeddings, shape):
+def test_umap_reduce_dimensionality(dim_model, embeddings, shape):
     """ Test UMAP
 
     Testing whether the dimensionality across different shapes is
@@ -92,26 +95,28 @@ def test_umap_reduce_dimensionality(embeddings, shape):
     as the main goal here is to reduce the dimensionality, the quality is
     tested in the full pipeline.
     """
-    model = BERTopic()
+    model = BERTopic(umap_model=dim_model(n_components=5))
     umap_embeddings = model._reduce_dimensionality(embeddings)
     assert umap_embeddings.shape == (shape, 5)
 
 
-@pytest.mark.parametrize("embeddings,shape,n_components", [(np.random.rand(100, 68), 100, 2),
+@pytest.mark.parametrize("dim_model", [UMAP, PCA])
+@pytest.mark.parametrize("embeddings,shape,n_components", [(np.random.rand(100, 68), 100, 5),
                                                            (np.random.rand(10, 768), 10, 5),
-                                                           (np.random.rand(1000, 5), 1000, 10)])
-def test_custom_umap_reduce_dimensionality(embeddings, shape, n_components):
+                                                           (np.random.rand(1000, 15), 1000, 10)])
+def test_custom_umap_reduce_dimensionality(dim_model, embeddings, shape, n_components):
     """ Test Custom UMAP
 
     Testing whether the dimensionality is reduced to the correct shape with
     a custom UMAP model. The custom UMAP model differs in the resulting
     dimensionality and is tested across different embeddings.
     """
-    model = BERTopic(umap_model=UMAP(n_components=n_components))
+    model = BERTopic(umap_model=dim_model(n_components=n_components))
     umap_embeddings = model._reduce_dimensionality(embeddings)
     assert umap_embeddings.shape == (shape, n_components)
 
 
+@pytest.mark.parametrize("cluster_model", ["hdbscan", "kmeans"])
 @pytest.mark.parametrize("samples,features,centers",
                          [(200, 500, 1),
                           (500, 200, 1),
@@ -119,7 +124,7 @@ def test_custom_umap_reduce_dimensionality(embeddings, shape, n_components):
                           (500, 200, 2),
                           (200, 500, 4),
                           (500, 200, 4)])
-def test_hdbscan_cluster_embeddings(samples, features, centers):
+def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
     """ Test HDBSCAN
 
     Testing whether the clusters are correctly created and if the old and new dataframes
@@ -128,7 +133,13 @@ def test_hdbscan_cluster_embeddings(samples, features, centers):
     embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
     documents = [str(i + 1) for i in range(embeddings.shape[0])]
     old_df = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
-    model = BERTopic()
+
+    if cluster_model == "kmeans":
+        cluster_model = KMeans(n_clusters=centers)
+    else:
+        cluster_model = HDBSCAN(min_cluster_size=10, metric="euclidean", cluster_selection_method="eom", prediction_data=True)
+
+    model = BERTopic(hdbscan_model=cluster_model)
     new_df, _ = model._cluster_embeddings(embeddings, old_df)
 
     assert len(new_df.Topic.unique()) == centers
@@ -136,6 +147,7 @@ def test_hdbscan_cluster_embeddings(samples, features, centers):
     pd.testing.assert_frame_equal(old_df.drop("Topic", 1), new_df.drop("Topic", 1))
 
 
+@pytest.mark.parametrize("cluster_model", ["hdbscan", "kmeans"])
 @pytest.mark.parametrize("samples,features,centers",
                          [(200, 500, 1),
                           (500, 200, 1),
@@ -143,7 +155,7 @@ def test_hdbscan_cluster_embeddings(samples, features, centers):
                           (500, 200, 2),
                           (200, 500, 4),
                           (500, 200, 4)])
-def test_custom_hdbscan_cluster_embeddings(samples, features, centers):
+def test_custom_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
     """ Test Custom HDBSCAN
 
     Testing whether the clusters are correctly created using a custom HDBSCAN instance
@@ -152,14 +164,17 @@ def test_custom_hdbscan_cluster_embeddings(samples, features, centers):
     embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
     documents = [str(i + 1) for i in range(embeddings.shape[0])]
     old_df = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
-    hdbscan_model = HDBSCAN(min_cluster_size=10, metric="euclidean", cluster_selection_method="eom", prediction_data=True)
-    model = BERTopic(hdbscan_model=hdbscan_model)
+    if cluster_model == "kmeans":
+        cluster_model = KMeans(n_clusters=centers)
+    else:
+        cluster_model = HDBSCAN(min_cluster_size=10, metric="euclidean", cluster_selection_method="eom", prediction_data=True)
+
+    model = BERTopic(hdbscan_model=cluster_model)
     new_df, _ = model._cluster_embeddings(embeddings, old_df)
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
     pd.testing.assert_frame_equal(old_df.drop("Topic", 1), new_df.drop("Topic", 1))
-    assert model.hdbscan_model.metric == "euclidean"
 
 
 def test_ctfidf(base_bertopic):
