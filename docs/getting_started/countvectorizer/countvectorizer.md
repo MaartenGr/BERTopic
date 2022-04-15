@@ -40,8 +40,10 @@ topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
 The great thing about using `.update_topics()` is that it allows you to tweak the topic representations without re-training your model! Thus, here we will be focusing 
 on fine-tuning our topic representations after training our model. 
 
-**NOTE**: The great thing about processing our topic representations with the `CountVectorizer` is that it does **not** influence the quality of clusters as that is 
-being performed before generating the topic representations. 
+
+!!! note
+    The great thing about processing our topic representations with the `CountVectorizer` is that it does **not** influence the quality of clusters as that is 
+	being performed before generating the topic representations. 
 
 ## **Basic Usage**
 
