@@ -82,7 +82,7 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs, embeddings)
 ```
 
-## **Speep up UMAP**
+## **Speed up UMAP**
 At times, UMAP may take a while to fit on the embeddings that you have. This often happens when you have
 the embeddings millions of documents that you want to reduce in dimensionality. There is a trick that 
 can speed up this process somewhat: Initializing UMAP with rescaled PCA embeddings. 
