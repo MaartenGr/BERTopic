@@ -1,4 +1,4 @@
-# CountVectorizer Tips & Tricks
+# CountVectorizer
 
 In topic modeling, the quality of the topic representations are key for interpreting the topics, communicating results, and understanding patterns. It is of utmost 
 importance to make sure that the topic representations fits with your use case. 

@@ -164,8 +164,7 @@ This is a known issue with the order of install using pypi. You can find more de
 I would suggest doing one of the following:
 
 * Install the newest version from BERTopic (>= v0.5).
-* You can install hdbscan with pip install hdbscan --no-cache-dir --no-binary :all: --no-build-isolation which might resolve the issue
-* Use the above step also with numpy as it is part of the issue
+* You can install hdbscan with `pip install hdbscan --no-cache-dir --no-binary :all: --no-build-isolation` which might resolve the issue
 * Install BERTopic in a fresh environment using these steps. 
 
 ## **How can I run BERTopic without an internet connection?**  
