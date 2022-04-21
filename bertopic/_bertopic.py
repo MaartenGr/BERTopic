@@ -1675,7 +1675,7 @@ class BERTopic:
 
         # Get top 30 words per topic based on c-TF-IDF score
         topics = {label: [(words[word_index], score)
-                          if word_index and score > 0
+                          if word_index is not None and score > 0
                           else ("", 0.00001)
                           for word_index, score in zip(indices[index][::-1], scores[index][::-1])
                           ]

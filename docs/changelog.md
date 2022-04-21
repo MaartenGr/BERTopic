@@ -1,3 +1,55 @@
+
+## **Version 0.10.0**
+*Release date: 24 April, 2022*
+
+
+**Highlights**: 
+
+* Use any dimensionality reduction technique instead of UMAP:
+
+```python
+from bertopic import BERTopic
+from sklearn.decomposition import PCA
+
+dim_model = PCA(n_components=5)
+topic_model = BERTopic(umap_model=dim_model)
+```
+
+* Use any clustering technique instead of HDBSCAN:
+
+```python
+from bertopic import BERTopic
+from sklearn.cluster import KMeans
+
+cluster_model = KMeans(n_clusters=50)
+topic_model = BERTopic(hdbscan_model=cluster_model)
+```
+
+**Documentation**: 
+
+* Add a CountVectorizer page with tips and tricks on how to create topic representations that fit your use case
+* Added pages on how to use other dimensionality reduction and clustering algorithms
+ * Additional instructions on how to reduce outliers in the FAQ:
+
+```python 
+import numpy as np
+probability_threshold = 0.01
+new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for prob in probs] 
+```
+
+**Fixes**: 
+
+* Fixed `None` being returned for probabilities when transforming unseen documents
+* Replaced all instances of `arg:` with `Arguments:` for consistency
+* Before saving a fitted BERTopic instance, we remove the stopwords in the fitted CountVectorizer model as it can get quite large due to the number of words that end in stopwords if `min_df` is set to a value larger than 1
+* Set `"hdbscan>=0.8.28"` to prevent numpy issues
+  * Although this was already fixed by the new release of HDBSCAN, it is technically still possible to install 0.8.27 with BERTopic which leads to these numpy issues
+* Update gensim dependency to `>=4.0.0` ([#371](https://github.com/MaartenGr/BERTopic/issues/371))
+* Fix topic 0 not appearing in visualizations ([#472](https://github.com/MaartenGr/BERTopic/issues/472))
+* Fix ([#506](https://github.com/MaartenGr/BERTopic/issues/506))
+
+
+
 ## **Version 0.9.4**
 *Release date: 14 December, 2021*
 
@@ -60,7 +112,7 @@ A release focused on fixing several issues:
 * Fix missing `normalize_frequency` param in plots ([#213](https://github.com/MaartenGr/BERTopic/issues/208))
   
 
-## **Version 0.9**
+## **Version 0.9.0**
 *Release date:  9 August, 2021*
 
 **Highlights**:  
