@@ -1,6 +1,6 @@
 
 ## **Version 0.10.0**
-*Release date: 24 April, 2022*
+*Release date: 30 April, 2022*
 
 
 **Highlights**: 
@@ -47,7 +47,7 @@ new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for 
 * Update gensim dependency to `>=4.0.0` ([#371](https://github.com/MaartenGr/BERTopic/issues/371))
 * Fix topic 0 not appearing in visualizations ([#472](https://github.com/MaartenGr/BERTopic/issues/472))
 * Fix ([#506](https://github.com/MaartenGr/BERTopic/issues/506))
-
+* Fix ([#429](https://github.com/MaartenGr/BERTopic/issues/506))
 
 
 ## **Version 0.9.4**
