@@ -17,10 +17,12 @@ nav:
       - Topic Reduction: getting_started/topicreduction/topicreduction.md
       - Topic Representation: getting_started/topicrepresentation/topicrepresentation.md
       - Search Topics: getting_started/search/search.md
-      - Customization:
-        - Custom Embedding Models: getting_started/custom_embeddings/embeddings.md
-        - Custom Sub-Models: getting_started/models/models.md
-        - Parameter tuning: getting_started/parameter tuning/parametertuning.md
+      - Parameter tuning: getting_started/parameter tuning/parametertuning.md       
+      - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md       
+      - Sub-models:
+        - Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
+        - Clustering: getting_started/clustering/clustering.md
+        - CountVectorizer: getting_started/countvectorizer/countvectorizer.md
       - Variations:
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
         - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
@@ -44,12 +46,14 @@ nav:
         - DTM: api/plotting/dtm.md
         - Topics per Class: api/plotting/topics_per_class.md
   - Changelog: changelog.md
+
 plugins:
   - mkdocstrings:
       watch:
         - bertopic
   - search
 copyright: Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+
 theme:
   custom_dir: images/
   name: material
@@ -66,17 +70,19 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.instant
-  palette: # 
-
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+  palette:
     - scheme: default
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
-    - scheme: slate # 
-
+    - scheme: slate
       toggle:
         icon: material/weather-night
         name: Switch to light mode
+
 markdown_extensions:
   - admonition
   - pymdownx.details
@@ -84,4 +90,3 @@ markdown_extensions:
   - pymdownx.superfences
   - toc:
       permalink: true
-

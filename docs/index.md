@@ -115,16 +115,13 @@ For an overview of BERTopic's visualization methods:
 
   
 ## **Citation**
-To cite BERTopic in your work, please use the following bibtex reference:
+To cite the [BERTopic paper](https://arxiv.org/abs/2203.05794), please use the following bibtex reference:
 
-```bibtex
-@misc{grootendorst2020bertopic,
-  author       = {Maarten Grootendorst},
-  title        = {BERTopic: Leveraging BERT and c-TF-IDF to create easily interpretable topics.},
-  year         = 2020,
-  publisher    = {Zenodo},
-  version      = {v0.9.4},
-  doi          = {10.5281/zenodo.4381785},
-  url          = {https://doi.org/10.5281/zenodo.4381785}
+```bibtext
+@article{grootendorst2022bertopic,
+  title={BERTopic: Neural topic modeling with a class-based TF-IDF procedure},
+  author={Grootendorst, Maarten},
+  journal={arXiv preprint arXiv:2203.05794},
+  year={2022}
 }
 ```

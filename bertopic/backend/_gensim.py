@@ -48,8 +48,8 @@ class GensimBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        vector_shape = self.embedding_model.word_vec(list(self.embedding_model.vocab.keys())[0]).shape
-        empty_vector = np.zeros(vector_shape[0])
+        vector_shape = self.embedding_model.get_vector(list(self.embedding_model.index_to_key)[0]).shape[0]
+        empty_vector = np.zeros(vector_shape)
 
         embeddings = []
         for doc in tqdm(documents, disable=not verbose, position=0, leave=True):
@@ -58,7 +58,7 @@ class GensimBackend(BaseEmbedder):
             # Extract word embeddings
             for word in doc.split(" "):
                 try:
-                    word_embedding = self.embedding_model.word_vec(word)
+                    word_embedding = self.embedding_model.get_vector(word)
                     doc_embedding.append(word_embedding)
                 except KeyError:
                     doc_embedding.append(empty_vector)

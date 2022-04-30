@@ -63,9 +63,11 @@ To visualize the heatmap, simply call `topic_model.visualize_heatmap()`:
  
 <iframe src="heatmap.html" style="width:1000px; height: 720px; border: 0px;""></iframe>
 
-Note that you can set `n_clusters` in `visualize_heatmap` to order the topics by their similarity. 
-This will result in blocks being formed in the heatmap indicating which clusters of topics are 
-similar to each other. This step is very much recommended as it will make reading the heatmap easier.      
+
+!!! note
+    You can set `n_clusters` in `visualize_heatmap` to order the topics by their similarity. 
+    This will result in blocks being formed in the heatmap indicating which clusters of topics are 
+    similar to each other. This step is very much recommended as it will make reading the heatmap easier.      
 
 
 ## **Visualize Term Score Decline**

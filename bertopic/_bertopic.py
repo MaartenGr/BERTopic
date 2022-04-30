@@ -108,6 +108,8 @@ class BERTopic:
                        calculation. If this is set to None, no reduction is applied. Use
                        "auto" to automatically reduce topics using HDBSCAN.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
+                        NOTE: This is only used in UMAP. For example, if you use PCA instead of UMAP
+                        this parameter will not be used.
             calculate_probabilities: Whether to calculate the probabilities of all topics
                                      per document instead of the probability of the assigned
                                      topic per document. This could slow down the extraction
@@ -117,8 +119,8 @@ class BERTopic:
                                      NOTE: If false you cannot use the corresponding
                                      visualization method `visualize_probabilities`.
             diversity: Whether to use MMR to diversify the resulting topic representations.
-                       If set to None, MMR will not be used. Accepted values lie between 
-                       0 and 1 with 0 being not at all diverse and 1 being very diverse. 
+                       If set to None, MMR will not be used. Accepted values lie between
+                       0 and 1 with 0 being not at all diverse and 1 being very diverse.
             seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
@@ -132,8 +134,12 @@ class BERTopic:
                              You can also pass in a string that points to one of the following
                              sentence-transformers models:
                                * https://www.sbert.net/docs/pretrained_models.html
-            umap_model: Pass in a UMAP model to be used instead of the default
+            umap_model: Pass in a UMAP model to be used instead of the default.
+                        NOTE: You can also pass in any dimensionality reduction algorithm as long
+                        as it has `.fit` and `.transform` functions.
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
+                           NOTE: You can also pass in any clustering algorithm as long as it has
+                           `.fit` and `.predict` functions along with the `.labels_` variable.
             vectorizer_model: Pass in a CountVectorizer instead of the default
         """
         # Topic-based parameters
@@ -156,14 +162,15 @@ class BERTopic:
         self.n_gram_range = n_gram_range
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
 
-        # UMAP
+        # UMAP or another algorithm that has .fit and .transform functions
         self.umap_model = umap_model or UMAP(n_neighbors=15,
                                              n_components=5,
                                              min_dist=0.0,
                                              metric='cosine',
                                              low_memory=self.low_memory)
 
-        # HDBSCAN
+        # HDBSCAN or another clustering algorithm that has .fit and .predict functions and
+        # the .labels_ variable to extract the labels
         self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(min_cluster_size=self.min_topic_size,
                                                               metric='euclidean',
                                                               cluster_selection_method='eom',
@@ -176,6 +183,7 @@ class BERTopic:
         self.topic_embeddings = None
         self.topic_sim_matrix = None
         self.representative_docs = None
+        self._outliers = 1
 
         if verbose:
             logger.set_level("DEBUG")
@@ -292,12 +300,12 @@ class BERTopic:
                 self.embedding_model = select_backend(self.embedding_model,
                                                       language=self.language)
 
-        # Reduce dimensionality with UMAP
+        # Reduce dimensionality
         if self.seed_topic_list is not None and self.embedding_model is not None:
             y, embeddings = self._guided_topic_modeling(embeddings)
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
-        # Cluster UMAP embeddings with HDBSCAN
+        # Cluster reduced embeddings
         documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
 
         # Sort and Map Topic IDs by their frequency
@@ -374,17 +382,23 @@ class BERTopic:
                                                   verbose=self.verbose)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("Reduced dimensionality with UMAP")
+        logger.info("Reduced dimensionality")
 
-        predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
-        logger.info("Predicted clusters with HDBSCAN")
+        # Extract predictions and probabilities if it is a HDBSCAN model
+        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
+            predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
 
-        if self.calculate_probabilities:
-            probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
-            logger.info("Calculated probabilities with HDBSCAN")
+            # Calculate probabilities
+            if self.calculate_probabilities:
+                probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
+                logger.info("Calculated probabilities with HDBSCAN")
+
         else:
+            predictions = self.hdbscan_model.predict(umap_embeddings)
             probabilities = None
+        logger.info("Predicted clusters")
 
+        # Map probabilities and predictions
         probabilities = self._map_probabilities(probabilities, original_topics=True)
         predictions = self._map_predictions(predictions)
         return predictions, probabilities
@@ -583,7 +597,7 @@ class BERTopic:
             # by simply taking the average of the two
             if global_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm='l1', copy=False)
-                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + 1] + c_tf_idf) / 2.0
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + self._outliers] + c_tf_idf) / 2.0
 
             # Extract the words per topic
             labels = sorted(list(documents_per_topic.Topic.unique()))
@@ -1257,6 +1271,11 @@ class BERTopic:
         ```
         """
         with open(path, 'wb') as file:
+
+            # This prevents the vectorizer from being too large in size if `min_df` was
+            # set to a value higher than 1
+            self.vectorizer_model.stop_words_ = None
+
             if not save_embedding_model:
                 embedding_model = self.embedding_model
                 self.embedding_model = None
@@ -1368,15 +1387,15 @@ class BERTopic:
         Returns:
             umap_embeddings: The reduced embeddings
         """
-        if isinstance(embeddings, csr_matrix):
-            self.umap_model = UMAP(n_neighbors=15,
-                                   n_components=5,
-                                   metric='hellinger',
-                                   low_memory=self.low_memory).fit(embeddings, y=y)
-        else:
+        try:
             self.umap_model.fit(embeddings, y=y)
+        except TypeError:
+            logger.info("The dimensionality reduction algorithm did not contain the `y` parameter and"
+                        " therefore the `y` parameter was not used")
+            self.umap_model.fit(embeddings)
+
         umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("Reduced dimensionality with UMAP")
+        logger.info("Reduced dimensionality")
         return np.nan_to_num(umap_embeddings)
 
     def _cluster_embeddings(self,
@@ -1394,17 +1413,31 @@ class BERTopic:
                        and newly added Topics
             probabilities: The distribution of probabilities
         """
+        # Fit and extract labels
         self.hdbscan_model.fit(umap_embeddings)
         documents['Topic'] = self.hdbscan_model.labels_
-        probabilities = self.hdbscan_model.probabilities_
 
-        if self.calculate_probabilities:
-            probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
+        # Some algorithms have outlier labels (-1) that can be tricky to work
+        # with if you are slicing data based on that labels. Therefore, we
+        # track if there are outlier labels and act accordingly when slicing.
+        if -1 in set(self.hdbscan_model.labels_):
+            self._outliers = 1
+        else:
+            self._outliers = 0
 
         self._update_topic_size(documents)
-        self._save_representative_docs(documents)
+
+        # Save representative docs and calculate probabilities if it is a HDBSCAN model
+        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
+            probabilities = self.hdbscan_model.probabilities_
+            self._save_representative_docs(documents)
+            if self.calculate_probabilities:
+                probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
+        else:
+            probabilities = None
+
         self.topic_mapper = TopicMapper(self.hdbscan_model)
-        logger.info("Clustered UMAP embeddings with HDBSCAN")
+        logger.info("Clustered reduced embeddings")
         return documents, probabilities
 
     def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
@@ -1507,22 +1540,23 @@ class BERTopic:
         larger topics are better representative of the entire merged
         topic.
 
-        Args:
+        Arguments:
             original_topics: Whether we want to map from the
                              original topics to the most recent topics
                              or from the second-most recent topics.
         """
-        mappings = self.topic_mapper.get_mappings(original_topics)
-        representative_docs = self.representative_docs.copy()
+        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
+            mappings = self.topic_mapper.get_mappings(original_topics)
+            representative_docs = self.representative_docs.copy()
 
-        # Update the representative documents
-        updated_representative_docs = {mappings[old_topic]: []
-                                       for old_topic, _ in representative_docs.items()}
-        for old_topic, docs in representative_docs.items():
-            new_topic = mappings[old_topic]
-            updated_representative_docs[new_topic].extend(docs)
+            # Update the representative documents
+            updated_representative_docs = {mappings[old_topic]: []
+                                           for old_topic, _ in representative_docs.items()}
+            for old_topic, docs in representative_docs.items():
+                new_topic = mappings[old_topic]
+                updated_representative_docs[new_topic].extend(docs)
 
-        self.representative_docs = updated_representative_docs
+            self.representative_docs = updated_representative_docs
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -1641,7 +1675,7 @@ class BERTopic:
 
         # Get top 30 words per topic based on c-TF-IDF score
         topics = {label: [(words[word_index], score)
-                          if word_index and score > 0
+                          if word_index is not None and score > 0
                           else ("", 0.00001)
                           for word_index, score in zip(indices[index][::-1], scores[index][::-1])
                           ]
@@ -1655,13 +1689,13 @@ class BERTopic:
                 for topic, topic_words in topics.items():
                     words = [word[0] for word in topic_words]
                     word_embeddings = self._extract_embeddings(words,
-                                                            method="word",
-                                                            verbose=False)
+                                                               method="word",
+                                                               verbose=False)
                     topic_embedding = self._extract_embeddings(" ".join(words),
-                                                            method="word",
-                                                            verbose=False).reshape(1, -1)
+                                                               method="word",
+                                                               verbose=False).reshape(1, -1)
                     topic_words = mmr(topic_embedding, word_embeddings, words,
-                                    top_n=self.top_n_words, diversity=self.diversity)
+                                      top_n=self.top_n_words, diversity=self.diversity)
                     topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
         topics = {label: values[:self.top_n_words] for label, values in topics.items()}
 
@@ -1709,10 +1743,10 @@ class BERTopic:
         # Find most similar topic to least common topic
         topics = documents.Topic.tolist().copy()
         mapped_topics = {}
-        while len(self.get_topic_freq()) > self.nr_topics + 1:
+        while len(self.get_topic_freq()) > self.nr_topics + self._outliers:
             topic_to_merge = self.get_topic_freq().iloc[-1].Topic
-            topic_to_merge_into = np.argmax(similarities[topic_to_merge + 1]) - 1
-            similarities[:, topic_to_merge + 1] = -1
+            topic_to_merge_into = np.argmax(similarities[topic_to_merge + self._outliers]) - self._outliers
+            similarities[:, topic_to_merge + self._outliers] = -self._outliers
             self.merged_topics.append(topic_to_merge)
 
             # Update Topic labels
@@ -1740,7 +1774,7 @@ class BERTopic:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
         topics = documents.Topic.tolist().copy()
-        unique_topics = sorted(list(documents.Topic.unique()))[1:]
+        unique_topics = sorted(list(documents.Topic.unique()))[self._outliers:]
         max_topic = unique_topics[-1]
 
         # Find similar topics
@@ -1752,7 +1786,7 @@ class BERTopic:
         predictions = hdbscan.HDBSCAN(min_cluster_size=2,
                                       metric='euclidean',
                                       cluster_selection_method='eom',
-                                      prediction_data=True).fit_predict(norm_data[1:])
+                                      prediction_data=True).fit_predict(norm_data[self._outliers:])
 
         # Map similar topics
         mapped_topics = {unique_topics[index]: prediction + max_topic
@@ -1861,7 +1895,7 @@ class BERTopic:
         Retrieved from:
             https://stackoverflow.com/questions/49207275/finding-the-top-n-values-in-a-row-of-a-scipy-sparse-matrix
 
-        Args:
+        Arguments:
             matrix: The sparse matrix from which to get the top n indices per row
             n: The number of highest values to extract from each row
 
@@ -1880,7 +1914,7 @@ class BERTopic:
     def _top_n_values_sparse(matrix: csr_matrix, indices: np.ndarray) -> np.ndarray:
         """ Return the top n values for each row in a sparse matrix
 
-        Args:
+        Arguments:
             matrix: The sparse matrix from which to get the top n indices per row
             indices: The top n indices per row
 
@@ -1944,7 +1978,7 @@ class TopicMapper:
     def __init__(self, hdbscan_model: hdbscan.HDBSCAN):
         """ Initalization of Topic Mapper
 
-        Args:
+        Arguments:
             hdbscan_model: The trained HDBSCAN-model which
                            is used to extract the topics from
         """
@@ -1956,7 +1990,7 @@ class TopicMapper:
         """ Get mappings from either the original topics or
         the second-most recent topics to the current topics
 
-        Args:
+        Arguments:
             original_topics: Whether we want to map from the
                              original topics to the most recent topics
                              or from the second-most recent topics.
@@ -1983,7 +2017,7 @@ class TopicMapper:
     def add_mappings(self, mappings: Mapping[int, int]):
         """ Add new column(s) of topic mappings
 
-        Args:
+        Arguments:
             mappings: The mappings to add
         """
         for topics in self.mappings:
