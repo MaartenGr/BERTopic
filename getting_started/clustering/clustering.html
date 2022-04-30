@@ -12,14 +12,14 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/parameter%20tuning/parametertuning.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html">
       
       <link rel="icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.9">
     
     
       
-        <title>Parameter tuning - BERTopic</title>
+        <title>Clustering - BERTopic</title>
       
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hyperparameter-tuning" class="md-skip">
+        <a href="#hdbscan" class="md-skip">
           Skip to content
         </a>
       
@@ -105,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Parameter tuning
+              Clustering
             
           </span>
         </div>
@@ -469,189 +469,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Parameter tuning
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="parametertuning.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../parameter%20tuning/parametertuning.html" class="md-nav__link">
         Parameter tuning
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#bertopic" class="md-nav__link">
-    BERTopic
-  </a>
-  
-    <nav class="md-nav" aria-label="BERTopic">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#language" class="md-nav__link">
-    language
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#top_n_words" class="md-nav__link">
-    top_n_words
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#n_gram_range" class="md-nav__link">
-    n_gram_range
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#min_topic_size" class="md-nav__link">
-    min_topic_size
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nr_topics" class="md-nav__link">
-    nr_topics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#low_memory" class="md-nav__link">
-    low_memory
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#calculate_probabilities" class="md-nav__link">
-    calculate_probabilities
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#umap" class="md-nav__link">
-    UMAP
-  </a>
-  
-    <nav class="md-nav" aria-label="UMAP">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#n_neighbors" class="md-nav__link">
-    n_neighbors
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#n_components" class="md-nav__link">
-    n_components
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#metric" class="md-nav__link">
-    metric
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#low_memory_1" class="md-nav__link">
-    low_memory
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hdbscan" class="md-nav__link">
-    HDBSCAN
-  </a>
-  
-    <nav class="md-nav" aria-label="HDBSCAN">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#min_cluster_size" class="md-nav__link">
-    min_cluster_size
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#min_samples" class="md-nav__link">
-    min_samples
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#metric_1" class="md-nav__link">
-    metric
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prediction_data" class="md-nav__link">
-    prediction_data
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -675,14 +497,16 @@
               
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_9" type="checkbox" id="__nav_3_9" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_9" type="checkbox" id="__nav_3_9" checked>
       
       
       
@@ -717,11 +541,62 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../clustering/clustering.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Clustering
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="clustering.html" class="md-nav__link md-nav__link--active">
         Clustering
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hdbscan" class="md-nav__link">
+    HDBSCAN
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k-means" class="md-nav__link">
+    k-Means
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agglomerative-clustering" class="md-nav__link">
+    Agglomerative Clustering
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1178,8 +1053,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1188,146 +1061,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bertopic" class="md-nav__link">
-    BERTopic
-  </a>
-  
-    <nav class="md-nav" aria-label="BERTopic">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#language" class="md-nav__link">
-    language
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#top_n_words" class="md-nav__link">
-    top_n_words
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#n_gram_range" class="md-nav__link">
-    n_gram_range
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#min_topic_size" class="md-nav__link">
-    min_topic_size
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nr_topics" class="md-nav__link">
-    nr_topics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#low_memory" class="md-nav__link">
-    low_memory
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#calculate_probabilities" class="md-nav__link">
-    calculate_probabilities
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#umap" class="md-nav__link">
-    UMAP
-  </a>
-  
-    <nav class="md-nav" aria-label="UMAP">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#n_neighbors" class="md-nav__link">
-    n_neighbors
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#n_components" class="md-nav__link">
-    n_components
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#metric" class="md-nav__link">
-    metric
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#low_memory_1" class="md-nav__link">
-    low_memory
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#hdbscan" class="md-nav__link">
     HDBSCAN
   </a>
   
-    <nav class="md-nav" aria-label="HDBSCAN">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#min_cluster_size" class="md-nav__link">
-    min_cluster_size
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#k-means" class="md-nav__link">
+    k-Means
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#min_samples" class="md-nav__link">
-    min_samples
+      
+        <li class="md-nav__item">
+  <a href="#agglomerative-clustering" class="md-nav__link">
+    Agglomerative Clustering
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#metric_1" class="md-nav__link">
-    metric
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#prediction_data" class="md-nav__link">
-    prediction_data
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1343,86 +1093,85 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/parameter tuning/parametertuning.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/clustering/clustering.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="hyperparameter-tuning">Hyperparameter Tuning<a class="headerlink" href="#hyperparameter-tuning" title="Permanent link">&para;</a></h1>
-<p>Although BERTopic works quite well out of the box, there are a number of hyperparameters to tune according to your use-case. 
-This section will focus on important parameters directly accessable in BERTopic but also hyperparameter optimization in sub-models 
-such as HDBSCAN and UMAP.</p>
-<h2 id="bertopic"><strong>BERTopic</strong><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h2>
-<p>When instantiating BERTopic, there are a number of hyperparameters that you can directly adjust that could significantly improve the performance of your topic model. In this section, we will go through the most impactful parameters in BERTopic and directions on how to optimize them. </p>
-<h3 id="language"><strong>language</strong><a class="headerlink" href="#language" title="Permanent link">&para;</a></h3>
-<p>The <code>language</code> parameter is used to simplify the selection of models for those who are not familiar with sentence-transformers models. </p>
-<p>In essence, there are two options to choose from:  </p>
+  <h1>Clustering</h1>
+
+<p>After reducing the dimensionality of our input embeddings, we need to cluster them into groups of similar embeddings in order to extract our topics. 
+This process of clustering is quite important because the more performant our clustering technique the more accurate our topic representations are.</p>
+<p>In BERTopic, we typically use HDBSCAN as it is quite capable of capturing structures with different densities. However, there is not perfect 
+clustering model and you might want to be using something entirely different for you use case. Moreover, what if a new state-of-the-art model 
+is released tomorrow? We would like to able to use that in BERTopic, right? </p>
+<p>As a result, the <code>hdbscan_model</code> parameter in BERTopic now allows for a variety of clustering models. To do so, the class should have 
+the following attributes:</p>
 <ul>
-<li><code>language = "english"</code> or</li>
-<li><code>language = "multilingual"</code></li>
+<li><code>.fit(X)</code>  <ul>
+<li>A function that can be used to fit the model</li>
 </ul>
-<p>The English model is "all-MiniLM-L6-v2" and can be found <a href="https://www.sbert.net/docs/pretrained_models.html">here</a>. It is the default model that is used in BERTopic and works great for English documents. </p>
-<p>The multilingual model is "paraphrase-multilingual-MiniLM-L12-v2" and supports over 50+ languages which can be found <a href="https://www.sbert.net/docs/pretrained_models.html">here</a>. The model is very similar to the base model but is trained on many languages and has a slightly different architecture. </p>
-<h3 id="top_n_words"><strong>top_n_words</strong><a class="headerlink" href="#top_n_words" title="Permanent link">&para;</a></h3>
-<p><code>top_n_words</code> refers to the number of words per topic that you want extracted. In practice, I would advise you to keep this value below 30 and preferably between 10 and 20. The reasoning for this is that the more words you put in a topic the less coherent it can become. The top words are the most representative for the topic and should be focused on. </p>
-<h3 id="n_gram_range"><strong>n_gram_range</strong><a class="headerlink" href="#n_gram_range" title="Permanent link">&para;</a></h3>
-<p>The <code>n_gram_range</code> parameter refers to the CountVectorizer used when creating the topic representation. It relates to the number of words you want in your topic representation. For example, "New" and "York" are two seperate words but are often used as "New York" which represents an n-gram of 2. Thus, the <code>n_gram_range</code> should be set to (1, 2) if you want "New York" in your topic representation. </p>
-<h3 id="min_topic_size"><strong>min_topic_size</strong><a class="headerlink" href="#min_topic_size" title="Permanent link">&para;</a></h3>
-<p><code>min_topic_size</code> is an important parameter! It is used to specify what the minimum size of a topic can be. The lower this value the more topics are created. If you set this value too high, then it is possible that simply no topics will be created! Set this value too low and you will get many micro clusters. </p>
-<p>It is advised to play around with this value depending on the size of the your dataset. If it nears a million documents, then it advised to set it much higher than the default of 10, for example 100 or even 500. </p>
-<h3 id="nr_topics"><strong>nr_topics</strong><a class="headerlink" href="#nr_topics" title="Permanent link">&para;</a></h3>
-<p><code>nr_topics</code> can be a tricky parameter. It specifies, after training the topic model, the number of topics that will be reduced to. For example, if your topic model results in 100 topics but you have set <code>nr_topics</code> to 20 then the topic model will try to reduce the number of topics from 100 to 20. </p>
-<p>This reduction can take awhile as each reduction in topics activates a c-TF-IDF calculation. If this is set to None, no reduction is applied. Use "auto" to automatically reduce topics that using HDBSCAN.</p>
-<h3 id="low_memory"><strong>low_memory</strong><a class="headerlink" href="#low_memory" title="Permanent link">&para;</a></h3>
-<p><code>low_memory</code> sets UMAP's <code>low_memory</code> to True to make sure that less memory is used in computation. This slows down computation but allows UMAP to be ran on low memory machines. </p>
-<h3 id="calculate_probabilities"><strong>calculate_probabilities</strong><a class="headerlink" href="#calculate_probabilities" title="Permanent link">&para;</a></h3>
-<p><code>calculate_probabilities</code> lets you calculate the probabilities of each topic to each document. This is computationally quite expensive and is turned off by default. </p>
-<h2 id="umap"><strong>UMAP</strong><a class="headerlink" href="#umap" title="Permanent link">&para;</a></h2>
-<p>UMAP is an amazing technique for dimensionality reduction. In BERTopic, it is used to reduce the dimensionality of document embedding into something that is easier to use with HDBSCAN in order to create good clusters.</p>
-<p>However, it does has a significant number of parameters you could take into account. As exposing all parameters in BERTopic would be difficult to manage, we can instantiate our UMAP model and pass it to BERTopic:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">umap</span> <span class="kn">import</span> <span class="n">UMAP</span>
+</li>
+<li><code>.predict(X)</code> <ul>
+<li>A predict function that transforms the input to cluster labels</li>
+</ul>
+</li>
+<li><code>.labels_</code><ul>
+<li>The labels after fitting the model</li>
+</ul>
+</li>
+</ul>
+<p>In other words, it should have the following structure:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ClusterModel</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">X</span>
 </code></pre></div>
-<h3 id="n_neighbors"><strong>n_neighbors</strong><a class="headerlink" href="#n_neighbors" title="Permanent link">&para;</a></h3>
-<p><code>n_neighbors</code> is the numer of neighboring sample points used when making the manifold approximation. Increasing this value typically results in a 
-more global view of the embedding structure whilst smaller values result in a more local view. Increasing this value often results in larger clusters 
-being created. </p>
-<h3 id="n_components"><strong>n_components</strong><a class="headerlink" href="#n_components" title="Permanent link">&para;</a></h3>
-<p><code>n_components</code> refers to the dimensionality of the embeddings after reducing them. This is set as a default to <code>5</code> in order to reduce dimensionality 
-as much as possible whilst trying to maximize the information kept in the resulting embeddings. Although lowering or increasing this value has an influence on the quality of embeddings, its effect is largest on the performance of HDBSCAN. Increasing this value too much and HDBSCAN will have a 
-hard time clustering the high-dimensional embeddings. Lower this value too much and too little information in the resulting embeddings is available 
-to create proper clusters. If you want to increase this value, I would advise setting using a metric for HDBSCAN that works well in high dimensional data. </p>
-<h3 id="metric"><strong>metric</strong><a class="headerlink" href="#metric" title="Permanent link">&para;</a></h3>
-<p><code>metric</code> refers to the method used to compute the distances in high dimensional space. The default is <code>cosine</code> as we are dealing with high dimensional data. However, BERTopic is also able to use any input, even regular tabular data, to cluster the documents. Thus, you might want to change the metric 
-to something that fits with your use case. </p>
-<h3 id="low_memory_1"><strong>low_memory</strong><a class="headerlink" href="#low_memory_1" title="Permanent link">&para;</a></h3>
-<p><code>low_memory</code> is used when datasets may consume a lot of memory. Using millions of documents can lead to memory issues and setting this value to <code>True</code> 
-might alleviate some of the issues. </p>
+<p>In this tutorial, I will show you how to use several clustering algorithms in BERTopic. </p>
 <h2 id="hdbscan"><strong>HDBSCAN</strong><a class="headerlink" href="#hdbscan" title="Permanent link">&para;</a></h2>
-<p>After reducing the embeddings with UMAP, we use HDBSCAN to cluster our documents into clusters of similar documents. Similar to UMAP, HDBSCAN has many parameters that could be tweaked in order to improve the cluster's quality.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">hdbscan</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
+<p>As a default, BERTopic uses HDBSCAN to perform its clustering. To use a HDBSCAN model with custom parameters, 
+we simply define it and pass it to BERTopic:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">hdbscan</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
 
-<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">cluster_selection_method</span><span class="o">=</span><span class="s1">&#39;eom&#39;</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="min_cluster_size"><strong>min_cluster_size</strong><a class="headerlink" href="#min_cluster_size" title="Permanent link">&para;</a></h3>
-<p><code>min_cluster_size</code> is arguably the most important parameter in HDBSCAN. It controls the minimum size of a cluster and thereby the amount of clusters 
-that will be generated. It is set to <code>10</code> as a default. Increasing this value results in less clusters but of larger size whereas decreasing this value 
-results in more micro clusters being generated. Typically, I would advise on increasing this value rather than decreasing it. </p>
-<h3 id="min_samples"><strong>min_samples</strong><a class="headerlink" href="#min_samples" title="Permanent link">&para;</a></h3>
-<p><code>min_samples</code> is automatically set to <code>min_cluster_size</code> and controls the amount of outliers are generated. Setting this value significantly lower than 
-<code>min_cluster_size</code> might help you reduce the amount of noise you will get. Do note that outliers are typically to be expected and forcing the output 
-to have no outliers may not properly represent the data. </p>
-<h3 id="metric_1"><strong>metric</strong><a class="headerlink" href="#metric_1" title="Permanent link">&para;</a></h3>
-<p><code>metric</code>, like with HDBSCAN is used to calculate the distances. Here, we went with <code>euclidean</code> as, after reducing the dimensionality, we have 
-low dimensional data and not much optimization is necessary. However, if you increase <code>n_components</code> in UMAP, then it would be advised to look into 
-metrics that work with high dimensional data. </p>
-<h3 id="prediction_data"><strong>prediction_data</strong><a class="headerlink" href="#prediction_data" title="Permanent link">&para;</a></h3>
-<p>Make sure you always set this value to <code>True</code> as it is needed to predict new points later on. You can set this to False if you do not wish to predict 
-any unseen datapoints. </p>
+<p>Here, we can define any parameters in HDBSCAN to optimize for the best performance based on whatever validation metrics that you are using. </p>
+<h2 id="k-means"><strong>k-Means</strong><a class="headerlink" href="#k-means" title="Permanent link">&para;</a></h2>
+<p>Although HDBSCAN works quite well in BERTopic and is typically advised, you might want to be using k-Means instead. 
+It allows you to select how many clusters you would like and forces every single point to be in a cluster. Therefore, no 
+outliers will be created. This has also has disadvantages. When you force every single point in a cluster, it will mean 
+that the cluster is highly likely to contain noise which can hurt the topic representations. As a small tip, using 
+the <code>vectorizer_model=CountVectorizer(stop_words="english")</code> helps quite a bit to then improve the topic representation. </p>
+<p>Having said that, using k-Means is quite straightforward:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+
+<span class="n">cluster_model</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As you might have noticed, the <code>cluster_model</code> is passed to <code>hdbscan_model</code> which might be a bit confusing considering 
+you are not passing a HDBSCAN model. For now, the name of the parameter is kept the same to adhere to the current 
+state of the API. Changing the name could lead to deprecation issues, which I want to prevent as much as possible. </p>
+</div>
+<h2 id="agglomerative-clustering"><strong>Agglomerative Clustering</strong><a class="headerlink" href="#agglomerative-clustering" title="Permanent link">&para;</a></h2>
+<p>Like k-Means, there are a bunch more clustering algorithms in <code>sklearn</code> that you can be using. Some of these models do 
+not have a <code>.predict()</code> method but still can be used in BERTopic. However, using BERTopic's <code>.transform()</code> function 
+will then give errors. </p>
+<p>Here, we will demonstrate Agglomerative Clustering:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+
+<span class="n">cluster_model</span> <span class="o">=</span> <span class="n">AgglomerativeClustering</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">)</span>
+</code></pre></div>
 
               
             </article>
@@ -1441,7 +1190,7 @@ any unseen datapoints. </p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../search/search.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Search Topics" rel="prev">
+        <a href="../dim_reduction/dim_reduction.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Dimensionality Reduction" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1450,20 +1199,20 @@ any unseen datapoints. </p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Search Topics
+              Dimensionality Reduction
             </div>
           </div>
         </a>
       
       
         
-        <a href="../tips_and_tricks/tips_and_tricks.html" class="md-footer__link md-footer__link--next" aria-label="Next: Tips &amp; Tricks" rel="next">
+        <a href="../countvectorizer/countvectorizer.html" class="md-footer__link md-footer__link--next" aria-label="Next: CountVectorizer" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Tips & Tricks
+              CountVectorizer
             </div>
           </div>
           <div class="md-footer__button md-icon">
