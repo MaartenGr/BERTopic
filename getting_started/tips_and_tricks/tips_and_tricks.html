@@ -560,6 +560,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#gpu-acceleration" class="md-nav__link">
+    GPU acceleration
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1127,6 +1134,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#gpu-acceleration" class="md-nav__link">
+    GPU acceleration
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1243,6 +1257,26 @@ and use that as a starting point. This can speed up the dimensionality reduction
 
 <span class="c1"># Pass the model to BERTopic:</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="gpu-acceleration"><strong>GPU acceleration</strong><a class="headerlink" href="#gpu-acceleration" title="Permanent link">&para;</a></h2>
+<p>You can use <a href="https://rapids.ai/start.html#rapids-release-selector">cuML</a> to speed up both 
+UMAP and HDBSCAN through GPU acceleration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">cuml.cluster</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
+<span class="kn">from</span> <span class="nn">cuml.manifold</span> <span class="kn">import</span> <span class="n">UMAP</span>
+
+<span class="c1"># Create instances of GPU-accelerated UMAP and HDBSCAN</span>
+<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">gen_min_span_tree</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Pass the above models to be used in BERTopic</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span> <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>Depending on the embeddings you are using, you might want to normalize them first in order to 
+force a cosine-related distance metric in UMAP:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">cuml.preprocessing</span> <span class="kn">import</span> <span class="n">normalize</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 </code></pre></div>
 
               

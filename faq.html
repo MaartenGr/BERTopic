@@ -1414,10 +1414,28 @@ and unzip it. Then, simply use the following to create your embedding model:</p>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="can-i-use-the-gpu-to-speed-up-the-model"><strong>Can I use the GPU to speed up the model?</strong><a class="headerlink" href="#can-i-use-the-gpu-to-speed-up-the-model" title="Permanent link">&para;</a></h2>
-<p>Yes and no. The GPU is automatically used when you use a SentenceTransformer or Flair embedding model. Using a CPU 
-would then definitely slow things down. However, UMAP and HDBSCAN are not GPU-accelerated and are likely not so in 
-the near future. For now, a GPU does help tremendously for extracting embeddings but does not speed up all 
-aspects of BERtopic.   </p>
+<p>Yes. The GPU is automatically used when you use a SentenceTransformer or Flair embedding model. Using 
+a CPU would then definitely slow things down. However, you can use other embeddings like TF-IDF or Doc2Vec 
+embeddings in BERTopic which do not depend on GPU acceleration. </p>
+<p>You can use <a href="https://rapids.ai/start.html#rapids-release-selector">cuML</a> to speed up both 
+UMAP and HDBSCAN through GPU acceleration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">cuml.cluster</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
+<span class="kn">from</span> <span class="nn">cuml.manifold</span> <span class="kn">import</span> <span class="n">UMAP</span>
+
+<span class="c1"># Create instances of GPU-accelerated UMAP and HDBSCAN</span>
+<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">gen_min_span_tree</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Pass the above models to be used in BERTopic</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span> <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>Depending on the embeddings you are using, you might want to normalize them first in order to 
+force a cosine-related distance metric in UMAP:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">cuml.preprocessing</span> <span class="kn">import</span> <span class="n">normalize</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="how-can-i-use-bertopic-with-chinese-documents"><strong>How can I use BERTopic with Chinese documents?</strong><a class="headerlink" href="#how-can-i-use-bertopic-with-chinese-documents" title="Permanent link">&para;</a></h2>
 <p>Currently, CountVectorizer tokenizes text by splitting whitespace which does not work for Chinese. 
 In order to get it to work, you will have to create a custom <code>CountVectorizer</code> with <code>jieba</code>:</p>
