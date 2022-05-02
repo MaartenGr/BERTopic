@@ -124,3 +124,30 @@ umap_model = UMAP(
 # Pass the model to BERTopic:
 topic_model = BERTopic(umap_model=umap_model)
 ```
+
+## **GPU acceleration**
+
+You can use [cuML](https://rapids.ai/start.html#rapids-release-selector) to speed up both 
+UMAP and HDBSCAN through GPU acceleration:
+
+```python
+from bertopic import BERTopic
+from cuml.cluster import HDBSCAN
+from cuml.manifold import UMAP
+
+# Create instances of GPU-accelerated UMAP and HDBSCAN
+umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
+hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True)
+
+# Pass the above models to be used in BERTopic
+topic_model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model)
+topics, probs = topic_model.fit_transform(docs)
+```
+
+Depending on the embeddings you are using, you might want to normalize them first in order to 
+force a cosine-related distance metric in UMAP:
+
+```python
+from cuml.preprocessing import normalize
+embeddings = normalize(embeddings)
+```
