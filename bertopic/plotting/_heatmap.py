@@ -71,7 +71,7 @@ def visualize_heatmap(topic_model,
             raise ValueError("Make sure to set `n_clusters` lower than "
                              "the total number of unique topics.")
 
-        embeddings = embeddings[[topic + 1 for topic in topics]]
+        embeddings = embeddings[[topic + topic_model._outliers for topic in topics]]
         distance_matrix = cosine_similarity(embeddings)
         Z = linkage(distance_matrix, 'ward')
         clusters = fcluster(Z, t=n_clusters, criterion='maxclust')
