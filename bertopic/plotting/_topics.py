@@ -65,8 +65,8 @@ def visualize_topics(topic_model,
     embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 
     # Visualize with plotly
-    df = pd.DataFrame({"x": embeddings[1:, 0], "y": embeddings[1:, 1],
-                       "Topic": topic_list[1:], "Words": words[1:], "Size": frequencies[1:]})
+    df = pd.DataFrame({"x": embeddings[:, 0], "y": embeddings[:, 1],
+                       "Topic": topic_list, "Words": words, "Size": frequencies})
     return _plotly_topic_visualization(df, topic_list, width, height)
 
 
@@ -78,9 +78,9 @@ def _plotly_topic_visualization(df: pd.DataFrame,
 
     def get_color(topic_selected):
         if topic_selected == -1:
-            marker_color = ["#B0BEC5" for _ in topic_list[1:]]
+            marker_color = ["#B0BEC5" for _ in topic_list]
         else:
-            marker_color = ["red" if topic == topic_selected else "#B0BEC5" for topic in topic_list[1:]]
+            marker_color = ["red" if topic == topic_selected else "#B0BEC5" for topic in topic_list]
         return [{'marker.color': [marker_color]}]
 
     # Prepare figure range
@@ -98,7 +98,7 @@ def _plotly_topic_visualization(df: pd.DataFrame,
                                                  "Size: %{customdata[2]}"]))
 
     # Create a slider for topic selection
-    steps = [dict(label=f"Topic {topic}", method="update", args=get_color(topic)) for topic in topic_list[1:]]
+    steps = [dict(label=f"Topic {topic}", method="update", args=get_color(topic)) for topic in topic_list]
     sliders = [dict(active=0, pad={"t": 50}, steps=steps)]
 
     # Stylize layout
