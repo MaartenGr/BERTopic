@@ -90,7 +90,7 @@ class BERTopic:
 
         Arguments:
             language: The main language used in your documents. For a full overview of
-                      supported languages see bertopic.backends.languages. Select
+                      supported languages see bertopic.backend.languages. Select
                       "multilingual" to load in a sentence-tranformers model that supports 50+ languages.
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
