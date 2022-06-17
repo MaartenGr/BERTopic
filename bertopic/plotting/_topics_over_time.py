@@ -58,8 +58,8 @@ def visualize_topics_over_time(topic_model,
     topic_names = {key: value[:40] + "..." if len(value) > 40 else value
                    for key, value in topic_model.topic_names.items()}
     topics_over_time["Name"] = topics_over_time.Topic.map(topic_names)
-    data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :]
-
+    data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :].sort_values(["Topic", "Timestamp"])
+    
     # Add traces
     fig = go.Figure()
     for index, topic in enumerate(data.Topic.unique()):
