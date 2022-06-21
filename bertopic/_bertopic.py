@@ -323,7 +323,7 @@ class BERTopic:
         probabilities = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
-        return predictions, probabilities
+        return predictions, probabilities, umap_embeddings, documents
 
     def transform(self,
                   documents: Union[str, List[str]],
