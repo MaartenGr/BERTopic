@@ -15,7 +15,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from scipy.sparse.csr import csr_matrix
-from typing import List, Tuple, Union, Mapping, Any
+from scipy.cluster import hierarchy as sch
+from typing import List, Tuple, Union, Mapping, Any, Callable
 
 # Models
 import hdbscan
@@ -616,6 +617,138 @@ class BERTopic:
 
         return topics_per_class
 
+    def hierarchical_topics(self, 
+                            docs: List[int], 
+                            topics: List[int],
+                            linkage_function: Callable[[csr_matrix], np.ndarray] = None,
+                            distance_function: Callable[[csr_matrix], csr_matrix] = None) -> pd.DataFrame:
+        """ Create a hierarchy of topics
+        
+        To create this hierarchy, BERTopic needs to be already fitted once.
+        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF
+        representation using `scipy.cluster.hierarchy.linkage`. 
+
+        Based on that hierarchy, we calculate the topic representation at each 
+        merged step. This is a local representation, as we only assume that the 
+        chosen step is merged and not all others which typically improves the 
+        topic representation.
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            linkage_function: The linkage function to use. Default is:
+                            `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
+            distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
+                                `lambda x: 1 - cosine_similarity(x)`
+
+        Returns:
+            hierarchical_topics: A dataframe that contains a hierarchy of topics
+                                represented by their parents and their children
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+        ```
+
+        A custom linkage function can be used as follows:
+
+        ```python
+        from scipy.cluster import hierarchy as sch
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+
+        # Hierarchical topics
+        linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics, linkage_function=linkage_function)
+        ```
+        """
+        if distance_function is None:
+            distance_function = lambda x: 1 - cosine_similarity(x)
+        
+        if linkage_function is None:
+            linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
+        
+        # Calculate linkage
+        embeddings = self.c_tf_idf[self._outliers:]
+        X = distance_function(embeddings)
+        Z = linkage_function(X)
+
+        # Calculate basic bag-of-words to be iteratively merged later
+        documents = pd.DataFrame({"Document": docs,
+                                "ID": range(len(docs)),
+                                "Topic": topics})
+        documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
+        documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
+        documents = self._preprocess_text(documents_per_topic.Document.values)
+        words = self.vectorizer_model.get_feature_names()
+        bow = self.vectorizer_model.transform(documents)
+
+        # Extract clusters
+        hier_topics = pd.DataFrame(columns=["Parent_ID", "Parent_Name", "Topics", 
+                                            "Child_Left_ID", "Child_Left_Name",
+                                            "Child_Right_ID", "Child_Right_Name"])
+        for index in tqdm(range(len(Z))):
+            
+            # Find clustered documents
+            clusters = sch.fcluster(Z, t=Z[index][2], criterion='distance') - self._outliers
+            cluster_df = pd.DataFrame({"Topic": range(len(clusters)), "Cluster": clusters})
+            cluster_df = cluster_df.groupby("Cluster").agg({'Topic':lambda x: list(x)}).reset_index()
+            nr_clusters = len(clusters)
+            
+            # Extract first topic we find to get the set of topics in a merged topic
+            topic = None
+            val = Z[index][0]
+            while topic is None:
+                if val - len(clusters) < 0:
+                    topic = int(val)
+                else:
+                    val = Z[int(val - len(clusters))][0]
+            clustered_topics = [i for i, x in enumerate(clusters) if x == clusters[topic]]        
+
+            # Group bow per cluster, calculate c-TF-IDF and extract words
+            grouped = csr_matrix(bow[clustered_topics].sum(axis=0))
+            c_tf_idf = self.transformer.transform(grouped)
+            words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels=[0])
+            
+            # Extract parent's name and ID
+            parent_id = index + len(clusters)
+            parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
+            
+            # Extract child's name and ID
+            Z_id = Z[index][0]
+            child_left_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
+            
+            if Z_id - nr_clusters < 0:
+                child_left_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
+            else:
+                child_left_name = hier_topics.iloc[int(child_left_id)].Parent_Name
+                
+            # Extract child's name and ID
+            Z_id = Z[index][1]
+            child_right_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
+            
+            if Z_id - nr_clusters < 0:
+                child_right_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
+            else:
+                child_right_name = hier_topics.iloc[int(child_right_id)].Parent_Name
+                    
+            # Save results
+            hier_topics.loc[len(hier_topics), :] = [parent_id, parent_name, 
+                                                    clustered_topics, 
+                                                    int(Z[index][0]), child_left_name,
+                                                    int(Z[index][1]), child_right_name]
+
+        hier_topics["Distance"] = Z[:, 2]
+        hier_topics = hier_topics.sort_values("Parent_ID", ascending=False)
+        hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]] = hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]].astype(str)
+
+        return hier_topics
+
     def find_topics(self,
                     search_term: str,
                     top_n: int = 5) -> Tuple[List[int], List[float]]:
@@ -834,6 +967,108 @@ class BERTopic:
             return self.representative_docs[topic]
         else:
             return self.representative_docs
+
+    @staticmethod
+    def get_topic_tree(hier_topics: pd.DataFrame, 
+                       max_distance: float = None, 
+                       tight_layout: bool = False) -> str:
+        """ Extract the topic tree such that it can be printed
+
+        Arguments:
+            hier_topics: A dataframe containing the structure of the topic tree.
+                        This is the output of `topic_model.hierachical_topics()`
+            max_distance: The maximum distance between two topics. This value is 
+                        based on the Distance column in `hier_topics`.   
+            tight_layout: Whether to use a tight layout (narrow width) for 
+                        easier readability if you have hundreds of topics.
+
+        Returns:
+            A tree that has the following structure when printed:
+                .
+                .  
+                └─health_medical_disease_patients_hiv
+                    ├─patients_medical_disease_candida_health
+                    │    ├─■──candida_yeast_infection_gonorrhea_infections ── Topic: 48
+                    │    └─patients_disease_cancer_medical_doctor
+                    │         ├─■──hiv_medical_cancer_patients_doctor ── Topic: 34
+                    │         └─■──pain_drug_patients_disease_diet ── Topic: 26
+                    └─■──health_newsgroup_tobacco_vote_votes ── Topic: 9
+
+            The blocks (■) indicate that the topic is one you can directly access
+            from `topic_model.get_topic`. In other words, they are the original un-grouped topics.
+
+        Usage:
+
+        ```python
+        # Train model
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+
+        # Print topic tree
+        tree = topic_model.get_topic_tree(hierarchical_topics)
+        print(tree)
+        ```
+        """
+        width = 1 if tight_layout else 4    
+        if max_distance is None:
+            max_distance = hier_topics.Distance.max() + 1
+
+        max_original_topic = hier_topics.Parent_ID.astype(int).min() - 1
+        
+        # Extract mapping from ID to name
+        topic_to_name = dict(zip(hier_topics.Child_Left_ID, hier_topics.Child_Left_Name))
+        topic_to_name.update(dict(zip(hier_topics.Child_Right_ID, hier_topics.Child_Right_Name)))
+        topic_to_name = {topic: name[:100] for topic, name in topic_to_name.items()}
+        
+        # Create tree
+        tree = {str(row[1].Parent_ID): [str(row[1].Child_Left_ID), str(row[1].Child_Right_ID)]
+                for row in hier_topics.iterrows()}
+
+        def get_tree(start, tree):
+            """ Based on: https://stackoverflow.com/a/51920869/10532563 """
+            
+            def _tree(to_print, start, parent, tree, grandpa=None, indent=""):
+
+                # Get distance between merged topics
+                distance = hier_topics.loc[(hier_topics.Child_Left_ID == parent) | 
+                                        (hier_topics.Child_Right_ID == parent), "Distance"]
+                distance = distance.values[0] if len(distance) > 0 else 10
+
+                if parent != start:
+                    if grandpa is None:
+                        to_print += topic_to_name[parent]
+                    else:
+                        if int(parent) <= max_original_topic:
+                            
+                            # Do not append topic ID if they are not merged
+                            if distance < max_distance:
+                                to_print += "■──" + topic_to_name[parent] + f" ── Topic: {parent}" + "\n" 
+                            else:
+                                to_print += "O \n"
+                        else:
+                            to_print += topic_to_name[parent] + "\n"  
+                        
+                if parent not in tree:
+                    return to_print
+
+                for child in tree[parent][:-1]:
+                    to_print += indent + "├" + "─" 
+                    to_print = _tree(to_print, start, child, tree, parent, indent + "│" + " " * width)
+                    
+                child = tree[parent][-1]
+                to_print += indent + "└" + "─" 
+                to_print = _tree(to_print, start, child, tree, parent, indent + " " * (width+1))
+                
+                return to_print
+
+            to_print = "." + "\n"
+            to_print = _tree(to_print, start, start, tree)
+            return to_print
+        
+        start = str(hier_topics.Parent_ID.astype(int).max())
+        return get_tree(start, tree)
 
     def reduce_topics(self,
                       docs: List[str],
@@ -1112,13 +1347,16 @@ class BERTopic:
                                                width=width,
                                                height=height)
 
-    def visualize_hierarchy(self,
+    def visualize_hierarchy(self,    
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
                             width: int = 1000,
                             height: int = 600,
-                            optimal_ordering: bool = False) -> go.Figure:
+                            hierarchical_topics: pd.DataFrame = None,
+                            linkage_function: Callable[[csr_matrix], np.ndarray] = None,
+                            distance_function: Callable[[csr_matrix], csr_matrix] = None,
+                            color_threshold: int = 1) -> go.Figure:
         """ Visualize a hierarchical structure of the topics
 
         A ward linkage function is used to perform the
@@ -1126,17 +1364,29 @@ class BERTopic:
         matrix between topic embeddings.
 
         Arguments:
+            topic_model: A fitted BERTopic instance.
             orientation: The orientation of the figure.
-                         Either 'left' or 'bottom'
+                        Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
-            optimal_ordering: If True, the linkage matrix will be reordered so that the distance
-                between successive leaves is minimal. This results in a more intuitive
-                tree structure when the data are visualized. defaults to False, because
-                this algorithm can be slow, particularly on large datasets. See
-                also the `linkage` function fun `scipy`.
+            hierarchical_topics: A dataframe that contains a hierarchy of topics
+                                represented by their parents and their children.
+                                NOTE: The hierarchical topic names are only visualized
+                                if both `topics` and `top_n_topics` are not set. 
+            linkage_function: The linkage function to use. Default is:
+                            `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
+                            NOTE: Make sure to use the same `linkage_function` as used 
+                            in `topic_model.hierarchical_topics`.
+            distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
+                            `lambda x: 1 - cosine_similarity(x)`
+                            NOTE: Make sure to use the same `distance_function` as used 
+                            in `topic_model.hierarchical_topics`.
+            color_threshold: Value at which the separation of clusters will be made which 
+                         will result in different colors for different clusters. 
+                         A higher value will typically lead in less colored clusters.
+            
         Returns:
             fig: A plotly figure
 
@@ -1149,12 +1399,25 @@ class BERTopic:
         topic_model.visualize_hierarchy()
         ```
 
-        Or if you want to save the resulting figure:
+        If you also want the labels visualized of hierarchical topics, 
+        run the following:
+
+        ```python
+        # Extract hierarchical topics and their representations
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+
+        # Visualize these representations
+        topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+        ```
+
+        If you want to save the resulting figure:
 
         ```python
         fig = topic_model.visualize_hierarchy()
         fig.write_html("path/to/file.html")
         ```
+        <iframe src="../../getting_started/visualization/hierarchy.html"
+        style="width:1000px; height: 680px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
         return plotting.visualize_hierarchy(self,
@@ -1163,7 +1426,11 @@ class BERTopic:
                                             top_n_topics=top_n_topics,
                                             width=width,
                                             height=height,
-                                            optimal_ordering=optimal_ordering)
+                                            hierarchical_topics=hierarchical_topics,
+                                            linkage_function=linkage_function,
+                                            distance_function=distance_function,
+                                            color_threshold=color_threshold
+                                            )
 
     def visualize_heatmap(self,
                           topics: List[int] = None,

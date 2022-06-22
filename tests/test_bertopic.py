@@ -14,7 +14,7 @@ from bertopic import BERTopic
 
 newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:2000]
 base_model = BERTopic(language="english", verbose=True, min_topic_size=5)
-kmeans_model = BERTopic(language="english", verbose=True, min_topic_size=5, hdbscan_model=KMeans(n_clusters=10, random_state=42))
+kmeans_model = BERTopic(language="english", verbose=True, hdbscan_model=KMeans(n_clusters=10, random_state=42))
 
 
 @pytest.mark.parametrize("topic_model", [base_model, kmeans_model])
@@ -51,6 +51,17 @@ def test_full_model(topic_model):
 
     assert topics_over_time.Frequency.sum() == 2000
     assert len(topics_over_time.Topic.unique()) == len(set(topics))
+
+    # Test hierarchical topics
+    hier_topics = topic_model.hierarchical_topics(newsgroup_docs, topics)
+
+    assert len(hier_topics) > 0
+    assert hier_topics.Parent_ID.astype(int).min() > max(topics)
+
+    # Test creation of topic tree
+    tree = topic_model.get_topic_tree(hier_topics, tight_layout=False)
+    assert isinstance(tree, str)
+    assert len(tree) > 10
 
     # Test find topic
     similar_topics, similarity = topic_model.find_topics("query", top_n=2)

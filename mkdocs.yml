@@ -28,6 +28,7 @@ nav:
         - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
+        - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
   - FAQ: faq.md
   - API:
       - BERTopic: api/bertopic.md
