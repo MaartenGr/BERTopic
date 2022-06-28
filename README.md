@@ -208,8 +208,6 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Get topic freq    |  `.get_topic_freq()` |
 | Get all topic information|  `.get_topic_info()` |
 | Get representative docs per topic |  `.get_representative_docs()` |
-| Get topics per class | `.topics_per_class(docs, topics, classes)` |
-| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
 | Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
 | Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `.find_topics("vehicle")` |
@@ -217,12 +215,25 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `.get_params()` |
 
+For an overview of extensions to and variations of BERTopic, such as topics over time:
+
+| Method | Code  | 
+|-----------------------|---|
+| (semi-) Supervised Topic Modeling | `.fit(docs, y=y)` |
+| Topic Modeling per Class | `.topics_per_class(docs, topics, classes)` |
+| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
+| Hierarchical Topic Modeling | `.hierarchical_topics(docs, topics)` |
+| Guided Topic Modeling | `BERTopic(seed_topic_list=seed_topic_list)` |
+
 For an overview of BERTopic's visualization methods:
 
 | Method | Code  | 
 |-----------------------|---|
 | Visualize Topics    |  `.visualize_topics()` |
+| Visualize Documents    |  `.visualize_documents()` |
+| Visualize Document Hierarchy    |  `.visualize_hierarchical_documents()` |
 | Visualize Topic Hierarchy    |  `.visualize_hierarchy()` |
+| Visualize Topic Tree   |  `.get_topic_tree(hierarchical_topics)` |
 | Visualize Topic Terms    |  `.visualize_barchart()` |
 | Visualize Topic Similarity  |  `.visualize_heatmap()` |
 | Visualize Term Score Decline  |  `.visualize_term_rank()` |
