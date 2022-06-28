@@ -70,8 +70,7 @@ topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
     The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the 
     option to hover over the individual points and see the content of the documents. This was done for demonstration purposes 
     as saving all those documents in the visualization can be quite expensive and result in large files. However, 
-    it might be interesting to set `hide_document_hover=False` in order to hover over the points and see the content of the documents. 
-    
+    it might be interesting to set `hide_document_hover=False` in order to hover over the points and see the content of the documents.    
 
 ## **Visualize Topic Hierarchy**
 The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
@@ -388,6 +387,44 @@ to view, we can see better which topics could be logically merged:
   ```
 </details>
 
+## **Visualize Hierarchical Document**
+We can extend the previous method by calculating the topic representation at different levels of the hierarchy and 
+plotting them on a 2D-plane. To do so, we first need to calculate the hierarchical topics:
+
+```python
+from sklearn.datasets import fetch_20newsgroups
+from sentence_transformers import SentenceTransformer
+from bertopic import BERTopic
+from umap import UMAP
+
+# Prepare embeddings
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+# Train BERTopic and extract hierarchical topics
+topic_model = BERTopic().fit(docs, embeddings)
+hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+```
+Then, we can visualize the hierarchical documents by either supplying it with our embeddings or by 
+reducing their dimensionality ourselves:
+
+```python
+# Run the visualization with the original embeddings
+topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, embeddings=embeddings)
+
+# Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
+reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+```
+
+<iframe src="hierarchical_documents.html" style="width:1200px; height: 800px; border: 0px;""></iframe>
+
+!!! note
+    The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the 
+    option to hover over the individual points and see the content of the documents. This makes the resulting visualization 
+    smaller and fit into your RAM. However, it might be interesting to set `hide_document_hover=False` in order to hover 
+    over the points and see the content of the documents. 
 
 ## **Visualize Terms**
 We can visualize the selected terms for a few topics by creating bar charts out of the c-TF-IDF scores 

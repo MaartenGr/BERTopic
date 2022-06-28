@@ -33,7 +33,7 @@ def visualize_documents(topic_model,
                 millions of documents as a subset is chosen.
         hide_annotations: Hide the names of the traces on top of each cluster.
         hide_document_hover: Hide the content of the documents when hovering over
-                             specific points. Helps to speed up generation of visualizatin.
+                             specific points. Helps to speed up generation of visualization.
         width: The width of the figure.
         height: The height of the figure.
 

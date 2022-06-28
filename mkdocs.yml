@@ -40,12 +40,13 @@ nav:
       - Plotting:
         - Barchart: api/plotting/barchart.md
         - Documents: api/plotting/documents.md
+        - DTM: api/plotting/dtm.md
+        - Hierarchical documents: api/plotting/hierarchical_documents.md
+        - Hierarchical topics: api/plotting/hierarchy.md
         - Distribution: api/plotting/distribution.md
         - Heatmap: api/plotting/heatmap.md
-        - Hierarchy: api/plotting/hierarchy.md
         - Term Scores: api/plotting/term.md
         - Topics: api/plotting/topics.md
-        - DTM: api/plotting/dtm.md
         - Topics per Class: api/plotting/topics_per_class.md
   - Changelog: changelog.md
 

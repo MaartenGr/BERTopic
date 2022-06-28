@@ -1192,7 +1192,7 @@ class BERTopic:
                     millions of documents as a subset is chosen.
             hide_annotations: Hide the names of the traces on top of each cluster.
             hide_document_hover: Hide the content of the documents when hovering over
-                                specific points. Helps to speed up generation of visualizatin.
+                                specific points. Helps to speed up generation of visualization.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1252,6 +1252,106 @@ class BERTopic:
                                             hide_document_hover=hide_document_hover,
                                             width=width,
                                             height=height)
+
+    def visualize_hierarchical_documents(self,
+                                         docs: List[str],
+                                         hierarchical_topics: pd.DataFrame,
+                                         topics: List[int] = None,
+                                         embeddings: np.ndarray = None,
+                                         reduced_embeddings: np.ndarray = None,
+                                         sample: Union[float, int] = None,
+                                         hide_annotations: bool = False,
+                                         hide_document_hover: bool = True,
+                                         nr_levels: int = 10,
+                                         width: int = 1200,
+                                         height: int = 750) -> go.Figure:
+        """ Visualize documents and their topics in 2D at different levels of hierarchy
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            hierarchical_topics: A dataframe that contains a hierarchy of topics
+                                represented by their parents and their children
+            topics: A selection of topics to visualize.
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`.
+            embeddings: The embeddings of all documents in `docs`.
+            reduced_embeddings: The 2D reduced embeddings of all documents in `docs`.
+            sample: The percentage of documents in each topic that you would like to keep.
+                    Value can be between 0 and 1. Setting this value to, for example,
+                    0.1 (10% of documents in each topic) makes it easier to visualize
+                    millions of documents as a subset is chosen.
+            hide_annotations: Hide the names of the traces on top of each cluster.
+            hide_document_hover: Hide the content of the documents when hovering over
+                                specific points. Helps to speed up generation of visualizations.
+            nr_levels: The number of levels to be visualized in the hierarchy. First, the distances
+                    in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances with
+                    equal length. Then, for each list of distances, the merged topics are selected that
+                    have a distance less or equal to the maximum distance of the selected list of distances.
+                    NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
+                    the length of `hierarchical_topics`.
+            width: The width of the figure.
+            height: The height of the figure.
+
+        Usage:
+
+        To visualize the topics simply run:
+
+        ```python
+        topic_model.visualize_hierarchical_documents(docs, hierarchical_topics)
+        ```
+
+        Do note that this re-calculates the embeddings and reduces them to 2D.
+        The advised and prefered pipeline for using this function is as follows:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+        from bertopic import BERTopic
+        from umap import UMAP
+
+        # Prepare embeddings
+        docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+        # Train BERTopic and extract hierarchical topics
+        topic_model = BERTopic().fit(docs, embeddings)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+
+        # Reduce dimensionality of embeddings, this step is optional
+        # reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+
+        # Run the visualization with the original embeddings
+        topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, embeddings=embeddings)
+
+        # Or, if you have reduced the original embeddings already:
+        topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+        fig.write_html("path/to/file.html")
+        ```
+
+        <iframe src="../../getting_started/visualization/hierarchical_documents.html"
+        style="width:1000px; height: 770px; border: 0px;""></iframe>
+        """
+        check_is_fitted(self)
+        return plotting.visualize_hierarchical_documents(self,
+                                                         docs=docs,
+                                                         hierarchical_topics=hierarchical_topics,
+                                                         topics=topics,
+                                                         embeddings=embeddings,
+                                                         reduced_embeddings=reduced_embeddings,
+                                                         sample=sample,
+                                                         hide_annotations=hide_annotations,
+                                                         hide_document_hover=hide_document_hover,
+                                                         nr_levels=nr_levels,
+                                                         width=width,
+                                                         height=height)
 
     def visualize_term_rank(self,
                             topics: List[int] = None,
