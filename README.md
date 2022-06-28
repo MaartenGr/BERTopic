@@ -196,6 +196,10 @@ topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=6)
 <img src="images/dtm.gif" width="80%" height="80%" align="center" />
 
 ## Overview
+BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
+of all methods and a short description of its purpose. 
+
+### Common
 For quick access to common functions, here is an overview of BERTopic's main methods:
 
 | Method | Code  | 
@@ -215,7 +219,9 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `.get_params()` |
 
-For an overview of extensions to and variations of BERTopic, such as topics over time:
+### Variations
+There are many different use cases in which topic modeling can be used. As such, a number of 
+variations of BERTopic have been developed such that one package can be used across across many use cases:
 
 | Method | Code  | 
 |-----------------------|---|
@@ -225,7 +231,10 @@ For an overview of extensions to and variations of BERTopic, such as topics over
 | Hierarchical Topic Modeling | `.hierarchical_topics(docs, topics)` |
 | Guided Topic Modeling | `BERTopic(seed_topic_list=seed_topic_list)` |
 
-For an overview of BERTopic's visualization methods:
+### Visualizations
+Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation. 
+Visualizing different aspects of the topic model helps in understanding the model and makes it easier 
+to tweak the model to your liking. 
 
 | Method | Code  | 
 |-----------------------|---|
