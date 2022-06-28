@@ -1,6 +1,7 @@
 from ._topics import visualize_topics
 from ._heatmap import visualize_heatmap
 from ._barchart import visualize_barchart
+from ._documents import visualize_documents
 from ._term_rank import visualize_term_rank
 from ._hierarchy import visualize_hierarchy
 from ._distribution import visualize_distribution
@@ -12,6 +13,7 @@ __all__ = [
     "visualize_topics",
     "visualize_heatmap",
     "visualize_barchart",
+    "visualize_documents",
     "visualize_term_rank",
     "visualize_hierarchy",
     "visualize_distribution",

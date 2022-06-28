@@ -33,7 +33,7 @@ You can use the slider to select the topic which then lights up red. If you hove
 information is given about the topic, including the size of the topic and its corresponding words.
 
 ## **Visualize Documents**
-Using the previous method, we can visualize the overall topics and get insight into their relationships. However, 
+Using the previous method, we can visualize the topics and get insight into their relationships. However, 
 you might want a more fine-grained approach where we can visualize the documents inside the topics to see 
 if they were assigned correctly or whether they make sense. To do so, we can use the `topic_model.visualize_documents()` 
 function. This function recalculates the document embeddings and reduces them to 2-dimensional space for easier visualization 

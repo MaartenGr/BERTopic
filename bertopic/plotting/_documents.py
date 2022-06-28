@@ -196,6 +196,15 @@ def visualize_documents(topic_model,
     # Stylize layout
     fig.update_layout(
         template="simple_white",
+        title={
+            'text': "<b>Documents and Topics",
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'font': dict(
+                size=22,
+                color="Black")
+        },
         width=width,
         height=height
     )
