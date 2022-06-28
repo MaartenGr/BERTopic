@@ -39,6 +39,7 @@ nav:
         - Word Doc: api/backends/word_doc.md
       - Plotting:
         - Barchart: api/plotting/barchart.md
+        - Documents: api/plotting/documents.md
         - Distribution: api/plotting/distribution.md
         - Heatmap: api/plotting/heatmap.md
         - Hierarchy: api/plotting/hierarchy.md

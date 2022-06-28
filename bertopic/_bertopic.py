@@ -1165,6 +1165,94 @@ class BERTopic:
                                          width=width,
                                          height=height)
 
+    def visualize_documents(self,
+                            docs: List[str],
+                            topics: List[int] = None,
+                            embeddings: np.ndarray = None,
+                            reduced_embeddings: np.ndarray = None,
+                            sample: float = None,
+                            hide_annotations: bool = False,
+                            hide_document_hover: bool = False,
+                            width: int = 1200,
+                            height: int = 750) -> go.Figure:
+        """ Visualize documents and their topics in 2D
+
+        Arguments:
+            topic_model: A fitted BERTopic instance.
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: A selection of topics to visualize.
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`.
+            embeddings: The embeddings of all documents in `docs`.
+            reduced_embeddings: The 2D reduced embeddings of all documents in `docs`.
+            sample: The percentage of documents in each topic that you would like to keep.
+                    Value can be between 0 and 1. Setting this value to, for example,
+                    0.1 (10% of documents in each topic) makes it easier to visualize
+                    millions of documents as a subset is chosen.
+            hide_annotations: Hide the names of the traces on top of each cluster.
+            hide_document_hover: Hide the content of the documents when hovering over
+                                specific points. Helps to speed up generation of visualizatin.
+            width: The width of the figure.
+            height: The height of the figure.
+
+        Usage:
+
+        To visualize the topics simply run:
+
+        ```python
+        topic_model.visualize_documents(docs)
+        ```
+
+        Do note that this re-calculates the embeddings and reduces them to 2D.
+        The advised and prefered pipeline for using this function is as follows:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+        from bertopic import BERTopic
+        from umap import UMAP
+
+        # Prepare embeddings
+        docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+        # Train BERTopic
+        topic_model = BERTopic().fit(docs, embeddings)
+
+        # Reduce dimensionality of embeddings, this step is optional
+        # reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+
+        # Run the visualization with the original embeddings
+        topic_model.visualize_documents(docs, embeddings=embeddings)
+
+        # Or, if you have reduced the original embeddings already:
+        topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
+        fig.write_html("path/to/file.html")
+        ```
+
+        <iframe src="../../getting_started/visualization/documents.html"
+        style="width:1000px; height: 800px; border: 0px;""></iframe>
+        """
+        check_is_fitted(self)
+        return plotting.visualize_documents(self,
+                                            docs=docs,
+                                            topics=topics,
+                                            embeddings=embeddings,
+                                            reduced_embeddings=reduced_embeddings,
+                                            sample=sample,
+                                            hide_annotations=hide_annotations,
+                                            hide_document_hover=hide_document_hover,
+                                            width=width,
+                                            height=height)
+
     def visualize_term_rank(self,
                             topics: List[int] = None,
                             log_scale: bool = False,
@@ -1347,7 +1435,7 @@ class BERTopic:
                                                width=width,
                                                height=height)
 
-    def visualize_hierarchy(self,    
+    def visualize_hierarchy(self,
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
@@ -1374,19 +1462,19 @@ class BERTopic:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
                                 represented by their parents and their children.
                                 NOTE: The hierarchical topic names are only visualized
-                                if both `topics` and `top_n_topics` are not set. 
+                                if both `topics` and `top_n_topics` are not set.
             linkage_function: The linkage function to use. Default is:
                             `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
-                            NOTE: Make sure to use the same `linkage_function` as used 
+                            NOTE: Make sure to use the same `linkage_function` as used
                             in `topic_model.hierarchical_topics`.
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
                             `lambda x: 1 - cosine_similarity(x)`
-                            NOTE: Make sure to use the same `distance_function` as used 
+                            NOTE: Make sure to use the same `distance_function` as used
                             in `topic_model.hierarchical_topics`.
-            color_threshold: Value at which the separation of clusters will be made which 
-                         will result in different colors for different clusters. 
+            color_threshold: Value at which the separation of clusters will be made which
+                         will result in different colors for different clusters.
                          A higher value will typically lead in less colored clusters.
-            
+
         Returns:
             fig: A plotly figure
 
@@ -1399,7 +1487,7 @@ class BERTopic:
         topic_model.visualize_hierarchy()
         ```
 
-        If you also want the labels visualized of hierarchical topics, 
+        If you also want the labels visualized of hierarchical topics,
         run the following:
 
         ```python

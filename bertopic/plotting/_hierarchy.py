@@ -36,20 +36,19 @@ def visualize_hierarchy(topic_model,
         hierarchical_topics: A dataframe that contains a hierarchy of topics
                              represented by their parents and their children.
                              NOTE: The hierarchical topic names are only visualized
-                             if both `topics` and `top_n_topics` are not set. 
+                             if both `topics` and `top_n_topics` are not set.
         linkage_function: The linkage function to use. Default is:
                           `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
-                          NOTE: Make sure to use the same `linkage_function` as used 
+                          NOTE: Make sure to use the same `linkage_function` as used
                           in `topic_model.hierarchical_topics`.
         distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
                            `lambda x: 1 - cosine_similarity(x)`
-                           NOTE: Make sure to use the same `distance_function` as used 
+                           NOTE: Make sure to use the same `distance_function` as used
                            in `topic_model.hierarchical_topics`.
-        color_threshold: Value at which the separation of clusters will be made which 
-                         will result in different colors for different clusters. 
+        color_threshold: Value at which the separation of clusters will be made which
+                         will result in different colors for different clusters.
                          A higher value will typically lead in less colored clusters.
 
-        
     Returns:
         fig: A plotly figure
 
@@ -62,7 +61,7 @@ def visualize_hierarchy(topic_model,
     topic_model.visualize_hierarchy()
     ```
 
-    If you also want the labels visualized of hierarchical topics, 
+    If you also want the labels visualized of hierarchical topics,
     run the following:
 
     ```python
@@ -83,8 +82,8 @@ def visualize_hierarchy(topic_model,
     style="width:1000px; height: 680px; border: 0px;""></iframe>
     """
     if distance_function is None:
-            distance_function = lambda x: 1 - cosine_similarity(x)
-    
+        distance_function = lambda x: 1 - cosine_similarity(x)
+
     if linkage_function is None:
         linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
 
@@ -105,11 +104,11 @@ def visualize_hierarchy(topic_model,
 
     # Annotations
     if hierarchical_topics is not None and len(topics) == len(freq_df.Topic.to_list()):
-        annotations = _get_annotations(topic_model=topic_model, 
-                                       hierarchical_topics=hierarchical_topics, 
-                                       embeddings=embeddings, 
-                                       distance_function=distance_function, 
-                                       linkage_function=linkage_function, 
+        annotations = _get_annotations(topic_model=topic_model,
+                                       hierarchical_topics=hierarchical_topics,
+                                       embeddings=embeddings,
+                                       distance_function=distance_function,
+                                       linkage_function=linkage_function,
                                        orientation=orientation)
     else:
         annotations = None
@@ -121,7 +120,7 @@ def visualize_hierarchy(topic_model,
                                linkagefun=linkage_function,
                                hovertext=annotations,
                                color_threshold=color_threshold)
-                
+
     # Create nicer labels
     axis = "yaxis" if orientation == "left" else "xaxis"
     new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
@@ -173,18 +172,18 @@ def visualize_hierarchy(topic_model,
             xs = [data["x"][index] for data in fig.data if (data["text"] and data[axis][index] > 0)]
             ys = [data["y"][index] for data in fig.data if (data["text"] and data[axis][index] > 0)]
             hovertext = [data["text"][index] for data in fig.data if (data["text"] and data[axis][index] > 0)]
-            
+
             fig.add_trace(go.Scatter(x=xs, y=ys, marker_color='black',
-                                     hovertext=hovertext, hoverinfo="text", 
+                                     hovertext=hovertext, hoverinfo="text",
                                      mode='markers', showlegend=False))
     return fig
 
 
-def _get_annotations(topic_model, 
-                     hierarchical_topics: pd.DataFrame, 
-                     embeddings: csr_matrix, 
+def _get_annotations(topic_model,
+                     hierarchical_topics: pd.DataFrame,
+                     embeddings: csr_matrix,
                      linkage_function: Callable[[csr_matrix], np.ndarray],
-                     distance_function: Callable[[csr_matrix], csr_matrix], 
+                     distance_function: Callable[[csr_matrix], csr_matrix],
                      orientation: str) -> List[List[str]]:
 
     """ Get annotations by replicating linkage function calculation in scipy
@@ -194,19 +193,19 @@ def _get_annotations(topic_model,
         hierarchical_topics: A dataframe that contains a hierarchy of topics
                              represented by their parents and their children.
                              NOTE: The hierarchical topic names are only visualized
-                             if both `topics` and `top_n_topics` are not set. 
+                             if both `topics` and `top_n_topics` are not set.
         embeddings: The c-TF-IDF matrix on which to model the hierarchy
         linkage_function: The linkage function to use. Default is:
                           `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
-                          NOTE: Make sure to use the same `linkage_function` as used 
+                          NOTE: Make sure to use the same `linkage_function` as used
                           in `topic_model.hierarchical_topics`.
         distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
                            `lambda x: 1 - cosine_similarity(x)`
-                           NOTE: Make sure to use the same `distance_function` as used 
+                           NOTE: Make sure to use the same `distance_function` as used
                            in `topic_model.hierarchical_topics`.
         orientation: The orientation of the figure.
                      Either 'left' or 'bottom'
-        
+
     Returns:
         text_annotations: Annotations to be used within Plotly's `ff.create_dendogram`
     """
@@ -216,7 +215,7 @@ def _get_annotations(topic_model,
     X = distance_function(embeddings)
     Z = linkage_function(X)
     P = sch.dendrogram(Z, orientation=orientation, no_plot=True)
-    
+
     # store topic no.(leaves) corresponding to the x-ticks in dendrogram
     x_ticks = np.arange(5, len(P['leaves']) * 10 + 5, 10)
     x_topic = dict(zip(P['leaves'], x_ticks))
@@ -224,7 +223,7 @@ def _get_annotations(topic_model,
     topic_vals = dict()
     for key, val in x_topic.items():
         topic_vals[val] = [key]
-        
+
     parent_topic = dict(zip(df.Parent_ID, df.Topics))
 
     # loop through every trace (scatter plot) in dendrogram
@@ -232,24 +231,24 @@ def _get_annotations(topic_model,
     for index, trace in enumerate(P['icoord']):
         fst_topic = topic_vals[trace[0]]
         scnd_topic = topic_vals[trace[2]]
-        
+
         if len(fst_topic) == 1:
             fst_name = "_".join([word for word, _ in topic_model.get_topic(fst_topic[0])][:5])
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(fst_topic):
                     fst_name = df.loc[df.Parent_ID == key, "Parent_Name"].values[0]
-                    
+
         if len(scnd_topic) == 1:
             scnd_name = "_".join([word for word, _ in topic_model.get_topic(scnd_topic[0])][:5])
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(scnd_topic):
                     scnd_name = df.loc[df.Parent_ID == key, "Parent_Name"].values[0]
-        
+
         text_annotations.append([fst_name, "", "", scnd_name])
 
         center = (trace[0] + trace[2]) / 2
         topic_vals[center] = fst_topic + scnd_topic
-    
+
     return text_annotations
