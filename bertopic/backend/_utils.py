@@ -1,5 +1,7 @@
 from ._base import BaseEmbedder
 from ._sentencetransformers import SentenceTransformerBackend
+from ._hftransformers import HFTransformerBackend
+from transformers.pipelines import Pipeline
 
 languages = ['afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese',
              'azerbaijani', 'basque', 'belarusian', 'bengali', 'bengali romanize',
@@ -58,6 +60,10 @@ def select_backend(embedding_model,
     # Create a Sentence Transformer model based on a string
     if isinstance(embedding_model, str):
         return SentenceTransformerBackend(embedding_model)
+
+    # Hugging Face embeddings
+    if isinstance(embedding_model, Pipeline):
+        return HFTransformerBackend(embedding_model)
 
     # Select embedding model based on language
     if language:
