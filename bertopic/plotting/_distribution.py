@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 def visualize_distribution(topic_model,
                            probabilities: np.ndarray,
                            min_probability: float = 0.015,
+                           custom_labels: bool = False,
                            width: int = 800,
                            height: int = 600) -> go.Figure:
     """ Visualize the distribution of topic probabilities
@@ -14,6 +15,8 @@ def visualize_distribution(topic_model,
         probabilities: An array of probability scores
         min_probability: The minimum probability score to visualize.
                          All others are ignored.
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -50,16 +53,19 @@ def visualize_distribution(topic_model,
     vals = probabilities[labels_idx].tolist()
 
     # Create labels
-    labels = []
-    for idx in labels_idx:
-        words = topic_model.get_topic(idx)
-        if words:
-            label = [word[0] for word in words[:5]]
-            label = f"<b>Topic {idx}</b>: {'_'.join(label)}"
-            label = label[:40] + "..." if len(label) > 40 else label
-            labels.append(label)
-        else:
-            vals.remove(probabilities[idx])
+    if topic_model.custom_labels is not None and custom_labels:
+        labels = [topic_model.custom_labels[idx + topic_model._outliers] for idx in labels_idx]
+    else:
+        labels = []
+        for idx in labels_idx:
+            words = topic_model.get_topic(idx)
+            if words:
+                label = [word[0] for word in words[:5]]
+                label = f"<b>Topic {idx}</b>: {'_'.join(label)}"
+                label = label[:40] + "..." if len(label) > 40 else label
+                labels.append(label)
+            else:
+                vals.remove(probabilities[idx])
 
     # Create Figure
     fig = go.Figure(go.Bar(

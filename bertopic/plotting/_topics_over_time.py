@@ -9,6 +9,7 @@ def visualize_topics_over_time(topic_model,
                                top_n_topics: int = None,
                                topics: List[int] = None,
                                normalize_frequency: bool = False,
+                               custom_labels: bool = False,
                                width: int = 1250,
                                height: int = 450) -> go.Figure:
     """ Visualize topics over time
@@ -20,6 +21,8 @@ def visualize_topics_over_time(topic_model,
         top_n_topics: To visualize the most frequent topics instead of all
         topics: Select which topics you would like to be visualized
         normalize_frequency: Whether to normalize each topic's frequency individually
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -55,8 +58,11 @@ def visualize_topics_over_time(topic_model,
         selected_topics = topic_model.get_topic_freq().Topic.values
 
     # Prepare data
-    topic_names = {key: value[:40] + "..." if len(value) > 40 else value
-                   for key, value in topic_model.topic_names.items()}
+    if topic_model.custom_labels is not None and custom_labels:
+        topic_names = {key: topic_model.custom_labels[key + topic_model._outliers] for key, _ in topic_model.topic_names.items()}
+    else:
+        topic_names = {key: value[:40] + "..." if len(value) > 40 else value
+                       for key, value in topic_model.topic_names.items()}
     topics_over_time["Name"] = topics_over_time.Topic.map(topic_names)
     data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :].sort_values(["Topic", "Timestamp"])
     

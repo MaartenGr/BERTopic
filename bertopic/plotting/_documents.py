@@ -14,6 +14,7 @@ def visualize_documents(topic_model,
                         sample: float = None,
                         hide_annotations: bool = False,
                         hide_document_hover: bool = False,
+                        custom_labels: bool = False,
                         width: int = 1200,
                         height: int = 750):
     """ Visualize documents and their topics in 2D
@@ -34,6 +35,8 @@ def visualize_documents(topic_model,
         hide_annotations: Hide the names of the traces on top of each cluster.
         hide_document_hover: Hide the content of the documents when hovering over
                              specific points. Helps to speed up generation of visualization.
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -129,7 +132,10 @@ def visualize_documents(topic_model,
     df["y"] = embeddings_2d[:, 1]
 
     # Prepare text and names
-    names = [f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]
+    if topic_model.custom_labels is not None and custom_labels:
+        names = [topic_model.custom_labels[topic + topic_model._outliers] for topic in unique_topics]
+    else:
+        names = [f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]
 
     # Visualize
     fig = go.Figure()

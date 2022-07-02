@@ -16,6 +16,7 @@ def visualize_hierarchical_documents(topic_model,
                                      hide_annotations: bool = False,
                                      hide_document_hover: bool = True,
                                      nr_levels: int = 10,
+                                     custom_labels: bool = False,
                                      width: int = 1200,
                                      height: int = 750) -> go.Figure:
     """ Visualize documents and their topics in 2D at different levels of hierarchy
@@ -43,6 +44,10 @@ def visualize_hierarchical_documents(topic_model,
                    have a distance less or equal to the maximum distance of the selected list of distances.
                    NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
                    the length of `hierarchical_topics`.
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
+                       NOTE: Custom labels are only generated for the original 
+                       un-merged topics.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -169,9 +174,11 @@ def visualize_hierarchical_documents(topic_model,
     for topic in range(hierarchical_topics.Parent_ID.astype(int).max()):
         if topic < hierarchical_topics.Parent_ID.astype(int).min():
             if topic_model.get_topic(topic):
-                plot_text = f"{topic}_" + "_".join([word[:20] for word, _ in topic_model.get_topic(topic)][:3])
-                trace_name = f"{topic}_" + "_".join([word for word, _ in topic_model.get_topic(topic)][:3])
-                topic_names[topic] = {"trace_name": trace_name[:40], "plot_text": plot_text[:40]}
+                if topic_model.custom_labels is not None and custom_labels:
+                    trace_name = topic_model.custom_labels[topic + topic_model._outliers]
+                else:
+                    trace_name = f"{topic}_" + "_".join([word[:20] for word, _ in topic_model.get_topic(topic)][:3])
+                topic_names[topic] = {"trace_name": trace_name[:40], "plot_text": trace_name[:40]}
                 trace_names.append(trace_name)
         else:
             trace_name = f"{topic}_" + hierarchical_topics.loc[hierarchical_topics.Parent_ID == str(topic), "Parent_Name"].values[0]

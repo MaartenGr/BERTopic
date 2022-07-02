@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import Callable, List
-from scipy.sparse.csr import csr_matrix
+from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -13,6 +13,7 @@ def visualize_hierarchy(topic_model,
                         orientation: str = "left",
                         topics: List[int] = None,
                         top_n_topics: int = None,
+                        custom_labels: bool = False,
                         width: int = 1000,
                         height: int = 600,
                         hierarchical_topics: pd.DataFrame = None,
@@ -31,6 +32,10 @@ def visualize_hierarchy(topic_model,
                      Either 'left' or 'bottom'
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
+                       NOTE: Custom labels are only generated for the original 
+                       un-merged topics.
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
         hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -109,7 +114,8 @@ def visualize_hierarchy(topic_model,
                                        embeddings=embeddings,
                                        distance_function=distance_function,
                                        linkage_function=linkage_function,
-                                       orientation=orientation)
+                                       orientation=orientation,
+                                       custom_labels=custom_labels)
     else:
         annotations = None
 
@@ -123,10 +129,13 @@ def visualize_hierarchy(topic_model,
 
     # Create nicer labels
     axis = "yaxis" if orientation == "left" else "xaxis"
-    new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
-                  for x in fig.layout[axis]["ticktext"]]
-    new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
-    new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
+    if topic_model.custom_labels is not None and custom_labels:
+        new_labels = [topic_model.custom_labels[topics[int(x)] + topic_model._outliers] for x in fig.layout[axis]["ticktext"]]
+    else:
+        new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
+                      for x in fig.layout[axis]["ticktext"]]
+        new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+        new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 
     # Stylize layout
     fig.update_layout(
@@ -184,7 +193,8 @@ def _get_annotations(topic_model,
                      embeddings: csr_matrix,
                      linkage_function: Callable[[csr_matrix], np.ndarray],
                      distance_function: Callable[[csr_matrix], csr_matrix],
-                     orientation: str) -> List[List[str]]:
+                     orientation: str,
+                     custom_labels: bool = False) -> List[List[str]]:
 
     """ Get annotations by replicating linkage function calculation in scipy
 
@@ -205,6 +215,10 @@ def _get_annotations(topic_model,
                            in `topic_model.hierarchical_topics`.
         orientation: The orientation of the figure.
                      Either 'left' or 'bottom'
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
+                       NOTE: Custom labels are only generated for the original 
+                       un-merged topics.
 
     Returns:
         text_annotations: Annotations to be used within Plotly's `ff.create_dendogram`
@@ -233,14 +247,20 @@ def _get_annotations(topic_model,
         scnd_topic = topic_vals[trace[2]]
 
         if len(fst_topic) == 1:
-            fst_name = "_".join([word for word, _ in topic_model.get_topic(fst_topic[0])][:5])
+            if topic_model.custom_labels is not None and custom_labels:
+                fst_name = topic_model.custom_labels[fst_topic[0] + topic_model._outliers]
+            else:
+                fst_name = "_".join([word for word, _ in topic_model.get_topic(fst_topic[0])][:5])
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(fst_topic):
                     fst_name = df.loc[df.Parent_ID == key, "Parent_Name"].values[0]
 
         if len(scnd_topic) == 1:
-            scnd_name = "_".join([word for word, _ in topic_model.get_topic(scnd_topic[0])][:5])
+            if topic_model.custom_labels is not None and custom_labels:
+                scnd_name = topic_model.custom_labels[scnd_topic[0] + topic_model._outliers]
+            else:
+                scnd_name = "_".join([word for word, _ in topic_model.get_topic(scnd_topic[0])][:5])
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(scnd_topic):

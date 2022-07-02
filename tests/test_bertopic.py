@@ -89,3 +89,11 @@ def test_full_model(topic_model):
 
     assert topic != updated_topic
     assert topic == original_topic
+
+    # Test updating topic labels
+    topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
+    assert len(topic_labels) == len(set(new_topics))
+
+    # Test setting topic labels
+    topic_model.set_topic_labels(topic_labels)
+    assert topic_model.custom_labels == topic_labels

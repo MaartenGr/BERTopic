@@ -14,7 +14,7 @@ import inspect
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from scipy.sparse.csr import csr_matrix
+from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from typing import List, Tuple, Union, Mapping, Any, Callable
 
@@ -177,10 +177,12 @@ class BERTopic:
                                                               cluster_selection_method='eom',
                                                               prediction_data=True)
 
+        # Attributes
         self.topics = None
         self.topic_mapper = None
         self.topic_sizes = None
         self.merged_topics = None
+        self.custom_labels = None
         self.topic_embeddings = None
         self.topic_sim_matrix = None
         self.representative_docs = None
@@ -883,7 +885,7 @@ class BERTopic:
             return False
 
     def get_topic_info(self, topic: int = None) -> pd.DataFrame:
-        """ Get information about each topic including its id, frequency, and name
+        """ Get information about each topic including its ID, frequency, and name.
 
         Arguments:
             topic: A specific topic for which you want the frequency
@@ -901,6 +903,11 @@ class BERTopic:
 
         info = pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
         info["Name"] = info.Topic.map(self.topic_names)
+
+        if self.custom_labels is not None:
+            if len(self.custom_labels) == len(info):
+                labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels)}
+                info["CustomName"] = info["Topic"].map(labels)
 
         if topic:
             info = info.loc[info.Topic == topic, :]
@@ -1070,6 +1077,119 @@ class BERTopic:
         start = str(hier_topics.Parent_ID.astype(int).max())
         return get_tree(start, tree)
 
+    def set_topic_labels(self, topic_labels: Union[List[str], Mapping[int, str]]) -> None:
+        """ Set custom topic labels in your fitted BERTopic model
+        
+        Arguments:
+            topic_labels: If a list of topic labels, it should contain the same number
+                        of labels as there are topics. This must be ordered 
+                        from the topic with the lowest ID to the highest ID, 
+                        including topic -1 if it exists.
+                        If a dictionary of `topic ID`: `topic_label`, it can have 
+                        any number of topics as it will only map the topics found 
+                        in the dictionary. 
+                        
+        Usage:
+        
+        First, we define our topic labels with `.get_topic_labels` in which
+        we can customize our topic labels:
+        
+        ```python
+        topic_labels = topic_model.get_topic_labels(nr_words=2,
+                                                    topic_prefix=True,
+                                                    word_length=10,
+                                                    separator=", ")
+        ```
+                        
+        Then, we pass these `topic_labels` to our topic model which 
+        can be accessed at any time with `.custom_labels`:
+        
+        ```python
+        topic_model.set_topic_labels(topic_labels)
+        topic_model.custom_labels
+        ```
+        
+        You might want to change only a few topic labels instead of all of them.
+        To do so, you can pass a dictionary where the keys are the topic IDs and 
+        its keys the topic labels:
+        
+        ```python
+        topic_model.set_topic_labels({0: "Space", 1: "Sports", 2: "Medicine"})
+        topic_model.custom_labels
+        ```
+        """
+        unique_topics = sorted(set(self._map_predictions(self.hdbscan_model.labels_)))
+
+        if isinstance(topic_labels, dict):
+                if self.custom_labels is not None:
+                    original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels)}
+                else:
+                    info = self.get_topic_info()
+                    original_labels = dict(zip(info.Topic, info.Name))
+                custom_labels = [topic_labels.get(topic) if topic_labels.get(topic) else original_labels[topic] for topic in unique_topics]
+
+        elif isinstance(topic_labels, list):
+            if len(topic_labels) == len(unique_topics):
+                custom_labels = topic_labels
+            else:
+                raise ValueError("Make sure that `topic_labels` contains the same number "
+                                "of labels as that there are topics.")
+
+        self.custom_labels = custom_labels
+
+    def generate_topic_labels(self, 
+                              nr_words: int = 3, 
+                              topic_prefix: bool = True, 
+                              word_length: int = None, 
+                              separator: str = "_") -> List[str]:
+        """ Get labels for each topic in a user-defined format
+
+        Arguments:
+            original_labels: 
+            nr_words: Top `n` words per topic to use
+            topic_prefix: Whether to use the topic ID as a prefix.
+                        If set to True, the topic ID will be separated
+                        using the `separator`
+            word_length: The maximum length of each word in the topic label.
+                        Some words might be relatively long and setting this
+                        value helps to make sure that all labels have relatively
+                        similar lengths.
+            separator: The string with which the words and topic prefix will be
+                    separated. Underscores are the default but a nice alternative
+                    is `", "`.
+
+        Returns:
+            topic_labels: A list of topic labels sorted from the lowest topic ID to the highest.
+                        If the topic model was trained using HDBSCAN, the lowest topic ID is -1,
+                        otherwise it is 0.
+                        
+        Usage:
+        
+        To create our custom topic labels, usage is rather straightforward:
+        
+        ```python
+        topic_labels = topic_model.get_topic_labels(nr_words=2, separator=", ")
+        ```
+        """
+        unique_topics = sorted(set(self._map_predictions(self.hdbscan_model.labels_)))
+        topic_labels = []
+        for topic in unique_topics:
+            words, _ = zip(*self.get_topic(topic))
+
+            if word_length:
+                words = [word[:word_length] for word in words][:nr_words]
+            else:
+                words = list(words)[:nr_words]
+
+            if topic_prefix:
+                topic_label = f"{topic}{separator}" + separator.join(words)
+            else:
+                topic_label = separator.join(words)
+
+            topic_labels.append(topic_label)
+            
+        return topic_labels
+
     def reduce_topics(self,
                       docs: List[str],
                       topics: List[int],
@@ -1173,6 +1293,7 @@ class BERTopic:
                             sample: float = None,
                             hide_annotations: bool = False,
                             hide_document_hover: bool = False,
+                            custom_labels: bool = False,
                             width: int = 1200,
                             height: int = 750) -> go.Figure:
         """ Visualize documents and their topics in 2D
@@ -1193,6 +1314,8 @@ class BERTopic:
             hide_annotations: Hide the names of the traces on top of each cluster.
             hide_document_hover: Hide the content of the documents when hovering over
                                 specific points. Helps to speed up generation of visualization.
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1250,6 +1373,7 @@ class BERTopic:
                                             sample=sample,
                                             hide_annotations=hide_annotations,
                                             hide_document_hover=hide_document_hover,
+                                            custom_labels=custom_labels,
                                             width=width,
                                             height=height)
 
@@ -1263,6 +1387,7 @@ class BERTopic:
                                          hide_annotations: bool = False,
                                          hide_document_hover: bool = True,
                                          nr_levels: int = 10,
+                                         custom_labels: bool = False,
                                          width: int = 1200,
                                          height: int = 750) -> go.Figure:
         """ Visualize documents and their topics in 2D at different levels of hierarchy
@@ -1290,6 +1415,10 @@ class BERTopic:
                     have a distance less or equal to the maximum distance of the selected list of distances.
                     NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
                     the length of `hierarchical_topics`.
+            custom_labels: Whether to use custom topic labels that were defined using 
+                           `topic_model.set_topic_labels`.
+                           NOTE: Custom labels are only generated for the original 
+                           un-merged topics.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1350,12 +1479,14 @@ class BERTopic:
                                                          hide_annotations=hide_annotations,
                                                          hide_document_hover=hide_document_hover,
                                                          nr_levels=nr_levels,
+                                                         custom_labels=custom_labels,
                                                          width=width,
                                                          height=height)
 
     def visualize_term_rank(self,
                             topics: List[int] = None,
                             log_scale: bool = False,
+                            custom_labels: bool = False,
                             width: int = 800,
                             height: int = 500) -> go.Figure:
         """ Visualize the ranks of all terms across all topics
@@ -1369,6 +1500,8 @@ class BERTopic:
             topics: A selection of topics to visualize. These will be colored
                     red where all others will be colored black.
             log_scale: Whether to represent the ranking on a log scale
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1403,6 +1536,7 @@ class BERTopic:
         return plotting.visualize_term_rank(self,
                                             topics=topics,
                                             log_scale=log_scale,
+                                            custom_labels=custom_labels,
                                             width=width,
                                             height=height)
 
@@ -1411,6 +1545,7 @@ class BERTopic:
                                    top_n_topics: int = None,
                                    topics: List[int] = None,
                                    normalize_frequency: bool = False,
+                                   custom_labels: bool = False,
                                    width: int = 1250,
                                    height: int = 450) -> go.Figure:
         """ Visualize topics over time
@@ -1421,6 +1556,8 @@ class BERTopic:
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1449,6 +1586,7 @@ class BERTopic:
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
                                                    normalize_frequency=normalize_frequency,
+                                                   custom_labels=custom_labels,
                                                    width=width,
                                                    height=height)
 
@@ -1457,6 +1595,7 @@ class BERTopic:
                                    top_n_topics: int = 10,
                                    topics: List[int] = None,
                                    normalize_frequency: bool = False,
+                                   custom_labels: bool = False,
                                    width: int = 1250,
                                    height: int = 900) -> go.Figure:
         """ Visualize topics per class
@@ -1467,6 +1606,8 @@ class BERTopic:
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1495,12 +1636,14 @@ class BERTopic:
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
                                                    normalize_frequency=normalize_frequency,
+                                                   custom_labels=custom_labels,
                                                    width=width,
                                                    height=height)
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
                                min_probability: float = 0.015,
+                               custom_labels: bool = False,
                                width: int = 800,
                                height: int = 600) -> go.Figure:
         """ Visualize the distribution of topic probabilities
@@ -1509,6 +1652,8 @@ class BERTopic:
             probabilities: An array of probability scores
             min_probability: The minimum probability score to visualize.
                              All others are ignored.
+            custom_labels: Whether to use custom topic labels that were defined using 
+                           `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1532,6 +1677,7 @@ class BERTopic:
         return plotting.visualize_distribution(self,
                                                probabilities=probabilities,
                                                min_probability=min_probability,
+                                               custom_labels=custom_labels,
                                                width=width,
                                                height=height)
 
@@ -1539,6 +1685,7 @@ class BERTopic:
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
+                            custom_labels: bool = False,
                             width: int = 1000,
                             height: int = 600,
                             hierarchical_topics: pd.DataFrame = None,
@@ -1557,6 +1704,10 @@ class BERTopic:
                         Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
+                       NOTE: Custom labels are only generated for the original 
+                       un-merged topics.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
             hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -1612,6 +1763,7 @@ class BERTopic:
                                             orientation=orientation,
                                             topics=topics,
                                             top_n_topics=top_n_topics,
+                                            custom_labels=custom_labels,
                                             width=width,
                                             height=height,
                                             hierarchical_topics=hierarchical_topics,
@@ -1624,6 +1776,7 @@ class BERTopic:
                           topics: List[int] = None,
                           top_n_topics: int = None,
                           n_clusters: int = None,
+                          custom_labels: bool = False,
                           width: int = 800,
                           height: int = 800) -> go.Figure:
         """ Visualize a heatmap of the topic's similarity matrix
@@ -1636,6 +1789,8 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1663,6 +1818,7 @@ class BERTopic:
                                           topics=topics,
                                           top_n_topics=top_n_topics,
                                           n_clusters=n_clusters,
+                                          custom_labels=custom_labels,
                                           width=width,
                                           height=height)
 
