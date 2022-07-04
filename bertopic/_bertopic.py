@@ -912,7 +912,7 @@ class BERTopic:
         if topic:
             info = info.loc[info.Topic == topic, :]
 
-        return info
+        return info.reset_index(drop=True)
 
     def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
         """ Return the the size of topics (descending order)
