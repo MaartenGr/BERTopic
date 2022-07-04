@@ -96,6 +96,8 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Get all topic information|  `.get_topic_info()` |
 | Get representative docs per topic |  `.get_representative_docs()` |
 | Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Generate topic labels | `.generate_topic_labels()` |
+| Set topic labels | `.set_topic_labels(my_custom_labels)` |
 | Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `.find_topics("vehicle")` |
 | Save model    |  `.save("my_model")` |
