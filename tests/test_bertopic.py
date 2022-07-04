@@ -97,3 +97,9 @@ def test_full_model(topic_model):
     # Test setting topic labels
     topic_model.set_topic_labels(topic_labels)
     assert topic_model.custom_labels == topic_labels
+
+    # Test merging topics
+    freq = topic_model.get_topic_freq(0)
+    topics_to_merge = [0, 1]
+    topic_model.merge_topics(newsgroup_docs, new_topics, topics_to_merge)
+    assert freq < topic_model.get_topic_freq(0)

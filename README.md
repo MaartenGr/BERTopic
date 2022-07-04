@@ -215,6 +215,7 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
 | Generate topic labels | `.generate_topic_labels()` |
 | Set topic labels | `.set_topic_labels(my_custom_labels)` |
+| Merge topics | `.merge_topics(docs, topics, topics_to_merge)` |
 | Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `.find_topics("vehicle")` |
 | Save model    |  `.save("my_model")` |

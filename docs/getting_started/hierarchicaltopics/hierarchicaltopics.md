@@ -323,3 +323,26 @@ to view, we can see better which topics could be logically merged:
                             └─■──modem_port_serial_irq_com ── Topic: 10
   ```
 </details>
+
+
+### **Merge topics**
+
+After seeing the potential hierarchy of your topic, you might want to merge specific 
+topics. For example, if topic 1 is 
+`1_space_launch_moon_nasa` and topic 2 is `2_spacecraft_solar_space_orbit` it might 
+make sense to merge those two topics as they are quite similar in meaning. In BERTopic, 
+you can use `.merge_topics` to manually select and merge those topics. Doing so will 
+update their topic representation which in turn updates the entire model:
+
+```python
+topics_to_merge = [1, 2]
+topic_model.merge_topics(docs, topics, topics_to_merge)
+```
+
+If you have several groups of topics you want to merge, create a list of lists instead:
+
+```python
+topics_to_merge = [[1, 2]
+                   [3, 4]]
+topic_model.merge_topics(docs, topics, topics_to_merge)
+```

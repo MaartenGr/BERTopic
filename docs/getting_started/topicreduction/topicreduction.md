@@ -6,12 +6,28 @@ so.
 ### **Manual Topic Reduction**
 Each resulting topic has its own 
 feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
-topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number 
-of topics quite easily. We do this until we reach the value of `nr_topics`:  
+topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number of topics quite easily. We do this until we reach the value of `nr_topics`:  
 
 ```python
 from bertopic import BERTopic
 topic_model = BERTopic(nr_topics=20)
+```
+
+It is also possible to manually select certain topics that you believe should be merged. 
+For example, if topic 1 is `1_space_launch_moon_nasa` and topic 2 is `2_spacecraft_solar_space_orbit` 
+it might make sense to merge those two topics: 
+
+```python
+topics_to_merge = [1, 2]
+topic_model.merge_topics(docs, topics, topics_to_merge)
+```
+
+If you have several groups of topics you want to merge, create a list of lists instead:
+
+```python
+topics_to_merge = [[1, 2]
+                   [3, 4]]
+topic_model.merge_topics(docs, topics, topics_to_merge)
 ```
 
 ### **Automatic Topic Reduction**

@@ -16,7 +16,7 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from typing import List, Tuple, Union, Mapping, Any, Callable
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
 import hdbscan
@@ -618,20 +618,20 @@ class BERTopic:
 
         return topics_per_class
 
-    def hierarchical_topics(self, 
-                            docs: List[int], 
+    def hierarchical_topics(self,
+                            docs: List[int],
                             topics: List[int],
                             linkage_function: Callable[[csr_matrix], np.ndarray] = None,
                             distance_function: Callable[[csr_matrix], csr_matrix] = None) -> pd.DataFrame:
         """ Create a hierarchy of topics
-        
+
         To create this hierarchy, BERTopic needs to be already fitted once.
         Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF
-        representation using `scipy.cluster.hierarchy.linkage`. 
+        representation using `scipy.cluster.hierarchy.linkage`.
 
-        Based on that hierarchy, we calculate the topic representation at each 
-        merged step. This is a local representation, as we only assume that the 
-        chosen step is merged and not all others which typically improves the 
+        Based on that hierarchy, we calculate the topic representation at each
+        merged step. This is a local representation, as we only assume that the
+        chosen step is merged and not all others which typically improves the
         topic representation.
 
         Arguments:
@@ -670,10 +670,10 @@ class BERTopic:
         """
         if distance_function is None:
             distance_function = lambda x: 1 - cosine_similarity(x)
-        
+
         if linkage_function is None:
             linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
-        
+
         # Calculate linkage
         embeddings = self.c_tf_idf[self._outliers:]
         X = distance_function(embeddings)
@@ -681,8 +681,8 @@ class BERTopic:
 
         # Calculate basic bag-of-words to be iteratively merged later
         documents = pd.DataFrame({"Document": docs,
-                                "ID": range(len(docs)),
-                                "Topic": topics})
+                                  "ID": range(len(docs)),
+                                  "Topic": topics})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
         documents = self._preprocess_text(documents_per_topic.Document.values)
@@ -690,17 +690,17 @@ class BERTopic:
         bow = self.vectorizer_model.transform(documents)
 
         # Extract clusters
-        hier_topics = pd.DataFrame(columns=["Parent_ID", "Parent_Name", "Topics", 
+        hier_topics = pd.DataFrame(columns=["Parent_ID", "Parent_Name", "Topics",
                                             "Child_Left_ID", "Child_Left_Name",
                                             "Child_Right_ID", "Child_Right_Name"])
         for index in tqdm(range(len(Z))):
-            
+
             # Find clustered documents
             clusters = sch.fcluster(Z, t=Z[index][2], criterion='distance') - self._outliers
             cluster_df = pd.DataFrame({"Topic": range(len(clusters)), "Cluster": clusters})
-            cluster_df = cluster_df.groupby("Cluster").agg({'Topic':lambda x: list(x)}).reset_index()
+            cluster_df = cluster_df.groupby("Cluster").agg({'Topic': lambda x: list(x)}).reset_index()
             nr_clusters = len(clusters)
-            
+
             # Extract first topic we find to get the set of topics in a merged topic
             topic = None
             val = Z[index][0]
@@ -709,38 +709,38 @@ class BERTopic:
                     topic = int(val)
                 else:
                     val = Z[int(val - len(clusters))][0]
-            clustered_topics = [i for i, x in enumerate(clusters) if x == clusters[topic]]        
+            clustered_topics = [i for i, x in enumerate(clusters) if x == clusters[topic]]
 
             # Group bow per cluster, calculate c-TF-IDF and extract words
             grouped = csr_matrix(bow[clustered_topics].sum(axis=0))
             c_tf_idf = self.transformer.transform(grouped)
             words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels=[0])
-            
+
             # Extract parent's name and ID
             parent_id = index + len(clusters)
             parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
-            
+
             # Extract child's name and ID
             Z_id = Z[index][0]
             child_left_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
-            
+
             if Z_id - nr_clusters < 0:
                 child_left_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
             else:
                 child_left_name = hier_topics.iloc[int(child_left_id)].Parent_Name
-                
+
             # Extract child's name and ID
             Z_id = Z[index][1]
             child_right_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
-            
+
             if Z_id - nr_clusters < 0:
                 child_right_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
             else:
                 child_right_name = hier_topics.iloc[int(child_right_id)].Parent_Name
-                    
+
             # Save results
-            hier_topics.loc[len(hier_topics), :] = [parent_id, parent_name, 
-                                                    clustered_topics, 
+            hier_topics.loc[len(hier_topics), :] = [parent_id, parent_name,
+                                                    clustered_topics,
                                                     int(Z[index][0]), child_left_name,
                                                     int(Z[index][1]), child_right_name]
 
@@ -975,23 +975,23 @@ class BERTopic:
             return self.representative_docs
 
     @staticmethod
-    def get_topic_tree(hier_topics: pd.DataFrame, 
-                       max_distance: float = None, 
+    def get_topic_tree(hier_topics: pd.DataFrame,
+                       max_distance: float = None,
                        tight_layout: bool = False) -> str:
         """ Extract the topic tree such that it can be printed
 
         Arguments:
             hier_topics: A dataframe containing the structure of the topic tree.
                         This is the output of `topic_model.hierachical_topics()`
-            max_distance: The maximum distance between two topics. This value is 
-                        based on the Distance column in `hier_topics`.   
-            tight_layout: Whether to use a tight layout (narrow width) for 
+            max_distance: The maximum distance between two topics. This value is
+                        based on the Distance column in `hier_topics`.
+            tight_layout: Whether to use a tight layout (narrow width) for
                         easier readability if you have hundreds of topics.
 
         Returns:
             A tree that has the following structure when printed:
                 .
-                .  
+                .
                 └─health_medical_disease_patients_hiv
                     ├─patients_medical_disease_candida_health
                     │    ├─■──candida_yeast_infection_gonorrhea_infections ── Topic: 48
@@ -1017,29 +1017,29 @@ class BERTopic:
         print(tree)
         ```
         """
-        width = 1 if tight_layout else 4    
+        width = 1 if tight_layout else 4
         if max_distance is None:
             max_distance = hier_topics.Distance.max() + 1
 
         max_original_topic = hier_topics.Parent_ID.astype(int).min() - 1
-        
+
         # Extract mapping from ID to name
         topic_to_name = dict(zip(hier_topics.Child_Left_ID, hier_topics.Child_Left_Name))
         topic_to_name.update(dict(zip(hier_topics.Child_Right_ID, hier_topics.Child_Right_Name)))
         topic_to_name = {topic: name[:100] for topic, name in topic_to_name.items()}
-        
+
         # Create tree
         tree = {str(row[1].Parent_ID): [str(row[1].Child_Left_ID), str(row[1].Child_Right_ID)]
                 for row in hier_topics.iterrows()}
 
         def get_tree(start, tree):
             """ Based on: https://stackoverflow.com/a/51920869/10532563 """
-            
+
             def _tree(to_print, start, parent, tree, grandpa=None, indent=""):
 
                 # Get distance between merged topics
-                distance = hier_topics.loc[(hier_topics.Child_Left_ID == parent) | 
-                                        (hier_topics.Child_Right_ID == parent), "Distance"]
+                distance = hier_topics.loc[(hier_topics.Child_Left_ID == parent) |
+                                           (hier_topics.Child_Right_ID == parent), "Distance"]
                 distance = distance.values[0] if len(distance) > 0 else 10
 
                 if parent != start:
@@ -1047,71 +1047,71 @@ class BERTopic:
                         to_print += topic_to_name[parent]
                     else:
                         if int(parent) <= max_original_topic:
-                            
+
                             # Do not append topic ID if they are not merged
                             if distance < max_distance:
-                                to_print += "■──" + topic_to_name[parent] + f" ── Topic: {parent}" + "\n" 
+                                to_print += "■──" + topic_to_name[parent] + f" ── Topic: {parent}" + "\n"
                             else:
                                 to_print += "O \n"
                         else:
-                            to_print += topic_to_name[parent] + "\n"  
-                        
+                            to_print += topic_to_name[parent] + "\n"
+
                 if parent not in tree:
                     return to_print
 
                 for child in tree[parent][:-1]:
-                    to_print += indent + "├" + "─" 
+                    to_print += indent + "├" + "─"
                     to_print = _tree(to_print, start, child, tree, parent, indent + "│" + " " * width)
-                    
+
                 child = tree[parent][-1]
-                to_print += indent + "└" + "─" 
+                to_print += indent + "└" + "─"
                 to_print = _tree(to_print, start, child, tree, parent, indent + " " * (width+1))
-                
+
                 return to_print
 
             to_print = "." + "\n"
             to_print = _tree(to_print, start, start, tree)
             return to_print
-        
+
         start = str(hier_topics.Parent_ID.astype(int).max())
         return get_tree(start, tree)
 
     def set_topic_labels(self, topic_labels: Union[List[str], Mapping[int, str]]) -> None:
         """ Set custom topic labels in your fitted BERTopic model
-        
+
         Arguments:
             topic_labels: If a list of topic labels, it should contain the same number
-                        of labels as there are topics. This must be ordered 
-                        from the topic with the lowest ID to the highest ID, 
+                        of labels as there are topics. This must be ordered
+                        from the topic with the lowest ID to the highest ID,
                         including topic -1 if it exists.
-                        If a dictionary of `topic ID`: `topic_label`, it can have 
-                        any number of topics as it will only map the topics found 
-                        in the dictionary. 
-                        
+                        If a dictionary of `topic ID`: `topic_label`, it can have
+                        any number of topics as it will only map the topics found
+                        in the dictionary.
+
         Usage:
-        
+
         First, we define our topic labels with `.get_topic_labels` in which
         we can customize our topic labels:
-        
+
         ```python
         topic_labels = topic_model.get_topic_labels(nr_words=2,
                                                     topic_prefix=True,
                                                     word_length=10,
                                                     separator=", ")
         ```
-                        
-        Then, we pass these `topic_labels` to our topic model which 
+
+        Then, we pass these `topic_labels` to our topic model which
         can be accessed at any time with `.custom_labels`:
-        
+
         ```python
         topic_model.set_topic_labels(topic_labels)
         topic_model.custom_labels
         ```
-        
+
         You might want to change only a few topic labels instead of all of them.
-        To do so, you can pass a dictionary where the keys are the topic IDs and 
+        To do so, you can pass a dictionary where the keys are the topic IDs and
         its keys the topic labels:
-        
+
         ```python
         topic_model.set_topic_labels({0: "Space", 1: "Sports", 2: "Medicine"})
         topic_model.custom_labels
@@ -1120,31 +1120,31 @@ class BERTopic:
         unique_topics = sorted(set(self._map_predictions(self.hdbscan_model.labels_)))
 
         if isinstance(topic_labels, dict):
-                if self.custom_labels is not None:
-                    original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels)}
-                else:
-                    info = self.get_topic_info()
-                    original_labels = dict(zip(info.Topic, info.Name))
-                custom_labels = [topic_labels.get(topic) if topic_labels.get(topic) else original_labels[topic] for topic in unique_topics]
+            if self.custom_labels is not None:
+                original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels)}
+            else:
+                info = self.get_topic_info()
+                original_labels = dict(zip(info.Topic, info.Name))
+            custom_labels = [topic_labels.get(topic) if topic_labels.get(topic) else original_labels[topic] for topic in unique_topics]
 
         elif isinstance(topic_labels, list):
             if len(topic_labels) == len(unique_topics):
                 custom_labels = topic_labels
             else:
                 raise ValueError("Make sure that `topic_labels` contains the same number "
-                                "of labels as that there are topics.")
+                                 "of labels as that there are topics.")
 
         self.custom_labels = custom_labels
 
-    def generate_topic_labels(self, 
-                              nr_words: int = 3, 
-                              topic_prefix: bool = True, 
-                              word_length: int = None, 
+    def generate_topic_labels(self,
+                              nr_words: int = 3,
+                              topic_prefix: bool = True,
+                              word_length: int = None,
                               separator: str = "_") -> List[str]:
         """ Get labels for each topic in a user-defined format
 
         Arguments:
-            original_labels: 
+            original_labels:
             nr_words: Top `n` words per topic to use
             topic_prefix: Whether to use the topic ID as a prefix.
                         If set to True, the topic ID will be separated
@@ -1161,11 +1161,11 @@ class BERTopic:
             topic_labels: A list of topic labels sorted from the lowest topic ID to the highest.
                         If the topic model was trained using HDBSCAN, the lowest topic ID is -1,
                         otherwise it is 0.
-                        
+
         Usage:
-        
+
         To create our custom topic labels, usage is rather straightforward:
-        
+
         ```python
         topic_labels = topic_model.get_topic_labels(nr_words=2, separator=", ")
         ```
@@ -1186,8 +1186,60 @@ class BERTopic:
                 topic_label = separator.join(words)
 
             topic_labels.append(topic_label)
-            
+
         return topic_labels
+
+    def merge_topics(self,
+                     docs: List[str],
+                     topics: List[int],
+                     topics_to_merge: List[Union[Iterable[int], int]]) -> None:
+        """
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            topics_to_merge: Either a list of topics or a list of list of topics
+                            to merge. For example:
+                                [1, 2, 3] will merge topics 1, 2 and 3
+                                [[1, 2], [3, 4]] will merge topics 1 and 2, and
+                                separately merge topics 3 and 4.
+
+        Usage:
+
+        If you want to merge topics 1, 2, and 3:
+
+        ```python
+        topics_to_merge = [1, 2, 3]
+        topic_model.merge_topics(docs, topics, topics_to_merge)
+        ```
+
+        or if you want to merge topics 1 and 2, and separately
+        merge topics 3 and 4:
+
+        ```python
+        topics_to_merge = [[1, 2]
+                            [3, 4]]
+        topic_model.merge_topics(docs, topics, topics_to_merge)
+        ```
+        """
+        check_is_fitted(self)
+        documents = pd.DataFrame({"Document": docs, "Topic": topics})
+
+        mapping = {topic: topic for topic in set(topics)}
+        if isinstance(topics_to_merge[0], int):
+            for topic in sorted(topics_to_merge):
+                mapping[topic] = topics_to_merge[0]
+        elif isinstance(topics_to_merge[0], Iterable):
+            for topic_group in sorted(topics_to_merge):
+                for topic in topic_group:
+                    mapping[topic] = topic_group[0]
+        else:
+            raise ValueError("Make sure that `topics_to_merge` is either"
+                             "a list of topics or a list of list of topics.")
+
+        documents.Topic = documents.Topic.map(mapping)
+        documents = self._sort_mappings_by_frequency(documents)
+        self._extract_topics(documents)
+        self._update_topic_size(documents)
 
     def reduce_topics(self,
                       docs: List[str],
@@ -1313,7 +1365,7 @@ class BERTopic:
             hide_annotations: Hide the names of the traces on top of each cluster.
             hide_document_hover: Hide the content of the documents when hovering over
                                 specific points. Helps to speed up generation of visualization.
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
@@ -1414,9 +1466,9 @@ class BERTopic:
                     have a distance less or equal to the maximum distance of the selected list of distances.
                     NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
                     the length of `hierarchical_topics`.
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
-                           NOTE: Custom labels are only generated for the original 
+                           NOTE: Custom labels are only generated for the original
                            un-merged topics.
             width: The width of the figure.
             height: The height of the figure.
@@ -1499,7 +1551,7 @@ class BERTopic:
             topics: A selection of topics to visualize. These will be colored
                     red where all others will be colored black.
             log_scale: Whether to represent the ranking on a log scale
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
@@ -1555,7 +1607,7 @@ class BERTopic:
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
@@ -1605,7 +1657,7 @@ class BERTopic:
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
@@ -1651,7 +1703,7 @@ class BERTopic:
             probabilities: An array of probability scores
             min_probability: The minimum probability score to visualize.
                              All others are ignored.
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
@@ -1703,9 +1755,9 @@ class BERTopic:
                         Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
-                       NOTE: Custom labels are only generated for the original 
+                       NOTE: Custom labels are only generated for the original
                        un-merged topics.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
@@ -1788,7 +1840,7 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
