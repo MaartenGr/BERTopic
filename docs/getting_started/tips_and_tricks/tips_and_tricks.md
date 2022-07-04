@@ -232,3 +232,122 @@ To find the matching topic, we extract the most similar topic in the `sim_matrix
 ```
 
 It seems to be working as, for example, `trein` is a translation of `train` and `sporen` a translation of `tracks`! You can do this for every single topic to find out which topic in the `en_model` might belong to a model in the `nl_model`. 
+
+## **Multi-model data**
+[Concept](https://github.com/MaartenGr/Concept) is a variation 
+of BERTopic for multi-modal data, such as images with captions. Although we can use that 
+package for multi-modal data, we can perform a small trick with BERTopic to have a similar feature. 
+
+BERTopic is a relatively modular approach that attempts to isolate steps from one another. This means, 
+for example, that you can use k-Means instead of HDBSCAN or PCA instead of UMAP as it does not make 
+any assumptions with respect to the nature of the clustering. 
+
+Similarly, you can pass pre-calculated embeddings to BERTopic that represent the documents that you have. 
+However, it does not make any assumption with respect to the relationship between those embeddings and 
+the documents. This means that we could pass any metadata to BERTopic to cluster on instead of document 
+embeddings. In this example, we can separate our embeddings from our documents so that the embeddings 
+are generated from images instead of their corresponding images. Thus, we will cluster image embeddings but 
+create the topic representation from the related captions. 
+
+In this example, we first need to fetch our data, namely the Flickr 8k dataset that contains images 
+with captions:
+
+```python
+import os
+import glob
+import zipfile
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from PIL import Image
+from sentence_transformers import SentenceTransformer, util
+
+# Flickr 8k images
+img_folder = 'photos/'
+caps_folder = 'captions/'
+if not os.path.exists(img_folder) or len(os.listdir(img_folder)) == 0:
+    os.makedirs(img_folder, exist_ok=True)
+    
+    if not os.path.exists('Flickr8k_Dataset.zip'):   #Download dataset if does not exist
+        util.http_get('https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip', 'Flickr8k_Dataset.zip')
+        util.http_get('https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip', 'Flickr8k_text.zip')
+
+    for folder, file in [(img_folder, 'Flickr8k_Dataset.zip'), (caps_folder, 'Flickr8k_text.zip')]:
+        with zipfile.ZipFile(file, 'r') as zf:
+            for member in tqdm(zf.infolist(), desc='Extracting'):
+                zf.extract(member, folder)
+images = list(glob.glob('photos/Flicker8k_Dataset/*.jpg'))
+
+# Prepare dataframe
+captions = pd.read_csv("captions/Flickr8k.lemma.token.txt",sep='\t',names=["img_id","img_caption"])
+captions.img_id = captions.apply(lambda row: "photos/Flicker8k_Dataset/" + row.img_id.split(".jpg")[0] + ".jpg", 1)
+captions = captions.groupby(["img_id"])["img_caption"].apply(','.join).reset_index()
+captions = pd.merge(captions, pd.Series(images, name="img_id"), on="img_id")
+
+# Extract images together with their documents/captions
+images = captions.img_id.to_list()
+docs = captions.img_caption.to_list()
+```
+
+Now that we have our images and captions, we need to generate our image embeddings:
+
+```python
+model = SentenceTransformer('clip-ViT-B-32')
+
+# Prepare images
+batch_size = 32
+nr_iterations = int(np.ceil(len(images) / batch_size))
+
+# Embed images per batch
+embeddings = []
+for i in tqdm(range(nr_iterations)):
+    start_index = i * batch_size
+    end_index = (i * batch_size) + batch_size
+
+    images_to_embed = [Image.open(filepath) for filepath in images[start_index:end_index]]
+    img_emb = model.encode(images_to_embed, show_progress_bar=False)
+    embeddings.extend(img_emb.tolist())
+
+    # Close images
+    for image in images_to_embed:
+        image.close()
+embeddings = np.array(embeddings)
+```
+
+Finally, we can fit BERTopic the way we are used to, with documents and embeddings:
+
+```python
+from bertopic import BERTopic
+from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer_model = CountVectorizer(stop_words="english")
+topic_model = BERTopic(vectorizer_model=vectorizer_model)
+topics, probs = topic_model.fit_transform(docs, embeddings)
+captions["Topic"] = topics
+```
+
+After fitting our model, let's inspect a topic about skateboarders:
+
+```python
+>>> topic_model.get_topic(2)
+[('skateboard', 0.09592033177340711),
+ ('skateboarder', 0.07792520092546491),
+ ('trick', 0.07481578896400298),
+ ('ramp', 0.056952605147927216),
+ ('skate', 0.03745127816149923),
+ ('perform', 0.036546213623432654),
+ ('bicycle', 0.03453483070441857),
+ ('bike', 0.033233021253898994),
+ ('jump', 0.026709362981948037),
+ ('air', 0.025422798170830936)]
+```
+
+Based on the above output, we can take an image to see if the representation makes sense:
+
+```python
+image = captions.loc[captions.Topic == 2, "img_id"].values.tolist()[0]
+Image.open(image)
+```
+
+![](skateboarders.jpg)

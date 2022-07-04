@@ -24,6 +24,23 @@ topic_model = BERTopic(embedding_model=sentence_model)
 !!! tip "Tip!"
     This embedding back-end was put here first for a reason, sentence-transformers works amazing out-of-the-box! Playing around with different models can give you great results. Also, make sure to frequently visit [this](https://www.sbert.net/docs/pretrained_models.html) page as new models are often released. 
 
+### 🤗 Hugging Face Transformers
+To use a Hugging Face transformers model, load in a pipeline and point 
+to any model found on their model hub (https://huggingface.co/models):
+
+```python
+from bertopic.backend import HFTransformerBackend
+from transformers.pipelines import pipeline
+
+hf_model = pipeline("feature-extraction", model="distilbert-base-cased")
+embedding_model = HFTransformerBackend(hf_model)
+
+topic_model = BERTopic(embedding_model=document_glove_embeddings)
+```
+
+!!! tip "Tip!"
+    These transformers also work quite well using `sentence-transformers` which has a number of 
+    optimizations tricks that make using it a bit faster. 
 
 ### **Flair**
 [Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that 

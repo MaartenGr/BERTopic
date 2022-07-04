@@ -901,7 +901,7 @@ class BERTopic:
         """
         check_is_fitted(self)
 
-        info = pd.DataFrame(self.topic_sizes.items(), columns=["Topic", "Count"]).sort_values("Topic", ascending=False)
+        info = pd.DataFrame(self.topic_sizes.items(), columns=["Topic", "Count"]).sort_values("Topic")
         info["Name"] = info.Topic.map(self.topic_names)
 
         if self.custom_labels is not None:
