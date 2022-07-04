@@ -184,7 +184,6 @@ class BERTopic:
         self.merged_topics = None
         self.custom_labels = None
         self.topic_embeddings = None
-        self.topic_sim_matrix = None
         self.representative_docs = None
         self._outliers = 1
 
@@ -2243,8 +2242,6 @@ class BERTopic:
             self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
-
-        self.topic_sim_matrix = cosine_similarity(c_tf_idf)
 
         return c_tf_idf, words
 

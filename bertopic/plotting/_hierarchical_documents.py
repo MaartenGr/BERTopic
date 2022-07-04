@@ -94,6 +94,10 @@ def visualize_hierarchical_documents(topic_model,
     fig.write_html("path/to/file.html")
     ```
 
+    NOTE:
+        This visualization was inspired by the scatter plot representation of Doc2Map:
+        https://github.com/louisgeisler/Doc2Map
+
     <iframe src="../../getting_started/visualization/hierarchical_documents.html"
     style="width:1000px; height: 770px; border: 0px;""></iframe>
     """
