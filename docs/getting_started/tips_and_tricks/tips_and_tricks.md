@@ -151,3 +151,84 @@ force a cosine-related distance metric in UMAP:
 from cuml.preprocessing import normalize
 embeddings = normalize(embeddings)
 ```
+
+## **Finding similar topics between models**
+
+Whenever you have trained seperate BERTopic models on different datasets, it might 
+be worthful to find the similarities among these models. Is there overlap between 
+topics in model A and topic in model B? In other words, can we find topics in model A that are similar to those in model B? 
+
+We can compare the topic representations of several models in two ways. First, by comparing the topic embeddings that are created when using the same embedding model across both fitted BERTopic instances. Second, we can compare the c-TF-IDF representations instead assuming we have fixed the vocabulary in both instances. 
+
+This example will go into the former, using the same embedding model across two BERTopic instances. To do this comparison, let's first create an example where I trained two models, one on an English dataset and one on a Dutch dataset:
+
+```python
+from datasets import load_dataset
+from bertopic import BERTopic
+from sentence_transformers import SentenceTransformer
+from bertopic import BERTopic
+from umap import UMAP
+
+# The same embedding model needs to be used for both topic models
+# and since we are dealing with multiple languages, the model needs to be multi-lingual
+sentence_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+# To make this example reproducible
+umap_model = UMAP(n_neighbors=15, n_components=5, 
+                  min_dist=0.0, metric='cosine', random_state=42)
+
+# English
+en_dataset = load_dataset("stsb_multi_mt", name="en", split="train").to_pandas().sentence1.tolist()
+en_model = BERTopic(embedding_model=sentence_model, umap_model=umap_model)
+en_model.fit(en_dataset)
+
+# Dutch
+nl_dataset = load_dataset("stsb_multi_mt", name="nl", split="train").to_pandas().sentence1.tolist()
+nl_model = BERTopic(embedding_model=sentence_model, umap_model=umap_model)
+nl_model.fit(nl_dataset)
+```
+
+In the code above, there is one important thing to note and that is the `sentence_model`. This model needs to be exactly the same in all BERTopic models, otherwise, it is not possible to compare topic models. 
+
+Next, we can calculate the similarity between topics in the English topic model `en_model` and the Dutch model `nl_model`. To do so, we can simply calculate the cosine similarity between the `topic_embedding` of both models: 
+
+```python
+from sklearn.metrics.pairwise import cosine_similarity
+sim_matrix = cosine_similarity(en_model.topic_embeddings, nl_model.topic_embeddings)
+```
+
+Now that we know which topics are similar to each other, we can extract the most similar topics. Let's say that we have topic 10 in the `en_model` which represents a topic related to trains:
+
+```python
+>>> topic = 10
+>>> en_model.get_topic(topic)
+[('train', 0.2588080580844999),
+ ('tracks', 0.1392140438801078),
+ ('station', 0.12126454635946024),
+ ('passenger', 0.058057876475695866),
+ ('engine', 0.05123717127783682),
+ ('railroad', 0.048142847325312044),
+ ('waiting', 0.04098973702226946),
+ ('track', 0.03978248702913929),
+ ('subway', 0.03834661195748458),
+ ('steam', 0.03834661195748458)]
+```
+
+To find the matching topic, we extract the most similar topic in the `sim_matrix`:
+
+```python
+>>> most_similar_topic = np.argmax(sim_matrix[topic + 1])-1
+>>> nl_model.get_topic(most_similar_topic)
+[('trein', 0.24186603209316418),
+ ('spoor', 0.1338118418551581),
+ ('sporen', 0.07683661859111401),
+ ('station', 0.056990389779394225),
+ ('stoommachine', 0.04905829711711234),
+ ('zilveren', 0.04083879598477808),
+ ('treinen', 0.03534099197032758),
+ ('treinsporen', 0.03534099197032758),
+ ('staat', 0.03481332997324445),
+ ('zwarte', 0.03179591746822408)]
+```
+
+It seems to be working as, for example, `trein` is a translation of `train` and `sporen` a translation of `tracks`! You can do this for every single topic to find out which topic in the `en_model` might belong to a model in the `nl_model`. 
