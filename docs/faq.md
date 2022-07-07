@@ -35,7 +35,7 @@ a word/sentence level but can easily be pooled using Flair (see Guides/Embedding
 specific language for which you want to generate embeddings, you can choose the model [here](https://huggingface.co/models).
 
 ## **How do I reduce topic outliers?**
-There are two ways in reducing outliers. 
+There are three ways in reducing outliers. 
 
 First, the amount of datapoint classified as outliers is handled by the `min_samples` parameters in HDBSCAN. This value is automatically set to the 
 same value of `min_cluster_size`. However, you can set it indepedently if you want to reduce the number of generated outliers. Lowering this value will 
@@ -71,6 +71,17 @@ new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for 
     The topics assigned using the above method can result in topics different from using `.fit_transform()`. This is expected
     behavior as HDBSCAN is merely trying to imitate soft clustering after fitting the model and it is not a core component
     of assigning points to clusters. 
+
+Third, we can replace HDBSCAN with any other clustering algorithm that we want. So we can choose a clustering algorithm, like k-Means, that 
+does not produce any outliers at all. Using k-Means instead of HDBSCAN is straightforward:
+
+```python
+from bertopic import BERTopic
+from sklearn.cluster import KMeans
+
+cluster_model = KMeans(n_clusters=50)
+topic_model = BERTopic(hdbscan_model=cluster_model)
+```
 
 ## **How can I speed up BERTopic?**
 You can speed up BERTopic by either generating your embeddings beforehand or by 
