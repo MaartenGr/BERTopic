@@ -387,7 +387,7 @@ to view, we can see better which topics could be logically merged:
   ```
 </details>
 
-## **Visualize Hierarchical Document**
+## **Visualize Hierarchical Documents**
 We can extend the previous method by calculating the topic representation at different levels of the hierarchy and 
 plotting them on a 2D-plane. To do so, we first need to calculate the hierarchical topics:
 

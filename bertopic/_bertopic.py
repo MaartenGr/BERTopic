@@ -43,6 +43,9 @@ class BERTopic:
     c-TF-IDF to create dense clusters allowing for easily interpretable topics
     whilst keeping important words in the topic descriptions.
 
+    The default embedding model is `all-MiniLM-L6-v2` when selecting `language="english"` 
+    and `paraphrase-multilingual-MiniLM-L12-v2` when selecting `language="multilingual"`.
+
     Usage:
 
     ```python
@@ -90,9 +93,11 @@ class BERTopic:
         """BERTopic initialization
 
         Arguments:
-            language: The main language used in your documents. For a full overview of
+            language: The main language used in your documents. The default sentence-transformers 
+                      model for "english" is `all-MiniLM-L6-v2`. For a full overview of
                       supported languages see bertopic.backend.languages. Select
-                      "multilingual" to load in a sentence-tranformers model that supports 50+ languages.
+                      "multilingual" to load in the `paraphrase-multilingual-MiniLM-L12-v2`
+                      sentence-tranformers model that supports 50+ languages.
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
                          are typically best represented by at most 10 words.

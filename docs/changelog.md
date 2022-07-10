@@ -1,3 +1,86 @@
+## **Version 0.11.0**
+*Release date: 11 July, 2022*
+
+**Highlights**:
+
+* Perform [hierarchical topic modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) with `.hierarchical_topics`
+
+```python 
+hierarchical_topics = topic_model.hierarchical_topics(docs, topics) 
+```
+
+* Visualize [hierarchical topic representations](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#visualizations) with `.visualize_hierarchy`
+
+```python
+topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+```
+
+* Extract a [text-based hierarchical topic representation](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#visualizations) with `.get_topic_tree`
+
+```python
+tree = topic_model.get_topic_tree(hierarchical_topics)
+```
+
+* Visualize [2D documents](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html#visualize-documents) with `.visualize_documents()`
+
+```python
+# Use input embeddings
+topic_model.visualize_documents(docs, embeddings=embeddings)
+
+# or use 2D reduced embeddings through a method of your own (e.g., PCA, t-SNE, UMAP, etc.)
+reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
+```
+
+* Visualize [2D hierarchical documents](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html#visualize-hierarchical-documents) with `.visualize_hierarchical_documents()` 
+
+```python
+# Run the visualization with the original embeddings
+topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, embeddings=embeddings)
+
+# Or, if you have reduced the original embeddings already which speed things up quite a bit:
+reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+```
+
+* Create [custom labels](https://maartengr.github.io/BERTopic/getting_started/topicrepresentation/topicrepresentation.html#custom-labels) to the topics throughout most visualizations
+
+```python
+# Generate topic labels
+topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
+
+# Set them internally in BERTopic
+topic_model.set_topic_labels(topics_labels)
+```
+
+* Manually [merge topics](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#merge-topics) with `.merge_topics()`
+
+```python
+# Merge topics 1, 2, and 3
+topics_to_merge = [1, 2, 3]
+topic_model.merge_topics(docs, topics, topics_to_merge)
+
+# Merge topics 1 and 2, and separately merge topics 3 and 4
+topics_to_merge = [[1, 2], [3, 4]]
+topic_model.merge_topics(docs, topics, topics_to_merge)
+```
+
+* Added example for finding similar topics between two models in the [tips & tricks](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html) page
+* Add multi-modal example in the [tips & tricks](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html) page
+* Added native [Hugging Face transformers](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html#hugging-face-transformers) support 
+
+**Fixes**: 
+
+* Fix support for k-Means in `.visualize_heatmap` ([#532](https://github.com/MaartenGr/BERTopic/issues/532))
+* Fix missing topic 0 in `.visualize_topics` ([#533](https://github.com/MaartenGr/BERTopic/issues/533))
+* Fix inconsistencies in `.get_topic_info` ([#572](https://github.com/MaartenGr/BERTopic/issues/572)) and ([#581](https://github.com/MaartenGr/BERTopic/issues/581))
+* Add `optimal_ordering` parameter to `.visualize_hierarchy` by [@rafaelvalero](https://github.com/rafaelvalero) in [#390](https://github.com/MaartenGr/BERTopic/pull/390)
+* Fix RuntimeError when used as sklearn estimator by [@simonfelding](https://github.com/simonfelding) in [#448](https://github.com/MaartenGr/BERTopic/pull/448)
+* Fix typo in visualization documentation by [@dwhdai](https://github.com/dwhdai) in [#475](https://github.com/MaartenGr/BERTopic/pull/475)
+* Fix typo in docstrings by [@xwwwwww](https://github.com/xwwwwww) in [#549](https://github.com/MaartenGr/BERTopic/pull/549)
+* Support higher Flair versions
+
+
 
 ## **Version 0.10.0**
 *Release date: 30 April, 2022*
@@ -47,8 +130,8 @@ new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for 
 * Update gensim dependency to `>=4.0.0` ([#371](https://github.com/MaartenGr/BERTopic/issues/371))
 * Fix topic 0 not appearing in visualizations ([#472](https://github.com/MaartenGr/BERTopic/issues/472))
 * Fix ([#506](https://github.com/MaartenGr/BERTopic/issues/506))
-* Fix ([#429](https://github.com/MaartenGr/BERTopic/issues/506))
-
+* Fix ([#429](https://github.com/MaartenGr/BERTopic/issues/429))
+* Fix typo in DTM documentation by [@hp0404](https://github.com/hp0404) in [#386](https://github.com/MaartenGr/BERTopic/pull/386)
 
 ## **Version 0.9.4**
 *Release date: 14 December, 2021*

@@ -73,17 +73,16 @@ using the `_` separator. Although this is an informative label, in practice, thi
 Although we can go through every single topic ourselves and try to label them, we can start by creating an overview of labels that have the length and number of words that we are looking for. To do so, we can generate our list of topic labels with `.get_topic_labels` and define the number of words, the separator, word length, etc:
 
 ```python
-topic_labels = topic_model.generate_topic_labels(topic_model,
-nr_words=3,
-                                            topic_prefix=False,
-                                            word_length=10,
-                                            separator=", ")
+topic_labels = topic_model.generate_topic_labels(nr_words=3,
+                                                 topic_prefix=False,
+                                                 word_length=10,
+                                                 separator=", ")
 ```
 
 In the above example, `1_space_nasa_orbit` would turn into `space, nasa, orbit` since we selected 3 words, no topic prefix, and the `, ` separator. We can then either change our `topic_labels` to whatever we want or directly pass them to `.set_topic_labels` so that they can be used across most visualization functions:
 
 ```python
-topic_model.set_topic_labels(topics_labels)
+topic_model.set_topic_labels(topic_labels)
 ```
 
 It is also possible to only change a few topic labels at a time by passing a dictionary 
@@ -113,7 +112,7 @@ from transformers import pipeline
 classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 # A selected topic representation
-# sequence_to_classify = 'god jesus atheists atheism belief atheist believe exist beliefs existence'
+# 'god jesus atheists atheism belief atheist believe exist beliefs existence'
 sequence_to_classify =  " ".join([word for word, _ in topic_model.get_topic(1)])
 
 # Our set of potential topic labels

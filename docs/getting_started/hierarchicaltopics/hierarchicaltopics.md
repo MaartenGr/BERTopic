@@ -38,8 +38,28 @@ hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
 
 The resulting `hierarchical_topics` is a dataframe in which merged topics are described. For example, if you would 
 merge two topics, what would the topic representation of the new topic be? 
-                                                                                                                                                                       
-### **Visualizations**
+
+## **Linkage functions**
+
+When creating the potential hierarchical nature of topics, we use Scipy's ward `linkage` function as a default 
+to generate the hierarchy. However, you might want to use a [different linkage function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html) 
+for your use case, such as `single`, `complete`, `average`, `centroid`, or `median`. In BERTopic, you can define the 
+linkage function yourself, including the distance function that you would like to use:
+
+
+```python
+from scipy.cluster import hierarchy as sch
+from bertopic import BERTopic
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(docs)
+
+# Hierarchical topics
+linkage_function = lambda x: sch.linkage(x, 'single', optimal_ordering=True)
+hierarchical_topics = topic_model.hierarchical_topics(docs, topics, linkage_function=linkage_function)
+```
+
+
+## **Visualizations**
 To visualize these results, we can start by running a familiar function, namely `topic_model.visualize_hierarchy`:
 
 ```python
@@ -325,7 +345,7 @@ to view, we can see better which topics could be logically merged:
 </details>
 
 
-### **Merge topics**
+## **Merge topics**
 
 After seeing the potential hierarchy of your topic, you might want to merge specific 
 topics. For example, if topic 1 is 

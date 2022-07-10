@@ -16,7 +16,7 @@ We start by creating document embeddings from a set of documents using
 [sentence-transformers](https://github.com/UKPLab/sentence-transformers). These models are pre-trained for many 
 languages and are great for creating either document- or sentence-embeddings. 
 
-In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:
+In BERTopic, you can choose any sentence-transformers model but there are two models that are set as defaults:
 
 * `"all-MiniLM-L6-v2"`
 * `"paraphrase-multilingual-MiniLM-L12-v2"`
@@ -26,13 +26,32 @@ well for most use-cases. The second model is very similar to the first with one 
 `multilingual` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
 you select any language other than English.
 
+!!! tip Embedding Models
+
+    Although BERTopic uses sentence-transformers models as a default, you can choose 
+    any embedding model that fits your use case. Follow the guide [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) for selecting 
+    and customizing your model.
+
+
 ##  **2. Cluster Documents**
 
 Typically, clustering algorithms have difficulty clustering data in high dimensional space. Before we are 
 going to cluster our documents, we first need to reduce the dimensionality of the embeddings that we generated. 
+As a default, we use UMAP since it preserves both the local and global structure of embeddings quite well. 
 
-To do so, we use UMAP as it preserves both the local and global structure of embeddings quite well. Then, 
-we use HDBSCAN  to cluster the reduced embeddings as it allows us to identify outliers. 
+!!! tip Dimensionality Reduction Models
+
+    Although BERTopic uses UMAP as a default, you can choose 
+    any dimensionality reduction model that fits your use case. Follow the guide [here](https://maartengr.github.io/BERTopic/getting_started/dim_reduction/dim_reduction.html) for selecting 
+    and customizing your model.
+
+Then, after reducing our embeddings, we leverage a density-based clustering technique, HDBSCAN, to create our clusters and identify outliers where possible. 
+
+!!! tip Cluster Models
+
+    Although BERTopic uses HDBSCAN as a default, you can choose 
+    any cluster model that fits your use case. Follow the guide [here](https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html) for selecting 
+    and customizing your model.
 
 ##  **3. Create topic representation**
 What we want to know from the clusters that we generated, is what makes one cluster, based on its content, 
@@ -59,6 +78,13 @@ of word `x` across all classes. We add plus one within the logarithm to force va
 This results in our class-based `idf` representation. 
 
 Like with the classic TF-IDF, we then multiply `tf` with `idf` to get the importance score per word in each class. 
+
+!!! tip CountVectorizer Models
+
+    This c-TF-IDF representation first create a vocabulary through the use of scikit-learn's `CountVectorizer` 
+    module. This module allows us to preprocess the topic representation without actually preprocessing 
+    the data input. Follow the guide [here](http://127.0.0.1:8000/BERTopic/getting_started/countvectorizer/countvectorizer.html) for selecting 
+    and customizing the `CountVectorizer`.
 
 ## **(Optional) Maximal Marginal Relevance Coherence**  
 After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
