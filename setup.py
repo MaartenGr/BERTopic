@@ -24,9 +24,9 @@ base_packages = [
 ]
 
 flair_packages = [
-    "transformers==3.5.1",
-    "torch>=1.4.0,<1.7.1",
-    "flair==0.7"
+    "transformers>=3.5.1",
+    "torch>=1.4.0",
+    "flair>=0.7"
 ]
 
 spacy_packages = [
