@@ -22,10 +22,12 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs) 
 ```
 
-Then, we simply call `topic_model.visualize_topics()` in order to visualize our topics. The resulting graph is a 
-plotly interactive graph which can be converted to HTML. 
+Then, we can use call `.visualize_topics` to create a 2D representation of your topics. The resulting graph is a 
+plotly interactive graph which can be converted to HTML:
 
-Thus, you can play around with the results below:
+```python
+topic_model.visualize_topics()
+```
 
 <iframe src="viz.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
@@ -53,13 +55,11 @@ embeddings = sentence_model.encode(docs, show_progress_bar=False)
 # Train BERTopic
 topic_model = BERTopic().fit(docs, embeddings)
 
-# Reduce dimensionality of embeddings, this step is optional
-# reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
-
 # Run the visualization with the original embeddings
 topic_model.visualize_documents(docs, embeddings=embeddings)
 
-# Or, if you have reduced the original embeddings already:
+# Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
+reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
 topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
 ```
 
@@ -76,7 +76,11 @@ topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
 The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
 structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how 
 they relate to one another. This might help selecting an appropriate `nr_topics` when reducing the number 
-of topics that you have created. To visualize this hierarchy, simply call `topic_model.visualize_hierarchy()`:
+of topics that you have created. To visualize this hierarchy, run the following:
+
+```python
+topic_model.visualize_hierarchy()
+```
 
 <iframe src="hierarchy.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
@@ -84,6 +88,8 @@ of topics that you have created. To visualize this hierarchy, simply call `topic
     Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to 
     auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
     the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected. 
+
+### **Hierarchical labels**
 
 Although visualizing this hierarchy gives us information about the structure, it would be helpful to see what happens 
 to the topic representations when merging topics. To do so, we first need to calculate the representations of the 
@@ -102,7 +108,7 @@ topics, probs = topic_model.fit_transform(docs)
 hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
 ```
 
-To visualize these results, we simply need to pass the resulting `hierarchical_topics` to our `topic_model.visualize_hierarchy()` function:
+To visualize these results, we simply need to pass the resulting `hierarchical_topics` to our `.visualize_hierarchy` function:
 
 ```python
 topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
@@ -113,6 +119,8 @@ topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
 If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations 
 help you understand the effect of merging certain topics together. Some might be logical to merge whilst others might not. Moreover, 
 we can now see which sub-topics can be found within certain larger themes. 
+
+### **Text-based topic tree**
 
 Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can 
 use `topic_model.get_topic_tree` to create a text-based representation of this hierarchy. Although the general structure is more difficult 
@@ -430,7 +438,11 @@ topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_
 We can visualize the selected terms for a few topics by creating bar charts out of the c-TF-IDF scores 
 for each topic representation. Insights can be gained from the relative c-TF-IDF scores between and within 
 topics. Moreover, you can easily compare topic representations to each other. 
-To visualize this hierarchy, simply call `topic_model.visualize_barchart()`:
+To visualize this hierarchy, run the following:
+
+```python
+topic_model.visualize_barchart()
+```
 
 <iframe src="bar_chart.html" style="width:1100px; height: 660px; border: 0px;""></iframe>
 
@@ -439,7 +451,11 @@ To visualize this hierarchy, simply call `topic_model.visualize_barchart()`:
 Having generated topic embeddings, through both c-TF-IDF and embeddings, we can create a similarity 
 matrix by simply applying cosine similarities through those topic embeddings. The result will be a 
 matrix indicating how similar certain topics are to each other. 
-To visualize the heatmap, simply call `topic_model.visualize_heatmap()`:
+To visualize the heatmap, run the following:
+
+```python
+topic_model.visualize_heatmap()
+```
  
 <iframe src="heatmap.html" style="width:1000px; height: 720px; border: 0px;""></iframe>
 
@@ -464,12 +480,19 @@ will be populated by the c-TF-IDF scores. The result is a visualization that sho
 of c-TF-IDF score when adding words to the topic representation. It allows you, using the elbow method, 
 the select the best number of words in a topic. 
 
-To visualize the c-TF-IDF score decline, simply call `topic_model.visualize_term_rank()`:
+To visualize the c-TF-IDF score decline, run the following:
+
+```python
+topic_model.visualize_term_rank()
+```
 
 <iframe src="term_rank.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
 
-To enable the log scale on the y-axis for a better view of individual topics, 
-simply call `topic_model.visualize_term_rank(log_scale=True)`:
+To enable the log scale on the y-axis for a better view of individual topics, run the following:
+
+```python
+topic_model.visualize_term_rank(log_scale=True)
+```
 
 <iframe src="term_rank_log.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
 
@@ -482,7 +505,7 @@ Reference to that specific analysis can be found
 After creating topics over time with Dynamic Topic Modeling, we can visualize these topics by 
 leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
 of topics over time whilst giving the option of hovering over the points to show the time-specific topic representations. 
-Simply call `visualize_topics_over_time` with the newly created topics over time:
+Simply call `.visualize_topics_over_time` with the newly created topics over time:
 
 
 ```python
@@ -559,7 +582,7 @@ topic_model = BERTopic(calculate_probabilities=True)
 topics, probabilities = topic_model.fit_transform(docs)
 ```
 
-To visualize the distributions, we simply call:
+To visualize the distributions, run the following:
 
 ```python
 topic_model.visualize_distribution(probabilities[0])
