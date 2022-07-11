@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 def visualize_term_rank(topic_model,
                         topics: List[int] = None,
                         log_scale: bool = False,
+                        custom_labels: bool = False,
                         width: int = 800,
                         height: int = 500) -> go.Figure:
     """ Visualize the ranks of all terms across all topics
@@ -20,6 +21,8 @@ def visualize_term_rank(topic_model,
         topics: A selection of topics to visualize. These will be colored
                 red where all others will be colored black.
         log_scale: Whether to represent the ranking on a log scale
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -69,9 +72,13 @@ def visualize_term_rank(topic_model,
     lines = []
     for topic, x, y in zip(topic_ids, indices, values):
         if not any(y > 1.5):
+
             # labels
-            label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
-            label = label[:50]
+            if topic_model.custom_labels is not None and custom_labels:
+                label = topic_model.custom_labels[topic + topic_model._outliers]
+            else:
+                label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
+                label = label[:50]
 
             # line parameters
             color = "red" if topic in topics else "black"

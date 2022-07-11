@@ -14,8 +14,9 @@ import inspect
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from scipy.sparse.csr import csr_matrix
-from typing import List, Tuple, Union, Mapping, Any
+from scipy.sparse import csr_matrix
+from scipy.cluster import hierarchy as sch
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
 import hdbscan
@@ -41,6 +42,9 @@ class BERTopic:
     """BERTopic is a topic modeling technique that leverages BERT embeddings and
     c-TF-IDF to create dense clusters allowing for easily interpretable topics
     whilst keeping important words in the topic descriptions.
+
+    The default embedding model is `all-MiniLM-L6-v2` when selecting `language="english"` 
+    and `paraphrase-multilingual-MiniLM-L12-v2` when selecting `language="multilingual"`.
 
     Usage:
 
@@ -89,9 +93,11 @@ class BERTopic:
         """BERTopic initialization
 
         Arguments:
-            language: The main language used in your documents. For a full overview of
+            language: The main language used in your documents. The default sentence-transformers 
+                      model for "english" is `all-MiniLM-L6-v2`. For a full overview of
                       supported languages see bertopic.backend.languages. Select
-                      "multilingual" to load in a sentence-tranformers model that supports 50+ languages.
+                      "multilingual" to load in the `paraphrase-multilingual-MiniLM-L12-v2`
+                      sentence-tranformers model that supports 50+ languages.
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
                          are typically best represented by at most 10 words.
@@ -176,12 +182,13 @@ class BERTopic:
                                                               cluster_selection_method='eom',
                                                               prediction_data=True)
 
+        # Attributes
         self.topics = None
         self.topic_mapper = None
         self.topic_sizes = None
         self.merged_topics = None
+        self.custom_labels = None
         self.topic_embeddings = None
-        self.topic_sim_matrix = None
         self.representative_docs = None
         self._outliers = 1
 
@@ -616,6 +623,138 @@ class BERTopic:
 
         return topics_per_class
 
+    def hierarchical_topics(self,
+                            docs: List[int],
+                            topics: List[int],
+                            linkage_function: Callable[[csr_matrix], np.ndarray] = None,
+                            distance_function: Callable[[csr_matrix], csr_matrix] = None) -> pd.DataFrame:
+        """ Create a hierarchy of topics
+
+        To create this hierarchy, BERTopic needs to be already fitted once.
+        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF
+        representation using `scipy.cluster.hierarchy.linkage`.
+
+        Based on that hierarchy, we calculate the topic representation at each
+        merged step. This is a local representation, as we only assume that the
+        chosen step is merged and not all others which typically improves the
+        topic representation.
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            linkage_function: The linkage function to use. Default is:
+                            `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
+            distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
+                                `lambda x: 1 - cosine_similarity(x)`
+
+        Returns:
+            hierarchical_topics: A dataframe that contains a hierarchy of topics
+                                represented by their parents and their children
+
+        Usage:
+
+        ```python
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+        ```
+
+        A custom linkage function can be used as follows:
+
+        ```python
+        from scipy.cluster import hierarchy as sch
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+
+        # Hierarchical topics
+        linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics, linkage_function=linkage_function)
+        ```
+        """
+        if distance_function is None:
+            distance_function = lambda x: 1 - cosine_similarity(x)
+
+        if linkage_function is None:
+            linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
+
+        # Calculate linkage
+        embeddings = self.c_tf_idf[self._outliers:]
+        X = distance_function(embeddings)
+        Z = linkage_function(X)
+
+        # Calculate basic bag-of-words to be iteratively merged later
+        documents = pd.DataFrame({"Document": docs,
+                                  "ID": range(len(docs)),
+                                  "Topic": topics})
+        documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
+        documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
+        documents = self._preprocess_text(documents_per_topic.Document.values)
+        words = self.vectorizer_model.get_feature_names()
+        bow = self.vectorizer_model.transform(documents)
+
+        # Extract clusters
+        hier_topics = pd.DataFrame(columns=["Parent_ID", "Parent_Name", "Topics",
+                                            "Child_Left_ID", "Child_Left_Name",
+                                            "Child_Right_ID", "Child_Right_Name"])
+        for index in tqdm(range(len(Z))):
+
+            # Find clustered documents
+            clusters = sch.fcluster(Z, t=Z[index][2], criterion='distance') - self._outliers
+            cluster_df = pd.DataFrame({"Topic": range(len(clusters)), "Cluster": clusters})
+            cluster_df = cluster_df.groupby("Cluster").agg({'Topic': lambda x: list(x)}).reset_index()
+            nr_clusters = len(clusters)
+
+            # Extract first topic we find to get the set of topics in a merged topic
+            topic = None
+            val = Z[index][0]
+            while topic is None:
+                if val - len(clusters) < 0:
+                    topic = int(val)
+                else:
+                    val = Z[int(val - len(clusters))][0]
+            clustered_topics = [i for i, x in enumerate(clusters) if x == clusters[topic]]
+
+            # Group bow per cluster, calculate c-TF-IDF and extract words
+            grouped = csr_matrix(bow[clustered_topics].sum(axis=0))
+            c_tf_idf = self.transformer.transform(grouped)
+            words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels=[0])
+
+            # Extract parent's name and ID
+            parent_id = index + len(clusters)
+            parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
+
+            # Extract child's name and ID
+            Z_id = Z[index][0]
+            child_left_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
+
+            if Z_id - nr_clusters < 0:
+                child_left_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
+            else:
+                child_left_name = hier_topics.iloc[int(child_left_id)].Parent_Name
+
+            # Extract child's name and ID
+            Z_id = Z[index][1]
+            child_right_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
+
+            if Z_id - nr_clusters < 0:
+                child_right_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
+            else:
+                child_right_name = hier_topics.iloc[int(child_right_id)].Parent_Name
+
+            # Save results
+            hier_topics.loc[len(hier_topics), :] = [parent_id, parent_name,
+                                                    clustered_topics,
+                                                    int(Z[index][0]), child_left_name,
+                                                    int(Z[index][1]), child_right_name]
+
+        hier_topics["Distance"] = Z[:, 2]
+        hier_topics = hier_topics.sort_values("Parent_ID", ascending=False)
+        hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]] = hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]].astype(str)
+
+        return hier_topics
+
     def find_topics(self,
                     search_term: str,
                     top_n: int = 5) -> Tuple[List[int], List[float]]:
@@ -750,7 +889,7 @@ class BERTopic:
             return False
 
     def get_topic_info(self, topic: int = None) -> pd.DataFrame:
-        """ Get information about each topic including its id, frequency, and name
+        """ Get information about each topic including its ID, frequency, and name.
 
         Arguments:
             topic: A specific topic for which you want the frequency
@@ -766,13 +905,18 @@ class BERTopic:
         """
         check_is_fitted(self)
 
-        info = pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count", ascending=False)
+        info = pd.DataFrame(self.topic_sizes.items(), columns=["Topic", "Count"]).sort_values("Topic")
         info["Name"] = info.Topic.map(self.topic_names)
+
+        if self.custom_labels is not None:
+            if len(self.custom_labels) == len(info):
+                labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels)}
+                info["CustomName"] = info["Topic"].map(labels)
 
         if topic:
             info = info.loc[info.Topic == topic, :]
 
-        return info
+        return info.reset_index(drop=True)
 
     def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
         """ Return the the size of topics (descending order)
@@ -834,6 +978,273 @@ class BERTopic:
             return self.representative_docs[topic]
         else:
             return self.representative_docs
+
+    @staticmethod
+    def get_topic_tree(hier_topics: pd.DataFrame,
+                       max_distance: float = None,
+                       tight_layout: bool = False) -> str:
+        """ Extract the topic tree such that it can be printed
+
+        Arguments:
+            hier_topics: A dataframe containing the structure of the topic tree.
+                        This is the output of `topic_model.hierachical_topics()`
+            max_distance: The maximum distance between two topics. This value is
+                        based on the Distance column in `hier_topics`.
+            tight_layout: Whether to use a tight layout (narrow width) for
+                        easier readability if you have hundreds of topics.
+
+        Returns:
+            A tree that has the following structure when printed:
+                .
+                .
+                └─health_medical_disease_patients_hiv
+                    ├─patients_medical_disease_candida_health
+                    │    ├─■──candida_yeast_infection_gonorrhea_infections ── Topic: 48
+                    │    └─patients_disease_cancer_medical_doctor
+                    │         ├─■──hiv_medical_cancer_patients_doctor ── Topic: 34
+                    │         └─■──pain_drug_patients_disease_diet ── Topic: 26
+                    └─■──health_newsgroup_tobacco_vote_votes ── Topic: 9
+
+            The blocks (■) indicate that the topic is one you can directly access
+            from `topic_model.get_topic`. In other words, they are the original un-grouped topics.
+
+        Usage:
+
+        ```python
+        # Train model
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+
+        # Print topic tree
+        tree = topic_model.get_topic_tree(hierarchical_topics)
+        print(tree)
+        ```
+        """
+        width = 1 if tight_layout else 4
+        if max_distance is None:
+            max_distance = hier_topics.Distance.max() + 1
+
+        max_original_topic = hier_topics.Parent_ID.astype(int).min() - 1
+
+        # Extract mapping from ID to name
+        topic_to_name = dict(zip(hier_topics.Child_Left_ID, hier_topics.Child_Left_Name))
+        topic_to_name.update(dict(zip(hier_topics.Child_Right_ID, hier_topics.Child_Right_Name)))
+        topic_to_name = {topic: name[:100] for topic, name in topic_to_name.items()}
+
+        # Create tree
+        tree = {str(row[1].Parent_ID): [str(row[1].Child_Left_ID), str(row[1].Child_Right_ID)]
+                for row in hier_topics.iterrows()}
+
+        def get_tree(start, tree):
+            """ Based on: https://stackoverflow.com/a/51920869/10532563 """
+
+            def _tree(to_print, start, parent, tree, grandpa=None, indent=""):
+
+                # Get distance between merged topics
+                distance = hier_topics.loc[(hier_topics.Child_Left_ID == parent) |
+                                           (hier_topics.Child_Right_ID == parent), "Distance"]
+                distance = distance.values[0] if len(distance) > 0 else 10
+
+                if parent != start:
+                    if grandpa is None:
+                        to_print += topic_to_name[parent]
+                    else:
+                        if int(parent) <= max_original_topic:
+
+                            # Do not append topic ID if they are not merged
+                            if distance < max_distance:
+                                to_print += "■──" + topic_to_name[parent] + f" ── Topic: {parent}" + "\n"
+                            else:
+                                to_print += "O \n"
+                        else:
+                            to_print += topic_to_name[parent] + "\n"
+
+                if parent not in tree:
+                    return to_print
+
+                for child in tree[parent][:-1]:
+                    to_print += indent + "├" + "─"
+                    to_print = _tree(to_print, start, child, tree, parent, indent + "│" + " " * width)
+
+                child = tree[parent][-1]
+                to_print += indent + "└" + "─"
+                to_print = _tree(to_print, start, child, tree, parent, indent + " " * (width+1))
+
+                return to_print
+
+            to_print = "." + "\n"
+            to_print = _tree(to_print, start, start, tree)
+            return to_print
+
+        start = str(hier_topics.Parent_ID.astype(int).max())
+        return get_tree(start, tree)
+
+    def set_topic_labels(self, topic_labels: Union[List[str], Mapping[int, str]]) -> None:
+        """ Set custom topic labels in your fitted BERTopic model
+
+        Arguments:
+            topic_labels: If a list of topic labels, it should contain the same number
+                        of labels as there are topics. This must be ordered
+                        from the topic with the lowest ID to the highest ID,
+                        including topic -1 if it exists.
+                        If a dictionary of `topic ID`: `topic_label`, it can have
+                        any number of topics as it will only map the topics found
+                        in the dictionary.
+
+        Usage:
+
+        First, we define our topic labels with `.get_topic_labels` in which
+        we can customize our topic labels:
+
+        ```python
+        topic_labels = topic_model.get_topic_labels(nr_words=2,
+                                                    topic_prefix=True,
+                                                    word_length=10,
+                                                    separator=", ")
+        ```
+
+        Then, we pass these `topic_labels` to our topic model which
+        can be accessed at any time with `.custom_labels`:
+
+        ```python
+        topic_model.set_topic_labels(topic_labels)
+        topic_model.custom_labels
+        ```
+
+        You might want to change only a few topic labels instead of all of them.
+        To do so, you can pass a dictionary where the keys are the topic IDs and
+        its keys the topic labels:
+
+        ```python
+        topic_model.set_topic_labels({0: "Space", 1: "Sports", 2: "Medicine"})
+        topic_model.custom_labels
+        ```
+        """
+        unique_topics = sorted(set(self._map_predictions(self.hdbscan_model.labels_)))
+
+        if isinstance(topic_labels, dict):
+            if self.custom_labels is not None:
+                original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels)}
+            else:
+                info = self.get_topic_info()
+                original_labels = dict(zip(info.Topic, info.Name))
+            custom_labels = [topic_labels.get(topic) if topic_labels.get(topic) else original_labels[topic] for topic in unique_topics]
+
+        elif isinstance(topic_labels, list):
+            if len(topic_labels) == len(unique_topics):
+                custom_labels = topic_labels
+            else:
+                raise ValueError("Make sure that `topic_labels` contains the same number "
+                                 "of labels as that there are topics.")
+
+        self.custom_labels = custom_labels
+
+    def generate_topic_labels(self,
+                              nr_words: int = 3,
+                              topic_prefix: bool = True,
+                              word_length: int = None,
+                              separator: str = "_") -> List[str]:
+        """ Get labels for each topic in a user-defined format
+
+        Arguments:
+            original_labels:
+            nr_words: Top `n` words per topic to use
+            topic_prefix: Whether to use the topic ID as a prefix.
+                        If set to True, the topic ID will be separated
+                        using the `separator`
+            word_length: The maximum length of each word in the topic label.
+                        Some words might be relatively long and setting this
+                        value helps to make sure that all labels have relatively
+                        similar lengths.
+            separator: The string with which the words and topic prefix will be
+                    separated. Underscores are the default but a nice alternative
+                    is `", "`.
+
+        Returns:
+            topic_labels: A list of topic labels sorted from the lowest topic ID to the highest.
+                        If the topic model was trained using HDBSCAN, the lowest topic ID is -1,
+                        otherwise it is 0.
+
+        Usage:
+
+        To create our custom topic labels, usage is rather straightforward:
+
+        ```python
+        topic_labels = topic_model.get_topic_labels(nr_words=2, separator=", ")
+        ```
+        """
+        unique_topics = sorted(set(self._map_predictions(self.hdbscan_model.labels_)))
+        topic_labels = []
+        for topic in unique_topics:
+            words, _ = zip(*self.get_topic(topic))
+
+            if word_length:
+                words = [word[:word_length] for word in words][:nr_words]
+            else:
+                words = list(words)[:nr_words]
+
+            if topic_prefix:
+                topic_label = f"{topic}{separator}" + separator.join(words)
+            else:
+                topic_label = separator.join(words)
+
+            topic_labels.append(topic_label)
+
+        return topic_labels
+
+    def merge_topics(self,
+                     docs: List[str],
+                     topics: List[int],
+                     topics_to_merge: List[Union[Iterable[int], int]]) -> None:
+        """
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: The topics that were returned when calling either `fit` or `fit_transform`
+            topics_to_merge: Either a list of topics or a list of list of topics
+                            to merge. For example:
+                                [1, 2, 3] will merge topics 1, 2 and 3
+                                [[1, 2], [3, 4]] will merge topics 1 and 2, and
+                                separately merge topics 3 and 4.
+
+        Usage:
+
+        If you want to merge topics 1, 2, and 3:
+
+        ```python
+        topics_to_merge = [1, 2, 3]
+        topic_model.merge_topics(docs, topics, topics_to_merge)
+        ```
+
+        or if you want to merge topics 1 and 2, and separately
+        merge topics 3 and 4:
+
+        ```python
+        topics_to_merge = [[1, 2]
+                            [3, 4]]
+        topic_model.merge_topics(docs, topics, topics_to_merge)
+        ```
+        """
+        check_is_fitted(self)
+        documents = pd.DataFrame({"Document": docs, "Topic": topics})
+
+        mapping = {topic: topic for topic in set(topics)}
+        if isinstance(topics_to_merge[0], int):
+            for topic in sorted(topics_to_merge):
+                mapping[topic] = topics_to_merge[0]
+        elif isinstance(topics_to_merge[0], Iterable):
+            for topic_group in sorted(topics_to_merge):
+                for topic in topic_group:
+                    mapping[topic] = topic_group[0]
+        else:
+            raise ValueError("Make sure that `topics_to_merge` is either"
+                             "a list of topics or a list of list of topics.")
+
+        documents.Topic = documents.Topic.map(mapping)
+        documents = self._sort_mappings_by_frequency(documents)
+        self._extract_topics(documents)
+        self._update_topic_size(documents)
 
     def reduce_topics(self,
                       docs: List[str],
@@ -930,9 +1341,208 @@ class BERTopic:
                                          width=width,
                                          height=height)
 
+    def visualize_documents(self,
+                            docs: List[str],
+                            topics: List[int] = None,
+                            embeddings: np.ndarray = None,
+                            reduced_embeddings: np.ndarray = None,
+                            sample: float = None,
+                            hide_annotations: bool = False,
+                            hide_document_hover: bool = False,
+                            custom_labels: bool = False,
+                            width: int = 1200,
+                            height: int = 750) -> go.Figure:
+        """ Visualize documents and their topics in 2D
+
+        Arguments:
+            topic_model: A fitted BERTopic instance.
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            topics: A selection of topics to visualize.
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`.
+            embeddings: The embeddings of all documents in `docs`.
+            reduced_embeddings: The 2D reduced embeddings of all documents in `docs`.
+            sample: The percentage of documents in each topic that you would like to keep.
+                    Value can be between 0 and 1. Setting this value to, for example,
+                    0.1 (10% of documents in each topic) makes it easier to visualize
+                    millions of documents as a subset is chosen.
+            hide_annotations: Hide the names of the traces on top of each cluster.
+            hide_document_hover: Hide the content of the documents when hovering over
+                                specific points. Helps to speed up generation of visualization.
+            custom_labels: Whether to use custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
+            width: The width of the figure.
+            height: The height of the figure.
+
+        Usage:
+
+        To visualize the topics simply run:
+
+        ```python
+        topic_model.visualize_documents(docs)
+        ```
+
+        Do note that this re-calculates the embeddings and reduces them to 2D.
+        The advised and prefered pipeline for using this function is as follows:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+        from bertopic import BERTopic
+        from umap import UMAP
+
+        # Prepare embeddings
+        docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+        # Train BERTopic
+        topic_model = BERTopic().fit(docs, embeddings)
+
+        # Reduce dimensionality of embeddings, this step is optional
+        # reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+
+        # Run the visualization with the original embeddings
+        topic_model.visualize_documents(docs, embeddings=embeddings)
+
+        # Or, if you have reduced the original embeddings already:
+        topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
+        fig.write_html("path/to/file.html")
+        ```
+
+        <iframe src="../../getting_started/visualization/documents.html"
+        style="width:1000px; height: 800px; border: 0px;""></iframe>
+        """
+        check_is_fitted(self)
+        return plotting.visualize_documents(self,
+                                            docs=docs,
+                                            topics=topics,
+                                            embeddings=embeddings,
+                                            reduced_embeddings=reduced_embeddings,
+                                            sample=sample,
+                                            hide_annotations=hide_annotations,
+                                            hide_document_hover=hide_document_hover,
+                                            custom_labels=custom_labels,
+                                            width=width,
+                                            height=height)
+
+    def visualize_hierarchical_documents(self,
+                                         docs: List[str],
+                                         hierarchical_topics: pd.DataFrame,
+                                         topics: List[int] = None,
+                                         embeddings: np.ndarray = None,
+                                         reduced_embeddings: np.ndarray = None,
+                                         sample: Union[float, int] = None,
+                                         hide_annotations: bool = False,
+                                         hide_document_hover: bool = True,
+                                         nr_levels: int = 10,
+                                         custom_labels: bool = False,
+                                         width: int = 1200,
+                                         height: int = 750) -> go.Figure:
+        """ Visualize documents and their topics in 2D at different levels of hierarchy
+
+        Arguments:
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            hierarchical_topics: A dataframe that contains a hierarchy of topics
+                                represented by their parents and their children
+            topics: A selection of topics to visualize.
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`.
+            embeddings: The embeddings of all documents in `docs`.
+            reduced_embeddings: The 2D reduced embeddings of all documents in `docs`.
+            sample: The percentage of documents in each topic that you would like to keep.
+                    Value can be between 0 and 1. Setting this value to, for example,
+                    0.1 (10% of documents in each topic) makes it easier to visualize
+                    millions of documents as a subset is chosen.
+            hide_annotations: Hide the names of the traces on top of each cluster.
+            hide_document_hover: Hide the content of the documents when hovering over
+                                specific points. Helps to speed up generation of visualizations.
+            nr_levels: The number of levels to be visualized in the hierarchy. First, the distances
+                    in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances with
+                    equal length. Then, for each list of distances, the merged topics are selected that
+                    have a distance less or equal to the maximum distance of the selected list of distances.
+                    NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
+                    the length of `hierarchical_topics`.
+            custom_labels: Whether to use custom topic labels that were defined using
+                           `topic_model.set_topic_labels`.
+                           NOTE: Custom labels are only generated for the original
+                           un-merged topics.
+            width: The width of the figure.
+            height: The height of the figure.
+
+        Usage:
+
+        To visualize the topics simply run:
+
+        ```python
+        topic_model.visualize_hierarchical_documents(docs, hierarchical_topics)
+        ```
+
+        Do note that this re-calculates the embeddings and reduces them to 2D.
+        The advised and prefered pipeline for using this function is as follows:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+        from bertopic import BERTopic
+        from umap import UMAP
+
+        # Prepare embeddings
+        docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+        # Train BERTopic and extract hierarchical topics
+        topic_model = BERTopic().fit(docs, embeddings)
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+
+        # Reduce dimensionality of embeddings, this step is optional
+        # reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+
+        # Run the visualization with the original embeddings
+        topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, embeddings=embeddings)
+
+        # Or, if you have reduced the original embeddings already:
+        topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+        fig.write_html("path/to/file.html")
+        ```
+
+        <iframe src="../../getting_started/visualization/hierarchical_documents.html"
+        style="width:1000px; height: 770px; border: 0px;""></iframe>
+        """
+        check_is_fitted(self)
+        return plotting.visualize_hierarchical_documents(self,
+                                                         docs=docs,
+                                                         hierarchical_topics=hierarchical_topics,
+                                                         topics=topics,
+                                                         embeddings=embeddings,
+                                                         reduced_embeddings=reduced_embeddings,
+                                                         sample=sample,
+                                                         hide_annotations=hide_annotations,
+                                                         hide_document_hover=hide_document_hover,
+                                                         nr_levels=nr_levels,
+                                                         custom_labels=custom_labels,
+                                                         width=width,
+                                                         height=height)
+
     def visualize_term_rank(self,
                             topics: List[int] = None,
                             log_scale: bool = False,
+                            custom_labels: bool = False,
                             width: int = 800,
                             height: int = 500) -> go.Figure:
         """ Visualize the ranks of all terms across all topics
@@ -946,6 +1556,8 @@ class BERTopic:
             topics: A selection of topics to visualize. These will be colored
                     red where all others will be colored black.
             log_scale: Whether to represent the ranking on a log scale
+            custom_labels: Whether to use custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -980,6 +1592,7 @@ class BERTopic:
         return plotting.visualize_term_rank(self,
                                             topics=topics,
                                             log_scale=log_scale,
+                                            custom_labels=custom_labels,
                                             width=width,
                                             height=height)
 
@@ -988,6 +1601,7 @@ class BERTopic:
                                    top_n_topics: int = None,
                                    topics: List[int] = None,
                                    normalize_frequency: bool = False,
+                                   custom_labels: bool = False,
                                    width: int = 1250,
                                    height: int = 450) -> go.Figure:
         """ Visualize topics over time
@@ -998,6 +1612,8 @@ class BERTopic:
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
+            custom_labels: Whether to use custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1026,6 +1642,7 @@ class BERTopic:
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
                                                    normalize_frequency=normalize_frequency,
+                                                   custom_labels=custom_labels,
                                                    width=width,
                                                    height=height)
 
@@ -1034,6 +1651,7 @@ class BERTopic:
                                    top_n_topics: int = 10,
                                    topics: List[int] = None,
                                    normalize_frequency: bool = False,
+                                   custom_labels: bool = False,
                                    width: int = 1250,
                                    height: int = 900) -> go.Figure:
         """ Visualize topics per class
@@ -1044,6 +1662,8 @@ class BERTopic:
             top_n_topics: To visualize the most frequent topics instead of all
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
+            custom_labels: Whether to use custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1072,12 +1692,14 @@ class BERTopic:
                                                    top_n_topics=top_n_topics,
                                                    topics=topics,
                                                    normalize_frequency=normalize_frequency,
+                                                   custom_labels=custom_labels,
                                                    width=width,
                                                    height=height)
 
     def visualize_distribution(self,
                                probabilities: np.ndarray,
                                min_probability: float = 0.015,
+                               custom_labels: bool = False,
                                width: int = 800,
                                height: int = 600) -> go.Figure:
         """ Visualize the distribution of topic probabilities
@@ -1086,6 +1708,8 @@ class BERTopic:
             probabilities: An array of probability scores
             min_probability: The minimum probability score to visualize.
                              All others are ignored.
+            custom_labels: Whether to use custom topic labels that were defined using
+                           `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1109,6 +1733,7 @@ class BERTopic:
         return plotting.visualize_distribution(self,
                                                probabilities=probabilities,
                                                min_probability=min_probability,
+                                               custom_labels=custom_labels,
                                                width=width,
                                                height=height)
 
@@ -1116,9 +1741,13 @@ class BERTopic:
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
+                            custom_labels: bool = False,
                             width: int = 1000,
                             height: int = 600,
-                            optimal_ordering: bool = False) -> go.Figure:
+                            hierarchical_topics: pd.DataFrame = None,
+                            linkage_function: Callable[[csr_matrix], np.ndarray] = None,
+                            distance_function: Callable[[csr_matrix], csr_matrix] = None,
+                            color_threshold: int = 1) -> go.Figure:
         """ Visualize a hierarchical structure of the topics
 
         A ward linkage function is used to perform the
@@ -1126,17 +1755,33 @@ class BERTopic:
         matrix between topic embeddings.
 
         Arguments:
+            topic_model: A fitted BERTopic instance.
             orientation: The orientation of the figure.
-                         Either 'left' or 'bottom'
+                        Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
+            custom_labels: Whether to use custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
+                       NOTE: Custom labels are only generated for the original
+                       un-merged topics.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
-            optimal_ordering: If True, the linkage matrix will be reordered so that the distance
-                between successive leaves is minimal. This results in a more intuitive
-                tree structure when the data are visualized. defaults to False, because
-                this algorithm can be slow, particularly on large datasets. See
-                also the `linkage` function fun `scipy`.
+            hierarchical_topics: A dataframe that contains a hierarchy of topics
+                                represented by their parents and their children.
+                                NOTE: The hierarchical topic names are only visualized
+                                if both `topics` and `top_n_topics` are not set.
+            linkage_function: The linkage function to use. Default is:
+                            `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
+                            NOTE: Make sure to use the same `linkage_function` as used
+                            in `topic_model.hierarchical_topics`.
+            distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
+                            `lambda x: 1 - cosine_similarity(x)`
+                            NOTE: Make sure to use the same `distance_function` as used
+                            in `topic_model.hierarchical_topics`.
+            color_threshold: Value at which the separation of clusters will be made which
+                         will result in different colors for different clusters.
+                         A higher value will typically lead in less colored clusters.
+
         Returns:
             fig: A plotly figure
 
@@ -1149,26 +1794,45 @@ class BERTopic:
         topic_model.visualize_hierarchy()
         ```
 
-        Or if you want to save the resulting figure:
+        If you also want the labels visualized of hierarchical topics,
+        run the following:
+
+        ```python
+        # Extract hierarchical topics and their representations
+        hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+
+        # Visualize these representations
+        topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+        ```
+
+        If you want to save the resulting figure:
 
         ```python
         fig = topic_model.visualize_hierarchy()
         fig.write_html("path/to/file.html")
         ```
+        <iframe src="../../getting_started/visualization/hierarchy.html"
+        style="width:1000px; height: 680px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
         return plotting.visualize_hierarchy(self,
                                             orientation=orientation,
                                             topics=topics,
                                             top_n_topics=top_n_topics,
+                                            custom_labels=custom_labels,
                                             width=width,
                                             height=height,
-                                            optimal_ordering=optimal_ordering)
+                                            hierarchical_topics=hierarchical_topics,
+                                            linkage_function=linkage_function,
+                                            distance_function=distance_function,
+                                            color_threshold=color_threshold
+                                            )
 
     def visualize_heatmap(self,
                           topics: List[int] = None,
                           top_n_topics: int = None,
                           n_clusters: int = None,
+                          custom_labels: bool = False,
                           width: int = 800,
                           height: int = 800) -> go.Figure:
         """ Visualize a heatmap of the topic's similarity matrix
@@ -1181,6 +1845,8 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
+            custom_labels: Whether to use custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -1208,6 +1874,7 @@ class BERTopic:
                                           topics=topics,
                                           top_n_topics=top_n_topics,
                                           n_clusters=n_clusters,
+                                          custom_labels=custom_labels,
                                           width=width,
                                           height=height)
 
@@ -1632,8 +2299,6 @@ class BERTopic:
             self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
 
         c_tf_idf = self.transformer.transform(X)
-
-        self.topic_sim_matrix = cosine_similarity(c_tf_idf)
 
         return c_tf_idf, words
 

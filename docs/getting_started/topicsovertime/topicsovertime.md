@@ -59,7 +59,7 @@ From these topics, we are going to generate the topic representations at each ti
 by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps)
+topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
 ```
 
 And that is it! Aside from what you always need for BERTopic, you now only need to add `topics` and `timestamps` 
@@ -75,7 +75,7 @@ evolved over time:
 
 ```python
 topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, 
-                                                global_tuning=True, evolution_tuning=True)
+                                                global_tuning=True, evolution_tuning=True, nr_bins=20)
 ```
 
 ### **Bins**
@@ -95,7 +95,7 @@ We can use `datetime_format` to pass the format the timestamps have:
 
 ```python
 topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, 
-                                                datetime_format="%b%M")
+                                                datetime_format="%b%M", nr_bins=20)
 ```
 
 ## **Visualization**

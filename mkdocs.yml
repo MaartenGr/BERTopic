@@ -28,6 +28,7 @@ nav:
         - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
+        - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
   - FAQ: faq.md
   - API:
       - BERTopic: api/bertopic.md
@@ -38,12 +39,14 @@ nav:
         - Word Doc: api/backends/word_doc.md
       - Plotting:
         - Barchart: api/plotting/barchart.md
+        - Documents: api/plotting/documents.md
+        - DTM: api/plotting/dtm.md
+        - Hierarchical documents: api/plotting/hierarchical_documents.md
+        - Hierarchical topics: api/plotting/hierarchy.md
         - Distribution: api/plotting/distribution.md
         - Heatmap: api/plotting/heatmap.md
-        - Hierarchy: api/plotting/hierarchy.md
         - Term Scores: api/plotting/term.md
         - Topics: api/plotting/topics.md
-        - DTM: api/plotting/dtm.md
         - Topics per Class: api/plotting/topics_per_class.md
   - Changelog: changelog.md
 

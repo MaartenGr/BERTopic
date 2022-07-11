@@ -1,100 +1,23 @@
-Visualizing BERTopic and its derivatives is important in understanding the model, how it works, but more importantly, where it works. 
-Since topic modeling can be quite a subjective field it is difficult for users to validate their models. Looking at the topics and seeing 
-if they make sense is an important factor in alleviating this issue. 
+When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. 
+Some topics could be merged together and having an understanding of the effect will help you understand which topics should and which 
+should not be merged. 
 
-## **Visualize Topics**
-After having trained our `BERTopic` model, we can iteratively go through hundreds of topics to get a good 
-understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
-Instead, we can visualize the topics that were generated in a way very similar to 
-[LDAvis](https://github.com/cpsievert/LDAvis). 
+That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created 
+in order to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might 
+exist in your data. 
 
-We embed our c-TF-IDF representation of the topics in 2D using Umap and then visualize the two dimensions using 
-plotly such that we can create an interactive view.
+In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix 
+contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. 
+The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging 
+topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). 
+It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are availabe. 
 
-First, we need to train our model:
+Whenever we merge two topics, we can calculate the c-TF-IDF representation of these two merged by summing their bag-of-words representation. 
+We assume that two sets of topics are merged and that all others are kept the same, regardless of their location in the hierarchy. This helps 
+us isolate the potential effect of merging sets of topics. As a result, we can see the topic representation at each level in the tree. 
 
-```python
-from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-
-docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-topic_model = BERTopic()
-topics, probs = topic_model.fit_transform(docs) 
-```
-
-Then, we can use call `.visualize_topics` to create a 2D representation of your topics. The resulting graph is a 
-plotly interactive graph which can be converted to HTML:
-
-```python
-topic_model.visualize_topics()
-```
-
-<iframe src="viz.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
-
-You can use the slider to select the topic which then lights up red. If you hover over a topic, then general 
-information is given about the topic, including the size of the topic and its corresponding words.
-
-## **Visualize Documents**
-Using the previous method, we can visualize the topics and get insight into their relationships. However, 
-you might want a more fine-grained approach where we can visualize the documents inside the topics to see 
-if they were assigned correctly or whether they make sense. To do so, we can use the `topic_model.visualize_documents()` 
-function. This function recalculates the document embeddings and reduces them to 2-dimensional space for easier visualization 
-purposes. This process can be quite expensive, so it is advised to adhere to the following pipeline:
-
-```python
-from sklearn.datasets import fetch_20newsgroups
-from sentence_transformers import SentenceTransformer
-from bertopic import BERTopic
-from umap import UMAP
-
-# Prepare embeddings
-docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = sentence_model.encode(docs, show_progress_bar=False)
-
-# Train BERTopic
-topic_model = BERTopic().fit(docs, embeddings)
-
-# Run the visualization with the original embeddings
-topic_model.visualize_documents(docs, embeddings=embeddings)
-
-# Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
-reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
-topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
-```
-
-<iframe src="documents.html" style="width:1200px; height: 800px; border: 0px;""></iframe>
-
-
-!!! note
-    The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the 
-    option to hover over the individual points and see the content of the documents. This was done for demonstration purposes 
-    as saving all those documents in the visualization can be quite expensive and result in large files. However, 
-    it might be interesting to set `hide_document_hover=False` in order to hover over the points and see the content of the documents.    
-
-## **Visualize Topic Hierarchy**
-The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
-structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how 
-they relate to one another. This might help selecting an appropriate `nr_topics` when reducing the number 
-of topics that you have created. To visualize this hierarchy, run the following:
-
-```python
-topic_model.visualize_hierarchy()
-```
-
-<iframe src="hierarchy.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
-
-!!! note
-    Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to 
-    auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
-    the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected. 
-
-### **Hierarchical labels**
-
-Although visualizing this hierarchy gives us information about the structure, it would be helpful to see what happens 
-to the topic representations when merging topics. To do so, we first need to calculate the representations of the 
-hierarchical topics:
-
+## **Example**
+To demonstrate hierarchical topic modeling with BERTopic, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of documents. 
 
 First, we train a basic BERTopic model:
 
@@ -105,22 +28,48 @@ from sklearn.datasets import fetch_20newsgroups
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))["data"]
 topic_model = BERTopic(verbose=True)
 topics, probs = topic_model.fit_transform(docs)
+``` 
+
+Next, we can use our fitted BERTopic model to extract possible hierarchies from our c-TF-IDF matrix:
+
+```python
 hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
 ```
 
-To visualize these results, we simply need to pass the resulting `hierarchical_topics` to our `.visualize_hierarchy` function:
+The resulting `hierarchical_topics` is a dataframe in which merged topics are described. For example, if you would 
+merge two topics, what would the topic representation of the new topic be? 
+
+## **Linkage functions**
+
+When creating the potential hierarchical nature of topics, we use Scipy's ward `linkage` function as a default 
+to generate the hierarchy. However, you might want to use a [different linkage function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html) 
+for your use case, such as `single`, `complete`, `average`, `centroid`, or `median`. In BERTopic, you can define the 
+linkage function yourself, including the distance function that you would like to use:
+
+
+```python
+from scipy.cluster import hierarchy as sch
+from bertopic import BERTopic
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(docs)
+
+# Hierarchical topics
+linkage_function = lambda x: sch.linkage(x, 'single', optimal_ordering=True)
+hierarchical_topics = topic_model.hierarchical_topics(docs, topics, linkage_function=linkage_function)
+```
+
+
+## **Visualizations**
+To visualize these results, we can start by running a familiar function, namely `topic_model.visualize_hierarchy`:
 
 ```python
 topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
 ```
 <iframe src="hierarchical_topics.html" style="width:1000px; height: 2150px; border: 0px;""></iframe>
 
-
 If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations 
 help you understand the effect of merging certain topics together. Some might be logical to merge whilst others might not. Moreover, 
 we can now see which sub-topics can be found within certain larger themes. 
-
-### **Text-based topic tree**
 
 Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can 
 use `topic_model.get_topic_tree` to create a text-based representation of this hierarchy. Although the general structure is more difficult 
@@ -395,204 +344,25 @@ to view, we can see better which topics could be logically merged:
   ```
 </details>
 
-## **Visualize Hierarchical Documents**
-We can extend the previous method by calculating the topic representation at different levels of the hierarchy and 
-plotting them on a 2D-plane. To do so, we first need to calculate the hierarchical topics:
+
+## **Merge topics**
+
+After seeing the potential hierarchy of your topic, you might want to merge specific 
+topics. For example, if topic 1 is 
+`1_space_launch_moon_nasa` and topic 2 is `2_spacecraft_solar_space_orbit` it might 
+make sense to merge those two topics as they are quite similar in meaning. In BERTopic, 
+you can use `.merge_topics` to manually select and merge those topics. Doing so will 
+update their topic representation which in turn updates the entire model:
 
 ```python
-from sklearn.datasets import fetch_20newsgroups
-from sentence_transformers import SentenceTransformer
-from bertopic import BERTopic
-from umap import UMAP
-
-# Prepare embeddings
-docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = sentence_model.encode(docs, show_progress_bar=False)
-
-# Train BERTopic and extract hierarchical topics
-topic_model = BERTopic().fit(docs, embeddings)
-hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+topics_to_merge = [1, 2]
+topic_model.merge_topics(docs, topics, topics_to_merge)
 ```
-Then, we can visualize the hierarchical documents by either supplying it with our embeddings or by 
-reducing their dimensionality ourselves:
+
+If you have several groups of topics you want to merge, create a list of lists instead:
 
 ```python
-# Run the visualization with the original embeddings
-topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, embeddings=embeddings)
-
-# Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:
-reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
-topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_embeddings=reduced_embeddings)
+topics_to_merge = [[1, 2]
+                   [3, 4]]
+topic_model.merge_topics(docs, topics, topics_to_merge)
 ```
-
-<iframe src="hierarchical_documents.html" style="width:1200px; height: 800px; border: 0px;""></iframe>
-
-!!! note
-    The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the 
-    option to hover over the individual points and see the content of the documents. This makes the resulting visualization 
-    smaller and fit into your RAM. However, it might be interesting to set `hide_document_hover=False` in order to hover 
-    over the points and see the content of the documents. 
-
-## **Visualize Terms**
-We can visualize the selected terms for a few topics by creating bar charts out of the c-TF-IDF scores 
-for each topic representation. Insights can be gained from the relative c-TF-IDF scores between and within 
-topics. Moreover, you can easily compare topic representations to each other. 
-To visualize this hierarchy, run the following:
-
-```python
-topic_model.visualize_barchart()
-```
-
-<iframe src="bar_chart.html" style="width:1100px; height: 660px; border: 0px;""></iframe>
-
-
-## **Visualize Topic Similarity**
-Having generated topic embeddings, through both c-TF-IDF and embeddings, we can create a similarity 
-matrix by simply applying cosine similarities through those topic embeddings. The result will be a 
-matrix indicating how similar certain topics are to each other. 
-To visualize the heatmap, run the following:
-
-```python
-topic_model.visualize_heatmap()
-```
- 
-<iframe src="heatmap.html" style="width:1000px; height: 720px; border: 0px;""></iframe>
-
-
-!!! note
-    You can set `n_clusters` in `visualize_heatmap` to order the topics by their similarity. 
-    This will result in blocks being formed in the heatmap indicating which clusters of topics are 
-    similar to each other. This step is very much recommended as it will make reading the heatmap easier.      
-
-
-## **Visualize Term Score Decline**
-Topics are represented by a number of words starting with the best representative word. 
-Each word is represented by a c-TF-IDF score. The higher the score, the more representative a word 
-to the topic is. Since the topic words are sorted by their c-TF-IDF score, the scores slowly decline 
-with each word that is added. At some point adding words to the topic representation only marginally 
-increases the total c-TF-IDF score and would not be beneficial for its representation. 
-
-To visualize this effect, we can plot the c-TF-IDF scores for each topic by the term rank of each word. 
-In other words, the position of the words (term rank), where the words with 
-the highest c-TF-IDF score will have a rank of 1, will be put on the x-axis. Whereas the y-axis 
-will be populated by the c-TF-IDF scores. The result is a visualization that shows you the decline 
-of c-TF-IDF score when adding words to the topic representation. It allows you, using the elbow method, 
-the select the best number of words in a topic. 
-
-To visualize the c-TF-IDF score decline, run the following:
-
-```python
-topic_model.visualize_term_rank()
-```
-
-<iframe src="term_rank.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
-
-To enable the log scale on the y-axis for a better view of individual topics, run the following:
-
-```python
-topic_model.visualize_term_rank(log_scale=True)
-```
-
-<iframe src="term_rank_log.html" style="width:1000px; height: 530px; border: 0px;""></iframe>
-
-This visualization was heavily inspired by the "Term Probability Decline" visualization found in an 
-analysis by the amazing [tmtoolkit](https://tmtoolkit.readthedocs.io/).
-Reference to that specific analysis can be found 
-[here](https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html). 
-
-## **Visualize Topics over Time**
-After creating topics over time with Dynamic Topic Modeling, we can visualize these topics by 
-leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
-of topics over time whilst giving the option of hovering over the points to show the time-specific topic representations. 
-Simply call `.visualize_topics_over_time` with the newly created topics over time:
-
-
-```python
-import re
-import pandas as pd
-from bertopic import BERTopic
-
-# Prepare data
-trump = pd.read_csv('https://drive.google.com/uc?export=download&id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6')
-trump.text = trump.apply(lambda row: re.sub(r"http\S+", "", row.text).lower(), 1)
-trump.text = trump.apply(lambda row: " ".join(filter(lambda x:x[0]!="@", row.text.split())), 1)
-trump.text = trump.apply(lambda row: " ".join(re.sub("[^a-zA-Z]+", " ", row.text).split()), 1)
-trump = trump.loc[(trump.isRetweet == "f") & (trump.text != ""), :]
-timestamps = trump.date.to_list()
-tweets = trump.text.to_list()
-
-# Create topics over time
-model = BERTopic(verbose=True)
-topics, probs = model.fit_transform(tweets)
-topics_over_time = model.topics_over_time(tweets, topics, timestamps)
-```
-
-Then, we visualize some interesting topics: 
-
-```python
-model.visualize_topics_over_time(topics_over_time, topics=[9, 10, 72, 83, 87, 91])
-```
-<iframe src="trump.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
-
-## **Visualize Topics per Class**
-You might want to extract and visualize the topic representation per class. For example, if you have 
-specific groups of users that might approach topics differently, then extracting them would help understanding 
-how these users talk about certain topics. In other words, this is simply creating a topic representation for 
-certain classes that you might have in your data. 
-
-First, we need to train our model:
-
-```python
-from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-
-# Prepare data and classes
-data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
-docs = data["data"]
-classes = [data["target_names"][i] for i in data["target"]]
-
-# Create topic model and calculate topics per class
-topic_model = BERTopic()
-topics, probs = topic_model.fit_transform(docs)
-topics_per_class = topic_model.topics_per_class(docs, topics, classes=classes)
-```
-
-Then, we visualize the topic representation of major topics per class: 
-
-```python
-topic_model.visualize_topics_per_class(topics_per_class)
-```
-
-<iframe src="topics_per_class.html" style="width:1400px; height: 1000px; border: 0px;""></iframe>
-
-
-## **Visualize Probablities**
-We can also calculate the probabilities of topics found in a document. In order to do so, we have to 
-set `calculate_probabilities` to True as calculating them can be quite computationally expensive. 
-Then, we use the variable `probabilities` that is returned from `transform()` or `fit_transform()` 
-to understand how confident BERTopic is that certain topics can be found in a document:
-
-```python
-from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-
-docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-topic_model = BERTopic(calculate_probabilities=True)
-topics, probabilities = topic_model.fit_transform(docs)
-```
-
-To visualize the distributions, run the following:
-
-```python
-topic_model.visualize_distribution(probabilities[0])
-```
-
-<iframe src="probabilities.html" style="width:1000px; height: 500px; border: 0px;""></iframe>
-
-
-!!! note
-    The distribution of the probabilities does not give an indication to 
-    the distribution of the frequencies of topics across a document. It merely shows
-    how confident BERTopic is that certain topics can be found in a document.
-

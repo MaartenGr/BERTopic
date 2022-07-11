@@ -196,6 +196,10 @@ topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=6)
 <img src="images/dtm.gif" width="80%" height="80%" align="center" />
 
 ## Overview
+BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
+of all methods and a short description of its purpose. 
+
+### Common
 For quick access to common functions, here is an overview of BERTopic's main methods:
 
 | Method | Code  | 
@@ -208,21 +212,40 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Get topic freq    |  `.get_topic_freq()` |
 | Get all topic information|  `.get_topic_info()` |
 | Get representative docs per topic |  `.get_representative_docs()` |
-| Get topics per class | `.topics_per_class(docs, topics, classes)` |
-| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
 | Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Generate topic labels | `.generate_topic_labels()` |
+| Set topic labels | `.set_topic_labels(my_custom_labels)` |
+| Merge topics | `.merge_topics(docs, topics, topics_to_merge)` |
 | Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
 | Find topics | `.find_topics("vehicle")` |
 | Save model    |  `.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `.get_params()` |
 
-For an overview of BERTopic's visualization methods:
+### Variations
+There are many different use cases in which topic modeling can be used. As such, a number of 
+variations of BERTopic have been developed such that one package can be used across across many use cases:
+
+| Method | Code  | 
+|-----------------------|---|
+| (semi-) Supervised Topic Modeling | `.fit(docs, y=y)` |
+| Topic Modeling per Class | `.topics_per_class(docs, topics, classes)` |
+| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
+| Hierarchical Topic Modeling | `.hierarchical_topics(docs, topics)` |
+| Guided Topic Modeling | `BERTopic(seed_topic_list=seed_topic_list)` |
+
+### Visualizations
+Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation. 
+Visualizing different aspects of the topic model helps in understanding the model and makes it easier 
+to tweak the model to your liking. 
 
 | Method | Code  | 
 |-----------------------|---|
 | Visualize Topics    |  `.visualize_topics()` |
+| Visualize Documents    |  `.visualize_documents()` |
+| Visualize Document Hierarchy    |  `.visualize_hierarchical_documents()` |
 | Visualize Topic Hierarchy    |  `.visualize_hierarchy()` |
+| Visualize Topic Tree   |  `.get_topic_tree(hierarchical_topics)` |
 | Visualize Topic Terms    |  `.visualize_barchart()` |
 | Visualize Topic Similarity  |  `.visualize_heatmap()` |
 | Visualize Term Score Decline  |  `.visualize_term_rank()` |
