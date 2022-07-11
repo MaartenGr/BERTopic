@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#version-0100" class="md-skip">
+        <a href="#version-0110" class="md-skip">
           Skip to content
         </a>
       
@@ -652,6 +652,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -861,6 +875,62 @@
   
   
     <li class="md-nav__item">
+      <a href="api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -889,20 +959,6 @@
   
   
     <li class="md-nav__item">
-      <a href="api/plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -919,20 +975,6 @@
     <li class="md-nav__item">
       <a href="api/plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="api/plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1002,6 +1044,13 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-0110" class="md-nav__link">
+    Version 0.11.0
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#version-0100" class="md-nav__link">
@@ -1197,6 +1246,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-0110" class="md-nav__link">
+    Version 0.11.0
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-0100" class="md-nav__link">
     Version 0.10.0
   </a>
@@ -1377,6 +1433,80 @@
 
   <h1>Changelog</h1>
 
+<h2 id="version-0110"><strong>Version 0.11.0</strong><a class="headerlink" href="#version-0110" title="Permanent link">&para;</a></h2>
+<p><em>Release date: 11 July, 2022</em></p>
+<p><strong>Highlights</strong>:</p>
+<ul>
+<li>Perform <a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html">hierarchical topic modeling</a> with <code>.hierarchical_topics</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span> 
+</code></pre></div>
+<ul>
+<li>Visualize <a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#visualizations">hierarchical topic representations</a> with <code>.visualize_hierarchy</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_hierarchy</span><span class="p">(</span><span class="n">hierarchical_topics</span><span class="o">=</span><span class="n">hierarchical_topics</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Extract a <a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#visualizations">text-based hierarchical topic representation</a> with <code>.get_topic_tree</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">tree</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_tree</span><span class="p">(</span><span class="n">hierarchical_topics</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Visualize <a href="https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html#visualize-documents">2D documents</a> with <code>.visualize_documents()</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use input embeddings</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># or use 2D reduced embeddings through a method of your own (e.g., PCA, t-SNE, UMAP, etc.)</span>
+<span class="n">reduced_embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">reduced_embeddings</span><span class="o">=</span><span class="n">reduced_embeddings</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Visualize <a href="https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html#visualize-hierarchical-documents">2D hierarchical documents</a> with <code>.visualize_hierarchical_documents()</code> </li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run the visualization with the original embeddings</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_hierarchical_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">hierarchical_topics</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># Or, if you have reduced the original embeddings already which speed things up quite a bit:</span>
+<span class="n">reduced_embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_hierarchical_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">hierarchical_topics</span><span class="p">,</span> <span class="n">reduced_embeddings</span><span class="o">=</span><span class="n">reduced_embeddings</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Create <a href="https://maartengr.github.io/BERTopic/getting_started/topicrepresentation/topicrepresentation.html#custom-labels">custom labels</a> to the topics throughout most visualizations</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate topic labels</span>
+<span class="n">topic_labels</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">generate_topic_labels</span><span class="p">(</span><span class="n">nr_words</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">topic_prefix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">word_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+
+<span class="c1"># Set them internally in BERTopic</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">set_topic_labels</span><span class="p">(</span><span class="n">topics_labels</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Manually <a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#merge-topics">merge topics</a> with <code>.merge_topics()</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Merge topics 1, 2, and 3</span>
+<span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+
+<span class="c1"># Merge topics 1 and 2, and separately merge topics 3 and 4</span>
+<span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Added example for finding similar topics between two models in the <a href="https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html">tips &amp; tricks</a> page</li>
+<li>Add multi-modal example in the <a href="https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html">tips &amp; tricks</a> page</li>
+<li>Added native <a href="https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html#hugging-face-transformers">Hugging Face transformers</a> support </li>
+</ul>
+<p><strong>Fixes</strong>: </p>
+<ul>
+<li>Fix support for k-Means in <code>.visualize_heatmap</code> (<a href="https://github.com/MaartenGr/BERTopic/issues/532">#532</a>)</li>
+<li>Fix missing topic 0 in <code>.visualize_topics</code> (<a href="https://github.com/MaartenGr/BERTopic/issues/533">#533</a>)</li>
+<li>Fix inconsistencies in <code>.get_topic_info</code> (<a href="https://github.com/MaartenGr/BERTopic/issues/572">#572</a>) and (<a href="https://github.com/MaartenGr/BERTopic/issues/581">#581</a>)</li>
+<li>Add <code>optimal_ordering</code> parameter to <code>.visualize_hierarchy</code> by <a href="https://github.com/rafaelvalero">@rafaelvalero</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/390">#390</a></li>
+<li>Fix RuntimeError when used as sklearn estimator by <a href="https://github.com/simonfelding">@simonfelding</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/448">#448</a></li>
+<li>Fix typo in visualization documentation by <a href="https://github.com/dwhdai">@dwhdai</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/475">#475</a></li>
+<li>Fix typo in docstrings by <a href="https://github.com/xwwwwww">@xwwwwww</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/549">#549</a></li>
+<li>Support higher Flair versions</li>
+</ul>
 <h2 id="version-0100"><strong>Version 0.10.0</strong><a class="headerlink" href="#version-0100" title="Permanent link">&para;</a></h2>
 <p><em>Release date: 30 April, 2022</em></p>
 <p><strong>Highlights</strong>: </p>
@@ -1418,7 +1548,8 @@
 <li>Update gensim dependency to <code>&gt;=4.0.0</code> (<a href="https://github.com/MaartenGr/BERTopic/issues/371">#371</a>)</li>
 <li>Fix topic 0 not appearing in visualizations (<a href="https://github.com/MaartenGr/BERTopic/issues/472">#472</a>)</li>
 <li>Fix (<a href="https://github.com/MaartenGr/BERTopic/issues/506">#506</a>)</li>
-<li>Fix (<a href="https://github.com/MaartenGr/BERTopic/issues/506">#429</a>)</li>
+<li>Fix (<a href="https://github.com/MaartenGr/BERTopic/issues/429">#429</a>)</li>
+<li>Fix typo in DTM documentation by <a href="https://github.com/hp0404">@hp0404</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/386">#386</a></li>
 </ul>
 <h2 id="version-094"><strong>Version 0.9.4</strong><a class="headerlink" href="#version-094" title="Permanent link">&para;</a></h2>
 <p><em>Release date: 14 December, 2021</em></p>

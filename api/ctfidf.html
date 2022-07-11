@@ -652,6 +652,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -918,6 +932,62 @@
   
   
     <li class="md-nav__item">
+      <a href="plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -946,20 +1016,6 @@
   
   
     <li class="md-nav__item">
-      <a href="plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -976,20 +1032,6 @@
     <li class="md-nav__item">
       <a href="plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1135,8 +1177,8 @@ sum of word <strong>i</strong> across all classes.</p>
 <span class="sd">    Next, the total, unjoined, number of documents across all classes **m** is divided by the total</span>
 <span class="sd">    sum of word **i** across all classes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ClassTFIDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ClassTFIDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>

@@ -652,6 +652,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -865,6 +879,62 @@
   
   
     <li class="md-nav__item">
+      <a href="documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -934,20 +1004,6 @@
   
   
     <li class="md-nav__item">
-      <a href="hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -964,20 +1020,6 @@
     <li class="md-nav__item">
       <a href="topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1126,6 +1168,13 @@ a heatmap is created showing the similarity between topics.</p>
         <td><code>None</code></td>
       </tr>
       <tr>
+        <td><code>custom_labels</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to use custom topic labels that were defined using 
+           <code>topic_model.set_topic_labels</code>.</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
         <td><code>width</code></td>
         <td><code>int</code></td>
         <td><p>The width of the figure.</p></td>
@@ -1171,6 +1220,7 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
                       <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">custom_labels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                       <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Visualize a heatmap of the topic&#39;s similarity matrix</span>
@@ -1184,6 +1234,8 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics.</span>
 <span class="sd">        n_clusters: Create n clusters and order the similarity</span>
 <span class="sd">                    matrix by those clusters.</span>
+<span class="sd">        custom_labels: Whether to use custom topic labels that were defined using </span>
+<span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">        width: The width of the figure.</span>
 <span class="sd">        height: The height of the figure.</span>
 
@@ -1231,7 +1283,7 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure to set `n_clusters` lower than &quot;</span>
                              <span class="s2">&quot;the total number of unique topics.&quot;</span><span class="p">)</span>
 
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[[</span><span class="n">topic</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]]</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[[</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]]</span>
         <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">,</span> <span class="s1">&#39;ward&#39;</span><span class="p">)</span>
         <span class="n">clusters</span> <span class="o">=</span> <span class="n">fcluster</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;maxclust&#39;</span><span class="p">)</span>
@@ -1250,10 +1302,13 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
     <span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
     <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 
-    <span class="c1"># Create nicer labels</span>
-    <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">sorted_topics</span><span class="p">]</span>
-    <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
-    <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
+    <span class="c1"># Create labels</span>
+    <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">sorted_topics</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">sorted_topics</span><span class="p">]</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
 
     <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">,</span>
                     <span class="n">labels</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;Similarity Score&quot;</span><span class="p">),</span>
@@ -1324,13 +1379,13 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
       
       
         
-        <a href="hierarchy.html" class="md-footer__link md-footer__link--next" aria-label="Next: Hierarchy" rel="next">
+        <a href="term.html" class="md-footer__link md-footer__link--next" aria-label="Next: Term Scores" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Hierarchy
+              Term Scores
             </div>
           </div>
           <div class="md-footer__button md-icon">

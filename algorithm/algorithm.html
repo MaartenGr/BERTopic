@@ -710,6 +710,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -919,6 +933,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -947,20 +1017,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -977,20 +1033,6 @@
     <li class="md-nav__item">
       <a href="../api/plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1133,7 +1175,7 @@
 <p>We start by creating document embeddings from a set of documents using 
 <a href="https://github.com/UKPLab/sentence-transformers">sentence-transformers</a>. These models are pre-trained for many 
 languages and are great for creating either document- or sentence-embeddings. </p>
-<p>In BERTopic, you can choose any sentence transformers model but there are two models that are set as defaults:</p>
+<p>In BERTopic, you can choose any sentence-transformers model but there are two models that are set as defaults:</p>
 <ul>
 <li><code>"all-MiniLM-L6-v2"</code></li>
 <li><code>"paraphrase-multilingual-MiniLM-L12-v2"</code></li>
@@ -1142,11 +1184,29 @@ languages and are great for creating either document- or sentence-embeddings. </
 well for most use-cases. The second model is very similar to the first with one major difference is that the 
 <code>multilingual</code> models work for 50+ languages. This model is quite a bit larger than the first and is only selected if 
 you select any language other than English.</p>
+<div class="admonition tip embedding models">
+<p class="admonition-title">Tip</p>
+<p>Although BERTopic uses sentence-transformers models as a default, you can choose 
+any embedding model that fits your use case. Follow the guide <a href="https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html">here</a> for selecting 
+and customizing your model.</p>
+</div>
 <h2 id="2-cluster-documents"><strong>2. Cluster Documents</strong><a class="headerlink" href="#2-cluster-documents" title="Permanent link">&para;</a></h2>
 <p>Typically, clustering algorithms have difficulty clustering data in high dimensional space. Before we are 
-going to cluster our documents, we first need to reduce the dimensionality of the embeddings that we generated. </p>
-<p>To do so, we use UMAP as it preserves both the local and global structure of embeddings quite well. Then, 
-we use HDBSCAN  to cluster the reduced embeddings as it allows us to identify outliers. </p>
+going to cluster our documents, we first need to reduce the dimensionality of the embeddings that we generated. 
+As a default, we use UMAP since it preserves both the local and global structure of embeddings quite well. </p>
+<div class="admonition tip dimensionality reduction models">
+<p class="admonition-title">Tip</p>
+<p>Although BERTopic uses UMAP as a default, you can choose 
+any dimensionality reduction model that fits your use case. Follow the guide <a href="https://maartengr.github.io/BERTopic/getting_started/dim_reduction/dim_reduction.html">here</a> for selecting 
+and customizing your model.</p>
+</div>
+<p>Then, after reducing our embeddings, we leverage a density-based clustering technique, HDBSCAN, to create our clusters and identify outliers where possible. </p>
+<div class="admonition tip cluster models">
+<p class="admonition-title">Tip</p>
+<p>Although BERTopic uses HDBSCAN as a default, you can choose 
+any cluster model that fits your use case. Follow the guide <a href="https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html">here</a> for selecting 
+and customizing your model.</p>
+</div>
 <h2 id="3-create-topic-representation"><strong>3. Create topic representation</strong><a class="headerlink" href="#3-create-topic-representation" title="Permanent link">&para;</a></h2>
 <p>What we want to know from the clusters that we generated, is what makes one cluster, based on its content, 
 different from another? To solve this, we can modify TF-IDF such that it allows for interesting words per cluster 
@@ -1168,6 +1228,13 @@ of word <code>x</code> in class <code>c</code>, where <code>c</code> refers to t
 of word <code>x</code> across all classes. We add plus one within the logarithm to force values to be positive. 
 This results in our class-based <code>idf</code> representation. </p>
 <p>Like with the classic TF-IDF, we then multiply <code>tf</code> with <code>idf</code> to get the importance score per word in each class. </p>
+<div class="admonition tip countvectorizer models">
+<p class="admonition-title">Tip</p>
+<p>This c-TF-IDF representation first create a vocabulary through the use of scikit-learn's <code>CountVectorizer</code> 
+module. This module allows us to preprocess the topic representation without actually preprocessing 
+the data input. Follow the guide <a href="http://127.0.0.1:8000/BERTopic/getting_started/countvectorizer/countvectorizer.html">here</a> for selecting 
+and customizing the <code>CountVectorizer</code>.</p>
+</div>
 <h2 id="optional-maximal-marginal-relevance-coherence"><strong>(Optional) Maximal Marginal Relevance Coherence</strong><a class="headerlink" href="#optional-maximal-marginal-relevance-coherence" title="Permanent link">&para;</a></h2>
 <p>After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
 Technically, this does not mean that this collection of words describes a coherent topic. In practice, we will 

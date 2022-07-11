@@ -652,6 +652,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -989,6 +1003,62 @@
   
   
     <li class="md-nav__item">
+      <a href="api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -1017,20 +1087,6 @@
   
   
     <li class="md-nav__item">
-      <a href="api/plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -1047,20 +1103,6 @@
     <li class="md-nav__item">
       <a href="api/plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="api/plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1280,7 +1322,7 @@ BERTopic allows you to use any 🤗 transformers model. These models  are typica
 a word/sentence level but can easily be pooled using Flair (see Guides/Embeddings). If you have a 
 specific language for which you want to generate embeddings, you can choose the model <a href="https://huggingface.co/models">here</a>.</p>
 <h2 id="how-do-i-reduce-topic-outliers"><strong>How do I reduce topic outliers?</strong><a class="headerlink" href="#how-do-i-reduce-topic-outliers" title="Permanent link">&para;</a></h2>
-<p>There are two ways in reducing outliers. </p>
+<p>There are three ways in reducing outliers. </p>
 <p>First, the amount of datapoint classified as outliers is handled by the <code>min_samples</code> parameters in HDBSCAN. This value is automatically set to the 
 same value of <code>min_cluster_size</code>. However, you can set it indepedently if you want to reduce the number of generated outliers. Lowering this value will 
 result in less noise being generated. </p>
@@ -1311,6 +1353,14 @@ generate an outlier class in our BERTopic model, we can assign documents to an a
 behavior as HDBSCAN is merely trying to imitate soft clustering after fitting the model and it is not a core component
 of assigning points to clusters. </p>
 </div>
+<p>Third, we can replace HDBSCAN with any other clustering algorithm that we want. So we can choose a clustering algorithm, like k-Means, that 
+does not produce any outliers at all. Using k-Means instead of HDBSCAN is straightforward:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+
+<span class="n">cluster_model</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="how-can-i-speed-up-bertopic"><strong>How can I speed up BERTopic?</strong><a class="headerlink" href="#how-can-i-speed-up-bertopic" title="Permanent link">&para;</a></h2>
 <p>You can speed up BERTopic by either generating your embeddings beforehand or by 
 setting <code>calculate_probabilities</code> to False. Calculating the probabilities is quite expensive and can 
@@ -1483,7 +1533,7 @@ topic modeling to HTML-code to extract topics of code, then it becomes important
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="getting_started/guided/guided.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Guided Topic Modeling" rel="prev">
+        <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Hierarchical Topic Modeling" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1492,7 +1542,7 @@ topic modeling to HTML-code to extract topics of code, then it becomes important
               <span class="md-footer__direction">
                 Previous
               </span>
-              Guided Topic Modeling
+              Hierarchical Topic Modeling
             </div>
           </div>
         </a>

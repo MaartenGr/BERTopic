@@ -705,6 +705,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -914,6 +928,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -942,20 +1012,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -972,20 +1028,6 @@
     <li class="md-nav__item">
       <a href="../../api/plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1106,10 +1148,20 @@ so. </p>
 <h3 id="manual-topic-reduction"><strong>Manual Topic Reduction</strong><a class="headerlink" href="#manual-topic-reduction" title="Permanent link">&para;</a></h3>
 <p>Each resulting topic has its own 
 feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
-topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number 
-of topics quite easily. We do this until we reach the value of <code>nr_topics</code>:  </p>
+topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number of topics quite easily. We do this until we reach the value of <code>nr_topics</code>:  </p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">nr_topics</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<p>It is also possible to manually select certain topics that you believe should be merged. 
+For example, if topic 1 is <code>1_space_launch_moon_nasa</code> and topic 2 is <code>2_spacecraft_solar_space_orbit</code> 
+it might make sense to merge those two topics: </p>
+<div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+</code></pre></div>
+<p>If you have several groups of topics you want to merge, create a list of lists instead:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                   <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="automatic-topic-reduction"><strong>Automatic Topic Reduction</strong><a class="headerlink" href="#automatic-topic-reduction" title="Permanent link">&para;</a></h3>
 <p>One issue with the approach above is that it will merge topics regardless of whether they are very similar. They 

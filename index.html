@@ -381,6 +381,33 @@
     Overview
   </a>
   
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common" class="md-nav__link">
+    Common
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variations" class="md-nav__link">
+    Variations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualizations" class="md-nav__link">
+    Visualizations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -714,6 +741,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -923,6 +964,62 @@
   
   
     <li class="md-nav__item">
+      <a href="api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -951,20 +1048,6 @@
   
   
     <li class="md-nav__item">
-      <a href="api/plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -981,20 +1064,6 @@
     <li class="md-nav__item">
       <a href="api/plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="api/plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1088,6 +1157,33 @@
     Overview
   </a>
   
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common" class="md-nav__link">
+    Common
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variations" class="md-nav__link">
+    Variations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualizations" class="md-nav__link">
+    Visualizations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1173,6 +1269,9 @@ frequent topic that was generated, topic 0:</p>
 </code></pre></div>
 <p><strong>NOTE</strong>: Use <code>BERTopic(language="multilingual")</code> to select a model that supports 50+ languages. </p>
 <h2 id="overview"><strong>Overview</strong><a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
+of all methods and a short description of its purpose. </p>
+<h3 id="common">Common<a class="headerlink" href="#common" title="Permanent link">&para;</a></h3>
 <p>For quick access to common functions, here is an overview of BERTopic's main methods:</p>
 <table>
 <thead>
@@ -1215,16 +1314,20 @@ frequent topic that was generated, topic 0:</p>
 <td><code>.get_representative_docs()</code></td>
 </tr>
 <tr>
-<td>Get topics per class</td>
-<td><code>.topics_per_class(docs, topics, classes)</code></td>
-</tr>
-<tr>
-<td>Dynamic Topic Modeling</td>
-<td><code>.topics_over_time(docs, topics, timestamps)</code></td>
-</tr>
-<tr>
 <td>Update topic representation</td>
 <td><code>.update_topics(docs, topics, n_gram_range=(1, 3))</code></td>
+</tr>
+<tr>
+<td>Generate topic labels</td>
+<td><code>.generate_topic_labels()</code></td>
+</tr>
+<tr>
+<td>Set topic labels</td>
+<td><code>.set_topic_labels(my_custom_labels)</code></td>
+</tr>
+<tr>
+<td>Merge topics</td>
+<td><code>.merge_topics(docs, topics, topics_to_merge)</code></td>
 </tr>
 <tr>
 <td>Reduce nr of topics</td>
@@ -1248,7 +1351,43 @@ frequent topic that was generated, topic 0:</p>
 </tr>
 </tbody>
 </table>
-<p>For an overview of BERTopic's visualization methods:</p>
+<h3 id="variations">Variations<a class="headerlink" href="#variations" title="Permanent link">&para;</a></h3>
+<p>There are many different use cases in which topic modeling can be used. As such, a number of 
+variations of BERTopic have been developed such that one package can be used across across many use cases:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(semi-) Supervised Topic Modeling</td>
+<td><code>.fit(docs, y=y)</code></td>
+</tr>
+<tr>
+<td>Topic Modeling per Class</td>
+<td><code>.topics_per_class(docs, topics, classes)</code></td>
+</tr>
+<tr>
+<td>Dynamic Topic Modeling</td>
+<td><code>.topics_over_time(docs, topics, timestamps)</code></td>
+</tr>
+<tr>
+<td>Hierarchical Topic Modeling</td>
+<td><code>.hierarchical_topics(docs, topics)</code></td>
+</tr>
+<tr>
+<td>Guided Topic Modeling</td>
+<td><code>BERTopic(seed_topic_list=seed_topic_list)</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="visualizations">Visualizations<a class="headerlink" href="#visualizations" title="Permanent link">&para;</a></h3>
+<p>Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation. 
+Visualizing different aspects of the topic model helps in understanding the model and makes it easier 
+to tweak the model to your liking. </p>
 <table>
 <thead>
 <tr>
@@ -1262,8 +1401,20 @@ frequent topic that was generated, topic 0:</p>
 <td><code>.visualize_topics()</code></td>
 </tr>
 <tr>
+<td>Visualize Documents</td>
+<td><code>.visualize_documents()</code></td>
+</tr>
+<tr>
+<td>Visualize Document Hierarchy</td>
+<td><code>.visualize_hierarchical_documents()</code></td>
+</tr>
+<tr>
 <td>Visualize Topic Hierarchy</td>
 <td><code>.visualize_hierarchy()</code></td>
+</tr>
+<tr>
+<td>Visualize Topic Tree</td>
+<td><code>.get_topic_tree(hierarchical_topics)</code></td>
 </tr>
 <tr>
 <td>Visualize Topic Terms</td>

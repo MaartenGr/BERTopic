@@ -567,6 +567,20 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#finding-similar-topics-between-models" class="md-nav__link">
+    Finding similar topics between models
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-model-data" class="md-nav__link">
+    Multi-model data
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -731,6 +745,20 @@
     <li class="md-nav__item">
       <a href="../guided/guided.html" class="md-nav__link">
         Guided Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
       </a>
     </li>
   
@@ -946,6 +974,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/plotting/distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -974,20 +1058,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
-        Hierarchy
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../api/plotting/term.html" class="md-nav__link">
         Term Scores
       </a>
@@ -1004,20 +1074,6 @@
     <li class="md-nav__item">
       <a href="../../api/plotting/topics.html" class="md-nav__link">
         Topics
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/plotting/dtm.html" class="md-nav__link">
-        DTM
       </a>
     </li>
   
@@ -1137,6 +1193,20 @@
         <li class="md-nav__item">
   <a href="#gpu-acceleration" class="md-nav__link">
     GPU acceleration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#finding-similar-topics-between-models" class="md-nav__link">
+    Finding similar topics between models
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-model-data" class="md-nav__link">
+    Multi-model data
   </a>
   
 </li>
@@ -1278,6 +1348,170 @@ force a cosine-related distance metric in UMAP:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">cuml.preprocessing</span> <span class="kn">import</span> <span class="n">normalize</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="finding-similar-topics-between-models"><strong>Finding similar topics between models</strong><a class="headerlink" href="#finding-similar-topics-between-models" title="Permanent link">&para;</a></h2>
+<p>Whenever you have trained seperate BERTopic models on different datasets, it might 
+be worthful to find the similarities among these models. Is there overlap between 
+topics in model A and topic in model B? In other words, can we find topics in model A that are similar to those in model B? </p>
+<p>We can compare the topic representations of several models in two ways. First, by comparing the topic embeddings that are created when using the same embedding model across both fitted BERTopic instances. Second, we can compare the c-TF-IDF representations instead assuming we have fixed the vocabulary in both instances. </p>
+<p>This example will go into the former, using the same embedding model across two BERTopic instances. To do this comparison, let's first create an example where I trained two models, one on an English dataset and one on a Dutch dataset:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">umap</span> <span class="kn">import</span> <span class="n">UMAP</span>
+
+<span class="c1"># The same embedding model needs to be used for both topic models</span>
+<span class="c1"># and since we are dealing with multiple languages, the model needs to be multi-lingual</span>
+<span class="n">sentence_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;paraphrase-multilingual-MiniLM-L12-v2&quot;</span><span class="p">)</span>
+
+<span class="c1"># To make this example reproducible</span>
+<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> 
+                  <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># English</span>
+<span class="n">en_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;stsb_multi_mt&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">sentence1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">en_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">sentence_model</span><span class="p">,</span> <span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">)</span>
+<span class="n">en_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">en_dataset</span><span class="p">)</span>
+
+<span class="c1"># Dutch</span>
+<span class="n">nl_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;stsb_multi_mt&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;nl&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">sentence1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">nl_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">sentence_model</span><span class="p">,</span> <span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">)</span>
+<span class="n">nl_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">nl_dataset</span><span class="p">)</span>
+</code></pre></div>
+<p>In the code above, there is one important thing to note and that is the <code>sentence_model</code>. This model needs to be exactly the same in all BERTopic models, otherwise, it is not possible to compare topic models. </p>
+<p>Next, we can calculate the similarity between topics in the English topic model <code>en_model</code> and the Dutch model <code>nl_model</code>. To do so, we can simply calculate the cosine similarity between the <code>topic_embedding</code> of both models: </p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+<span class="n">sim_matrix</span> <span class="o">=</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">en_model</span><span class="o">.</span><span class="n">topic_embeddings</span><span class="p">,</span> <span class="n">nl_model</span><span class="o">.</span><span class="n">topic_embeddings</span><span class="p">)</span>
+</code></pre></div>
+<p>Now that we know which topics are similar to each other, we can extract the most similar topics. Let's say that we have topic 10 in the <code>en_model</code> which represents a topic related to trains:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">en_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="mf">0.2588080580844999</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;tracks&#39;</span><span class="p">,</span> <span class="mf">0.1392140438801078</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;station&#39;</span><span class="p">,</span> <span class="mf">0.12126454635946024</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;passenger&#39;</span><span class="p">,</span> <span class="mf">0.058057876475695866</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;engine&#39;</span><span class="p">,</span> <span class="mf">0.05123717127783682</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;railroad&#39;</span><span class="p">,</span> <span class="mf">0.048142847325312044</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;waiting&#39;</span><span class="p">,</span> <span class="mf">0.04098973702226946</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;track&#39;</span><span class="p">,</span> <span class="mf">0.03978248702913929</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;subway&#39;</span><span class="p">,</span> <span class="mf">0.03834661195748458</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;steam&#39;</span><span class="p">,</span> <span class="mf">0.03834661195748458</span><span class="p">)]</span>
+</code></pre></div>
+<p>To find the matching topic, we extract the most similar topic in the <code>sim_matrix</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">most_similar_topic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">sim_matrix</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">nl_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">most_similar_topic</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;trein&#39;</span><span class="p">,</span> <span class="mf">0.24186603209316418</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;spoor&#39;</span><span class="p">,</span> <span class="mf">0.1338118418551581</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;sporen&#39;</span><span class="p">,</span> <span class="mf">0.07683661859111401</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;station&#39;</span><span class="p">,</span> <span class="mf">0.056990389779394225</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;stoommachine&#39;</span><span class="p">,</span> <span class="mf">0.04905829711711234</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;zilveren&#39;</span><span class="p">,</span> <span class="mf">0.04083879598477808</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;treinen&#39;</span><span class="p">,</span> <span class="mf">0.03534099197032758</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;treinsporen&#39;</span><span class="p">,</span> <span class="mf">0.03534099197032758</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;staat&#39;</span><span class="p">,</span> <span class="mf">0.03481332997324445</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;zwarte&#39;</span><span class="p">,</span> <span class="mf">0.03179591746822408</span><span class="p">)]</span>
+</code></pre></div>
+<p>It seems to be working as, for example, <code>trein</code> is a translation of <code>train</code> and <code>sporen</code> a translation of <code>tracks</code>! You can do this for every single topic to find out which topic in the <code>en_model</code> might belong to a model in the <code>nl_model</code>. </p>
+<h2 id="multi-model-data"><strong>Multi-model data</strong><a class="headerlink" href="#multi-model-data" title="Permanent link">&para;</a></h2>
+<p><a href="https://github.com/MaartenGr/Concept">Concept</a> is a variation 
+of BERTopic for multi-modal data, such as images with captions. Although we can use that 
+package for multi-modal data, we can perform a small trick with BERTopic to have a similar feature. </p>
+<p>BERTopic is a relatively modular approach that attempts to isolate steps from one another. This means, 
+for example, that you can use k-Means instead of HDBSCAN or PCA instead of UMAP as it does not make 
+any assumptions with respect to the nature of the clustering. </p>
+<p>Similarly, you can pass pre-calculated embeddings to BERTopic that represent the documents that you have. 
+However, it does not make any assumption with respect to the relationship between those embeddings and 
+the documents. This means that we could pass any metadata to BERTopic to cluster on instead of document 
+embeddings. In this example, we can separate our embeddings from our documents so that the embeddings 
+are generated from images instead of their corresponding images. Thus, we will cluster image embeddings but 
+create the topic representation from the related captions. </p>
+<p>In this example, we first need to fetch our data, namely the Flickr 8k dataset that contains images 
+with captions:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span><span class="p">,</span> <span class="n">util</span>
+
+<span class="c1"># Flickr 8k images</span>
+<span class="n">img_folder</span> <span class="o">=</span> <span class="s1">&#39;photos/&#39;</span>
+<span class="n">caps_folder</span> <span class="o">=</span> <span class="s1">&#39;captions/&#39;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">img_folder</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">img_folder</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">img_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;Flickr8k_Dataset.zip&#39;</span><span class="p">):</span>   <span class="c1">#Download dataset if does not exist</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">http_get</span><span class="p">(</span><span class="s1">&#39;https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip&#39;</span><span class="p">,</span> <span class="s1">&#39;Flickr8k_Dataset.zip&#39;</span><span class="p">)</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">http_get</span><span class="p">(</span><span class="s1">&#39;https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip&#39;</span><span class="p">,</span> <span class="s1">&#39;Flickr8k_text.zip&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">folder</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">img_folder</span><span class="p">,</span> <span class="s1">&#39;Flickr8k_Dataset.zip&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">caps_folder</span><span class="p">,</span> <span class="s1">&#39;Flickr8k_text.zip&#39;</span><span class="p">)]:</span>
+        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zf</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">infolist</span><span class="p">(),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Extracting&#39;</span><span class="p">):</span>
+                <span class="n">zf</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+<span class="n">images</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;photos/Flicker8k_Dataset/*.jpg&#39;</span><span class="p">))</span>
+
+<span class="c1"># Prepare dataframe</span>
+<span class="n">captions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;captions/Flickr8k.lemma.token.txt&quot;</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;img_id&quot;</span><span class="p">,</span><span class="s2">&quot;img_caption&quot;</span><span class="p">])</span>
+<span class="n">captions</span><span class="o">.</span><span class="n">img_id</span> <span class="o">=</span> <span class="n">captions</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="s2">&quot;photos/Flicker8k_Dataset/&quot;</span> <span class="o">+</span> <span class="n">row</span><span class="o">.</span><span class="n">img_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.jpg&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.jpg&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">captions</span> <span class="o">=</span> <span class="n">captions</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;img_id&quot;</span><span class="p">])[</span><span class="s2">&quot;img_caption&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">captions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">captions</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;img_id&quot;</span><span class="p">),</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;img_id&quot;</span><span class="p">)</span>
+
+<span class="c1"># Extract images together with their documents/captions</span>
+<span class="n">images</span> <span class="o">=</span> <span class="n">captions</span><span class="o">.</span><span class="n">img_id</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">captions</span><span class="o">.</span><span class="n">img_caption</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</code></pre></div>
+<p>Now that we have our images and captions, we need to generate our image embeddings:</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s1">&#39;clip-ViT-B-32&#39;</span><span class="p">)</span>
+
+<span class="c1"># Prepare images</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">nr_iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">))</span>
+
+<span class="c1"># Embed images per batch</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nr_iterations</span><span class="p">)):</span>
+    <span class="n">start_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">batch_size</span>
+    <span class="n">end_index</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">batch_size</span>
+
+    <span class="n">images_to_embed</span> <span class="o">=</span> <span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">images</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]]</span>
+    <span class="n">img_emb</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">images_to_embed</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">embeddings</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">img_emb</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+    <span class="c1"># Close images</span>
+    <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">images_to_embed</span><span class="p">:</span>
+        <span class="n">image</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+<p>Finally, we can fit BERTopic the way we are used to, with documents and embeddings:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+<span class="n">captions</span><span class="p">[</span><span class="s2">&quot;Topic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topics</span>
+</code></pre></div>
+<p>After fitting our model, let's inspect a topic about skateboarders:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;skateboard&#39;</span><span class="p">,</span> <span class="mf">0.09592033177340711</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;skateboarder&#39;</span><span class="p">,</span> <span class="mf">0.07792520092546491</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;trick&#39;</span><span class="p">,</span> <span class="mf">0.07481578896400298</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;ramp&#39;</span><span class="p">,</span> <span class="mf">0.056952605147927216</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;skate&#39;</span><span class="p">,</span> <span class="mf">0.03745127816149923</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;perform&#39;</span><span class="p">,</span> <span class="mf">0.036546213623432654</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;bicycle&#39;</span><span class="p">,</span> <span class="mf">0.03453483070441857</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;bike&#39;</span><span class="p">,</span> <span class="mf">0.033233021253898994</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;jump&#39;</span><span class="p">,</span> <span class="mf">0.026709362981948037</span><span class="p">),</span>
+ <span class="p">(</span><span class="s1">&#39;air&#39;</span><span class="p">,</span> <span class="mf">0.025422798170830936</span><span class="p">)]</span>
+</code></pre></div>
+<p>Based on the above output, we can take an image to see if the representation makes sense:</p>
+<div class="highlight"><pre><span></span><code><span class="n">image</span> <span class="o">=</span> <span class="n">captions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">captions</span><span class="o">.</span><span class="n">Topic</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;img_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</code></pre></div>
+<p><img alt="" src="skateboarders.jpg" /></p>
 
               
             </article>

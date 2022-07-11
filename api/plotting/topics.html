@@ -652,6 +652,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -865,6 +879,62 @@
   
   
     <li class="md-nav__item">
+      <a href="documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="distribution.html" class="md-nav__link">
         Distribution
       </a>
@@ -881,20 +951,6 @@
     <li class="md-nav__item">
       <a href="heatmap.html" class="md-nav__link">
         Heatmap
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="hierarchy.html" class="md-nav__link">
-        Hierarchy
       </a>
     </li>
   
@@ -965,20 +1021,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="dtm.html" class="md-nav__link">
-        DTM
-      </a>
     </li>
   
 
@@ -1201,8 +1243,8 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
     <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;hellinger&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 
     <span class="c1"># Visualize with plotly</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
-                       <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">&quot;Words&quot;</span><span class="p">:</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="s2">&quot;Size&quot;</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">[</span><span class="mi">1</span><span class="p">:]})</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                       <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">,</span> <span class="s2">&quot;Words&quot;</span><span class="p">:</span> <span class="n">words</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">_plotly_topic_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">topic_list</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
 </code></pre></div>
         </details>
@@ -1243,13 +1285,13 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
       
       
         
-        <a href="dtm.html" class="md-footer__link md-footer__link--next" aria-label="Next: DTM" rel="next">
+        <a href="topics_per_class.html" class="md-footer__link md-footer__link--next" aria-label="Next: Topics per Class" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              DTM
+              Topics per Class
             </div>
           </div>
           <div class="md-footer__button md-icon">
