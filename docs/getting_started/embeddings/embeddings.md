@@ -35,7 +35,7 @@ from transformers.pipelines import pipeline
 hf_model = pipeline("feature-extraction", model="distilbert-base-cased")
 embedding_model = HFTransformerBackend(hf_model)
 
-topic_model = BERTopic(embedding_model=document_glove_embeddings)
+topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
 !!! tip "Tip!"
