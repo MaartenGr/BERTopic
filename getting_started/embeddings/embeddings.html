@@ -1284,7 +1284,7 @@ to any model found on their model hub (https://huggingface.co/models):</p>
 <span class="n">hf_model</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s2">&quot;feature-extraction&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;distilbert-base-cased&quot;</span><span class="p">)</span>
 <span class="n">embedding_model</span> <span class="o">=</span> <span class="n">HFTransformerBackend</span><span class="p">(</span><span class="n">hf_model</span><span class="p">)</span>
 
-<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">document_glove_embeddings</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Tip!</p>
