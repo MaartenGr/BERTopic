@@ -48,7 +48,8 @@ class SentenceTransformerBackend(BaseEmbedder):
 
     def embed(self,
               documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+              verbose: bool = False,
+              **kwargs) -> np.ndarray:
         """ Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -60,5 +61,5 @@ class SentenceTransformerBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
+        embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose, **kwargs)
         return embeddings

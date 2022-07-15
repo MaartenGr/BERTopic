@@ -21,7 +21,8 @@ class BaseEmbedder:
 
     def embed(self,
               documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+              verbose: bool = False,
+              **kwargs) -> np.ndarray:
         """ Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -37,7 +38,8 @@ class BaseEmbedder:
 
     def embed_words(self,
                     words: List[str],
-                    verbose: bool = False) -> np.ndarray:
+                    verbose: bool = False,
+                    **kwargs) -> np.ndarray:
         """ Embed a list of n words into an n-dimensional
         matrix of embeddings
 
@@ -50,11 +52,12 @@ class BaseEmbedder:
             that each have an embeddings size of `m`
 
         """
-        return self.embed(words, verbose)
+        return self.embed(words, verbose, **kwargs)
 
     def embed_documents(self,
                         document: List[str],
-                        verbose: bool = False) -> np.ndarray:
+                        verbose: bool = False,
+                        **kwargs) -> np.ndarray:
         """ Embed a list of n words into an n-dimensional
         matrix of embeddings
 
@@ -66,4 +69,4 @@ class BaseEmbedder:
             Document embeddings with shape (n, m) with `n` documents
             that each have an embeddings size of `m`
         """
-        return self.embed(document, verbose)
+        return self.embed(document, verbose, **kwargs)

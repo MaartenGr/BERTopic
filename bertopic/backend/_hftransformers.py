@@ -42,7 +42,7 @@ class HFTransformerBackend(BaseEmbedder):
 
     def embed(self,
               documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+              verbose: bool = False, **kwargs) -> np.ndarray:
         """ Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -57,7 +57,7 @@ class HFTransformerBackend(BaseEmbedder):
         dataset = MyDataset(documents)
 
         embeddings = []
-        for document, features in tqdm(zip(documents, self.embedding_model(dataset, truncation=True, padding=True)),
+        for document, features in tqdm(zip(documents, self.embedding_model(dataset, truncation=True, padding=True, **kwargs)),
                                        total=len(dataset), disable=not verbose):
             embeddings.append(self._embed(document, features))
 

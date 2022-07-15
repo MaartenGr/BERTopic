@@ -36,7 +36,8 @@ class GensimBackend(BaseEmbedder):
 
     def embed(self,
               documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+              verbose: bool = False,
+              **kwargs) -> np.ndarray:
         """ Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -58,7 +59,7 @@ class GensimBackend(BaseEmbedder):
             # Extract word embeddings
             for word in doc.split(" "):
                 try:
-                    word_embedding = self.embedding_model.get_vector(word)
+                    word_embedding = self.embedding_model.get_vector(word, **kwargs)
                     doc_embedding.append(word_embedding)
                 except KeyError:
                     doc_embedding.append(empty_vector)

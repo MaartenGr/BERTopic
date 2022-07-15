@@ -198,7 +198,8 @@ class BERTopic:
     def fit(self,
             documents: List[str],
             embeddings: np.ndarray = None,
-            y: Union[List[int], np.ndarray] = None):
+            y: Union[List[int], np.ndarray] = None,
+            **kwargs):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
         Arguments:
@@ -240,8 +241,8 @@ class BERTopic:
     def fit_transform(self,
                       documents: List[str],
                       embeddings: np.ndarray = None,
-                      y: Union[List[int], np.ndarray] = None) -> Tuple[List[int],
-                                                                       Union[np.ndarray, None]]:
+                      y: Union[List[int], np.ndarray] = None,
+                      **kwargs) -> Tuple[List[int], Union[np.ndarray, None]]:
         """ Fit the models on a collection of documents, generate topics, and return the docs with topics
 
         Arguments:
@@ -300,7 +301,7 @@ class BERTopic:
                                                   language=self.language)
             embeddings = self._extract_embeddings(documents.Document,
                                                   method="document",
-                                                  verbose=self.verbose)
+                                                  verbose=self.verbose, **kwargs)
             logger.info("Transformed documents to Embeddings")
         else:
             if self.embedding_model is not None:
@@ -320,7 +321,7 @@ class BERTopic:
             documents = self._sort_mappings_by_frequency(documents)
 
         # Extract topics by calculating c-TF-IDF
-        self._extract_topics(documents)
+        self._extract_topics(documents, **kwargs)
 
         # Reduce topics
         if self.nr_topics:
@@ -334,7 +335,8 @@ class BERTopic:
 
     def transform(self,
                   documents: Union[str, List[str]],
-                  embeddings: np.ndarray = None) -> Tuple[List[int], np.ndarray]:
+                  embeddings: np.ndarray = None,
+                  **kwargs) -> Tuple[List[int], np.ndarray]:
         """ After having fit a model, use transform to predict new instances
 
         Arguments:
@@ -386,7 +388,8 @@ class BERTopic:
         if embeddings is None:
             embeddings = self._extract_embeddings(documents,
                                                   method="document",
-                                                  verbose=self.verbose)
+                                                  verbose=self.verbose,
+                                                  **kwargs)
 
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality")
@@ -757,7 +760,8 @@ class BERTopic:
 
     def find_topics(self,
                     search_term: str,
-                    top_n: int = 5) -> Tuple[List[int], List[float]]:
+                    top_n: int = 5,
+                    **kwargs) -> Tuple[List[int], List[float]]:
         """ Find topics most similar to a search_term
 
         Creates an embedding for search_term and compares that with
@@ -797,7 +801,8 @@ class BERTopic:
         # Extract search_term embeddings and compare with topic embeddings
         search_embedding = self._extract_embeddings([search_term],
                                                     method="word",
-                                                    verbose=False).flatten()
+                                                    verbose=False,
+                                                    **kwargs).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
 
         # Extract topics most similar to search_term
@@ -811,7 +816,8 @@ class BERTopic:
                       docs: List[str],
                       topics: List[int],
                       n_gram_range: Tuple[int, int] = None,
-                      vectorizer_model: CountVectorizer = None):
+                      vectorizer_model: CountVectorizer = None,
+                      **kwargs):
         """ Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
 
@@ -850,7 +856,7 @@ class BERTopic:
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
 
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
-        self._extract_topics(documents)
+        self._extract_topics(documents, **kwargs)
 
     def get_topics(self) -> Mapping[str, Tuple[str, float]]:
         """ Return topics with top n words and their c-TF-IDF score
@@ -1197,7 +1203,8 @@ class BERTopic:
     def merge_topics(self,
                      docs: List[str],
                      topics: List[int],
-                     topics_to_merge: List[Union[Iterable[int], int]]) -> None:
+                     topics_to_merge: List[Union[Iterable[int], int]],
+                     **kwargs) -> None:
         """
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
@@ -1243,7 +1250,7 @@ class BERTopic:
 
         documents.Topic = documents.Topic.map(mapping)
         documents = self._sort_mappings_by_frequency(documents)
-        self._extract_topics(documents)
+        self._extract_topics(documents, **kwargs)
         self._update_topic_size(documents)
 
     def reduce_topics(self,
@@ -2014,7 +2021,8 @@ class BERTopic:
     def _extract_embeddings(self,
                             documents: Union[List[str], str],
                             method: str = "document",
-                            verbose: bool = None) -> np.ndarray:
+                            verbose: bool = None,
+                            **kwargs) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html
 
@@ -2030,9 +2038,9 @@ class BERTopic:
             documents = [documents]
 
         if method == "word":
-            embeddings = self.embedding_model.embed_words(documents, verbose)
+            embeddings = self.embedding_model.embed_words(documents, verbose, **kwargs)
         elif method == "document":
-            embeddings = self.embedding_model.embed_documents(documents, verbose)
+            embeddings = self.embedding_model.embed_documents(documents, verbose, **kwargs)
         else:
             raise ValueError("Wrong method for extracting document/word embeddings. "
                              "Either choose 'word' or 'document' as the method. ")
@@ -2113,7 +2121,7 @@ class BERTopic:
         logger.info("Clustered reduced embeddings")
         return documents, probabilities
 
-    def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
+    def _guided_topic_modeling(self, embeddings: np.ndarray, **kwargs) -> Tuple[List[int], np.array]:
         """ Apply Guided Topic Modeling
 
         We transform the seeded topics to embeddings using the
@@ -2136,7 +2144,7 @@ class BERTopic:
         """
         # Create embeddings from the seeded topics
         seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
-        seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
+        seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose, **kwargs)
         seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
 
         # Label documents that are most similar to one of the seeded topics
@@ -2151,7 +2159,7 @@ class BERTopic:
             embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
         return y, embeddings
 
-    def _extract_topics(self, documents: pd.DataFrame):
+    def _extract_topics(self, documents: pd.DataFrame, **kwargs):
         """ Extract topics from the clusters using a class-based TF-IDF
 
         Arguments:
@@ -2163,7 +2171,7 @@ class BERTopic:
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf, words = self._c_tf_idf(documents_per_topic)
         self.topics = self._extract_words_per_topic(words)
-        self._create_topic_vectors()
+        self._create_topic_vectors(**kwargs)
         self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                             for key, values in
                             self.topics.items()}
@@ -2231,7 +2239,7 @@ class BERTopic:
 
             self.representative_docs = updated_representative_docs
 
-    def _create_topic_vectors(self):
+    def _create_topic_vectors(self, **kwargs):
         """ Creates embeddings per topics based on their topic representation
 
         We start by creating embeddings out of the topic representation. This
@@ -2253,7 +2261,8 @@ class BERTopic:
             topic_words = [word[0] for topic in topic_words for word in topic]
             embeddings = self._extract_embeddings(topic_words,
                                                   method="word",
-                                                  verbose=False)
+                                                  verbose=False,
+                                                  **kwargs)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -2314,8 +2323,8 @@ class BERTopic:
     def _extract_words_per_topic(self,
                                  words: List[str],
                                  c_tf_idf: csr_matrix = None,
-                                 labels: List[int] = None) -> Mapping[str,
-                                                                      List[Tuple[str, float]]]:
+                                 labels: List[int] = None,
+                                 **kwargs) -> Mapping[str, List[Tuple[str, float]]]:
         """ Based on tf_idf scores per topic, extract the top n words per topic
 
         If the top words per topic need to be extracted, then only the `words` parameter
@@ -2361,10 +2370,12 @@ class BERTopic:
                     words = [word[0] for word in topic_words]
                     word_embeddings = self._extract_embeddings(words,
                                                                method="word",
-                                                               verbose=False)
+                                                               verbose=False,
+                                                               **kwargs)
                     topic_embedding = self._extract_embeddings(" ".join(words),
                                                                method="word",
-                                                               verbose=False).reshape(1, -1)
+                                                               verbose=False,
+                                                               **kwargs).reshape(1, -1)
                     topic_words = mmr(topic_embedding, word_embeddings, words,
                                       top_n=self.top_n_words, diversity=self.diversity)
                     topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
@@ -2394,7 +2405,7 @@ class BERTopic:
         logger.info(f"Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
         return documents
 
-    def _reduce_to_n_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
+    def _reduce_to_n_topics(self, documents: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
         Arguments:
@@ -2431,11 +2442,11 @@ class BERTopic:
 
         # Update representations
         documents = self._sort_mappings_by_frequency(documents)
-        self._extract_topics(documents)
+        self._extract_topics(documents, **kwargs)
         self._update_topic_size(documents)
         return documents
 
-    def _auto_reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
+    def _auto_reduce_topics(self, documents: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """ Reduce the number of topics automatically using HDBSCAN
 
         Arguments:
@@ -2469,7 +2480,7 @@ class BERTopic:
         # Update documents and topics
         self.topic_mapper.add_mappings(mapped_topics)
         documents = self._sort_mappings_by_frequency(documents)
-        self._extract_topics(documents)
+        self._extract_topics(documents, **kwargs)
         self._update_topic_size(documents)
         return documents
 

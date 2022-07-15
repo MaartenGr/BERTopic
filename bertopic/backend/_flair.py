@@ -52,7 +52,8 @@ class FlairBackend(BaseEmbedder):
 
     def embed(self,
               documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+              verbose: bool = False,
+              **kwargs) -> np.ndarray:
         """ Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -71,7 +72,7 @@ class FlairBackend(BaseEmbedder):
                 self.embedding_model.embed(sentence)
             except RuntimeError:
                 sentence = Sentence("an empty document")
-                self.embedding_model.embed(sentence)
+                self.embedding_model.embed(sentence, **kwargs)
             embedding = sentence.embedding.detach().cpu().numpy()
             embeddings.append(embedding)
         embeddings = np.asarray(embeddings)
