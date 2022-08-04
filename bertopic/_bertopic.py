@@ -913,7 +913,7 @@ class BERTopic:
                 labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels)}
                 info["CustomName"] = info["Topic"].map(labels)
 
-        if topic:
+        if topic is not None:
             info = info.loc[info.Topic == topic, :]
 
         return info.reset_index(drop=True)
