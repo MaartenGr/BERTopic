@@ -71,7 +71,7 @@ def visualize_hierarchy(topic_model,
 
     ```python
     # Extract hierarchical topics and their representations
-    hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+    hierarchical_topics = topic_model.hierarchical_topics(docs)
 
     # Visualize these representations
     topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)

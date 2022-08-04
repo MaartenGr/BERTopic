@@ -75,7 +75,7 @@ def visualize_hierarchical_documents(topic_model,
 
     # Train BERTopic and extract hierarchical topics
     topic_model = BERTopic().fit(docs, embeddings)
-    hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+    hierarchical_topics = topic_model.hierarchical_topics(docs)
 
     # Reduce dimensionality of embeddings, this step is optional
     # reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
@@ -101,7 +101,7 @@ def visualize_hierarchical_documents(topic_model,
     <iframe src="../../getting_started/visualization/hierarchical_documents.html"
     style="width:1000px; height: 770px; border: 0px;""></iframe>
     """
-    topic_per_doc = topic_model._map_predictions(topic_model.hdbscan_model.labels_)
+    topic_per_doc = topic_model.topics_
 
     # Sample the data to optimize for visualization and dimensionality reduction
     if sample is None or sample > 1:

@@ -59,10 +59,10 @@ From these topics, we are going to generate the topic representations at each ti
 by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
+topics_over_time = topic_model.topics_over_time(tweets, timestamps, nr_bins=20)
 ```
 
-And that is it! Aside from what you always need for BERTopic, you now only need to add `topics` and `timestamps` 
+And that is it! Aside from what you always need for BERTopic, you now only need to add `timestamps` 
 to quickly calculate the topics over time. 
 
 ## **Parameters**
@@ -74,7 +74,7 @@ you do not want the representations to be influenced by the global representatio
 evolved over time:
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, 
+topics_over_time = topic_model.topics_over_time(tweets, timestamps, 
                                                 global_tuning=True, evolution_tuning=True, nr_bins=20)
 ```
 
@@ -85,7 +85,7 @@ timestamps below 50. To do this, you can simply set the number of bins that are 
 topic representations. The timestamps will be taken and put into equal-sized bins:
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
+topics_over_time = topic_model.topics_over_time(tweets, timestamps, nr_bins=20)
 ```
 
 ### **Datetime format**
@@ -94,8 +94,7 @@ which datetime format your strings have. Unfortunately, this will not always wor
 We can use `datetime_format` to pass the format the timestamps have: 
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, 
-                                                datetime_format="%b%M", nr_bins=20)
+topics_over_time = topic_model.topics_over_time(tweets, timestamps, datetime_format="%b%M", nr_bins=20)
 ```
 
 ## **Visualization**

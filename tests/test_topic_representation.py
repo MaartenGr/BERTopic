@@ -96,8 +96,7 @@ def test_topic_reduction(cluster_model, reduced_topics):
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": topics})
-    model.hdbscan_model.labels_ = topics
-    model.topic_mapper = TopicMapper(model.hdbscan_model)
+    model.topic_mapper = TopicMapper(topics)
     model._update_topic_size(old_documents)
     old_documents = model._sort_mappings_by_frequency(old_documents)
     model._extract_topics(old_documents.copy())

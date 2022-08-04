@@ -85,7 +85,7 @@ def visualize_documents(topic_model,
     <iframe src="../../getting_started/visualization/documents.html"
     style="width:1000px; height: 800px; border: 0px;""></iframe>
     """
-    topic_per_doc = topic_model._map_predictions(topic_model.hdbscan_model.labels_)
+    topic_per_doc = topic_model.topics_
 
     # Sample the data to optimize for visualization and dimensionality reduction
     if sample is None or sample > 1:

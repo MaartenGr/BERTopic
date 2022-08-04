@@ -34,7 +34,7 @@ def visualize_topics_over_time(topic_model,
     To visualize the topics over time, simply run:
 
     ```python
-    topics_over_time = topic_model.topics_over_time(docs, topics, timestamps)
+    topics_over_time = topic_model.topics_over_time(docs, timestamps)
     topic_model.visualize_topics_over_time(topics_over_time)
     ```
 

@@ -34,7 +34,7 @@ def visualize_topics_per_class(topic_model,
     To visualize the topics per class, simply run:
 
     ```python
-    topics_per_class = topic_model.topics_per_class(docs, topics, classes)
+    topics_per_class = topic_model.topics_per_class(docs, classes)
     topic_model.visualize_topics_per_class(topics_per_class)
     ```
 

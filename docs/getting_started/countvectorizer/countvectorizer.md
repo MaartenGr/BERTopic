@@ -34,7 +34,7 @@ topics, probs = topic_model.fit_transform(docs)
 
 # Fine-tune topic representations after training BERTopic
 vectorizer_model = CountVectorizer(stop_words="english", ngram_range=(1, 3), min_df=10)
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
 The great thing about using `.update_topics()` is that it allows you to tweak the topic representations without re-training your model! Thus, here we will be focusing 
@@ -96,7 +96,7 @@ we can set the `ngram_range` parameter:
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer_model = CountVectorizer(ngram_range=(1, 3), stop_words="english")
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
 As you might have noticed, I also added `stop_words="english"`. This is necessary as longer words tend to have many stop words and removing them allows 
@@ -144,7 +144,7 @@ To prevent those stop words, we can use the `stop_words` parameter in the `Count
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer_model = CountVectorizer(stop_words="english")
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
 After running the above, we get the following output:
@@ -181,7 +181,7 @@ When you have millions of documents, or error issues, I would advise increasing 
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer_model = CountVectorizer(min_df=10)
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
 With the following topic representation:
@@ -214,7 +214,7 @@ directly without having to fiddle around with the `min_df` parameter:
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer_model = CountVectorizer(max_features=10_000)
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
 With the following representation:
@@ -256,5 +256,5 @@ vectorizer = CountVectorizer(tokenizer=tokenize_zh)
 Then, we can simply pass the vectorizer update our topic representations:
 
 ```python
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```

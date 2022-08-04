@@ -19,7 +19,7 @@ it might make sense to merge those two topics:
 
 ```python
 topics_to_merge = [1, 2]
-topic_model.merge_topics(docs, topics, topics_to_merge)
+topic_model.merge_topics(docs, topics_to_merge)
 ```
 
 If you have several groups of topics you want to merge, create a list of lists instead:
@@ -27,7 +27,7 @@ If you have several groups of topics you want to merge, create a list of lists i
 ```python
 topics_to_merge = [[1, 2]
                    [3, 4]]
-topic_model.merge_topics(docs, topics, topics_to_merge)
+topic_model.merge_topics(docs, topics_to_merge)
 ```
 
 ### **Automatic Topic Reduction**
@@ -57,7 +57,7 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
 # Further reduce topics
-new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
+new_topics, new_probs = topic_model.reduce_topics(docs, nr_topics=30)
 ```
 
 The reasoning for putting `docs` and `topics` (and optionally `probabilities`) as parameters is that these values are not saved within 

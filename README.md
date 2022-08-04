@@ -185,7 +185,7 @@ From these topics, we are going to generate the topic representations at each ti
 by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
 
 ```python
-topics_over_time = topic_model.topics_over_time(tweets, topics, timestamps, nr_bins=20)
+topics_over_time = topic_model.topics_over_time(tweets, timestamps, nr_bins=20)
 ```
 
 Finally, we can visualize the topics by simply calling `visualize_topics_over_time()`: 
@@ -213,11 +213,11 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Get topic freq    |  `.get_topic_freq()` |
 | Get all topic information|  `.get_topic_info()` |
 | Get representative docs per topic |  `.get_representative_docs()` |
-| Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Update topic representation | `.update_topics(docs, n_gram_range=(1, 3))` |
 | Generate topic labels | `.generate_topic_labels()` |
 | Set topic labels | `.set_topic_labels(my_custom_labels)` |
-| Merge topics | `.merge_topics(docs, topics, topics_to_merge)` |
-| Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
+| Merge topics | `.merge_topics(docs, topics_to_merge)` |
+| Reduce nr of topics | `.reduce_topics(docs, nr_topics=30)` |
 | Find topics | `.find_topics("vehicle")` |
 | Save model    |  `.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
@@ -230,9 +230,9 @@ variations of BERTopic have been developed such that one package can be used acr
 | Method | Code  | 
 |-----------------------|---|
 | (semi-) Supervised Topic Modeling | `.fit(docs, y=y)` |
-| Topic Modeling per Class | `.topics_per_class(docs, topics, classes)` |
-| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
-| Hierarchical Topic Modeling | `.hierarchical_topics(docs, topics)` |
+| Topic Modeling per Class | `.topics_per_class(docs, classes)` |
+| Dynamic Topic Modeling | `.topics_over_time(docs, timestamps)` |
+| Hierarchical Topic Modeling | `.hierarchical_topics(docs)` |
 | Guided Topic Modeling | `BERTopic(seed_topic_list=seed_topic_list)` |
 
 ### Visualizations

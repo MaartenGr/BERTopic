@@ -47,13 +47,13 @@ def test_full_model(topic_model):
 
     # Test topics over time
     timestamps = [i % 10 for i in range(2000)]
-    topics_over_time = topic_model.topics_over_time(newsgroup_docs, topics, timestamps)
+    topics_over_time = topic_model.topics_over_time(newsgroup_docs, timestamps)
 
     assert topics_over_time.Frequency.sum() == 2000
     assert len(topics_over_time.Topic.unique()) == len(set(topics))
 
     # Test hierarchical topics
-    hier_topics = topic_model.hierarchical_topics(newsgroup_docs, topics)
+    hier_topics = topic_model.hierarchical_topics(newsgroup_docs)
 
     assert len(hier_topics) > 0
     assert hier_topics.Parent_ID.astype(int).min() > max(topics)
@@ -72,7 +72,7 @@ def test_full_model(topic_model):
     # Test topic reduction
     nr_topics = len(set(topics))
     nr_topics = 2 if nr_topics < 2 else nr_topics - 1
-    new_topics, new_probs = topic_model.reduce_topics(newsgroup_docs, topics, probs, nr_topics=nr_topics)
+    new_topics, new_probs = topic_model.reduce_topics(newsgroup_docs, probs, nr_topics=nr_topics)
 
     assert len(topic_model.get_topic_freq()) == nr_topics + topic_model._outliers
     assert len(new_topics) == len(topics)
@@ -82,9 +82,9 @@ def test_full_model(topic_model):
 
     # Test update topics
     topic = topic_model.get_topic(1)[:10]
-    topic_model.update_topics(newsgroup_docs, new_topics, n_gram_range=(2, 2))
+    topic_model.update_topics(newsgroup_docs, n_gram_range=(2, 2))
     updated_topic = topic_model.get_topic(1)[:10]
-    topic_model.update_topics(newsgroup_docs, new_topics)
+    topic_model.update_topics(newsgroup_docs)
     original_topic = topic_model.get_topic(1)[:10]
 
     assert topic != updated_topic
@@ -101,5 +101,5 @@ def test_full_model(topic_model):
     # Test merging topics
     freq = topic_model.get_topic_freq(0)
     topics_to_merge = [0, 1]
-    topic_model.merge_topics(newsgroup_docs, new_topics, topics_to_merge)
+    topic_model.merge_topics(newsgroup_docs, topics_to_merge)
     assert freq < topic_model.get_topic_freq(0)
