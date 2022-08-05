@@ -1254,9 +1254,11 @@ class BERTopic:
                              "a list of topics or a list of list of topics.")
 
         documents.Topic = documents.Topic.map(mapping)
+        self.topic_mapper.add_mappings(mapping)
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
         self._update_topic_size(documents)
+        self._map_representative_docs()
 
     def reduce_topics(self,
                       docs: List[str],
