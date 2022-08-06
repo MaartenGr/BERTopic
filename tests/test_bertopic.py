@@ -96,7 +96,7 @@ def test_full_model(topic_model):
 
     # Test setting topic labels
     topic_model.set_topic_labels(topic_labels)
-    assert topic_model.custom_labels == topic_labels
+    assert topic_model.custom_labels_ == topic_labels
 
     # Test merging topics
     freq = topic_model.get_topic_freq(0)

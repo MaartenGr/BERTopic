@@ -132,8 +132,8 @@ def visualize_documents(topic_model,
     df["y"] = embeddings_2d[:, 1]
 
     # Prepare text and names
-    if topic_model.custom_labels is not None and custom_labels:
-        names = [topic_model.custom_labels[topic + topic_model._outliers] for topic in unique_topics]
+    if topic_model.custom_labels_ is not None and custom_labels:
+        names = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in unique_topics]
     else:
         names = [f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]
 

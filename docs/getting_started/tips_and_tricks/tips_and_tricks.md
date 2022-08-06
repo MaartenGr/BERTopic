@@ -54,7 +54,7 @@ This topic-term matrix is calculated using c-TF-IDF, a TF-IDF procedure optimize
 To extract the topic-term matrix (or c-TF-IDF matrix) with the corresponding words, we can simply do the following:
 
 ```python
-topic_term_matrix = topic_model.c_tf_idf
+topic_term_matrix = topic_model.c_tf_idf_
 words = topic_model.vectorizer_model.get_feature_names()
 ```
 
@@ -194,7 +194,7 @@ Next, we can calculate the similarity between topics in the English topic model 
 
 ```python
 from sklearn.metrics.pairwise import cosine_similarity
-sim_matrix = cosine_similarity(en_model.topic_embeddings, nl_model.topic_embeddings)
+sim_matrix = cosine_similarity(en_model.topic_embeddings_, nl_model.topic_embeddings_)
 ```
 
 Now that we know which topics are similar to each other, we can extract the most similar topics. Let's say that we have topic 10 in the `en_model` which represents a topic related to trains:

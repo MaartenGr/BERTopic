@@ -44,8 +44,8 @@ def test_extract_topics(cluster_model):
     model._extract_topics(documents)
     freq = model.get_topic_freq()
 
-    assert model.c_tf_idf.shape[0] == 5
-    assert model.c_tf_idf.shape[1] > 100
+    assert model.c_tf_idf_.shape[0] == 5
+    assert model.c_tf_idf_.shape[1] > 100
     assert isinstance(freq, pd.DataFrame)
     assert nr_topics == len(freq.Topic.unique())
     assert freq.Count.sum() == len(documents)
@@ -72,8 +72,8 @@ def test_extract_topics_custom_cv(cluster_model):
     model._extract_topics(documents)
     freq = model.get_topic_freq()
 
-    assert model.c_tf_idf.shape[0] == 5
-    assert model.c_tf_idf.shape[1] > 100
+    assert model.c_tf_idf_.shape[0] == 5
+    assert model.c_tf_idf_.shape[1] > 100
     assert isinstance(freq, pd.DataFrame)
     assert nr_topics == len(freq.Topic.unique())
     assert freq.Count.sum() == len(documents)
@@ -96,7 +96,7 @@ def test_topic_reduction(cluster_model, reduced_topics):
     old_documents = pd.DataFrame({"Document": newsgroup_docs,
                                   "ID": range(len(newsgroup_docs)),
                                   "Topic": topics})
-    model.topic_mapper = TopicMapper(topics)
+    model.topic_mapper_ = TopicMapper(topics)
     model._update_topic_size(old_documents)
     old_documents = model._sort_mappings_by_frequency(old_documents)
     model._extract_topics(old_documents.copy())

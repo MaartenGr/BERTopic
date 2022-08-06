@@ -178,8 +178,8 @@ def visualize_hierarchical_documents(topic_model,
     for topic in range(hierarchical_topics.Parent_ID.astype(int).max()):
         if topic < hierarchical_topics.Parent_ID.astype(int).min():
             if topic_model.get_topic(topic):
-                if topic_model.custom_labels is not None and custom_labels:
-                    trace_name = topic_model.custom_labels[topic + topic_model._outliers]
+                if topic_model.custom_labels_ is not None and custom_labels:
+                    trace_name = topic_model.custom_labels_[topic + topic_model._outliers]
                 else:
                     trace_name = f"{topic}_" + "_".join([word[:20] for word, _ in topic_model.get_topic(topic)][:3])
                 topic_names[topic] = {"trace_name": trace_name[:40], "plot_text": trace_name[:40]}

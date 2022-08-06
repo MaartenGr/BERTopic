@@ -43,12 +43,25 @@ class BERTopic:
     c-TF-IDF to create dense clusters allowing for easily interpretable topics
     whilst keeping important words in the topic descriptions.
 
-    The default embedding model is `all-MiniLM-L6-v2` when selecting `language="english"` 
+    The default embedding model is `all-MiniLM-L6-v2` when selecting `language="english"`
     and `paraphrase-multilingual-MiniLM-L12-v2` when selecting `language="multilingual"`.
 
     Attributes:
-        topics_ (List[int]) : The topics that are generated for each document after training or updating 
-                              the topic model. The most recent topics are tracked. 
+        topics_ (List[int]) : The topics that are generated for each document after training or updating
+                              the topic model. The most recent topics are tracked.
+        topic_sizes_ (Mapping[int, int]) : The size of each topic
+        topic_mapper_ (TopicMapper) : A class for tracking topics and their mappings anytime they are
+                                      merged, reduced, added, or removed.
+        topic_representations_ (Mapping[int, Tuple[int, float]]) : The top n terms per topic and their respective
+                                                                   c-TF-IDF values.
+        c_tf_idf_ (csr_matrix) : The topic-term matrix as calculated through c-TF-IDF. To access its respective
+                                 words, run `.vectorizer_model.get_feature_names()`  or
+                                 `.vectorizer_model.get_feature_names_out()`
+        topic_labels_ (Mapping[int, str]) : The default labels for each topic.
+        custom_labels_ (List[str]) : Custom labels for each topic.
+        topic_embeddings_ (np.ndarray) : The embeddings for each topic. It is calculated by taking the
+                                         weighted average of word embeddings in a topic based on their c-TF-IDF values.
+        representative_docs_ (Mapping[int, str]) : The representative documents for each topic.
 
     Usage:
 
@@ -97,7 +110,7 @@ class BERTopic:
         """BERTopic initialization
 
         Arguments:
-            language: The main language used in your documents. The default sentence-transformers 
+            language: The main language used in your documents. The default sentence-transformers
                       model for "english" is `all-MiniLM-L6-v2`. For a full overview of
                       supported languages see bertopic.backend.languages. Select
                       "multilingual" to load in the `paraphrase-multilingual-MiniLM-L12-v2`
@@ -189,15 +202,20 @@ class BERTopic:
                                                               cluster_selection_method='eom',
                                                               prediction_data=True)
 
-        # Attributes
-        self.topics = None
-        self.topic_mapper = None
-        self.topic_sizes = None
-        self.merged_topics = None
-        self.custom_labels = None
-        self.topic_embeddings = None
-        self.representative_docs = None
+        # Public attributes
+        self.topics_ = None
+        self.topic_sizes_ = None
+        self.topic_mapper_ = None
+        self.topic_representations_ = None
+        self.topic_embeddings_ = None
+        self.topic_labels_ = None
+        self.custom_labels_ = None
+        self.representative_docs_ = None
+        self.c_tf_idf_ = None
+
+        # Private attributes for internal tracking purposes
         self._outliers = 1
+        self._merged_topics = None
 
         if verbose:
             logger.set_level("DEBUG")
@@ -479,7 +497,7 @@ class BERTopic:
         check_is_fitted(self)
         check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Timestamps": timestamps})
-        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+        global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm='l1', copy=False)
 
         all_topics = sorted(list(documents.Topic.unique()))
         all_topics_indices = {topic: index for index, topic in enumerate(all_topics)}
@@ -591,7 +609,7 @@ class BERTopic:
         ```
         """
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Class": classes})
-        global_c_tf_idf = normalize(self.c_tf_idf, axis=1, norm='l1', copy=False)
+        global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm='l1', copy=False)
 
         # For each unique timestamp, create topic representations
         topics_per_class = []
@@ -681,7 +699,7 @@ class BERTopic:
             linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
 
         # Calculate linkage
-        embeddings = self.c_tf_idf[self._outliers:]
+        embeddings = self.c_tf_idf_[self._outliers:]
         X = distance_function(embeddings)
         Z = linkage_function(X)
 
@@ -792,14 +810,14 @@ class BERTopic:
         if self.embedding_model is None:
             raise Exception("This method can only be used if you did not use custom embeddings.")
 
-        topic_list = list(self.topics.keys())
+        topic_list = list(self.topic_representations_.keys())
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
         search_embedding = self._extract_embeddings([search_term],
                                                     method="word",
                                                     verbose=False).flatten()
-        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings).flatten()
+        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings_).flatten()
 
         # Extract topics most similar to search_term
         ids = np.argsort(sims)[-top_n:]
@@ -823,8 +841,8 @@ class BERTopic:
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
-            topics: A list of topics where each topic is related to a document in `docs`. 
-                    Use this variable to change or map the topics. 
+            topics: A list of topics where each topic is related to a document in `docs`.
+                    Use this variable to change or map the topics.
             n_gram_range: The n-gram range for the CountVectorizer.
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
@@ -845,7 +863,7 @@ class BERTopic:
         topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
         ```
 
-        You can also use this function to change or map the topics to something else. 
+        You can also use this function to change or map the topics to something else.
         You can update them as follows:
 
         ```python
@@ -869,7 +887,7 @@ class BERTopic:
         """ Return topics with top n words and their c-TF-IDF score
 
         Returns:
-            self.topic: The top n words per topic and the corresponding c-TF-IDF score
+            self.topic_representations_: The top n words per topic and the corresponding c-TF-IDF score
 
         Usage:
 
@@ -878,7 +896,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        return self.topics
+        return self.topic_representations_
 
     def get_topic(self, topic: int) -> Union[Mapping[str, Tuple[str, float]], bool]:
         """ Return top n words for a specific topic and their c-TF-IDF scores
@@ -896,8 +914,8 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        if topic in self.topics:
-            return self.topics[topic]
+        if topic in self.topic_representations_:
+            return self.topic_representations_[topic]
         else:
             return False
 
@@ -918,12 +936,12 @@ class BERTopic:
         """
         check_is_fitted(self)
 
-        info = pd.DataFrame(self.topic_sizes.items(), columns=["Topic", "Count"]).sort_values("Topic")
-        info["Name"] = info.Topic.map(self.topic_names)
+        info = pd.DataFrame(self.topic_sizes_.items(), columns=["Topic", "Count"]).sort_values("Topic")
+        info["Name"] = info.Topic.map(self.topic_labels_)
 
-        if self.custom_labels is not None:
-            if len(self.custom_labels) == len(info):
-                labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels)}
+        if self.custom_labels_ is not None:
+            if len(self.custom_labels_) == len(info):
+                labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels_)}
                 info["CustomName"] = info["Topic"].map(labels)
 
         if topic:
@@ -957,10 +975,10 @@ class BERTopic:
         """
         check_is_fitted(self)
         if isinstance(topic, int):
-            return self.topic_sizes[topic]
+            return self.topic_sizes_[topic]
         else:
-            return pd.DataFrame(self.topic_sizes.items(), columns=['Topic', 'Count']).sort_values("Count",
-                                                                                                  ascending=False)
+            return pd.DataFrame(self.topic_sizes_.items(), columns=['Topic', 'Count']).sort_values("Count",
+                                                                                                   ascending=False)
 
     def get_representative_docs(self, topic: int = None) -> List[str]:
         """ Extract representative documents per topic
@@ -988,9 +1006,9 @@ class BERTopic:
         """
         check_is_fitted(self)
         if isinstance(topic, int):
-            return self.representative_docs[topic]
+            return self.representative_docs_[topic]
         else:
-            return self.representative_docs
+            return self.representative_docs_
 
     @staticmethod
     def get_topic_tree(hier_topics: pd.DataFrame,
@@ -1119,11 +1137,11 @@ class BERTopic:
         ```
 
         Then, we pass these `topic_labels` to our topic model which
-        can be accessed at any time with `.custom_labels`:
+        can be accessed at any time with `.custom_labels_`:
 
         ```python
         topic_model.set_topic_labels(topic_labels)
-        topic_model.custom_labels
+        topic_model.custom_labels_
         ```
 
         You might want to change only a few topic labels instead of all of them.
@@ -1132,14 +1150,14 @@ class BERTopic:
 
         ```python
         topic_model.set_topic_labels({0: "Space", 1: "Sports", 2: "Medicine"})
-        topic_model.custom_labels
+        topic_model.custom_labels_
         ```
         """
         unique_topics = sorted(set(self.topics_))
 
         if isinstance(topic_labels, dict):
-            if self.custom_labels is not None:
-                original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels)}
+            if self.custom_labels_ is not None:
+                original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels_)}
             else:
                 info = self.get_topic_info()
                 original_labels = dict(zip(info.Topic, info.Name))
@@ -1152,7 +1170,7 @@ class BERTopic:
                 raise ValueError("Make sure that `topic_labels` contains the same number "
                                  "of labels as that there are topics.")
 
-        self.custom_labels = custom_labels
+        self.custom_labels_ = custom_labels
 
     def generate_topic_labels(self,
                               nr_words: int = 3,
@@ -1254,7 +1272,7 @@ class BERTopic:
                              "a list of topics or a list of list of topics.")
 
         documents.Topic = documents.Topic.map(mapping)
-        self.topic_mapper.add_mappings(mapping)
+        self.topic_mapper_.add_mappings(mapping)
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
         self._update_topic_size(documents)
@@ -1306,7 +1324,7 @@ class BERTopic:
 
         # Reduce number of topics
         documents = self._reduce_topics(documents)
-        self.merged_topics = None
+        self._merged_topics = None
         self._map_representative_docs()
 
         # Extract topics and map probabilities
@@ -2053,7 +2071,7 @@ class BERTopic:
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
         """ Map predictions to the correct topics if topics were reduced """
-        mappings = self.topic_mapper.get_mappings(original_topics=True)
+        mappings = self.topic_mapper_.get_mappings(original_topics=True)
         mapped_predictions = [mappings[prediction]
                               if prediction in mappings
                               else -1
@@ -2121,7 +2139,7 @@ class BERTopic:
         else:
             probabilities = None
 
-        self.topic_mapper = TopicMapper(self.topics_)
+        self.topic_mapper_ = TopicMapper(self.topics_)
         logger.info("Clustered reduced embeddings")
         return documents, probabilities
 
@@ -2173,12 +2191,12 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
-        self.c_tf_idf, words = self._c_tf_idf(documents_per_topic)
-        self.topics = self._extract_words_per_topic(words)
+        self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
+        self.topic_representations_ = self._extract_words_per_topic(words)
         self._create_topic_vectors()
-        self.topic_names = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
-                            for key, values in
-                            self.topics.items()}
+        self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
+                              for key, values in
+                              self.topic_representations_.items()}
 
     def _save_representative_docs(self, documents: pd.DataFrame):
         """ Save the most representative docs (3) per topic
@@ -2213,9 +2231,9 @@ class BERTopic:
                 representative_docs[topic] = list(np.random.choice(result, 3, replace=False).astype(int))
 
         # Convert indices to documents
-        self.representative_docs = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
-                                    for topic, doc_ids in
-                                    representative_docs.items()}
+        self.representative_docs_ = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
+                                     for topic, doc_ids in
+                                     representative_docs.items()}
 
     def _map_representative_docs(self, original_topics: bool = False):
         """ Map the representative docs per topic to the correct topics
@@ -2231,8 +2249,8 @@ class BERTopic:
                              or from the second-most recent topics.
         """
         if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-            mappings = self.topic_mapper.get_mappings(original_topics)
-            representative_docs = self.representative_docs.copy()
+            mappings = self.topic_mapper_.get_mappings(original_topics)
+            representative_docs = self.representative_docs_.copy()
 
             # Update the representative documents
             updated_representative_docs = {mappings[old_topic]: []
@@ -2241,7 +2259,7 @@ class BERTopic:
                 new_topic = mappings[old_topic]
                 updated_representative_docs[new_topic].extend(docs)
 
-            self.representative_docs = updated_representative_docs
+            self.representative_docs_ = updated_representative_docs
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -2256,7 +2274,7 @@ class BERTopic:
         to use a different multi-lingual sentence-transformer model
         """
         if self.embedding_model is not None:
-            topic_list = list(self.topics.keys())
+            topic_list = list(self.topic_representations_.keys())
             topic_list.sort()
             n = self.top_n_words
 
@@ -2278,7 +2296,7 @@ class BERTopic:
                 topic_embedding = np.average(embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
                 topic_embeddings.append(topic_embedding)
 
-            self.topic_embeddings = topic_embeddings
+            self.topic_embeddings_ = topic_embeddings
 
     def _c_tf_idf(self, documents_per_topic: pd.DataFrame, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
@@ -2321,7 +2339,7 @@ class BERTopic:
             documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
         """
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
-        self.topic_sizes = dict(zip(sizes.Topic, sizes.Document))
+        self.topic_sizes_ = dict(zip(sizes.Topic, sizes.Document))
         self.topics_ = documents.Topic.tolist()
 
     def _extract_words_per_topic(self,
@@ -2345,10 +2363,10 @@ class BERTopic:
             topics: The top words per topic
         """
         if c_tf_idf is None:
-            c_tf_idf = self.c_tf_idf
+            c_tf_idf = self.c_tf_idf_
 
         if labels is None:
-            labels = sorted(list(self.topic_sizes.keys()))
+            labels = sorted(list(self.topic_sizes_.keys()))
 
         # Get the top 30 indices and values per row in a sparse c-TF-IDF matrix
         indices = self._top_n_idx_sparse(c_tf_idf, 30)
@@ -2417,11 +2435,11 @@ class BERTopic:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
         # Track which topics where originally merged
-        if not self.merged_topics:
-            self.merged_topics = []
+        if not self._merged_topics:
+            self._merged_topics = []
 
         # Create topic similarity matrix
-        similarities = cosine_similarity(self.c_tf_idf)
+        similarities = cosine_similarity(self.c_tf_idf_)
         np.fill_diagonal(similarities, 0)
 
         # Find most similar topic to least common topic
@@ -2431,7 +2449,7 @@ class BERTopic:
             topic_to_merge = self.get_topic_freq().iloc[-1].Topic
             topic_to_merge_into = np.argmax(similarities[topic_to_merge + self._outliers]) - self._outliers
             similarities[:, topic_to_merge + self._outliers] = -self._outliers
-            self.merged_topics.append(topic_to_merge)
+            self._merged_topics.append(topic_to_merge)
 
             # Update Topic labels
             documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
@@ -2440,7 +2458,7 @@ class BERTopic:
 
         # Map topics
         mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
-        self.topic_mapper.add_mappings(mapped_topics)
+        self.topic_mapper_.add_mappings(mapped_topics)
 
         # Update representations
         documents = self._sort_mappings_by_frequency(documents)
@@ -2462,10 +2480,10 @@ class BERTopic:
         max_topic = unique_topics[-1]
 
         # Find similar topics
-        if self.topic_embeddings is not None:
-            embeddings = np.array(self.topic_embeddings)
+        if self.topic_embeddings_ is not None:
+            embeddings = np.array(self.topic_embeddings_)
         else:
-            embeddings = self.c_tf_idf.toarray()
+            embeddings = self.c_tf_idf_.toarray()
         norm_data = normalize(embeddings, norm='l2')
         predictions = hdbscan.HDBSCAN(min_cluster_size=2,
                                       metric='euclidean',
@@ -2480,7 +2498,7 @@ class BERTopic:
         mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
 
         # Update documents and topics
-        self.topic_mapper.add_mappings(mapped_topics)
+        self.topic_mapper_.add_mappings(mapped_topics)
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
         self._update_topic_size(documents)
@@ -2513,10 +2531,10 @@ class BERTopic:
         self._update_topic_size(documents)
 
         # Map topics based on frequency
-        df = pd.DataFrame(self.topic_sizes.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
+        df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
         df = df[df.Old_Topic != -1]
         sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
-        self.topic_mapper.add_mappings(sorted_topics)
+        self.topic_mapper_.add_mappings(sorted_topics)
 
         # Map documents
         documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
@@ -2541,7 +2559,7 @@ class BERTopic:
         Returns:
             mapped_probabilities: Updated probabilities
         """
-        mappings = self.topic_mapper.get_mappings(original_topics)
+        mappings = self.topic_mapper_.get_mappings(original_topics)
 
         # Map array of probabilities (probability for assigned topic per document)
         if probabilities is not None:
@@ -2649,8 +2667,8 @@ class TopicMapper:
     predictions need to be mapped to the new
     topics.
 
-    These mappings are tracked in the `self.mappings`
-    variable where each set of topic are stacked horizontally.
+    These mappings are tracked in the `self.mappings_`
+    attribute where each set of topic are stacked horizontally.
     For example, the most recent topics can be found in the
     last column. To get a mapping, simply take the two columns
     of topics.
@@ -2658,6 +2676,12 @@ class TopicMapper:
     In other words, it is represented as graph:
     Topic 1 --> Topic 11 --> Topic 4 --> etc.
 
+    Attributes:
+        self.mappings_ (np.ndarray) : A  matrix indicating the mappings from one topic 
+                                      to another. The columns represent a collection of topics 
+                                      at any time. The last column represents the current state 
+                                      of topics and the first column represents the initial state 
+                                      of topics.
     """
     def __init__(self, topics: List[int]):
         """ Initalization of Topic Mapper
@@ -2665,9 +2689,9 @@ class TopicMapper:
         Arguments:
             topics: A list of topics per document
         """
-        self.base_topics = np.array(sorted(topics))
-        topics = self.base_topics.copy().reshape(-1, 1)
-        self.mappings = np.hstack([topics.copy(), topics.copy()]).tolist()
+        base_topics = np.array(sorted(set(topics)))
+        topics = base_topics.copy().reshape(-1, 1)
+        self.mappings_ = np.hstack([topics.copy(), topics.copy()]).tolist()
 
     def get_mappings(self, original_topics: bool = True) -> Mapping[int, int]:
         """ Get mappings from either the original topics or
@@ -2690,10 +2714,10 @@ class TopicMapper:
         ```
         """
         if original_topics:
-            mappings = np.array(self.mappings)[:, [0, -1]]
+            mappings = np.array(self.mappings_)[:, [0, -1]]
             mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
         else:
-            mappings = np.array(self.mappings)[:, [-3, -1]]
+            mappings = np.array(self.mappings_)[:, [-3, -1]]
             mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
         return mappings
 
@@ -2703,7 +2727,7 @@ class TopicMapper:
         Arguments:
             mappings: The mappings to add
         """
-        for topics in self.mappings:
+        for topics in self.mappings_:
             topic = topics[-1]
             if topic in mappings:
                 topics.append(mappings[topic])
