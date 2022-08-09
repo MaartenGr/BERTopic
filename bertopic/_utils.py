@@ -66,7 +66,7 @@ def check_is_fitted(topic_model):
     msg = ("This %(name)s instance is not fitted yet. Call 'fit' with "
            "appropriate arguments before using this estimator.")
 
-    if not topic_model.topics_:
+    if topic_model.topics_ is None:
         raise ValueError(msg % {'name': type(topic_model).__name__})
 
 

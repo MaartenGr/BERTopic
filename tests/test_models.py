@@ -28,7 +28,7 @@ from umap import UMAP
 from hdbscan import HDBSCAN
 from bertopic import BERTopic
 from bertopic._mmr import mmr
-from bertopic._ctfidf import ClassTFIDF
+from bertopic.vectorizers import CTfidfTransformer
 from bertopic.backend._utils import select_backend
 
 newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
@@ -193,7 +193,7 @@ def test_ctfidf(base_bertopic):
     count = base_bertopic.vectorizer_model.fit(documents)
     words = count.get_feature_names()
     X = count.transform(documents)
-    transformer = ClassTFIDF().fit(X)
+    transformer = CTfidfTransformer().fit(X)
     c_tf_idf = transformer.transform(X)
 
     assert len(words) > 1000
@@ -233,7 +233,7 @@ def test_ctfidf_custom_cv():
     count = model.vectorizer_model.fit(documents)
     words = count.get_feature_names()
     X = count.transform(documents)
-    transformer = ClassTFIDF().fit(X)
+    transformer = CTfidfTransformer().fit(X)
     c_tf_idf = transformer.transform(X)
 
     assert len(words) > 1000

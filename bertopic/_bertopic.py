@@ -21,16 +21,16 @@ from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 # Models
 import hdbscan
 from umap import UMAP
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
 
 # BERTopic
-from bertopic._ctfidf import ClassTFIDF
-from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
-from bertopic._mmr import mmr
-from bertopic.backend._utils import select_backend
 from bertopic import plotting
+from bertopic._mmr import mmr
+from bertopic.vectorizers import CTfidfTransformer
+from bertopic.backend._utils import select_backend
+from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 
 # Visualization
 import plotly.graph_objects as go
@@ -63,7 +63,7 @@ class BERTopic:
                                          weighted average of word embeddings in a topic based on their c-TF-IDF values.
         representative_docs_ (Mapping[int, str]) : The representative documents for each topic.
 
-    Usage:
+    Examples:
 
     ```python
     from bertopic import BERTopic
@@ -105,6 +105,7 @@ class BERTopic:
                  umap_model: UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
                  vectorizer_model: CountVectorizer = None,
+                 ctfidf_model: TfidfTransformer = None,
                  verbose: bool = False,
                  ):
         """BERTopic initialization
@@ -163,7 +164,8 @@ class BERTopic:
             hdbscan_model: Pass in a hdbscan.HDBSCAN model to be used instead of the default
                            NOTE: You can also pass in any clustering algorithm as long as it has
                            `.fit` and `.predict` functions along with the `.labels_` variable.
-            vectorizer_model: Pass in a CountVectorizer instead of the default
+            vectorizer_model: Pass in a custom `CountVectorizer` instead of the default model.
+            ctfidf_model: Pass in a custom CTfidfTransformer instead of the default model.
 
         Attributes:
 
@@ -187,6 +189,7 @@ class BERTopic:
         # Vectorizer
         self.n_gram_range = n_gram_range
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
+        self.ctfidf_model = ctfidf_model or CTfidfTransformer()
 
         # UMAP or another algorithm that has .fit and .transform functions
         self.umap_model = umap_model or UMAP(n_neighbors=15,
@@ -737,7 +740,7 @@ class BERTopic:
 
             # Group bow per cluster, calculate c-TF-IDF and extract words
             grouped = csr_matrix(bow[clustered_topics].sum(axis=0))
-            c_tf_idf = self.transformer.transform(grouped)
+            c_tf_idf = self.ctfidf_model.transform(grouped)
             words_per_topic = self._extract_words_per_topic(words, c_tf_idf, labels=[0])
 
             # Extract parent's name and ID
@@ -2326,9 +2329,9 @@ class BERTopic:
             multiplier = None
 
         if fit:
-            self.transformer = ClassTFIDF().fit(X, multiplier=multiplier)
+            self.ctfidf_model = self.ctfidf_model.fit(X, multiplier=multiplier)
 
-        c_tf_idf = self.transformer.transform(X)
+        c_tf_idf = self.ctfidf_model.transform(X)
 
         return c_tf_idf, words
 
