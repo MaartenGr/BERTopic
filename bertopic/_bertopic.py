@@ -2481,6 +2481,8 @@ class BERTopic:
         elif fit:
             self.vectorizer_model.fit(documents)
             X = self.vectorizer_model.transform(documents)
+        else:
+            X = self.vectorizer_model.transform(documents)
 
         words = self.vectorizer_model.get_feature_names()
 
