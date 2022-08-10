@@ -438,6 +438,147 @@ class BERTopic:
         predictions = self._map_predictions(predictions)
         return predictions, probabilities
 
+    def partial_fit(self,
+                    documents: List[str],
+                    embeddings: np.ndarray = None,
+                    y: Union[List[int], np.ndarray] = None):
+        """ Fit BERTopic on a subset of the data and perform online learning
+        with batch-like data.
+
+        Online topic modeling in BERTopic is performed by using dimensionality
+        reduction and cluster algorithms that support a `partial_fit` method
+        in order to incrementally train the topic model.
+
+        Likewise, the `bertopic.vectorizers.OnlineCountVectorizer` is used
+        to dynamically update its vocabulary when presented with new data.
+        It has several parameters for modeling decay and updating the
+        representations.
+
+        In other words, although the main algorithm stays the same, the training
+        procedure now works as follows:
+
+        For each subset of the data:
+
+        1. Generate embeddings with a pre-traing language model
+        2. Incrementally update the dimensionality reduction algorithm with `partial_fit`
+        3. Incrementally update the cluster algorithm with `partial_fit`
+        4. Incrementally update the OnlineCountVectorizer and apply some form of decay
+
+        Note that it is advised to use `partial_fit` with batches and
+        not single documents for the best performance.
+
+        Arguments:
+            documents: A list of documents to fit on
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
+            y: The target class for (semi)-supervised modeling. Use -1 if no class for a
+               specific instance is specified.
+
+        Usage:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+        from sklearn.cluster import MiniBatchKMeans
+        from sklearn.decomposition import IncrementalPCA
+        from bertopic.vectorizers import OnlineCountVectorizer
+        from bertopic import BERTopic
+
+        # Prepare documents
+        docs = fetch_20newsgroups(subset=subset,  remove=('headers', 'footers', 'quotes'))["data"]
+
+        # Prepare sub-models that support online learning
+        umap_model = IncrementalPCA(n_components=5)
+        cluster_model = MiniBatchKMeans(n_clusters=50, random_state=0)
+        vectorizer_model = OnlineCountVectorizer(stop_words="english", decay=.01)
+
+        topic_model = BERTopic(umap_model=umap_model,
+                               hdbscan_model=cluster_model,
+                               vectorizer_model=vectorizer_model)
+
+        # Incrementally fit the topic model by training on 1000 documents at a time
+        for index in range(0, len(docs), 1000):
+            topic_model.partial_fit(docs[index: index+1000])
+        ```
+        """
+        # Checks
+        check_embeddings_shape(embeddings, documents)
+        if not hasattr(self.hdbscan_model, "partial_fit"):
+            raise ValueError("In order to use `.partial_fit`, the cluster model should have "
+                             "a `partial_fit` function.")
+
+        # Prepare documents
+        if isinstance(documents, str):
+            documents = [documents]
+        documents = pd.DataFrame({"Document": documents,
+                                  "ID": range(len(documents)),
+                                  "Topic": None})
+
+        # Extract embeddings
+        if embeddings is None:
+            if self.topic_representations_ is None:
+                self.embedding_model = select_backend(self.embedding_model,
+                                                      language=self.language)
+            embeddings = self._extract_embeddings(documents.Document,
+                                                  method="document",
+                                                  verbose=self.verbose)
+        else:
+            if self.embedding_model is not None and self.topic_representations_ is None:
+                self.embedding_model = select_backend(self.embedding_model,
+                                                      language=self.language)
+
+        # Reduce dimensionality
+        if self.seed_topic_list is not None and self.embedding_model is not None:
+            y, embeddings = self._guided_topic_modeling(embeddings)
+        umap_embeddings = self._reduce_dimensionality(embeddings, y, partial_fit=True)
+
+        # Cluster reduced embeddings
+        documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, partial_fit=True)
+        topics = documents.Topic.to_list()
+
+        # Map and find new topics
+        mappings = self.topic_mapper_.get_mappings()
+        new_topics = set(topics).difference(set(mappings.keys()))
+        new_topic_ids = {topic: max(mappings.values()) + index + 1 for index, topic in enumerate(new_topics)}
+        self.topic_mapper_.add_new_topics(new_topic_ids)
+        updated_mappings = self.topic_mapper_.get_mappings()
+        updated_topics = [updated_mappings[topic] for topic in topics]
+        documents["Topic"] = updated_topics
+
+        # Add missing topics (topics that were originally created but are now missing)
+        if self.topic_representations_:
+            missing_topics = set(self.topic_representations_.keys()).difference(set(updated_topics))
+            for missing_topic in missing_topics:
+                documents.loc[len(documents), :] = [" ", len(documents), missing_topic]
+        else:
+            missing_topics = {}
+
+        # Prepare documents
+        documents_per_topic = documents.sort_values("Topic").groupby(['Topic'], as_index=False)
+        updated_topics = documents_per_topic.first().Topic.astype(int)
+        documents_per_topic = documents_per_topic.agg({'Document': ' '.join})
+
+        # Update topic representations
+        self.c_tf_idf_, updated_words = self._c_tf_idf(documents_per_topic, partial_fit=True)
+        self.topic_representations_ = self._extract_words_per_topic(updated_words, self.c_tf_idf_, labels=updated_topics)
+        self._create_topic_vectors()
+        self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
+                              for key, values in self.topic_representations_.items()}
+
+        # Update topic sizes
+        if self.topic_sizes_ is None:
+            self._update_topic_size(documents)
+        else:
+            sizes = documents.groupby(['Topic'], as_index=False).count()
+            for _, row in sizes.iterrows():
+                topic = int(row.Topic)
+                if self.topic_sizes_.get(topic) is not None and topic not in missing_topics:
+                    self.topic_sizes_[topic] += int(row.Document)
+                elif self.topic_sizes_.get(topic) is None:
+                    self.topic_sizes_[topic] = int(row.Document)
+            self.topics_ = documents.Topic.tolist()
+
+        return self
+
     def topics_over_time(self,
                          docs: List[str],
                          timestamps: Union[List[str],
@@ -2083,22 +2224,33 @@ class BERTopic:
 
     def _reduce_dimensionality(self,
                                embeddings: Union[np.ndarray, csr_matrix],
-                               y: Union[List[int], np.ndarray] = None) -> np.ndarray:
+                               y: Union[List[int], np.ndarray] = None,
+                               partial_fit: bool = False) -> np.ndarray:
         """ Reduce dimensionality of embeddings using UMAP and train a UMAP model
 
         Arguments:
             embeddings: The extracted embeddings using the sentence transformer module.
             y: The target class for (semi)-supervised dimensionality reduction
+            partial_fit: Whether to run `partial_fit` for online learning
 
         Returns:
             umap_embeddings: The reduced embeddings
         """
-        try:
-            self.umap_model.fit(embeddings, y=y)
-        except TypeError:
-            logger.info("The dimensionality reduction algorithm did not contain the `y` parameter and"
-                        " therefore the `y` parameter was not used")
-            self.umap_model.fit(embeddings)
+        # Partial fit
+        if partial_fit:
+            if hasattr(self.umap_model, "partial_fit"):
+                self.umap_model = self.umap_model.partial_fit(embeddings)
+            elif self.topic_representations_ is None:
+                self.umap_model.fit(embeddings)
+
+        # Regular fit
+        else:
+            try:
+                self.umap_model.fit(embeddings, y=y)
+            except TypeError:
+                logger.info("The dimensionality reduction algorithm did not contain the `y` parameter and"
+                            " therefore the `y` parameter was not used")
+                self.umap_model.fit(embeddings)
 
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality")
@@ -2106,32 +2258,36 @@ class BERTopic:
 
     def _cluster_embeddings(self,
                             umap_embeddings: np.ndarray,
-                            documents: pd.DataFrame) -> Tuple[pd.DataFrame,
-                                                              np.ndarray]:
+                            documents: pd.DataFrame,
+                            partial_fit: bool = False) -> Tuple[pd.DataFrame,
+                                                                np.ndarray]:
         """ Cluster UMAP embeddings with HDBSCAN
 
         Arguments:
             umap_embeddings: The reduced sentence embeddings with UMAP
             documents: Dataframe with documents and their corresponding IDs
+            partial_fit: Whether to run `partial_fit` for online learning
 
         Returns:
             documents: Updated dataframe with documents and their corresponding IDs
                        and newly added Topics
             probabilities: The distribution of probabilities
         """
-        # Fit and extract labels
-        self.hdbscan_model.fit(umap_embeddings)
-        documents['Topic'] = self.hdbscan_model.labels_
+        if partial_fit:
+            self.hdbscan_model = self.hdbscan_model.partial_fit(umap_embeddings)
+            labels = self.hdbscan_model.labels_
+            documents['Topic'] = labels
+            self.topics_ = labels
+        else:
+            self.hdbscan_model.fit(umap_embeddings)
+            labels = self.hdbscan_model.labels_
+            documents['Topic'] = labels
+            self._update_topic_size(documents)
 
         # Some algorithms have outlier labels (-1) that can be tricky to work
         # with if you are slicing data based on that labels. Therefore, we
         # track if there are outlier labels and act accordingly when slicing.
-        if -1 in set(self.hdbscan_model.labels_):
-            self._outliers = 1
-        else:
-            self._outliers = 0
-
-        self._update_topic_size(documents)
+        self._outliers = 1 if -1 in set(labels) else 0
 
         # Save representative docs and calculate probabilities if it is a HDBSCAN model
         if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
@@ -2301,7 +2457,10 @@ class BERTopic:
 
             self.topic_embeddings_ = topic_embeddings
 
-    def _c_tf_idf(self, documents_per_topic: pd.DataFrame, fit: bool = True) -> Tuple[csr_matrix, List[str]]:
+    def _c_tf_idf(self, 
+                  documents_per_topic: pd.DataFrame, 
+                  fit: bool = True,
+                  partial_fit: bool = False) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
 
         Arguments:
@@ -2309,6 +2468,7 @@ class BERTopic:
                                  string made out of multiple documents
             m: The total number of documents (unjoined)
             fit: Whether to fit a new vectorizer or use the fitted self.vectorizer_model
+            partial_fit: Whether to run `partial_fit` for online learning
 
         Returns:
             tf_idf: The resulting matrix giving a value (importance score) for each word per topic
@@ -2316,11 +2476,13 @@ class BERTopic:
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
 
-        if fit:
+        if partial_fit:
+            X = self.vectorizer_model.partial_fit(documents).update_bow(documents)
+        elif fit:
             self.vectorizer_model.fit(documents)
+            X = self.vectorizer_model.transform(documents)
 
         words = self.vectorizer_model.get_feature_names()
-        X = self.vectorizer_model.transform(documents)
 
         if self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
@@ -2736,3 +2898,14 @@ class TopicMapper:
                 topics.append(mappings[topic])
             else:
                 topics.append(-1)
+
+    def add_new_topics(self, mappings: Mapping[int, int]):
+        """ Add new row(s) of topic mappings
+
+        Arguments:
+            mappings: The mappings to add
+        """
+        length = len(self.mappings_[0])
+        for key, value in mappings.items():
+            to_append = [key] + ([None] * (length-2)) + [value]
+            self.mappings_.append(to_append)
