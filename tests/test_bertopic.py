@@ -4,29 +4,23 @@ Test fitted BERTopic
 These test relate to a typical order of BERTopic usage. From training the model
 and predicting new instances, to further reducing topics and visualizing the results.
 
-TO DO:
-    * Add Evaluation measures to check for quality
 """
+import copy
 import pytest
 from sklearn.datasets import fetch_20newsgroups
-from sklearn.cluster import KMeans
-from bertopic import BERTopic
 
-newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:2000]
-base_model = BERTopic(language="english", verbose=True, min_topic_size=5)
-kmeans_model = BERTopic(language="english", verbose=True, hdbscan_model=KMeans(n_clusters=10, random_state=42))
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:500]
 
 
-@pytest.mark.parametrize("topic_model", [base_model, kmeans_model])
-def test_full_model(topic_model):
+@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model')])
+def test_full_model(model, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
 
     NOTE: This does not cover all cases but merely combines it all together
     """
-    # Test fit
-    topic_model.calculate_probabilities = True
-    topics, probs = topic_model.fit_transform(newsgroup_docs)
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+    topics = topic_model.topics_
 
     for topic in set(topics):
         words = topic_model.get_topic(topic)[:10]
@@ -46,14 +40,14 @@ def test_full_model(topic_model):
     assert len(topics_test) == 1
 
     # Test topics over time
-    timestamps = [i % 10 for i in range(2000)]
-    topics_over_time = topic_model.topics_over_time(newsgroup_docs, timestamps)
+    timestamps = [i % 10 for i in range(len(docs))]
+    topics_over_time = topic_model.topics_over_time(docs, timestamps)
 
-    assert topics_over_time.Frequency.sum() == 2000
+    assert topics_over_time.Frequency.sum() == len(docs)
     assert len(topics_over_time.Topic.unique()) == len(set(topics))
 
     # Test hierarchical topics
-    hier_topics = topic_model.hierarchical_topics(newsgroup_docs)
+    hier_topics = topic_model.hierarchical_topics(docs)
 
     assert len(hier_topics) > 0
     assert hier_topics.Parent_ID.astype(int).min() > max(topics)
@@ -72,19 +66,19 @@ def test_full_model(topic_model):
     # Test topic reduction
     nr_topics = len(set(topics))
     nr_topics = 2 if nr_topics < 2 else nr_topics - 1
-    new_topics, new_probs = topic_model.reduce_topics(newsgroup_docs, probs, nr_topics=nr_topics)
+    new_topics, new_probs = topic_model.reduce_topics(docs, nr_topics=nr_topics)
 
     assert len(topic_model.get_topic_freq()) == nr_topics + topic_model._outliers
     assert len(new_topics) == len(topics)
 
-    if probs is not None:
-        assert len(new_probs) == len(probs)
-
     # Test update topics
     topic = topic_model.get_topic(1)[:10]
-    topic_model.update_topics(newsgroup_docs, n_gram_range=(2, 2))
+    vectorizer_model = topic_model.vectorizer_model
+    topic_model.update_topics(docs, n_gram_range=(2, 2))
+
     updated_topic = topic_model.get_topic(1)[:10]
-    topic_model.update_topics(newsgroup_docs)
+
+    topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
     original_topic = topic_model.get_topic(1)[:10]
 
     assert topic != updated_topic
@@ -101,5 +95,5 @@ def test_full_model(topic_model):
     # Test merging topics
     freq = topic_model.get_topic_freq(0)
     topics_to_merge = [0, 1]
-    topic_model.merge_topics(newsgroup_docs, topics_to_merge)
+    topic_model.merge_topics(docs, topics_to_merge)
     assert freq < topic_model.get_topic_freq(0)

@@ -536,6 +536,8 @@ class BERTopic:
         topics = documents.Topic.to_list()
 
         # Map and find new topics
+        if not self.topic_mapper_:
+            self.topic_mapper_ = TopicMapper(topics)
         mappings = self.topic_mapper_.get_mappings()
         new_topics = set(topics).difference(set(mappings.keys()))
         new_topic_ids = {topic: max(mappings.values()) + index + 1 for index, topic in enumerate(new_topics)}
@@ -565,6 +567,9 @@ class BERTopic:
                               for key, values in self.topic_representations_.items()}
 
         # Update topic sizes
+        if len(missing_topics) > 0:
+            documents = documents.iloc[:-len(missing_topics)]
+
         if self.topic_sizes_ is None:
             self._update_topic_size(documents)
         else:
@@ -575,7 +580,7 @@ class BERTopic:
                     self.topic_sizes_[topic] += int(row.Document)
                 elif self.topic_sizes_.get(topic) is None:
                     self.topic_sizes_[topic] = int(row.Document)
-            self.topics_ = documents.Topic.tolist()
+            self.topics_ = documents.Topic.astype(int).tolist()
 
         return self
 
@@ -1022,9 +1027,19 @@ class BERTopic:
 
         if topics is None:
             topics = self.topics_
+            labels = None
+        else:
+            labels = sorted(list(set(topics)))
 
+        # Extract words
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
-        self._extract_topics(documents)
+        documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
+        self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
+        self.topic_representations_ = self._extract_words_per_topic(words, labels=labels)
+        self._create_topic_vectors()
+        self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
+                              for key, values in
+                              self.topic_representations_.items()}
         self._update_topic_size(documents)
 
     def get_topics(self) -> Mapping[str, Tuple[str, float]]:
@@ -1088,7 +1103,7 @@ class BERTopic:
                 labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels_)}
                 info["CustomName"] = info["Topic"].map(labels)
 
-        if topic:
+        if topic is not None:
             info = info.loc[info.Topic == topic, :]
 
         return info.reset_index(drop=True)
@@ -2298,7 +2313,8 @@ class BERTopic:
         else:
             probabilities = None
 
-        self.topic_mapper_ = TopicMapper(self.topics_)
+        if not partial_fit:
+            self.topic_mapper_ = TopicMapper(self.topics_)
         logger.info("Clustered reduced embeddings")
         return documents, probabilities
 
@@ -2419,6 +2435,7 @@ class BERTopic:
                 updated_representative_docs[new_topic].extend(docs)
 
             self.representative_docs_ = updated_representative_docs
+            self.representative_docs_.pop(-1, None)
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation
@@ -2507,7 +2524,7 @@ class BERTopic:
         """
         sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
         self.topic_sizes_ = dict(zip(sizes.Topic, sizes.Document))
-        self.topics_ = documents.Topic.tolist()
+        self.topics_ = documents.Topic.astype(int).tolist()
 
     def _extract_words_per_topic(self,
                                  words: List[str],
