@@ -1,3 +1,10 @@
+---
+hide:
+  - navigation
+---
+
+# Frequently Asked Questions
+
 ## **Why are the results not consistent between runs?**
 Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code
 multiple times. Using custom embeddings allows you to try out BERTopic several times until you find the 

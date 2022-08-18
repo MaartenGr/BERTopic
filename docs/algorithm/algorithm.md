@@ -1,3 +1,10 @@
+---
+hide:
+  - navigation
+---
+
+# The Algorithm
+
 <img src="../img/algorithm.png" width="80%" height="80%"/>
 
 The algorithm contains, roughly, 3 stages:   

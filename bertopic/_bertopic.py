@@ -2844,7 +2844,7 @@ class BERTopic:
 
         Returns:
             str: Human readable representation of the most important model parameters.
-                 The parameters that represent models are ignored due to their
+                 The parameters that represent models are ignored due to their length.
         """
         parameters = ""
         for parameter, value in self.get_params().items():

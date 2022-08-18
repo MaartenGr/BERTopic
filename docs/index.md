@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # BERTopic
 
 <img src="logo.png" width="30%" height="30%" align="right" />

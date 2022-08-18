@@ -1,3 +1,10 @@
+---
+hide:
+  - navigation
+---
+
+# Changelog
+
 ## **Version 0.11.0**
 *Release date: 11 July, 2022*
 
