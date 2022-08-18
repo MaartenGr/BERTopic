@@ -49,13 +49,15 @@ def visualize_topics_per_class(topic_model,
     """
     colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 
-    # Select topics
-    if topics:
-        selected_topics = topics
-    elif top_n_topics:
-        selected_topics = topic_model.get_topic_freq().head(top_n_topics + 1)[1:].Topic.values
+    # Select topics based on top_n and topics args
+    freq_df = topic_model.get_topic_freq()
+    freq_df = freq_df.loc[freq_df.Topic != -1, :]
+    if topics is not None:
+        selected_topics = list(topics)
+    elif top_n_topics is not None:
+        selected_topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
     else:
-        selected_topics = topic_model.get_topic_freq().Topic.values
+        selected_topics = sorted(freq_df.Topic.to_list())
 
     # Prepare data
     if topic_model.custom_labels_ is not None and custom_labels:
