@@ -14,6 +14,7 @@ import inspect
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from packaging import version
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
@@ -21,9 +22,10 @@ from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 # Models
 import hdbscan
 from umap import UMAP
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
+from sklearn import __version__ as sklearn_version
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 # BERTopic
 from bertopic import plotting
@@ -859,7 +861,14 @@ class BERTopic:
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
         documents = self._preprocess_text(documents_per_topic.Document.values)
-        words = self.vectorizer_model.get_feature_names()
+
+        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
+        # and will be removed in 1.2. Please use get_feature_names_out instead.
+        if version.parse(sklearn_version) >= version.parse("1.0.0"):
+            words = self.vectorizer_model.get_feature_names_out()
+        else:
+            words = self.vectorizer_model.get_feature_names()
+
         bow = self.vectorizer_model.transform(documents)
 
         # Extract clusters
@@ -2501,7 +2510,12 @@ class BERTopic:
         else:
             X = self.vectorizer_model.transform(documents)
 
-        words = self.vectorizer_model.get_feature_names()
+        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
+        # and will be removed in 1.2. Please use get_feature_names_out instead.
+        if version.parse(sklearn_version) >= version.parse("1.0.0"):
+            words = self.vectorizer_model.get_feature_names_out()
+        else:
+            words = self.vectorizer_model.get_feature_names()
 
         if self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]

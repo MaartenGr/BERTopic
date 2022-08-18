@@ -3,7 +3,9 @@ import copy
 import pytest
 import numpy as np
 import pandas as pd
+from packaging import version
 from scipy.sparse.csr import csr_matrix
+from sklearn import __version__ as sklearn_version
 from sklearn.feature_extraction.text import CountVectorizer
 from bertopic.vectorizers import CTfidfTransformer
 
@@ -24,7 +26,13 @@ def test_ctfidf(model, documents, request):
     documents = topic_model._preprocess_text(documents_per_topic.Document.values)
     count = topic_model.vectorizer_model.fit(documents)
 
-    words = count.get_feature_names()
+    # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
+    # and will be removed in 1.2. Please use get_feature_names_out instead.
+    if version.parse(sklearn_version) >= version.parse("1.0.0"):
+        words = count.get_feature_names_out()
+    else:
+        words = count.get_feature_names()
+
     X = count.transform(documents)
     transformer = CTfidfTransformer().fit(X)
     c_tf_idf = transformer.transform(X)
@@ -61,7 +69,14 @@ def test_ctfidf_custom_cv(model, documents, request):
     documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
     documents = topic_model._preprocess_text(documents_per_topic.Document.values)
     count = topic_model.vectorizer_model.fit(documents)
-    words = count.get_feature_names()
+
+    # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
+    # and will be removed in 1.2. Please use get_feature_names_out instead.
+    if version.parse(sklearn_version) >= version.parse("1.0.0"):
+        words = count.get_feature_names_out()
+    else:
+        words = count.get_feature_names()
+
     X = count.transform(documents)
     transformer = CTfidfTransformer().fit(X)
     c_tf_idf = transformer.transform(X)
