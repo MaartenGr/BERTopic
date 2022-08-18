@@ -18,11 +18,6 @@ from bertopic import BERTopic
                           (200, 500, 4),
                           (500, 200, 4)])
 def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
-    """ Test HDBSCAN
-
-    Testing whether the clusters are correctly created and if the old and new dataframes
-    are the exact same aside from the Topic column.
-    """
     embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
     documents = [str(i + 1) for i in range(embeddings.shape[0])]
     old_df = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
@@ -49,11 +44,6 @@ def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
                           (200, 500, 4),
                           (500, 200, 4)])
 def test_custom_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
-    """ Test Custom HDBSCAN
-
-    Testing whether the clusters are correctly created using a custom HDBSCAN instance
-    and if the old and new dataframes are the exact same aside from the Topic column.
-    """
     embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
     documents = [str(i + 1) for i in range(embeddings.shape[0])]
     old_df = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})

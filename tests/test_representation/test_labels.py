@@ -1,9 +1,5 @@
 import copy
 import pytest
-from sklearn.datasets import fetch_20newsgroups
-
-
-newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:500]
 
 
 @pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),

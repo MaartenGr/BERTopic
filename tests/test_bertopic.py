@@ -1,19 +1,9 @@
-"""
-Test fitted BERTopic
-
-These test relate to a typical order of BERTopic usage. From training the model
-and predicting new instances, to further reducing topics and visualizing the results.
-
-"""
 import copy
 import pytest
-from sklearn.datasets import fetch_20newsgroups
-
-docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:500]
 
 
 @pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model')])
-def test_full_model(model, request):
+def test_full_model(model, documents, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
 
@@ -40,14 +30,14 @@ def test_full_model(model, request):
     assert len(topics_test) == 1
 
     # Test topics over time
-    timestamps = [i % 10 for i in range(len(docs))]
-    topics_over_time = topic_model.topics_over_time(docs, timestamps)
+    timestamps = [i % 10 for i in range(len(documents))]
+    topics_over_time = topic_model.topics_over_time(documents, timestamps)
 
-    assert topics_over_time.Frequency.sum() == len(docs)
+    assert topics_over_time.Frequency.sum() == len(documents)
     assert len(topics_over_time.Topic.unique()) == len(set(topics))
 
     # Test hierarchical topics
-    hier_topics = topic_model.hierarchical_topics(docs)
+    hier_topics = topic_model.hierarchical_topics(documents)
 
     assert len(hier_topics) > 0
     assert hier_topics.Parent_ID.astype(int).min() > max(topics)
@@ -66,7 +56,7 @@ def test_full_model(model, request):
     # Test topic reduction
     nr_topics = len(set(topics))
     nr_topics = 2 if nr_topics < 2 else nr_topics - 1
-    new_topics, new_probs = topic_model.reduce_topics(docs, nr_topics=nr_topics)
+    new_topics, new_probs = topic_model.reduce_topics(documents, nr_topics=nr_topics)
 
     assert len(topic_model.get_topic_freq()) == nr_topics + topic_model._outliers
     assert len(new_topics) == len(topics)
@@ -74,11 +64,11 @@ def test_full_model(model, request):
     # Test update topics
     topic = topic_model.get_topic(1)[:10]
     vectorizer_model = topic_model.vectorizer_model
-    topic_model.update_topics(docs, n_gram_range=(2, 2))
+    topic_model.update_topics(documents, n_gram_range=(2, 2))
 
     updated_topic = topic_model.get_topic(1)[:10]
 
-    topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
+    topic_model.update_topics(documents, vectorizer_model=vectorizer_model)
     original_topic = topic_model.get_topic(1)[:10]
 
     assert topic != updated_topic
@@ -95,5 +85,5 @@ def test_full_model(model, request):
     # Test merging topics
     freq = topic_model.get_topic_freq(0)
     topics_to_merge = [0, 1]
-    topic_model.merge_topics(docs, topics_to_merge)
+    topic_model.merge_topics(documents, topics_to_merge)
     assert freq < topic_model.get_topic_freq(0)

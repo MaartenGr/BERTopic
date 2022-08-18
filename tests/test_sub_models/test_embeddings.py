@@ -11,15 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
                                    ('merged_topic_model'),
                                    ('reduced_topic_model'),
                                    ('online_topic_model')])
-
 def test_extract_embeddings(model, request):
-    """ Test SentenceTransformer
-
-    Check whether the embeddings are correctly generated
-    for both a single string or a list of strings. This means that
-    the correct shape should be outputted. The embeddings by itself
-    should not exceed certain values as a sanity check.
-    """
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     single_embedding = topic_model._extract_embeddings("a document")
     multiple_embeddings = topic_model._extract_embeddings(["something different", "another document"])
@@ -45,13 +37,7 @@ def test_extract_embeddings(model, request):
                                    ('merged_topic_model'),
                                    ('reduced_topic_model'),
                                    ('online_topic_model')])
-
 def test_extract_embeddings_compare(model, embedding_model, request):
-    """ Test SentenceTransformer with BERTopic
-
-    Test if the correct embedding model is loaded in BERTopic and
-    whether BERTopic embeddings match the sentence-transformers embeddings.
-    """
     docs = ["some document"]
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     bertopic_embeddings = topic_model._extract_embeddings(docs)
@@ -64,7 +50,6 @@ def test_extract_embeddings_compare(model, embedding_model, request):
 
 
 def test_extract_incorrect_embeddings():
-    """ Test if errors are raised when loading incorrect model """
     with pytest.raises(ValueError):
         model = BERTopic(language="Unknown language")
         model.fit(["some document"])
