@@ -1,7 +1,9 @@
 :root {
     --md-primary-fg-color:        #234E70;
+    
   }
 
 :root>* {
---md-typeset-a-color: #0277BD;
+--md-typeset-a-color: #016198;
+--md-text-link-color: #000000; 
 }
