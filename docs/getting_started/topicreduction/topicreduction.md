@@ -57,10 +57,12 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
 # Further reduce topics
-new_topics, new_probs = topic_model.reduce_topics(docs, nr_topics=30)
+topic_model.reduce_topics(docs, nr_topics=30)
+
+# Access updated topics
+topics = topic_model.topics_
 ```
 
-The reasoning for putting `docs` and `topics` (and optionally `probabilities`) as parameters is that these values are not saved within 
-BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic 
-instead of a dedicated database.  
+The reasoning for putting `docs` as a parameter is that the documents are not saved within 
+BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic instead of a dedicated database.  
 

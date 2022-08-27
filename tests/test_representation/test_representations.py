@@ -95,7 +95,7 @@ def test_topic_reduction(model, reduced_topics, documents, request):
     old_topics = copy.deepcopy(topic_model.topics_)
     old_freq = topic_model.get_topic_freq()
 
-    new_topics, new_probs = topic_model.reduce_topics(documents, nr_topics=reduced_topics)
+    topic_model.reduce_topics(documents, nr_topics=reduced_topics)
 
     new_freq = topic_model.get_topic_freq()
 
@@ -103,8 +103,8 @@ def test_topic_reduction(model, reduced_topics, documents, request):
         assert old_freq.Count.sum() == new_freq.Count.sum()
     assert len(old_freq.Topic.unique()) == len(old_freq)
     assert len(new_freq.Topic.unique()) == len(new_freq)
-    assert len(new_topics) == len(old_topics)
-    assert new_topics != old_topics
+    assert len(topic_model.topics_) == len(old_topics)
+    assert topic_model.topics_ != old_topics
 
 
 @pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),

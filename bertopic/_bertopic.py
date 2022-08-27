@@ -51,6 +51,10 @@ class BERTopic:
     Attributes:
         topics_ (List[int]) : The topics that are generated for each document after training or updating
                               the topic model. The most recent topics are tracked.
+        probabilities_ (List[float]): The probability of the assigned topic per document. These are
+                                      only calculated if a HDBSCAN model is used for the clustering step.
+                                      When `calculate_probabilities=True`, then it is the probabilities
+                                      of all topics per document.
         topic_sizes_ (Mapping[int, int]) : The size of each topic
         topic_mapper_ (TopicMapper) : A class for tracking topics and their mappings anytime they are
                                       merged, reduced, added, or removed.
@@ -209,6 +213,7 @@ class BERTopic:
 
         # Public attributes
         self.topics_ = None
+        self.probabilities_ = None
         self.topic_sizes_ = None
         self.topic_mapper_ = None
         self.topic_representations_ = None
@@ -357,10 +362,10 @@ class BERTopic:
             documents = self._reduce_topics(documents)
 
         self._map_representative_docs(original_topics=True)
-        probabilities = self._map_probabilities(probabilities, original_topics=True)
+        self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
-        return predictions, probabilities
+        return predictions, self.probabilities_
 
     def transform(self,
                   documents: Union[str, List[str]],
@@ -534,7 +539,7 @@ class BERTopic:
         umap_embeddings = self._reduce_dimensionality(embeddings, y, partial_fit=True)
 
         # Cluster reduced embeddings
-        documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, partial_fit=True)
+        documents, self.probabilities_ = self._cluster_embeddings(umap_embeddings, documents, partial_fit=True)
         topics = documents.Topic.to_list()
 
         # Map and find new topics
@@ -1001,6 +1006,9 @@ class BERTopic:
             docs: The documents you used when calling either `fit` or `fit_transform`
             topics: A list of topics where each topic is related to a document in `docs`.
                     Use this variable to change or map the topics.
+                    NOTE: Using a custom list of topic assignments may lead to errors if
+                          topic reduction techniques are used afterwards. Make sure that
+                          manually assigning topics is the last step in the pipeline
             n_gram_range: The n-gram range for the CountVectorizer.
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
 
@@ -1039,7 +1047,9 @@ class BERTopic:
             labels = None
         else:
             labels = sorted(list(set(topics)))
-
+            warnings.warn("Using a custom list of topic assignments may lead to errors if "
+                          "topic reduction techniques are used afterwards. Make sure that "
+                          "manually assigning topics is the last step in the pipeline.")
         # Extract words
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
@@ -1445,11 +1455,11 @@ class BERTopic:
         self._extract_topics(documents)
         self._update_topic_size(documents)
         self._map_representative_docs()
+        self.probabilities_ = self._map_probabilities(self.probabilities_)
 
     def reduce_topics(self,
                       docs: List[str],
-                      probabilities: np.ndarray = None,
-                      nr_topics: int = 20) -> Tuple[List[int], np.ndarray]:
+                      nr_topics: int = 20) -> None:
         """ Further reduce the number of topics to nr_topics.
 
         The number of topics is further reduced by calculating the c-TF-IDF matrix
@@ -1457,19 +1467,13 @@ class BERTopic:
         frequent topic with the most similar one based on their c-TF-IDF matrices.
         The topics, their sizes, and representations are updated.
 
-        The reasoning for putting `docs`, `topics`, and `probs` as parameters is that
-        these values are not saved within BERTopic on purpose. If you were to have a
-        million documents, it seems very inefficient to save those in BERTopic
-        instead of a dedicated database.
-
         Arguments:
             docs: The docs you used when calling either `fit` or `fit_transform`
-            probabilities: The probabilities that were returned when calling either `fit` or `fit_transform`
             nr_topics: The number of topics you want reduced to
 
-        Returns:
-            new_topics: Updated topics
-            new_probabilities: Updated probabilities
+        Updates:
+            topics_ : Assigns topics to their merged representations.
+            probabilities_ : Assigns probabilities to their merged representations.
 
         Usage:
 
@@ -1477,13 +1481,14 @@ class BERTopic:
         topics and probabilities (if they were calculated):
 
         ```python
-        new_topics, new_probs = topic_model.reduce_topics(docs, probabilities, nr_topics=30)
+        topic_model.reduce_topics(docs, nr_topics=30)
         ```
 
-        If probabilities were not calculated simply run the function without them:
+        You can then access the updated topics and probabilities with:
 
         ```python
-        new_topics, new_probs = topic_model.reduce_topics(docs, nr_topics=30)
+        topics = topic_model.topics_
+        probabilities = topic_model.probabilities_
         ```
         """
         check_is_fitted(self)
@@ -1495,11 +1500,10 @@ class BERTopic:
         self._merged_topics = None
         self._map_representative_docs()
 
-        # Extract topics and map probabilities
-        new_topics = documents.Topic.to_list()
-        new_probabilities = self._map_probabilities(probabilities)
+        # Map probabilities
+        self.probabilities_ = self._map_probabilities(self.probabilities_)
 
-        return new_topics, new_probabilities
+        return self
 
     def visualize_topics(self,
                          topics: List[int] = None,
@@ -1917,13 +1921,13 @@ class BERTopic:
         probabilities of a single document:
 
         ```python
-        topic_model.visualize_distribution(probabilities[0])
+        topic_model.visualize_distribution(topic_model.probabilities_[0])
         ```
 
         Or if you want to save the resulting figure:
 
         ```python
-        fig = topic_model.visualize_distribution(probabilities[0])
+        fig = topic_model.visualize_distribution(topic_model.probabilities_[0])
         fig.write_html("path/to/file.html")
         ```
         """
@@ -2483,8 +2487,8 @@ class BERTopic:
 
             self.topic_embeddings_ = topic_embeddings
 
-    def _c_tf_idf(self, 
-                  documents_per_topic: pd.DataFrame, 
+    def _c_tf_idf(self,
+                  documents_per_topic: pd.DataFrame,
                   fit: bool = True,
                   partial_fit: bool = False) -> Tuple[csr_matrix, List[str]]:
         """ Calculate a class-based TF-IDF where m is the number of total documents.
@@ -2875,10 +2879,10 @@ class TopicMapper:
     Topic 1 --> Topic 11 --> Topic 4 --> etc.
 
     Attributes:
-        self.mappings_ (np.ndarray) : A  matrix indicating the mappings from one topic 
-                                      to another. The columns represent a collection of topics 
-                                      at any time. The last column represents the current state 
-                                      of topics and the first column represents the initial state 
+        self.mappings_ (np.ndarray) : A  matrix indicating the mappings from one topic
+                                      to another. The columns represent a collection of topics
+                                      at any time. The last column represents the current state
+                                      of topics and the first column represents the initial state
                                       of topics.
     """
     def __init__(self, topics: List[int]):

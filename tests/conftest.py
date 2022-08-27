@@ -54,7 +54,7 @@ def custom_topic_model(documents, document_embeddings, embedding_model):
 @pytest.fixture(scope="session")
 def reduced_topic_model(custom_topic_model, documents):
     model = copy.deepcopy(custom_topic_model)
-    _, _ = model.reduce_topics(documents, nr_topics=12)
+    model.reduce_topics(documents, nr_topics=12)
     return model
 
 

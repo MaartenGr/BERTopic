@@ -56,10 +56,10 @@ def test_full_model(model, documents, request):
     # Test topic reduction
     nr_topics = len(set(topics))
     nr_topics = 2 if nr_topics < 2 else nr_topics - 1
-    new_topics, new_probs = topic_model.reduce_topics(documents, nr_topics=nr_topics)
+    topic_model.reduce_topics(documents, nr_topics=nr_topics)
 
     assert len(topic_model.get_topic_freq()) == nr_topics + topic_model._outliers
-    assert len(new_topics) == len(topics)
+    assert len(topic_model.topics_) == len(topics)
 
     # Test update topics
     topic = topic_model.get_topic(1)[:10]
@@ -76,7 +76,7 @@ def test_full_model(model, documents, request):
 
     # Test updating topic labels
     topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
-    assert len(topic_labels) == len(set(new_topics))
+    assert len(topic_labels) == len(set(topic_model.topics_))
 
     # Test setting topic labels
     topic_model.set_topic_labels(topic_labels)
