@@ -5,7 +5,7 @@ import numpy as np
 import scipy.sparse as sp
 
 
-class CTfidfTransformer(TfidfTransformer):
+class ClassTfidfTransformer(TfidfTransformer):
     """
     A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.
 
@@ -30,13 +30,13 @@ class CTfidfTransformer(TfidfTransformer):
     Usage:
 
     ```python
-    transformer = CTfidfTransformer()
+    transformer = ClassTfidfTransformer()
     ```
     """
     def __init__(self, bm25_weighting: bool = False, reduce_frequent_words: bool = False):
         self.bm25_weighting = bm25_weighting
         self.reduce_frequent_words = reduce_frequent_words
-        super(CTfidfTransformer, self).__init__()
+        super(ClassTfidfTransformer, self).__init__()
 
     def fit(self, X: sp.csr_matrix, multiplier: np.ndarray = None):
         """Learn the idf vector (global term weights).

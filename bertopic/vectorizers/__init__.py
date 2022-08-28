@@ -1,7 +1,7 @@
-from ._ctfidf import CTfidfTransformer
+from ._ctfidf import ClassTfidfTransformer
 from ._online_cv import OnlineCountVectorizer
 
 __all__ = [
-    "CTfidfTransformer",
+    "ClassTfidfTransformer",
     "OnlineCountVectorizer"
 ]

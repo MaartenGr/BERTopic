@@ -7,7 +7,7 @@ from packaging import version
 from scipy.sparse.csr import csr_matrix
 from sklearn import __version__ as sklearn_version
 from sklearn.feature_extraction.text import CountVectorizer
-from bertopic.vectorizers import CTfidfTransformer
+from bertopic.vectorizers import ClassTfidfTransformer
 
 
 @pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
@@ -34,7 +34,7 @@ def test_ctfidf(model, documents, request):
         words = count.get_feature_names()
 
     X = count.transform(documents)
-    transformer = CTfidfTransformer().fit(X)
+    transformer = ClassTfidfTransformer().fit(X)
     c_tf_idf = transformer.transform(X)
 
     assert len(words) > 1000
@@ -78,7 +78,7 @@ def test_ctfidf_custom_cv(model, documents, request):
         words = count.get_feature_names()
 
     X = count.transform(documents)
-    transformer = CTfidfTransformer().fit(X)
+    transformer = ClassTfidfTransformer().fit(X)
     c_tf_idf = transformer.transform(X)
 
     assert len(words) > 1000

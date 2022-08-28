@@ -30,7 +30,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 # BERTopic
 from bertopic import plotting
 from bertopic._mmr import mmr
-from bertopic.vectorizers import CTfidfTransformer
+from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.backend._utils import select_backend
 from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 
@@ -171,7 +171,7 @@ class BERTopic:
                            NOTE: You can also pass in any clustering algorithm as long as it has
                            `.fit` and `.predict` functions along with the `.labels_` variable.
             vectorizer_model: Pass in a custom `CountVectorizer` instead of the default model.
-            ctfidf_model: Pass in a custom CTfidfTransformer instead of the default model.
+            ctfidf_model: Pass in a custom ClassTfidfTransformer instead of the default model.
 
         Attributes:
 
@@ -195,7 +195,7 @@ class BERTopic:
         # Vectorizer
         self.n_gram_range = n_gram_range
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
-        self.ctfidf_model = ctfidf_model or CTfidfTransformer()
+        self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
 
         # UMAP or another algorithm that has .fit and .transform functions
         self.umap_model = umap_model or UMAP(n_neighbors=15,
