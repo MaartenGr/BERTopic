@@ -79,3 +79,49 @@ topic_model.topics_ = topics
 
 !!! note
     Do note that in BERTopic it is not possible to use `.partial_fit` after the `.fit` as they work quite differently with respect to internally updating topics, frequencies, representations, etc. 
+
+## **River**
+
+To continuously find new topics as they come in, we can use the package [river](https://github.com/online-ml/river). It contains several clustering models that can create new clusters as new data comes in. To make sure we can use their models, we first need to create a class that has a `.partial_fit` function and the option to extract labels through `.labels_`:
+
+```python
+from river import stream
+from river import cluster
+
+class River:
+    def __init__(self, model):
+        self.model = model
+        
+    def partial_fit(self, umap_embeddings):
+        for umap_embedding, _ in stream.iter_array(umap_embeddings):
+            self.model = self.model.learn_one(umap_embedding)
+
+        labels = []
+        for umap_embedding, _ in stream.iter_array(umap_embeddings):
+            label = self.model.predict_one(umap_embedding)
+            labels.append(label)
+            
+        self.labels_ = labels
+        return self
+```
+
+Then, we can choose any `river.cluster` model that we are interested in and pass it to the `River` class before using it in BERTopic:
+
+```python
+# Using DBSTREAM to detect new topics as they come in
+cluster_model = River(cluster.DBSTREAM())
+vectorizer_model = OnlineCountVectorizer(stop_words="english")
+ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True, bm25_weighting=True)
+
+# Prepare model
+topic_model = BERTopic(
+    hdbscan_model=cluster_model, 
+    vectorizer_model=vectorizer_model, 
+    ctfidf_model=ctfidf_model,
+)
+
+
+# Incrementally fit the topic model by training on 1000 documents at a time
+for docs in doc_chunks:
+    topic_model.partial_fit(docs)
+```
