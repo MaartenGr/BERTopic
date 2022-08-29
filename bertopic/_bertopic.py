@@ -172,9 +172,6 @@ class BERTopic:
                            `.fit` and `.predict` functions along with the `.labels_` variable.
             vectorizer_model: Pass in a custom `CountVectorizer` instead of the default model.
             ctfidf_model: Pass in a custom ClassTfidfTransformer instead of the default model.
-
-        Attributes:
-
         """
         # Topic-based parameters
         if top_n_words > 30:
