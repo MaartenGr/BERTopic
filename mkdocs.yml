@@ -23,6 +23,7 @@ nav:
         - Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
         - Clustering: getting_started/clustering/clustering.md
         - Vectorizers: getting_started/vectorizers/vectorizers.md
+        - c-TF-IDF: getting_started/ctfidf/ctfidf.md
       - Variations:
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
         - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md

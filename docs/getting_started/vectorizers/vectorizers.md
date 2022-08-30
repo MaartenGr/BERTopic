@@ -260,3 +260,34 @@ Then, we can simply pass the vectorizer update our topic representations:
 ```python
 topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
+
+
+## **OnlineCountVectorizer**
+
+When using the online/incremental variant of BERTopic, we need a `CountVectorizer` than can incrementally update its representation. For that purpose, `OnlineCountVectorizer` was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large in size. It is a class that can be found in `bertopic.vectorizers` which extends `sklearn.feature_extraction.text.CountVectorizer`. In other words, you can use the exact same parameter in `OnlineCountVectorizer` as found in Scikit-Learn's `CountVectorizer`. We can use it as follows:
+
+```python
+from bertopic import BERTopic
+from bertopic.vectorizers import OnlineCountVectorizer
+
+# Train BERTopic with a custom OnlineCountVectorizer
+vectorizer_model = OnlineCountVectorizer()
+topic_model = BERTopic(vectorizer_model=vectorizer_model)
+```
+
+### **Parameters**
+
+Other than parameters found in `CountVectorizer`, such as `stop_words`  and `ngram_range`, we can two parameters in `OnlineCountVectorizer` to adjust the way old data is processed and kept. 
+
+#### decay
+
+At each iteration, we sum the bag-of-words representation of the new documents with the bag-of-words representation of all documents processed thus far. In other words, the bag-of-words matrix keeps increasing with each iteration. However, especially in a streaming setting, older documents might become less and less relevant as time goes on. Therefore, a `decay` parameter was implemented that decays the bag-of-words's frequencies at each iteration before adding the document frequencies of new documents. The `decay` parameter is a value between 0 and 1 and indicates the percentage of frequencies the previous bag-of-words matrix should be reduced to. For example, a value of `.1` will decrease the frequencies in the bag-of-words matrix with 10% at each iteration before adding the new bag-of-words matrix. This will make sure that recent data has more weight than previously iterations. 
+
+#### delete_min_df
+
+In BERTopic, we might want to remove words from the topic representation that ppear infrequently. The `min_df` in the `CountVectorizer` works quite well for that. However, when have a streaming setting, the `min_df` does not work as well since a word's frequency might start below `min_df` but will end up higher than that over time. Setting that value high might not always be advised. 
+
+As a result, the vocabulary of the resulting bag-of-words matrix can become quite large. Similarly, if we implement the `decay` parameter, then some values will actually decrease over time until they are below `min_df`. For these reasons, the `delete_min_df` parameter was implemented. The parameter takes positive integers and indicates, at each iteration, which words will be removed. If the value is set to 5, it will check after each iteration if the total frequency of a word is exceed by that value. If so, the word will be removed in its entirety from the bag-of-words matrix. This helps to keep the bag-of-words matrix of a manageble size. 
+
+!!! note
+	Although the `delete_min_df` parameter removes words from the bag-of-words matrix, it is not permament. If new documents come in where those previously deleted words are used frequently, they get added back to the matrix. 

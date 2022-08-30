@@ -257,7 +257,7 @@ To do this, we first combine all documents in a cluster into a single document. 
 
 !!! tip Bag-of-words and tokenization
 
-    There are many ways you can tune or change the bag-of-words step. This step allows for processing the documents however you want without affecting the first step, embedding the documents. You can follow the guide [here](http://127.0.0.1:8000/BERTopic/getting_started/countvectorizer/countvectorizer.html) for more information about tokenization options in BERTopic.
+    There are many ways you can tune or change the bag-of-words step. This step allows for processing the documents however you want without affecting the first step, embedding the documents. You can follow the guide [here](https://maartengr.github.io/BERTopic/getting_started/countvectorizer/countvectorizer.html) for more information about tokenization options in BERTopic.
 
 ###  **5. Topic representation**
 From the generated bag-of-words representation, we want to know what makes one cluster different from another? Which words are typical for cluster 1 and not so much for all other clusters? To solve this, we need to modify TF-IDF such that it considers topics (i.e., clusters) instead of documents. 
@@ -275,7 +275,7 @@ Then, we take take the logarithm of one plus the average number of words per cla
 
 !!! tip c-TF-IDF parameters
 
-    In the `ClassTfidfTransformer`, there are a few parameters that might be worth exploring, including an option to perform additional BM-25 weighting. You can find more information about that [here](http://127.0.0.1:8000/BERTopic/getting_started/ctfidf/ctfidf.html).
+    In the `ClassTfidfTransformer`, there are a few parameters that might be worth exploring, including an option to perform additional BM-25 weighting. You can find more information about that [here](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html).
 
 ### **6. (Optional) Maximal Marginal Relevance**  
 After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 

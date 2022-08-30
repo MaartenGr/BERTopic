@@ -9,7 +9,7 @@ class ClassTfidfTransformer(TfidfTransformer):
     """
     A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.
 
-    ![](../img/ctfidf.png)
+    ![](../algorithm/c-TF-IDF.svg)
 
     c-TF-IDF can best be explained as a TF-IDF formula adopted for multiple classes
     by joining all documents per class. Thus, each class is converted to a single document
