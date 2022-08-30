@@ -362,7 +362,7 @@ topic_model.merge_topics(docs, topics_to_merge)
 If you have several groups of topics you want to merge, create a list of lists instead:
 
 ```python
-topics_to_merge = [[1, 2]
+topics_to_merge = [[1, 2],
                    [3, 4]]
 topic_model.merge_topics(docs, topics_to_merge)
 ```

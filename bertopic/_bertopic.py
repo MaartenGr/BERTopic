@@ -990,7 +990,8 @@ class BERTopic:
                       docs: List[str],
                       topics: List[int] = None,
                       n_gram_range: Tuple[int, int] = None,
-                      vectorizer_model: CountVectorizer = None):
+                      vectorizer_model: CountVectorizer = None,
+                      ctfidf_model: ClassTfidfTransformer = None):
         """ Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
 
@@ -1008,6 +1009,7 @@ class BERTopic:
                           manually assigning topics is the last step in the pipeline
             n_gram_range: The n-gram range for the CountVectorizer.
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
+            ctfidf_model: Pass in your own c-TF-IDF model to update the representations
 
         Usage:
 
@@ -1038,6 +1040,7 @@ class BERTopic:
             n_gram_range = self.n_gram_range
 
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
+        self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
 
         if topics is None:
             topics = self.topics_
