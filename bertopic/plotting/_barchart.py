@@ -1,15 +1,17 @@
 import itertools
 import numpy as np
-from typing import List
+from typing import List, Optional
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
 def visualize_barchart(topic_model,
-                       topics: List[int] = None,
+                       topics: Optional[List[int]] = None,
                        top_n_topics: int = 8,
                        n_words: int = 5,
+                       custom_labels: bool = False,
+                       title: str = "Topic Word Scores",
                        width: int = 250,
                        height: int = 250) -> go.Figure:
     """ Visualize a barchart of selected topics
@@ -46,17 +48,24 @@ def visualize_barchart(topic_model,
     colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
+    df_topic_info = topic_model.get_topic_info()
+    df_topic_info = df_topic_info.loc[df_topic_info.Topic != -1, :]
+    topic_label_map = {
+        df_topic_info.Topic.iloc[i] : df_topic_info.CustomName.iloc[i]
+        for i in range(len(df_topic_info))
+    }
     if topics is not None:
         topics = list(topics)
     elif top_n_topics is not None:
-        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
+        topics = sorted(df_topic_info.Topic.to_list()[:top_n_topics])
     else:
-        topics = sorted(freq_df.Topic.to_list()[0:6])
+        topics = sorted(df_topic_info.Topic.to_list()[0:6])
 
     # Initialize figure
-    subplot_titles = [f"Topic {topic}" for topic in topics]
+    if custom_labels:
+        subplot_titles = [f"{topic_label_map[topic]}" for topic in topics]
+    else:
+        subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
     rows = int(np.ceil(len(topics) / columns))
     fig = make_subplots(rows=rows,
@@ -91,7 +100,7 @@ def visualize_barchart(topic_model,
         template="plotly_white",
         showlegend=False,
         title={
-            'text': "<b>Topic Word Scores",
+            'text': f"<b>{title}",
             'x': .5,
             'xanchor': 'center',
             'yanchor': 'top',

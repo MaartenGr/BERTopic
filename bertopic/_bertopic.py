@@ -16,7 +16,7 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
+from typing import List, Optional, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
 import hdbscan
@@ -1879,9 +1879,11 @@ class BERTopic:
                                           height=height)
 
     def visualize_barchart(self,
-                           topics: List[int] = None,
+                           topics: Optional[List[int]] = None,
                            top_n_topics: int = 8,
                            n_words: int = 5,
+                           custom_labels: bool = False,
+                           title: str = "Topic Word Scores",
                            width: int = 250,
                            height: int = 250) -> go.Figure:
         """ Visualize a barchart of selected topics
@@ -1917,6 +1919,8 @@ class BERTopic:
                                            topics=topics,
                                            top_n_topics=top_n_topics,
                                            n_words=n_words,
+                                           custom_labels=custom_labels,
+                                           title=title,
                                            width=width,
                                            height=height)
 
