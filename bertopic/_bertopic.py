@@ -1882,6 +1882,8 @@ class BERTopic:
                            topics: List[int] = None,
                            top_n_topics: int = 8,
                            n_words: int = 5,
+                           custom_labels: bool = False,
+                           title: str = "Topic Word Scores",
                            width: int = 250,
                            height: int = 250) -> go.Figure:
         """ Visualize a barchart of selected topics
@@ -1890,6 +1892,8 @@ class BERTopic:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
+            custom_labels: If True, use the labels provided by the user.
+            title: Title of the plot.
             width: The width of each figure.
             height: The height of each figure.
 
@@ -1917,6 +1921,8 @@ class BERTopic:
                                            topics=topics,
                                            top_n_topics=top_n_topics,
                                            n_words=n_words,
+                                           custom_labels=custom_labels,
+                                           title=title,
                                            width=width,
                                            height=height)
 
