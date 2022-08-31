@@ -50,7 +50,7 @@ def visualize_barchart(topic_model,
     colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_info()
+    freq_df = topic_model.get_topic_freq()
     freq_df = freq_df.loc[freq_df.Topic != -1, :]
     if topics is not None:
         topics = list(topics)
