@@ -10,6 +10,8 @@ def visualize_barchart(topic_model,
                        topics: List[int] = None,
                        top_n_topics: int = 8,
                        n_words: int = 5,
+                       custom_labels: bool = False,
+                       title: str = "Topic Word Scores",
                        width: int = 250,
                        height: int = 250) -> go.Figure:
     """ Visualize a barchart of selected topics
@@ -19,6 +21,8 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
+        custom_labels: If True, use the labels provided by the user.
+        title: Title of the plot.
         width: The width of each figure.
         height: The height of each figure.
 
@@ -56,7 +60,10 @@ def visualize_barchart(topic_model,
         topics = sorted(freq_df.Topic.to_list()[0:6])
 
     # Initialize figure
-    subplot_titles = [f"Topic {topic}" for topic in topics]
+    if custom_labels:
+        subplot_titles = [topic_model.custom_labels[topic + topic_model._outliers] for topic in topics]
+    else:
+        subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
     rows = int(np.ceil(len(topics) / columns))
     fig = make_subplots(rows=rows,
@@ -91,7 +98,7 @@ def visualize_barchart(topic_model,
         template="plotly_white",
         showlegend=False,
         title={
-            'text': "<b>Topic Word Scores",
+            'text': f"<b>{title}",
             'x': .5,
             'xanchor': 'center',
             'yanchor': 'top',
