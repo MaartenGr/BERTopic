@@ -2,9 +2,9 @@ Online topic modeling (sometimes called "incremental topic modeling") is the abi
 
 In BERTopic, there are two main goals for using this technique.
 
-1. To reduce the memory necessary for training a topic model. 
-2. To continuously update the topic model as new data comes in. 
-3. To continuously find new topics as new data comes in. 
+* To reduce the memory necessary for training a topic model. 
+* To continuously update the topic model as new data comes in. 
+* To continuously find new topics as new data comes in. 
 
 In BERTopic, online topic modeling can be a bit tricky as there are several steps involved in which online learning needs to be made available. To recap, BERTopic consists of the following 6 steps:
 

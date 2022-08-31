@@ -10,9 +10,10 @@ Below, you will find different types of overviews of each step in BERTopic's mai
 ## **Visual Overview**
 
 This visual overview reduces BERTopic to four main steps, namely the embedding of documents, the clustering of documents, the topic extraction, and the topic diversification. Each step contains one or more sub-steps that you can read a bit more about below. 
-<br><br>
+
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/flowbite@1.5.2/dist/flowbite.js"></script>
+
+<!-- <script src="https://unpkg.com/flowbite@1.5.2/dist/flowbite.js"></script> -->
 
 <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-x-4 w-4/5 
 sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
@@ -169,6 +170,8 @@ sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
 
 </div>
 
+<script>
+</script>
 
 ## **Code Overview**
 After going through the visual overview, this code overview demonstrates the algorithm using BERTopic. An advantage of using BERTopic is each major step in its algorithm can be explicitly defined, thereby making the process not only transparent but also more intuitive. 

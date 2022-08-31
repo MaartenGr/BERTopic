@@ -2787,12 +2787,10 @@ class BERTopic:
         """ Basic preprocessing of text
 
         Steps:
-            * Lower text
             * Replace \n and \t with whitespace
             * Only keep alpha-numerical characters
         """
-        cleaned_documents = [doc.lower() for doc in documents]
-        cleaned_documents = [doc.replace("\n", " ") for doc in cleaned_documents]
+        cleaned_documents = [doc.replace("\n", " ") for doc in documents]
         cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
         if self.language == "english":
             cleaned_documents = [re.sub(r'[^A-Za-z0-9 ]+', '', doc) for doc in cleaned_documents]
