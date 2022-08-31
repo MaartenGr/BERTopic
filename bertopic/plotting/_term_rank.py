@@ -29,7 +29,7 @@ def visualize_term_rank(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the ranks of all words across
     all topics simply run:

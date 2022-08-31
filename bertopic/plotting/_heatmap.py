@@ -33,7 +33,7 @@ def visualize_heatmap(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the similarity matrix of
     topics simply run:

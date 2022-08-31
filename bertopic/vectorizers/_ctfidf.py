@@ -27,7 +27,7 @@ class ClassTfidfTransformer(TfidfTransformer):
         reduce_frequent_words: Takes the square root of the bag-of-words after normalizing the matrix.
                                Helps to reduce the impact of words that appear too frequently.
 
-    Usage:
+    Examples:
 
     ```python
     transformer = ClassTfidfTransformer()

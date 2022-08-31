@@ -16,7 +16,7 @@ class FlairBackend(BaseEmbedder):
     Arguments:
         embedding_model: A Flair embedding model
 
-    Usage:
+    Examples:
 
     ```python
     from bertopic.backend import FlairBackend

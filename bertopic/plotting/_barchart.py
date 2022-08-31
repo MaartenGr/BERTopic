@@ -25,7 +25,7 @@ def visualize_barchart(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the barchart of selected topics
     simply run:

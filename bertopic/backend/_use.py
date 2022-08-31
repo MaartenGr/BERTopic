@@ -14,7 +14,7 @@ class USEBackend(BaseEmbedder):
     Arguments:
         embedding_model: An USE embedding model
 
-    Usage:
+    Examples:
 
     ```python
     import tensorflow_hub

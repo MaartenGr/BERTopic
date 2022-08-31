@@ -57,7 +57,7 @@ def visualize_hierarchy(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the hierarchical structure of
     topics simply run:

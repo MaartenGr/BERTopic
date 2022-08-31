@@ -240,7 +240,7 @@ class BERTopic:
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
-        Usage:
+        Examples:
 
         ```python
         from bertopic import BERTopic
@@ -291,7 +291,7 @@ class BERTopic:
                            instead of only the assigned topic. This, however, slows down
                            computation and may increase memory usage.
 
-        Usage:
+        Examples:
 
         ```python
         from bertopic import BERTopic
@@ -381,7 +381,7 @@ class BERTopic:
                            probabilities are not calculated to speed up computation and
                            decrease memory usage.
 
-        Usage:
+        Examples:
 
         ```python
         from bertopic import BERTopic
@@ -478,7 +478,7 @@ class BERTopic:
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
-        Usage:
+        Examples:
 
         ```python
         from sklearn.datasets import fetch_20newsgroups
@@ -635,7 +635,7 @@ class BERTopic:
             topics_over_time: A dataframe that contains the topic, words, and frequency of topic
                               at timestamp *t*.
 
-        Usage:
+        Examples:
 
         The timestamps variable represent the timestamp of each document. If you have over
         100 unique timestamps, it is advised to bin the timestamps as shown below:
@@ -752,7 +752,7 @@ class BERTopic:
             topics_per_class: A dataframe that contains the topic, words, and frequency of topics
                               for each class.
 
-        Usage:
+        Examples:
 
         ```python
         from bertopic import BERTopic
@@ -823,7 +823,7 @@ class BERTopic:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
                                 represented by their parents and their children
 
-        Usage:
+        Examples:
 
         ```python
         from bertopic import BERTopic
@@ -955,7 +955,7 @@ class BERTopic:
             similar_topics: the most similar topics from high to low
             similarity: the similarity scores from high to low
 
-        Usage:
+        Examples:
 
         You can use the underlying embedding model to find topics that
         best represent the search term:
@@ -1011,7 +1011,7 @@ class BERTopic:
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
             ctfidf_model: Pass in your own c-TF-IDF model to update the representations
 
-        Usage:
+        Examples:
 
         In order to update the topic representation, you will need to first fit the topic
         model and extract topics from them. Based on these, you can update the representation:
@@ -1067,7 +1067,7 @@ class BERTopic:
         Returns:
             self.topic_representations_: The top n words per topic and the corresponding c-TF-IDF score
 
-        Usage:
+        Examples:
 
         ```python
         all_topics = topic_model.get_topics()
@@ -1085,7 +1085,7 @@ class BERTopic:
         Returns:
             The top n words for a specific word and its respective c-TF-IDF scores
 
-        Usage:
+        Examples:
 
         ```python
         topic = topic_model.get_topic(12)
@@ -1106,7 +1106,7 @@ class BERTopic:
         Returns:
             info: The information relating to either a single topic or all topics
 
-        Usage:
+        Examples:
 
         ```python
         info_df = topic_model.get_topic_info()
@@ -1137,7 +1137,7 @@ class BERTopic:
             Either the frequency of a single topic or dataframe with
             the frequencies of all topics
 
-        Usage:
+        Examples:
 
         To extract the frequency of all topics:
 
@@ -1168,7 +1168,7 @@ class BERTopic:
         Returns:
             Representative documents of the chosen topic
 
-        Usage:
+        Examples:
 
         To extract the representative docs of all topics:
 
@@ -1217,7 +1217,7 @@ class BERTopic:
             The blocks (■) indicate that the topic is one you can directly access
             from `topic_model.get_topic`. In other words, they are the original un-grouped topics.
 
-        Usage:
+        Examples:
 
         ```python
         # Train model
@@ -1302,7 +1302,7 @@ class BERTopic:
                         any number of topics as it will only map the topics found
                         in the dictionary.
 
-        Usage:
+        Examples:
 
         First, we define our topic labels with `.get_topic_labels` in which
         we can customize our topic labels:
@@ -1376,7 +1376,7 @@ class BERTopic:
                         If the topic model was trained using HDBSCAN, the lowest topic ID is -1,
                         otherwise it is 0.
 
-        Usage:
+        Examples:
 
         To create our custom topic labels, usage is rather straightforward:
 
@@ -1416,7 +1416,7 @@ class BERTopic:
                                 [[1, 2], [3, 4]] will merge topics 1 and 2, and
                                 separately merge topics 3 and 4.
 
-        Usage:
+        Examples:
 
         If you want to merge topics 1, 2, and 3:
 
@@ -1475,7 +1475,7 @@ class BERTopic:
             topics_ : Assigns topics to their merged representations.
             probabilities_ : Assigns probabilities to their merged representations.
 
-        Usage:
+        Examples:
 
         You can further reduce the topics by passing the documents with its
         topics and probabilities (if they were calculated):
@@ -1521,7 +1521,7 @@ class BERTopic:
             width: The width of the figure.
             height: The height of the figure.
 
-        Usage:
+        Examples:
 
         To visualize the topics simply run:
 
@@ -1577,7 +1577,7 @@ class BERTopic:
             width: The width of the figure.
             height: The height of the figure.
 
-        Usage:
+        Examples:
 
         To visualize the topics simply run:
 
@@ -1680,7 +1680,7 @@ class BERTopic:
             width: The width of the figure.
             height: The height of the figure.
 
-        Usage:
+        Examples:
 
         To visualize the topics simply run:
 
@@ -1766,7 +1766,7 @@ class BERTopic:
         Returns:
             fig: A plotly figure
 
-        Usage:
+        Examples:
 
         To visualize the ranks of all words across
         all topics simply run:
@@ -1822,7 +1822,7 @@ class BERTopic:
         Returns:
             A plotly.graph_objects.Figure including all traces
 
-        Usage:
+        Examples:
 
         To visualize the topics over time, simply run:
 
@@ -1872,7 +1872,7 @@ class BERTopic:
         Returns:
             A plotly.graph_objects.Figure including all traces
 
-        Usage:
+        Examples:
 
         To visualize the topics per class, simply run:
 
@@ -1915,7 +1915,7 @@ class BERTopic:
             width: The width of the figure.
             height: The height of the figure.
 
-        Usage:
+        Examples:
 
         Make sure to fit the model before and only input the
         probabilities of a single document:
@@ -1987,7 +1987,7 @@ class BERTopic:
         Returns:
             fig: A plotly figure
 
-        Usage:
+        Examples:
 
         To visualize the hierarchical structure of
         topics simply run:
@@ -2055,7 +2055,7 @@ class BERTopic:
         Returns:
             fig: A plotly figure
 
-        Usage:
+        Examples:
 
         To visualize the similarity matrix of
         topics simply run:
@@ -2098,7 +2098,7 @@ class BERTopic:
         Returns:
             fig: A plotly figure
 
-        Usage:
+        Examples:
 
         To visualize the barchart of selected topics
         simply run:
@@ -2133,7 +2133,7 @@ class BERTopic:
                                   as you might have selected a local model or one that
                                   is downloaded automatically from the cloud.
 
-        Usage:
+        Examples:
 
         ```python
         topic_model.save("my_model")
@@ -2170,7 +2170,7 @@ class BERTopic:
             embedding_model: If the embedding_model was not saved to save space or to load
                              it in from the cloud, you can load it in by specifying it here.
 
-        Usage:
+        Examples:
 
         ```python
         BERTopic.load("my_model")
@@ -2907,7 +2907,7 @@ class TopicMapper:
         Returns:
             mappings: The mappings from old topics to new topics
 
-        Usage:
+        Examples:
 
         To get mappings, simply call:
         ```python

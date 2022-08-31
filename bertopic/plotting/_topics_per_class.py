@@ -29,7 +29,7 @@ def visualize_topics_per_class(topic_model,
     Returns:
         A plotly.graph_objects.Figure including all traces
 
-    Usage:
+    Examples:
 
     To visualize the topics per class, simply run:
 

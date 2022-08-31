@@ -20,7 +20,7 @@ def visualize_distribution(topic_model,
         width: The width of the figure.
         height: The height of the figure.
 
-    Usage:
+    Examples:
 
     Make sure to fit the model before and only input the
     probabilities of a single document:

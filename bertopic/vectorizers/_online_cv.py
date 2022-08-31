@@ -41,7 +41,7 @@ class OnlineCountVectorizer(CountVectorizer):
     Attributes:
         X_ (scipy.sparse.csr_matrix) : The Bag-of-Words representation
 
-    Usage:
+    Examples:
 
     ```python
     from bertopic.vectorizers import OnlineCountVectorizer

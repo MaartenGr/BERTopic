@@ -25,7 +25,7 @@ def visualize_topics(topic_model,
         width: The width of the figure.
         height: The height of the figure.
 
-    Usage:
+    Examples:
 
     To visualize the topics simply run:
 
