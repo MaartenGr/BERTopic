@@ -16,7 +16,7 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from typing import List, Optional, Tuple, Union, Mapping, Any, Callable, Iterable
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
 import hdbscan
@@ -1879,7 +1879,7 @@ class BERTopic:
                                           height=height)
 
     def visualize_barchart(self,
-                           topics: Optional[List[int]] = None,
+                           topics: List[int] = None,
                            top_n_topics: int = 8,
                            n_words: int = 5,
                            custom_labels: bool = False,
@@ -1892,6 +1892,8 @@ class BERTopic:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
+            custom_labels: If True, use the labels provided by the user.
+            title: Title of the plot.
             width: The width of each figure.
             height: The height of each figure.
 

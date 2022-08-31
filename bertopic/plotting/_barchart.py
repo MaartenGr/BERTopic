@@ -1,13 +1,13 @@
 import itertools
 import numpy as np
-from typing import List, Optional
+from typing import List
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
 def visualize_barchart(topic_model,
-                       topics: Optional[List[int]] = None,
+                       topics: List[int] = None,
                        top_n_topics: int = 8,
                        n_words: int = 5,
                        custom_labels: bool = False,
@@ -21,6 +21,8 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
+        custom_labels: If True, use the labels provided by the user.
+        title: Title of the plot.
         width: The width of each figure.
         height: The height of each figure.
 
@@ -48,22 +50,18 @@ def visualize_barchart(topic_model,
     colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
 
     # Select topics based on top_n and topics args
-    df_topic_info = topic_model.get_topic_info()
-    df_topic_info = df_topic_info.loc[df_topic_info.Topic != -1, :]
-    topic_label_map = {
-        df_topic_info.Topic.iloc[i] : df_topic_info.CustomName.iloc[i]
-        for i in range(len(df_topic_info))
-    }
+    freq_df = topic_model.get_topic_info()
+    freq_df = freq_df.loc[freq_df.Topic != -1, :]
     if topics is not None:
         topics = list(topics)
     elif top_n_topics is not None:
-        topics = sorted(df_topic_info.Topic.to_list()[:top_n_topics])
+        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
     else:
-        topics = sorted(df_topic_info.Topic.to_list()[0:6])
+        topics = sorted(freq_df.Topic.to_list()[0:6])
 
     # Initialize figure
     if custom_labels:
-        subplot_titles = [f"{topic_label_map[topic]}" for topic in topics]
+        subplot_titles = [topic_model.custom_labels[topic + topic_model._outliers] for topic in topics]
     else:
         subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
