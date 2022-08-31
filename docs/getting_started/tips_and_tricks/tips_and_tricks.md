@@ -233,7 +233,7 @@ To find the matching topic, we extract the most similar topic in the `sim_matrix
 
 It seems to be working as, for example, `trein` is a translation of `train` and `sporen` a translation of `tracks`! You can do this for every single topic to find out which topic in the `en_model` might belong to a model in the `nl_model`. 
 
-## **Multi-model data**
+## **Multi-modal data**
 [Concept](https://github.com/MaartenGr/Concept) is a variation 
 of BERTopic for multi-modal data, such as images with captions. Although we can use that 
 package for multi-modal data, we can perform a small trick with BERTopic to have a similar feature. 
