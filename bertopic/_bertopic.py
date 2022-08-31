@@ -2094,7 +2094,8 @@ class BERTopic:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
-            custom_labels: If True, use the labels provided by the user.
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of each figure.
             height: The height of each figure.

@@ -21,7 +21,8 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
-        custom_labels: If True, use the labels provided by the user.
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
         title: Title of the plot.
         width: The width of each figure.
         height: The height of each figure.
@@ -60,8 +61,8 @@ def visualize_barchart(topic_model,
         topics = sorted(freq_df.Topic.to_list()[0:6])
 
     # Initialize figure
-    if custom_labels:
-        subplot_titles = [topic_model.custom_labels[topic + topic_model._outliers] for topic in topics]
+    if topic_model.custom_labels_ is not None and custom_labels:
+        subplot_titles = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in topics]
     else:
         subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
