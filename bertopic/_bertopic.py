@@ -508,7 +508,7 @@ class BERTopic:
         check_embeddings_shape(embeddings, documents)
         if not hasattr(self.hdbscan_model, "partial_fit"):
             raise ValueError("In order to use `.partial_fit`, the cluster model should have "
-                             "a `partial_fit` function.")
+                             "a `.partial_fit` function.")
 
         # Prepare documents
         if isinstance(documents, str):

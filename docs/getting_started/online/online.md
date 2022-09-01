@@ -1,6 +1,6 @@
 Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained on before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic. 
 
-In BERTopic, there are two main goals for using this technique.
+In BERTopic, there are three main goals for using this technique.
 
 * To reduce the memory necessary for training a topic model. 
 * To continuously update the topic model as new data comes in. 
