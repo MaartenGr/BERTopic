@@ -10,7 +10,7 @@ Below, you will find different types of overviews of each step in BERTopic's mai
 ## **Visual Overview**
 
 This visual overview reduces BERTopic to four main steps, namely the embedding of documents, the clustering of documents, the topic extraction, and the topic diversification. Each step contains one or more sub-steps that you can read a bit more about below. 
-
+<br><br>
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- <script src="https://unpkg.com/flowbite@1.5.2/dist/flowbite.js"></script> -->
@@ -20,7 +20,7 @@ sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
 
   <!--Title stage 1-->
   <div class="overflow-hidden">
-    <p class="text-gray-300 text-center text-lg">Embed documents</p>
+    <p class="text-blue-300 text-center text-lg">Embed documents</p>
   </div>
   <div class="overflow-hidden"></div>
 
@@ -56,7 +56,7 @@ sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
   <!--Title stage 2-->
   <div class="overflow-hidden sm:col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 pt-5">
   
-  <p class="text-gray-300 text-center text-lg">Cluster embeddings</p>
+  <p class="text-blue-300 text-center text-lg">Cluster embeddings</p>
   </div>
 
   <!--Card 2-->
@@ -91,7 +91,7 @@ sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
       <a href="/BERTopic/getting_started/clustering/clustering.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">3. Clustering</a>
       </div>
       <p class="text-gray-700 text-sm">
-        The reduced vectors are clustered to find semantically similar documents. 
+        A clustering algorithm is used to cluster the reduced vectors in order to find semantically similar documents. 
       </p>
     </div>
     <div class="px-6 pt-4 pb-2">
@@ -102,7 +102,7 @@ sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
   </div>
 
   <div class="overflow-hidden sm:col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 pt-5">
-    <p class="text-gray-300 text-center text-lg">Topic Representation</p>
+    <p class="text-blue-300 text-center text-lg">Topic Representation</p>
   </div>
 
   <!--Card 4-->
@@ -145,7 +145,7 @@ sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
   </div>
 
   <div class="overflow-hidden pt-5">
-    <p class="text-gray-300 text-center text-lg">(Optional) Topic Diversity</p>
+    <p class="text-blue-300 text-center text-lg">(Optional) Topic Diversity</p>
   </div>
   <div class="overflow-hidden"></div>
 
