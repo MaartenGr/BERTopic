@@ -33,8 +33,10 @@ topic_model.merge_topics(docs, topics_to_merge)
 ### **Automatic Topic Reduction**
 One issue with the approach above is that it will merge topics regardless of whether they are very similar. They 
 are simply the most similar out of all options. This can be resolved by reducing the number of topics automatically. 
-It will reduce the number of topics, starting from the least frequent topic, as long as it exceeds a minimum 
-similarity of 0.915. To use this option, we simply set `nr_topics` to `"auto"`:
+To do this, we can use HDBSCAN to cluster our topics using each c-TF-IDF representation. Then, we merge topics that are clustered together. 
+Another benefit of HDBSCAN is that it generates outliers. These outliers prevent topics from being merged if no other topics are similar.
+
+To use this option, we simply set `nr_topics` to `"auto"`:
 
 ```python
 from bertopic import BERTopic
