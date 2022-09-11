@@ -17,7 +17,8 @@ BERTopic supports
 [**guided**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html), 
 (semi-) [**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
 [**hierarchical**](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html), 
-and [**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) topic modeling. It even supports visualizations similar to LDAvis!
+[**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html), and 
+[**online**](https://maartengr.github.io/BERTopic/getting_started/online/online.html) topic modeling. It even supports visualizations similar to LDAvis!
 
 Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
 and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794). 
@@ -155,46 +156,6 @@ topic_model = BERTopic(embedding_model=roberta)
 
 Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) 
 for a full overview of all supported embedding models. 
-
-## Dynamic Topic Modeling
-Dynamic topic modeling (DTM) is a collection of techniques aimed at analyzing the evolution of topics 
-over time. These methods allow you to understand how a topic is represented over time. 
-Here, we will be using all of Donald Trump's tweet to see how he talked over certain topics over time: 
-
-```python
-import re
-import pandas as pd
-
-trump = pd.read_csv('https://drive.google.com/uc?export=download&id=1xRKHaP-QwACMydlDnyFPEaFdtskJuBa6')
-trump.text = trump.apply(lambda row: re.sub(r"http\S+", "", row.text).lower(), 1)
-trump.text = trump.apply(lambda row: " ".join(filter(lambda x:x[0]!="@", row.text.split())), 1)
-trump.text = trump.apply(lambda row: " ".join(re.sub("[^a-zA-Z]+", " ", row.text).split()), 1)
-trump = trump.loc[(trump.isRetweet == "f") & (trump.text != ""), :]
-timestamps = trump.date.to_list()
-tweets = trump.text.to_list()
-```
-
-Then, we need to extract the global topic representations by simply creating and training a BERTopic model:
-
-```python
-topic_model = BERTopic(verbose=True)
-topics, probs = topic_model.fit_transform(tweets)
-```
-
-From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 
-by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
-
-```python
-topics_over_time = topic_model.topics_over_time(tweets, timestamps, nr_bins=20)
-```
-
-Finally, we can visualize the topics by simply calling `visualize_topics_over_time()`: 
-
-```python
-topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=6)
-```
-
-<img src="images/dtm.gif" width="80%" height="80%" align="center" />
 
 ## Overview
 BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 

@@ -11,6 +11,7 @@ you would like to be using.
 
 As a result, the `umap_model` parameter in BERTopic now allows for a variety of dimensionality reduction models. To do so, the class should have 
 the following attributes:
+  
 * `.fit(X)` 
     * A function that can be used to fit the model
 * `.transform(X)` 
