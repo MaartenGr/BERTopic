@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # BERTopic
 
 <img src="logo.png" width="30%" height="30%" align="right" />
@@ -83,7 +88,7 @@ BERTopic has quite a number of functions that quickly can become overwhelming. T
 of all methods and a short description of its purpose. 
 
 ### Common
-For quick access to common functions, here is an overview of BERTopic's main methods:
+Below, you will find an overview of common functions in BERTopic. 
 
 | Method | Code  | 
 |-----------------------|---|
@@ -95,26 +100,46 @@ For quick access to common functions, here is an overview of BERTopic's main met
 | Get topic freq    |  `.get_topic_freq()` |
 | Get all topic information|  `.get_topic_info()` |
 | Get representative docs per topic |  `.get_representative_docs()` |
-| Update topic representation | `.update_topics(docs, topics, n_gram_range=(1, 3))` |
+| Update topic representation | `.update_topics(docs, n_gram_range=(1, 3))` |
 | Generate topic labels | `.generate_topic_labels()` |
 | Set topic labels | `.set_topic_labels(my_custom_labels)` |
-| Merge topics | `.merge_topics(docs, topics, topics_to_merge)` |
-| Reduce nr of topics | `.reduce_topics(docs, topics, nr_topics=30)` |
+| Merge topics | `.merge_topics(docs, topics_to_merge)` |
+| Reduce nr of topics | `.reduce_topics(docs, nr_topics=30)` |
 | Find topics | `.find_topics("vehicle")` |
 | Save model    |  `.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `.get_params()` |
 
+
+### Attributes
+After having trained your BERTopic model, a number of attributes are saved within your model. These attributes, in part, 
+refer to how model information is stored on an estimator during fitting. The attributes that you see below all end in `_` and are 
+public attributes that can be used to access model information. 
+
+| Attribute | Description |
+|------------------------|---------------------------------------------------------------------------------------------|
+| topics_               | The topics that are generated for each document after training or updating the topic model. |
+| probabilities_ | The probabilities that are generated for each document if HDBSCAN is used. |
+| topic_sizes_           | The size of each topic                                                                      |
+| topic_mapper_          | A class for tracking topics and their mappings anytime they are merged/reduced.             |
+| topic_representations_ | The top *n* terms per topic and their respective c-TF-IDF values.                             |
+| c_tf_idf_              | The topic-term matrix as calculated through c-TF-IDF.                                       |
+| topic_labels_          | The default labels for each topic.                                                          |
+| custom_labels_         | Custom labels for each topic as generated through `.set_topic_labels`.                                                               |
+| topic_embeddings_      | The embeddings for each topic if `embedding_model` was used.                                                              |
+| representative_docs_   | The representative documents for each topic if HDBSCAN is used.                                                |
+
+
 ### Variations
 There are many different use cases in which topic modeling can be used. As such, a number of 
-variations of BERTopic have been developed such that one package can be used across across many use cases:
+variations of BERTopic have been developed such that one package can be used across across many use cases.
 
 | Method | Code  | 
 |-----------------------|---|
 | (semi-) Supervised Topic Modeling | `.fit(docs, y=y)` |
-| Topic Modeling per Class | `.topics_per_class(docs, topics, classes)` |
-| Dynamic Topic Modeling | `.topics_over_time(docs, topics, timestamps)` |
-| Hierarchical Topic Modeling | `.hierarchical_topics(docs, topics)` |
+| Topic Modeling per Class | `.topics_per_class(docs, classes)` |
+| Dynamic Topic Modeling | `.topics_over_time(docs, timestamps)` |
+| Hierarchical Topic Modeling | `.hierarchical_topics(docs)` |
 | Guided Topic Modeling | `BERTopic(seed_topic_list=seed_topic_list)` |
 
 ### Visualizations

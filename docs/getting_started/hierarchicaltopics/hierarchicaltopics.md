@@ -33,7 +33,7 @@ topics, probs = topic_model.fit_transform(docs)
 Next, we can use our fitted BERTopic model to extract possible hierarchies from our c-TF-IDF matrix:
 
 ```python
-hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+hierarchical_topics = topic_model.hierarchical_topics(docs)
 ```
 
 The resulting `hierarchical_topics` is a dataframe in which merged topics are described. For example, if you would 
@@ -55,7 +55,7 @@ topics, probs = topic_model.fit_transform(docs)
 
 # Hierarchical topics
 linkage_function = lambda x: sch.linkage(x, 'single', optimal_ordering=True)
-hierarchical_topics = topic_model.hierarchical_topics(docs, topics, linkage_function=linkage_function)
+hierarchical_topics = topic_model.hierarchical_topics(docs, linkage_function=linkage_function)
 ```
 
 
@@ -356,13 +356,13 @@ update their topic representation which in turn updates the entire model:
 
 ```python
 topics_to_merge = [1, 2]
-topic_model.merge_topics(docs, topics, topics_to_merge)
+topic_model.merge_topics(docs, topics_to_merge)
 ```
 
 If you have several groups of topics you want to merge, create a list of lists instead:
 
 ```python
-topics_to_merge = [[1, 2]
+topics_to_merge = [[1, 2],
                    [3, 4]]
-topic_model.merge_topics(docs, topics, topics_to_merge)
+topic_model.merge_topics(docs, topics_to_merge)
 ```

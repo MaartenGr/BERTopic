@@ -25,7 +25,7 @@ def visualize_topics(topic_model,
         width: The width of the figure.
         height: The height of the figure.
 
-    Usage:
+    Examples:
 
     To visualize the topics simply run:
 
@@ -54,13 +54,13 @@ def visualize_topics(topic_model,
 
     # Extract topic words and their frequencies
     topic_list = sorted(topics)
-    frequencies = [topic_model.topic_sizes[topic] for topic in topic_list]
+    frequencies = [topic_model.topic_sizes_[topic] for topic in topic_list]
     words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]
 
     # Embed c-TF-IDF into 2D
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
-    embeddings = topic_model.c_tf_idf.toarray()[indices]
+    embeddings = topic_model.c_tf_idf_.toarray()[indices]
     embeddings = MinMaxScaler().fit_transform(embeddings)
     embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
 

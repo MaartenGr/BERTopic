@@ -1,3 +1,109 @@
+---
+hide:
+  - navigation
+---
+
+# Changelog
+
+## **Version 0.12.0**
+*Release date: 5 September, 2022*
+
+**Highlights**:
+
+* Perform [online/incremental topic modeling](https://maartengr.github.io/BERTopic/getting_started/online/online.html) with `.partial_fit`
+* Expose [c-TF-IDF model](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html) for customization with `bertopic.vectorizers.ClassTfidfTransformer`
+    * The parameters `bm25_weighting` and `reduce_frequent_words` were added to potentially improve representations:
+* Expose attributes for easier access to internal data
+* Major changes to the [Algorithm](https://maartengr.github.io/BERTopic/algorithm/algorithm.html) page of the documentation, which now contains three overviews of the algorithm:
+    *  [Visualize Overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html#visual-overview)
+    *  [Code Overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html#code-overview)
+    *  [Detailed Overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html#detailed-overview)
+* Added an [example](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#keybert-bertopic) of combining BERTopic with KeyBERT
+* Added many tests with the intention of making development a bit more stable
+
+**Fixes**: 
+
+* Fixed iteratively merging topics ([#632](https://github.com/MaartenGr/BERTopic/issues/632) and ([#648](https://github.com/MaartenGr/BERTopic/issues/648))
+* Fixed 0th topic not showing up in visualizations ([#667](https://github.com/MaartenGr/BERTopic/issues/667))
+* Fixed lowercasing not being optional ([#682](https://github.com/MaartenGr/BERTopic/issues/682))
+* Fixed spelling ([#664](https://github.com/MaartenGr/BERTopic/issues/664) and ([#673](https://github.com/MaartenGr/BERTopic/issues/673))
+* Fixed 0th topic not shown in `.get_topic_info` by [@oxymor0n](https://github.com/oxymor0n) in [#660](https://github.com/MaartenGr/BERTopic/pull/660)
+* Fixed spelling by [@domenicrosati](https://github.com/domenicrosati) in [#674](https://github.com/MaartenGr/BERTopic/pull/674)
+* Add custom labels and title options to barchart [@leloykun](https://github.com/leloykun) in [#694](https://github.com/MaartenGr/BERTopic/pull/694)
+
+**Online/incremental topic modeling**:
+
+Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained on before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic. 
+
+At a minimum, the cluster model needs to support a `.partial_fit` function in order to use this feature. The default HDBSCAN model will not work as it does not support online updating. 
+
+```python
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.cluster import MiniBatchKMeans
+from sklearn.decomposition import IncrementalPCA
+from bertopic.vectorizers import OnlineCountVectorizer
+from bertopic import BERTopic
+
+# Prepare documents
+all_docs = fetch_20newsgroups(subset=subset,  remove=('headers', 'footers', 'quotes'))["data"]
+doc_chunks = [all_docs[i:i+1000] for i in range(0, len(all_docs), 1000)]
+
+# Prepare sub-models that support online learning
+umap_model = IncrementalPCA(n_components=5)
+cluster_model = MiniBatchKMeans(n_clusters=50, random_state=0)
+vectorizer_model = OnlineCountVectorizer(stop_words="english", decay=.01)
+
+topic_model = BERTopic(umap_model=umap_model,
+                       hdbscan_model=cluster_model,
+                       vectorizer_model=vectorizer_model)
+
+# Incrementally fit the topic model by training on 1000 documents at a time
+for docs in doc_chunks:
+    topic_model.partial_fit(docs)
+```
+
+Only the topics for the most recent batch of documents are tracked. If you want to be using online topic modeling, not for a streaming setting but merely for low-memory use cases, then it is advised to also update the `.topics_` attribute as variations such as hierarchical topic modeling will not work afterward:
+
+```python
+# Incrementally fit the topic model by training on 1000 documents at a time and track the topics in each iteration
+topics = []
+for docs in doc_chunks:
+    topic_model.partial_fit(docs)
+    topics.extend(topic_model.topics_)
+
+topic_model.topics_ = topics
+```
+
+**c-TF-IDF**:
+
+Explicitly define, use, and adjust the `ClassTfidfTransformer` with new parameters, `bm25_weighting` and `reduce_frequent_words`, to potentially improve the topic representation: 
+
+```python
+from bertopic import BERTopic
+from bertopic.vectorizers import ClassTfidfTransformer
+
+ctfidf_model = ClassTfidfTransformer(bm25_weighting=True)
+topic_model = BERTopic(ctfidf_model=ctfidf_model)
+```
+
+**Attributes**:
+
+After having fitted your BERTopic instance, you can use the following attributes to have quick access to certain information, such as the topic assignment for each document in `topic_model.topics_`. 
+
+| Attribute | Type | Description |
+|--------------------|----|---------------------------------------------------------------------------------------------|
+| topics_            | List[int]   | The topics that are generated for each document after training or updating the topic model. The most recent topics are tracked.  |
+| probabilities_ | List[float] | The probability of the assigned topic per document. These are only calculated if a HDBSCAN model is used for the clustering step. When `calculate_probabilities=True`, then it is the probabilities of all topics per document. |
+| topic_sizes_          | Mapping[int, int] | The size of each topic.                                                                   |
+| topic_mapper_         | TopicMapper | A class for tracking topics and their mappings anytime they are merged, reduced, added, or removed.             |
+| topic_representations_  | Mapping[int, Tuple[int, float]] | The top *n* terms per topic and their respective c-TF-IDF values.                            |
+| c_tf_idf_             | csr_matrix | The topic-term matrix as calculated through c-TF-IDF. To access its respective words, run `.vectorizer_model.get_feature_names()` or `.vectorizer_model.get_feature_names_out()`                                      |
+| topic_labels_         | Mapping[int, str] |  The default labels for each topic.                                                          |
+| custom_labels_        | List[str] | Custom labels for each topic as generated through `.set_topic_labels`.                                                               |
+| topic_embeddings_     | np.ndarray | The embeddings for each topic. It is calculated by taking the weighted average of word embeddings in a topic based on their c-TF-IDF values.                                                  |
+| representative_docs_  | Mapping[int, str] | The representative documents for each topic if HDBSCAN is used.                                                |
+
+
 ## **Version 0.11.0**
 *Release date: 11 July, 2022*
 

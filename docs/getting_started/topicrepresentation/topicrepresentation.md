@@ -39,7 +39,7 @@ what the topic is about. Instead, let's simplify the topic representation by set
 also allow for single words.
 
 ```python
->>> topic_model.update_topics(docs, topics, n_gram_range=(1, 3))
+>>> topic_model.update_topics(docs, n_gram_range=(1, 3))
 >>> topic_model.get_topic(31)[:10]
 [('encryption', 0.008021846079148017),
  ('clipper', 0.00789642647602742),
@@ -60,8 +60,12 @@ instead:
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
 vectorizer_model = CountVectorizer(stop_words="English", ngram_range=(1, 5))
-topic_model.update_topics(docs, topics, vectorizer_model=vectorizer_model)
+topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
+
+!!! Tip "Tip!"
+    If you want to change the topics to something else, whether that is merging them or removing outliers, you can pass in 
+    a custom list of topics in order to update them: `topic_model.update_topics(docs, topics=my_updated_topics)`
 
 ### **Custom labels**
 

@@ -14,7 +14,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     Arguments:
         embedding_model: A sentence-transformers embedding model
 
-    Usage:
+    Examples:
 
     To create a model, you can load in a string pointing to a
     sentence-transformers model:

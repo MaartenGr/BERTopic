@@ -29,12 +29,9 @@ To use a Hugging Face transformers model, load in a pipeline and point
 to any model found on their model hub (https://huggingface.co/models):
 
 ```python
-from bertopic.backend import HFTransformerBackend
 from transformers.pipelines import pipeline
 
-hf_model = pipeline("feature-extraction", model="distilbert-base-cased")
-embedding_model = HFTransformerBackend(hf_model)
-
+embedding_model = pipeline("feature-extraction", model="distilbert-base-cased")
 topic_model = BERTopic(embedding_model=embedding_model)
 ```
 

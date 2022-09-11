@@ -14,7 +14,7 @@ class GensimBackend(BaseEmbedder):
     Arguments:
         embedding_model: A Gensim embedding model
 
-    Usage:
+    Examples:
 
     ```python
     from bertopic.backend import GensimBackend

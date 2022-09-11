@@ -1,3 +1,3 @@
 # `c-TF-IDF`
 
-::: bertopic._ctfidf.ClassTFIDF
+::: bertopic.vectorizers.ClassTfidfTransformer

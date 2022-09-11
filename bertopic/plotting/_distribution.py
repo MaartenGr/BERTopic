@@ -20,7 +20,7 @@ def visualize_distribution(topic_model,
         width: The width of the figure.
         height: The height of the figure.
 
-    Usage:
+    Examples:
 
     Make sure to fit the model before and only input the
     probabilities of a single document:
@@ -53,8 +53,8 @@ def visualize_distribution(topic_model,
     vals = probabilities[labels_idx].tolist()
 
     # Create labels
-    if topic_model.custom_labels is not None and custom_labels:
-        labels = [topic_model.custom_labels[idx + topic_model._outliers] for idx in labels_idx]
+    if topic_model.custom_labels_ is not None and custom_labels:
+        labels = [topic_model.custom_labels_[idx + topic_model._outliers] for idx in labels_idx]
     else:
         labels = []
         for idx in labels_idx:

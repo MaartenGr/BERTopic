@@ -105,7 +105,7 @@ from sklearn.datasets import fetch_20newsgroups
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))["data"]
 topic_model = BERTopic(verbose=True)
 topics, probs = topic_model.fit_transform(docs)
-hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+hierarchical_topics = topic_model.hierarchical_topics(docs)
 ```
 
 To visualize these results, we simply need to pass the resulting `hierarchical_topics` to our `.visualize_hierarchy` function:
@@ -412,7 +412,7 @@ embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Train BERTopic and extract hierarchical topics
 topic_model = BERTopic().fit(docs, embeddings)
-hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+hierarchical_topics = topic_model.hierarchical_topics(docs)
 ```
 Then, we can visualize the hierarchical documents by either supplying it with our embeddings or by 
 reducing their dimensionality ourselves:
@@ -525,7 +525,7 @@ tweets = trump.text.to_list()
 # Create topics over time
 model = BERTopic(verbose=True)
 topics, probs = model.fit_transform(tweets)
-topics_over_time = model.topics_over_time(tweets, topics, timestamps)
+topics_over_time = model.topics_over_time(tweets, timestamps)
 ```
 
 Then, we visualize some interesting topics: 
@@ -555,7 +555,7 @@ classes = [data["target_names"][i] for i in data["target"]]
 # Create topic model and calculate topics per class
 topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
-topics_per_class = topic_model.topics_per_class(docs, topics, classes=classes)
+topics_per_class = topic_model.topics_per_class(docs, classes=classes)
 ```
 
 Then, we visualize the topic representation of major topics per class: 

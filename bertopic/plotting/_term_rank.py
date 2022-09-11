@@ -29,7 +29,7 @@ def visualize_term_rank(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the ranks of all words across
     all topics simply run:
@@ -74,8 +74,8 @@ def visualize_term_rank(topic_model,
         if not any(y > 1.5):
 
             # labels
-            if topic_model.custom_labels is not None and custom_labels:
-                label = topic_model.custom_labels[topic + topic_model._outliers]
+            if topic_model.custom_labels_ is not None and custom_labels:
+                label = topic_model.custom_labels_[topic + topic_model._outliers]
             else:
                 label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
                 label = label[:50]

@@ -19,7 +19,7 @@ it might make sense to merge those two topics:
 
 ```python
 topics_to_merge = [1, 2]
-topic_model.merge_topics(docs, topics, topics_to_merge)
+topic_model.merge_topics(docs, topics_to_merge)
 ```
 
 If you have several groups of topics you want to merge, create a list of lists instead:
@@ -27,14 +27,16 @@ If you have several groups of topics you want to merge, create a list of lists i
 ```python
 topics_to_merge = [[1, 2]
                    [3, 4]]
-topic_model.merge_topics(docs, topics, topics_to_merge)
+topic_model.merge_topics(docs, topics_to_merge)
 ```
 
 ### **Automatic Topic Reduction**
 One issue with the approach above is that it will merge topics regardless of whether they are very similar. They 
 are simply the most similar out of all options. This can be resolved by reducing the number of topics automatically. 
-It will reduce the number of topics, starting from the least frequent topic, as long as it exceeds a minimum 
-similarity of 0.915. To use this option, we simply set `nr_topics` to `"auto"`:
+To do this, we can use HDBSCAN to cluster our topics using each c-TF-IDF representation. Then, we merge topics that are clustered together. 
+Another benefit of HDBSCAN is that it generates outliers. These outliers prevent topics from being merged if no other topics are similar.
+
+To use this option, we simply set `nr_topics` to `"auto"`:
 
 ```python
 from bertopic import BERTopic
@@ -57,10 +59,12 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
 # Further reduce topics
-new_topics, new_probs = topic_model.reduce_topics(docs, topics, nr_topics=30)
+topic_model.reduce_topics(docs, nr_topics=30)
+
+# Access updated topics
+topics = topic_model.topics_
 ```
 
-The reasoning for putting `docs` and `topics` (and optionally `probabilities`) as parameters is that these values are not saved within 
-BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic 
-instead of a dedicated database.  
+The reasoning for putting `docs` as a parameter is that the documents are not saved within 
+BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic instead of a dedicated database.  
 

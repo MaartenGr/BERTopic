@@ -1,3 +1,10 @@
+---
+hide:
+  - navigation
+---
+
+# Frequently Asked Questions
+
 ## **Why are the results not consistent between runs?**
 Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code
 multiple times. Using custom embeddings allows you to try out BERTopic several times until you find the 
@@ -95,13 +102,13 @@ However, if you do not have access to a GPU, looking into quantization might hel
 
 ## **I am facing memory issues. Help!**
 There are several ways to perform computation with large datasets. 
-First, you can set `low_memory` to True when instantiating BERTopic. 
+* First, you can set `low_memory` to True when instantiating BERTopic. 
 This may prevent blowing up the memory in UMAP. 
 
-Second, setting `calculate_probabilities` to False when instantiating BERTopic prevents a huge document-topic 
+* Second, setting `calculate_probabilities` to False when instantiating BERTopic prevents a huge document-topic 
 probability matrix from being created. Moreover, HDBSCAN is quite slow when it tries to calculate probabilities on large datasets. 
 
-Third, you can set the minimum frequency of words in the CountVectorizer class to reduce the size of the resulting 
+* Third, you can set the minimum frequency of words in the CountVectorizer class to reduce the size of the resulting 
 sparse c-TF-IDF matrix. You can do this as follows:
 
 ```python
@@ -114,6 +121,8 @@ topic_model = BERTopic(vectorizer_model=vectorizer_model)
 
 The [min_df](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html) 
 parameter is used to indicate the minimum frequency of words. Setting this value larger than 1 can significantly reduce memory.
+
+* Fourth, you can use <a href="/BERTopic/getting_started/online/online.html">online topic modeling</a> instead to use BERTopic on big data by training the model in chunks
 
 If the problem persists, then this could be an issue related to your available memory. The processing of 
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  

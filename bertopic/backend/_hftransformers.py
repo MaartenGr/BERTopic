@@ -18,7 +18,7 @@ class HFTransformerBackend(BaseEmbedder):
     Arguments:
         embedding_model: A Hugging Face feature extraction pipeline
 
-    Usage:
+    Examples:
 
     To use a Hugging Face transformers model, load in a pipeline and point 
     to any model found on their model hub (https://huggingface.co/models):

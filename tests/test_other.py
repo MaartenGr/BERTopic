@@ -1,20 +1,7 @@
-"""
-Unit Tests of uncategorized functions/features
-
-These tests are those that could not easily be categorized
-into one of the other test_XXX.py files.
-
-
-"""
-
-from sklearn.datasets import fetch_20newsgroups
 from bertopic import BERTopic
-
-newsgroup_docs = fetch_20newsgroups(subset='all')['data'][:1000]
 
 
 def test_load_save_model():
-    """ Check if the model is correctly saved """
     model = BERTopic(language="Dutch", embedding_model=None)
     model.save("test")
     loaded_model = BERTopic.load("test")
@@ -25,7 +12,6 @@ def test_load_save_model():
 
 
 def test_get_params():
-    """ Test if parameters could be extracted """
     model = BERTopic()
     params = model.get_params()
     assert not params["embedding_model"]

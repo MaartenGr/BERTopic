@@ -57,7 +57,7 @@ def visualize_hierarchy(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the hierarchical structure of
     topics simply run:
@@ -71,7 +71,7 @@ def visualize_hierarchy(topic_model,
 
     ```python
     # Extract hierarchical topics and their representations
-    hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
+    hierarchical_topics = topic_model.hierarchical_topics(docs)
 
     # Visualize these representations
     topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
@@ -105,7 +105,7 @@ def visualize_hierarchy(topic_model,
     # Select embeddings
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
-    embeddings = topic_model.c_tf_idf[indices]
+    embeddings = topic_model.c_tf_idf_[indices]
 
     # Annotations
     if hierarchical_topics is not None and len(topics) == len(freq_df.Topic.to_list()):
@@ -129,8 +129,8 @@ def visualize_hierarchy(topic_model,
 
     # Create nicer labels
     axis = "yaxis" if orientation == "left" else "xaxis"
-    if topic_model.custom_labels is not None and custom_labels:
-        new_labels = [topic_model.custom_labels[topics[int(x)] + topic_model._outliers] for x in fig.layout[axis]["ticktext"]]
+    if topic_model.custom_labels_ is not None and custom_labels:
+        new_labels = [topic_model.custom_labels_[topics[int(x)] + topic_model._outliers] for x in fig.layout[axis]["ticktext"]]
     else:
         new_labels = [[[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
                       for x in fig.layout[axis]["ticktext"]]
@@ -215,9 +215,9 @@ def _get_annotations(topic_model,
                            in `topic_model.hierarchical_topics`.
         orientation: The orientation of the figure.
                      Either 'left' or 'bottom'
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
-                       NOTE: Custom labels are only generated for the original 
+                       NOTE: Custom labels are only generated for the original
                        un-merged topics.
 
     Returns:
@@ -247,8 +247,8 @@ def _get_annotations(topic_model,
         scnd_topic = topic_vals[trace[2]]
 
         if len(fst_topic) == 1:
-            if topic_model.custom_labels is not None and custom_labels:
-                fst_name = topic_model.custom_labels[fst_topic[0] + topic_model._outliers]
+            if topic_model.custom_labels_ is not None and custom_labels:
+                fst_name = topic_model.custom_labels_[fst_topic[0] + topic_model._outliers]
             else:
                 fst_name = "_".join([word for word, _ in topic_model.get_topic(fst_topic[0])][:5])
         else:
@@ -257,8 +257,8 @@ def _get_annotations(topic_model,
                     fst_name = df.loc[df.Parent_ID == key, "Parent_Name"].values[0]
 
         if len(scnd_topic) == 1:
-            if topic_model.custom_labels is not None and custom_labels:
-                scnd_name = topic_model.custom_labels[scnd_topic[0] + topic_model._outliers]
+            if topic_model.custom_labels_ is not None and custom_labels:
+                scnd_name = topic_model.custom_labels_[scnd_topic[0] + topic_model._outliers]
             else:
                 scnd_name = "_".join([word for word, _ in topic_model.get_topic(scnd_topic[0])][:5])
         else:

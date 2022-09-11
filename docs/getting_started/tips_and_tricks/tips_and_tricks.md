@@ -54,7 +54,7 @@ This topic-term matrix is calculated using c-TF-IDF, a TF-IDF procedure optimize
 To extract the topic-term matrix (or c-TF-IDF matrix) with the corresponding words, we can simply do the following:
 
 ```python
-topic_term_matrix = topic_model.c_tf_idf
+topic_term_matrix = topic_model.c_tf_idf_
 words = topic_model.vectorizer_model.get_feature_names()
 ```
 
@@ -194,7 +194,7 @@ Next, we can calculate the similarity between topics in the English topic model 
 
 ```python
 from sklearn.metrics.pairwise import cosine_similarity
-sim_matrix = cosine_similarity(en_model.topic_embeddings, nl_model.topic_embeddings)
+sim_matrix = cosine_similarity(en_model.topic_embeddings_, nl_model.topic_embeddings_)
 ```
 
 Now that we know which topics are similar to each other, we can extract the most similar topics. Let's say that we have topic 10 in the `en_model` which represents a topic related to trains:
@@ -351,3 +351,36 @@ Image.open(image)
 ```
 
 ![](skateboarders.jpg)
+
+## **KeyBERT** & **BERTopic**
+
+Although BERTopic focuses on topic extraction methods that does not assume specific structures for the generated clusters, it is possible to do this on a more local level. More specifically, we can use KeyBERT to generate a number of keywords for each document and then build a vocabulary on top of that as the input for BERTopic. This way, we can select words that we know have meaning to a topic, without focusing on the centroid of that cluster. This also allows more frequent words to pop-up regardless of the structure and density of a cluster. 
+
+To do this, we first need to run [KeyBERT](https://github.com/MaartenGr/KeyBERT) on our data and create our vocabulary:
+
+```python
+from sklearn.datasets import fetch_20newsgroups
+from keybert import KeyBERT
+
+# Prepare documents 
+docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+
+# Extract keywords
+kw_model = KeyBERT()
+keywords = kw_model.extract_keywords(docs)
+
+# Create our vocabulary
+vocabulary = [k[0] for keyword in keywords for k in keyword]
+vocabulary = list(set(vocabulary))
+```
+
+Then, we pass our `vocabulary` to BERTopic and train the model:
+
+```python
+from bertopic import BERTopic
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer_model= CountVectorizer(vocabulary=vocabulary)
+topic_model = BERTopic(vectorizer_model=vectorizer_model)
+topics, probs = topic_model.fit_transform(docs)
+```

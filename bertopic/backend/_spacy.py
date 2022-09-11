@@ -13,7 +13,7 @@ class SpacyBackend(BaseEmbedder):
     Arguments:
         embedding_model: A spacy embedding model
 
-    Usage:
+    Examples:
 
     To create a Spacy backend, you need to create an nlp object and
     pass it through this backend:

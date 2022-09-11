@@ -31,13 +31,13 @@ topics, probs = topic_model.fit_transform(docs)
 Now that we have created our global topic model, let us calculate the topic representations across each category:
 
 ```python
-topics_per_class = topic_model.topics_per_class(docs, topics, classes=classes)
+topics_per_class = topic_model.topics_per_class(docs, classes=classes)
 ```
 
 The `classes` variable contains the class for each document. Then, we simply visualize these topics per class:
 
 ```python
-topic_model.visualize_topics_per_class(topics_per_class, top_n=10)
+topic_model.visualize_topics_per_class(topics_per_class, top_n_topics=10)
 ```
 <iframe src="topics_per_class.html" style="width:1000px; height: 1100px; border: 0px;""></iframe>
 

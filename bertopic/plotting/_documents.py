@@ -40,7 +40,7 @@ def visualize_documents(topic_model,
         width: The width of the figure.
         height: The height of the figure.
 
-    Usage:
+    Examples:
 
     To visualize the topics simply run:
 
@@ -85,7 +85,7 @@ def visualize_documents(topic_model,
     <iframe src="../../getting_started/visualization/documents.html"
     style="width:1000px; height: 800px; border: 0px;""></iframe>
     """
-    topic_per_doc = topic_model._map_predictions(topic_model.hdbscan_model.labels_)
+    topic_per_doc = topic_model.topics_
 
     # Sample the data to optimize for visualization and dimensionality reduction
     if sample is None or sample > 1:
@@ -132,8 +132,8 @@ def visualize_documents(topic_model,
     df["y"] = embeddings_2d[:, 1]
 
     # Prepare text and names
-    if topic_model.custom_labels is not None and custom_labels:
-        names = [topic_model.custom_labels[topic + topic_model._outliers] for topic in unique_topics]
+    if topic_model.custom_labels_ is not None and custom_labels:
+        names = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in unique_topics]
     else:
         names = [f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]
 

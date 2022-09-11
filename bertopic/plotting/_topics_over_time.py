@@ -29,12 +29,12 @@ def visualize_topics_over_time(topic_model,
     Returns:
         A plotly.graph_objects.Figure including all traces
 
-    Usage:
+    Examples:
 
     To visualize the topics over time, simply run:
 
     ```python
-    topics_over_time = topic_model.topics_over_time(docs, topics, timestamps)
+    topics_over_time = topic_model.topics_over_time(docs, timestamps)
     topic_model.visualize_topics_over_time(topics_over_time)
     ```
 
@@ -49,23 +49,25 @@ def visualize_topics_over_time(topic_model,
     """
     colors = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#0072B2", "#CC79A7"]
 
-    # Select topics
-    if topics:
-        selected_topics = topics
-    elif top_n_topics:
-        selected_topics = topic_model.get_topic_freq().head(top_n_topics + 1)[1:].Topic.values
+    # Select topics based on top_n and topics args
+    freq_df = topic_model.get_topic_freq()
+    freq_df = freq_df.loc[freq_df.Topic != -1, :]
+    if topics is not None:
+        selected_topics = list(topics)
+    elif top_n_topics is not None:
+        selected_topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
     else:
-        selected_topics = topic_model.get_topic_freq().Topic.values
+        selected_topics = sorted(freq_df.Topic.to_list())
 
     # Prepare data
-    if topic_model.custom_labels is not None and custom_labels:
-        topic_names = {key: topic_model.custom_labels[key + topic_model._outliers] for key, _ in topic_model.topic_names.items()}
+    if topic_model.custom_labels_ is not None and custom_labels:
+        topic_names = {key: topic_model.custom_labels_[key + topic_model._outliers] for key, _ in topic_model.topic_labels_.items()}
     else:
         topic_names = {key: value[:40] + "..." if len(value) > 40 else value
-                       for key, value in topic_model.topic_names.items()}
+                       for key, value in topic_model.topic_labels_.items()}
     topics_over_time["Name"] = topics_over_time.Topic.map(topic_names)
     data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :].sort_values(["Topic", "Timestamp"])
-    
+
     # Add traces
     fig = go.Figure()
     for index, topic in enumerate(data.Topic.unique()):

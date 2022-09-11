@@ -51,7 +51,7 @@ def check_embeddings_shape(embeddings, docs):
                                  "of the vector embeddings. ")
 
 
-def check_is_fitted(model):
+def check_is_fitted(topic_model):
     """ Checks if the model was fitted by verifying the presence of self.matches
 
     Arguments:
@@ -66,8 +66,8 @@ def check_is_fitted(model):
     msg = ("This %(name)s instance is not fitted yet. Call 'fit' with "
            "appropriate arguments before using this estimator.")
 
-    if not model.topics:
-        raise ValueError(msg % {'name': type(model).__name__})
+    if topic_model.topics_ is None:
+        raise ValueError(msg % {'name': type(topic_model).__name__})
 
 
 class NotInstalled:

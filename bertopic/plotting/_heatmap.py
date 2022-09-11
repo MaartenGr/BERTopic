@@ -33,7 +33,7 @@ def visualize_heatmap(topic_model,
     Returns:
         fig: A plotly figure
 
-    Usage:
+    Examples:
 
     To visualize the similarity matrix of
     topics simply run:
@@ -53,10 +53,10 @@ def visualize_heatmap(topic_model,
     """
 
     # Select topic embeddings
-    if topic_model.topic_embeddings is not None:
-        embeddings = np.array(topic_model.topic_embeddings)
+    if topic_model.topic_embeddings_ is not None:
+        embeddings = np.array(topic_model.topic_embeddings_)
     else:
-        embeddings = topic_model.c_tf_idf
+        embeddings = topic_model.c_tf_idf_
 
     # Select topics based on top_n and topics args
     freq_df = topic_model.get_topic_freq()
@@ -94,8 +94,8 @@ def visualize_heatmap(topic_model,
     distance_matrix = cosine_similarity(embeddings)
 
     # Create labels
-    if topic_model.custom_labels is not None and custom_labels:
-        new_labels = [topic_model.custom_labels[topic + topic_model._outliers] for topic in sorted_topics]
+    if topic_model.custom_labels_ is not None and custom_labels:
+        new_labels = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in sorted_topics]
     else:
         new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]
         new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
