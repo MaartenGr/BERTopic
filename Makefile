@@ -6,7 +6,7 @@ install:
 
 install-test:
 	python -m pip install -e ".[test]"
-	python -m pip install -e ".[all]"
+	python -m pip install -e "."
 
 pypi:
 	python setup.py sdist
