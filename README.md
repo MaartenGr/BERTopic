@@ -43,7 +43,7 @@ pip install bertopic[use]
 
 ## Getting Started
 For an in-depth overview of the features of BERTopic 
-you can check the full documentation [here](https://maartengr.github.io/BERTopic/) or you can follow along 
+you can check the [**full documentation**](https://maartengr.github.io/BERTopic/) or you can follow along 
 with one of the examples below:
 
 | Name  | Link  |
@@ -131,6 +131,7 @@ Find all possible visualizations with interactive examples in the documentation
 ## Embedding Models
 BERTopic supports many embedding models that can be used to embed the documents and words:
 * Sentence-Transformers
+* 🤗 Transformers
 * Flair
 * Spacy
 * Gensim
@@ -144,14 +145,13 @@ meant for semantic similarity. Simply select any from their documentation
 topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2")
 ```
 
-[**Flair**](https://github.com/flairNLP/flair) allows you to choose almost any 🤗 transformers model. Simply 
-select any from [here](https://huggingface.co/models) and pass it to BERTopic:
+Similarly, you can choose any [**🤗 Transformers**](https://huggingface.co/models) model and pass it to BERTopic:
 
 ```python
-from flair.embeddings import TransformerDocumentEmbeddings
+from transformers.pipelines import pipeline
 
-roberta = TransformerDocumentEmbeddings('roberta-base')
-topic_model = BERTopic(embedding_model=roberta)
+embedding_model = pipeline("feature-extraction", model="distilbert-base-cased")
+topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
 Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) 
