@@ -675,8 +675,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -788,6 +802,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -864,6 +892,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -878,9 +948,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1366,7 +1443,7 @@ hierarchical topics:</p>
 <span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-<span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
+<span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 <p>To visualize these results, we simply need to pass the resulting <code>hierarchical_topics</code> to our <code>.visualize_hierarchy</code> function:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_hierarchy</span><span class="p">(</span><span class="n">hierarchical_topics</span><span class="o">=</span><span class="n">hierarchical_topics</span><span class="p">)</span>
@@ -1661,7 +1738,7 @@ plotting them on a 2D-plane. To do so, we first need to calculate the hierarchic
 
 <span class="c1"># Train BERTopic and extract hierarchical topics</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
-<span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
+<span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 Then, we can visualize the hierarchical documents by either supplying it with our embeddings or by 
 reducing their dimensionality ourselves:</p>
@@ -1752,7 +1829,7 @@ Simply call <code>.visualize_topics_over_time</code> with the newly created topi
 <span class="c1"># Create topics over time</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">tweets</span><span class="p">)</span>
-<span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">)</span>
+<span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">)</span>
 </code></pre></div>
 <p>Then, we visualize some interesting topics: </p>
 <div class="highlight"><pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">visualize_topics_over_time</span><span class="p">(</span><span class="n">topics_over_time</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">83</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">91</span><span class="p">])</span>
@@ -1776,7 +1853,7 @@ certain classes that you might have in your data. </p>
 <span class="c1"># Create topic model and calculate topics per class</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">()</span>
 <span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-<span class="n">topics_per_class</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_per_class</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
+<span class="n">topics_per_class</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_per_class</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
 </code></pre></div>
 <p>Then, we visualize the topic representation of major topics per class: </p>
 <div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="n">topics_per_class</span><span class="p">)</span>

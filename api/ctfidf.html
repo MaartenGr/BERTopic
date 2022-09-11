@@ -553,8 +553,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -666,6 +680,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -742,6 +770,50 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
     
   
   
@@ -778,21 +850,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bertopic._ctfidf.ClassTFIDF" class="md-nav__link">
-    bertopic._ctfidf.ClassTFIDF
+  <a href="#bertopic.vectorizers.ClassTfidfTransformer" class="md-nav__link">
+    bertopic.vectorizers.ClassTfidfTransformer
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bertopic._ctfidf.ClassTFIDF.fit" class="md-nav__link">
+  <a href="#bertopic.vectorizers._ctfidf.ClassTfidfTransformer.fit" class="md-nav__link">
     fit()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bertopic._ctfidf.ClassTFIDF.transform" class="md-nav__link">
+  <a href="#bertopic.vectorizers._ctfidf.ClassTfidfTransformer.transform" class="md-nav__link">
     transform()
   </a>
   
@@ -813,9 +885,16 @@
   
   
     <li class="md-nav__item">
-      <a href="mmr.html" class="md-nav__link">
-        MMR
+      <a href="onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1107,21 +1186,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#bertopic._ctfidf.ClassTFIDF" class="md-nav__link">
-    bertopic._ctfidf.ClassTFIDF
+  <a href="#bertopic.vectorizers.ClassTfidfTransformer" class="md-nav__link">
+    bertopic.vectorizers.ClassTfidfTransformer
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bertopic._ctfidf.ClassTFIDF.fit" class="md-nav__link">
+  <a href="#bertopic.vectorizers._ctfidf.ClassTfidfTransformer.fit" class="md-nav__link">
     fit()
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bertopic._ctfidf.ClassTFIDF.transform" class="md-nav__link">
+  <a href="#bertopic.vectorizers._ctfidf.ClassTfidfTransformer.transform" class="md-nav__link">
     transform()
   </a>
   
@@ -1148,37 +1227,193 @@
 <h1 id="c-tf-idf"><code>c-TF-IDF</code><a class="headerlink" href="#c-tf-idf" title="Permanent link">&para;</a></h1>
 
 
-  <div class="doc doc-object doc-class">
+<div class="doc doc-object doc-class">
 
-<a id="bertopic._ctfidf.ClassTFIDF"></a>
-    <div class="doc doc-contents first">
 
+<a id="bertopic.vectorizers.ClassTfidfTransformer"></a>
+  <div class="doc doc-contents first">
+      <p class="doc doc-class-bases">
+        Bases: <code><span title="sklearn.feature_extraction.text.TfidfTransformer">TfidfTransformer</span></code></p>
+
+  
       <p>A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.</p>
-<p><img alt="" src="../img/ctfidf.png" /></p>
-<p>C-TF-IDF can best be explained as a TF-IDF formula adopted for multiple classes
+<p><img alt="" src="../algorithm/c-TF-IDF.svg" /></p>
+<p>c-TF-IDF can best be explained as a TF-IDF formula adopted for multiple classes
 by joining all documents per class. Thus, each class is converted to a single document
-instead of set of documents. Then, the frequency of words <strong>t</strong> are extracted for
-each class <strong>i</strong> and divided by the total number of words <strong>w</strong>.
-Next, the total, unjoined, number of documents across all classes <strong>m</strong> is divided by the total
-sum of word <strong>i</strong> across all classes.</p>
+instead of set of documents. The frequency of each word <strong>x</strong> is extracted
+for each class <strong>c</strong> and is <strong>l1</strong> normalized. This constitutes the term frequency.</p>
+<p>Then, the term frequency is multiplied with IDF which is the logarithm of 1 plus
+the average number of words per class <strong>A</strong> divided by the frequency of word <strong>x</strong>
+across all classes.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>bm25_weighting</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Uses BM25-inspired idf-weighting procedure instead of the procedure
+            as defined in the c-TF-IDF formula. It uses the following weighting scheme:
+            <code>log(1+((avg_nr_samples - df + 0.5) / (df+0.5)))</code></p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>reduce_frequent_words</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Takes the square root of the bag-of-words after normalizing the matrix.
+                   Helps to reduce the impact of words that appear too frequently.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+<p><strong>Examples:</strong></p>
+    
+      <div class="highlight"><pre><span></span><code><span class="n">transformer</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">()</span>
+</code></pre></div>
+
 
         <details class="quote">
-          <summary>Source code in <code>bertopic\_ctfidf.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ClassTFIDF</span><span class="p">(</span><span class="n">TfidfTransformer</span><span class="p">):</span>
+          <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
+          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span>
+<span class="normal">99</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ClassTfidfTransformer</span><span class="p">(</span><span class="n">TfidfTransformer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.</span>
 
-<span class="sd">    ![](../img/ctfidf.png)</span>
+<span class="sd">    ![](../algorithm/c-TF-IDF.svg)</span>
 
-<span class="sd">    C-TF-IDF can best be explained as a TF-IDF formula adopted for multiple classes</span>
+<span class="sd">    c-TF-IDF can best be explained as a TF-IDF formula adopted for multiple classes</span>
 <span class="sd">    by joining all documents per class. Thus, each class is converted to a single document</span>
-<span class="sd">    instead of set of documents. Then, the frequency of words **t** are extracted for</span>
-<span class="sd">    each class **i** and divided by the total number of words **w**.</span>
-<span class="sd">    Next, the total, unjoined, number of documents across all classes **m** is divided by the total</span>
-<span class="sd">    sum of word **i** across all classes.</span>
+<span class="sd">    instead of set of documents. The frequency of each word **x** is extracted</span>
+<span class="sd">    for each class **c** and is **l1** normalized. This constitutes the term frequency.</span>
+
+<span class="sd">    Then, the term frequency is multiplied with IDF which is the logarithm of 1 plus</span>
+<span class="sd">    the average number of words per class **A** divided by the frequency of word **x**</span>
+<span class="sd">    across all classes.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        bm25_weighting: Uses BM25-inspired idf-weighting procedure instead of the procedure</span>
+<span class="sd">                        as defined in the c-TF-IDF formula. It uses the following weighting scheme:</span>
+<span class="sd">                        `log(1+((avg_nr_samples - df + 0.5) / (df+0.5)))`</span>
+<span class="sd">        reduce_frequent_words: Takes the square root of the bag-of-words after normalizing the matrix.</span>
+<span class="sd">                               Helps to reduce the impact of words that appear too frequently.</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    transformer = ClassTfidfTransformer()</span>
+<span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ClassTFIDF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bm25_weighting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reduce_frequent_words</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bm25_weighting</span> <span class="o">=</span> <span class="n">bm25_weighting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduce_frequent_words</span> <span class="o">=</span> <span class="n">reduce_frequent_words</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ClassTfidfTransformer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>
@@ -1201,9 +1436,14 @@ sum of word <strong>i</strong> across all classes.</p>
             <span class="c1"># Calculate the average number of samples as regularization</span>
             <span class="n">avg_nr_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
+            <span class="c1"># BM25-inspired weighting procedure</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bm25_weighting</span><span class="p">:</span>
+                <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">-</span> <span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)))</span>
+
             <span class="c1"># Divide the average number of samples by the word frequency</span>
             <span class="c1"># +1 is added to force values to be positive</span>
-            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Multiplier to increase/decrease certain idf scores</span>
             <span class="k">if</span> <span class="n">multiplier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1227,13 +1467,18 @@ sum of word <strong>i</strong> across all classes.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_idf</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_frequent_words</span><span class="p">:</span>
+                <span class="n">X</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
             <span class="n">X</span> <span class="o">=</span> <span class="n">X</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idf_diag</span>
 
         <span class="k">return</span> <span class="n">X</span>
 </code></pre></div>
+</td></tr></table>
         </details>
 
-
+  
 
   <div class="doc doc-children">
 
@@ -1245,49 +1490,96 @@ sum of word <strong>i</strong> across all classes.</p>
 
 
 
-
-  <div class="doc doc-object doc-method">
-
+<div class="doc doc-object doc-function">
 
 
-<h2 id="bertopic._ctfidf.ClassTFIDF.fit" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<h2 id="bertopic.vectorizers._ctfidf.ClassTfidfTransformer.fit" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#bertopic.vectorizers._ctfidf.ClassTfidfTransformer.fit" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-<a href="#bertopic._ctfidf.ClassTFIDF.fit" class="headerlink" title="Permanent link">&para;</a></h2>
-
-    <div class="doc doc-contents ">
-
+  <div class="doc doc-contents ">
+  
       <p>Learn the idf vector (global term weights).</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>X</code></td>
-        <td><code>csr_matrix</code></td>
-        <td><p>A matrix of term/token counts.</p></td>
-        <td><em>required</em></td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
       </tr>
-      <tr>
-        <td><code>multiplier</code></td>
-        <td><code>ndarray</code></td>
-        <td><p>A multiplier for increasing/decreasing certain IDF scores</p></td>
-        <td><code>None</code></td>
-      </tr>
-  </tbody>
-</table>
-        <details class="quote">
-          <summary>Source code in <code>bertopic\_ctfidf.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>X</code></td>
+          <td>
+                <code><span title="scipy.sparse">sp</span>.<span title="scipy.sparse.csr_matrix">csr_matrix</span></code>
+          </td>
+          <td><p>A matrix of term/token counts.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>multiplier</code></td>
+          <td>
+                <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+          </td>
+          <td><p>A multiplier for increasing/decreasing certain IDF scores</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
+        <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>
 
 <span class="sd">    Arguments:</span>
@@ -1308,9 +1600,14 @@ sum of word <strong>i</strong> across all classes.</p>
         <span class="c1"># Calculate the average number of samples as regularization</span>
         <span class="n">avg_nr_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
+        <span class="c1"># BM25-inspired weighting procedure</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bm25_weighting</span><span class="p">:</span>
+            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">-</span> <span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)))</span>
+
         <span class="c1"># Divide the average number of samples by the word frequency</span>
         <span class="c1"># +1 is added to force values to be positive</span>
-        <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Multiplier to increase/decrease certain idf scores</span>
         <span class="k">if</span> <span class="n">multiplier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1323,64 +1620,88 @@ sum of word <strong>i</strong> across all classes.</p>
 
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div>
-        </details>
-    </div>
-
+</td></tr></table>
+      </details>
   </div>
 
+</div>
+
+<div class="doc doc-object doc-function">
 
 
-  <div class="doc doc-object doc-method">
+
+<h2 id="bertopic.vectorizers._ctfidf.ClassTfidfTransformer.transform" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+
+<a href="#bertopic.vectorizers._ctfidf.ClassTfidfTransformer.transform" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
-
-<h2 id="bertopic._ctfidf.ClassTFIDF.transform" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span></code>
-
-
-<a href="#bertopic._ctfidf.ClassTFIDF.transform" class="headerlink" title="Permanent link">&para;</a></h2>
-
-    <div class="doc doc-contents ">
-
+  <div class="doc doc-contents ">
+  
       <p>Transform a count-based matrix to c-TF-IDF</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>X</code></td>
-        <td><code>sparse matrix</code></td>
-        <td><p>A matrix of term/token counts.</p></td>
-        <td><em>required</em></td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
       </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>X (sparse matrix)</code></td>
-      <td><p>A c-TF-IDF matrix</p></td>
-    </tr>
-  </tbody>
-</table>
-        <details class="quote">
-          <summary>Source code in <code>bertopic\_ctfidf.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">):</span>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>X</code></td>
+          <td>
+                <code>sparse matrix</code>
+          </td>
+          <td><p>A matrix of term/token counts.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>X</code></td>          <td>
+                <code>sparse matrix</code>
+          </td>
+          <td><p>A c-TF-IDF matrix</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
+        <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span>
+<span class="normal">99</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
 
 <span class="sd">    Arguments:</span>
@@ -1391,24 +1712,27 @@ sum of word <strong>i</strong> across all classes.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_idf</span><span class="p">:</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_frequent_words</span><span class="p">:</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
         <span class="n">X</span> <span class="o">=</span> <span class="n">X</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idf_diag</span>
 
     <span class="k">return</span> <span class="n">X</span>
 </code></pre></div>
-        </details>
-    </div>
+</td></tr></table>
+      </details>
+  </div>
+
+</div>
+
+
 
   </div>
 
-
-
-
-
   </div>
 
-    </div>
-
-  </div>
+</div>
 
               
             </article>
@@ -1427,7 +1751,7 @@ sum of word <strong>i</strong> across all classes.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="bertopic.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: BERTopic" rel="prev">
+        <a href="mmr.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: MMR" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1436,20 +1760,20 @@ sum of word <strong>i</strong> across all classes.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              BERTopic
+              MMR
             </div>
           </div>
         </a>
       
       
         
-        <a href="mmr.html" class="md-footer__link md-footer__link--next" aria-label="Next: MMR" rel="next">
+        <a href="onlinecv.html" class="md-footer__link md-footer__link--next" aria-label="Next: OnlineCountVectorizer" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              MMR
+              OnlineCountVectorizer
             </div>
           </div>
           <div class="md-footer__button md-icon">

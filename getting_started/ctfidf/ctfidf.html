@@ -12,14 +12,14 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html">
       
       <link rel="icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.9">
     
     
       
-        <title>Topics per Class - BERTopic</title>
+        <title>c-TF-IDF - BERTopic</title>
       
     
     
@@ -72,6 +72,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#c-tf-idf" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -100,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Topics per Class
+              c-TF-IDF
             
           </span>
         </div>
@@ -492,14 +497,16 @@
               
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_9" type="checkbox" id="__nav_3_9" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_9" type="checkbox" id="__nav_3_9" checked>
       
       
       
@@ -562,11 +569,72 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          c-TF-IDF
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="ctfidf.html" class="md-nav__link md-nav__link--active">
         c-TF-IDF
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bm25_weighting" class="md-nav__link">
+    bm25_weighting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reduce_frequent_words" class="md-nav__link">
+    reduce_frequent_words
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -583,16 +651,14 @@
               
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_10" type="checkbox" id="__nav_3_10" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_10" type="checkbox" id="__nav_3_10" >
       
       
       
@@ -613,19 +679,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="topicsperclass.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
-      
     </li>
   
 
@@ -1124,6 +1182,43 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    Parameters
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bm25_weighting" class="md-nav__link">
+    bm25_weighting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reduce_frequent_words" class="md-nav__link">
+    reduce_frequent_words
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1135,52 +1230,58 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/topicsperclass/topicsperclass.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/ctfidf/ctfidf.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-  <h1>Topics per Class</h1>
-
-<p>In some cases, you might be interested in how certain topics are represented over certain categories. Perhaps 
-there are specific groups of users for which you want to see how they talk about certain topics. </p>
-<p>Instead of running the topic model per class, we can simply create a topic model and then extract, for each topic, 
-its representation per class. This allows you to see how certain topics, calculated over all documents, are represented 
-for certain subgroups. </p>
-<p>To do so, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of 
-documents. </p>
-<p>First, let's prepare the data:</p>
+<h1 id="c-tf-idf">c-TF-IDF<a class="headerlink" href="#c-tf-idf" title="Permanent link">&para;</a></h1>
+<p>In BERTopic, in order to get an accurate representation of the topics from our bag-of-words matrix, TF-IDF was adjusted to work on a cluster/categorical/topic-level instead of a document-level. This adjusted TF-IDF representation is called <strong>c-TF-IDF</strong> takes into account what makes the documents in once cluster different from documents in another cluster:</p>
+<p><img class="w-6/12" src="../../algorithm/c-TF-IDF.svg"></p>
+<p><br>
+Each cluster is converted to a single document instead of a set of documents. Then, we extract the frequency of word <code>x</code> in class <code>c</code>, where <code>c</code> refers to the cluster we created before. This results in our class-based <code>tf</code> representation. This representation is L1-normalized to account for the differences in topic sizes. 
+  <br><br>
+Then, we take take the logarithm of one plus the average number of words per class <code>A</code> divided by the frequency of word <code>x</code> across all classes. We add plus one within the logarithm to force values to be positive. This results in our class-based <code>idf</code> representation. Like with the classic TF-IDF, we then multiply <code>tf</code> with <code>idf</code> to get the importance score per word in each class. In other words, the classical TF-IDF procedure is <strong>not</strong> used here but a modified version of the algorithm that allows for a much better representation. </p>
+<p>This class-based TF-IDF representation is enabled by default in BERTopic. However, we can explicitly pass it to BERTopic through the <code>ctfidf_model</code> allowing for parameter tuning and the customization of the topic extraction technique:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">ClassTfidfTransformer</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))</span>
-<span class="n">docs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-<span class="n">targets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span>
-<span class="n">target_names</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">]</span>
-<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]]</span>
+<span class="n">ctfidf_model</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">()</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">ctfidf_model</span><span class="o">=</span><span class="n">ctfidf_model</span> <span class="p">)</span>
 </code></pre></div>
-<p>Next, we want to extract the topics across all documents without taking the categories into account:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-</code></pre></div>
-<p>Now that we have created our global topic model, let us calculate the topic representations across each category:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_per_class</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_per_class</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
-</code></pre></div>
-<p>The <code>classes</code> variable contains the class for each document. Then, we simply visualize these topics per class:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="n">topics_per_class</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-</code></pre></div>
-<iframe src="topics_per_class.html" style="width:1000px; height: 1100px; border: 0px;""></iframe>
+<h2 id="parameters"><strong>Parameters</strong><a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>There are two parameters worth exploring in the <code>ClassTfidfTransformer</code>, namely <code>bm25_weighting</code> and <code>reduce_frequent_words</code>.</p>
+<h3 id="bm25_weighting">bm25_weighting<a class="headerlink" href="#bm25_weighting" title="Permanent link">&para;</a></h3>
+<p>The <code>bm25_weighting</code> is a boolean parameter that indicates whether a class-based BM-25 weighting measure is used instead of the default method as defined in the formula at the beginning of this page. </p>
+<p>Instead of the using the following weighting scheme:</p>
+<p><img class="w-6/12" src="idf.svg"></p>
+<p>the class-based BM-25 weighting is used instead:</p>
+<p><img class="w-6/12" src="bm25.svg"></p>
+<p>At smaller datasets, this variant can be more robust to stop words that appear in your data. It can be enabled as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">ClassTfidfTransformer</span>
 
-<p>You can hover over the bars to see the topic representation per class.</p>
-<p>As you can see in the visualization above, the topics <code>93_homosexual_homosexuality_sex</code> and <code>58_bike_bikes_motorcycle</code> 
-are somewhat distributed over all classes. </p>
-<p>You can see that the topic representation between rec.motorcycles and rec.autos in <code>58_bike_bikes_motorcycle</code> clearly 
-differs from one another. It seems that BERTopic has tried to combine those two categories into a single topic. However, 
-since they do contain two separate topics, the topic representation in those two categories differs. </p>
-<p>We see something similar for <code>93_homosexual_homosexuality_sex</code>, where the topic is distributed among several categories 
-and is represented slightly differently. </p>
-<p>Thus, you can see that although in certain categories the topic is similar, the way the topic is represented can differ.   </p>
+<span class="n">ctfidf_model</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">(</span><span class="n">bm25_weighting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">ctfidf_model</span><span class="o">=</span><span class="n">ctfidf_model</span> <span class="p">)</span>
+</code></pre></div>
+<h3 id="reduce_frequent_words">reduce_frequent_words<a class="headerlink" href="#reduce_frequent_words" title="Permanent link">&para;</a></h3>
+<p>Some words appear quite often in every topic but are generally not considered stop words as found in the <code>CountVectorizer(stop_words="english")</code> list. To further reduce these frequent words, we can use <code>reduce_frequent_words</code> to take the square root of the term frequency after applying the weighting scheme. </p>
+<p>Instead of the default term frequency:</p>
+<p><img class="w-8/12" src="tf.svg"></p>
+<p>we take the square root of the term frequency after applying normalizing the frequency matrix:</p>
+<p><img class="w-8/12" src="tf_reduced.svg"></p>
+<p>Although seemingly a small change, it can have quite a large effect on the number of stop words in the resulting topic representations. It can be enabled as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">ClassTfidfTransformer</span>
+
+<span class="n">ctfidf_model</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">(</span><span class="n">reduce_frequent_words</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">ctfidf_model</span><span class="o">=</span><span class="n">ctfidf_model</span> <span class="p">)</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Both parameters can be used simultaneously: <code>ClassTfidfTransformer(bm25_weighting=True, reduce_frequent_words=True)</code></p>
+</div>
 
               
             </article>
@@ -1199,7 +1300,7 @@ and is represented slightly differently. </p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../ctfidf/ctfidf.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: c-TF-IDF" rel="prev">
+        <a href="../vectorizers/vectorizers.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Vectorizers" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1208,20 +1309,20 @@ and is represented slightly differently. </p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              c-TF-IDF
+              Vectorizers
             </div>
           </div>
         </a>
       
       
         
-        <a href="../supervised/supervised.html" class="md-footer__link md-footer__link--next" aria-label="Next: (semi)-Supervised Topic Modeling" rel="next">
+        <a href="../topicsperclass/topicsperclass.html" class="md-footer__link md-footer__link--next" aria-label="Next: Topics per Class" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              (semi)-Supervised Topic Modeling
+              Topics per Class
             </div>
           </div>
           <div class="md-footer__button md-icon">

@@ -606,8 +606,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -719,6 +733,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -795,6 +823,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -809,9 +879,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1156,18 +1233,19 @@ topics and merge them. If we do this iteratively, starting from the least freque
 For example, if topic 1 is <code>1_space_launch_moon_nasa</code> and topic 2 is <code>2_spacecraft_solar_space_orbit</code> 
 it might make sense to merge those two topics: </p>
 <div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
 </code></pre></div>
 <p>If you have several groups of topics you want to merge, create a list of lists instead:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
                    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
-<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="automatic-topic-reduction"><strong>Automatic Topic Reduction</strong><a class="headerlink" href="#automatic-topic-reduction" title="Permanent link">&para;</a></h3>
 <p>One issue with the approach above is that it will merge topics regardless of whether they are very similar. They 
 are simply the most similar out of all options. This can be resolved by reducing the number of topics automatically. 
-It will reduce the number of topics, starting from the least frequent topic, as long as it exceeds a minimum 
-similarity of 0.915. To use this option, we simply set <code>nr_topics</code> to <code>"auto"</code>:</p>
+To do this, we can use HDBSCAN to cluster our topics using each c-TF-IDF representation. Then, we merge topics that are clustered together. 
+Another benefit of HDBSCAN is that it generates outliers. These outliers prevent topics from being merged if no other topics are similar.</p>
+<p>To use this option, we simply set <code>nr_topics</code> to <code>"auto"</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">nr_topics</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -1185,11 +1263,13 @@ Instead, we can decide afterward how many topics seem realistic:</p>
 <span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 
 <span class="c1"># Further reduce topics</span>
-<span class="n">new_topics</span><span class="p">,</span> <span class="n">new_probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">reduce_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">reduce_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="c1"># Access updated topics</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span>
 </code></pre></div>
-<p>The reasoning for putting <code>docs</code> and <code>topics</code> (and optionally <code>probabilities</code>) as parameters is that these values are not saved within 
-BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic 
-instead of a dedicated database.  </p>
+<p>The reasoning for putting <code>docs</code> as a parameter is that the documents are not saved within 
+BERTopic on purpose. If you were to have a million documents, it is very inefficient to save those in BERTopic instead of a dedicated database.  </p>
 
               
             </article>

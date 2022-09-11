@@ -553,8 +553,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../../getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -666,6 +680,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -744,6 +772,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -758,9 +828,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../mmr.html" class="md-nav__link">
-        MMR
+      <a href="../onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1150,16 +1227,63 @@
 <h1 id="worddocembedder"><code>WordDocEmbedder</code><a class="headerlink" href="#worddocembedder" title="Permanent link">&para;</a></h1>
 
 
-  <div class="doc doc-object doc-class">
+<div class="doc doc-object doc-class">
+
 
 <a id="bertopic.backend._word_doc.WordDocEmbedder"></a>
-    <div class="doc doc-contents first">
+  <div class="doc doc-contents first">
+      <p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" title="bertopic.backend._base.BaseEmbedder" href="base.html#bertopic.backend._base.BaseEmbedder">BaseEmbedder</a></code></p>
 
+  
       <p>Combine a document- and word-level embedder</p>
+
 
         <details class="quote">
           <summary>Source code in <code>bertopic\backend\_word_doc.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">WordDocEmbedder</span><span class="p">(</span><span class="n">BaseEmbedder</span><span class="p">):</span>
+          <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">WordDocEmbedder</span><span class="p">(</span><span class="n">BaseEmbedder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Combine a document- and word-level embedder</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -1203,9 +1327,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_model</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 </code></pre></div>
+</td></tr></table>
         </details>
 
-
+  
 
   <div class="doc doc-children">
 
@@ -1217,66 +1342,96 @@
 
 
 
-
-  <div class="doc doc-object doc-method">
+<div class="doc doc-object doc-function">
 
 
 
 <h2 id="bertopic.backend._word_doc.WordDocEmbedder.embed_documents" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">embed_documents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">document</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
-
+<code class="highlight language-python"><span class="n">embed_documents</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 <a href="#bertopic.backend._word_doc.WordDocEmbedder.embed_documents" class="headerlink" title="Permanent link">&para;</a></h2>
 
-    <div class="doc doc-contents ">
 
+  <div class="doc doc-contents ">
+  
       <p>Embed a list of n words into an n-dimensional
 matrix of embeddings</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>document</code></td>
-        <td><code>List[str]</code></td>
-        <td><p>A list of documents to be embedded</p></td>
-        <td><em>required</em></td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
       </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>document</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[str]</code>
+          </td>
+          <td><p>A list of documents to be embedded</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>verbose</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Controls the verbosity of the process</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>verbose</code></td>
-        <td><code>bool</code></td>
-        <td><p>Controls the verbosity of the process</p></td>
-        <td><code>False</code></td>
+        <th>Type</th>
+        <th>Description</th>
       </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>ndarray</code></td>
-      <td><p>Document embeddings with shape (n, m) with <code>n</code> documents
-that each have an embeddings size of <code>m</code></p></td>
-    </tr>
-  </tbody>
-</table>
-        <details class="quote">
-          <summary>Source code in <code>bertopic\backend\_word_doc.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed_documents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+          </td>
+          <td><p>Document embeddings with shape (n, m) with <code>n</code> documents</p></td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+          </td>
+          <td><p>that each have an embeddings size of <code>m</code></p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bertopic\backend\_word_doc.py</code></summary>
+        <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed_documents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">document</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
@@ -1292,72 +1447,103 @@ that each have an embeddings size of <code>m</code></p></td>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_model</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 </code></pre></div>
-        </details>
-    </div>
-
+</td></tr></table>
+      </details>
   </div>
 
+</div>
 
-
-  <div class="doc doc-object doc-method">
+<div class="doc doc-object doc-function">
 
 
 
 <h2 id="bertopic.backend._word_doc.WordDocEmbedder.embed_words" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">embed_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
-
+<code class="highlight language-python"><span class="n">embed_words</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 <a href="#bertopic.backend._word_doc.WordDocEmbedder.embed_words" class="headerlink" title="Permanent link">&para;</a></h2>
 
-    <div class="doc doc-contents ">
 
+  <div class="doc doc-contents ">
+  
       <p>Embed a list of n words into an n-dimensional
 matrix of embeddings</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>words</code></td>
-        <td><code>List[str]</code></td>
-        <td><p>A list of words to be embedded</p></td>
-        <td><em>required</em></td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
       </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>words</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[str]</code>
+          </td>
+          <td><p>A list of words to be embedded</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>verbose</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Controls the verbosity of the process</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>verbose</code></td>
-        <td><code>bool</code></td>
-        <td><p>Controls the verbosity of the process</p></td>
-        <td><code>False</code></td>
+        <th>Type</th>
+        <th>Description</th>
       </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>ndarray</code></td>
-      <td><p>Word embeddings with shape (n, m) with <code>n</code> words
-that each have an embeddings size of <code>m</code></p></td>
-    </tr>
-  </tbody>
-</table>
-        <details class="quote">
-          <summary>Source code in <code>bertopic\backend\_word_doc.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+          </td>
+          <td><p>Word embeddings with shape (n, m) with <code>n</code> words</p></td>
+        </tr>
+        <tr>
+          <td>
+                <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
+          </td>
+          <td><p>that each have an embeddings size of <code>m</code></p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>bertopic\backend\_word_doc.py</code></summary>
+        <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
@@ -1374,20 +1560,19 @@ that each have an embeddings size of <code>m</code></p></td>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">word_embedding_model</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 </code></pre></div>
-        </details>
-    </div>
+</td></tr></table>
+      </details>
+  </div>
+
+</div>
+
+
 
   </div>
 
-
-
-
-
   </div>
 
-    </div>
-
-  </div>
+</div>
 
               
             </article>

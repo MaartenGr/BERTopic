@@ -575,8 +575,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#multi-model-data" class="md-nav__link">
-    Multi-model data
+  <a href="#multi-modal-data" class="md-nav__link">
+    Multi-modal data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keybert-bertopic" class="md-nav__link">
+    KeyBERT &amp; BERTopic
   </a>
   
 </li>
@@ -652,8 +659,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -765,6 +786,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -841,6 +876,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -855,9 +932,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1205,8 +1289,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#multi-model-data" class="md-nav__link">
-    Multi-model data
+  <a href="#multi-modal-data" class="md-nav__link">
+    Multi-modal data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keybert-bertopic" class="md-nav__link">
+    KeyBERT &amp; BERTopic
   </a>
   
 </li>
@@ -1266,7 +1357,7 @@ with the topic embedding. </p>
 <p>Although BERTopic focuses on clustering our documents, the end result does contain a topic-term matrix. 
 This topic-term matrix is calculated using c-TF-IDF, a TF-IDF procedure optimized for class-based analyses. </p>
 <p>To extract the topic-term matrix (or c-TF-IDF matrix) with the corresponding words, we can simply do the following:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_term_matrix</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf</span>
+<div class="highlight"><pre><span></span><code><span class="n">topic_term_matrix</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span>
 <span class="n">words</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">vectorizer_model</span><span class="o">.</span><span class="n">get_feature_names</span><span class="p">()</span>
 </code></pre></div>
 <div class="admonition note">
@@ -1381,7 +1472,7 @@ topics in model A and topic in model B? In other words, can we find topics in mo
 <p>In the code above, there is one important thing to note and that is the <code>sentence_model</code>. This model needs to be exactly the same in all BERTopic models, otherwise, it is not possible to compare topic models. </p>
 <p>Next, we can calculate the similarity between topics in the English topic model <code>en_model</code> and the Dutch model <code>nl_model</code>. To do so, we can simply calculate the cosine similarity between the <code>topic_embedding</code> of both models: </p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
-<span class="n">sim_matrix</span> <span class="o">=</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">en_model</span><span class="o">.</span><span class="n">topic_embeddings</span><span class="p">,</span> <span class="n">nl_model</span><span class="o">.</span><span class="n">topic_embeddings</span><span class="p">)</span>
+<span class="n">sim_matrix</span> <span class="o">=</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">en_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">,</span> <span class="n">nl_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">)</span>
 </code></pre></div>
 <p>Now that we know which topics are similar to each other, we can extract the most similar topics. Let's say that we have topic 10 in the <code>en_model</code> which represents a topic related to trains:</p>
 <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic</span> <span class="o">=</span> <span class="mi">10</span>
@@ -1412,7 +1503,7 @@ topics in model A and topic in model B? In other words, can we find topics in mo
  <span class="p">(</span><span class="s1">&#39;zwarte&#39;</span><span class="p">,</span> <span class="mf">0.03179591746822408</span><span class="p">)]</span>
 </code></pre></div>
 <p>It seems to be working as, for example, <code>trein</code> is a translation of <code>train</code> and <code>sporen</code> a translation of <code>tracks</code>! You can do this for every single topic to find out which topic in the <code>en_model</code> might belong to a model in the <code>nl_model</code>. </p>
-<h2 id="multi-model-data"><strong>Multi-model data</strong><a class="headerlink" href="#multi-model-data" title="Permanent link">&para;</a></h2>
+<h2 id="multi-modal-data"><strong>Multi-modal data</strong><a class="headerlink" href="#multi-modal-data" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/MaartenGr/Concept">Concept</a> is a variation 
 of BERTopic for multi-modal data, such as images with captions. Although we can use that 
 package for multi-modal data, we can perform a small trick with BERTopic to have a similar feature. </p>
@@ -1512,6 +1603,31 @@ with captions:</p>
 <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="" src="skateboarders.jpg" /></p>
+<h2 id="keybert-bertopic"><strong>KeyBERT</strong> &amp; <strong>BERTopic</strong><a class="headerlink" href="#keybert-bertopic" title="Permanent link">&para;</a></h2>
+<p>Although BERTopic focuses on topic extraction methods that does not assume specific structures for the generated clusters, it is possible to do this on a more local level. More specifically, we can use KeyBERT to generate a number of keywords for each document and then build a vocabulary on top of that as the input for BERTopic. This way, we can select words that we know have meaning to a topic, without focusing on the centroid of that cluster. This also allows more frequent words to pop-up regardless of the structure and density of a cluster. </p>
+<p>To do this, we first need to run <a href="https://github.com/MaartenGr/KeyBERT">KeyBERT</a> on our data and create our vocabulary:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">keybert</span> <span class="kn">import</span> <span class="n">KeyBERT</span>
+
+<span class="c1"># Prepare documents </span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+
+<span class="c1"># Extract keywords</span>
+<span class="n">kw_model</span> <span class="o">=</span> <span class="n">KeyBERT</span><span class="p">()</span>
+<span class="n">keywords</span> <span class="o">=</span> <span class="n">kw_model</span><span class="o">.</span><span class="n">extract_keywords</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+
+<span class="c1"># Create our vocabulary</span>
+<span class="n">vocabulary</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">keywords</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keyword</span><span class="p">]</span>
+<span class="n">vocabulary</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">))</span>
+</code></pre></div>
+<p>Then, we pass our <code>vocabulary</code> to BERTopic and train the model:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+
+<span class="n">vectorizer_model</span><span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">vocabulary</span><span class="o">=</span><span class="n">vocabulary</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
 
               
             </article>

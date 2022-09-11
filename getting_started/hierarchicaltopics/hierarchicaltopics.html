@@ -555,8 +555,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -728,6 +742,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -804,6 +832,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -818,9 +888,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1182,7 +1259,7 @@ us isolate the potential effect of merging sets of topics. As a result, we can s
 <span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 <p>Next, we can use our fitted BERTopic model to extract possible hierarchies from our c-TF-IDF matrix:</p>
-<div class="highlight"><pre><span></span><code><span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 <p>The resulting <code>hierarchical_topics</code> is a dataframe in which merged topics are described. For example, if you would 
 merge two topics, what would the topic representation of the new topic be? </p>
@@ -1198,7 +1275,7 @@ linkage function yourself, including the distance function that you would like t
 
 <span class="c1"># Hierarchical topics</span>
 <span class="n">linkage_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sch</span><span class="o">.</span><span class="n">linkage</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="n">optimal_ordering</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">linkage_function</span><span class="o">=</span><span class="n">linkage_function</span><span class="p">)</span>
+<span class="n">hierarchical_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">hierarchical_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">linkage_function</span><span class="o">=</span><span class="n">linkage_function</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="visualizations"><strong>Visualizations</strong><a class="headerlink" href="#visualizations" title="Permanent link">&para;</a></h2>
 <p>To visualize these results, we can start by running a familiar function, namely <code>topic_model.visualize_hierarchy</code>:</p>
@@ -1486,12 +1563,12 @@ make sense to merge those two topics as they are quite similar in meaning. In BE
 you can use <code>.merge_topics</code> to manually select and merge those topics. Doing so will 
 update their topic representation which in turn updates the entire model:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
-<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
 </code></pre></div>
 <p>If you have several groups of topics you want to merge, create a list of lists instead:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><span class="n">topics_to_merge</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
                    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
-<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">merge_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics_to_merge</span><span class="p">)</span>
 </code></pre></div>
 
               
@@ -1527,13 +1604,13 @@ update their topic representation which in turn updates the entire model:</p>
       
       
         
-        <a href="../../faq.html" class="md-footer__link md-footer__link--next" aria-label="Next: FAQ" rel="next">
+        <a href="../online/online.html" class="md-footer__link md-footer__link--next" aria-label="Next: Online Topic Modeling" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              FAQ
+              Online Topic Modeling
             </div>
           </div>
           <div class="md-footer__button md-icon">

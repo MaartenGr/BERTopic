@@ -555,8 +555,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -748,6 +762,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -824,6 +852,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -838,9 +908,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1243,9 +1320,9 @@ re-tweets for this use-case: </p>
 </code></pre></div>
 <p>From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 
 by simply calling <code>topics_over_time</code> and pass in his tweets, the corresponding timestamps, and the related topics:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </code></pre></div>
-<p>And that is it! Aside from what you always need for BERTopic, you now only need to add <code>topics</code> and <code>timestamps</code> 
+<p>And that is it! Aside from what you always need for BERTopic, you now only need to add <code>timestamps</code> 
 to quickly calculate the topics over time. </p>
 <h2 id="parameters"><strong>Parameters</strong><a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <p>There are a few parameters that are of interest which will be discussed below. </p>
@@ -1253,7 +1330,7 @@ to quickly calculate the topics over time. </p>
 <p>Both <code>global_tuning</code> and <code>evolutionary_tuning</code> are set to True as a default, but can easily be changed. Perhaps 
 you do not want the representations to be influenced by the global representation and merely see how they 
 evolved over time:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> 
+<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> 
                                                 <span class="n">global_tuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">evolution_tuning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="bins"><strong>Bins</strong><a class="headerlink" href="#bins" title="Permanent link">&para;</a></h3>
@@ -1261,14 +1338,13 @@ evolved over time:</p>
 timestamps which can negatively affect the topic representations. It is advised to keep the number of unique 
 timestamps below 50. To do this, you can simply set the number of bins that are created when calculating the 
 topic representations. The timestamps will be taken and put into equal-sized bins:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="datetime-format"><strong>Datetime format</strong><a class="headerlink" href="#datetime-format" title="Permanent link">&para;</a></h3>
 <p>If you are passing strings (dates) instead of integers, then BERTopic will try to automatically detect 
 which datetime format your strings have. Unfortunately, this will not always work if they are in an unexpected format. 
 We can use <code>datetime_format</code> to pass the format the timestamps have: </p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> 
-                                                <span class="n">datetime_format</span><span class="o">=</span><span class="s2">&quot;%b%M&quot;</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">tweets</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">datetime_format</span><span class="o">=</span><span class="s2">&quot;%b%M&quot;</span><span class="p">,</span> <span class="n">nr_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="visualization"><strong>Visualization</strong><a class="headerlink" href="#visualization" title="Permanent link">&para;</a></h2>
 <p>To me, DTM becomes truly interesting when you have a good way of visualizing how topics have changed over time. 

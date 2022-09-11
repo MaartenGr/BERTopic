@@ -553,8 +553,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../../getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -666,6 +680,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -744,6 +772,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -758,9 +828,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../mmr.html" class="md-nav__link">
-        MMR
+      <a href="../onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1122,59 +1199,82 @@
 <h1 id="topics"><code>Topics</code><a class="headerlink" href="#topics" title="Permanent link">&para;</a></h1>
 
 
-  <div class="doc doc-object doc-function">
+<div class="doc doc-object doc-function">
+
 
 <a id="bertopic.plotting._topics.visualize_topics"></a>
-    <div class="doc doc-contents first">
-
+  <div class="doc doc-contents first">
+  
       <p>Visualize topics, their sizes, and their corresponding words</p>
 <p>This visualization is highly inspired by LDAvis, a great visualization
 technique typically reserved for LDA.</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>topic_model</code></td>
-        <td></td>
-        <td><p>A fitted BERTopic instance.</p></td>
-        <td><em>required</em></td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
       </tr>
-      <tr>
-        <td><code>topics</code></td>
-        <td><code>List[int]</code></td>
-        <td><p>A selection of topics to visualize</p></td>
-        <td><code>None</code></td>
-      </tr>
-      <tr>
-        <td><code>top_n_topics</code></td>
-        <td><code>int</code></td>
-        <td><p>Only select the top n most frequent topics</p></td>
-        <td><code>None</code></td>
-      </tr>
-      <tr>
-        <td><code>width</code></td>
-        <td><code>int</code></td>
-        <td><p>The width of the figure.</p></td>
-        <td><code>650</code></td>
-      </tr>
-      <tr>
-        <td><code>height</code></td>
-        <td><code>int</code></td>
-        <td><p>The height of the figure.</p></td>
-        <td><code>650</code></td>
-      </tr>
-  </tbody>
-</table>      <p>Usage:</p>
-<p>To visualize the topics simply run:</p>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>topic_model</code></td>
+          <td>
+          </td>
+          <td><p>A fitted BERTopic instance.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>topics</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[int]</code>
+          </td>
+          <td><p>A selection of topics to visualize</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>top_n_topics</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Only select the top n most frequent topics</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>width</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The width of the figure.</p></td>
+          <td>
+                <code>650</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>height</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The height of the figure.</p></td>
+          <td>
+                <code>650</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+<p><strong>Examples:</strong></p>
+    
+      <p>To visualize the topics simply run:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics</span><span class="p">()</span>
 </code></pre></div>
 <p>Or if you want to save the resulting figure:</p>
@@ -1184,9 +1284,68 @@ technique typically reserved for LDA.</p>
 <iframe src="../../getting_started/visualization/viz.html"
 style="width:1000px; height: 680px; border: 0px;""></iframe>
 
-        <details class="quote">
-          <summary>Source code in <code>bertopic\plotting\_topics.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
+      <details class="quote">
+        <summary>Source code in <code>bertopic\plotting\_topics.py</code></summary>
+        <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
                      <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
@@ -1203,7 +1362,7 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 <span class="sd">        width: The width of the figure.</span>
 <span class="sd">        height: The height of the figure.</span>
 
-<span class="sd">    Usage:</span>
+<span class="sd">    Examples:</span>
 
 <span class="sd">    To visualize the topics simply run:</span>
 
@@ -1232,13 +1391,13 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 
     <span class="c1"># Extract topic words and their frequencies</span>
     <span class="n">topic_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span>
-    <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_sizes</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topic_list</span><span class="p">]</span>
+    <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_sizes_</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topic_list</span><span class="p">]</span>
     <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]])</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topic_list</span><span class="p">]</span>
 
     <span class="c1"># Embed c-TF-IDF into 2D</span>
     <span class="n">all_topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">all_topics</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">])</span>
-    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf</span><span class="o">.</span><span class="n">toarray</span><span class="p">()[</span><span class="n">indices</span><span class="p">]</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="o">.</span><span class="n">toarray</span><span class="p">()[</span><span class="n">indices</span><span class="p">]</span>
     <span class="n">embeddings</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
     <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;hellinger&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 
@@ -1247,10 +1406,11 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
                        <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">,</span> <span class="s2">&quot;Words&quot;</span><span class="p">:</span> <span class="n">words</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">_plotly_topic_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">topic_list</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
 </code></pre></div>
-        </details>
-    </div>
-
+</td></tr></table>
+      </details>
   </div>
+
+</div>
 
               
             </article>

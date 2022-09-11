@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#version-0110" class="md-skip">
+        <a href="#changelog" class="md-skip">
           Skip to content
         </a>
       
@@ -289,7 +289,9 @@
           
             
               
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -553,8 +555,22 @@
   
   
     <li class="md-nav__item">
-      <a href="getting_started/countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -666,6 +682,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -742,6 +772,48 @@
   
   
     <li class="md-nav__item">
+      <a href="api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -756,9 +828,16 @@
   
   
     <li class="md-nav__item">
-      <a href="api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1022,6 +1101,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Changelog
@@ -1038,12 +1119,21 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-0120" class="md-nav__link">
+    Version 0.12.0
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#version-0110" class="md-nav__link">
@@ -1229,6 +1319,8 @@
             
             
               
+                
+              
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
@@ -1238,12 +1330,21 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-0120" class="md-nav__link">
+    Version 0.12.0
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#version-0110" class="md-nav__link">
@@ -1431,8 +1532,142 @@
 
 
 
-  <h1>Changelog</h1>
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="version-0120"><strong>Version 0.12.0</strong><a class="headerlink" href="#version-0120" title="Permanent link">&para;</a></h2>
+<p><em>Release date: 5 September, 2022</em></p>
+<p><strong>Highlights</strong>:</p>
+<ul>
+<li>Perform <a href="https://maartengr.github.io/BERTopic/getting_started/online/online.html">online/incremental topic modeling</a> with <code>.partial_fit</code></li>
+<li>Expose <a href="https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html">c-TF-IDF model</a> for customization with <code>bertopic.vectorizers.ClassTfidfTransformer</code><ul>
+<li>The parameters <code>bm25_weighting</code> and <code>reduce_frequent_words</code> were added to potentially improve representations:</li>
+</ul>
+</li>
+<li>Expose attributes for easier access to internal data</li>
+<li>Major changes to the <a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html">Algorithm</a> page of the documentation, which now contains three overviews of the algorithm:<ul>
+<li><a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html#visual-overview">Visualize Overview</a></li>
+<li><a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html#code-overview">Code Overview</a></li>
+<li><a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html#detailed-overview">Detailed Overview</a></li>
+</ul>
+</li>
+<li>Added an <a href="https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#keybert-bertopic">example</a> of combining BERTopic with KeyBERT</li>
+<li>Added many tests with the intention of making development a bit more stable</li>
+</ul>
+<p><strong>Fixes</strong>: </p>
+<ul>
+<li>Fixed iteratively merging topics (<a href="https://github.com/MaartenGr/BERTopic/issues/632">#632</a> and (<a href="https://github.com/MaartenGr/BERTopic/issues/648">#648</a>)</li>
+<li>Fixed 0th topic not showing up in visualizations (<a href="https://github.com/MaartenGr/BERTopic/issues/667">#667</a>)</li>
+<li>Fixed lowercasing not being optional (<a href="https://github.com/MaartenGr/BERTopic/issues/682">#682</a>)</li>
+<li>Fixed spelling (<a href="https://github.com/MaartenGr/BERTopic/issues/664">#664</a> and (<a href="https://github.com/MaartenGr/BERTopic/issues/673">#673</a>)</li>
+<li>Fixed 0th topic not shown in <code>.get_topic_info</code> by <a href="https://github.com/oxymor0n">@oxymor0n</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/660">#660</a></li>
+<li>Fixed spelling by <a href="https://github.com/domenicrosati">@domenicrosati</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/674">#674</a></li>
+<li>Add custom labels and title options to barchart <a href="https://github.com/leloykun">@leloykun</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/694">#694</a></li>
+</ul>
+<p><strong>Online/incremental topic modeling</strong>:</p>
+<p>Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained on before. In Scikit-Learn, this technique is often modeled through a <code>.partial_fit</code> function, which is also used in BERTopic. </p>
+<p>At a minimum, the cluster model needs to support a <code>.partial_fit</code> function in order to use this feature. The default HDBSCAN model will not work as it does not support online updating. </p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">MiniBatchKMeans</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">IncrementalPCA</span>
+<span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">OnlineCountVectorizer</span>
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 
+<span class="c1"># Prepare documents</span>
+<span class="n">all_docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">subset</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+<span class="n">doc_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">all_docs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1000</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_docs</span><span class="p">),</span> <span class="mi">1000</span><span class="p">)]</span>
+
+<span class="c1"># Prepare sub-models that support online learning</span>
+<span class="n">umap_model</span> <span class="o">=</span> <span class="n">IncrementalPCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">cluster_model</span> <span class="o">=</span> <span class="n">MiniBatchKMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">OnlineCountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">.01</span><span class="p">)</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span>
+                       <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">,</span>
+                       <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+
+<span class="c1"># Incrementally fit the topic model by training on 1000 documents at a time</span>
+<span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>Only the topics for the most recent batch of documents are tracked. If you want to be using online topic modeling, not for a streaming setting but merely for low-memory use cases, then it is advised to also update the <code>.topics_</code> attribute as variations such as hierarchical topic modeling will not work afterward:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Incrementally fit the topic model by training on 1000 documents at a time and track the topics in each iteration</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+    <span class="n">topics</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span><span class="p">)</span>
+
+<span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span> <span class="o">=</span> <span class="n">topics</span>
+</code></pre></div>
+<p><strong>c-TF-IDF</strong>:</p>
+<p>Explicitly define, use, and adjust the <code>ClassTfidfTransformer</code> with new parameters, <code>bm25_weighting</code> and <code>reduce_frequent_words</code>, to potentially improve the topic representation: </p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">ClassTfidfTransformer</span>
+
+<span class="n">ctfidf_model</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">(</span><span class="n">bm25_weighting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">ctfidf_model</span><span class="o">=</span><span class="n">ctfidf_model</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Attributes</strong>:</p>
+<p>After having fitted your BERTopic instance, you can use the following attributes to have quick access to certain information, such as the topic assignment for each document in <code>topic_model.topics_</code>. </p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topics_</td>
+<td>List[int]</td>
+<td>The topics that are generated for each document after training or updating the topic model. The most recent topics are tracked.</td>
+</tr>
+<tr>
+<td>probabilities_</td>
+<td>List[float]</td>
+<td>The probability of the assigned topic per document. These are only calculated if a HDBSCAN model is used for the clustering step. When <code>calculate_probabilities=True</code>, then it is the probabilities of all topics per document.</td>
+</tr>
+<tr>
+<td>topic_sizes_</td>
+<td>Mapping[int, int]</td>
+<td>The size of each topic.</td>
+</tr>
+<tr>
+<td>topic_mapper_</td>
+<td>TopicMapper</td>
+<td>A class for tracking topics and their mappings anytime they are merged, reduced, added, or removed.</td>
+</tr>
+<tr>
+<td>topic_representations_</td>
+<td>Mapping[int, Tuple[int, float]]</td>
+<td>The top <em>n</em> terms per topic and their respective c-TF-IDF values.</td>
+</tr>
+<tr>
+<td>c_tf_idf_</td>
+<td>csr_matrix</td>
+<td>The topic-term matrix as calculated through c-TF-IDF. To access its respective words, run <code>.vectorizer_model.get_feature_names()</code> or <code>.vectorizer_model.get_feature_names_out()</code></td>
+</tr>
+<tr>
+<td>topic_labels_</td>
+<td>Mapping[int, str]</td>
+<td>The default labels for each topic.</td>
+</tr>
+<tr>
+<td>custom_labels_</td>
+<td>List[str]</td>
+<td>Custom labels for each topic as generated through <code>.set_topic_labels</code>.</td>
+</tr>
+<tr>
+<td>topic_embeddings_</td>
+<td>np.ndarray</td>
+<td>The embeddings for each topic. It is calculated by taking the weighted average of word embeddings in a topic based on their c-TF-IDF values.</td>
+</tr>
+<tr>
+<td>representative_docs_</td>
+<td>Mapping[int, str]</td>
+<td>The representative documents for each topic if HDBSCAN is used.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="version-0110"><strong>Version 0.11.0</strong><a class="headerlink" href="#version-0110" title="Permanent link">&para;</a></h2>
 <p><em>Release date: 11 July, 2022</em></p>
 <p><strong>Highlights</strong>:</p>

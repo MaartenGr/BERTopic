@@ -553,8 +553,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="../../getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -666,6 +680,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -744,6 +772,48 @@
   
   
     <li class="md-nav__item">
+      <a href="../mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -758,9 +828,16 @@
   
   
     <li class="md-nav__item">
-      <a href="../mmr.html" class="md-nav__link">
-        MMR
+      <a href="../onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1122,78 +1199,129 @@
 <h1 id="barchart"><code>Barchart</code><a class="headerlink" href="#barchart" title="Permanent link">&para;</a></h1>
 
 
-  <div class="doc doc-object doc-function">
+<div class="doc doc-object doc-function">
+
 
 <a id="bertopic.plotting._barchart.visualize_barchart"></a>
-    <div class="doc doc-contents first">
-
+  <div class="doc doc-contents first">
+  
       <p>Visualize a barchart of selected topics</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>topic_model</code></td>
-        <td></td>
-        <td><p>A fitted BERTopic instance.</p></td>
-        <td><em>required</em></td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
       </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>topic_model</code></td>
+          <td>
+          </td>
+          <td><p>A fitted BERTopic instance.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>topics</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[int]</code>
+          </td>
+          <td><p>A selection of topics to visualize.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>top_n_topics</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Only select the top n most frequent topics.</p></td>
+          <td>
+                <code>8</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>n_words</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of words to show in a topic</p></td>
+          <td>
+                <code>5</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>custom_labels</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Whether to use custom topic labels that were defined using 
+           <code>topic_model.set_topic_labels</code>.</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>title</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>Title of the plot.</p></td>
+          <td>
+                <code>&#39;Topic Word Scores&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>width</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The width of each figure.</p></td>
+          <td>
+                <code>250</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>height</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The height of each figure.</p></td>
+          <td>
+                <code>250</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
       <tr>
-        <td><code>topics</code></td>
-        <td><code>List[int]</code></td>
-        <td><p>A selection of topics to visualize.</p></td>
-        <td><code>None</code></td>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
       </tr>
-      <tr>
-        <td><code>top_n_topics</code></td>
-        <td><code>int</code></td>
-        <td><p>Only select the top n most frequent topics.</p></td>
-        <td><code>8</code></td>
-      </tr>
-      <tr>
-        <td><code>n_words</code></td>
-        <td><code>int</code></td>
-        <td><p>Number of words to show in a topic</p></td>
-        <td><code>5</code></td>
-      </tr>
-      <tr>
-        <td><code>width</code></td>
-        <td><code>int</code></td>
-        <td><p>The width of each figure.</p></td>
-        <td><code>250</code></td>
-      </tr>
-      <tr>
-        <td><code>height</code></td>
-        <td><code>int</code></td>
-        <td><p>The height of each figure.</p></td>
-        <td><code>250</code></td>
-      </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>fig</code></td>
-      <td><p>A plotly figure</p></td>
-    </tr>
-  </tbody>
-</table>      <p>Usage:</p>
-<p>To visualize the barchart of selected topics
+    </thead>
+    <tbody>
+        <tr>
+<td><code>fig</code></td>          <td>
+                <code><span title="plotly.graph_objects">go</span>.<span title="plotly.graph_objects.Figure">Figure</span></code>
+          </td>
+          <td><p>A plotly figure</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+<p><strong>Examples:</strong></p>
+    
+      <p>To visualize the barchart of selected topics
 simply run:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_barchart</span><span class="p">()</span>
 </code></pre></div>
@@ -1204,12 +1332,127 @@ simply run:</p>
 <iframe src="../../getting_started/visualization/bar_chart.html"
 style="width:1100px; height: 660px; border: 0px;""></iframe>
 
-        <details class="quote">
-          <summary>Source code in <code>bertopic\plotting\_barchart.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_barchart</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
+      <details class="quote">
+        <summary>Source code in <code>bertopic\plotting\_barchart.py</code></summary>
+        <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_barchart</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
                        <span class="n">n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                       <span class="n">custom_labels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Topic Word Scores&quot;</span><span class="p">,</span>
                        <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
                        <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; Visualize a barchart of selected topics</span>
@@ -1219,13 +1462,16 @@ style="width:1100px; height: 660px; border: 0px;""></iframe>
 <span class="sd">        topics: A selection of topics to visualize.</span>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics.</span>
 <span class="sd">        n_words: Number of words to show in a topic</span>
+<span class="sd">        custom_labels: Whether to use custom topic labels that were defined using </span>
+<span class="sd">                       `topic_model.set_topic_labels`.</span>
+<span class="sd">        title: Title of the plot.</span>
 <span class="sd">        width: The width of each figure.</span>
 <span class="sd">        height: The height of each figure.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        fig: A plotly figure</span>
 
-<span class="sd">    Usage:</span>
+<span class="sd">    Examples:</span>
 
 <span class="sd">    To visualize the barchart of selected topics</span>
 <span class="sd">    simply run:</span>
@@ -1256,7 +1502,10 @@ style="width:1100px; height: 660px; border: 0px;""></iframe>
         <span class="n">topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">freq_df</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">to_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
 
     <span class="c1"># Initialize figure</span>
-    <span class="n">subplot_titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic </span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
+        <span class="n">subplot_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">subplot_titles</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic </span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">]</span>
     <span class="n">columns</span> <span class="o">=</span> <span class="mi">4</span>
     <span class="n">rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span> <span class="o">/</span> <span class="n">columns</span><span class="p">))</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span>
@@ -1291,7 +1540,7 @@ style="width:1100px; height: 660px; border: 0px;""></iframe>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">,</span>
         <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s2">&quot;&lt;b&gt;Topic Word Scores&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;&lt;b&gt;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">.5</span><span class="p">,</span>
             <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
             <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
@@ -1313,10 +1562,11 @@ style="width:1100px; height: 660px; border: 0px;""></iframe>
 
     <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div>
-        </details>
-    </div>
-
+</td></tr></table>
+      </details>
   </div>
+
+</div>
 
               
             </article>

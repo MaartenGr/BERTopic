@@ -12,14 +12,14 @@
         <meta name="author" content="Maarten P. Grootendorst">
       
       
-        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html">
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/online/online.html">
       
       <link rel="icon" href="../../icon.png">
       <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.9">
     
     
       
-        <title>Topics per Class - BERTopic</title>
+        <title>Online Topic Modeling - BERTopic</title>
       
     
     
@@ -72,6 +72,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#example" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -100,7 +105,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Topics per Class
+              Online Topic Modeling
             
           </span>
         </div>
@@ -613,19 +618,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="topicsperclass.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
-      
     </li>
   
 
@@ -691,11 +688,55 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../online/online.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Online Topic Modeling
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="online.html" class="md-nav__link md-nav__link--active">
         Online Topic Modeling
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#river" class="md-nav__link">
+    River
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1125,6 +1166,28 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#river" class="md-nav__link">
+    River
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1135,52 +1198,118 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/topicsperclass/topicsperclass.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/getting_started/online/online.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-  <h1>Topics per Class</h1>
+  <h1>Online Topic Modeling</h1>
 
-<p>In some cases, you might be interested in how certain topics are represented over certain categories. Perhaps 
-there are specific groups of users for which you want to see how they talk about certain topics. </p>
-<p>Instead of running the topic model per class, we can simply create a topic model and then extract, for each topic, 
-its representation per class. This allows you to see how certain topics, calculated over all documents, are represented 
-for certain subgroups. </p>
-<p>To do so, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of 
-documents. </p>
-<p>First, let's prepare the data:</p>
+<p>Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained on before. In Scikit-Learn, this technique is often modeled through a <code>.partial_fit</code> function, which is also used in BERTopic. </p>
+<p>In BERTopic, there are three main goals for using this technique.</p>
+<ul>
+<li>To reduce the memory necessary for training a topic model. </li>
+<li>To continuously update the topic model as new data comes in. </li>
+<li>To continuously find new topics as new data comes in. </li>
+</ul>
+<p>In BERTopic, online topic modeling can be a bit tricky as there are several steps involved in which online learning needs to be made available. To recap, BERTopic consists of the following 6 steps:</p>
+<ol>
+<li>Extract embeddings</li>
+<li>Reduce dimensionality</li>
+<li>Cluster reduced embeddings</li>
+<li>Tokenize topics</li>
+<li>Extract topic words</li>
+<li>Diversify topic words</li>
+</ol>
+<p>For some steps, an online variant is more important than others. Typically, in step 1 we use pre-trained language models that are in less need for continuous updates. This means that we can use an embedding model like Sentence-Transformers for extracting the embeddings and still use it in an online setting. Similarly, step 5 and 6 do not necessarily need online variants since they are built upon step 4, the tokenization. If that tokenization is by itself incremental, then so will steps 5 and 6. </p>
+<p>This means that we will need online variants for steps 2 through 4. Steps 2 and 3, dimensionality reduction and clustering, can be modeled through the use of Scikit-Learn's <code>.partial_fit</code> function. In other words, it supports any algorithm that can be trained using <code>.partial_fit</code> since these algorithms can be trained incrementally. For example, incremental dimensionality reduction can be achieved using Scikit-Learn's <code>IncrementalPCA</code> and incremental clustering with <code>MiniBatchKMeans</code>.</p>
+<p>Lastly, we need to develop an online variant for step 5, tokenization. In this step, a Bag-of-words representation is created through the <code>CountVectorizer</code>. However, as new data comes in, its vocabulary will need to be updated. For that purpose, <code>bertopic.vectorizers.OnlineCountVectorizer</code> was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large in size. Most notably, the <code>decay</code> parameter is a value between 0 and 1 to weight the percentage of frequencies that the previous bag-of-words matrix should be reduced to. For example, a value of <code>.1</code> will decrease the frequencies in the bag-of-words matrix with 10% at each iteration. This will make sure that recent data has more weight than previously iterations. Similarly, <code>delete_min_df</code> will remove certain words from its vocabulary if its frequency is lower than a set value. This ties together with the <code>decay</code> parameter as some words will decay over time if not used. For more information regarding the <code>OnlineCountVectorizer</code>, please see the <a href="https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html#onlinecountvectorizer">vectorizers documentation</a>.</p>
+<h2 id="example"><strong>Example</strong><a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<p>Online topic modeling in BERTopic is rather straightforward. We first need to have our documents in split in chunks such that we can train and update our topic model incrementally. </p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
+
+<span class="c1"># Prepare documents</span>
+<span class="n">all_docs</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">subset</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+<span class="n">doc_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">all_docs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1000</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_docs</span><span class="p">),</span> <span class="mi">1000</span><span class="p">)]</span>
+</code></pre></div>
+<p>Here, we created chunks of 1000 documents to be fed in BERTopic. Then, we will need to define a number of sub-models that support online learning. Specifically, we are going to be using <code>IncrementalPCA</code>, <code>MiniBatchKMeans</code>, and the <code>OnlineCountVectorizer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">MiniBatchKMeans</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">IncrementalPCA</span>
+<span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">OnlineCountVectorizer</span>
+
+<span class="c1"># Prepare sub-models that support online learning</span>
+<span class="n">umap_model</span> <span class="o">=</span> <span class="n">IncrementalPCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">cluster_model</span> <span class="o">=</span> <span class="n">MiniBatchKMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">OnlineCountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">,</span> <span class="n">decay</span><span class="o">=</span><span class="mf">.01</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition tip tip">
+<p class="admonition-title">Tip</p>
+<p>You can use any other dimensionality reduction and clustering algorithm as long as they have a <code>.partial_fit</code> function. Moreover, you can use dimensionality reduction algorithms that do not support <code>.partial_fit</code> functions but do have a <code>.fit</code> function to first train it on a large amount of data and then continously add documents. The dimensionality reduction will not be updated but may be trained sufficiently to properly reduce the embeddings without the need to continuously add documents.</p>
+</div>
+<p>After having defined our sub-models, we can start training our topic model incrementally by looping over our document chunks:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_20newsgroups</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>  <span class="n">remove</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="s1">&#39;footers&#39;</span><span class="p">,</span> <span class="s1">&#39;quotes&#39;</span><span class="p">))</span>
-<span class="n">docs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-<span class="n">targets</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span>
-<span class="n">target_names</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">]</span>
-<span class="n">classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_names&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]]</span>
-</code></pre></div>
-<p>Next, we want to extract the topics across all documents without taking the categories into account:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
-</code></pre></div>
-<p>Now that we have created our global topic model, let us calculate the topic representations across each category:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topics_per_class</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_per_class</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="n">classes</span><span class="p">)</span>
-</code></pre></div>
-<p>The <code>classes</code> variable contains the class for each document. Then, we simply visualize these topics per class:</p>
-<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics_per_class</span><span class="p">(</span><span class="n">topics_per_class</span><span class="p">,</span> <span class="n">top_n_topics</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-</code></pre></div>
-<iframe src="topics_per_class.html" style="width:1000px; height: 1100px; border: 0px;""></iframe>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span>
+                       <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">,</span>
+                       <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
 
-<p>You can hover over the bars to see the topic representation per class.</p>
-<p>As you can see in the visualization above, the topics <code>93_homosexual_homosexuality_sex</code> and <code>58_bike_bikes_motorcycle</code> 
-are somewhat distributed over all classes. </p>
-<p>You can see that the topic representation between rec.motorcycles and rec.autos in <code>58_bike_bikes_motorcycle</code> clearly 
-differs from one another. It seems that BERTopic has tried to combine those two categories into a single topic. However, 
-since they do contain two separate topics, the topic representation in those two categories differs. </p>
-<p>We see something similar for <code>93_homosexual_homosexuality_sex</code>, where the topic is distributed among several categories 
-and is represented slightly differently. </p>
-<p>Thus, you can see that although in certain categories the topic is similar, the way the topic is represented can differ.   </p>
+<span class="c1"># Incrementally fit the topic model by training on 1000 documents at a time</span>
+<span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>And that is it! During each iteration, you can access the predicted topics through the <code>.topics_</code> attribute. Do note though that only the most recent batch of documents are tracked. If you want to be using online topic modeling for low-memory use cases, then it is advised to also update the <code>.topics_</code> attribute. Otherwise, variations such as hierarchical topic model will not work. </p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Incrementally fit the topic model by training on 1000 documents at a time and track the topics in each iteration</span>
+<span class="n">topics</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+    <span class="n">topics</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span><span class="p">)</span>
+
+<span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span> <span class="o">=</span> <span class="n">topics</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do note that in BERTopic it is not possible to use <code>.partial_fit</code> after the <code>.fit</code> as they work quite differently with respect to internally updating topics, frequencies, representations, etc. </p>
+</div>
+<h2 id="river"><strong>River</strong><a class="headerlink" href="#river" title="Permanent link">&para;</a></h2>
+<p>To continuously find new topics as they come in, we can use the package <a href="https://github.com/online-ml/river">river</a>. It contains several clustering models that can create new clusters as new data comes in. To make sure we can use their models, we first need to create a class that has a <code>.partial_fit</code> function and the option to extract labels through <code>.labels_</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">river</span> <span class="kn">import</span> <span class="n">stream</span>
+<span class="kn">from</span> <span class="nn">river</span> <span class="kn">import</span> <span class="n">cluster</span>
+
+<span class="k">class</span> <span class="nc">River</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">umap_embeddings</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">umap_embedding</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">stream</span><span class="o">.</span><span class="n">iter_array</span><span class="p">(</span><span class="n">umap_embeddings</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">learn_one</span><span class="p">(</span><span class="n">umap_embedding</span><span class="p">)</span>
+
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">umap_embedding</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">stream</span><span class="o">.</span><span class="n">iter_array</span><span class="p">(</span><span class="n">umap_embeddings</span><span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_one</span><span class="p">(</span><span class="n">umap_embedding</span><span class="p">)</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="n">labels</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+<p>Then, we can choose any <code>river.cluster</code> model that we are interested in and pass it to the <code>River</code> class before using it in BERTopic:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Using DBSTREAM to detect new topics as they come in</span>
+<span class="n">cluster_model</span> <span class="o">=</span> <span class="n">River</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">DBSTREAM</span><span class="p">())</span>
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">OnlineCountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
+<span class="n">ctfidf_model</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">(</span><span class="n">reduce_frequent_words</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bm25_weighting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Prepare model</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span>
+    <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">,</span> 
+    <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">,</span> 
+    <span class="n">ctfidf_model</span><span class="o">=</span><span class="n">ctfidf_model</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Incrementally fit the topic model by training on 1000 documents at a time</span>
+<span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
 
               
             </article>
@@ -1199,7 +1328,7 @@ and is represented slightly differently. </p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../ctfidf/ctfidf.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: c-TF-IDF" rel="prev">
+        <a href="../hierarchicaltopics/hierarchicaltopics.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Hierarchical Topic Modeling" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1208,20 +1337,20 @@ and is represented slightly differently. </p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              c-TF-IDF
+              Hierarchical Topic Modeling
             </div>
           </div>
         </a>
       
       
         
-        <a href="../supervised/supervised.html" class="md-footer__link md-footer__link--next" aria-label="Next: (semi)-Supervised Topic Modeling" rel="next">
+        <a href="../../faq.html" class="md-footer__link md-footer__link--next" aria-label="Next: FAQ" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              (semi)-Supervised Topic Modeling
+              FAQ
             </div>
           </div>
           <div class="md-footer__button md-icon">

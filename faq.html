@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#why-are-the-results-not-consistent-between-runs" class="md-skip">
+        <a href="#frequently-asked-questions" class="md-skip">
           Skip to content
         </a>
       
@@ -289,7 +289,9 @@
           
             
               
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -553,8 +555,22 @@
   
   
     <li class="md-nav__item">
-      <a href="getting_started/countvectorizer/countvectorizer.html" class="md-nav__link">
-        CountVectorizer
+      <a href="getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        c-TF-IDF
       </a>
     </li>
   
@@ -666,6 +682,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -693,6 +723,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           FAQ
@@ -708,6 +740,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -870,6 +904,48 @@
   
   
     <li class="md-nav__item">
+      <a href="api/mmr.html" class="md-nav__link">
+        MMR
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_3">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/ctfidf.html" class="md-nav__link">
         cTFIDF
       </a>
@@ -884,9 +960,16 @@
   
   
     <li class="md-nav__item">
-      <a href="api/mmr.html" class="md-nav__link">
-        MMR
+      <a href="api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -1159,6 +1242,8 @@
             
             
               
+                
+              
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
@@ -1167,6 +1252,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -1291,8 +1378,7 @@
 
 
 
-  <h1>FAQ</h1>
-
+<h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">&para;</a></h1>
 <h2 id="why-are-the-results-not-consistent-between-runs"><strong>Why are the results not consistent between runs?</strong><a class="headerlink" href="#why-are-the-results-not-consistent-between-runs" title="Permanent link">&para;</a></h2>
 <p>Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code
 multiple times. Using custom embeddings allows you to try out BERTopic several times until you find the 
@@ -1371,12 +1457,18 @@ typically require a GPU and using only a CPU can slow down computation time quit
 However, if you do not have access to a GPU, looking into quantization might help. </p>
 <h2 id="i-am-facing-memory-issues-help"><strong>I am facing memory issues. Help!</strong><a class="headerlink" href="#i-am-facing-memory-issues-help" title="Permanent link">&para;</a></h2>
 <p>There are several ways to perform computation with large datasets. 
-First, you can set <code>low_memory</code> to True when instantiating BERTopic. 
+* First, you can set <code>low_memory</code> to True when instantiating BERTopic. 
 This may prevent blowing up the memory in UMAP. </p>
+<ul>
+<li>
 <p>Second, setting <code>calculate_probabilities</code> to False when instantiating BERTopic prevents a huge document-topic 
 probability matrix from being created. Moreover, HDBSCAN is quite slow when it tries to calculate probabilities on large datasets. </p>
+</li>
+<li>
 <p>Third, you can set the minimum frequency of words in the CountVectorizer class to reduce the size of the resulting 
 sparse c-TF-IDF matrix. You can do this as follows:</p>
+</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
 
@@ -1385,6 +1477,9 @@ sparse c-TF-IDF matrix. You can do this as follows:</p>
 </code></pre></div>
 <p>The <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html">min_df</a> 
 parameter is used to indicate the minimum frequency of words. Setting this value larger than 1 can significantly reduce memory.</p>
+<ul>
+<li>Fourth, you can use <a href="/BERTopic/getting_started/online/online.html">online topic modeling</a> instead to use BERTopic on big data by training the model in chunks</li>
+</ul>
 <p>If the problem persists, then this could be an issue related to your available memory. The processing of 
 millions of documents is quite computationally expensive and sufficient RAM is necessary.  </p>
 <h2 id="i-have-only-a-few-topics-how-do-i-increase-them"><strong>I have only a few topics, how do I increase them?</strong><a class="headerlink" href="#i-have-only-a-few-topics-how-do-i-increase-them" title="Permanent link">&para;</a></h2>
@@ -1533,7 +1628,7 @@ topic modeling to HTML-code to extract topics of code, then it becomes important
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Hierarchical Topic Modeling" rel="prev">
+        <a href="getting_started/online/online.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Online Topic Modeling" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1542,7 +1637,7 @@ topic modeling to HTML-code to extract topics of code, then it becomes important
               <span class="md-footer__direction">
                 Previous
               </span>
-              Hierarchical Topic Modeling
+              Online Topic Modeling
             </div>
           </div>
         </a>
