@@ -231,3 +231,30 @@ topics, probs = topic_model.fit_transform(docs, embeddings)
 Here, you will probably notice that creating the embeddings is quite fast whereas `fit_transform` is quite slow. 
 This is to be expected as reducing the dimensionality of a large sparse matrix takes some time. The inverse of using 
 transformer embeddings is true: creating the embeddings is slow whereas `fit_transform` is quite fast. 
+
+#### **Scikit-Learn Embeddings**
+Scikit-Learn is very flexible framework it offers many preprocessing tools
+that can be used to create representations for text. Many of these tools are
+relatively lightweight and don't require a GPU. While the representations may
+be less expressive as many BERT models, the fact that it runs much faster can
+still make it a relevant candidate to consider. 
+
+If you have a scikit-learn compatible pipeline that you'd like to use to embed
+text then you can use the `SklearnEmbedder` helper class. An example is shown 
+below.
+
+```python
+from sklearn.pipeline import make_pipeline
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+from bertopic.backend import SklearnEmbedder
+
+pipe = make_pipeline(
+    TfidfVectorizer(),
+    TruncatedSVD(100)
+)
+
+sklearn_embedder = SklearnEmbedder(pipe)
+topic_model = BERTopic(embedding_model=sklearn_embedder)
+```
