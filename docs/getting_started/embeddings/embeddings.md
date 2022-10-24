@@ -233,11 +233,11 @@ This is to be expected as reducing the dimensionality of a large sparse matrix t
 transformer embeddings is true: creating the embeddings is slow whereas `fit_transform` is quite fast. 
 
 #### **Scikit-Learn Embeddings**
-Scikit-Learn is very flexible framework it offers many preprocessing tools
-that can be used to create representations for text. Many of these tools are
-relatively lightweight and don't require a GPU. While the representations may
-be less expressive as many BERT models, the fact that it runs much faster can
-still make it a relevant candidate to consider. 
+Scikit-Learn is a framework for more than just machine learning. 
+It offers many preprocessing tools, some of which can be used to create representations 
+for text. Many of these tools are relatively lightweight and don't require a GPU. 
+While the representations may be less expressive as many BERT models, the fact that 
+it runs much faster can make it a relevant candidate to consider. 
 
 If you have a scikit-learn compatible pipeline that you'd like to use to embed
 text then you can use the `SklearnEmbedder` helper class. An example is shown 
