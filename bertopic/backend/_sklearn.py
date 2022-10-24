@@ -53,7 +53,7 @@ class SklearnEmbedder(BaseEmbedder):
 
         Arguments:
             documents: A list of documents or words to be embedded
-            verbose: Controls the verbosity of the process
+            verbose: No-op variable that's kept around to keep the API consistent. If you want to get feedback on training times, you should use the sklearn API.
 
         Returns:
             Document/words embeddings with shape (n, m) with `n` documents/words
