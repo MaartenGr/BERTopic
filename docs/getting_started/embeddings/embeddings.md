@@ -231,3 +231,42 @@ topics, probs = topic_model.fit_transform(docs, embeddings)
 Here, you will probably notice that creating the embeddings is quite fast whereas `fit_transform` is quite slow. 
 This is to be expected as reducing the dimensionality of a large sparse matrix takes some time. The inverse of using 
 transformer embeddings is true: creating the embeddings is slow whereas `fit_transform` is quite fast. 
+
+#### **Scikit-Learn Embeddings**
+Scikit-Learn is a framework for more than just machine learning. 
+It offers many preprocessing tools, some of which can be used to create representations 
+for text. Many of these tools are relatively lightweight and don't require a GPU. 
+While the representations may be less expressive as many BERT models, the fact that 
+it runs much faster can make it a relevant candidate to consider. 
+
+If you have a scikit-learn compatible pipeline that you'd like to use to embed
+text then you can also pass this to BERTopic. 
+
+```python
+from sklearn.pipeline import make_pipeline
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+pipe = make_pipeline(
+    TfidfVectorizer(),
+    TruncatedSVD(100)
+)
+
+topic_model = BERTopic(embedding_model=pipe)
+```
+
+Internally, this uses the `SklearnEmbedder` that ensures the scikit-learn
+pipeline is compatible. 
+
+```python
+from bertopic.backend import SklearnEmbedder
+
+sklearn_embedder = SklearnEmbedder(pipe)
+topic_model = BERTopic(embedding_model=sklearn_embedder)
+```
+
+!!! Warning 
+    One caveat to be aware of is that scikit-learns base `Pipeline` class does not
+    support the `.partial_fit()`-API. If you have a pipeline that theoretically should
+    be able to support online learning then you might want to explore
+    the [scikit-partial](https://github.com/koaning/scikit-partial) project.

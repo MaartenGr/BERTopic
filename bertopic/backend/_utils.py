@@ -1,7 +1,9 @@
 from ._base import BaseEmbedder
 from ._sentencetransformers import SentenceTransformerBackend
 from ._hftransformers import HFTransformerBackend
+from ._sklearn import SklearnEmbedder
 from transformers.pipelines import Pipeline
+from sklearn.pipeline import Pipeline as ScikitPipeline
 
 languages = ['afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese',
              'azerbaijani', 'basque', 'belarusian', 'bengali', 'bengali romanize',
@@ -32,6 +34,9 @@ def select_backend(embedding_model,
     # BERTopic language backend
     if isinstance(embedding_model, BaseEmbedder):
         return embedding_model
+
+    if isinstance(embedding_model, ScikitPipeline):
+        return SklearnEmbedder(embedding_model)
 
     # Flair word embeddings
     if "flair" in str(type(embedding_model)):
