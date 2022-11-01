@@ -1619,7 +1619,7 @@ class BERTopic:
         fig.write_html("path/to/file.html")
         ```
 
-        <iframe src="../../getting_started/visualization/documents.html"
+        <iframe src="../getting_started/visualization/documents.html"
         style="width:1000px; height: 800px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
@@ -1723,7 +1723,7 @@ class BERTopic:
         fig.write_html("path/to/file.html")
         ```
 
-        <iframe src="../../getting_started/visualization/hierarchical_documents.html"
+        <iframe src="../getting_started/visualization/hierarchical_documents.html"
         style="width:1000px; height: 770px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
@@ -2013,7 +2013,7 @@ class BERTopic:
         fig = topic_model.visualize_hierarchy()
         fig.write_html("path/to/file.html")
         ```
-        <iframe src="../../getting_started/visualization/hierarchy.html"
+        <iframe src="../getting_started/visualization/hierarchy.html"
         style="width:1000px; height: 680px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
