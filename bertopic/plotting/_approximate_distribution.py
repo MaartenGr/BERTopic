@@ -20,7 +20,7 @@ def visualize_approximate_distribution(topic_model,
     NOTE:
     This fuction will return a stylized pandas dataframe if Jinja2 is installed. If not, 
     it will only return a pandas dataframe without color highlighting. To install jinja:
-    
+
     `pip install jinja2`
     
     Arguments:
@@ -61,6 +61,9 @@ def visualize_approximate_distribution(topic_model,
     # Tokenize document
     analyzer = topic_model.vectorizer_model.build_tokenizer()
     tokens = analyzer(document)
+
+    if len(tokens) == 0:
+        raise ValueError("Make sure that your document contains at least 1 token.")
     
     # Prepare dataframe with results
     if normalize:

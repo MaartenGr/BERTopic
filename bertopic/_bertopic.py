@@ -1086,21 +1086,26 @@ class BERTopic:
                 if start == end:
                     end = end + 1
 
+                # Assign topics to individual tokens
                 token_id = [i for i in range(len(token))]
                 token_val = {index: [] for index in token_id}
                 for sim, token_set in zip(similarity[start:end], all_token_sets_ids[start:end]):
-                    for t in token_set:
-                        if t in token_val:
-                            token_val[t].append(sim)
+                    for token in token_set:
+                        if token in token_val:
+                            token_val[token].append(sim)
 
                 matrix = []      
                 for _, value in token_val.items():
                     matrix.append(np.add.reduce(value))
+                
+                # Take empty documents into account
+                matrix = np.array(matrix)
+                if len(matrix.shape) == 1:
+                    matrix = np.zeros((1, len(self.topic_labels_) - self._outliers))
 
                 topic_token_distributions.append(np.array(matrix))
                 topic_distributions.append(np.add.reduce(matrix))
             
-            topic_distributions = np.array(topic_distributions)
             topic_distributions = normalize(topic_distributions, norm='l1', axis=1)
 
         # Aggregate on a tokenset level indicated by the window and stride
