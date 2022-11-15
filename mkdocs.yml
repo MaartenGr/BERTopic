@@ -25,6 +25,7 @@ nav:
         - Vectorizers: getting_started/vectorizers/vectorizers.md
         - c-TF-IDF: getting_started/ctfidf/ctfidf.md
       - Variations:
+        - Topic Distributions: getting_started/distribution/distribution.md
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
         - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
