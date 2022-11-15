@@ -18,7 +18,6 @@ from tqdm import tqdm
 from packaging import version
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from pandas.io.formats.style import Styler
 from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
@@ -2132,7 +2131,7 @@ class BERTopic:
     def visualize_approximate_distribution(self,
                                            document: str, 
                                            topic_token_distribution: np.ndarray, 
-                                           normalize: bool = False) -> Styler:
+                                           normalize: bool = False):
         """ Visualize the topic distribution calculated by `.approximate_topic_distribution` 
         on a token level. Thereby indicating the extend to which a certain word or phrases belong 
         to a specific topic. The assumption here is that a single word can belong to multiple 
