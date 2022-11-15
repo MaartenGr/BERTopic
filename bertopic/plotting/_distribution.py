@@ -44,9 +44,6 @@ def visualize_distribution(topic_model,
     if len(probabilities[probabilities > min_probability]) == 0:
         raise ValueError("There are no values where `min_probability` is higher than the "
                          "probabilities that were supplied. Lower `min_probability` to prevent this error.")
-    if not topic_model.calculate_probabilities:
-        raise ValueError("This visualization cannot be used if you have set `calculate_probabilities` to False "
-                         "as it uses the topic probabilities. ")
 
     # Get values and indices equal or exceed the minimum probability
     labels_idx = np.argwhere(probabilities >= min_probability).flatten()
