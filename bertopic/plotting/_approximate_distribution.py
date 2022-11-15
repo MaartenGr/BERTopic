@@ -1,17 +1,27 @@
 import numpy as np
 import pandas as pd
-from pandas.io.formats.style import Styler
+
+try:
+    from pandas.io.formats.style import Styler
+except ModuleNotFoundError:
+    HAS_JINJA = False
 
 
 def visualize_approximate_distribution(topic_model, 
                                        document: str, 
                                        topic_token_distribution: np.ndarray, 
-                                       normalize: bool = False) -> Styler:
+                                       normalize: bool = False):
     """ Visualize the topic distribution calculated by `.approximate_topic_distribution` 
     on a token level. Thereby indicating the extend to which a certain word or phrases belong 
     to a specific topic. The assumption here is that a single word can belong to multiple 
     similar topics and as such give information about the broader set of topics within 
     a single document. 
+
+    NOTE:
+    This fuction will return a stylized pandas dataframe if Jinja2 is installed. If not, 
+    it will only return a pandas dataframe without color highlighting. To install jinja:
+    
+    `pip install jinja2`
     
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -74,7 +84,7 @@ def visualize_approximate_distribution(topic_model,
     
     if len(df) == 0:
         return df
-    else:
+    elif HAS_JINJA:
         df = (
             df.style
               .format("{:.3f}")

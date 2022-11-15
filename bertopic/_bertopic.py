@@ -1027,13 +1027,10 @@ class BERTopic:
 
         # Extract token sets
         all_sentences = []
-        all_token_sets = []
         all_indices = [0]
-        all_doc_ids = []
         all_token_sets_ids = []
 
-        for doc_id, tokenset in enumerate(tokens):
-            token_ids = [i for i in range(len(tokenset))]
+        for tokenset in tokens:
             if len(tokens) < window:
                 token_sets = tokens
             else:
@@ -1061,10 +1058,8 @@ class BERTopic:
             # Join the tokens
             sentences = [separator.join(token) for token in token_sets]
             all_sentences.extend(sentences)
-            all_token_sets.extend(token_sets)
             all_token_sets_ids.extend(token_sets_ids)
             all_indices.append(all_indices[-1] + len(sentences))
-            all_doc_ids.extend([doc_id for _ in range(len(sentences))])
         
         # Calculate similarity between embeddings of token sets and the topics
         if use_embedding_model:
@@ -1099,12 +1094,13 @@ class BERTopic:
                             token_val[t].append(sim)
 
                 matrix = []      
-                for key, value in token_val.items():
+                for _, value in token_val.items():
                     matrix.append(np.add.reduce(value))
 
                 topic_token_distributions.append(np.array(matrix))
                 topic_distributions.append(np.add.reduce(matrix))
-                
+            
+            topic_distributions = np.array(topic_distributions)
             topic_distributions = normalize(topic_distributions, norm='l1', axis=1)
 
         # Aggregate on a tokenset level indicated by the window and stride
