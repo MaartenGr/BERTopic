@@ -218,7 +218,7 @@ class BERTopic:
         self.topic_embeddings_ = None
         self.topic_labels_ = None
         self.custom_labels_ = None
-        self.representative_docs_ = None
+        self.representative_docs_ = {}
         self.c_tf_idf_ = None
 
         # Private attributes for internal tracking purposes
@@ -1384,7 +1384,20 @@ class BERTopic:
                                                                                                    ascending=False)
 
     def get_representative_docs(self, topic: int = None) -> List[str]:
-        """ Extract representative documents per topic
+        """ Extract the best representing documents per topic. 
+
+        NOTE:
+            This does not extract all documents per topic as all documents
+            are not saved within BERTopic. To get all documents, please 
+            run the following:
+
+            ```python
+            # When you used `.fit_transform`:
+            df = pd.DataFrame({"Document": docs, "Topic": topic})
+
+            # When you used `.fit`:
+            df = pd.DataFrame({"Document": docs, "Topic": topic_model.topics_})
+            ```
 
         Arguments:
             topic: A specific topic for which you want
@@ -1409,7 +1422,10 @@ class BERTopic:
         """
         check_is_fitted(self)
         if isinstance(topic, int):
-            return self.representative_docs_[topic]
+            if self.representative_docs_.get(topic):
+                return self.representative_docs_[topic]
+            else:
+                return None
         else:
             return self.representative_docs_
 
@@ -2735,7 +2751,10 @@ class BERTopic:
                              or from the second-most recent topics.
         """
         mappings = self.topic_mapper_.get_mappings(original_topics)
-        representative_docs = self.representative_docs_.copy()
+        if self.representative_docs_ is not None:
+            representative_docs = self.representative_docs_.copy()
+        else:
+            representative_docs = {}
 
         # Update the representative documents
         updated_representative_docs = {mappings[old_topic]: []
