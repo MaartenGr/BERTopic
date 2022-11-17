@@ -74,22 +74,22 @@ def select_backend(embedding_model,
 
     # Select embedding model based on language
     if language:
-        from ._sentencetransformers import SentenceTransformerBackend
-        if language.lower() in ["English", "english", "en"]:
-            return SentenceTransformerBackend("all-MiniLM-L6-v2")
-        elif language.lower() in languages or language == "multilingual":
-            return SentenceTransformerBackend("paraphrase-multilingual-MiniLM-L12-v2")
-        else:
-            raise ValueError(f"{language} is currently not supported. However, you can "
-                             f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
-                             "Else, please select a language from the following list:\n"
-                             f"{languages}")
-    
-    try:
-        from ._sentencetransformers import SentenceTransformerBackend
-        return SentenceTransformerBackend("all-MiniLM-L6-v2")
-    
-    # Only for light-weight installation
-    except ModuleNotFoundError:
-        pipe = make_pipeline(TfidfVectorizer(), TruncatedSVD(100))
-        return SklearnEmbedder(pipe)
+        try:
+            from ._sentencetransformers import SentenceTransformerBackend
+            if language.lower() in ["English", "english", "en"]:
+                return SentenceTransformerBackend("all-MiniLM-L6-v2")
+            elif language.lower() in languages or language == "multilingual":
+                return SentenceTransformerBackend("paraphrase-multilingual-MiniLM-L12-v2")
+            else:
+                raise ValueError(f"{language} is currently not supported. However, you can "
+                                f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
+                                "Else, please select a language from the following list:\n"
+                                f"{languages}")
+
+        # Only for light-weight installation
+        except ModuleNotFoundError:
+            pipe = make_pipeline(TfidfVectorizer(), TruncatedSVD(100))
+            return SklearnEmbedder(pipe)
+
+    from ._sentencetransformers import SentenceTransformerBackend
+    return SentenceTransformerBackend("all-MiniLM-L6-v2")
