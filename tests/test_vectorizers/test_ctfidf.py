@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from packaging import version
-from scipy.sparse.csr import csr_matrix
+from scipy.sparse import csr_matrix
 from sklearn import __version__ as sklearn_version
 from sklearn.feature_extraction.text import CountVectorizer
 from bertopic.vectorizers import ClassTfidfTransformer
