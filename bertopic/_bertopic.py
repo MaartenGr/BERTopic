@@ -346,7 +346,7 @@ class BERTopic:
         umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Cluster reduced embeddings
-        documents, probabilities = self._cluster_embeddings(umap_embeddings, documents)
+        documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, y=y)
 
         # Sort and Map Topic IDs by their frequency
         if not self.nr_topics:
@@ -2586,7 +2586,8 @@ class BERTopic:
     def _cluster_embeddings(self,
                             umap_embeddings: np.ndarray,
                             documents: pd.DataFrame,
-                            partial_fit: bool = False) -> Tuple[pd.DataFrame,
+                            partial_fit: bool = False,
+                            y: np.ndarray = None) -> Tuple[pd.DataFrame,
                                                                 np.ndarray]:
         """ Cluster UMAP embeddings with HDBSCAN
 
@@ -2606,8 +2607,15 @@ class BERTopic:
             documents['Topic'] = labels
             self.topics_ = labels
         else:
-            self.hdbscan_model.fit(umap_embeddings)
-            labels = self.hdbscan_model.labels_
+            try:
+                self.hdbscan_model.fit(umap_embeddings, y=y)
+            except TypeError:
+                self.hdbscan_model.fit(umap_embeddings)
+                
+            try:
+                labels = self.hdbscan_model.labels_
+            except AttributeError:
+                labels = y
             documents['Topic'] = labels
             self._update_topic_size(documents)
 
