@@ -18,7 +18,7 @@ To do so, we need to skip over the dimensionality reduction and clustering steps
 from sklearn.datasets import fetch_20newsgroups
 
 # Get labeled data
-data= fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
 docs = data['data']
 y = data['target']
 ```
@@ -32,9 +32,11 @@ from bertopic.cluster import BaseCluster
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.dimensionality import BaseDimensionalityReduction
 
-# Prepare our empty sub-models and reduce frequent words
+# Prepare our empty sub-models, empty embeddings,
+# and reduce frequent words while we are at it.
 empty_dimensionality_model = BaseDimensionalityReduction()
 empty_cluster_model = BaseCluster()
+empty_embeddings = np.zeros((len(docs), 1))
 ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
 
 # Fit BERTopic without actually performing any clustering
@@ -43,7 +45,7 @@ topic_model= BERTopic(
         umap_model=empty_dimensionality_model,
         ctfidf_model=ctfidf_model
 )
-topics, probs = topic_model.fit_transform(docs, y=y)
+topics, probs = topic_model.fit_transform(docs, empty_embeddings, y=y)
 ```
 
 Let's take a look at a few topics that we get out of training this way by running `topic_model.get_topic_info()`:
@@ -52,24 +54,36 @@ Let's take a look at a few topics that we get out of training this way by runnin
 <p align="center">
   <img src="table.svg">
 </p>
-
 <br>
 
-As a result, BERTopic directly learned from our labeled data `y` what the most representative words are per class. We can still perform BERTopic-specific features like dynamic topic modeling, topics per class, hierarchical topic modeling, modeling topic distributions, etc.
-
-The resulting `topics` may be a different mapping from the `y` labels. In order to map `y` to `topics`, we can run the following:
-
+We can see a number of interesting topics appearing here. They seem to relate to the 20 classes we had as an input. Now, let's map those topics to our original classes in order to view their relationship:
 
 ```python
+# Map input `y` to topics
 mappings = topic_model.topic_mapper_.get_mappings()
-y__mapped = [mappings[val] for val in y]
-```
+mappings = {value: data["target_names"][key] for key, value in mappings.items()}
 
+# Assign original classes to our topics
+df = topic_model.get_topic_info()
+df["Class"] = df.Topic.map(mappings)
+df
+```
+<br>
+<p align="center">
+  <img src="table_classes.svg">
+</p>
+<br>
+
+
+We can clearly see that that the c-TF-IDF representations nicely extracts the words that give a nice representation of our input classes. This is all done without actually embeddings and clustering the data.
+
+As a result, the entire "training" process only takes a couple of seconds. Moreover, we can still perform BERTopic-specific features like dynamic topic modeling, topics per class, hierarchical topic modeling, modeling topic distributions, etc.
 
 !!! note
-    Although we can skip over our embeddings step, it may be worthwhile to create them nonetheless in order to get some topic embeddings together with our c-TF-IDF representation. However, you can also skip over this step by running the following instead:
+    The resulting `topics` may be a different mapping from the `y` labels. In order to map `y` to `topics`, we can run the following:
+
 
     ```python
-    empty_embeddings = np.zeros((len(docs), 1))
-    topics, probs = topic_model.fit_transform(docs, empty_embeddings, y=y)
+    mappings = topic_model.topic_mapper_.get_mappings()
+    y_mapped = [mappings[val] for val in y]
     ```
