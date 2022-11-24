@@ -5,10 +5,9 @@ We can view this as a manual topic modeling approach. There is no underlying alg
 In other words, we can pass our labels to BERTopic and it will try to transform those labels into topics by running the c-TF-IDF representations on the set of documents within each label. This process allows us to model the topics themselves and similarly gives us the option to use everything BERTopic has to offer. 
 
 <br>
-<p align="center">
-  <img src="pipeline.svg">
-</p>
-
+<div class="svg_image">
+--8<-- "docs/getting_started/manual/pipeline.svg"
+</div>
 <br>
 
 To do so, we need to skip over the dimensionality reduction and clustering steps since we already know the labels for our documents. We can use the documents and labels from the 20 NewsGroups dataset to create topics from those 20 labels:
@@ -51,9 +50,10 @@ topics, probs = topic_model.fit_transform(docs, empty_embeddings, y=y)
 Let's take a look at a few topics that we get out of training this way by running `topic_model.get_topic_info()`:
 
 <br>
-<p align="center">
-  <img src="table.svg">
-</p>
+<div class="svg_image">
+--8<-- "docs/getting_started/manual/table.svg"
+</div>
+
 <br>
 
 We can see a number of interesting topics appearing here. They seem to relate to the 20 classes we had as an input. Now, let's map those topics to our original classes in order to view their relationship:
@@ -69,13 +69,14 @@ df["Class"] = df.Topic.map(mappings)
 df
 ```
 <br>
-<p align="center">
-  <img src="table_classes.svg">
-</p>
+<div class="svg_image">
+--8<-- "docs/getting_started/manual/table_classes.svg"
+</div>
+
 <br>
 
 
-We can clearly see that that the c-TF-IDF representations nicely extracts the words that give a nice representation of our input classes. This is all done without actually embeddings and clustering the data.
+We can clearly see that that the c-TF-IDF representations nicely extracts the words that give a nice representation of our input classes. This is all done without actually embedding and clustering the data.
 
 As a result, the entire "training" process only takes a couple of seconds. Moreover, we can still perform BERTopic-specific features like dynamic topic modeling, topics per class, hierarchical topic modeling, modeling topic distributions, etc.
 

@@ -1,86 +1,120 @@
-In this tutorial, we will be looking at a new feature of BERTopic, namely (semi)-supervised topic modeling! 
-This allows us to steer the dimensionality reduction of the embeddings into a space that closely follows any labels you might already have. 
-In other words, we use a semi-supervised UMAP instance to reduce the dimensionality of embeddings before clustering the documents 
-with HDBSCAN. 
+Although topic modeling is typically done by discovering topics in an unsupervised manner, there might be times when you already have a bunch of clusters or classes from which you want to model the topics. For example, the often used [20 NewsGroups dataset](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) is already split up into 20 classes. Similarly, you might already have created some labels yourself through packages like [human-learn](https://github.com/koaning/human-learn), [bulk](https://github.com/koaning/bulk), [thisnotthat](https://github.com/TutteInstitute/thisnotthat) or something entirely different. 
 
-First, let us prepare the data needed for our topic model:
+Instead of using BERTopic to discover previously unknown topics, we are now going to manually pass them to BERTopic and try to learn the relationship between those topics and the input documents. 
+
+> In other words, we are going to be performing classification instead! 
+
+We can view this as a supervised topic modeling approach. Instead of using a clustering algorithm, we are going to be using a classification algorithm instead. 
+
+Generally, we have the following pipeline:
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/supervised/default_pipeline.svg"
+</div>
+<br>
+
+Instead, we are now going to skip over the dimensionality reduction step and replace the clustering step with a classification model:
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/supervised/classification_pipeline.svg"
+</div>
+<br>
+
+In other words, we can pass our labels to BERTopic and it will not only learn how to predict labels for new instances, it also transforms those labels into topics by running the c-TF-IDF representations on the set of documents within each label. This process allows us to model the topics themselves and similarly gives us the option to use everything BERTopic has to offer. 
+
+To do so, we need to skip over the dimensionality reduction step and replace the clustering step with a classification algorithm. We can use the documents and labels from the 20 NewsGroups dataset to create topics from those 20 labels:
+
+
+```python
+from sklearn.datasets import fetch_20newsgroups
+
+# Get labeled data
+data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+docs = data['data']
+y = data['target']
+```
+
+Then, we make sure to create empty instances of the dimensionality reduction and clustering steps. We pass those to BERTopic in order to simply skip over them and go to the topic representation process:
+
 
 ```python
 from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
+from bertopic.vectorizers import ClassTfidfTransformer
+from bertopic.dimensionality import BaseDimensionalityReduction
+from sklearn.linear_model import LogisticRegression
 
+# Get labeled data
 data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
-docs = data["data"]
-categories = data["target"]
-category_names = data["target_names"]
+docs = data['data']
+y = data['target']
+
+# Skip over dimensionality reduction, replace cluster model with classifier,
+# and reduce frequent words while we are at it.
+empty_dimensionality_model = BaseDimensionalityReduction()
+clf = LogisticRegression()
+ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
+
+# Create a fully supervised BERTopic instance
+topic_model= BERTopic(
+        umap_model=empty_dimensionality_model,
+        hdbscan_model=clf,
+        ctfidf_model=ctfidf_model
+)
+topics, probs = topic_model.fit_transform(docs, y=y)
 ```
 
-We are using the popular 20 Newsgroups dataset which contains roughly 18000 newsgroups posts that each is 
-assigned to one of 20 categories. Using this dataset we can try to extract its corresponding topic model whilst 
-taking its underlying categories into account. These categories are here the variable `targets`.
+Let's take a look at a few topics that we get out of training this way by running `topic_model.get_topic_info()`:
 
-Each document can be put into one of the following categories:
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/supervised/table.svg"
+</div>
+<br>
+
+We can see a number of interesting topics appearing here. They seem to relate to the 20 classes we had as an input. Now, let's map those topics to our original classes in order to view their relationship:
 
 ```python
->>> category_names
+# Map input `y` to topics
+mappings = topic_model.topic_mapper_.get_mappings()
+mappings = {value: data["target_names"][key] for key, value in mappings.items()}
 
-['alt.atheism',
- 'comp.graphics',
- 'comp.os.ms-windows.misc',
- 'comp.sys.ibm.pc.hardware',
- 'comp.sys.mac.hardware',
- 'comp.windows.x',
- 'misc.forsale',
- 'rec.autos',
- 'rec.motorcycles',
- 'rec.sport.baseball',
- 'rec.sport.hockey',
- 'sci.crypt',
- 'sci.electronics',
- 'sci.med',
- 'sci.space',
- 'soc.religion.christian',
- 'talk.politics.guns',
- 'talk.politics.mideast',
- 'talk.politics.misc',
- 'talk.religion.misc'] 
+# Assign original classes to our topics
+df = topic_model.get_topic_info()
+df["Class"] = df.Topic.map(mappings)
+df
 ```
-## **Semi-supervised Topic Modeling**
-In semi-supervised topic modeling, we only have some labels for our documents. The documents for which we do have labels 
-are used to somewhat guide BERTopic to the extraction of topics for those labels. The documents for which we do not have 
-labels are assigned a -1. For this example, imagine we only the labels of categories that are related to computers 
-and we want to create a topic model using semi-supervised modeling: 
+<div class="svg_image">
+--8<-- "docs/getting_started/supervised/table_classes.svg"
+</div>
+
+<br>
+
+We can see that the c-TF-IDF representations extracts the words that give a good representation of our input classes. This is all done directly from the labeling. A welcome side-effect is that we now have a classification algorithm that allows us to predict the topics of unseen data:
 
 ```python
-labels_to_add = ['comp.graphics', 'comp.os.ms-windows.misc',
-              'comp.sys.ibm.pc.hardware', 'comp.sys.mac.hardware',
-              'comp.windows.x',]
-indices = [category_names.index(label) for label in labels_to_add]
-y = [label if label in indices else -1 for label in categories]
-``` 
-
-The `y` variable contains many -1 values since we do not know all the categories. 
-
-Next, we use those newly constructed labels to again BERTopic semi-supervised:
-
-```python
-topic_model = BERTopic(verbose=True).fit(docs, y=y)
+>>> topic, _ = topic_model.transform("this is a document about cars")
+>>> topic_model.get_topic(topic)
+[('car', 0.4407600315538472),
+ ('cars', 0.32348015696446325),
+ ('engine', 0.28032518444946686),
+ ('ford', 0.2500224508115155),
+ ('oil', 0.2325984913598611),
+ ('dealer', 0.2310723968585826),
+ ('my', 0.22045777551991935),
+ ('it', 0.21327993649430219),
+ ('tires', 0.20420842634292657),
+ ('brake', 0.20246902481367085)]
 ```
 
-And that is it! By defining certain classes for our documents, we can steer the topic modeling towards modeling the 
-pre-defined categories. 
+ Moreover, we can still perform BERTopic-specific features like dynamic topic modeling, topics per class, hierarchical topic modeling, modeling topic distributions, etc.
 
-## **Supervised Topic Modeling**
-In supervised topic modeling, we have labels for all our documents. This can be pre-defined topics or simply documents  
-that you feel belong together regardless of their content. BERTopic will nudge the creation of topics towards these categories 
-using the pre-defined labels. 
+!!! note
+    The resulting `topics` may be a different mapping from the `y` labels. In order to map `y` to `topics`, we can run the following:
 
-To perform supervised topic modeling, we simply use all categories:
 
-```python
-topic_model = BERTopic(verbose=True).fit(docs, y=categories)
-```
-
-The topic model will be much more attuned to the categories that were defined previously. However, this does not mean 
-that only topics for these categories will be found. BERTopic is likely to find more specific topics in those you 
-have already defined. This allows you to discover previously unknown topics!
+    ```python
+    mappings = topic_model.topic_mapper_.get_mappings()
+    y_mapped = [mappings[val] for val in y]
+    ```

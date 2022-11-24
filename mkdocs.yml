@@ -27,7 +27,8 @@ nav:
       - Variations:
         - Topic Distributions: getting_started/distribution/distribution.md
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
-        - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
+        - Supervised Topic Modeling: getting_started/supervised/supervised.md
+        - Semi-supervised Topic Modeling: getting_started/semisupervised/semisupervised.md
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
         - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
@@ -83,19 +84,23 @@ theme:
     - navigation.tracking
     - toc.follow
   palette:
-    - scheme: default
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to dark mode
-    - scheme: slate
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: black
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    toggle:
+      icon: material/weather-night
+      name: Switch to light mode
 
 markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.snippets
   - toc:
       permalink: true
