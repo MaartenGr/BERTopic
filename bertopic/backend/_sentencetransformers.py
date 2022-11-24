@@ -1,6 +1,5 @@
-from typing import List, Union
-
 import numpy as np
+from typing import List, Union
 from sentence_transformers import SentenceTransformer
 
 from bertopic.backend import BaseEmbedder
