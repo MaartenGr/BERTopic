@@ -1,5 +1,6 @@
-import numpy as np
 from typing import List, Union
+
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from bertopic.backend import BaseEmbedder
@@ -60,5 +61,4 @@ class SentenceTransformerBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
-        return embeddings
+        return self.embedding_model.encode(documents, show_progress_bar=verbose)
