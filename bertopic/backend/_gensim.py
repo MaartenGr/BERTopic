@@ -1,10 +1,10 @@
-from typing import List
 
 import numpy as np
-from gensim.models.keyedvectors import Word2VecKeyedVectors
 from tqdm import tqdm
+from typing import List
 
 from bertopic.backend import BaseEmbedder
+from gensim.models.keyedvectors import Word2VecKeyedVectors
 
 
 class GensimBackend(BaseEmbedder):
