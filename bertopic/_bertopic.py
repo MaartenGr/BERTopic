@@ -33,6 +33,7 @@ from bertopic import plotting
 from bertopic._mmr import mmr
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.backend._utils import select_backend
+from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
 
 # Visualization
@@ -428,15 +429,15 @@ class BERTopic:
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality")
 
-        # Extract predictions and probabilities if it is a HDBSCAN model
-        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-            predictions, probabilities = hdbscan.approximate_predict(self.hdbscan_model, umap_embeddings)
+
+        # Extract predictions and probabilities if it is a HDBSCAN-like model
+        if is_supported_hdbscan(self.hdbscan_model):
+            predictions, probabilities = hdbscan_delegator(self.hdbscan_model, "approximate_predict", umap_embeddings)
 
             # Calculate probabilities
-            if self.calculate_probabilities:
+            if self.calculate_probabilities and isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
                 probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
                 logger.info("Calculated probabilities with HDBSCAN")
-
         else:
             predictions = self.hdbscan_model.predict(umap_embeddings)
             probabilities = None
@@ -2624,14 +2625,17 @@ class BERTopic:
         # track if there are outlier labels and act accordingly when slicing.
         self._outliers = 1 if -1 in set(labels) else 0
 
-        # Save representative docs and calculate probabilities if it is a HDBSCAN model
+        # Save representative docs
         if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-            probabilities = self.hdbscan_model.probabilities_
             self._save_representative_docs(documents)
-            if self.calculate_probabilities:
-                probabilities = hdbscan.all_points_membership_vectors(self.hdbscan_model)
-        else:
-            probabilities = None
+
+        # Extract probabilities
+        probabilities = None
+        if hasattr(self.hdbscan_model, "probabilities_"):
+            probabilities = self.hdbscan_model.probabilities_
+
+            if self.calculate_probabilities and is_supported_hdbscan(self.hdbscan_model):
+                probabilities = hdbscan_delegator(self.hdbscan_model, "all_points_membership_vectors")
 
         if not partial_fit:
             self.topic_mapper_ = TopicMapper(self.topics_)
