@@ -152,6 +152,10 @@ from cuml.preprocessing import normalize
 embeddings = normalize(embeddings)
 ```
 
+!!! note
+    As of the v0.13 release, it is not yet possible to calculate the topic-document probability matrix for unseen data (i.e., `.transform`) using cuML's HDBSCAN. 
+    However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., `.fit` and `.fit_tranform`).
+
 ## **Finding similar topics between models**
 
 Whenever you have trained seperate BERTopic models on different datasets, it might 

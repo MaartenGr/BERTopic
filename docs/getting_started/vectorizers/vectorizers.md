@@ -5,6 +5,14 @@ importance to make sure that the topic representations fits with your use case.
 
 In practice, there is not one correct way of creating topic representations. Some use cases might opt more higher n-grams, whereas others might focus more on single 
 words without any stop words. The diversity in use cases also means that we need to have some flexibility in BERTopic to make sure it can be used across most use cases. 
+The image below illustrates this modularity:
+
+<p align=center>
+<img src="vectorizers.svg">
+<p>
+
+
+In this section, we will go through several examples of vectorization algorithms and how they can be implemented.  
 
 ## **CountVectorizer**
 

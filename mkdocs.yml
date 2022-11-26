@@ -12,7 +12,6 @@ nav:
   - The Algorithm: algorithm/algorithm.md
   - Getting Started:
       - getting_started/quickstart/quickstart.md
-      - Embedding Models: getting_started/embeddings/embeddings.md
       - Topic Visualization: getting_started/visualization/visualization.md
       - Topic Reduction: getting_started/topicreduction/topicreduction.md
       - Topic Representation: getting_started/topicrepresentation/topicrepresentation.md
@@ -20,6 +19,7 @@ nav:
       - Parameter tuning: getting_started/parameter tuning/parametertuning.md       
       - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md       
       - Sub-models:
+        - Embeddings: getting_started/embeddings/embeddings.md
         - Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
         - Clustering: getting_started/clustering/clustering.md
         - Vectorizers: getting_started/vectorizers/vectorizers.md

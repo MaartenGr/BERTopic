@@ -9,169 +9,17 @@ Below, you will find different types of overviews of each step in BERTopic's mai
 
 ## **Visual Overview**
 
-This visual overview reduces BERTopic to four main steps, namely the embedding of documents, the clustering of documents, the topic extraction, and the topic diversification. Each step contains one or more sub-steps that you can read a bit more about below. 
-<br><br>
-<script src="https://cdn.tailwindcss.com"></script>
+BERTopic can be viewed as a sequence of steps in order to create its topic representations. There are five steps to this process:
 
-<!-- <script src="https://unpkg.com/flowbite@1.5.2/dist/flowbite.js"></script> -->
+<img src="default.svg">
 
-<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-x-4 w-4/5 
-sm:w-full md:w-4/5 lg:w-4/5 xl:w-4/5 2xl:4/5">
+Although these steps are the default, there is some modularity to BERTopic. Each step in this process was carefully selected such that they are all somewhat independent from one another. For example, the tokenization step is not directly influenced by the embedding model that was used to convert the documents which allows us to be creative in how we perform the tokenization step. 
 
-  <!--Title stage 1-->
-  <div class="overflow-hidden">
-    <p class="text-blue-300 text-center text-lg">Embed documents</p>
-  </div>
-  <div class="overflow-hidden"></div>
+This effect is especially strong in the clustering step. Models like HDBSCAN assume that clusters can have different shapes and forms. As a result, using a centroid-based technique to model the topic representations would not be beneficial since the centroid is not always representative of these types of clusters. A bag-of-words representation, however, makes very few assumptions with respect to the shape and form of a cluster. 
 
+As a result, BERTopic is quite modular and can maintain its quality of topic generation throughout a variety of sub-models. In other words, BERTopic essentially allows you to **build your own topic model**:
 
-  <!--Card 1-->
-  <div class="rounded overflow-hidden shadow-outline shadow-md shadow-slate-300
-              border-solid border-2 border-slate-100">
-    <div class="flex justify-center pt-4">
-      <img class="h-48 pb-1" src="1. embeddings.svg" alt="embeddings">
-    </div>
-    <div class="px-6">
-      <div class="font-bold text-lg mb-2">
-        <a href="/BERTopic/getting_started/embeddings/embeddings.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">1. Embeddings</a>
-      </div>
-      <p class="text-gray-700 text-sm">
-        We start by converting our documents to vector representations through the use of language models. 
-      </p>
-    </div>
-    <div class="px-6 pt-4 pb-2">
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">
-        SBERT
-      </span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">
-        🤗 Transformers
-      </span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">
-        spaCy
-      </span>
-    </div>
-  </div>
-  <div class="overflow-hidden"></div>
-
-  <!--Title stage 2-->
-  <div class="overflow-hidden sm:col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 pt-5">
-  
-  <p class="text-blue-300 text-center text-lg">Cluster embeddings</p>
-  </div>
-
-  <!--Card 2-->
-  <div class="rounded overflow-hidden shadow-outline shadow-md shadow-slate-300
-              border-solid border-2 border-slate-100">
-    <div class="flex justify-center pt-4">
-        <img class="h-48 pb-1" src="2. reduction.svg" alt="reduction">
-    </div>
-    <div class="px-6">
-      <div class="font-bold text-lg mb-2">
-      <a href="/BERTopic/getting_started/dim_reduction/dim_reduction.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">2. Dimension Reduction</a>
-      </div>
-      <p class="text-gray-700 text-sm">
-        The vector representations are reduced in dimensionality so that clustering algorithms have an easier time finding clusters.
-      </p>
-    </div>
-    <div class="px-6 pt-4 pb-2">
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">UMAP</span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">PCA</span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">Truncated SVD</span>
-    </div>
-  </div>
-
-  <!--Card 3-->
-  <div class="rounded overflow-hidden shadow-outline shadow-md shadow-slate-300
-              border-solid border-2 border-slate-100">
-    <div class="flex justify-center pt-4">
-        <img class="h-48 pb-1" src="3. cluster.svg" alt="cluster">
-    </div>
-    <div class="px-6">
-      <div class="font-bold text-lg mb-2">
-      <a href="/BERTopic/getting_started/clustering/clustering.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">3. Clustering</a>
-      </div>
-      <p class="text-gray-700 text-sm">
-        A clustering algorithm is used to cluster the reduced vectors in order to find semantically similar documents. 
-      </p>
-    </div>
-    <div class="px-6 pt-4 pb-2">
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">HDBSCAN</span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">k-Means</span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">BIRCH</span>
-    </div>
-  </div>
-
-  <div class="overflow-hidden sm:col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 pt-5">
-    <p class="text-blue-300 text-center text-lg">Topic Representation</p>
-  </div>
-
-  <!--Card 4-->
-  <div class="rounded overflow-hidden shadow-outline shadow-md shadow-slate-300
-              border-solid border-2 border-slate-100">
-    <div class="flex justify-center pt-4">
-        <img class="h-48 pb-1" src="4. bow.svg" alt="bow">
-    </div>
-    <div class="px-6">
-      <div class="font-bold text-lg mb-2">
-      <a href="/BERTopic/getting_started/countvectorizer/countvectorizer.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">4. Bag-of-Words</a>
-      </div>
-      <p class="text-gray-700 text-sm">
-        We tokenize each topic into a bag-of-words representation that allows us to process the data without affecting the input embeddings.
-      </p>
-    </div>
-    <div class="px-6 pt-4 pb-2">
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">CountVectorizer</span>
-    </div>
-  </div>
-
-  <!--Card 5-->
-  <div class="rounded overflow-hidden shadow-outline shadow-md shadow-slate-300
-              border-solid border-2 border-slate-100">
-    <div class="flex justify-center pt-4">
-        <img class="h-48 pb-1" src="5. ctfidf.svg" alt="ctfidf">
-    </div>
-    <div class="px-6">
-      <div class="font-bold text-lg mb-2">
-      <a href="/BERTopic/getting_started/ctfidf/ctfidf.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">5. Topic Representation</a>
-      </div>
-      <p class="text-gray-700 text-sm">
-        We calculate words that are interesting to each topic with a class-based TF-IDF procedure called c-TF-IDF.
-      </p>
-    </div>
-    <div class="px-6 pt-4 pb-2">
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">c-TF-IDF</span>
-      <span class="inline-block bg-slate-200 rounded-full px-2 py-1 text-xs text-gray-700 mr-1 mb-1">BM-25</span>
-    </div>
-  </div>
-
-  <div class="overflow-hidden pt-5">
-    <p class="text-blue-300 text-center text-lg">(Optional) Topic Diversity</p>
-  </div>
-  <div class="overflow-hidden"></div>
-
-  <!--Card 6-->
-  <div class="rounded overflow-hidden shadow-outline shadow-md shadow-slate-300
-              border-solid border-2 border-slate-100">
-    <div class="flex justify-center pt-4">
-        <img class="h-48 pb-1" src="6. diversity.svg" alt="embeddings">
-    </div>
-    <div class="px-6">
-      <div class="font-bold text-lg mb-2">
-      <a href="/BERTopic/getting_started/diversity/diversity.html" class="text-sky-800 no-underline hover:underline hover:text-sky-800">6. Topic Diversity</a>
-      </div>
-      <p class="text-gray-700 text-sm">
-        Maximal Marginal Relevance is used to diversify words in each topic which removes repeating and similar words. 
-      </p>
-    </div>
-    <div class="px-6 pt-4 pb-2">
-      <span class="inline-block bg-slate-200 rounded-full px-3 py-2 text-xs text-gray-700 mr-1 mb-1">MMR</span>
-    </div>
-  </div>
-
-</div>
-
-<script>
-</script>
+<img src="modularity.svg">
 
 ## **Code Overview**
 After going through the visual overview, this code overview demonstrates the algorithm using BERTopic. An advantage of using BERTopic is each major step in its algorithm can be explicitly defined, thereby making the process not only transparent but also more intuitive. 

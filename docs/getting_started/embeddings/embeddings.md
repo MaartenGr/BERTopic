@@ -1,7 +1,16 @@
 # Embedding Models
-In this tutorial, we will be going through the embedding models that can be used in BERTopic. 
-Having the option to choose embedding models allows you to leverage pre-trained embeddings that suit your use case. 
-Moreover, it helps to create a topic when you have little data available.
+BERTopic starts with transforming our input documents into numerical representations. Althought there are a number of ways this can be achieved, we typically use sentence-transformers (`"all-MiniLM-L6-v2"`) as it is quite capable of capturing the semantic similarity between documents. 
+
+However, there is not one perfect 
+embedding model and you might want to be using something entirely different for you use case. Since BERTopic assumes some independence among steps, we can allow for this modularity:
+
+<p align=center>
+<img src="embeddings.svg">
+<p>
+
+This modularity allows us not only to choose any embedding model to convert our documents into numerical representations, we can use essentially any data to perform our clustering. 
+When new state-of-the-art pre-trained embedding models are released, BERTopic will be able to use them. As a result, BERTopic grows with any new models being released.
+Out-of-the-box, BERTopic supports a number of embedding techniques. In this section, we will go through several of them and how they can be implemented. 
 
 ### **Sentence Transformers**
 You can select any model from sentence-transformers [here](https://www.sbert.net/docs/pretrained_models.html) 

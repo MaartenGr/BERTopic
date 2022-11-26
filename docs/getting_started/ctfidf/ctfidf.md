@@ -9,6 +9,11 @@ Each cluster is converted to a single document instead of a set of documents. Th
   <br><br>
 Then, we take take the logarithm of one plus the average number of words per class `A` divided by the frequency of word `x` across all classes. We add plus one within the logarithm to force values to be positive. This results in our class-based `idf` representation. Like with the classic TF-IDF, we then multiply `tf` with `idf` to get the importance score per word in each class. In other words, the classical TF-IDF procedure is **not** used here but a modified version of the algorithm that allows for a much better representation. 
 
+Since the topic representation is somewhat independent from the clustering step, we can change how the c-TF-IDF representation will look like. This can be in the form of parameter tuning, different weighting schemes, or using a diversity metric on top of it. This allows for some modularity with respect to the weighting scheme:
+
+<p align=center>
+<img src="ctfidf.svg">
+<p>
 
 This class-based TF-IDF representation is enabled by default in BERTopic. However, we can explicitly pass it to BERTopic through the `ctfidf_model` allowing for parameter tuning and the customization of the topic extraction technique:
 

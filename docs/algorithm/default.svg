@@ -1,0 +1,41 @@
+<svg width="282" height="212" viewBox="0 0 282 212" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="164" y="170" width="118" height="38" fill="#64B5F6"/>
+<rect x="256" y="160" width="20" height="8" fill="#64B5F6"/>
+<rect x="228" y="160" width="20" height="8" fill="#64B5F6"/>
+<rect x="200" y="160" width="20" height="8" fill="#64B5F6"/>
+<rect x="172" y="160" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="190.256" y="197.939">SBERT</tspan></text>
+<rect x="164" y="130" width="118" height="38" fill="#E57373"/>
+<rect x="256" y="120" width="20" height="8" fill="#E57373"/>
+<rect x="228" y="120" width="20" height="8" fill="#E57373"/>
+<rect x="200" y="120" width="20" height="8" fill="#E57373"/>
+<rect x="172" y="120" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="193.254" y="157.939">UMAP</tspan></text>
+<rect x="164" y="90" width="118" height="38" fill="#4DB6AC"/>
+<rect x="256" y="80" width="20" height="8" fill="#4DB6AC"/>
+<rect x="228" y="80" width="20" height="8" fill="#4DB6AC"/>
+<rect x="200" y="80" width="20" height="8" fill="#4DB6AC"/>
+<rect x="172" y="80" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="173.342" y="117.939">HDBSCAN</tspan></text>
+<rect x="164" y="50" width="118" height="38" fill="#FFD54F"/>
+<rect x="256" y="40" width="20" height="8" fill="#FFD54F"/>
+<rect x="228" y="40" width="20" height="8" fill="#FFD54F"/>
+<rect x="200" y="40" width="20" height="8" fill="#FFD54F"/>
+<rect x="172" y="40" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="170.346" y="73.1606">CountVectorizer</tspan></text>
+<rect x="164" y="10" width="118" height="38" fill="#90A4AE"/>
+<rect x="256" width="20" height="8" fill="#90A4AE"/>
+<rect x="228" width="20" height="8" fill="#90A4AE"/>
+<rect x="200" width="20" height="8" fill="#90A4AE"/>
+<rect x="172" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="178.938" y="37.9395">c-TF-IDF</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="47.4023" y="25.7637">Weighting scheme</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="100.938" y="71.7637">Tokenizer</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="98.3125" y="113.764">Clustering</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="5.16016" y="153.764">Dimensionality Reduction</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="86.3008" y="193.764">Embeddings</tspan></text>
+<path d="M131.354 163.646C131.158 163.451 130.842 163.451 130.646 163.646L127.464 166.828C127.269 167.024 127.269 167.34 127.464 167.536C127.66 167.731 127.976 167.731 128.172 167.536L131 164.707L133.828 167.536C134.024 167.731 134.34 167.731 134.536 167.536C134.731 167.34 134.731 167.024 134.536 166.828L131.354 163.646ZM131.5 178L131.5 164L130.5 164L130.5 178L131.5 178Z" fill="black"/>
+<path d="M131.354 35.6464C131.158 35.4512 130.842 35.4512 130.646 35.6464L127.464 38.8284C127.269 39.0237 127.269 39.3403 127.464 39.5355C127.66 39.7308 127.976 39.7308 128.172 39.5355L131 36.7071L133.828 39.5355C134.024 39.7308 134.34 39.7308 134.536 39.5355C134.731 39.3403 134.731 39.0237 134.536 38.8284L131.354 35.6464ZM131.5 50L131.5 36L130.5 36L130.5 50L131.5 50Z" fill="black"/>
+<path d="M131.354 80.6464C131.158 80.4512 130.842 80.4512 130.646 80.6464L127.464 83.8284C127.269 84.0237 127.269 84.3403 127.464 84.5355C127.66 84.7308 127.976 84.7308 128.172 84.5355L131 81.7071L133.828 84.5355C134.024 84.7308 134.34 84.7308 134.536 84.5355C134.731 84.3403 134.731 84.0237 134.536 83.8284L131.354 80.6464ZM131.5 95L131.5 81L130.5 81L130.5 95L131.5 95Z" fill="black"/>
+<path d="M131.354 122.646C131.158 122.451 130.842 122.451 130.646 122.646L127.464 125.828C127.269 126.024 127.269 126.34 127.464 126.536C127.66 126.731 127.976 126.731 128.172 126.536L131 123.707L133.828 126.536C134.024 126.731 134.34 126.731 134.536 126.536C134.731 126.34 134.731 126.024 134.536 125.828L131.354 122.646ZM131.5 137L131.5 123L130.5 123L130.5 137L131.5 137Z" fill="black"/>
+</svg>
