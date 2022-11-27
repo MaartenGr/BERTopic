@@ -146,7 +146,7 @@ topic_model = BERTopic(embedding_model=ft)
 ### **Scikit-Learn Embeddings**
 Scikit-Learn is a framework for more than just machine learning. 
 It offers many preprocessing tools, some of which can be used to create representations 
-for text. Many of these tools are relatively lightweight and don't require a GPU. 
+for text. Many of these tools are relatively lightweight and do not require a GPU. 
 While the representations may be less expressive as many BERT models, the fact that 
 it runs much faster can make it a relevant candidate to consider. 
 
