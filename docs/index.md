@@ -132,15 +132,18 @@ public attributes that can be used to access model information.
 
 ### Variations
 There are many different use cases in which topic modeling can be used. As such, a number of 
-variations of BERTopic have been developed such that one package can be used across across many use cases.
+variations of BERTopic have been developed such that one package can be used across many use cases.
 
 | Method | Code  | 
 |-----------------------|---|
-| (semi-) Supervised Topic Modeling | `.fit(docs, y=y)` |
-| Topic Modeling per Class | `.topics_per_class(docs, classes)` |
-| Dynamic Topic Modeling | `.topics_over_time(docs, timestamps)` |
-| Hierarchical Topic Modeling | `.hierarchical_topics(docs)` |
-| Guided Topic Modeling | `BERTopic(seed_topic_list=seed_topic_list)` |
+| [Topic Distribution Approximation](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) | `.approximate_distribution(docs)` |
+| [Online Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/online/online.html) | `.partial_fit(doc)` |
+| [Semi-supervised Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html) | `.fit(docs, y=y)` |
+| [Supervised Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html) | `.fit(docs, y=y)` |
+| [Topic Modeling per Class](https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html) | `.topics_per_class(docs, classes)` |
+| [Dynamic Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) | `.topics_over_time(docs, timestamps)` |
+| [Hierarchical Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) | `.hierarchical_topics(docs)` |
+| [Guided Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) | `BERTopic(seed_topic_list=seed_topic_list)` |
 
 ### Visualizations
 Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation. 
