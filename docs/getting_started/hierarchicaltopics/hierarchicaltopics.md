@@ -1,20 +1,16 @@
-When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. 
-Some topics could be merged together and having an understanding of the effect will help you understand which topics should and which 
-should not be merged. 
+When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. Some topics could be merged together and having an understanding of the effect will help you understand which topics should and which should not be merged. 
 
-That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created 
-in order to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might 
-exist in your data. 
+That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created in order to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might exist in your data. 
 
-In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix 
-contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. 
-The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging 
-topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). 
-It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are availabe. 
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/hierarchicaltopics/hierarchical.svg"
+</div>
+<br>
 
-Whenever we merge two topics, we can calculate the c-TF-IDF representation of these two merged by summing their bag-of-words representation. 
-We assume that two sets of topics are merged and that all others are kept the same, regardless of their location in the hierarchy. This helps 
-us isolate the potential effect of merging sets of topics. As a result, we can see the topic representation at each level in the tree. 
+In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are availabe. 
+
+Whenever we merge two topics, we can calculate the c-TF-IDF representation of these two merged by summing their bag-of-words representation. We assume that two sets of topics are merged and that all others are kept the same, regardless of their location in the hierarchy. This helps us isolate the potential effect of merging sets of topics. As a result, we can see the topic representation at each level in the tree. 
 
 ## **Example**
 To demonstrate hierarchical topic modeling with BERTopic, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of documents. 

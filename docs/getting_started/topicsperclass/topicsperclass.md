@@ -1,12 +1,16 @@
 In some cases, you might be interested in how certain topics are represented over certain categories. Perhaps 
 there are specific groups of users for which you want to see how they talk about certain topics. 
 
-Instead of running the topic model per class, we can simply create a topic model and then extract, for each topic, 
-its representation per class. This allows you to see how certain topics, calculated over all documents, are represented 
-for certain subgroups. 
+Instead of running the topic model per class, we can simply create a topic model and then extract, for each topic, its representation per class. This allows you to see how certain topics, calculated over all documents, are represented for certain subgroups. 
 
-To do so, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of 
-documents. 
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/topicsperclass/class_modeling.svg"
+</div>
+<br>
+
+
+To do so, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of documents. 
 
 First, let's prepare the data:
 

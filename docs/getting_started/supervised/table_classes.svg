@@ -1,62 +1,62 @@
 <svg width="550" height="347" viewBox="0 0 550 347" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="550" height="34" fill="white"/>
 <line y1="35" x2="547" y2="35" stroke="#BDBDBD" stroke-width="2"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="31" y="23.5909">Topic</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="82" y="23.5909">Count&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="338" y="22.5909">Name</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="498" y="22.5909">Class</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="31" y="24.0576">Topic</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="82" y="24.0576">Count&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="338" y="23.0576">Name</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="498" y="23.0576">Class</tspan></text>
 <rect y="36" width="550" height="34" fill="white"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="57.5909">0</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.25" y="57.5909">0</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="100.791" y="58.5909">999&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="211.285" y="58.5909">0_game_hockey_team_25&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="426.916" y="59.5909">rec.sport.hockey&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="58.0576">0</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="58.0576">0</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="59.0576">999&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="215.92" y="59.0576">0_game_hockey_team_25&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="436.131" y="60.0576">rec.sport.hockey&#10;</tspan></text>
 <rect y="70" width="550" height="34" fill="#F5F5F5"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="202.207" y="91.5909">1_god_church_jesus_christ&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="101.803" y="91.5909">997&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="58.4922" y="91.5909">1</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="91.5909">1</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="210.232" y="92.0576">1_god_church_jesus_christ&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="92.0576">997&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="92.0576">1</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="92.0576">1</tspan></text>
 <rect y="104" width="550" height="34" fill="white"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="125.591">2</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.5234" y="125.591">2</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="100.791" y="126.591">996&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="229.715" y="126.591">2_bike_dod_ride_bikes&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="126.058">2</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="126.058">2</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="127.058">996&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="236.551" y="127.058">2_bike_dod_ride_bikes&#10;</tspan></text>
 <rect y="138" width="550" height="34" fill="#F5F5F5"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="207.197" y="159.591">3_baseball_game_he_year&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="100.545" y="159.591">994&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.0859" y="159.591">3</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="159.591">3</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="213.445" y="160.058">3_baseball_game_he_year&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="160.058">994&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="160.058">3</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="160.058">3</tspan></text>
 <rect y="172" width="550" height="34" fill="white"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="193.591">4</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.0176" y="193.591">4</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="103.02" y="194.591">991&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="188.645" y="194.591">4_key_encryption_db_clipper&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="194.058">4</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="194.058">4</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="195.058">991&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="197.545" y="195.058">4_key_encryption_db_clipper&#10;</tspan></text>
 <rect y="206" width="550" height="34" fill="#F5F5F5"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="223.727" y="227.591">5_car_cars_engine_ford&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="100.777" y="227.591">990</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.4824" y="227.591">5</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="227.591">5</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="229.674" y="228.058">5_car_cars_engine_ford&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="228.058">990</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="228.058">5</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="228.058">5</tspan></text>
 <rect y="240" width="550" height="34" fill="white"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="261.591">6</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.2637" y="261.591">6</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="100.777" y="262.591">990</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="142.119" y="262.591">6_medical_patients_cancer_disease&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="262.058">6</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="262.058">6</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="263.058">990</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="157.568" y="263.058">6_medical_patients_cancer_disease&#10;</tspan></text>
 <rect y="274" width="550" height="34" fill="#F5F5F5"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="174.303" y="295.591">7_window_server_widget_motif&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="101.01" y="295.591">988&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="57.002" y="295.591">7</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="295.591">7</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="181.781" y="296.058">7_window_server_widget_motif&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="296.058">988&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="296.058">7</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="296.058">7</tspan></text>
 <rect y="308" width="550" height="34" fill="white"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="329.591">8</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="56.373" y="329.591">8</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="101.01" y="330.591">988&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="198.133" y="330.591">8_space_launch_nasa_orbit&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="475.984" y="330.591">sci.space&#10;</tspan><tspan x="538" y="347.591">&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="427.49" y="296.591">comp.windows.x&#10;</tspan><tspan x="538" y="313.591">&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="486.676" y="263.591">sci.med&#10;</tspan><tspan x="538" y="280.591">&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="476.504" y="228.591">rec.autos&#10;</tspan><tspan x="538" y="245.591">&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="481.016" y="194.591">sci.crypt&#10;</tspan><tspan x="538" y="211.591">&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="419.096" y="159.591">rec.sport.baseball&#10;</tspan><tspan x="538" y="176.591">&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="432.398" y="126.591">rec.motorcycles&#10;</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" letter-spacing="0em"><tspan x="402.211" y="91.5909">soc.religion.christian&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="7" y="330.058">8</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="57.3574" y="330.058">8</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="104.072" y="331.058">988&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="207.129" y="331.058">8_space_launch_nasa_orbit&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="482.67" y="331.058">sci.space&#10;</tspan><tspan x="538" y="348.058">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="435.652" y="297.058">comp.windows.x&#10;</tspan><tspan x="538" y="314.058">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="490.982" y="264.058">sci.med&#10;</tspan><tspan x="538" y="281.058">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="481.18" y="229.058">rec.autos&#10;</tspan><tspan x="538" y="246.058">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="486.936" y="195.058">sci.crypt&#10;</tspan><tspan x="538" y="212.058">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="429.117" y="160.058">rec.sport.baseball&#10;</tspan><tspan x="538" y="177.058">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="441.463" y="127.058">rec.motorcycles&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" letter-spacing="0em"><tspan x="412.232" y="92.0576">soc.religion.christian&#10;</tspan></text>
 </svg>

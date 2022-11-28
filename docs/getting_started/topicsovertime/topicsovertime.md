@@ -5,21 +5,20 @@ topic itself remains the same, environmental awareness, the exact representation
 
 BERTopic allows for DTM by calculating the topic representation at each timestep without the need to 
 run the entire model several times. To do this, we first need to fit BERTopic as if there were no temporal 
-aspect in the data. Thus, a general topic model will be created. We use the global representation as to the main 
-topics that can be found at, most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF 
-representation. This will result in a specific topic representation at each timestep without the need to create 
-clusters from embeddings as they were already created.
+aspect in the data. Thus, a general topic model will be created. We use the global representation as to the main topics that can be found at, most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF representation. This will result in a specific topic representation at each timestep without the need to create clusters from embeddings as they were already created.
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/topicsovertime/topicsovertime.svg"
+</div>
+<br>
 
 Next, there are two main ways to further fine-tune these specific topic representations, 
 namely **globally** and **evolutionary**.
 
-A topic representation at timestep *t* can fine-tuned **globally** by averaging its c-TF-IDF representation with 
-that of the global representation. This allows each topic representation to move slightly towards the global 
-representation whilst still keeping some its specific words. 
+A topic representation at timestep *t* can fine-tuned **globally** by averaging its c-TF-IDF representation with that of the global representation. This allows each topic representation to move slightly towards the global representation whilst still keeping some its specific words. 
 
-A topic representation at timestep *t* can be fine-tuned **evolutionary** by averaging its c-TF-IDF representation 
-with that of the c-TF-IDF representation at timestep *t-1*. This is done for each topic representation allowing for 
-the representations to evolve over time. 
+A topic representation at timestep *t* can be fine-tuned **evolutionary** by averaging its c-TF-IDF representation with that of the c-TF-IDF representation at timestep *t-1*. This is done for each topic representation allowing for the representations to evolve over time. 
 
 Both fine-tuning methods are set to `True` as a default and allow for interesting representations to be created. 
    

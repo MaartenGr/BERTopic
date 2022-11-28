@@ -17,6 +17,12 @@ In BERTopic, online topic modeling can be a bit tricky as there are several step
 
 For some steps, an online variant is more important than others. Typically, in step 1 we use pre-trained language models that are in less need for continuous updates. This means that we can use an embedding model like Sentence-Transformers for extracting the embeddings and still use it in an online setting. Similarly, step 5 and 6 do not necessarily need online variants since they are built upon step 4, the tokenization. If that tokenization is by itself incremental, then so will steps 5 and 6. 
 
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/online/online.svg"
+</div>
+<br>
+
 This means that we will need online variants for steps 2 through 4. Steps 2 and 3, dimensionality reduction and clustering, can be modeled through the use of Scikit-Learn's `.partial_fit` function. In other words, it supports any algorithm that can be trained using `.partial_fit` since these algorithms can be trained incrementally. For example, incremental dimensionality reduction can be achieved using Scikit-Learn's `IncrementalPCA` and incremental clustering with `MiniBatchKMeans`.
 
 Lastly, we need to develop an online variant for step 5, tokenization. In this step, a Bag-of-words representation is created through the `CountVectorizer`. However, as new data comes in, its vocabulary will need to be updated. For that purpose, `bertopic.vectorizers.OnlineCountVectorizer` was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large in size. Most notably, the `decay` parameter is a value between 0 and 1 to weight the percentage of frequencies that the previous bag-of-words matrix should be reduced to. For example, a value of `.1` will decrease the frequencies in the bag-of-words matrix with 10% at each iteration. This will make sure that recent data has more weight than previously iterations. Similarly, `delete_min_df` will remove certain words from its vocabulary if its frequency is lower than a set value. This ties together with the `decay` parameter as some words will decay over time if not used. For more information regarding the `OnlineCountVectorizer`, please see the [vectorizers documentation](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html#onlinecountvectorizer).

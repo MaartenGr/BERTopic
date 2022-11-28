@@ -1,6 +1,13 @@
 In BERTopic, you have several options to nudge the creation of topics towards certain pre-specified topics. Here, we will be looking at semi-supervised topic modeling with BERTopic. 
 
 Semi-supervised modeling allows us to steer the dimensionality reduction of the embeddings into a space that closely follows any labels you might already have. 
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/semisupervised/semisupervised.svg"
+</div>
+<br>
+
 In other words, we use a semi-supervised UMAP instance to reduce the dimensionality of embeddings before clustering the documents 
 with HDBSCAN. 
 

@@ -1,9 +1,13 @@
 BERTopic approaches topic modeling as a cluster task and attempts to cluster semantically similar documents in order to extract common topics. A disadvantage of using such a method is that each document is assigned to a single cluster and therefore also a single topic. In practice, documents may contain a mixture of topics. This can be accounted for by splitting up the documents into sentences and feeding those to BERTopic. 
   
 Another option is to use a cluster model that can perform soft-clustering, like HDBSCAN. As BERTopic focuses on modularity, we may still want to model that mixture of topics even when we are using a hard-clustering model, like k-Means without the need to split up our documents. This is where `.approximate_distribution` comes in!
-<br><br>
-<img src="approximate_distribution.svg">
-<br><br>
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/distribution/approximate_distribution.svg"
+</div>
+<br>
+
 In order to perform this approximation, each document is split into tokens according to the provided tokenizer in the `CountVectorizer`. Then, a **sliding window** is applied on each document creating subsets of the document. For example, with a window size of 3 and stride of 1, the document: 
     
 > Solving the right problem is difficult.
