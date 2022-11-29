@@ -83,10 +83,10 @@
 <rect x="1085.43" y="238.5" width="20.8389" height="20.8389" stroke="black"/>
 <rect x="1106.66" y="238.5" width="20.8389" height="20.8389" stroke="black"/>
 <path d="M1063.29 230.707C1063.68 231.098 1064.32 231.098 1064.71 230.707L1071.07 224.343C1071.46 223.953 1071.46 223.319 1071.07 222.929C1070.68 222.538 1070.05 222.538 1069.66 222.929L1064 228.586L1058.34 222.929C1057.95 222.538 1057.32 222.538 1056.93 222.929C1056.54 223.319 1056.54 223.953 1056.93 224.343L1063.29 230.707ZM1063 172L1063 230L1065 230L1065 172L1063 172Z" fill="black"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="36.7656" y="146.939">create tokensets</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="10.332" y="258.939">topic-tokenset similarity</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="30.5156" y="146.939">create token sets</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="4.08203" y="258.939">topic-token set similarity</tspan></text>
 <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="356.066" y="379.939">document-topic distribution</tspan></text>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="179.961" y="548.939">multi-topic assignment </tspan><tspan x="238.359" y="572.939">on a token-level</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" letter-spacing="0em"><tspan x="179.961" y="548.939">multi-topic assignment </tspan><tspan x="239.375" y="572.939">on a token level</tspan></text>
 <rect x="398" y="528" width="82" height="24" fill="#F1F1F1"/>
 <rect x="478" y="528" width="82" height="24" fill="#0A539E"/>
 <rect x="560" y="528" width="82" height="24" fill="#85BCDC"/>

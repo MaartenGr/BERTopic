@@ -21,6 +21,17 @@ vectorizer_model = CountVectorizer(stop_words="english")
 topic_model = BERTopic(vectorizer_model=vectorizer_model)
 ```
 
+We can also use the `ClassTfidfTransformer` to reduce the impact of frequent words. The end result is very similar to explictly removing stopwords but this process does this automatically:
+
+```python
+from bertopic import BERTopic
+from bertopic.vectorizers import ClassTfidfTransformer
+
+ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
+topic_model = BERTopic(ctfidf_model=ctfidf_model)
+```
+
+
 ## **Diversify topic representation**
 After having calculated our top *n* words per topic there might be many words that essentially 
 mean the same thing. As a little bonus, we can use the `diversity` parameter in BERTopic to 

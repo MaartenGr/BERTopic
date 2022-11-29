@@ -22,7 +22,7 @@ Instead, we are now going to skip over the dimensionality reduction step and rep
 </div>
 <br>
 
-In other words, we can pass our labels to BERTopic and it will not only learn how to predict labels for new instances, it also transforms those labels into topics by running the c-TF-IDF representations on the set of documents within each label. This process allows us to model the topics themselves and similarly gives us the option to use everything BERTopic has to offer. 
+In other words, we can pass our labels to BERTopic and it will not only learn how to predict labels for new instances, but it also transforms those labels into topics by running the c-TF-IDF representations on the set of documents within each label. This process allows us to model the topics themselves and similarly gives us the option to use everything BERTopic has to offer. 
 
 To do so, we need to skip over the dimensionality reduction step and replace the clustering step with a classification algorithm. We can use the documents and labels from the 20 NewsGroups dataset to create topics from those 20 labels:
 
@@ -36,7 +36,7 @@ docs = data['data']
 y = data['target']
 ```
 
-Then, we make sure to create empty instances of the dimensionality reduction and clustering steps. We pass those to BERTopic in order to simply skip over them and go to the topic representation process:
+Then, we make sure to create empty instances of the dimensionality reduction and clustering steps. We pass those to BERTopic to simply skip over them and go to the topic representation process:
 
 
 ```python
@@ -73,7 +73,7 @@ Let's take a look at a few topics that we get out of training this way by runnin
 </div>
 <br>
 
-We can see a number of interesting topics appearing here. They seem to relate to the 20 classes we had as an input. Now, let's map those topics to our original classes in order to view their relationship:
+We can see several interesting topics appearing here. They seem to relate to the 20 classes we had as input. Now, let's map those topics to our original classes to view their relationship:
 
 ```python
 # Map input `y` to topics
@@ -91,7 +91,7 @@ df
 
 <br>
 
-We can see that the c-TF-IDF representations extracts the words that give a good representation of our input classes. This is all done directly from the labeling. A welcome side-effect is that we now have a classification algorithm that allows us to predict the topics of unseen data:
+We can see that the c-TF-IDF representations extract the words that give a good representation of our input classes. This is all done directly from the labeling. A welcome side-effect is that we now have a classification algorithm that allows us to predict the topics of unseen data:
 
 ```python
 >>> topic, _ = topic_model.transform("this is a document about cars")
@@ -111,7 +111,7 @@ We can see that the c-TF-IDF representations extracts the words that give a good
  Moreover, we can still perform BERTopic-specific features like dynamic topic modeling, topics per class, hierarchical topic modeling, modeling topic distributions, etc.
 
 !!! note
-    The resulting `topics` may be a different mapping from the `y` labels. In order to map `y` to `topics`, we can run the following:
+    The resulting `topics` may be a different mapping from the `y` labels. To map `y` to `topics`, we can run the following:
 
 
     ```python

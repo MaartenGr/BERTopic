@@ -84,7 +84,7 @@ frequent topic that was generated, topic 0:
 
 
 ## **Overview**
-BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
+BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
 of all methods and a short description of its purpose. 
 
 ### Common
@@ -112,7 +112,7 @@ Below, you will find an overview of common functions in BERTopic.
 
 
 ### Attributes
-After having trained your BERTopic model, a number of attributes are saved within your model. These attributes, in part, 
+After having trained your BERTopic model, several are saved within your model. These attributes, in part, 
 refer to how model information is stored on an estimator during fitting. The attributes that you see below all end in `_` and are 
 public attributes that can be used to access model information. 
 
@@ -131,8 +131,7 @@ public attributes that can be used to access model information.
 
 
 ### Variations
-There are many different use cases in which topic modeling can be used. As such, a number of 
-variations of BERTopic have been developed such that one package can be used across many use cases.
+There are many different use cases in which topic modeling can be used. As such, several variations of BERTopic have been developed such that one package can be used across many use cases.
 
 | Method | Code  | 
 |-----------------------|---|

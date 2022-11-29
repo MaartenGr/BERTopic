@@ -1,9 +1,9 @@
-After reducing the dimensionality of our input embeddings, we need to cluster them into groups of similar embeddings in order to extract our topics. 
+After reducing the dimensionality of our input embeddings, we need to cluster them into groups of similar embeddings to extract our topics. 
 This process of clustering is quite important because the more performant our clustering technique the more accurate our topic representations are.
 
 In BERTopic, we typically use HDBSCAN as it is quite capable of capturing structures with different densities. However, there is not one perfect 
-clustering model and you might want to be using something entirely different for you use case. Moreover, what if a new state-of-the-art model 
-is released tomorrow? We would like to able to use that in BERTopic, right? Since BERTopic assumes some independence among steps, we can allow for this modularity:
+clustering model and you might want to be using something entirely different for your use case. Moreover, what if a new state-of-the-art model 
+is released tomorrow? We would like to be able to use that in BERTopic, right? Since BERTopic assumes some independence among steps, we can allow for this modularity:
 
 <p align=center>
 <img src="clustering.svg">
@@ -48,12 +48,12 @@ hdbscan_model = HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selecti
 topic_model = BERTopic(hdbscan_model=hdbscan_model)
 ```
 
-Here, we can define any parameters in HDBSCAN to optimize for the best performance based on whatever validation metrics that you are using. 
+Here, we can define any parameters in HDBSCAN to optimize for the best performance based on whatever validation metrics you are using. 
 
 ## **k-Means**
 Although HDBSCAN works quite well in BERTopic and is typically advised, you might want to be using k-Means instead. 
 It allows you to select how many clusters you would like and forces every single point to be in a cluster. Therefore, no 
-outliers will be created. This has also has disadvantages. When you force every single point in a cluster, it will mean 
+outliers will be created. This also has disadvantages. When you force every single point in a cluster, it will mean 
 that the cluster is highly likely to contain noise which can hurt the topic representations. As a small tip, using 
 the `vectorizer_model=CountVectorizer(stop_words="english")` helps quite a bit to then improve the topic representation. 
 
@@ -69,7 +69,7 @@ topic_model = BERTopic(hdbscan_model=cluster_model)
 
 !!! note
     As you might have noticed, the `cluster_model` is passed to `hdbscan_model` which might be a bit confusing considering 
-    you are not passing a HDBSCAN model. For now, the name of the parameter is kept the same to adhere to the current 
+    you are not passing an HDBSCAN model. For now, the name of the parameter is kept the same to adhere to the current 
     state of the API. Changing the name could lead to deprecation issues, which I want to prevent as much as possible. 
 
 ## **Agglomerative Clustering**

@@ -1,10 +1,10 @@
-Visualizing BERTopic and its derivatives is important in understanding the model, how it works, but more importantly, where it works. 
+Visualizing BERTopic and its derivatives is important in understanding the model, how it works, and more importantly, where it works. 
 Since topic modeling can be quite a subjective field it is difficult for users to validate their models. Looking at the topics and seeing 
 if they make sense is an important factor in alleviating this issue. 
 
 ## **Visualize Topics**
 After having trained our `BERTopic` model, we can iteratively go through hundreds of topics to get a good 
-understanding of the topics that were extract. However, that takes quite some time and lacks a global representation. 
+understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
 Instead, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis). 
 
@@ -22,7 +22,7 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs) 
 ```
 
-Then, we can use call `.visualize_topics` to create a 2D representation of your topics. The resulting graph is a 
+Then, we can call `.visualize_topics` to create a 2D representation of your topics. The resulting graph is a 
 plotly interactive graph which can be converted to HTML:
 
 ```python
@@ -75,7 +75,7 @@ topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
 ## **Visualize Topic Hierarchy**
 The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
 structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how 
-they relate to one another. This might help selecting an appropriate `nr_topics` when reducing the number 
+they relate to one another. This might help to select an appropriate `nr_topics` when reducing the number 
 of topics that you have created. To visualize this hierarchy, run the following:
 
 ```python
@@ -117,7 +117,7 @@ topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
 
 
 If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations 
-help you understand the effect of merging certain topics together. Some might be logical to merge whilst others might not. Moreover, 
+help you understand the effect of merging certain topics. Some might be logical to merge whilst others might not. Moreover, 
 we can now see which sub-topics can be found within certain larger themes. 
 
 ### **Text-based topic tree**
@@ -397,7 +397,7 @@ to view, we can see better which topics could be logically merged:
 
 ## **Visualize Hierarchical Documents**
 We can extend the previous method by calculating the topic representation at different levels of the hierarchy and 
-plotting them on a 2D-plane. To do so, we first need to calculate the hierarchical topics:
+plotting them on a 2D plane. To do so, we first need to calculate the hierarchical topics:
 
 ```python
 from sklearn.datasets import fetch_20newsgroups
@@ -431,7 +431,7 @@ topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_
 !!! note
     The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the 
     option to hover over the individual points and see the content of the documents. This makes the resulting visualization 
-    smaller and fit into your RAM. However, it might be interesting to set `hide_document_hover=False` in order to hover 
+    smaller and fit into your RAM. However, it might be interesting to set `hide_document_hover=False` to hover 
     over the points and see the content of the documents. 
 
 ## **Visualize Terms**
@@ -567,25 +567,37 @@ topic_model.visualize_topics_per_class(topics_per_class)
 <iframe src="topics_per_class.html" style="width:1400px; height: 1000px; border: 0px;""></iframe>
 
 
-## **Visualize Probablities**
-We can also calculate the probabilities of topics found in a document. In order to do so, we have to 
-set `calculate_probabilities` to True as calculating them can be quite computationally expensive. 
-Then, we use the variable `probabilities` that is returned from `transform()` or `fit_transform()` 
-to understand how confident BERTopic is that certain topics can be found in a document:
+## **Visualize Probablities or Distribution**
+
+We can generate the topic-document probability matrix by simply setting `calculate_probabilities=True` if a HDBSCAN model is used:
 
 ```python
 from bertopic import BERTopic
-from sklearn.datasets import fetch_20newsgroups
-
-docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 topic_model = BERTopic(calculate_probabilities=True)
-topics, probabilities = topic_model.fit_transform(docs)
+topics, probs = topic_model.fit_transform(docs) 
 ```
 
-To visualize the distributions, run the following:
+The resulting `probs` variable contains the soft-clustering as done through HDBSCAN. 
+
+If a non-HDBSCAN model is used, we can estimate the topic distributions after training our model:
 
 ```python
-topic_model.visualize_distribution(probabilities[0])
+from bertopic import BERTopic
+
+topic_model = BERTopic()
+topics, _ = topic_model.fit_transform(docs) 
+topic_distr, _ = topic_model.approximate_distribution(docs, min_similarity=0)
+```
+
+Then, we either pass the `probs` or `topic_distr` variable to `.visualize_distribution` to visualize either the probability distributions or the topic distributions:
+
+
+```python
+# To visualize the probabilities of topic assignment
+topic_model.visualize_distribution(probs[0])
+
+# To visualize the topic distributions in a document
+topic_model.visualize_distribution(topic_distr[0])
 ```
 
 <iframe src="probabilities.html" style="width:1000px; height: 500px; border: 0px;""></iframe>

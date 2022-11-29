@@ -1,4 +1,4 @@
-In BERTopic, you have several options to nudge the creation of topics towards certain pre-specified topics. Here, we will be looking at semi-supervised topic modeling with BERTopic. 
+In BERTopic, you have several options to nudge the creation of topics toward certain pre-specified topics. Here, we will be looking at semi-supervised topic modeling with BERTopic. 
 
 Semi-supervised modeling allows us to steer the dimensionality reduction of the embeddings into a space that closely follows any labels you might already have. 
 
@@ -54,7 +54,7 @@ Each document can be put into one of the following categories:
  'talk.religion.misc'] 
 ```
 
-To perform this semi-supervised approach, we can take in some pre-defined topics and simply pass those to the `y` parameter when fitting BERTopic. These labels can be pre-defined topics or simply documents that you feel belong together regardless of their content. BERTopic will nudge the creation of topics towards these categories 
+To perform this semi-supervised approach, we can take in some pre-defined topics and simply pass those to the `y` parameter when fitting BERTopic. These labels can be pre-defined topics or simply documents that you feel belong together regardless of their content. BERTopic will nudge the creation of topics toward these categories 
 using the pre-defined labels. 
 
 To perform supervised topic modeling, we simply use all categories:

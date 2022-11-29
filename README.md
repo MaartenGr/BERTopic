@@ -115,7 +115,7 @@ topic_model.visualize_topics()
 <img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
 
 We can create an overview of the most frequent topics in a way that they are easily interpretable. 
-Horizontal barcharts typically convey information rather well and allow for an intuitive representation 
+Horizontal bar charts typically convey information rather well and allow for an intuitive representation 
 of the topics: 
 
 ```python
@@ -129,7 +129,7 @@ Find all possible visualizations with interactive examples in the documentation
 [here](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html). 
 
 ## Embedding Models
-BERTopic supports many embedding models that can be used to embed the documents and words:
+BERTopic supports many embedding models that can be used to embed documents and words:
 * Sentence-Transformers
 * 🤗 Transformers
 * Flair
@@ -137,7 +137,7 @@ BERTopic supports many embedding models that can be used to embed the documents 
 * Gensim
 * USE
 
-[**Sentence-Transformers**](https://github.com/UKPLab/sentence-transformers) is typically used as it has shown great results embedding documents 
+[**Sentence-Transformers**](https://github.com/UKPLab/sentence-transformers) is typically used as it has shown great results in embedding documents 
 meant for semantic similarity. Simply select any from their documentation 
 [here](https://www.sbert.net/docs/pretrained_models.html) and pass it to BERTopic:
 
@@ -158,7 +158,7 @@ Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/emb
 for a full overview of all supported embedding models. 
 
 ## Overview
-BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
+BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
 of all methods and a short description of its purpose. 
 
 ### Common
@@ -186,7 +186,7 @@ Below, you will find an overview of common functions in BERTopic.
 
 
 ### Attributes
-After having trained your BERTopic model, a number of attributes are saved within your model. These attributes, in part, 
+After having trained your BERTopic model, several attributes are saved within your model. These attributes, in part, 
 refer to how model information is stored on an estimator during fitting. The attributes that you see below all end in `_` and are 
 public attributes that can be used to access model information. 
 
@@ -205,8 +205,7 @@ public attributes that can be used to access model information.
 
 
 ### Variations
-There are many different use cases in which topic modeling can be used. As such, a number of 
-variations of BERTopic have been developed such that one package can be used across many use cases.
+There are many different use cases in which topic modeling can be used. As such, several variations of BERTopic have been developed such that one package can be used across many use cases.
 
 | Method | Code  | 
 |-----------------------|---|

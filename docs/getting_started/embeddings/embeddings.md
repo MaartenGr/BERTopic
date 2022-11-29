@@ -1,8 +1,8 @@
 # Embedding Models
-BERTopic starts with transforming our input documents into numerical representations. Althought there are a number of ways this can be achieved, we typically use sentence-transformers (`"all-MiniLM-L6-v2"`) as it is quite capable of capturing the semantic similarity between documents. 
+BERTopic starts with transforming our input documents into numerical representations. Although there are many ways this can be achieved, we typically use sentence-transformers (`"all-MiniLM-L6-v2"`) as it is quite capable of capturing the semantic similarity between documents. 
 
 However, there is not one perfect 
-embedding model and you might want to be using something entirely different for you use case. Since BERTopic assumes some independence among steps, we can allow for this modularity:
+embedding model and you might want to be using something entirely different for your use case. Since BERTopic assumes some independence among steps, we can allow for this modularity:
 
 <p align=center>
 <img src="embeddings.svg">
@@ -10,7 +10,7 @@ embedding model and you might want to be using something entirely different for 
 
 This modularity allows us not only to choose any embedding model to convert our documents into numerical representations, we can use essentially any data to perform our clustering. 
 When new state-of-the-art pre-trained embedding models are released, BERTopic will be able to use them. As a result, BERTopic grows with any new models being released.
-Out-of-the-box, BERTopic supports a number of embedding techniques. In this section, we will go through several of them and how they can be implemented. 
+Out of the box, BERTopic supports several embedding techniques. In this section, we will go through several of them and how they can be implemented. 
 
 ### **Sentence Transformers**
 You can select any model from sentence-transformers [here](https://www.sbert.net/docs/pretrained_models.html) 
@@ -31,7 +31,7 @@ topic_model = BERTopic(embedding_model=sentence_model)
 ```
 
 !!! tip "Tip!"
-    This embedding back-end was put here first for a reason, sentence-transformers works amazing out-of-the-box! Playing around with different models can give you great results. Also, make sure to frequently visit [this](https://www.sbert.net/docs/pretrained_models.html) page as new models are often released. 
+    This embedding back-end was put here first for a reason, sentence-transformers works amazing out of the box! Playing around with different models can give you great results. Also, make sure to frequently visit [this](https://www.sbert.net/docs/pretrained_models.html) page as new models are often released. 
 
 ### 🤗 Hugging Face Transformers
 To use a Hugging Face transformers model, load in a pipeline and point 
@@ -45,8 +45,7 @@ topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
 !!! tip "Tip!"
-    These transformers also work quite well using `sentence-transformers` which has a number of 
-    optimizations tricks that make using it a bit faster. 
+    These transformers also work quite well using `sentence-transformers` which has great optimizations tricks that make using it a bit faster. 
 
 ### **Flair**
 [Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that 
@@ -63,7 +62,7 @@ You can select any 🤗 transformers model [here](https://huggingface.co/models)
 
 Moreover, you can also use Flair to use word embeddings and pool them to create document embeddings. 
 Under the hood, Flair simply averages all word embeddings in a document. Then, we can easily 
-pass it to BERTopic in order to use those word embeddings as document embeddings: 
+pass it to BERTopic to use those word embeddings as document embeddings: 
 
 ```python
 from flair.embeddings import WordEmbeddings, DocumentPoolEmbeddings
@@ -147,7 +146,7 @@ topic_model = BERTopic(embedding_model=ft)
 Scikit-Learn is a framework for more than just machine learning. 
 It offers many preprocessing tools, some of which can be used to create representations 
 for text. Many of these tools are relatively lightweight and do not require a GPU. 
-While the representations may be less expressive as many BERT models, the fact that 
+While the representations may be less expressive than many BERT models, the fact that 
 it runs much faster can make it a relevant candidate to consider. 
 
 If you have a scikit-learn compatible pipeline that you'd like to use to embed
@@ -181,11 +180,11 @@ topic_model = BERTopic(embedding_model=sklearn_embedder)
     support the `.partial_fit()`-API. If you have a pipeline that theoretically should
     be able to support online learning then you might want to explore
     the [scikit-partial](https://github.com/koaning/scikit-partial) project. 
-    Moreover, since this backend does not generate representations on a word-level, 
+    Moreover, since this backend does not generate representations on a word level, 
     it does not support the `diversity` parameter.
 
 ### **Word + Document Embeddings**
-You might want to be using different language models for creating document- and word-embeddings. For example, 
+You might want to be using different language models for creating document and word embeddings. For example, 
 while SentenceTransformers might be great in embedding sentences and documents, you might prefer to use 
 FastText to create the word embeddings.
 
@@ -237,7 +236,7 @@ topic_model = BERTopic(embedding_model=custom_embedder)
 
 ### **Custom Embeddings**
 The base models in BERTopic are BERT-based models that work well with document similarity tasks. Your documents, 
-however, might be too specific for a general pre-trained model to be used. Fortunately, you can use embedding 
+however, might be too specific for a general pre-trained model to be used. Fortunately, you can use the embedding 
 model in BERTopic to create document features.   
 
 You only need to prepare the document embeddings yourself and pass them through `fit_transform` of BERTopic:
@@ -259,7 +258,7 @@ As you can see above, we used a SentenceTransformer model to create the embeddin
 `🤗 transformers`, `Doc2Vec`, or any other embedding method. 
 
 #### **TF-IDF**
-As mentioned above, any embedding technique can be used. However, when running umap, the typical distance metric is 
+As mentioned above, any embedding technique can be used. However, when running UMAP, the typical distance metric is 
 `cosine` which does not work quite well for a TF-IDF matrix. Instead, BERTopic will recognize that a sparse matrix 
 is passed and use `hellinger` instead which works quite well for the similarity between probability distributions. 
 

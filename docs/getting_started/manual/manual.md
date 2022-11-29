@@ -22,7 +22,7 @@ docs = data['data']
 y = data['target']
 ```
 
-Then, we make sure to create empty instances of the dimensionality reduction and clustering steps. We pass those to BERTopic in order to simply skip over them and go to the topic representation process:
+Then, we make sure to create empty instances of the dimensionality reduction and clustering steps. We pass those to BERTopic to simply skip over them and go to the topic representation process:
 
 
 ```python
@@ -56,7 +56,7 @@ Let's take a look at a few topics that we get out of training this way by runnin
 
 <br>
 
-We can see a number of interesting topics appearing here. They seem to relate to the 20 classes we had as an input. Now, let's map those topics to our original classes in order to view their relationship:
+We can see several interesting topics appearing here. They seem to relate to the 20 classes we had as input. Now, let's map those topics to our original classes to view their relationship:
 
 ```python
 # Map input `y` to topics
@@ -76,12 +76,12 @@ df
 <br>
 
 
-We can clearly see that that the c-TF-IDF representations nicely extracts the words that give a nice representation of our input classes. This is all done without actually embedding and clustering the data.
+We can see that the c-TF-IDF representations nicely extract the words that give a nice representation of our input classes. This is all done without actually embedding and clustering the data.
 
 As a result, the entire "training" process only takes a couple of seconds. Moreover, we can still perform BERTopic-specific features like dynamic topic modeling, topics per class, hierarchical topic modeling, modeling topic distributions, etc.
 
 !!! note
-    The resulting `topics` may be a different mapping from the `y` labels. In order to map `y` to `topics`, we can run the following:
+    The resulting `topics` may be a different mapping from the `y` labels. To map `y` to `topics`, we can run the following:
 
 
     ```python

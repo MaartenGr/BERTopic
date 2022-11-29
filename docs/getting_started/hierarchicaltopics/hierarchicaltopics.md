@@ -1,6 +1,6 @@
-When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. Some topics could be merged together and having an understanding of the effect will help you understand which topics should and which should not be merged. 
+When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. Some topics could be merged and having an understanding of the effect will help you understand which topics should and which should not be merged. 
 
-That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created in order to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might exist in your data. 
+That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might exist in your data. 
 
 <br>
 <div class="svg_image">
@@ -8,7 +8,7 @@ That is where hierarchical topic modeling comes in. It tries to model the possib
 </div>
 <br>
 
-In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are availabe. 
+In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are available. 
 
 Whenever we merge two topics, we can calculate the c-TF-IDF representation of these two merged by summing their bag-of-words representation. We assume that two sets of topics are merged and that all others are kept the same, regardless of their location in the hierarchy. This helps us isolate the potential effect of merging sets of topics. As a result, we can see the topic representation at each level in the tree. 
 
@@ -64,7 +64,7 @@ topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
 <iframe src="hierarchical_topics.html" style="width:1000px; height: 2150px; border: 0px;""></iframe>
 
 If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations 
-help you understand the effect of merging certain topics together. Some might be logical to merge whilst others might not. Moreover, 
+help you understand the effect of merging certain topics. Some might be logical to merge whilst others might not. Moreover, 
 we can now see which sub-topics can be found within certain larger themes. 
 
 Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can 

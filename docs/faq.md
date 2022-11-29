@@ -93,6 +93,32 @@ cluster_model = KMeans(n_clusters=50)
 topic_model = BERTopic(hdbscan_model=cluster_model)
 ```
 
+
+## **How do I remove stop words?**
+At times, stop words might end up in our topic representations. This is something we typically want to avoid as they contribute little to the interpretation of the topics. However, removing stop words as a preprocessing step is not advised as the transformer-based embedding models that we use need the full context to create accurate embeddings. 
+
+Instead, we can use the `CountVectorizer` to preprocess our documents **after** having generated embeddings and clustered 
+our documents. I have found almost no disadvantages to using the `CountVectorizer` to remove stop words and 
+it is something I would strongly advise to try out:
+
+```python
+from bertopic import BERTopic
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer_model = CountVectorizer(stop_words="english")
+topic_model = BERTopic(vectorizer_model=vectorizer_model)
+```
+
+We can also use the `ClassTfidfTransformer` to reduce the impact of frequent words. The result is very similar to explicitly removing stop words but this process does this automatically:
+
+```python
+from bertopic import BERTopic
+from bertopic.vectorizers import ClassTfidfTransformer
+
+ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
+topic_model = BERTopic(ctfidf_model=ctfidf_model)
+```
+
 ## **How can I speed up BERTopic?**
 You can speed up BERTopic by either generating your embeddings beforehand or by 
 setting `calculate_probabilities` to False. Calculating the probabilities is quite expensive and can significantly increase the computation time. Thus, only use it if you do not mind waiting a bit before the model is done running or if you have less than a couple of hundred thousand documents. 
@@ -155,27 +181,27 @@ the minimum size of topics, then you are much more likely to increase the number
 You could also decrease the `n_neighbors` parameter used in `UMAP` if this does not work. 
 
 * Third, although this does not happen very often, there simply aren't that many topics to be found 
-in your documents. You can often see this when you have many `-1` topics, which is actually not a topic 
+in your documents. You can often see this when you have many `-1` topics, which is not a topic 
 but a category of outliers.  
 
 ## **I have too many topics, how do I decrease them?**  
-If you have a large dataset, then it is possible to generate thousands of topics. Especially with large datasets, there is a good chance they actually contain many small topics. In practice, you might want a few hundred topics at most in order to interpret them nicely. 
+If you have a large dataset, then it is possible to generate thousands of topics. Especially with large datasets, there is a good chance they contain many small topics. In practice, you might want a few hundred topics at most to interpret them nicely. 
 
 There are a few ways of increasing the number of generated topics: 
 
-* First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) to make sure that those small clusters will not be generated. This is an HDBSCAN parameter that specifies minimum number of documents needed in a cluster. More documents in a cluster mean fewer topics will be generated. 
+* First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) to make sure that those small clusters will not be generated. This is an HDBSCAN parameter that specifies the minimum number of documents needed in a cluster. More documents in a cluster mean fewer topics will be generated. 
 
-* Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). This also prevents those micro clusters to be generated as it will need quite a number of neighboring documents to create a cluster. 
+* Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). This also prevents those micro clusters to be generated as it will need many neighboring documents to create a cluster. 
 
 * Third, we can set `nr_topics` to a value that seems logical to the user. Do note that topics are forced 
-to merge together which might result in a lower quality of topics. In practice, I would advise using 
-`nr_topic="auto"` as that will merge topics together that are very similar. Dissimilar topics will 
+to merge which might result in a lower quality of topics. In practice, I would advise using 
+`nr_topic="auto"` as that will merge topics that are very similar. Dissimilar topics will 
 therefore remain separated. 
 
 ## **How do I calculate the probabilities of all topics in a document?**
 Although it is possible to calculate all the probabilities, the process of doing so is quite computationally 
 inefficient and might significantly increase the computation time. To prevent this, the probabilities are 
-not calculated as a default. In order to calculate, you will have to set `calculate_probabilities` to True:
+not calculated as a default. To calculate them, you will have to set `calculate_probabilities` to True:
 
 ```python
 from bertopic import BERTopic
@@ -184,7 +210,7 @@ topics, probs = topic_model.fit_transform(docs)
 ```  
 
 !!! note
-    The `calculate_probabilties` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
+    The `calculate_probabilties` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`.approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
  
 ## **Numpy gives me an error when running BERTopic**
 With the release of Numpy 1.20.0, there have been significant issues with using that version (and previous ones) due to compilation issues and pypi.   
@@ -241,8 +267,7 @@ topic_model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model)
 topics, probs = topic_model.fit_transform(docs)
 ```
 
-Depending on the embeddings you are using, you might want to normalize them first in order to 
-force a cosine-related distance metric in UMAP:
+Depending on the embeddings you are using, you might want to normalize them first to force a cosine-related distance metric in UMAP:
 
 ```python
 from cuml.preprocessing import normalize
@@ -251,7 +276,7 @@ embeddings = normalize(embeddings)
 
 ## **How can I use BERTopic with Chinese documents?**  
 Currently, CountVectorizer tokenizes text by splitting whitespace which does not work for Chinese. 
-In order to get it to work, you will have to create a custom `CountVectorizer` with `jieba`:
+To get it to work, you will have to create a custom `CountVectorizer` with `jieba`:
 
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
@@ -283,7 +308,7 @@ issue can be found [here](https://github.com/lmcinnes/umap/issues/631).
 
 ## **Should I preprocess the data?**
 No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
-are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
+are important in understanding the general topic of the document. Although this holds in 99% of cases, if you 
 have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
 typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
 topic modeling to HTML-code to extract topics of code, then it becomes important.

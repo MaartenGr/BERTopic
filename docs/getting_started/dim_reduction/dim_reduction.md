@@ -1,8 +1,7 @@
-An important aspect of BERTopic is dimensionality reduction of the input embeddings. As embeddings are often high in dimensionality, clustering becomes difficult due 
-to the curse of dimensionality. A solution is to reduce the dimensionality into 
+An important aspect of BERTopic is the dimensionality reduction of the input embeddings. As embeddings are often high in dimensionality, clustering becomes difficult due to the curse of dimensionality. 
 
 A solution is to reduce the dimensionality of the embeddings to a workable dimensional space (e.g., 5) for clustering algorithms to work with. 
-UMAP is used as a default in BERTopic since it is able to capture both the local and global high-dimensional space in lower dimensions. 
+UMAP is used as a default in BERTopic since it can capture both the local and global high-dimensional space in lower dimensions. 
 However, there are other solutions out there, such as PCA that users might be interested in trying out. Since BERTopic allows assumes some independency between steps, we can 
 use any other dimensionality reduction algorithm. The image below illustrates this modularity:
 
@@ -46,11 +45,11 @@ umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine')
 topic_model = BERTopic(umap_model=umap_model)
 ```
 
-Here, we can define any parameters in UMAP to optimize for the best performance based on whatever validation metrics that you are using. 
+Here, we can define any parameters in UMAP to optimize for the best performance based on whatever validation metrics you are using. 
 
 ## **PCA**
-Although UMAP works quite well in BERTopic and is typically advised, you might want to be using PCA instead. It can be faster to train and to perform
-inference with. To use PCA, we can simply import it from `sklearn` and pass it to the `umap_model` parameter:
+Although UMAP works quite well in BERTopic and is typically advised, you might want to be using PCA instead. It can be faster to train and perform
+inference. To use PCA, we can simply import it from `sklearn` and pass it to the `umap_model` parameter:
 
 
 ```python
