@@ -134,7 +134,8 @@ class BERTopic:
                           NOTE: This param will not be used if you pass in your own
                           CountVectorizer.
             min_topic_size: The minimum size of the topic. Increasing this value will lead
-                            to a lower number of clusters/topics.
+                            to a lower number of clusters/topics. 
+                            NOTE: This param will not be used if you are not using HDBSCAN.
             nr_topics: Specifying the number of topics will reduce the initial
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
@@ -179,6 +180,7 @@ class BERTopic:
         # Topic-based parameters
         if top_n_words > 30:
             raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
+
         self.top_n_words = top_n_words
         self.min_topic_size = min_topic_size
         self.nr_topics = nr_topics
@@ -2716,6 +2718,12 @@ class BERTopic:
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
         """
+        smallest_cluster_size = min(self.topic_sizes_.items(), key=lambda x: x[1])
+        if smallest_cluster_size < 3:
+            top_n_representative_docs = smallest_cluster_size
+        else:
+            top_n_representative_docs = 3
+
         if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
             # Prepare the condensed tree and luf clusters beneath a given cluster
             condensed_tree = self.hdbscan_model.condensed_tree_
@@ -2735,7 +2743,7 @@ class BERTopic:
                         points = raw_tree['child'][(raw_tree['parent'] == leaf) & (raw_tree['lambda_val'] == max_lambda)]
                         result = np.hstack((result, points))
 
-                    representative_docs[topic] = list(np.random.choice(result, 3, replace=False).astype(int))
+                    representative_docs[topic] = list(np.random.choice(result, top_n_representative_docs, replace=False).astype(int))
 
             # Convert indices to documents
             self.representative_docs_ = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
@@ -2753,7 +2761,8 @@ class BERTopic:
                 sim_matrix = cosine_similarity(ctfidf, self.c_tf_idf_[topic + self._outliers])
 
                 # Extract top 3 most representative documents
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -3)[-3:]
+                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], 
+                                          -top_n_representative_docs)[-top_n_representative_docs:]
                 self.representative_docs_[topic] = [selected_docs[index] for index in indices]
 
     def _map_representative_docs(self, original_topics: bool = False):
