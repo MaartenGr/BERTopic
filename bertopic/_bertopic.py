@@ -2718,7 +2718,7 @@ class BERTopic:
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
         """
-        smallest_cluster_size = min(self.topic_sizes_.items(), key=lambda x: x[1])
+        smallest_cluster_size = min(self.topic_sizes_.items(), key=lambda x: x[1])[1]
         if smallest_cluster_size < 3:
             top_n_representative_docs = smallest_cluster_size
         else:
