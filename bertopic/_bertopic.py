@@ -18,6 +18,7 @@ from tqdm import tqdm
 from packaging import version
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
+from scipy.spatial.distance import squareform
 from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
@@ -860,6 +861,12 @@ class BERTopic:
         # Calculate linkage
         embeddings = self.c_tf_idf_[self._outliers:]
         X = distance_function(embeddings)
+
+        # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal 
+        np.fill_diagonal(X, 0)
+        X = squareform(X)
+
+        # Use the 1-D condensed distance matrix as an input instead of the raw distance matrix
         Z = linkage_function(X)
 
         # Calculate basic bag-of-words to be iteratively merged later

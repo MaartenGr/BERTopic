@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Callable, List
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
+from scipy.spatial.distance import squareform
 from sklearn.metrics.pairwise import cosine_similarity
 
 import plotly.graph_objects as go
@@ -225,8 +226,14 @@ def _get_annotations(topic_model,
     """
     df = hierarchical_topics.loc[hierarchical_topics.Parent_Name != "Top", :]
 
-    # Calculate linkage
+    # Calculate distance
     X = distance_function(embeddings)
+
+    # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal 
+    np.fill_diagonal(X, 0)
+    X = squareform(X)
+
+    # Calculate linkage and generate dendrogram
     Z = linkage_function(X)
     P = sch.dendrogram(Z, orientation=orientation, no_plot=True)
 
