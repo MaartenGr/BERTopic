@@ -591,7 +591,6 @@ topic_distr, _ = topic_model.approximate_distribution(docs, min_similarity=0)
 
 Then, we either pass the `probs` or `topic_distr` variable to `.visualize_distribution` to visualize either the probability distributions or the topic distributions:
 
-
 ```python
 # To visualize the probabilities of topic assignment
 topic_model.visualize_distribution(probs[0])

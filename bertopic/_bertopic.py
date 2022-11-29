@@ -858,7 +858,7 @@ class BERTopic:
         if linkage_function is None:
             linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
 
-        # Calculate linkage
+        # Calculate distance
         embeddings = self.c_tf_idf_[self._outliers:]
         X = distance_function(embeddings)
 
