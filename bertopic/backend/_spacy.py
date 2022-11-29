@@ -83,17 +83,21 @@ class SpacyBackend(BaseEmbedder):
                 except:
                     embedding = self.embedding_model("An empty document")._.trf_data.tensors[-1][0].tolist()
                 embeddings.append(embedding)
-            embeddings = np.array(embeddings)
 
         # Extract embeddings from a general spacy model
         else:
             embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
                 try:
-                    vector = self.embedding_model(doc).vector
+                    embedding = self.embedding_model(doc).vector
                 except ValueError:
-                    vector = self.embedding_model("An empty document").vector
-                embeddings.append(vector)
+                    embedding = self.embedding_model("An empty document").vector
+                embeddings.append(embedding)
+
+        # Convert to numpy arrays depending on whether cupy was used or not
+        if isinstance(embedding, np.ndarray):
             embeddings = np.array(embeddings)
+        else:
+            embeddings = np.array([embedding.get() for embedding in embeddings])
 
         return embeddings
