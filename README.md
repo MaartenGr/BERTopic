@@ -15,13 +15,14 @@ allowing for easily interpretable topics whilst keeping important words in the t
 
 BERTopic supports 
 [**guided**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html), 
-(semi-) [**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
+[**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
+[**semi-supervised**](https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html), 
+[**manual**](https://maartengr.github.io/BERTopic/getting_started/manual/manual.html), 
 [**hierarchical**](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html), 
 [**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html), and 
 [**online**](https://maartengr.github.io/BERTopic/getting_started/online/online.html) topic modeling. It even supports visualizations similar to LDAvis!
 
-Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99) 
-and [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794). 
+Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99), [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4) and [here](https://towardsdatascience.com/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
 ## Installation
 
@@ -31,8 +32,7 @@ Installation, with sentence-transformers, can be done using [pypi](https://pypi.
 pip install bertopic
 ```
 
-You may want to install more depending on the transformers and language backends that you will be using. 
-The possible installations are: 
+If you want to install BERTopic with other embedding models, you can choose one of the following:
 
 ```bash
 pip install bertopic[flair]
@@ -82,8 +82,8 @@ Topic	Count	Name
 3	381	22_key_encryption_keys_encrypted
 ```
 
--1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
-frequent topic that was generated, topic 0:
+The `-1` topic refers to all outlier documents and are typically ignored. Next, let's take a look at the most 
+frequent topic that was generated:
 
 ```python
 >>> topic_model.get_topic(0)
@@ -100,7 +100,9 @@ frequent topic that was generated, topic 0:
  ('pc', 0.003047105930670237)]
 ```  
 
-**NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
+> **Note**
+>
+> Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
 ## Visualize Topics
 After having trained our BERTopic model, we can iteratively go through hundreds of topics to get a good 
@@ -114,48 +116,16 @@ topic_model.visualize_topics()
 
 <img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
 
-We can create an overview of the most frequent topics in a way that they are easily interpretable. 
-Horizontal bar charts typically convey information rather well and allow for an intuitive representation 
-of the topics: 
-
-```python
-topic_model.visualize_barchart()
-``` 
-
-<img src="images/topics.png" width="70%" height="70%" align="center" />
-
-
 Find all possible visualizations with interactive examples in the documentation 
 [here](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html). 
 
-## Embedding Models
-BERTopic supports many embedding models that can be used to embed documents and words:
-* Sentence-Transformers
-* 🤗 Transformers
-* Flair
-* Spacy
-* Gensim
-* USE
 
-[**Sentence-Transformers**](https://github.com/UKPLab/sentence-transformers) is typically used as it has shown great results in embedding documents 
-meant for semantic similarity. Simply select any from their documentation 
-[here](https://www.sbert.net/docs/pretrained_models.html) and pass it to BERTopic:
+## Modularity
+By default, the main steps for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, BERTopic assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic essentially allows you to build your own topic model:
 
-```python
-topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2")
-```
+<img src="images/modularity.svg"/>
 
-Similarly, you can choose any [**🤗 Transformers**](https://huggingface.co/models) model and pass it to BERTopic:
-
-```python
-from transformers.pipelines import pipeline
-
-embedding_model = pipeline("feature-extraction", model="distilbert-base-cased")
-topic_model = BERTopic(embedding_model=embedding_model)
-```
-
-Click [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) 
-for a full overview of all supported embedding models. 
+You can swap out any of these models or even remove them entirely. Starting with the embedding step, you can find out how to do this [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) and more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
 ## Overview
 BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 

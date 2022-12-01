@@ -33,6 +33,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from bertopic import plotting
 from bertopic._mmr import mmr
 from bertopic.vectorizers import ClassTfidfTransformer
+from bertopic.backend import BaseEmbedder
 from bertopic.backend._utils import select_backend
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
@@ -2806,7 +2807,7 @@ class BERTopic:
         a sentence-transformer model to be used or there are custom embeddings but it is allowed
         to use a different multi-lingual sentence-transformer model
         """
-        if self.embedding_model is not None:
+        if self.embedding_model is not None and type(self.embedding_model) is not BaseEmbedder:
             topic_list = list(self.topic_representations_.keys())
             topic_list.sort()
             n = self.top_n_words

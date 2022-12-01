@@ -93,3 +93,32 @@ from cuml.manifold import UMAP
 umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
 topic_model = BERTopic(umap_model=umap_model)
 ```
+
+## **Skip dimensionality reduction**
+Although BERTopic applies dimensionality reduction as a default in its pipeline, this is a step that you might want to skip. We generate an "empty" model that simply returns the data pass it to: 
+
+```python
+from bertopic import BERTopic
+from bertopic.dimensionality import BaseDimensionalityReduction
+
+# Fit BERTopic without actually performing any dimensionality reduction
+empty_dimensionality_model = BaseDimensionalityReduction()
+topic_model = BERTopic(umap_model=empty_dimensionality_model)
+```
+
+In other words, we go from this pipeline:
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/dim_reduction/default_pipeline.svg"
+</div>
+<br>
+
+To the following pipeline:
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/dim_reduction/no_dimensionality.svg"
+</div>
+
+<br>

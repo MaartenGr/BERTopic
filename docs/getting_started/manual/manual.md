@@ -27,24 +27,25 @@ Then, we make sure to create empty instances of the dimensionality reduction and
 
 ```python
 from bertopic import BERTopic
+from bertopic.backend import BaseEmbedder
 from bertopic.cluster import BaseCluster
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.dimensionality import BaseDimensionalityReduction
 
-# Prepare our empty sub-models, empty embeddings,
-# and reduce frequent words while we are at it.
+# Prepare our empty sub-models and reduce frequent words while we are at it.
+empty_embedding_model = BaseEmbedder()
 empty_dimensionality_model = BaseDimensionalityReduction()
 empty_cluster_model = BaseCluster()
-empty_embeddings = np.zeros((len(docs), 1))
 ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
 
 # Fit BERTopic without actually performing any clustering
 topic_model= BERTopic(
-        hdbscan_model=empty_cluster_model,
+        embedding_model=empty_embedding_model,
         umap_model=empty_dimensionality_model,
+        hdbscan_model=empty_cluster_model,
         ctfidf_model=ctfidf_model
 )
-topics, probs = topic_model.fit_transform(docs, empty_embeddings, y=y)
+topics, probs = topic_model.fit_transform(docs, y=y)
 ```
 
 Let's take a look at a few topics that we get out of training this way by running `topic_model.get_topic_info()`:
@@ -53,7 +54,6 @@ Let's take a look at a few topics that we get out of training this way by runnin
 <div class="svg_image">
 --8<-- "docs/getting_started/manual/table.svg"
 </div>
-
 <br>
 
 We can see several interesting topics appearing here. They seem to relate to the 20 classes we had as input. Now, let's map those topics to our original classes to view their relationship:
@@ -68,13 +68,12 @@ df = topic_model.get_topic_info()
 df["Class"] = df.Topic.map(mappings)
 df
 ```
+
 <br>
 <div class="svg_image">
 --8<-- "docs/getting_started/manual/table_classes.svg"
 </div>
-
 <br>
-
 
 We can see that the c-TF-IDF representations nicely extract the words that give a nice representation of our input classes. This is all done without actually embedding and clustering the data.
 
