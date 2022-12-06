@@ -94,6 +94,20 @@ umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
 topic_model = BERTopic(umap_model=umap_model)
 ```
 
+!!! note
+    If you want to install cuML together with BERTopic using Google Colab, you can run the following code:
+
+    ```bash
+    !pip install bertopic
+    !pip install cudf-cu11 dask-cudf-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip install cuml-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip install cugraph-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip uninstall cupy-cuda115 -y
+    !pip uninstall cupy-cuda11x -y
+    !pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
+    ```
+
+
 ## **Skip dimensionality reduction**
 Although BERTopic applies dimensionality reduction as a default in its pipeline, this is a step that you might want to skip. We generate an "empty" model that simply returns the data pass it to: 
 

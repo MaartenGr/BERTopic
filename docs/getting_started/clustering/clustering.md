@@ -108,3 +108,16 @@ The great thing about using cuML's HDBSCAN implementation is that it supports ma
 !!! note
     As of the v0.13 release, it is not yet possible to calculate the topic-document probability matrix for unseen data (i.e., `.transform`) using cuML's HDBSCAN. 
     However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., `.fit` and `.fit_transform`).
+
+!!! note
+    If you want to install cuML together with BERTopic using Google Colab, you can run the following code:
+
+    ```bash
+    !pip install bertopic
+    !pip install cudf-cu11 dask-cudf-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip install cuml-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip install cugraph-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip uninstall cupy-cuda115 -y
+    !pip uninstall cupy-cuda11x -y
+    !pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
+    ```
