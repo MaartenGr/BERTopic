@@ -1,4 +1,4 @@
-BERTopic uses HDSCAN for clustering the data and it cannot specify the number of clusters you would want. To a certain extent, 
+BERTopic uses HDBSCAN for clustering the data and it cannot specify the number of clusters you would want. To a certain extent, 
 this is an advantage, as we can trust HDBSCAN to be better at finding the number of clusters than we are.
 Instead, we can try to reduce the number of topics that have been created. Below, you will find three methods of doing 
 so. 
