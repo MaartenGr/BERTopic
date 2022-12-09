@@ -1065,8 +1065,9 @@ class BERTopic:
             all_token_sets_ids = []
 
             for tokenset in tokens:
-                if len(tokens) < window:
-                    token_sets = tokens
+                if len(tokenset) < window:
+                    token_sets = [tokenset]
+                    token_sets_ids = [list(range(len(tokenset)))]
                 else:
 
                     # Extract tokensets using window and stride parameters
