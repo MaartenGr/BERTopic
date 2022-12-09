@@ -4,7 +4,7 @@ import pandas as pd
 try:
     from pandas.io.formats.style import Styler
     HAS_JINJA = True
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     HAS_JINJA = False
 
 
