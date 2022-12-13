@@ -60,4 +60,5 @@ class SentenceTransformerBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        return self.embedding_model.encode(documents, show_progress_bar=verbose)
+        embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
+        return embeddings
