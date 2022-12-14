@@ -165,16 +165,6 @@ pipe = make_pipeline(
 topic_model = BERTopic(embedding_model=pipe)
 ```
 
-Internally, this uses the `SklearnEmbedder` that ensures the scikit-learn
-pipeline is compatible. 
-
-```python
-from bertopic.backend import SklearnEmbedder
-
-sklearn_embedder = SklearnEmbedder(pipe)
-topic_model = BERTopic(embedding_model=sklearn_embedder)
-```
-
 !!! Warning 
     One caveat to be aware of is that scikit-learns base `Pipeline` class does not
     support the `.partial_fit()`-API. If you have a pipeline that theoretically should
