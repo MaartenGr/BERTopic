@@ -18,7 +18,9 @@ BERTopic supports
 [**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
 [**semi-supervised**](https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html), 
 [**manual**](https://maartengr.github.io/BERTopic/getting_started/manual/manual.html), 
+[**long-document**](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html),
 [**hierarchical**](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html), 
+[**class-based**](https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html),
 [**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html), and 
 [**online**](https://maartengr.github.io/BERTopic/getting_started/online/online.html) topic modeling. It even supports visualizations similar to LDAvis!
 
@@ -183,6 +185,7 @@ There are many different use cases in which topic modeling can be used. As such,
 | [Online Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/online/online.html) | `.partial_fit(doc)` |
 | [Semi-supervised Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html) | `.fit(docs, y=y)` |
 | [Supervised Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html) | `.fit(docs, y=y)` |
+| [Manual Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/manual/manual.html) | `.fit(docs, y=y)` |
 | [Topic Modeling per Class](https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html) | `.topics_per_class(docs, classes)` |
 | [Dynamic Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) | `.topics_over_time(docs, timestamps)` |
 | [Hierarchical Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) | `.hierarchical_topics(docs)` |
