@@ -20,8 +20,8 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
             predictions, probabilities = hdbscan.approximate_predict(model, embeddings)
             return predictions, probabilities
         elif "cuml" and "hdbscan" in str(type(model)).lower():
-            from cuml.cluster import approximate_predict
-            predictions, probabilities = approximate_predict(model, embeddings)
+            from cuml.cluster import hdbscan as cuml_hdbscan
+            predictions, probabilities = cuml_hdbscan.approximate_predict(model, embeddings)
             return predictions, probabilities
         else:
             predictions = model.predict(embeddings)
@@ -32,8 +32,8 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         if isinstance(model, hdbscan.HDBSCAN):
             return hdbscan.all_points_membership_vectors(model)
         elif "cuml" and "hdbscan" in str(type(model)).lower():
-            from cuml import cluster
-            return cluster.all_points_membership_vectors(model)
+            from cuml.cluster import hdbscan as cuml_hdbscan
+            return cuml_hdbscan.all_points_membership_vectors(model)
         else:
             return None
 
