@@ -1,5 +1,3 @@
-# Vectorizers
-
 In topic modeling, the quality of the topic representations is key for interpreting the topics, communicating results, and understanding patterns. It is of utmost 
 importance to make sure that the topic representations fit with your use case. 
 
@@ -7,10 +5,10 @@ In practice, there is not one correct way of creating topic representations. Som
 words without any stop words. The diversity in use cases also means that we need to have some flexibility in BERTopic to make sure it can be used across most use cases. 
 The image below illustrates this modularity:
 
-<p align=center>
-<img src="vectorizers.svg">
-<p>
-
+<figure markdown>
+  ![Image title](vectorizers.svg)
+  <figcaption></figcaption>
+</figure>
 
 In this section, we will go through several examples of vectorization algorithms and how they can be implemented.  
 

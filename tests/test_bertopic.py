@@ -87,3 +87,12 @@ def test_full_model(model, documents, request):
     topics_to_merge = [0, 1]
     topic_model.merge_topics(documents, topics_to_merge)
     assert freq < topic_model.get_topic_freq(0)
+
+    # Test reduction of outliers
+    if -1 in topics:
+        new_topics = topic_model.reduce_outliers(documents, topics, threshold=0.0)
+        nr_outliers_topic_model = sum([1 for topic in topic_model.topics_ if topic == -1])
+        nr_outliers_new_topics = sum([1 for topic in new_topics if topic == -1])
+
+        if topic_model._outliers == 1:
+            assert nr_outliers_topic_model < nr_outliers_new_topics

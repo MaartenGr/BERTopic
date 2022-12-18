@@ -11,9 +11,11 @@ Then, we take the logarithm of one plus the average number of words per class `A
 
 Since the topic representation is somewhat independent of the clustering step, we can change how the c-TF-IDF representation will look like. This can be in the form of parameter tuning, different weighting schemes, or using a diversity metric on top of it. This allows for some modularity concerning the weighting scheme:
 
-<p align=center>
-<img src="ctfidf.svg">
-<p>
+<figure markdown>
+  ![Image title](ctfidf.svg)
+  <figcaption></figcaption>
+</figure>
+
 
 This class-based TF-IDF representation is enabled by default in BERTopic. However, we can explicitly pass it to BERTopic through the `ctfidf_model` allowing for parameter tuning and the customization of the topic extraction technique:
 

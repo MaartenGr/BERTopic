@@ -4,9 +4,11 @@ BERTopic starts with transforming our input documents into numerical representat
 However, there is not one perfect 
 embedding model and you might want to be using something entirely different for your use case. Since BERTopic assumes some independence among steps, we can allow for this modularity:
 
-<p align=center>
-<img src="embeddings.svg">
-<p>
+<figure markdown>
+  ![Image title](embeddings.svg)
+  <figcaption></figcaption>
+</figure>
+
 
 This modularity allows us not only to choose any embedding model to convert our documents into numerical representations, we can use essentially any data to perform our clustering. 
 When new state-of-the-art pre-trained embedding models are released, BERTopic will be able to use them. As a result, BERTopic grows with any new models being released.

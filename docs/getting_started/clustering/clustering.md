@@ -5,10 +5,10 @@ In BERTopic, we typically use HDBSCAN as it is quite capable of capturing struct
 clustering model and you might want to be using something entirely different for your use case. Moreover, what if a new state-of-the-art model 
 is released tomorrow? We would like to be able to use that in BERTopic, right? Since BERTopic assumes some independence among steps, we can allow for this modularity:
 
-<p align=center>
-<img src="clustering.svg">
-<p>
-
+<figure markdown>
+  ![Image title](clustering.svg)
+  <figcaption></figcaption>
+</figure>
 
 As a result, the `hdbscan_model` parameter in BERTopic now allows for a variety of clustering models. To do so, the class should have 
 the following attributes:

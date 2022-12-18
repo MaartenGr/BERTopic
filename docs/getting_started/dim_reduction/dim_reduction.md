@@ -6,9 +6,11 @@ However, there are other solutions out there, such as PCA that users might be in
 use any other dimensionality reduction algorithm. The image below illustrates this modularity:
 
 
-<p align=center>
-<img src="dimensionality.svg">
-<p>
+<figure markdown>
+  ![Image title](dimensionality.svg)
+  <figcaption></figcaption>
+</figure>
+
 
 
 As a result, the `umap_model` parameter in BERTopic now allows for a variety of dimensionality reduction models. To do so, the class should have 

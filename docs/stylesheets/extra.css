@@ -19,3 +19,8 @@ body[data-md-color-primary="black"] .svg_image svg rect {
 .svg_image {
   text-align: center;
 }
+
+.center {
+  display: block;
+  margin: 0 auto;
+}

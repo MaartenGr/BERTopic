@@ -151,6 +151,7 @@ Below, you will find an overview of common functions in BERTopic.
 | Set topic labels | `.set_topic_labels(my_custom_labels)` |
 | Merge topics | `.merge_topics(docs, topics_to_merge)` |
 | Reduce nr of topics | `.reduce_topics(docs, nr_topics=30)` |
+| Reduce outliers | `.reduce_outliers(docs, topics)` |
 | Find topics | `.find_topics("vehicle")` |
 | Save model    |  `.save("my_model")` |
 | Load model    |  `BERTopic.load("my_model")` |

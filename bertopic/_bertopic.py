@@ -135,7 +135,7 @@ class BERTopic:
                           NOTE: This param will not be used if you pass in your own
                           CountVectorizer.
             min_topic_size: The minimum size of the topic. Increasing this value will lead
-                            to a lower number of clusters/topics. 
+                            to a lower number of clusters/topics.
                             NOTE: This param will not be used if you are not using HDBSCAN.
             nr_topics: Specifying the number of topics will reduce the initial
                        number of topics to the value specified. This reduction can take
@@ -432,7 +432,6 @@ class BERTopic:
 
         umap_embeddings = self.umap_model.transform(embeddings)
         logger.info("Reduced dimensionality")
-
 
         # Extract predictions and probabilities if it is a HDBSCAN-like model
         if is_supported_hdbscan(self.hdbscan_model):
@@ -865,7 +864,7 @@ class BERTopic:
         embeddings = self.c_tf_idf_[self._outliers:]
         X = distance_function(embeddings)
 
-        # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal 
+        # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal
         np.fill_diagonal(X, 0)
         X = squareform(X)
 
@@ -950,10 +949,10 @@ class BERTopic:
 
         return hier_topics
 
-    def approximate_distribution(self, 
-                                 documents: Union[str, List[str]], 
-                                 window: int = 4, 
-                                 stride: int = 1, 
+    def approximate_distribution(self,
+                                 documents: Union[str, List[str]],
+                                 window: int = 4,
+                                 stride: int = 1,
                                  min_similarity: float = 0.1,
                                  batch_size: int = None,
                                  padding: bool = False,
@@ -962,84 +961,84 @@ class BERTopic:
                                  separator: str = " ") -> Tuple[np.ndarray,
                                                                 Union[List[np.ndarray], None]]:
         """ A post-hoc approximation of topic distributions across documents.
-        
-        In order to perform this approximation, each document is split into tokens 
-        according to the provided tokenizer in the `CountVectorizer`. Then, a 
-        sliding window is applied on each document creating subsets of the document. 
-        For example, with a window size of 3 and stride of 1, the sentence: 
-        
+
+        In order to perform this approximation, each document is split into tokens
+        according to the provided tokenizer in the `CountVectorizer`. Then, a
+        sliding window is applied on each document creating subsets of the document.
+        For example, with a window size of 3 and stride of 1, the sentence:
+
         `Solving the right problem is difficult.`
-        
-        can be split up into `solving the right`, `the right problem`, `right problem is`, 
-        and `problem is difficult`. These are called tokensets. For each of these 
-        tokensets, we calculate their c-TF-IDF representation and find out 
-        how similar they are to the previously generated topics. Then, the 
-        similarities to the topics for each tokenset are summed in order to 
-        create a topic distribution for the entire document. 
-        
-        We can also dive into this a bit deeper by then splitting these tokensets 
-        up into individual tokens and calculate how much a word, in a specific sentence, 
-        contributes to the topics found in that document. This can be enabled by 
-        setting `calculate_tokens=True` which can be used for visualization purposes 
-        in `topic_model.visualize_approximate_distribution`. 
-        
-        The main output, `topic_distributions`, can also be used directly in 
-        `.visualize_distribution(topic_distributions[index])` by simply selecting 
-        a single distribution. 
-        
+
+        can be split up into `solving the right`, `the right problem`, `right problem is`,
+        and `problem is difficult`. These are called tokensets. For each of these
+        tokensets, we calculate their c-TF-IDF representation and find out
+        how similar they are to the previously generated topics. Then, the
+        similarities to the topics for each tokenset are summed in order to
+        create a topic distribution for the entire document.
+
+        We can also dive into this a bit deeper by then splitting these tokensets
+        up into individual tokens and calculate how much a word, in a specific sentence,
+        contributes to the topics found in that document. This can be enabled by
+        setting `calculate_tokens=True` which can be used for visualization purposes
+        in `topic_model.visualize_approximate_distribution`.
+
+        The main output, `topic_distributions`, can also be used directly in
+        `.visualize_distribution(topic_distributions[index])` by simply selecting
+        a single distribution.
+
         Arguments:
             documents: A single document or a list of documents for which we
                     approximate their topic distributions
-            window: Size of the moving window which indicates the number of 
-                    tokens being considered. 
+            window: Size of the moving window which indicates the number of
+                    tokens being considered.
             stride: How far the window should move at each step.
-            min_similarity: The minimum similarity of a document's tokenset 
-                            with respect to the topics. 
-            batch_size: The number of documents to process at a time. If None, 
-                        then all documents are processed at once. 
-                        NOTE: With a large number of documents, it is not 
-                        advised to process all documents at once. 
+            min_similarity: The minimum similarity of a document's tokenset
+                            with respect to the topics.
+            batch_size: The number of documents to process at a time. If None,
+                        then all documents are processed at once.
+                        NOTE: With a large number of documents, it is not
+                        advised to process all documents at once.
             padding: Whether to pad the beginning and ending of a document with
-                     empty tokens. 
-            use_embedding_model: Whether to use the topic model's embedding 
-                                model to calculate the similarity between 
+                     empty tokens.
+            use_embedding_model: Whether to use the topic model's embedding
+                                model to calculate the similarity between
                                 tokensets and topics instead of using c-TF-IDF.
-            calculate_tokens: Calculate the similarity of tokens with all topics. 
-                            NOTE: This is computation-wise more expensive and 
-                            can require more memory. Using this over batches of 
-                            documents might be preferred. 
+            calculate_tokens: Calculate the similarity of tokens with all topics.
+                            NOTE: This is computation-wise more expensive and
+                            can require more memory. Using this over batches of
+                            documents might be preferred.
             separator: The separator used to merge tokens into tokensets.
-            
+
         Returns:
-            topic_distributions: A `n` x `m` matrix containing the topic distributions 
-                                for all input documents with `n` being the documents 
+            topic_distributions: A `n` x `m` matrix containing the topic distributions
+                                for all input documents with `n` being the documents
                                 and `m` the topics.
-            topic_token_distributions: A list of `t` x `m` arrays with `t` being the 
-                                    number of tokens for the respective document 
+            topic_token_distributions: A list of `t` x `m` arrays with `t` being the
+                                    number of tokens for the respective document
                                     and `m` the topics.
-            
+
         Examples:
-        
-        After fitting the model, the topic distributions can be calculated regardless 
+
+        After fitting the model, the topic distributions can be calculated regardless
         of the clustering model and regardless of whether the documents were previously
         seen or not:
-        
+
         ```python
         topic_distr, _ = topic_model.approximate_distribution(docs)
         ```
-        
-        As a result, the topic distributions are calculated in `topic_distr` for the 
-        entire document based on token set with a specific window size and stride. 
-        
+
+        As a result, the topic distributions are calculated in `topic_distr` for the
+        entire document based on token set with a specific window size and stride.
+
         If you want to calculate the topic distributions on a token-level:
-        
+
         ```python
         topic_distr, topic_token_distr = topic_model.approximate_distribution(docs, calculate_tokens=True)
         ```
-        
-        The `topic_token_distr` then contains, for each token, the best fitting topics. 
-        As with `topic_distr`, it can contain multiple topics for a single token. 
-        """   
+
+        The `topic_token_distr` then contains, for each token, the best fitting topics.
+        As with `topic_distr`, it can contain multiple topics for a single token.
+        """
         if isinstance(documents, str):
             documents = [documents]
 
@@ -1098,21 +1097,21 @@ class BERTopic:
                 all_sentences.extend(sentences)
                 all_token_sets_ids.extend(token_sets_ids)
                 all_indices.append(all_indices[-1] + len(sentences))
-            
+
             # Calculate similarity between embeddings of token sets and the topics
             if use_embedding_model:
                 embeddings = self._extract_embeddings(all_sentences, method="document", verbose=True)
                 similarity = cosine_similarity(embeddings, self.topic_embeddings_[self._outliers:])
-                
+
             # Calculate similarity between c-TF-IDF of token sets and the topics
             else:
                 bow_doc = self.vectorizer_model.transform(all_sentences)
                 c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
                 similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers:])
-            
+
             # Only keep similarities that exceed the minimum
             similarity[similarity < min_similarity] = 0
-            
+
             # Aggregate results on an individual token level
             if calculate_tokens:
                 topic_distribution = []
@@ -1132,10 +1131,10 @@ class BERTopic:
                             if token in token_val:
                                 token_val[token].append(sim)
 
-                    matrix = []      
+                    matrix = []
                     for _, value in token_val.items():
                         matrix.append(np.add.reduce(value))
-                    
+
                     # Take empty documents into account
                     matrix = np.array(matrix)
                     if len(matrix.shape) == 1:
@@ -1143,7 +1142,7 @@ class BERTopic:
 
                     topic_token_distribution.append(np.array(matrix))
                     topic_distribution.append(np.add.reduce(matrix))
-                
+
                 topic_distribution = normalize(topic_distribution, norm='l1', axis=1)
 
             # Aggregate on a tokenset level indicated by the window and stride
@@ -1159,7 +1158,7 @@ class BERTopic:
                     topic_distribution.append(group)
                 topic_distribution = normalize(np.array(topic_distribution), norm='l1', axis=1)
                 topic_token_distribution = None
-            
+
             # Combine results
             topic_distributions.append(topic_distribution)
             if topic_token_distribution is None:
@@ -1396,11 +1395,11 @@ class BERTopic:
                                                                                                    ascending=False)
 
     def get_representative_docs(self, topic: int = None) -> List[str]:
-        """ Extract the best representing documents per topic. 
+        """ Extract the best representing documents per topic.
 
         NOTE:
             This does not extract all documents per topic as all documents
-            are not saved within BERTopic. To get all documents, please 
+            are not saved within BERTopic. To get all documents, please
             run the following:
 
             ```python
@@ -1757,6 +1756,138 @@ class BERTopic:
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
         return self
+
+    def reduce_outliers(self,
+                        documents: List[str],
+                        topics: List[int],
+                        strategy: str = "distributions",
+                        probabilities: np.ndarray = None,
+                        threshold: int = 0,
+                        embeddings: np.ndarray = None,
+                        distributions_params: Mapping[str, Any] = {}):
+        """ Reduce outliers by merging them with their nearest topic according
+        to one of several strategies.
+
+        When using HDBSCAN, DBSCAN, or OPTICS, a number of outlier documents might be created
+        that do not fall within any of the created topics. These are labeled as -1.
+        This function allows the user to match outlier documents with their nearest topic
+        using one of the following strategies using the `strategy` parameter:
+            * "probabilities"
+                This uses the soft-clustering as performed by HDBSCAN to find the
+                best matching topic for each outlier document. To use this, make
+                sure to calculate the `probabilities` beforehand by instantiating
+                BERTopic with `calculate_probabilities=True`.
+            * "distributions"
+                Use the topic distributions, as calculated with `.approximate_distribution`
+                to find the most frequent topic in each outlier document. You can use the
+                `distributions_params` variable to tweak the parameters of
+                `.approximate_distribution`.
+            * "c-tf-idf"
+                Calculate the c-TF-IDF representation for each outlier document and
+                find the best matching c-TF-IDF topic representation using
+                cosine similarity.
+            * "embeddings"
+                Using the embeddings of each outlier documents, find the best
+                matching topic embedding using cosine similarity.
+
+        Arguments:
+            documents: A list of documents for which we reduce or remove the outliers.
+            topics: The topics that correspond to the documents
+            strategy: The strategy used for reducing outliers.
+                    Options:
+                        * "probabilities"
+                            This uses the soft-clustering as performed by HDBSCAN
+                            to find the best matching topic for each outlier document.
+
+                        * "distributions"
+                            Use the topic distributions, as calculated with `.approximate_distribution`
+                            to find the most frequent topic in each outlier document.
+
+                        * "c-tf-idf"
+                            Calculate the c-TF-IDF representation for outlier documents and
+                            find the best matching c-TF-IDF topic representation.
+
+                        * "embeddings"
+                            Calculate the embeddings for outlier documents and
+                            find the best matching topic embedding.
+            threshold: The threshold for assigning topics to outlier documents. This value
+                    represents the minimum probability when `strategy="probabilities"`.
+                    For all other strategies, it represents the minimum similarity.
+            embeddings: The pre-computed embeddings to be used when `strategy="embeddings"`.
+                        If this is None, then it will compute the embeddings for the outlier documents.
+            distributions_params: The parameters used in `.approximate_distribution` when using
+                                  the strategy `"distributions"`.
+
+        Usage:
+
+        The default settings uses the `"distributions"` strategy:
+
+        ```python
+        new_topics = topic_model.reduce_outliers(docs, topics)
+        ```
+
+        When you use the `"probabilities"` strategy, make sure to also pass the probabilities
+        as generated through HDBSCAN:
+
+        ```python
+        from bertopic import BERTopic
+        topic_model = BERTopic(calculate_probabilities=True)
+        topics, probs = topic_model.fit_transform(docs)
+
+        new_topics = topic_model.reduce_outliers(docs, topics, probabilities=probs, strategy="probabilities")
+        ```
+        """
+
+        # Check correct use of parameters
+        if strategy.lower() == "probabilities" and probabilities is None:
+            raise ValueError("Make sure to pass in `probabilities` in order to use the probabilities strategy")
+
+        # Reduce outliers by extracting most likely topics through the topic-term probability matrix
+        if strategy.lower() == "probabilities":
+            new_topics = [np.argmax(prob) if max(prob) >= threshold and topic == -1 else topic
+                          for topic, prob in zip(topics, probabilities)]
+
+        # Reduce outliers by extracting most frequent topics through calculating of Topic Distributions
+        elif strategy.lower() == "distributions":
+            outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
+            outlier_docs = [documents[index] for index in outlier_ids]
+            topic_distr, _ = self.approximate_distribution(outlier_docs, min_similarity=threshold, **distributions_params)
+            outlier_topics = iter([np.argmax(prob) if sum(prob) > 0 else -1 for prob in topic_distr])
+            new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
+
+        # Reduce outliers by finding the most similar c-TF-IDF representations
+        elif strategy.lower() == "c-tf-idf":
+            outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
+            outlier_docs = [documents[index] for index in outlier_ids]
+
+            # Calculate c-TF-IDF of outlier documents with all topics
+            bow_doc = self.vectorizer_model.transform(outlier_docs)
+            c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
+            similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers:])
+
+            # Update topics
+            similarity[similarity < threshold] = 0
+            outlier_topics = iter([np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity])
+            new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
+
+        # Reduce outliers by finding the most similar topic embeddings
+        elif strategy.lower() == "embeddings":
+            outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
+            outlier_docs = [documents[index] for index in outlier_ids]
+
+            # Extract or calculate embeddings for outlier documents
+            if embeddings is not None:
+                outlier_embeddings = np.array([embeddings[index] for index in outlier_ids])
+            else:
+                outlier_embeddings = self.embedding_model.embed_documents(outlier_docs)
+            similarity = cosine_similarity(outlier_embeddings, self.topic_embeddings_[self._outliers:])
+
+            # Update topics
+            similarity[similarity < threshold] = 0
+            outlier_topics = iter([np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity])
+            new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
+
+        return new_topics
 
     def visualize_topics(self,
                          topics: List[int] = None,
@@ -2193,49 +2324,49 @@ class BERTopic:
                                                height=height)
 
     def visualize_approximate_distribution(self,
-                                           document: str, 
-                                           topic_token_distribution: np.ndarray, 
+                                           document: str,
+                                           topic_token_distribution: np.ndarray,
                                            normalize: bool = False):
-        """ Visualize the topic distribution calculated by `.approximate_topic_distribution` 
-        on a token level. Thereby indicating the extend to which a certain word or phrases belong 
-        to a specific topic. The assumption here is that a single word can belong to multiple 
-        similar topics and as such give information about the broader set of topics within 
-        a single document. 
-        
+        """ Visualize the topic distribution calculated by `.approximate_topic_distribution`
+        on a token level. Thereby indicating the extend to which a certain word or phrases belong
+        to a specific topic. The assumption here is that a single word can belong to multiple
+        similar topics and as such give information about the broader set of topics within
+        a single document.
+
         Arguments:
             topic_model: A fitted BERTopic instance.
-            document: The document for which you want to visualize 
+            document: The document for which you want to visualize
                     the approximated topic distribution.
-            topic_token_distribution: The topic-token distribution of the document as 
+            topic_token_distribution: The topic-token distribution of the document as
                                     extracted by `.approximate_topic_distribution`
-            normalize: Whether to normalize, between 0 and 1 (summing to 1), the 
-                    topic distribution values. 
-                    
+            normalize: Whether to normalize, between 0 and 1 (summing to 1), the
+                    topic distribution values.
+
         Returns:
             df: A stylized dataframe indicating the best fitting topics
                 for each token.
-        
+
         Examples:
-        
+
         ```python
         # Calculate the topic distributions on a token level
         # Note that we need to have `calculate_token_level=True`
         topic_distr, topic_token_distr = topic_model.approximate_distribution(
                 docs, calculate_token_level=True
         )
-        
+
         # Visualize the approximated topic distributions
         df = topic_model.visualize_approximate_distribution(docs[0], topic_token_distr[0])
         df
         ```
-        
-        To revert this stylized dataframe back to a regular dataframe, 
+
+        To revert this stylized dataframe back to a regular dataframe,
         you can run the following:
-        
+
         ```python
         df.data.columns = [column.strip() for column in df.data.columns]
         df = df.data
-        ```  
+        ```
         """
         check_is_fitted(self)
         return plotting.visualize_approximate_distribution(self,
@@ -2398,7 +2529,7 @@ class BERTopic:
             topics: A selection of topics to visualize.
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
-            custom_labels: Whether to use custom topic labels that were defined using 
+            custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of each figure.
@@ -2600,7 +2731,7 @@ class BERTopic:
                             documents: pd.DataFrame,
                             partial_fit: bool = False,
                             y: np.ndarray = None) -> Tuple[pd.DataFrame,
-                                                                np.ndarray]:
+                                                           np.ndarray]:
         """ Cluster UMAP embeddings with HDBSCAN
 
         Arguments:
@@ -2623,7 +2754,7 @@ class BERTopic:
                 self.hdbscan_model.fit(umap_embeddings, y=y)
             except TypeError:
                 self.hdbscan_model.fit(umap_embeddings)
-                
+
             try:
                 labels = self.hdbscan_model.labels_
             except AttributeError:
@@ -2749,8 +2880,8 @@ class BERTopic:
 
             # Convert indices to documents
             self.representative_docs_ = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
-                                        for topic, doc_ids in
-                                        representative_docs.items()}
+                                         for topic, doc_ids in
+                                         representative_docs.items()}
         else:
             documents_per_topic = documents.groupby('Topic').sample(n=500, replace=True).drop_duplicates()
             self.representative_docs_ = {}
@@ -2759,11 +2890,11 @@ class BERTopic:
                 # Calculate similarity
                 selected_docs = documents_per_topic.loc[documents_per_topic.Topic == topic, "Document"].values
                 bow = self.vectorizer_model.transform(selected_docs)
-                ctfidf = self.ctfidf_model.transform(bow)            
+                ctfidf = self.ctfidf_model.transform(bow)
                 sim_matrix = cosine_similarity(ctfidf, self.c_tf_idf_[topic + self._outliers])
 
                 # Extract top 3 most representative documents
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], 
+                indices = np.argpartition(sim_matrix.reshape(1, -1)[0],
                                           -top_n_representative_docs)[-top_n_representative_docs:]
                 self.representative_docs_[topic] = [selected_docs[index] for index in indices]
 
@@ -2788,7 +2919,7 @@ class BERTopic:
 
         # Update the representative documents
         updated_representative_docs = {mappings[old_topic]: []
-                                    for old_topic, _ in representative_docs.items()}
+                                       for old_topic, _ in representative_docs.items()}
         for old_topic, docs in representative_docs.items():
             new_topic = mappings[old_topic]
             updated_representative_docs[new_topic].extend(docs)
