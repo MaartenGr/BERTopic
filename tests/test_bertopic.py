@@ -95,4 +95,4 @@ def test_full_model(model, documents, request):
         nr_outliers_new_topics = sum([1 for topic in new_topics if topic == -1])
 
         if topic_model._outliers == 1:
-            assert nr_outliers_topic_model < nr_outliers_new_topics
+            assert nr_outliers_topic_model > nr_outliers_new_topics

@@ -601,6 +601,23 @@ topic_model.visualize_distribution(topic_distr[0])
 
 <iframe src="probabilities.html" style="width:1000px; height: 500px; border: 0px;""></iframe>
 
+Although a topic distribution is nice, we may want to see how each token contributes to a specific topic. To do so, we need to first calculate topic distributions on a token level and then visualize the results:
+
+```python
+# Calculate the topic distributions on a token-level
+topic_distr, topic_token_distr = topic_model.approximate_distribution(docs, calculate_tokens=True)
+
+# Visualize the token-level distributions
+df = topic_model.visualize_approximate_distribution(docs[1], topic_token_distr[1])
+df
+```
+
+<br><br>
+<img src="../distribution/distribution.png">
+<br><br>
+
+!!! note
+     To get the stylized dataframe for `.visualize_approximate_distribution` you will need to have Jinja installed. If you do not have this installed, an unstylized dataframe will be returned instead. You can install Jinja via `pip install jinja2`
 
 !!! note
     The distribution of the probabilities does not give an indication to 
