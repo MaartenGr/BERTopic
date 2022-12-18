@@ -55,34 +55,20 @@ topics, probs = topic_model.fit_transform(docs)
     Although this will lower outliers found in the data, this might force outliers to be put into topics where they do not belong. So make 
     sure to strike a balance between keeping noise and reducing outliers. 
 
-Second, after training our BERTopic model, we can assign outliers to topics. By setting `calculate_probabilities=True`, we calculate the probability 
-of a document belonging to any topic. That way, we can select, for each document, the topic with the highest probability. Thus, although we do 
-generate an outlier class in our BERTopic model, we can assign documents to an actual topic. 
-
-To do this, we can set a probability threshold and assign each document to a topic based on their probabilities:
+Second, after training our BERTopic model, we can assign outliers to topics by making use of the `.reduce_outliers` function in BERTopic. An advantage of using this approach is that there are four built in strategies one can choose for reducing outliers. Moreover, this technique allows the user to experiment with reducing outliers across a number of strategies and parameters without actually having to re-train the topic model each time. You can learn more about the `.reduce_outlier` function [here](https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html). The following is a minimal example of how to use this function:
 
 ```python
-import numpy as np
-probability_threshold = 0.01
-new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for prob in probs]
+from bertopic import BERTopic
+
+# Train your BERTopic model
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(docs)
+
+# Reduce outliers
+new_topics = topic_model.reduce_outliers(docs, topics)
 ```
 
-!!! note "Note"
-    The topics assigned using the above method can result in topics different from those using `.fit_transform()`. This is expected
-    behavior as HDBSCAN is merely trying to imitate soft clustering after fitting the model and it is not a core component
-    of assigning points to clusters. 
-
-Third, we can estimate the topic distributions after training our model and use those to assign an outlier document to the topic that has the largest distribution in that document:
-
-```python
-import numpy as np
-topic_distr, _ = topic_model.approximate_distribution(docs, min_similarity=0)
-new_topics = [np.argmax(prob) if topic == -1 else topic 
-              for topic, prob in zip(topics, topic_distr)]
-```
-
-
-Fourth, we can replace HDBSCAN with any other clustering algorithm that we want. So we can choose a clustering algorithm, like k-Means, that 
+Third, we can replace HDBSCAN with any other clustering algorithm that we want. So we can choose a clustering algorithm, like k-Means, that 
 does not produce any outliers at all. Using k-Means instead of HDBSCAN is straightforward:
 
 ```python

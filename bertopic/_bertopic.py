@@ -1764,7 +1764,7 @@ class BERTopic:
                         probabilities: np.ndarray = None,
                         threshold: int = 0,
                         embeddings: np.ndarray = None,
-                        distributions_params: Mapping[str, Any] = {}):
+                        distributions_params: Mapping[str, Any] = {}) -> List[int]:
         """ Reduce outliers by merging them with their nearest topic according
         to one of several strategies.
 
@@ -1817,6 +1817,9 @@ class BERTopic:
                         If this is None, then it will compute the embeddings for the outlier documents.
             distributions_params: The parameters used in `.approximate_distribution` when using
                                   the strategy `"distributions"`.
+
+        Returns:
+            new_topics: The updated topics
 
         Usage:
 
