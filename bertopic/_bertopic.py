@@ -989,6 +989,7 @@ class BERTopic:
     def update_topics(self,
                       docs: List[str],
                       topics: List[int] = None,
+                      top_n_words: int = 10,
                       n_gram_range: Tuple[int, int] = None,
                       diversity: float = None,
                       vectorizer_model: CountVectorizer = None,
@@ -1008,6 +1009,9 @@ class BERTopic:
                     NOTE: Using a custom list of topic assignments may lead to errors if
                           topic reduction techniques are used afterwards. Make sure that
                           manually assigning topics is the last step in the pipeline
+            top_n_words: The number of words per topic to extract. Setting this
+                         too high can negatively impact topic embeddings as topics
+                         are typically best represented by at most 10 words.
             n_gram_range: The n-gram range for the CountVectorizer.
             diversity: Whether to use MMR to diversify the resulting topic representations.
                        If set to None, MMR will not be used. Accepted values lie between
@@ -1043,6 +1047,9 @@ class BERTopic:
         if not n_gram_range:
             n_gram_range = self.n_gram_range
 
+        if top_n_words > 30:
+            raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
+        self.top_n_words = top_n_words
         self.diversity = diversity
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
