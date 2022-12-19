@@ -75,7 +75,7 @@ class SpacyBackend(BaseEmbedder):
         """
         # Handle empty documents, spaCy models automatically map
         # empty strings to the zero vector
-        empty_document = ""
+        empty_document = " "
 
         # Extract embeddings from a transformer model
         if "transformer" in self.embedding_model.component_names:
