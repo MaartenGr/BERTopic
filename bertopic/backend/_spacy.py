@@ -73,29 +73,22 @@ class SpacyBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
+        # Handle empty documents, spaCy models automatically map
+        # empty strings to the zero vector
+        empty_document = ""
 
         # Extract embeddings from a transformer model
         if "transformer" in self.embedding_model.component_names:
             embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-                try:
-                    embedding = self.embedding_model(doc)._.trf_data.tensors[-1][0].tolist()
-                except:
-                    embedding = self.embedding_model("An empty document")._.trf_data.tensors[-1][0].tolist()
-                embeddings.append(embedding)
+                embeddings.append(self.embedding_model(doc or empty_document)._.trf_data.tensors[-1][0].tolist())
+            embeddings = np.array(embeddings)
 
         # Extract embeddings from a general spacy model
         else:
             embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-                try:
-                    embedding = self.embedding_model(doc).vector
-                except ValueError:
-                    embedding = self.embedding_model("An empty document").vector
-                embeddings.append(embedding)
-
-        # Convert to numpy arrays depending on whether cupy was used or not
-        if isinstance(embedding, np.ndarray):
+                embeddings.append(self.embedding_model(doc or empty_document).vector)
             embeddings = np.array(embeddings)
         else:
             embeddings = np.array([embedding.get() for embedding in embeddings])

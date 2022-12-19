@@ -65,7 +65,7 @@ class FlairBackend(BaseEmbedder):
             that each have an embeddings size of `m`
         """
         embeddings = []
-        for index, document in tqdm(enumerate(documents), disable=not verbose):
+        for document in tqdm(documents, disable=not verbose):
             try:
                 sentence = Sentence(document) if document else Sentence("an empty document")
                 self.embedding_model.embed(sentence)
