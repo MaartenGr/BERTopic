@@ -90,7 +90,5 @@ class SpacyBackend(BaseEmbedder):
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
                 embeddings.append(self.embedding_model(doc or empty_document).vector)
             embeddings = np.array(embeddings)
-        else:
-            embeddings = np.array([embedding.get() for embedding in embeddings])
 
         return embeddings
