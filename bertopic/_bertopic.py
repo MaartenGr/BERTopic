@@ -1394,6 +1394,94 @@ class BERTopic:
             return pd.DataFrame(self.topic_sizes_.items(), columns=['Topic', 'Count']).sort_values("Count",
                                                                                                    ascending=False)
 
+    def get_document_info(self,
+                          docs: List[str],
+                          df: pd.DataFrame = None,
+                          meta_data: Mapping[str, Any] = None) -> pd.DataFrame:
+        """ Get information about the documents on which the topic was trained
+        including the documents themselves, their respective topics, the name
+        of each topic, the top n words of each topic, whether it is a
+        representative document, and probability of the clustering if the cluster
+        model supports it.
+
+        There are also options to include other meta data, such as the topic
+        distributions or the x and y coordinates of the reduced embeddings.
+
+        Arguments:
+            docs: The documents on which the topic model was trained.
+            df: A dataframe containing the metadata and the documents on which
+                the topic model was originally trained on.
+            meta_data: A dictionary with meta data for each document in the form
+                    of column name (key) and the respective values (value).
+
+        Returns:
+            document_info: A dataframe with several statistics regarding
+                        the documents on which the topic model was trained.
+
+        Usage:
+
+        To get the document info, you will only need to pass the documents on which
+        the topic model was trained:
+
+        ```python
+        document_info = topic_model.get_document_info(docs)
+        ```
+
+        There are additionally options to include meta data, such as the topic
+        distributions. Moreover, we can pass the original dataframe that contains
+        the documents and extend it with the information retrieved from BERTopic:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+
+        # The original data in a dataframe format to include the target variable
+        data= fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+        df = pd.DataFrame({"Document": data['data'], "Class": data['target']})
+
+        # Add information about the percentage of the document that relates to the topic
+        topic_distr, _ = topic_model.approximate_distribution(docs, batch_size=1000)
+        distributions = [distr[topic] if topic != -1 else 0 for topic, distr in zip(topics, topic_distr)]
+
+        # Create our documents dataframe using the original dataframe and meta data about
+        # the topic distributions
+        document_info = topic_model.get_document_info(docs, df=df,
+                                                       meta_data={"Topic_distribution": distributions})
+        ```
+        """
+        if df is not None:
+            document_info = df.copy()
+            document_info["Document"] = docs
+            document_info["Topic"] = self.topics_
+        else:
+            document_info = pd.DataFrame({"Document": docs, "Topic": self.topics_})
+
+        # Add topic info through `.get_topic_info()`
+        topic_info = self.get_topic_info().drop("Count", axis=1)
+        document_info = pd.merge(document_info, topic_info, on="Topic", how="left")
+
+        # Add top n words
+        top_n_words = {topic: " - ".join(list(zip(*self.get_topic(topic)))[0]) for topic in set(self.topics_)}
+        document_info["Top_n_words"] = document_info.Topic.map(top_n_words)
+
+        # Add flat probabilities
+        if self.probabilities_ is not None:
+            if len(self.probabilities_.shape) == 1:
+                document_info["Probability"] = self.probabilities_
+            else:
+                document_info["Probability"] = [max(probs) if topic != -1 else 1-sum(probs)
+                                                for topic, probs in zip(self.topics_, self.probabilities_)]
+
+        # Add representative document labels
+        repr_docs = [repr_doc for repr_docs in self.representative_docs_.values() for repr_doc in repr_docs]
+        document_info["Representative_document"] = False
+        document_info.loc[document_info.Document.isin(repr_docs), "Representative_document"] = True
+
+        # Add custom meta data provided by the user
+        if meta_data is not None:
+            for column, values in meta_data.items():
+                document_info[column] = values
+        return document_info
+
     def get_representative_docs(self, topic: int = None) -> List[str]:
         """ Extract the best representing documents per topic.
 
@@ -2571,6 +2659,11 @@ class BERTopic:
              path: str,
              save_embedding_model: bool = True) -> None:
         """ Saves the model to the specified path
+
+        When saving the model, make sure to also keep track of the versions 
+        of dependencies and Python used. Loading and saving the model should 
+        be done using the same dependencies and Python. Moreover, models 
+        saved in one version of BERTopic should not be loaded in other versions. 
 
         Arguments:
             path: the location and name of the file you want to save

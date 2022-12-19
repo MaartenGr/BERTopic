@@ -60,6 +60,19 @@ frequent topic that was generated, topic 0:
  ('pc', 0.003047105930670237)]
 ```  
 
+Using `.get_document_info`, we can also extract information on a document level, such as their corresponding topics, probabilities, whether they are representative documents for a topic, etc.:
+
+```python
+>>> topic_model.get_document_info(docs)
+
+Document                               Topic	Name	                    Top_n_words                     Probability    ...
+I am sure some bashers of Pens...	    0	    0_game_team_games_season	game - team - games...	        0.200010       ...
+My brother is in the market for...      -1     -1_can_your_will_any	        can - your - will...	        0.420668       ...
+Finally you said what you dream...	    -1     -1_can_your_will_any	        can - your - will...            0.807259       ...
+Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.071746       ...
+1) I have an old Jasmine drive...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.038983       ...
+```
+
 !!! Tip "Tip!"
     Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
@@ -92,3 +105,8 @@ topic_model = BERTopic.load("my_model")
     If you do not want to save the embedding model because it is loaded from the cloud, simply run 
     `model.save("my_model", save_embedding_model=False)` instead. Then, you can load in the model 
     with `BERTopic.load("my_model", embedding_model="whatever_model_you_used")`. 
+
+!!! Warning "Warning"
+    When saving the model, make sure to also keep track of the versions of dependencies and Python used. 
+    Loading and saving the model should be done using the same dependencies and Python. Moreover, models 
+    saved in one version of BERTopic should not be loaded in other versions. 

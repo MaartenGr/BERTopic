@@ -83,7 +83,20 @@ frequent topic that was generated, topic 0:
  ('software', 0.0034415334250699077),
  ('email', 0.0034239554442333257),
  ('pc', 0.003047105930670237)]
-```  
+```
+
+Using `.get_document_info`, we can also extract information on a document level, such as their corresponding topics, probabilities, whether they are representative documents for a topic, etc.:
+
+```python
+>>> topic_model.get_document_info(docs)
+
+Document                               Topic	Name	                    Top_n_words                     Probability    ...
+I am sure some bashers of Pens...	    0	    0_game_team_games_season	game - team - games...	        0.200010       ...
+My brother is in the market for...      -1     -1_can_your_will_any	        can - your - will...	        0.420668       ...
+Finally you said what you dream...	    -1     -1_can_your_will_any	        can - your - will...            0.807259       ...
+Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.071746       ...
+1) I have an old Jasmine drive...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.038983       ...
+```
 
 **NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
@@ -112,6 +125,7 @@ Below, you will find an overview of common functions in BERTopic.
 | Access all topics     |  `.get_topics()` |
 | Get topic freq    |  `.get_topic_freq()` |
 | Get all topic information|  `.get_topic_info()` |
+| Get all document information|  `.get_document_info(docs)` |
 | Get representative docs per topic |  `.get_representative_docs()` |
 | Update topic representation | `.update_topics(docs, n_gram_range=(1, 3))` |
 | Generate topic labels | `.generate_topic_labels()` |

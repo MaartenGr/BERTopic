@@ -23,6 +23,10 @@ def test_full_model(model, documents, request):
     assert len(topic_model.get_topic_freq()) > 2
     assert len(topic_model.get_topics()) == len(topic_model.get_topic_freq())
 
+    # Test extraction of document info
+    document_info = topic_model.get_document_info(documents)
+    assert len(document_info) == len(documents)
+
     # Test transform
     doc = "This is a new document to predict."
     topics_test, probs_test = topic_model.transform([doc])
@@ -96,3 +100,5 @@ def test_full_model(model, documents, request):
 
         if topic_model._outliers == 1:
             assert nr_outliers_topic_model > nr_outliers_new_topics
+
+    
