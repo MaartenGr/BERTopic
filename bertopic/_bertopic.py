@@ -990,6 +990,8 @@ class BERTopic:
                       docs: List[str],
                       topics: List[int] = None,
                       n_gram_range: Tuple[int, int] = None,
+                      diversity: float = None,
+
                       vectorizer_model: CountVectorizer = None,
                       ctfidf_model: ClassTfidfTransformer = None):
         """ Updates the topic representation by recalculating c-TF-IDF with the new
@@ -1008,6 +1010,10 @@ class BERTopic:
                           topic reduction techniques are used afterwards. Make sure that
                           manually assigning topics is the last step in the pipeline
             n_gram_range: The n-gram range for the CountVectorizer.
+            diversity: Whether to use MMR to diversify the resulting topic representations.
+                       If set to None, MMR will not be used. Accepted values lie between
+                       0 and 1 with 0 being not at all diverse and 1 being very diverse.
+
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
             ctfidf_model: Pass in your own c-TF-IDF model to update the representations
 
@@ -1039,6 +1045,7 @@ class BERTopic:
         if not n_gram_range:
             n_gram_range = self.n_gram_range
 
+        self.diversity = diversity
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
 
