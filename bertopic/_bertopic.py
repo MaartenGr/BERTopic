@@ -954,7 +954,7 @@ class BERTopic:
                                  window: int = 4,
                                  stride: int = 1,
                                  min_similarity: float = 0.1,
-                                 batch_size: int = None,
+                                 batch_size: int = 1000,
                                  padding: bool = False,
                                  use_embedding_model: bool = False,
                                  calculate_tokens: bool = False,

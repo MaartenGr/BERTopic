@@ -72,6 +72,14 @@ topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
     as saving all those documents in the visualization can be quite expensive and result in large files. However, 
     it might be interesting to set `hide_document_hover=False` in order to hover over the points and see the content of the documents.    
 
+### **Custom Hover**
+
+When you visualize the documents, you might not always want to see the complete document over hover. Many documents have shorter information that might be more interesting to visualize, such as its title. To create the hover based on a documents' title instead of its content, you can simply pass a variable (`titles`) containing the title for each document:
+
+```python
+topic_model.visualize_documents(titles, reduced_embeddings=reduced_embeddings)
+```
+
 ## **Visualize Topic Hierarchy**
 The topics that were created can be hierarchically reduced. In order to understand the potential hierarchical 
 structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how 

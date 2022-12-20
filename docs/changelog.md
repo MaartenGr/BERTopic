@@ -5,6 +5,165 @@ hide:
 
 # Changelog
 
+## **Version 0.13.0**
+*Release date: 4 January, 2023*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Calculate [topic distributions](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) with `.approximate_distribution` regardless of the cluster model used
+    * Generates topic distributions on a document- and token-levels
+    * Can be used for any document regardless of its size!
+* [Fully supervised BERTopic](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html)
+    * You can now use a classification model for the clustering step instead to create a fully supervised topic model
+* [Manual topic modeling](https://maartengr.github.io/BERTopic/getting_started/manual/manual.html)
+    * Generate topic representations from labels directly
+    * Allows for skipping the embedding and clustering steps in order to go directly to the topic representation step
+* [Reduce outliers](https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html) with 4 different strategies using `.reduce_outliers`
+* Install BERTopic without `SentenceTransformers` for a [lightweight package](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation):
+    * `pip install --no-deps bertopic`
+    * `pip install --upgrade numpy hdbscan umap-learn pandas scikit-learn tqdm plotly pyyaml`
+* Get meta data of trained documents such as topics and probabilities using `.get_document_info(docs)`
+* Added more support for cuML's HDBSCAN
+    * Calculate and predict probabilities during `fit_transform`  and `transform` respectively
+    * This should give a major speed-up when setting `calculate_probabilities=True`
+* More images to the documentation and a lot of changes/updates/clarifications
+* Get representative documents for non-HDBSCAN models by comparing document and topic c-TF-IDF representations 
+* Sklearn Pipeline [Embedder](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html#scikit-learn-embeddings) by [@koaning](https://github.com/koaning) in [#791](https://github.com/MaartenGr/BERTopic/pull/791)
+
+<h3><b>Fixes:</a></b></h3>
+
+* Improve `.partial_fit` documentation ([#837](https://github.com/MaartenGr/BERTopic/issues/837))
+* Fixed scipy linkage usage ([#807](https://github.com/MaartenGr/BERTopic/issues/807))
+* Fixed shifted heatmap ([#782](https://github.com/MaartenGr/BERTopic/issues/782))
+* Fixed SpaCy backend ([#744](https://github.com/MaartenGr/BERTopic/issues/744))
+* Fixed representative docs with small clusters (<3) ([#703](https://github.com/MaartenGr/BERTopic/issues/703))
+* Typo fixed by [@timpal0l](https://github.com/timpal0l) in [#734](https://github.com/MaartenGr/BERTopic/pull/734)
+* Typo fixed by [@srulikbd](https://github.com/timpal0l) in [#842](https://github.com/MaartenGr/BERTopic/pull/842)
+* Correcting iframe urls by [@Mustapha-AJEGHRIR](https://github.com/Mustapha-AJEGHRIR) in [#798](https://github.com/MaartenGr/BERTopic/pull/798)
+* Refactor embedding methods by [@zachschillaci27](https://github.com/zachschillaci27) in [#855](https://github.com/MaartenGr/BERTopic/pull/855)
+* Added diversity parameter to update_topics() function by [@anubhabdaserrr](https://github.com/anubhabdaserrr) in [#887](https://github.com/MaartenGr/BERTopic/pull/887)
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html">Documentation</a></b></h3>
+
+Personally, I believe that documentation can be seen as a feature and is an often underestimated aspect of open-source. So I went a bit overboard😅... and created an animation about the three pillars of BERTopic using Manim. There are many other visualizations added, one of each variation of BERTopic, and many smaller changes. 
+
+<iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/205490350-cd9833e7-9cd5-44fa-8752-407d748de633.mp4
+" title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html">Topic Distributions</a></b></h3>
+
+The difficulty with a cluster-based topic modeling technique is that it does not directly consider that documents may contain multiple topics. With the new release, we can now model the distributions of topics! We even consider that a single word might be related to multiple topics. If a document is a mixture of topics, what is preventing a single word to be the same? 
+
+To do so, we approximate the distribution of topics in a document by calculating and summing the similarities of tokensets (achieved by applying a sliding window) with the topics:
+
+```python
+# After fitting your model run the following for either your trained documents or even unseen documents
+topic_distr, _ = topic_model.approximate_distribution(docs)
+```
+
+To calculate and visualize the topic distributions in a document on a token-level, we can run the following:
+
+```python
+# We need to calculate the topic distributions on a token level
+topic_distr, topic_token_distr = topic_model.approximate_distribution(docs, calculate_tokens=True)
+
+# Create a visualization using a styled dataframe if Jinja2 is installed
+df = topic_model.visualize_approximate_distribution(docs[0], topic_token_distr[0]); df
+```
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html">Supervised Topic Modeling</a></b></h3>
+
+BERTopic now supports fully-supervised classification! Instead of using a clustering algorithm, like HDBSCAN, we can replace it with a classifier, like Logistic Regression:
+
+```python
+from bertopic import BERTopic
+from bertopic.dimensionality import BaseDimensionalityReduction
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.linear_model import LogisticRegression
+
+# Get labeled data
+data= fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+docs = data['data']
+y = data['target']
+
+# Allows us to skip over the dimensionality reduction step
+empty_dimensionality_model = BaseDimensionalityReduction()
+
+# Create a classifier to be used instead of the cluster model
+clf= LogisticRegression()
+
+# Create a fully supervised BERTopic instance
+topic_model= BERTopic(
+        umap_model=empty_dimensionality_model,
+        hdbscan_model=clf
+)
+topics, probs = topic_model.fit_transform(docs, y=y)
+```
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/manual/manual.html">Manual Topic Modeling</a></b></h3>
+
+When you already have a bunch of labels and simply want to extract topic representations from them, you might not need to actually learn how those can predicted. We can bypass the `embeddings -> dimensionality reduction -> clustering` steps and go straight to the c-TF-IDF representation of our labels:
+
+```python
+from bertopic import BERTopic
+from bertopic.backend import BaseEmbedder
+from bertopic.cluster import BaseCluster
+from bertopic.dimensionality import BaseDimensionalityReduction
+
+# Prepare our empty sub-models and reduce frequent words while we are at it.
+empty_embedding_model = BaseEmbedder()
+empty_dimensionality_model = BaseDimensionalityReduction()
+empty_cluster_model = BaseCluster()
+
+# Fit BERTopic without actually performing any clustering
+topic_model= BERTopic(
+        embedding_model=empty_embedding_model,
+        umap_model=empty_dimensionality_model,
+        hdbscan_model=empty_cluster_model,
+)
+topics, probs = topic_model.fit_transform(docs, y=y)
+```
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html">Outlier Reduction</a></b></h3>
+
+Outlier reduction is an frequently-discussed topic in BERTopic as its default cluster model, HDBSCAN, has a tendency to generate many outliers. This often helps in the topic representation steps, as we do not consider documents that are less relevant, but you might want to still assign those outliers to actual topics. In the modular philosophy of BERTopic, keeping training times in mind, it is now possible to perform outlier reduction **after** having trained your topic model. This allows for ease of iteration and prevents having to train BERTopic many times to find the parameters you are searching for. There are 4 different strategies that you can use, so make sure to check out the [documentation](https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html)!
+
+Using it is rather straightforward:
+
+```python
+new_topics = topic_model.reduce_outliers(docs, topics)
+```
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation">Lightweight BERTopic</a></b></h3>
+
+The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely `"all-MiniLM-L6-v2"`. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires `pytorch` which often results in a rather large environment, memory-wise. 
+
+Fortunately, it is possible to install BERTopic without `sentence-transformers` and use it as a lightweight solution instead. The installation can be done as follows:
+
+```bash
+pip install --no-deps bertopic
+pip install --upgrade numpy hdbscan umap-learn pandas scikit-learn tqdm plotly pyyaml
+```
+
+Then, we can use BERTopic without `sentence-transformers` as follows using a CPU-based embedding technique:
+
+```python
+from sklearn.pipeline import make_pipeline
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+pipe = make_pipeline(
+    TfidfVectorizer(),
+    TruncatedSVD(100)
+)
+
+topic_model = BERTopic(embedding_model=pipe)
+```
+
+As a result, the entire package and resulting model can be run quickly on the CPU and no GPU is necessary!
+
+
+
 ## **Version 0.12.0**
 *Release date: 5 September, 2022*
 
