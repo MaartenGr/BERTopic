@@ -595,7 +595,8 @@ class BERTopic:
                          nr_bins: int = None,
                          datetime_format: str = None,
                          evolution_tuning: bool = True,
-                         global_tuning: bool = True) -> pd.DataFrame:
+                         global_tuning: bool = True,
+                         top_n_words_per_time: int = 5) -> pd.DataFrame:
         """ Create topics over time
 
         To create the topics over time, BERTopic needs to be already fitted once.
@@ -630,6 +631,7 @@ class BERTopic:
             global_tuning: Fine-tune each topic representation at timestamp *t* by averaging its c-TF-IDF matrix
                        with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                        topic representations that could not be found in the documents at timestamp *t*.
+            top_n_words_per_time: The number of words per topic you want to appear at each timestamp *t*.
 
         Returns:
             topics_over_time: A dataframe that contains the topic, words, and frequency of topic
@@ -712,7 +714,7 @@ class BERTopic:
 
             # Fill dataframe with results
             topics_at_timestamp = [(topic,
-                                    ", ".join([words[0] for words in values][:5]),
+                                    ", ".join([words[0] for words in values][:top_n_words_per_time]),
                                     topic_frequency[topic],
                                     timestamp) for topic, values in words_per_topic.items()]
             topics_over_time.extend(topics_at_timestamp)
