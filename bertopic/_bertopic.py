@@ -2984,7 +2984,7 @@ class BERTopic:
                                          for topic, doc_ids in
                                          representative_docs.items()}
         else:
-            documents_per_topic = documents.groupby('Topic').sample(n=500, replace=True).drop_duplicates()
+            documents_per_topic = documents.groupby('Topic').sample(n=500, replace=True, random_state=42).drop_duplicates()
             self.representative_docs_ = {}
             for topic in documents['Topic'].unique():
 
