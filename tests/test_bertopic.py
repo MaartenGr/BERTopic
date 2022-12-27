@@ -2,7 +2,7 @@ import copy
 import pytest
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model')])
+@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model')])
 def test_full_model(model, documents, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.

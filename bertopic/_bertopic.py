@@ -753,9 +753,9 @@ class BERTopic:
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             classes: The class of each document. This can be either a list of strings or ints.
-            global_tuning: Fine-tune each topic representation at timestamp t by averaging its c-TF-IDF matrix
-                       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
-                       topic representations that could not be found in the documents at timestamp t.
+            global_tuning: Fine-tune each topic representation for class c t by averaging its c-TF-IDF matrix
+                           with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                           topic representations that could not be found in the documents for class c.
 
         Returns:
             topics_per_class: A dataframe that contains the topic, words, and frequency of topics
@@ -2665,10 +2665,10 @@ class BERTopic:
              save_embedding_model: bool = True) -> None:
         """ Saves the model to the specified path
 
-        When saving the model, make sure to also keep track of the versions 
-        of dependencies and Python used. Loading and saving the model should 
-        be done using the same dependencies and Python. Moreover, models 
-        saved in one version of BERTopic should not be loaded in other versions. 
+        When saving the model, make sure to also keep track of the versions
+        of dependencies and Python used. Loading and saving the model should
+        be done using the same dependencies and Python. Moreover, models
+        saved in one version of BERTopic should not be loaded in other versions.
 
         Arguments:
             path: the location and name of the file you want to save

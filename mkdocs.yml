@@ -39,12 +39,17 @@ nav:
   - API:
       - BERTopic: api/bertopic.md
       - MMR: api/mmr.md
-      - Vectorizers:
-        - cTFIDF: api/ctfidf.md
-        - OnlineCountVectorizer: api/onlinecv.md
-      - Backends:
-        - Base: api/backends/base.md
-        - Word Doc: api/backends/word_doc.md
+      - Sub-models:
+        - Backends:
+          - Base: api/backends/base.md
+          - Word Doc: api/backends/word_doc.md
+        - Dimensionality Reduction:
+          - Base: api/dimensionality/base.md
+        - Clustering:
+          - Base: api/cluster/base.md
+        - Vectorizers:
+          - cTFIDF: api/ctfidf.md
+          - OnlineCountVectorizer: api/onlinecv.md
       - Plotting:
         - Barchart: api/plotting/barchart.md
         - Documents: api/plotting/documents.md
