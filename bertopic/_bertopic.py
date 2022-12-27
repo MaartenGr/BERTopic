@@ -1402,7 +1402,7 @@ class BERTopic:
     def get_document_info(self,
                           docs: List[str],
                           df: pd.DataFrame = None,
-                          meta_data: Mapping[str, Any] = None) -> pd.DataFrame:
+                          metadata: Mapping[str, Any] = None) -> pd.DataFrame:
         """ Get information about the documents on which the topic was trained
         including the documents themselves, their respective topics, the name
         of each topic, the top n words of each topic, whether it is a
@@ -1416,7 +1416,7 @@ class BERTopic:
             docs: The documents on which the topic model was trained.
             df: A dataframe containing the metadata and the documents on which
                 the topic model was originally trained on.
-            meta_data: A dictionary with meta data for each document in the form
+            metadata: A dictionary with meta data for each document in the form
                     of column name (key) and the respective values (value).
 
         Returns:
@@ -1450,7 +1450,7 @@ class BERTopic:
         # Create our documents dataframe using the original dataframe and meta data about
         # the topic distributions
         document_info = topic_model.get_document_info(docs, df=df,
-                                                       meta_data={"Topic_distribution": distributions})
+                                                      metadata={"Topic_distribution": distributions})
         ```
         """
         if df is not None:
@@ -1482,8 +1482,8 @@ class BERTopic:
         document_info.loc[document_info.Document.isin(repr_docs), "Representative_document"] = True
 
         # Add custom meta data provided by the user
-        if meta_data is not None:
-            for column, values in meta_data.items():
+        if metadata is not None:
+            for column, values in metadata.items():
                 document_info[column] = values
         return document_info
 

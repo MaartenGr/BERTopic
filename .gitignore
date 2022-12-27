@@ -73,6 +73,7 @@ ENV/
 env.bak/
 venv.bak/
 
+# Artifacts
 .idea
 .idea/
 .vscode

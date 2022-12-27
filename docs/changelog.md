@@ -162,6 +162,24 @@ topic_model = BERTopic(embedding_model=pipe)
 
 As a result, the entire package and resulting model can be run quickly on the CPU and no GPU is necessary!
 
+<h3><b><a href="https://maartengr.github.io/BERTopic/api/bertopic.html#bertopic._bertopic.BERTopic.get_document_info">Document Information</a></b></h3>
+
+Get information about the documents on which the topic was trained including the documents themselves, their respective topics, the name of each topic, the top n words of each topic, whether it is a representative document, and the probability of the clustering if the cluster model supports it. There are also options to include other metadata, such as the topic distributions or the x and y coordinates of the reduced embeddings that you can learn more about <a href="https://maartengr.github.io/BERTopic/api/bertopic.html#bertopic._bertopic.BERTopic.get_document_info">here</a>.
+
+To get the document info, you will only need to pass the documents on which the topic model was trained:
+
+
+```python
+>>> topic_model.get_document_info(docs)
+
+Document                               Topic	Name	                    Top_n_words                     Probability    ...
+I am sure some bashers of Pens...	    0	    0_game_team_games_season	game - team - games...	        0.200010       ...
+My brother is in the market for...      -1     -1_can_your_will_any	        can - your - will...	        0.420668       ...
+Finally you said what you dream...	    -1     -1_can_your_will_any	        can - your - will...            0.807259       ...
+Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.071746       ...
+1) I have an old Jasmine drive...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.038983       ...
+```
+
 
 
 ## **Version 0.12.0**
