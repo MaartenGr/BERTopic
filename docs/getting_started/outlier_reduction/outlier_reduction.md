@@ -79,7 +79,7 @@ from bertopic import BERTopic
 topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
-# Reduce outliers using the `distributions` strategy
+# Reduce outliers using the `c-tf-idf` strategy
 new_topics = topic_model.reduce_outliers(docs, topics, strategy="c-tf-idf")
 ```
 
@@ -94,7 +94,7 @@ from bertopic import BERTopic
 topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 
-# Reduce outliers using the `distributions` strategy
+# Reduce outliers using the `embeddings` strategy
 new_topics = topic_model.reduce_outliers(docs, topics, strategy="embeddings")
 ```
 
