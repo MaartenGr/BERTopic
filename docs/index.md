@@ -100,7 +100,8 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 
 **NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
-## Modularity
+## **Modularity**
+
 By default, the main steps for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, it assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic not only allows you to build your own topic model but to explore several topic modeling techniques on top of your customized topic model:
 
 <iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/205490350-cd9833e7-9cd5-44fa-8752-407d748de633.mp4
