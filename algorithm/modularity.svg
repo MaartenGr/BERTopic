@@ -1,0 +1,228 @@
+<svg width="1031" height="425" viewBox="0 0 1031 425" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="170" y="373" width="118" height="38" fill="#64B5F6"/>
+<rect x="262" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="234" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="206" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="178" y="363" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="196.256" y="400.939">SBERT</tspan></text>
+<rect x="302" y="373" width="118" height="38" fill="#64B5F6"/>
+<rect x="394" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="366" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="338" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="310" y="363" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="329.936" y="400.939">SpaCy</tspan></text>
+<rect x="497" y="373" width="118" height="38" fill="#64B5F6"/>
+<rect x="589" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="561" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="533" y="363" width="20" height="8" fill="#64B5F6"/>
+<rect x="505" y="363" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="528.623" y="395.764">Transformers</tspan></text>
+<circle cx="436.5" cy="391.5" r="5.5" fill="black"/>
+<circle cx="455.5" cy="391.5" r="5.5" fill="black"/>
+<circle cx="477.5" cy="391.5" r="5.5" fill="black"/>
+<path d="M515.944 399.706C512.02 399.706 507.788 397.245 507.788 391.845C507.788 386.445 512.02 383.984 515.944 383.984C518.124 383.984 520.134 384.702 521.625 386.009C523.242 387.444 524.1 389.469 524.1 391.845C524.1 394.222 523.242 396.233 521.625 397.667C520.134 398.975 518.109 399.706 515.944 399.706Z" fill="url(#paint0_radial_34_2523)"/>
+<path d="M515.944 399.706C512.02 399.706 507.788 397.245 507.788 391.845C507.788 386.445 512.02 383.984 515.944 383.984C518.124 383.984 520.134 384.702 521.625 386.009C523.242 387.444 524.1 389.469 524.1 391.845C524.1 394.222 523.242 396.233 521.625 397.667C520.134 398.975 518.109 399.706 515.944 399.706Z" fill="url(#paint1_linear_34_2523)"/>
+<path d="M522.678 387.172C523.428 388.382 523.819 389.822 523.819 391.423C523.819 393.8 522.961 395.811 521.344 397.245C519.853 398.553 517.828 399.284 515.663 399.284C513.123 399.284 510.454 398.251 508.887 396.058C510.4 398.542 513.245 399.706 515.944 399.706C518.109 399.706 520.134 398.975 521.625 397.667C523.242 396.233 524.1 394.222 524.1 391.845C524.1 390.054 523.612 388.462 522.678 387.172V387.172Z" fill="#EB8F00"/>
+<path opacity="0.8" d="M511.176 394.306C512.442 394.306 513.469 393.28 513.469 392.014C513.469 390.748 512.442 389.722 511.176 389.722C509.911 389.722 508.884 390.748 508.884 392.014C508.884 393.28 509.911 394.306 511.176 394.306Z" fill="url(#paint2_radial_34_2523)"/>
+<path opacity="0.8" d="M520.627 392.534C521.893 392.534 522.919 391.508 522.919 390.242C522.919 388.976 521.893 387.95 520.627 387.95C519.361 387.95 518.334 388.976 518.334 390.242C518.334 391.508 519.361 392.534 520.627 392.534Z" fill="url(#paint3_radial_34_2523)"/>
+<path d="M520.627 389.947C519.544 390.945 518.109 391.733 516.45 392.113C514.791 392.492 513.159 392.422 511.753 391.986C511.5 391.902 511.317 392.239 511.542 392.408C512.963 393.463 514.861 393.913 516.759 393.463C518.658 393.027 520.177 391.803 520.992 390.228C521.133 389.989 520.823 389.764 520.627 389.947V389.947Z" fill="#422B0D"/>
+<path d="M513.82 389.637L513.792 389.609C513.778 389.595 513.75 389.581 513.722 389.553C513.694 389.539 513.666 389.511 513.638 389.497C513.609 389.469 513.567 389.441 513.525 389.412C513.483 389.384 513.441 389.356 513.399 389.342C513.356 389.314 513.314 389.3 513.272 389.3C513.23 389.286 513.202 389.286 513.188 389.286H513.159H513.145H513.174L513.103 389.3C513.089 389.3 513.103 389.3 513.103 389.3H513.117C513.131 389.3 513.117 389.3 513.117 389.3H513.103C513.089 389.314 513.061 389.328 513.033 389.342C513.005 389.37 512.963 389.398 512.934 389.427C512.906 389.455 512.878 389.497 512.85 389.539C512.794 389.623 512.752 389.694 512.724 389.75C512.695 389.806 512.667 389.834 512.667 389.834L512.639 389.891C512.499 390.13 512.189 390.228 511.936 390.102C511.767 390.017 511.669 389.862 511.655 389.694V389.539C511.669 389.441 511.683 389.3 511.739 389.131C511.795 388.962 511.894 388.752 512.077 388.555C512.175 388.456 512.288 388.344 512.428 388.273C512.456 388.245 512.499 388.231 512.541 388.217C512.583 388.203 512.611 388.175 512.667 388.161L512.738 388.133C512.766 388.119 512.794 388.119 512.808 388.119L512.878 388.105L512.92 388.091H512.977L513.047 388.077H513.174C513.258 388.077 513.342 388.077 513.427 388.091C513.595 388.119 513.736 388.175 513.863 388.231C514.116 388.358 514.27 388.512 514.397 388.639C514.453 388.709 514.509 388.766 514.538 388.822C514.58 388.878 514.608 388.934 514.636 388.977C514.664 389.019 514.664 389.047 514.678 389.061C514.678 389.075 514.692 389.089 514.692 389.089C514.791 389.342 514.65 389.623 514.369 389.722C514.172 389.792 513.961 389.75 513.82 389.637V389.637Z" fill="#422B0D"/>
+<path d="M518.644 388.695L518.616 388.667C518.602 388.653 518.574 388.639 518.545 388.611C518.517 388.597 518.489 388.569 518.461 388.555C518.433 388.527 518.391 388.498 518.349 388.47C518.306 388.442 518.264 388.414 518.222 388.4C518.18 388.372 518.138 388.358 518.095 388.358C518.067 388.344 518.039 388.344 518.025 388.344H517.983H518.011L517.941 388.358C517.927 388.358 517.941 388.358 517.941 388.358H517.955C517.969 388.358 517.955 388.358 517.955 388.358H517.941C517.927 388.372 517.899 388.386 517.856 388.4C517.828 388.428 517.8 388.456 517.758 388.484C517.73 388.512 517.702 388.555 517.674 388.597C517.617 388.681 517.575 388.752 517.547 388.808C517.519 388.864 517.491 388.892 517.491 388.892L517.463 388.934C517.322 389.173 517.013 389.272 516.76 389.145C516.591 389.061 516.492 388.906 516.478 388.737C516.478 388.737 516.478 388.681 516.492 388.583C516.506 388.484 516.52 388.344 516.577 388.175C516.633 388.006 516.731 387.795 516.914 387.598C517.013 387.5 517.125 387.387 517.266 387.317C517.294 387.303 517.336 387.275 517.378 387.261C517.42 387.247 517.449 387.219 517.505 387.205L517.589 387.177C517.617 387.162 517.645 387.162 517.66 387.162L517.73 387.148L517.772 387.134H517.828L517.899 387.12H518.025C518.11 387.12 518.194 387.12 518.278 387.134C518.447 387.162 518.588 387.219 518.714 387.275C518.967 387.402 519.122 387.556 519.249 387.683C519.305 387.753 519.361 387.809 519.389 387.866C519.431 387.922 519.46 387.978 519.488 388.02C519.516 388.062 519.516 388.091 519.53 388.105C519.544 388.119 519.544 388.133 519.544 388.133C519.642 388.386 519.502 388.667 519.22 388.766C518.995 388.864 518.785 388.822 518.644 388.695V388.695Z" fill="#422B0D"/>
+<path d="M513.029 394.62C512.993 394.27 513.009 394.07 512.74 394.007C512.439 393.936 512.171 394.152 512.089 394.46C511.874 395.284 512.24 395.859 512.24 395.859C511.719 395.756 511.285 395.25 511.285 395.25C511.013 394.931 510.631 394.137 510.367 393.811C510.206 393.613 509.943 393.451 509.682 393.588C509.055 393.917 509.749 395.036 509.983 395.334C510.248 395.673 509.292 394.589 509.152 394.353C508.89 393.914 508.569 393.797 508.301 394.026C508.032 394.254 508.247 394.824 508.37 395.04C509.119 396.355 509.773 396.677 509.773 396.677C509.773 396.677 509.077 396.342 508.484 395.624C507.924 394.946 507.392 395.662 507.765 396.264C507.844 396.392 507.994 396.722 508.478 397.14C508.849 397.46 508.607 397.268 508.478 397.14C507.983 396.652 507.456 397.172 507.615 397.598C507.799 398.089 508.399 398.543 508.806 398.844C509.596 399.429 510.582 399.897 511.58 399.865C512.691 399.83 513.511 399.367 513.757 397.993C513.871 397.355 513.515 396.376 513.41 396.126C513.065 395.316 513.048 394.818 513.029 394.62Z" fill="url(#paint4_radial_34_2523)"/>
+<path d="M511.914 398.038C511.765 397.829 511.344 396.856 512.129 395.86L512.357 396.004C511.468 397.1 512.089 398.037 512.198 398.249C512.198 398.249 512.056 398.24 511.914 398.038V398.038Z" fill="#EB8F00"/>
+<path d="M513.497 396.036C513.148 395.36 513.123 395.008 513.099 394.623C513.072 394.344 513.052 394 512.716 393.921C512.573 393.887 512.373 393.907 512.196 394.102C511.753 394.595 512.106 395.739 512.106 395.739C511.469 395.441 511.362 395.178 510.911 394.499C510.714 394.201 510.4 393.65 510.113 393.489C509.908 393.374 509.604 393.46 509.452 393.665C509.111 394.123 509.72 395.053 509.72 395.053C509.72 395.053 509.384 394.564 509.237 394.308C508.988 393.873 508.533 393.633 508.197 393.935C507.648 394.429 508.714 395.756 508.714 395.756C508.714 395.756 508.223 394.978 507.734 395.307C507.48 395.479 507.38 395.926 507.644 396.357C507.761 396.552 508.057 396.898 508.057 396.898C508.057 396.898 507.938 396.822 507.738 396.887C507.516 396.96 507.326 397.235 507.488 397.666C507.675 398.169 508.229 398.605 508.734 398.969C509.883 399.799 511.226 399.85 511.226 399.85C511.226 399.85 509.753 399.567 508.811 398.709C508.516 398.441 507.346 397.624 507.764 397.199C507.862 397.098 508.042 397.047 508.308 397.258C509.243 398.003 509.562 397.83 509.562 397.83C509.596 397.701 509.503 397.646 509.225 397.482C509.032 397.368 508.768 397.212 508.572 397.044C508.093 396.629 507.551 395.908 507.848 395.587C508.007 395.416 508.191 395.452 508.37 395.637C509.613 396.905 509.905 396.726 509.905 396.726C509.905 396.726 509.943 396.589 509.551 396.244C509.25 395.981 508.88 395.656 508.423 394.86C508.302 394.649 508.24 394.274 508.417 394.126C508.657 393.924 508.877 394.057 509.076 394.354C509.317 394.715 509.661 395.16 510.002 395.487C510.416 395.883 510.638 396.004 510.652 395.99C510.75 395.883 510.327 395.468 510.139 395.209C509.475 394.294 509.485 393.993 509.623 393.755C509.71 393.605 509.95 393.537 510.24 393.901C510.864 394.621 511.179 395.793 512.355 396.001C512.355 396.001 512.4 395.93 512.295 395.549C512.168 395.151 512.147 394.812 512.212 394.516C512.283 394.188 512.546 394.095 512.691 394.13C512.885 394.177 512.863 394.503 512.863 394.503C512.863 394.503 512.874 394.623 512.88 394.677C512.902 394.914 512.948 395.406 513.275 396.165C513.405 396.469 514.103 397.718 513.158 399.28C513.158 399.28 513.559 399.383 514.019 399.49C514.019 399.49 514.2 398.85 514.116 397.856C514.013 396.605 513.732 396.492 513.497 396.036V396.036Z" fill="#EB8F00"/>
+<path d="M507.077 397.438C507.082 397.399 507.087 397.365 507.094 397.335C507.084 397.368 507.079 397.401 507.077 397.438Z" fill="url(#paint5_radial_34_2523)"/>
+<path d="M518.843 394.62C518.879 394.27 518.865 394.077 519.132 394.007C519.419 393.932 519.696 394.153 519.783 394.459C519.984 395.179 519.599 395.859 519.599 395.859C520.119 395.756 520.56 395.257 520.56 395.257C520.832 394.938 521.242 394.137 521.505 393.811C521.666 393.613 521.856 393.485 522.131 393.586C522.701 393.797 522.106 394.95 521.872 395.25C521.607 395.589 521.775 395.534 522.133 395.142C522.491 394.746 522.681 394.523 522.822 394.288C523.083 393.849 523.397 393.883 523.571 394.026C523.844 394.251 523.625 394.824 523.502 395.04C522.753 396.355 523.388 395.624 523.388 395.624C523.948 394.946 524.48 395.662 524.107 396.264C524.028 396.392 523.878 396.722 523.394 397.14C523.023 397.46 523.265 397.268 523.394 397.14C523.889 396.652 524.416 397.172 524.257 397.598C524.073 398.089 523.473 398.543 523.066 398.844C522.276 399.429 521.29 399.897 520.292 399.865C519.181 399.83 518.361 399.367 518.115 397.993C518.001 397.355 518.357 396.376 518.462 396.126C518.807 395.316 518.824 394.818 518.843 394.62V394.62Z" fill="url(#paint6_radial_34_2523)"/>
+<path d="M519.959 398.038C520.108 397.829 520.528 396.856 519.743 395.86L519.516 396.004C520.404 397.1 519.783 398.037 519.675 398.249C519.675 398.249 519.817 398.24 519.959 398.038V398.038Z" fill="#EB8F00"/>
+<path d="M518.375 396.036C518.724 395.36 518.749 395.008 518.773 394.623C518.8 394.344 518.82 394 519.156 393.921C519.299 393.887 519.499 393.907 519.676 394.102C520.119 394.595 519.766 395.739 519.766 395.739C520.403 395.441 520.51 395.178 520.961 394.499C521.158 394.201 521.472 393.65 521.759 393.489C521.964 393.374 522.268 393.46 522.42 393.665C522.761 394.123 522.152 395.053 522.152 395.053C522.152 395.053 522.488 394.564 522.635 394.308C522.884 393.873 523.339 393.633 523.675 393.935C524.224 394.429 523.158 395.756 523.158 395.756C523.158 395.756 523.649 394.978 524.138 395.307C524.393 395.479 524.492 395.926 524.228 396.357C524.111 396.552 523.815 396.898 523.815 396.898C523.815 396.898 523.934 396.822 524.134 396.887C524.356 396.96 524.546 397.235 524.384 397.666C524.197 398.169 523.643 398.605 523.138 398.969C521.989 399.799 520.646 399.85 520.646 399.85C520.646 399.85 522.119 399.567 523.061 398.709C523.356 398.441 524.526 397.624 524.108 397.199C524.01 397.098 523.83 397.047 523.564 397.258C522.629 398.003 522.31 397.83 522.31 397.83C522.276 397.701 522.369 397.646 522.647 397.482C522.84 397.368 523.104 397.212 523.3 397.044C523.779 396.629 524.321 395.908 524.024 395.587C523.865 395.416 523.681 395.452 523.502 395.637C522.259 396.905 521.967 396.726 521.967 396.726C521.967 396.726 521.929 396.589 522.321 396.244C522.622 395.981 522.992 395.656 523.449 394.86C523.57 394.649 523.632 394.274 523.455 394.126C523.216 393.924 522.995 394.057 522.796 394.354C522.555 394.715 522.211 395.16 521.87 395.487C521.456 395.883 521.234 396.004 521.22 395.99C521.122 395.883 521.545 395.468 521.733 395.209C522.397 394.294 522.387 393.993 522.249 393.755C522.162 393.605 521.922 393.537 521.632 393.901C521.005 394.624 520.69 395.795 519.516 396.004C519.516 396.004 519.471 395.933 519.576 395.552C519.703 395.154 519.724 394.815 519.659 394.519C519.587 394.191 519.324 394.098 519.18 394.133C518.986 394.18 519.008 394.506 519.008 394.506C519.008 394.506 518.997 394.625 518.991 394.68C518.969 394.917 518.922 395.409 518.596 396.168C518.465 396.472 517.766 397.733 518.713 399.283C518.713 399.283 518.312 399.386 517.852 399.492C517.852 399.492 517.671 398.853 517.755 397.858C517.859 396.605 518.14 396.492 518.375 396.036V396.036Z" fill="#EB8F00"/>
+<path d="M524.795 397.438C524.79 397.399 524.785 397.365 524.778 397.335C524.788 397.368 524.793 397.401 524.795 397.438Z" fill="url(#paint7_radial_34_2523)"/>
+<rect x="170" y="280" width="118" height="38" fill="#E57373"/>
+<rect x="262" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="234" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="206" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="178" y="270" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="199.254" y="307.939">UMAP</tspan></text>
+<rect x="302" y="280" width="118" height="38" fill="#E57373"/>
+<rect x="394" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="366" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="338" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="310" y="270" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="340.902" y="307.939">PCA</tspan></text>
+<rect x="497" y="280" width="118" height="38" fill="#E57373"/>
+<rect x="589" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="561" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="533" y="270" width="20" height="8" fill="#E57373"/>
+<rect x="505" y="270" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="505.886" y="305.058">TruncatedSVD</tspan></text>
+<circle cx="436.5" cy="298.5" r="5.5" fill="black"/>
+<circle cx="456.5" cy="298.5" r="5.5" fill="black"/>
+<circle cx="476.5" cy="298.5" r="5.5" fill="black"/>
+<rect x="170" y="190" width="118" height="38" fill="#4DB6AC"/>
+<rect x="262" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="234" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="206" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="178" y="180" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="179.342" y="217.939">HDBSCAN</tspan></text>
+<rect x="170" y="100" width="118" height="38" fill="#FFD54F"/>
+<rect x="262" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="234" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="206" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="178" y="90" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="176.346" y="124.161">CountVectorizer</tspan></text>
+<rect x="302" y="100" width="118" height="38" fill="#FFD54F"/>
+<rect x="394" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="366" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="338" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="310" y="90" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="334.73" y="127.939">Jieba</tspan></text>
+<rect x="497" y="100" width="118" height="38" fill="#FFD54F"/>
+<rect x="589" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="561" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="533" y="90" width="20" height="8" fill="#FFD54F"/>
+<rect x="505" y="90" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="535.385" y="127.939">POS</tspan></text>
+<rect x="302" y="190" width="118" height="38" fill="#4DB6AC"/>
+<rect x="394" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="366" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="338" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="310" y="180" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="318.246" y="217.939">k-Means</tspan></text>
+<rect x="497" y="190" width="118" height="38" fill="#4DB6AC"/>
+<rect x="589" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="561" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="533" y="180" width="20" height="8" fill="#4DB6AC"/>
+<rect x="505" y="180" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="521.709" y="217.939">BIRCH</tspan></text>
+<circle cx="436.5" cy="208.5" r="5.5" fill="black"/>
+<circle cx="456.5" cy="208.5" r="5.5" fill="black"/>
+<circle cx="476.5" cy="208.5" r="5.5" fill="black"/>
+<circle cx="436.5" cy="118.5" r="5.5" fill="black"/>
+<circle cx="456.5" cy="118.5" r="5.5" fill="black"/>
+<circle cx="476.5" cy="118.5" r="5.5" fill="black"/>
+<circle cx="436.5" cy="29.5" r="5.5" fill="black"/>
+<circle cx="456.5" cy="29.5" r="5.5" fill="black"/>
+<circle cx="476.5" cy="29.5" r="5.5" fill="black"/>
+<circle cx="842.5" cy="205.5" r="5.5" fill="black"/>
+<circle cx="862.5" cy="205.5" r="5.5" fill="black"/>
+<circle cx="882.5" cy="205.5" r="5.5" fill="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="86.3008" y="398.764">Embeddings</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="8.67578" y="301.764">Dimensionality reduction</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="98.3125" y="212.764">Clustering</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="102.938" y="122.764">Tokenizer</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="50.4023" y="31.7637">Weighting scheme</tspan></text>
+<rect x="701" y="266" width="118" height="38" fill="#64B5F6"/>
+<rect x="793" y="256" width="20" height="8" fill="#64B5F6"/>
+<rect x="765" y="256" width="20" height="8" fill="#64B5F6"/>
+<rect x="737" y="256" width="20" height="8" fill="#64B5F6"/>
+<rect x="709" y="256" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="728.936" y="293.939">SpaCy</tspan></text>
+<rect x="701" y="226" width="118" height="38" fill="#E57373"/>
+<rect x="793" y="216" width="20" height="8" fill="#E57373"/>
+<rect x="765" y="216" width="20" height="8" fill="#E57373"/>
+<rect x="737" y="216" width="20" height="8" fill="#E57373"/>
+<rect x="709" y="216" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="739.902" y="253.939">PCA</tspan></text>
+<rect x="701" y="186" width="118" height="38" fill="#4DB6AC"/>
+<rect x="793" y="176" width="20" height="8" fill="#4DB6AC"/>
+<rect x="765" y="176" width="20" height="8" fill="#4DB6AC"/>
+<rect x="737" y="176" width="20" height="8" fill="#4DB6AC"/>
+<rect x="709" y="176" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="717.246" y="213.939">k-Means</tspan></text>
+<rect x="701" y="146" width="118" height="38" fill="#FFD54F"/>
+<rect x="793" y="136" width="20" height="8" fill="#FFD54F"/>
+<rect x="765" y="136" width="20" height="8" fill="#FFD54F"/>
+<rect x="737" y="136" width="20" height="8" fill="#FFD54F"/>
+<rect x="709" y="136" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="707.346" y="170.161">CountVectorizer</tspan></text>
+<rect x="701" y="106" width="118" height="38" fill="#90A4AE"/>
+<rect x="793" y="96" width="20" height="8" fill="#90A4AE"/>
+<rect x="765" y="96" width="20" height="8" fill="#90A4AE"/>
+<rect x="737" y="96" width="20" height="8" fill="#90A4AE"/>
+<rect x="709" y="96" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="715.938" y="133.939">c-TF-IDF</tspan></text>
+<rect x="170" y="10" width="118" height="38" fill="#90A4AE"/>
+<rect x="262" width="20" height="8" fill="#90A4AE"/>
+<rect x="234" width="20" height="8" fill="#90A4AE"/>
+<rect x="206" width="20" height="8" fill="#90A4AE"/>
+<rect x="178" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="184.938" y="36.9395">c-TF-IDF</tspan></text>
+<rect x="302" y="10" width="118" height="38" fill="#90A4AE"/>
+<rect x="394" width="20" height="8" fill="#90A4AE"/>
+<rect x="366" width="20" height="8" fill="#90A4AE"/>
+<rect x="338" width="20" height="8" fill="#90A4AE"/>
+<rect x="310" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="320.326" y="26.0576">c-TF-IDF + &#10;</tspan><tspan x="343.404" y="43.0576">MMR</tspan></text>
+<rect x="497" y="10" width="118" height="38" fill="#90A4AE"/>
+<rect x="589" width="20" height="8" fill="#90A4AE"/>
+<rect x="561" width="20" height="8" fill="#90A4AE"/>
+<rect x="533" width="20" height="8" fill="#90A4AE"/>
+<rect x="505" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="515.326" y="26.0576">c-TF-IDF + &#10;</tspan><tspan x="536.025" y="43.0576">BM25 </tspan></text>
+<rect x="904" y="266" width="118" height="38" fill="#64B5F6"/>
+<rect x="996" y="256" width="20" height="8" fill="#64B5F6"/>
+<rect x="968" y="256" width="20" height="8" fill="#64B5F6"/>
+<rect x="940" y="256" width="20" height="8" fill="#64B5F6"/>
+<rect x="912" y="256" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="928.527" y="293.939">TF-IDF</tspan></text>
+<rect x="904" y="226" width="118" height="38" fill="#E57373"/>
+<rect x="996" y="216" width="20" height="8" fill="#E57373"/>
+<rect x="968" y="216" width="20" height="8" fill="#E57373"/>
+<rect x="940" y="216" width="20" height="8" fill="#E57373"/>
+<rect x="912" y="216" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="15" font-weight="bold" letter-spacing="0em"><tspan x="910.306" y="251.955">TruncatedSVD</tspan></text>
+<rect x="904" y="186" width="118" height="38" fill="#4DB6AC"/>
+<rect x="996" y="176" width="20" height="8" fill="#4DB6AC"/>
+<rect x="968" y="176" width="20" height="8" fill="#4DB6AC"/>
+<rect x="940" y="176" width="20" height="8" fill="#4DB6AC"/>
+<rect x="912" y="176" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="929.709" y="213.939">BIRCH</tspan></text>
+<rect x="904" y="146" width="118" height="38" fill="#FFD54F"/>
+<rect x="996" y="136" width="20" height="8" fill="#FFD54F"/>
+<rect x="968" y="136" width="20" height="8" fill="#FFD54F"/>
+<rect x="940" y="136" width="20" height="8" fill="#FFD54F"/>
+<rect x="912" y="136" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="910.346" y="170.161">CountVectorizer</tspan></text>
+<rect x="904" y="106" width="118" height="38" fill="#90A4AE"/>
+<rect x="996" y="96" width="20" height="8" fill="#90A4AE"/>
+<rect x="968" y="96" width="20" height="8" fill="#90A4AE"/>
+<rect x="940" y="96" width="20" height="8" fill="#90A4AE"/>
+<rect x="912" y="96" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="15" font-weight="bold" letter-spacing="0em"><tspan x="928.756" y="121.955">c-TF-IDF &#10;</tspan><tspan x="936.812" y="139.955">+ MMR</tspan></text>
+<path d="M688.061 210.061C688.646 209.475 688.646 208.525 688.061 207.939L678.515 198.393C677.929 197.808 676.979 197.808 676.393 198.393C675.808 198.979 675.808 199.929 676.393 200.515L684.879 209L676.393 217.485C675.808 218.071 675.808 219.021 676.393 219.607C676.979 220.192 677.929 220.192 678.515 219.607L688.061 210.061ZM625 210.5L687 210.5L687 207.5L625 207.5L625 210.5Z" fill="black"/>
+<defs>
+<radialGradient id="paint0_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(515.944 391.845) scale(8.01)">
+<stop offset="0.5" stop-color="#FDE030"/>
+<stop offset="0.919" stop-color="#F7C02B"/>
+<stop offset="1" stop-color="#F4A223"/>
+</radialGradient>
+<linearGradient id="paint1_linear_34_2523" x1="515.944" y1="399.706" x2="515.944" y2="383.984" gradientUnits="userSpaceOnUse">
+<stop offset="0.158" stop-color="#F4A223"/>
+<stop offset="0.333" stop-color="#F7C02B"/>
+<stop offset="0.807" stop-color="#FDE030" stop-opacity="0"/>
+</linearGradient>
+<radialGradient id="paint2_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(511.172 392.015) rotate(-10.6121) scale(2.49432 2.36965)">
+<stop stop-color="#ED7770"/>
+<stop offset="0.9" stop-color="#ED7770" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint3_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520.628 390.247) rotate(-10.6121) scale(2.49404 2.36938)">
+<stop stop-color="#ED7770"/>
+<stop offset="0.9" stop-color="#ED7770" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint4_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(511.552 396.229) scale(5.41589)">
+<stop offset="0.33" stop-color="#FFF176"/>
+<stop offset="1" stop-color="#FFC400"/>
+</radialGradient>
+<radialGradient id="paint5_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(511.104 396.2) scale(5.47088 5.47084)">
+<stop offset="0.33" stop-color="#FFF176"/>
+<stop offset="1" stop-color="#FFC400"/>
+</radialGradient>
+<radialGradient id="paint6_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520.321 396.236) rotate(180) scale(5.40773)">
+<stop offset="0.33" stop-color="#FFF176"/>
+<stop offset="1" stop-color="#FFC400"/>
+</radialGradient>
+<radialGradient id="paint7_radial_34_2523" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520.768 396.2) rotate(180) scale(5.471 5.47084)">
+<stop offset="0.33" stop-color="#FFF176"/>
+<stop offset="1" stop-color="#FFC400"/>
+</radialGradient>
+</defs>
+</svg>

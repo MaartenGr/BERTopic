@@ -61,7 +61,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent="">
   
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vectorizers" class="md-skip">
+        <a href="#countvectorizer" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         
           
           
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
@@ -125,7 +125,7 @@
         
           
           
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
             <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
@@ -401,20 +401,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../embeddings/embeddings.html" class="md-nav__link">
-        Embedding Models
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../visualization/visualization.html" class="md-nav__link">
         Topic Visualization
       </a>
@@ -485,6 +471,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        Outlier reduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
         Tips & Tricks
       </a>
@@ -529,6 +529,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../embeddings/embeddings.html" class="md-nav__link">
+        Embeddings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../dim_reduction/dim_reduction.html" class="md-nav__link">
         Dimensionality Reduction
       </a>
@@ -563,8 +577,6 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
-        
-      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Vectorizers
@@ -580,8 +592,6 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
-  
-    
   
   
     <label class="md-nav__title" for="__toc">
@@ -762,6 +772,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../distribution/distribution.html" class="md-nav__link">
+        Topic Distributions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
@@ -777,7 +801,21 @@
   
     <li class="md-nav__item">
       <a href="../supervised/supervised.html" class="md-nav__link">
-        (semi)-Supervised Topic Modeling
+        Supervised Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semisupervised/semisupervised.html" class="md-nav__link">
+        Semi-supervised Topic Modeling
       </a>
     </li>
   
@@ -834,6 +872,20 @@
     <li class="md-nav__item">
       <a href="../online/online.html" class="md-nav__link">
         Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/manual.html" class="md-nav__link">
+        Manual Topic Modeling
       </a>
     </li>
   
@@ -941,14 +993,14 @@
       
       
         <label class="md-nav__link" for="__nav_5_3">
-          Vectorizers
+          Sub-models
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+      <nav class="md-nav" aria-label="Sub-models" data-md-level="2">
         <label class="md-nav__title" for="__nav_5_3">
           <span class="md-nav__icon md-icon"></span>
-          Vectorizers
+          Sub-models
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -957,59 +1009,22 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../api/ctfidf.html" class="md-nav__link">
-        cTFIDF
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/onlinecv.html" class="md-nav__link">
-        OnlineCountVectorizer
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
     
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_1" type="checkbox" id="__nav_5_3_1" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_4">
+        <label class="md-nav__link" for="__nav_5_3_1">
           Backends
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Backends" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_4">
+      <nav class="md-nav" aria-label="Backends" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_1">
           <span class="md-nav__icon md-icon"></span>
           Backends
         </label>
@@ -1056,23 +1071,185 @@
   
   
     
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_2" type="checkbox" id="__nav_5_3_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_2">
+          Dimensionality Reduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Dimensionality Reduction" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Dimensionality Reduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dimensionality/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_3" type="checkbox" id="__nav_5_3_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_3">
+          Clustering
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Clustering" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Clustering
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cluster/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_4" type="checkbox" id="__nav_5_3_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_4">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
       
     
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_5">
+        <label class="md-nav__link" for="__nav_5_4">
           Plotting
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plotting" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_5">
+        <label class="md-nav__title" for="__nav_5_4">
           <span class="md-nav__icon md-icon"></span>
           Plotting
         </label>
@@ -1263,8 +1440,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1398,13 +1573,21 @@
 
 
 
-<h1 id="vectorizers">Vectorizers<a class="headerlink" href="#vectorizers" title="Permanent link">&para;</a></h1>
-<p>In topic modeling, the quality of the topic representations are key for interpreting the topics, communicating results, and understanding patterns. It is of utmost 
-importance to make sure that the topic representations fits with your use case. </p>
-<p>In practice, there is not one correct way of creating topic representations. Some use cases might opt more higher n-grams, whereas others might focus more on single 
-words without any stop words. The diversity in use cases also means that we need to have some flexibility in BERTopic to make sure it can be used across most use cases. </p>
+  <h1>Vectorizers</h1>
+
+<p>In topic modeling, the quality of the topic representations is key for interpreting the topics, communicating results, and understanding patterns. It is of utmost 
+importance to make sure that the topic representations fit with your use case. </p>
+<p>In practice, there is not one correct way of creating topic representations. Some use cases might opt for higher n-grams, whereas others might focus more on single 
+words without any stop words. The diversity in use cases also means that we need to have some flexibility in BERTopic to make sure it can be used across most use cases. 
+The image below illustrates this modularity:</p>
+<figure>
+<p><img alt="Image title" src="vectorizers.svg" />
+  </p>
+<figcaption></figcaption>
+</figure>
+<p>In this section, we will go through several examples of vectorization algorithms and how they can be implemented.  </p>
 <h2 id="countvectorizer"><strong>CountVectorizer</strong><a class="headerlink" href="#countvectorizer" title="Permanent link">&para;</a></h2>
-<p>One often understimated component of BERTopic is the <code>CountVectorizer</code> and <code>c-TF-IDF</code> calculation. Together, they are responsible for creating the topic representations and luckily 
+<p>One often underestimated component of BERTopic is the <code>CountVectorizer</code> and <code>c-TF-IDF</code> calculation. Together, they are responsible for creating the topic representations and luckily 
 can be quite flexible in parameter tuning. Here, we will go through tips and tricks for tuning your <code>CountVectorizer</code> and see how they might affect the topic representations. </p>
 <p>Before starting, it should be noted that you can pass the <code>CountVectorizer</code> before and after training your topic model. Passing it before training allows you to 
 minimize the size of the resulting <code>c-TF-IDF</code> matrix:</p>
@@ -1436,7 +1619,7 @@ on fine-tuning our topic representations after training our model. </p>
 being performed before generating the topic representations. </p>
 </div>
 <h3 id="basic-usage"><strong>Basic Usage</strong><a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
-<p>First, let's start with defining our documents and train our topic model:</p>
+<p>First, let's start with defining our documents and training our topic model:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_20newsgroups</span>
 
@@ -1465,7 +1648,7 @@ being performed before generating the topic representations. </p>
 to re-train our model. Next, we will go through common parameters in <code>CountVectorizer</code> and focus on the effects that they might have. As a baseline, we will be comparing 
 them to the topic representation above. </p>
 <h3 id="parameters"><strong>Parameters</strong><a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h3>
-<p>There are a number of basic parameters in the CountVectorizer that we can use to improve upon the quality of the resulting topic representations.</p>
+<p>There are several basic parameters in the CountVectorizer that we can use to improve upon the quality of the resulting topic representations.</p>
 <h4 id="ngram_range">ngram_range<a class="headerlink" href="#ngram_range" title="Permanent link">&para;</a></h4>
 <p>The <code>ngram_range</code> parameter allows us to decide how many tokens each entity is in a topic representation. For example, we have words like 
 <code>game</code> and <code>team</code> with a length of 1 in a topic but it would also make sense to have words like <code>hockey league</code> with a length of 2. To allow for these words to be generated, 
@@ -1505,7 +1688,7 @@ for nicer topic representations:</p>
 <p><code>tear</code> and <code>gas</code> have now been combined into a single representation. This helps us understand what those individual words might have been representing. </p>
 <h4 id="stop_words">stop_words<a class="headerlink" href="#stop_words" title="Permanent link">&para;</a></h4>
 <p>In some of the topics, we can see stop words appearing like <code>he</code> or <code>the</code>.<br />
-Stop words is something we typically want to prevent in our topic representations as they do not give additional information to the topic. 
+Stop words are something we typically want to prevent in our topic representations as they do not give additional information to the topic. 
 To prevent those stop words, we can use the <code>stop_words</code> parameter in the <code>CountVectorizer</code> to remove them from the representations:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
 <span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">)</span>
@@ -1530,10 +1713,10 @@ We can also pass in a list of stop words if you have multiple languages to take 
 <h4 id="min_df">min_df<a class="headerlink" href="#min_df" title="Permanent link">&para;</a></h4>
 <p>One important parameter to keep in mind is the <code>min_df</code>. This is typically an integer representing how frequent a word must be before 
 being added to our representation. You can imagine that if we have a million documents and a certain word only appears a single time across all of them, then 
-it would be highly unlikely to be representive of a topic. Typically, the <code>c-TF-IDF</code> calculation removes that word from the topic representation but when 
-you have millions of documents, that will also lead to very large topic-term matrix. To prevent a huge vocabulary, we can set the <code>min_df</code> to only accept 
+it would be highly unlikely to be representative of a topic. Typically, the <code>c-TF-IDF</code> calculation removes that word from the topic representation but when 
+you have millions of documents, that will also lead to a very large topic-term matrix. To prevent a huge vocabulary, we can set the <code>min_df</code> to only accept 
 words that have a minimum frequency. </p>
-<p>When you have millions of documents, or error issues, I would advise increasing the value of <code>min_df</code> as long as the topic representations might sense:</p>
+<p>When you have millions of documents or error issues, I would advise increasing the value of <code>min_df</code> as long as the topic representations might sense:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
 <span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">min_df</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
@@ -1552,11 +1735,11 @@ words that have a minimum frequency. </p>
 <span class="mi">9</span>   <span class="mi">8</span>   <span class="mi">218</span> <span class="mi">8</span><span class="n">_fbi_koresh_fire_gas</span>
 <span class="mi">10</span>  <span class="mi">9</span>   <span class="mi">174</span> <span class="mi">9</span><span class="n">_audio_condition_stereo_asking</span>
 </code></pre></div>
-<p>As you can see, the output is nearly the same which is actually what we would like to achieve. All words that appear less than 10 times are now removed 
+<p>As you can see, the output is nearly the same which is what we would like to achieve. All words that appear less than 10 times are now removed 
 from our topic-term matrix (i.e., <code>c-TF-IDF</code> matrix) which drastically lowers the matrix in size. </p>
 <h4 id="max_features">max_features<a class="headerlink" href="#max_features" title="Permanent link">&para;</a></h4>
 <p>A parameter similar to <code>min_df</code> is <code>max_features</code> which allows you to select the top n most frequent words to be used in the topic representation. 
-Setting this to, for example, <code>10_000</code> creates a topic-term matrix with <code>10_000</code> terms. This helps you control the size of the topic-term matrix 
+Setting this, for example, to <code>10_000</code> creates a topic-term matrix with <code>10_000</code> terms. This helps you control the size of the topic-term matrix 
 directly without having to fiddle around with the <code>min_df</code> parameter:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
 <span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">max_features</span><span class="o">=</span><span class="mi">10_000</span><span class="p">)</span>
@@ -1590,11 +1773,11 @@ for Chinese text segmentation. Using it is straightforward:</p>
 
 <span class="n">vectorizer</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenize_zh</span><span class="p">)</span>
 </code></pre></div>
-<p>Then, we can simply pass the vectorizer update our topic representations:</p>
+<p>Then, we can simply pass the vectorizer to update our topic representations:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="onlinecountvectorizer"><strong>OnlineCountVectorizer</strong><a class="headerlink" href="#onlinecountvectorizer" title="Permanent link">&para;</a></h2>
-<p>When using the online/incremental variant of BERTopic, we need a <code>CountVectorizer</code> than can incrementally update its representation. For that purpose, <code>OnlineCountVectorizer</code> was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large in size. It is a class that can be found in <code>bertopic.vectorizers</code> which extends <code>sklearn.feature_extraction.text.CountVectorizer</code>. In other words, you can use the exact same parameter in <code>OnlineCountVectorizer</code> as found in Scikit-Learn's <code>CountVectorizer</code>. We can use it as follows:</p>
+<p>When using the online/incremental variant of BERTopic, we need a <code>CountVectorizer</code> than can incrementally update its representation. For that purpose, <code>OnlineCountVectorizer</code> was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large. It is a class that can be found in <code>bertopic.vectorizers</code> which extends <code>sklearn.feature_extraction.text.CountVectorizer</code>. In other words, you can use the exact same parameter in <code>OnlineCountVectorizer</code> as found in Scikit-Learn's <code>CountVectorizer</code>. We can use it as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">bertopic.vectorizers</span> <span class="kn">import</span> <span class="n">OnlineCountVectorizer</span>
 
@@ -1605,13 +1788,13 @@ for Chinese text segmentation. Using it is straightforward:</p>
 <h3 id="parameters_1"><strong>Parameters</strong><a class="headerlink" href="#parameters_1" title="Permanent link">&para;</a></h3>
 <p>Other than parameters found in <code>CountVectorizer</code>, such as <code>stop_words</code>  and <code>ngram_range</code>, we can two parameters in <code>OnlineCountVectorizer</code> to adjust the way old data is processed and kept. </p>
 <h4 id="decay">decay<a class="headerlink" href="#decay" title="Permanent link">&para;</a></h4>
-<p>At each iteration, we sum the bag-of-words representation of the new documents with the bag-of-words representation of all documents processed thus far. In other words, the bag-of-words matrix keeps increasing with each iteration. However, especially in a streaming setting, older documents might become less and less relevant as time goes on. Therefore, a <code>decay</code> parameter was implemented that decays the bag-of-words's frequencies at each iteration before adding the document frequencies of new documents. The <code>decay</code> parameter is a value between 0 and 1 and indicates the percentage of frequencies the previous bag-of-words matrix should be reduced to. For example, a value of <code>.1</code> will decrease the frequencies in the bag-of-words matrix with 10% at each iteration before adding the new bag-of-words matrix. This will make sure that recent data has more weight than previously iterations. </p>
+<p>At each iteration, we sum the bag-of-words representation of the new documents with the bag-of-words representation of all documents processed thus far. In other words, the bag-of-words matrix keeps increasing with each iteration. However, especially in a streaming setting, older documents might become less and less relevant as time goes on. Therefore, a <code>decay</code> parameter was implemented that decays the bag-of-words' frequencies at each iteration before adding the document frequencies of new documents. The <code>decay</code> parameter is a value between 0 and 1 and indicates the percentage of frequencies the previous bag-of-words matrix should be reduced to. For example, a value of <code>.1</code> will decrease the frequencies in the bag-of-words matrix by 10% at each iteration before adding the new bag-of-words matrix. This will make sure that recent data has more weight than previous iterations. </p>
 <h4 id="delete_min_df">delete_min_df<a class="headerlink" href="#delete_min_df" title="Permanent link">&para;</a></h4>
-<p>In BERTopic, we might want to remove words from the topic representation that ppear infrequently. The <code>min_df</code> in the <code>CountVectorizer</code> works quite well for that. However, when have a streaming setting, the <code>min_df</code> does not work as well since a word's frequency might start below <code>min_df</code> but will end up higher than that over time. Setting that value high might not always be advised. </p>
-<p>As a result, the vocabulary of the resulting bag-of-words matrix can become quite large. Similarly, if we implement the <code>decay</code> parameter, then some values will actually decrease over time until they are below <code>min_df</code>. For these reasons, the <code>delete_min_df</code> parameter was implemented. The parameter takes positive integers and indicates, at each iteration, which words will be removed. If the value is set to 5, it will check after each iteration if the total frequency of a word is exceed by that value. If so, the word will be removed in its entirety from the bag-of-words matrix. This helps to keep the bag-of-words matrix of a manageble size. </p>
+<p>In BERTopic, we might want to remove words from the topic representation that appear infrequently. The <code>min_df</code> in the <code>CountVectorizer</code> works quite well for that. However, when we have a streaming setting, the <code>min_df</code> does not work as well since a word's frequency might start below <code>min_df</code> but will end up higher than that over time. Setting that value high might not always be advised. </p>
+<p>As a result, the vocabulary of the resulting bag-of-words matrix can become quite large. Similarly, if we implement the <code>decay</code> parameter, then some values will decrease over time until they are below <code>min_df</code>. For these reasons, the <code>delete_min_df</code> parameter was implemented. The parameter takes positive integers and indicates, at each iteration, which words will be removed. If the value is set to 5, it will check after each iteration if the total frequency of a word is exceeded by that value. If so, the word will be removed in its entirety from the bag-of-words matrix. This helps to keep the bag-of-words matrix of a manageable size. </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Although the <code>delete_min_df</code> parameter removes words from the bag-of-words matrix, it is not permament. If new documents come in where those previously deleted words are used frequently, they get added back to the matrix. </p>
+<p>Although the <code>delete_min_df</code> parameter removes words from the bag-of-words matrix, it is not permanent. If new documents come in where those previously deleted words are used frequently, they get added back to the matrix. </p>
 </div>
 
               

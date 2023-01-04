@@ -61,7 +61,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent="">
   
     
     
@@ -116,7 +116,7 @@
         
           
           
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
@@ -125,7 +125,7 @@
         
           
           
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
             <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
@@ -401,20 +401,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../embeddings/embeddings.html" class="md-nav__link">
-        Embedding Models
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../visualization/visualization.html" class="md-nav__link">
         Topic Visualization
       </a>
@@ -485,6 +471,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        Outlier reduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
         Tips & Tricks
       </a>
@@ -522,6 +522,20 @@
           Sub-models
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embeddings/embeddings.html" class="md-nav__link">
+        Embeddings
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -589,6 +603,13 @@
         <li class="md-nav__item">
   <a href="#agglomerative-clustering" class="md-nav__link">
     Agglomerative Clustering
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cuml-hdbscan" class="md-nav__link">
+    cuML HDBSCAN
   </a>
   
 </li>
@@ -671,6 +692,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../distribution/distribution.html" class="md-nav__link">
+        Topic Distributions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
@@ -686,7 +721,21 @@
   
     <li class="md-nav__item">
       <a href="../supervised/supervised.html" class="md-nav__link">
-        (semi)-Supervised Topic Modeling
+        Supervised Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semisupervised/semisupervised.html" class="md-nav__link">
+        Semi-supervised Topic Modeling
       </a>
     </li>
   
@@ -743,6 +792,20 @@
     <li class="md-nav__item">
       <a href="../online/online.html" class="md-nav__link">
         Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/manual.html" class="md-nav__link">
+        Manual Topic Modeling
       </a>
     </li>
   
@@ -850,14 +913,14 @@
       
       
         <label class="md-nav__link" for="__nav_5_3">
-          Vectorizers
+          Sub-models
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+      <nav class="md-nav" aria-label="Sub-models" data-md-level="2">
         <label class="md-nav__title" for="__nav_5_3">
           <span class="md-nav__icon md-icon"></span>
-          Vectorizers
+          Sub-models
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -866,59 +929,22 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../api/ctfidf.html" class="md-nav__link">
-        cTFIDF
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/onlinecv.html" class="md-nav__link">
-        OnlineCountVectorizer
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
     
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_1" type="checkbox" id="__nav_5_3_1" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_4">
+        <label class="md-nav__link" for="__nav_5_3_1">
           Backends
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Backends" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_4">
+      <nav class="md-nav" aria-label="Backends" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_1">
           <span class="md-nav__icon md-icon"></span>
           Backends
         </label>
@@ -965,23 +991,185 @@
   
   
     
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_2" type="checkbox" id="__nav_5_3_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_2">
+          Dimensionality Reduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Dimensionality Reduction" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Dimensionality Reduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dimensionality/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_3" type="checkbox" id="__nav_5_3_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_3">
+          Clustering
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Clustering" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Clustering
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cluster/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_4" type="checkbox" id="__nav_5_3_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_4">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
       
     
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_5">
+        <label class="md-nav__link" for="__nav_5_4">
           Plotting
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plotting" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_5">
+        <label class="md-nav__title" for="__nav_5_4">
           <span class="md-nav__icon md-icon"></span>
           Plotting
         </label>
@@ -1200,6 +1388,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#cuml-hdbscan" class="md-nav__link">
+    cuML HDBSCAN
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1220,11 +1415,16 @@
 
   <h1>Clustering</h1>
 
-<p>After reducing the dimensionality of our input embeddings, we need to cluster them into groups of similar embeddings in order to extract our topics. 
+<p>After reducing the dimensionality of our input embeddings, we need to cluster them into groups of similar embeddings to extract our topics. 
 This process of clustering is quite important because the more performant our clustering technique the more accurate our topic representations are.</p>
-<p>In BERTopic, we typically use HDBSCAN as it is quite capable of capturing structures with different densities. However, there is not perfect 
-clustering model and you might want to be using something entirely different for you use case. Moreover, what if a new state-of-the-art model 
-is released tomorrow? We would like to able to use that in BERTopic, right? </p>
+<p>In BERTopic, we typically use HDBSCAN as it is quite capable of capturing structures with different densities. However, there is not one perfect 
+clustering model and you might want to be using something entirely different for your use case. Moreover, what if a new state-of-the-art model 
+is released tomorrow? We would like to be able to use that in BERTopic, right? Since BERTopic assumes some independence among steps, we can allow for this modularity:</p>
+<figure>
+<p><img alt="Image title" src="clustering.svg" />
+  </p>
+<figcaption></figcaption>
+</figure>
 <p>As a result, the <code>hdbscan_model</code> parameter in BERTopic now allows for a variety of clustering models. To do so, the class should have 
 the following attributes:</p>
 <ul>
@@ -1250,7 +1450,7 @@ the following attributes:</p>
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">X</span>
 </code></pre></div>
-<p>In this tutorial, I will show you how to use several clustering algorithms in BERTopic. </p>
+<p>In this section, we will go through several examples of clustering algorithms and how they can be implemented.  </p>
 <h2 id="hdbscan"><strong>HDBSCAN</strong><a class="headerlink" href="#hdbscan" title="Permanent link">&para;</a></h2>
 <p>As a default, BERTopic uses HDBSCAN to perform its clustering. To use a HDBSCAN model with custom parameters, 
 we simply define it and pass it to BERTopic:</p>
@@ -1260,11 +1460,11 @@ we simply define it and pass it to BERTopic:</p>
 <span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">cluster_selection_method</span><span class="o">=</span><span class="s1">&#39;eom&#39;</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">)</span>
 </code></pre></div>
-<p>Here, we can define any parameters in HDBSCAN to optimize for the best performance based on whatever validation metrics that you are using. </p>
+<p>Here, we can define any parameters in HDBSCAN to optimize for the best performance based on whatever validation metrics you are using. </p>
 <h2 id="k-means"><strong>k-Means</strong><a class="headerlink" href="#k-means" title="Permanent link">&para;</a></h2>
 <p>Although HDBSCAN works quite well in BERTopic and is typically advised, you might want to be using k-Means instead. 
 It allows you to select how many clusters you would like and forces every single point to be in a cluster. Therefore, no 
-outliers will be created. This has also has disadvantages. When you force every single point in a cluster, it will mean 
+outliers will be created. This also has disadvantages. When you force every single point in a cluster, it will mean 
 that the cluster is highly likely to contain noise which can hurt the topic representations. As a small tip, using 
 the <code>vectorizer_model=CountVectorizer(stop_words="english")</code> helps quite a bit to then improve the topic representation. </p>
 <p>Having said that, using k-Means is quite straightforward:</p>
@@ -1277,7 +1477,7 @@ the <code>vectorizer_model=CountVectorizer(stop_words="english")</code> helps qu
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>As you might have noticed, the <code>cluster_model</code> is passed to <code>hdbscan_model</code> which might be a bit confusing considering 
-you are not passing a HDBSCAN model. For now, the name of the parameter is kept the same to adhere to the current 
+you are not passing an HDBSCAN model. For now, the name of the parameter is kept the same to adhere to the current 
 state of the API. Changing the name could lead to deprecation issues, which I want to prevent as much as possible. </p>
 </div>
 <h2 id="agglomerative-clustering"><strong>Agglomerative Clustering</strong><a class="headerlink" href="#agglomerative-clustering" title="Permanent link">&para;</a></h2>
@@ -1291,6 +1491,34 @@ will then give errors. </p>
 <span class="n">cluster_model</span> <span class="o">=</span> <span class="n">AgglomerativeClustering</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">cluster_model</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="cuml-hdbscan"><strong>cuML HDBSCAN</strong><a class="headerlink" href="#cuml-hdbscan" title="Permanent link">&para;</a></h2>
+<p>Although the original HDBSCAN implementation is an amazing technique, it may have difficulty handling large amounts of data. Instead, 
+we can use <a href="https://rapids.ai/start.html#rapids-release-selector">cuML</a> to speed up HDBSCAN through GPU acceleration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">cuml.cluster</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
+
+<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">gen_min_span_tree</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">)</span>
+</code></pre></div>
+<p>The great thing about using cuML's HDBSCAN implementation is that it supports many features of the original implementation. In other words, 
+<code>calculate_probabilities=True</code> also works!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As of the v0.13 release, it is not yet possible to calculate the topic-document probability matrix for unseen data (i.e., <code>.transform</code>) using cuML's HDBSCAN. 
+However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., <code>.fit</code> and <code>.fit_transform</code>).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to install cuML together with BERTopic using Google Colab, you can run the following code:</p>
+<div class="highlight"><pre><span></span><code>!pip install bertopic
+!pip install cudf-cu11 dask-cudf-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip install cuml-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip install cugraph-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip uninstall cupy-cuda115 -y
+!pip uninstall cupy-cuda11x -y
+!pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
+</code></pre></div>
+</div>
 
               
             </article>

@@ -61,7 +61,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent="">
   
     
     
@@ -116,7 +116,7 @@
         
           
           
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
@@ -125,7 +125,7 @@
         
           
           
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
             <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
@@ -379,6 +379,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#modularity" class="md-nav__link">
+    Modularity
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     Overview
   </a>
@@ -497,20 +504,6 @@
   
   
     <li class="md-nav__item">
-      <a href="getting_started/embeddings/embeddings.html" class="md-nav__link">
-        Embedding Models
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="getting_started/visualization/visualization.html" class="md-nav__link">
         Topic Visualization
       </a>
@@ -581,6 +574,20 @@
   
   
     <li class="md-nav__item">
+      <a href="getting_started/outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        Outlier reduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="getting_started/tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
         Tips & Tricks
       </a>
@@ -616,6 +623,20 @@
           Sub-models
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/embeddings/embeddings.html" class="md-nav__link">
+        Embeddings
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -714,6 +735,20 @@
   
   
     <li class="md-nav__item">
+      <a href="getting_started/distribution/distribution.html" class="md-nav__link">
+        Topic Distributions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="getting_started/topicsperclass/topicsperclass.html" class="md-nav__link">
         Topics per Class
       </a>
@@ -729,7 +764,21 @@
   
     <li class="md-nav__item">
       <a href="getting_started/supervised/supervised.html" class="md-nav__link">
-        (semi)-Supervised Topic Modeling
+        Supervised Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/semisupervised/semisupervised.html" class="md-nav__link">
+        Semi-supervised Topic Modeling
       </a>
     </li>
   
@@ -786,6 +835,20 @@
     <li class="md-nav__item">
       <a href="getting_started/online/online.html" class="md-nav__link">
         Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/manual/manual.html" class="md-nav__link">
+        Manual Topic Modeling
       </a>
     </li>
   
@@ -893,14 +956,14 @@
       
       
         <label class="md-nav__link" for="__nav_5_3">
-          Vectorizers
+          Sub-models
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Vectorizers" data-md-level="2">
+      <nav class="md-nav" aria-label="Sub-models" data-md-level="2">
         <label class="md-nav__title" for="__nav_5_3">
           <span class="md-nav__icon md-icon"></span>
-          Vectorizers
+          Sub-models
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -909,59 +972,22 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="api/ctfidf.html" class="md-nav__link">
-        cTFIDF
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="api/onlinecv.html" class="md-nav__link">
-        OnlineCountVectorizer
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
     
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_1" type="checkbox" id="__nav_5_3_1" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_4">
+        <label class="md-nav__link" for="__nav_5_3_1">
           Backends
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Backends" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_4">
+      <nav class="md-nav" aria-label="Backends" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_1">
           <span class="md-nav__icon md-icon"></span>
           Backends
         </label>
@@ -1008,23 +1034,185 @@
   
   
     
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_2" type="checkbox" id="__nav_5_3_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_2">
+          Dimensionality Reduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Dimensionality Reduction" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          Dimensionality Reduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/dimensionality/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_3" type="checkbox" id="__nav_5_3_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_3">
+          Clustering
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Clustering" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Clustering
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/cluster/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3_4" type="checkbox" id="__nav_5_3_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_3_4">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Vectorizers" data-md-level="3">
+        <label class="md-nav__title" for="__nav_5_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
       
     
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_4" type="checkbox" id="__nav_5_4" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_5">
+        <label class="md-nav__link" for="__nav_5_4">
           Plotting
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plotting" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_5">
+        <label class="md-nav__title" for="__nav_5_4">
           <span class="md-nav__icon md-icon"></span>
           Plotting
         </label>
@@ -1241,6 +1429,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#modularity" class="md-nav__link">
+    Modularity
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     Overview
   </a>
@@ -1312,10 +1507,15 @@
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions.</p>
 <p>BERTopic supports 
 <a href="https://maartengr.github.io/BERTopic/getting_started/guided/guided.html"><strong>guided</strong></a>, 
-(semi-) <a href="https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html"><strong>supervised</strong></a>, 
-and <a href="https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html"><strong>dynamic</strong></a> topic modeling. It even supports visualizations similar to LDAvis!</p>
-<p>Corresponding medium posts can be found <a href="https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&amp;sk=0b5a470c006d1842ad4c8a3057063a99">here</a> 
-and <a href="https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4">here</a>.</p>
+<a href="https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html"><strong>supervised</strong></a>, 
+<a href="https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html"><strong>semi-supervised</strong></a>, 
+<a href="https://maartengr.github.io/BERTopic/getting_started/manual/manual.html"><strong>manual</strong></a>, 
+<a href="https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html"><strong>long-document</strong></a>,
+<a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html"><strong>hierarchical</strong></a>, 
+<a href="https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html"><strong>class-based</strong></a>,
+<a href="https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html"><strong>dynamic</strong></a>, and 
+<a href="https://maartengr.github.io/BERTopic/getting_started/online/online.html"><strong>online</strong></a> topic modeling. It even supports visualizations similar to LDAvis!</p>
+<p>Corresponding medium posts can be found <a href="https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&amp;sk=0b5a470c006d1842ad4c8a3057063a99">here</a>, <a href="https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4">here</a> and <a href="https://towardsdatascience.com/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d">here</a>. For a more detailed overview, you can read the <a href="https://arxiv.org/abs/2203.05794">paper</a> or see a <a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html">brief overview</a>. </p>
 <h2 id="installation"><strong>Installation</strong><a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Installation, with sentence-transformers, can be done using <a href="https://pypi.org/project/bertopic/">pypi</a>:</p>
 <div class="highlight"><pre><span></span><code>pip install bertopic
@@ -1362,9 +1562,25 @@ frequent topic that was generated, topic 0:</p>
  <span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="mf">0.0034239554442333257</span><span class="p">),</span>
  <span class="p">(</span><span class="s1">&#39;pc&#39;</span><span class="p">,</span> <span class="mf">0.003047105930670237</span><span class="p">)]</span>
 </code></pre></div>
+<p>Using <code>.get_document_info</code>, we can also extract information on a document level, such as their corresponding topics, probabilities, whether they are representative documents for a topic, etc.:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_document_info</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+
+<span class="n">Document</span>                               <span class="n">Topic</span>    <span class="n">Name</span>                        <span class="n">Top_n_words</span>                     <span class="n">Probability</span>    <span class="o">...</span>
+<span class="n">I</span> <span class="n">am</span> <span class="n">sure</span> <span class="n">some</span> <span class="n">bashers</span> <span class="n">of</span> <span class="n">Pens</span><span class="o">...</span>       <span class="mi">0</span>       <span class="mi">0</span><span class="n">_game_team_games_season</span>    <span class="n">game</span> <span class="o">-</span> <span class="n">team</span> <span class="o">-</span> <span class="n">games</span><span class="o">...</span>          <span class="mf">0.200010</span>       <span class="o">...</span>
+<span class="n">My</span> <span class="n">brother</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">market</span> <span class="k">for</span><span class="o">...</span>      <span class="o">-</span><span class="mi">1</span>     <span class="o">-</span><span class="mi">1</span><span class="n">_can_your_will_any</span>         <span class="n">can</span> <span class="o">-</span> <span class="n">your</span> <span class="o">-</span> <span class="n">will</span><span class="o">...</span>            <span class="mf">0.420668</span>       <span class="o">...</span>
+<span class="n">Finally</span> <span class="n">you</span> <span class="n">said</span> <span class="n">what</span> <span class="n">you</span> <span class="n">dream</span><span class="o">...</span>      <span class="o">-</span><span class="mi">1</span>     <span class="o">-</span><span class="mi">1</span><span class="n">_can_your_will_any</span>         <span class="n">can</span> <span class="o">-</span> <span class="n">your</span> <span class="o">-</span> <span class="n">will</span><span class="o">...</span>            <span class="mf">0.807259</span>       <span class="o">...</span>
+<span class="n">Think</span><span class="err">!</span> <span class="n">It</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">SCSI</span> <span class="n">card</span> <span class="n">doing</span><span class="o">...</span>     <span class="mi">49</span>     <span class="mi">49</span><span class="n">_windows_drive_dos_file</span>    <span class="n">windows</span> <span class="o">-</span> <span class="n">drive</span> <span class="o">-</span> <span class="n">docs</span><span class="o">...</span>       <span class="mf">0.071746</span>       <span class="o">...</span>
+<span class="mi">1</span><span class="p">)</span> <span class="n">I</span> <span class="n">have</span> <span class="n">an</span> <span class="n">old</span> <span class="n">Jasmine</span> <span class="n">drive</span><span class="o">...</span>       <span class="mi">49</span>     <span class="mi">49</span><span class="n">_windows_drive_dos_file</span>    <span class="n">windows</span> <span class="o">-</span> <span class="n">drive</span> <span class="o">-</span> <span class="n">docs</span><span class="o">...</span>       <span class="mf">0.038983</span>       <span class="o">...</span>
+</code></pre></div>
 <p><strong>NOTE</strong>: Use <code>BERTopic(language="multilingual")</code> to select a model that supports 50+ languages. </p>
+<h2 id="modularity"><strong>Modularity</strong><a class="headerlink" href="#modularity" title="Permanent link">&para;</a></h2>
+<p>By default, the main steps for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, it assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic not only allows you to build your own topic model but to explore several topic modeling techniques on top of your customized topic model:</p>
+<iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/205490350-cd9833e7-9cd5-44fa-8752-407d748de633.mp4
+" title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<p>You can swap out any of these models or even remove them entirely. Starting with the embedding step, you can find out how to do this <a href="https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html">here</a> and more about the underlying algorithm and assumptions <a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html">here</a>. </p>
 <h2 id="overview"><strong>Overview</strong><a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>BERTopic has quite a number of functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
+<p>BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
 of all methods and a short description of its purpose. </p>
 <h3 id="common">Common<a class="headerlink" href="#common" title="Permanent link">&para;</a></h3>
 <p>Below, you will find an overview of common functions in BERTopic. </p>
@@ -1405,6 +1621,10 @@ of all methods and a short description of its purpose. </p>
 <td><code>.get_topic_info()</code></td>
 </tr>
 <tr>
+<td>Get all document information</td>
+<td><code>.get_document_info(docs)</code></td>
+</tr>
+<tr>
 <td>Get representative docs per topic</td>
 <td><code>.get_representative_docs()</code></td>
 </tr>
@@ -1429,6 +1649,10 @@ of all methods and a short description of its purpose. </p>
 <td><code>.reduce_topics(docs, nr_topics=30)</code></td>
 </tr>
 <tr>
+<td>Reduce outliers</td>
+<td><code>.reduce_outliers(docs, topics)</code></td>
+</tr>
+<tr>
 <td>Find topics</td>
 <td><code>.find_topics("vehicle")</code></td>
 </tr>
@@ -1447,7 +1671,7 @@ of all methods and a short description of its purpose. </p>
 </tbody>
 </table>
 <h3 id="attributes">Attributes<a class="headerlink" href="#attributes" title="Permanent link">&para;</a></h3>
-<p>After having trained your BERTopic model, a number of attributes are saved within your model. These attributes, in part, 
+<p>After having trained your BERTopic model, several are saved within your model. These attributes, in part, 
 refer to how model information is stored on an estimator during fitting. The attributes that you see below all end in <code>_</code> and are 
 public attributes that can be used to access model information. </p>
 <table>
@@ -1501,8 +1725,7 @@ public attributes that can be used to access model information. </p>
 </tbody>
 </table>
 <h3 id="variations">Variations<a class="headerlink" href="#variations" title="Permanent link">&para;</a></h3>
-<p>There are many different use cases in which topic modeling can be used. As such, a number of 
-variations of BERTopic have been developed such that one package can be used across across many use cases.</p>
+<p>There are many different use cases in which topic modeling can be used. As such, several variations of BERTopic have been developed such that one package can be used across many use cases.</p>
 <table>
 <thead>
 <tr>
@@ -1512,23 +1735,39 @@ variations of BERTopic have been developed such that one package can be used acr
 </thead>
 <tbody>
 <tr>
-<td>(semi-) Supervised Topic Modeling</td>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html">Topic Distribution Approximation</a></td>
+<td><code>.approximate_distribution(docs)</code></td>
+</tr>
+<tr>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/online/online.html">Online Topic Modeling</a></td>
+<td><code>.partial_fit(doc)</code></td>
+</tr>
+<tr>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html">Semi-supervised Topic Modeling</a></td>
 <td><code>.fit(docs, y=y)</code></td>
 </tr>
 <tr>
-<td>Topic Modeling per Class</td>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html">Supervised Topic Modeling</a></td>
+<td><code>.fit(docs, y=y)</code></td>
+</tr>
+<tr>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/manual/manual.html">Manual Topic Modeling</a></td>
+<td><code>.fit(docs, y=y)</code></td>
+</tr>
+<tr>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html">Topic Modeling per Class</a></td>
 <td><code>.topics_per_class(docs, classes)</code></td>
 </tr>
 <tr>
-<td>Dynamic Topic Modeling</td>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html">Dynamic Topic Modeling</a></td>
 <td><code>.topics_over_time(docs, timestamps)</code></td>
 </tr>
 <tr>
-<td>Hierarchical Topic Modeling</td>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html">Hierarchical Topic Modeling</a></td>
 <td><code>.hierarchical_topics(docs)</code></td>
 </tr>
 <tr>
-<td>Guided Topic Modeling</td>
+<td><a href="https://maartengr.github.io/BERTopic/getting_started/guided/guided.html">Guided Topic Modeling</a></td>
 <td><code>BERTopic(seed_topic_list=seed_topic_list)</code></td>
 </tr>
 </tbody>
