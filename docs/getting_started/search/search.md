@@ -32,8 +32,8 @@ search term "motor". Then, we extract the most similar topic and check the resul
  ('advice', 0.005534544418830091)]
 ```
 
-It definitely seems that a topic was found that closely matches with "motor". The topic seems to be motorcycle 
-related and therefore matches with our "motor" input. You can use the `similarity` variable to see how similar 
+It definitely seems that a topic was found that closely matches "motor". The topic seems to be motorcycle 
+related and therefore matches our "motor" input. You can use the `similarity` variable to see how similar 
 the extracted topics are to the search term. 
  
 !!! note

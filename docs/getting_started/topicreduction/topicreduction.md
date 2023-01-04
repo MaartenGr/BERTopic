@@ -4,8 +4,7 @@ Instead, we can try to reduce the number of topics that have been created. Below
 so. 
   
 ### **Manual Topic Reduction**
-Each resulting topic has its own 
-feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
+Each resulting topic has its feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
 topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number of topics quite easily. We do this until we reach the value of `nr_topics`:  
 
 ```python
@@ -44,9 +43,7 @@ topic_model = BERTopic(nr_topics="auto")
 ```
 
 ### **Topic Reduction after Training**
-Finally, we can also reduce the number of topics after having trained a BERTopic model. The advantage of doing so, 
-is that you can decide the number of topics after knowing how many are created. It is difficult to 
-predict before training your model how many topics that are in your documents and how many will be extracted. 
+Finally, we can also reduce the number of topics after having trained a BERTopic model. The advantage of doing so is that you can decide the number of topics after knowing how many are created. It is difficult to predict before training your model how many topics that are in your documents and how many will be extracted. 
 Instead, we can decide afterward how many topics seem realistic:
 
 ```python

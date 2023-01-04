@@ -13,7 +13,7 @@ docs_packages = [
 
 base_packages = [
     "numpy>=1.20.0",
-    "hdbscan>=0.8.28",
+    "hdbscan>=0.8.29",
     "umap-learn>=0.5.0",
     "pandas>=1.1.5",
     "scikit-learn>=0.22.2.post1",
@@ -53,7 +53,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.12.0",
+    version="0.13.0",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",

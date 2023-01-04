@@ -2,7 +2,7 @@ import copy
 import pytest
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model')])
+@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model')])
 def test_full_model(model, documents, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
@@ -22,6 +22,10 @@ def test_full_model(model, documents, request):
 
     assert len(topic_model.get_topic_freq()) > 2
     assert len(topic_model.get_topics()) == len(topic_model.get_topic_freq())
+
+    # Test extraction of document info
+    document_info = topic_model.get_document_info(documents)
+    assert len(document_info) == len(documents)
 
     # Test transform
     doc = "This is a new document to predict."
@@ -87,3 +91,14 @@ def test_full_model(model, documents, request):
     topics_to_merge = [0, 1]
     topic_model.merge_topics(documents, topics_to_merge)
     assert freq < topic_model.get_topic_freq(0)
+
+    # Test reduction of outliers
+    if -1 in topics:
+        new_topics = topic_model.reduce_outliers(documents, topics, threshold=0.0)
+        nr_outliers_topic_model = sum([1 for topic in topic_model.topics_ if topic == -1])
+        nr_outliers_new_topics = sum([1 for topic in new_topics if topic == -1])
+
+        if topic_model._outliers == 1:
+            assert nr_outliers_topic_model > nr_outliers_new_topics
+
+    

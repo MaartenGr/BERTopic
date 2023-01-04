@@ -48,19 +48,19 @@ class GensimBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
+        vector_shape = self.embedding_model.get_vector(list(self.embedding_model.index_to_key)[0]).shape[0]
+        empty_vector = np.zeros(vector_shape)
+
+        # Extract word embeddings and pool to document-level
         embeddings = []
         for doc in tqdm(documents, disable=not verbose, position=0, leave=True):
-            # Extract word embeddings and pool to document-level
-            embeddings.append(
-                np.mean(
-                    [
-                        self.embedding_model.get_vector(word)
-                        for word in doc.split()
-                        if word in self.embedding_model.key_to_index
-                    ],
-                    axis=0,
-                )
-            )
+            embedding = [self.embedding_model.get_vector(word) for word in doc.split()
+                         if word in self.embedding_model.key_to_index]
+
+            if len(embedding) > 0:
+                embeddings.append(np.mean(embedding, axis=0))
+            else:
+                embeddings.append(empty_vector)
 
         embeddings = np.array(embeddings)
         return embeddings

@@ -54,9 +54,9 @@ def visualize_heatmap(topic_model,
 
     # Select topic embeddings
     if topic_model.topic_embeddings_ is not None:
-        embeddings = np.array(topic_model.topic_embeddings_)
+        embeddings = np.array(topic_model.topic_embeddings_)[topic_model._outliers:]
     else:
-        embeddings = topic_model.c_tf_idf_
+        embeddings = topic_model.c_tf_idf_[topic_model._outliers:]
 
     # Select topics based on top_n and topics args
     freq_df = topic_model.get_topic_freq()
@@ -69,13 +69,13 @@ def visualize_heatmap(topic_model,
         topics = sorted(freq_df.Topic.to_list())
 
     # Order heatmap by similar clusters of topics
+    sorted_topics = topics
     if n_clusters:
         if n_clusters >= len(set(topics)):
             raise ValueError("Make sure to set `n_clusters` lower than "
                              "the total number of unique topics.")
 
-        embeddings = embeddings[[topic + topic_model._outliers for topic in topics]]
-        distance_matrix = cosine_similarity(embeddings)
+        distance_matrix = cosine_similarity(embeddings[topics])
         Z = linkage(distance_matrix, 'ward')
         clusters = fcluster(Z, t=n_clusters, criterion='maxclust')
 
@@ -85,8 +85,6 @@ def visualize_heatmap(topic_model,
             mapping[cluster].append(topic)
         mapping = [cluster for cluster in mapping.values()]
         sorted_topics = [topic for cluster in mapping for topic in cluster]
-    else:
-        sorted_topics = topics
 
     # Select embeddings
     indices = np.array([topics.index(topic) for topic in sorted_topics])

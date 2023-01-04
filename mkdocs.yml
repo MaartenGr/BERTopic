@@ -12,35 +12,44 @@ nav:
   - The Algorithm: algorithm/algorithm.md
   - Getting Started:
       - getting_started/quickstart/quickstart.md
-      - Embedding Models: getting_started/embeddings/embeddings.md
       - Topic Visualization: getting_started/visualization/visualization.md
       - Topic Reduction: getting_started/topicreduction/topicreduction.md
       - Topic Representation: getting_started/topicrepresentation/topicrepresentation.md
       - Search Topics: getting_started/search/search.md
       - Parameter tuning: getting_started/parameter tuning/parametertuning.md       
+      - Outlier reduction: getting_started/outlier_reduction/outlier_reduction.md       
       - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md       
       - Sub-models:
+        - Embeddings: getting_started/embeddings/embeddings.md
         - Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
         - Clustering: getting_started/clustering/clustering.md
         - Vectorizers: getting_started/vectorizers/vectorizers.md
         - c-TF-IDF: getting_started/ctfidf/ctfidf.md
       - Variations:
+        - Topic Distributions: getting_started/distribution/distribution.md
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
-        - (semi)-Supervised Topic Modeling: getting_started/supervised/supervised.md
+        - Supervised Topic Modeling: getting_started/supervised/supervised.md
+        - Semi-supervised Topic Modeling: getting_started/semisupervised/semisupervised.md
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
         - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
         - Online Topic Modeling: getting_started/online/online.md
+        - Manual Topic Modeling: getting_started/manual/manual.md
   - FAQ: faq.md
   - API:
       - BERTopic: api/bertopic.md
       - MMR: api/mmr.md
-      - Vectorizers:
-        - cTFIDF: api/ctfidf.md
-        - OnlineCountVectorizer: api/onlinecv.md
-      - Backends:
-        - Base: api/backends/base.md
-        - Word Doc: api/backends/word_doc.md
+      - Sub-models:
+        - Backends:
+          - Base: api/backends/base.md
+          - Word Doc: api/backends/word_doc.md
+        - Dimensionality Reduction:
+          - Base: api/dimensionality/base.md
+        - Clustering:
+          - Base: api/cluster/base.md
+        - Vectorizers:
+          - cTFIDF: api/ctfidf.md
+          - OnlineCountVectorizer: api/onlinecv.md
       - Plotting:
         - Barchart: api/plotting/barchart.md
         - Documents: api/plotting/documents.md
@@ -81,19 +90,24 @@ theme:
     - navigation.tracking
     - toc.follow
   palette:
-    - scheme: default
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to dark mode
-    - scheme: slate
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: black
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    toggle:
+      icon: material/weather-night
+      name: Switch to light mode
 
 markdown_extensions:
   - admonition
+  - md_in_html
   - pymdownx.details
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.snippets
   - toc:
       permalink: true

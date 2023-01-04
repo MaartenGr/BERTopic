@@ -8,6 +8,9 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.decomposition import PCA, IncrementalPCA
 from bertopic.vectorizers import OnlineCountVectorizer
+from bertopic.cluster import BaseCluster
+from bertopic.dimensionality import BaseDimensionalityReduction
+from sklearn.linear_model import LogisticRegression
 
 
 @pytest.fixture(scope="session")
@@ -32,6 +35,13 @@ def reduced_embeddings(document_embeddings):
 def documents():
     newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:500]
     return newsgroup_docs
+
+
+@pytest.fixture(scope="session")
+def targets():
+    data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+    y = data['target'][:500]
+    return y
 
 
 @pytest.fixture(scope="session")
@@ -78,6 +88,19 @@ def kmeans_pca_topic_model(documents, document_embeddings):
     hdbscan_model = KMeans(n_clusters=15, random_state=42)
     dim_model = PCA(n_components=5)
     model = BERTopic(hdbscan_model=hdbscan_model, umap_model=dim_model, embedding_model=embedding_model).fit(documents, document_embeddings)
+    return model
+
+
+@pytest.fixture(scope="session")
+def supervised_topic_model(documents, document_embeddings, embedding_model, targets):
+    empty_dimensionality_model = BaseDimensionalityReduction()
+    clf = LogisticRegression()
+
+    model = BERTopic(
+            embedding_model=embedding_model,
+            umap_model=empty_dimensionality_model,
+            hdbscan_model=clf,
+    ).fit(documents, embeddings=document_embeddings, y=targets)
     return model
 
 

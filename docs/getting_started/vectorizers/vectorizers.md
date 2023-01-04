@@ -1,14 +1,20 @@
-# Vectorizers
+In topic modeling, the quality of the topic representations is key for interpreting the topics, communicating results, and understanding patterns. It is of utmost 
+importance to make sure that the topic representations fit with your use case. 
 
-In topic modeling, the quality of the topic representations are key for interpreting the topics, communicating results, and understanding patterns. It is of utmost 
-importance to make sure that the topic representations fits with your use case. 
-
-In practice, there is not one correct way of creating topic representations. Some use cases might opt more higher n-grams, whereas others might focus more on single 
+In practice, there is not one correct way of creating topic representations. Some use cases might opt for higher n-grams, whereas others might focus more on single 
 words without any stop words. The diversity in use cases also means that we need to have some flexibility in BERTopic to make sure it can be used across most use cases. 
+The image below illustrates this modularity:
+
+<figure markdown>
+  ![Image title](vectorizers.svg)
+  <figcaption></figcaption>
+</figure>
+
+In this section, we will go through several examples of vectorization algorithms and how they can be implemented.  
 
 ## **CountVectorizer**
 
-One often understimated component of BERTopic is the `CountVectorizer` and `c-TF-IDF` calculation. Together, they are responsible for creating the topic representations and luckily 
+One often underestimated component of BERTopic is the `CountVectorizer` and `c-TF-IDF` calculation. Together, they are responsible for creating the topic representations and luckily 
 can be quite flexible in parameter tuning. Here, we will go through tips and tricks for tuning your `CountVectorizer` and see how they might affect the topic representations. 
 
 Before starting, it should be noted that you can pass the `CountVectorizer` before and after training your topic model. Passing it before training allows you to 
@@ -49,7 +55,7 @@ on fine-tuning our topic representations after training our model.
 
 ### **Basic Usage**
 
-First, let's start with defining our documents and train our topic model:
+First, let's start with defining our documents and training our topic model:
 
 ```python
 from bertopic import BERTopic
@@ -86,7 +92,7 @@ them to the topic representation above.
 
 ### **Parameters**
 
-There are a number of basic parameters in the CountVectorizer that we can use to improve upon the quality of the resulting topic representations.
+There are several basic parameters in the CountVectorizer that we can use to improve upon the quality of the resulting topic representations.
 
 #### ngram_range
 
@@ -140,7 +146,7 @@ Although they look very similar, if we zoom in on topic 8, we can see longer wor
 #### stop_words
 
 In some of the topics, we can see stop words appearing like `he` or `the`.  
-Stop words is something we typically want to prevent in our topic representations as they do not give additional information to the topic. 
+Stop words are something we typically want to prevent in our topic representations as they do not give additional information to the topic. 
 To prevent those stop words, we can use the `stop_words` parameter in the `CountVectorizer` to remove them from the representations:
 
 ```python
@@ -174,11 +180,11 @@ We can also pass in a list of stop words if you have multiple languages to take 
 
 One important parameter to keep in mind is the `min_df`. This is typically an integer representing how frequent a word must be before 
 being added to our representation. You can imagine that if we have a million documents and a certain word only appears a single time across all of them, then 
-it would be highly unlikely to be representive of a topic. Typically, the `c-TF-IDF` calculation removes that word from the topic representation but when 
-you have millions of documents, that will also lead to very large topic-term matrix. To prevent a huge vocabulary, we can set the `min_df` to only accept 
+it would be highly unlikely to be representative of a topic. Typically, the `c-TF-IDF` calculation removes that word from the topic representation but when 
+you have millions of documents, that will also lead to a very large topic-term matrix. To prevent a huge vocabulary, we can set the `min_df` to only accept 
 words that have a minimum frequency. 
 
-When you have millions of documents, or error issues, I would advise increasing the value of `min_df` as long as the topic representations might sense:
+When you have millions of documents or error issues, I would advise increasing the value of `min_df` as long as the topic representations might sense:
 
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
@@ -203,14 +209,14 @@ With the following topic representation:
 10	9	174	9_audio_condition_stereo_asking
 ```
 
-As you can see, the output is nearly the same which is actually what we would like to achieve. All words that appear less than 10 times are now removed 
+As you can see, the output is nearly the same which is what we would like to achieve. All words that appear less than 10 times are now removed 
 from our topic-term matrix (i.e., `c-TF-IDF` matrix) which drastically lowers the matrix in size. 
 
 
 #### max_features
 
 A parameter similar to `min_df` is `max_features` which allows you to select the top n most frequent words to be used in the topic representation. 
-Setting this to, for example, `10_000` creates a topic-term matrix with `10_000` terms. This helps you control the size of the topic-term matrix 
+Setting this, for example, to `10_000` creates a topic-term matrix with `10_000` terms. This helps you control the size of the topic-term matrix 
 directly without having to fiddle around with the `min_df` parameter:
 
 ```python
@@ -255,7 +261,7 @@ def tokenize_zh(text):
 vectorizer = CountVectorizer(tokenizer=tokenize_zh)
 ```
 
-Then, we can simply pass the vectorizer update our topic representations:
+Then, we can simply pass the vectorizer to update our topic representations:
 
 ```python
 topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
@@ -264,7 +270,7 @@ topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 
 ## **OnlineCountVectorizer**
 
-When using the online/incremental variant of BERTopic, we need a `CountVectorizer` than can incrementally update its representation. For that purpose, `OnlineCountVectorizer` was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large in size. It is a class that can be found in `bertopic.vectorizers` which extends `sklearn.feature_extraction.text.CountVectorizer`. In other words, you can use the exact same parameter in `OnlineCountVectorizer` as found in Scikit-Learn's `CountVectorizer`. We can use it as follows:
+When using the online/incremental variant of BERTopic, we need a `CountVectorizer` than can incrementally update its representation. For that purpose, `OnlineCountVectorizer` was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large. It is a class that can be found in `bertopic.vectorizers` which extends `sklearn.feature_extraction.text.CountVectorizer`. In other words, you can use the exact same parameter in `OnlineCountVectorizer` as found in Scikit-Learn's `CountVectorizer`. We can use it as follows:
 
 ```python
 from bertopic import BERTopic
@@ -281,13 +287,13 @@ Other than parameters found in `CountVectorizer`, such as `stop_words`  and `ngr
 
 #### decay
 
-At each iteration, we sum the bag-of-words representation of the new documents with the bag-of-words representation of all documents processed thus far. In other words, the bag-of-words matrix keeps increasing with each iteration. However, especially in a streaming setting, older documents might become less and less relevant as time goes on. Therefore, a `decay` parameter was implemented that decays the bag-of-words's frequencies at each iteration before adding the document frequencies of new documents. The `decay` parameter is a value between 0 and 1 and indicates the percentage of frequencies the previous bag-of-words matrix should be reduced to. For example, a value of `.1` will decrease the frequencies in the bag-of-words matrix with 10% at each iteration before adding the new bag-of-words matrix. This will make sure that recent data has more weight than previously iterations. 
+At each iteration, we sum the bag-of-words representation of the new documents with the bag-of-words representation of all documents processed thus far. In other words, the bag-of-words matrix keeps increasing with each iteration. However, especially in a streaming setting, older documents might become less and less relevant as time goes on. Therefore, a `decay` parameter was implemented that decays the bag-of-words' frequencies at each iteration before adding the document frequencies of new documents. The `decay` parameter is a value between 0 and 1 and indicates the percentage of frequencies the previous bag-of-words matrix should be reduced to. For example, a value of `.1` will decrease the frequencies in the bag-of-words matrix by 10% at each iteration before adding the new bag-of-words matrix. This will make sure that recent data has more weight than previous iterations. 
 
 #### delete_min_df
 
-In BERTopic, we might want to remove words from the topic representation that ppear infrequently. The `min_df` in the `CountVectorizer` works quite well for that. However, when have a streaming setting, the `min_df` does not work as well since a word's frequency might start below `min_df` but will end up higher than that over time. Setting that value high might not always be advised. 
+In BERTopic, we might want to remove words from the topic representation that appear infrequently. The `min_df` in the `CountVectorizer` works quite well for that. However, when we have a streaming setting, the `min_df` does not work as well since a word's frequency might start below `min_df` but will end up higher than that over time. Setting that value high might not always be advised. 
 
-As a result, the vocabulary of the resulting bag-of-words matrix can become quite large. Similarly, if we implement the `decay` parameter, then some values will actually decrease over time until they are below `min_df`. For these reasons, the `delete_min_df` parameter was implemented. The parameter takes positive integers and indicates, at each iteration, which words will be removed. If the value is set to 5, it will check after each iteration if the total frequency of a word is exceed by that value. If so, the word will be removed in its entirety from the bag-of-words matrix. This helps to keep the bag-of-words matrix of a manageble size. 
+As a result, the vocabulary of the resulting bag-of-words matrix can become quite large. Similarly, if we implement the `decay` parameter, then some values will decrease over time until they are below `min_df`. For these reasons, the `delete_min_df` parameter was implemented. The parameter takes positive integers and indicates, at each iteration, which words will be removed. If the value is set to 5, it will check after each iteration if the total frequency of a word is exceeded by that value. If so, the word will be removed in its entirety from the bag-of-words matrix. This helps to keep the bag-of-words matrix of a manageable size. 
 
 !!! note
-	Although the `delete_min_df` parameter removes words from the bag-of-words matrix, it is not permament. If new documents come in where those previously deleted words are used frequently, they get added back to the matrix. 
+	Although the `delete_min_df` parameter removes words from the bag-of-words matrix, it is not permanent. If new documents come in where those previously deleted words are used frequently, they get added back to the matrix. 

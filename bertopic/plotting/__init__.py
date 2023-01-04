@@ -8,6 +8,7 @@ from ._distribution import visualize_distribution
 from ._topics_over_time import visualize_topics_over_time
 from ._topics_per_class import visualize_topics_per_class
 from ._hierarchical_documents import visualize_hierarchical_documents
+from ._approximate_distribution import visualize_approximate_distribution
 
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     "visualize_distribution",
     "visualize_topics_over_time",
     "visualize_topics_per_class",
-    "visualize_hierarchical_documents"
+    "visualize_hierarchical_documents",
+    "visualize_approximate_distribution"
 ]

@@ -21,6 +21,17 @@ vectorizer_model = CountVectorizer(stop_words="english")
 topic_model = BERTopic(vectorizer_model=vectorizer_model)
 ```
 
+We can also use the `ClassTfidfTransformer` to reduce the impact of frequent words. The end result is very similar to explictly removing stopwords but this process does this automatically:
+
+```python
+from bertopic import BERTopic
+from bertopic.vectorizers import ClassTfidfTransformer
+
+ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
+topic_model = BERTopic(ctfidf_model=ctfidf_model)
+```
+
+
 ## **Diversify topic representation**
 After having calculated our top *n* words per topic there might be many words that essentially 
 mean the same thing. As a little bonus, we can use the `diversity` parameter in BERTopic to 
@@ -151,6 +162,53 @@ force a cosine-related distance metric in UMAP:
 from cuml.preprocessing import normalize
 embeddings = normalize(embeddings)
 ```
+
+!!! note
+    As of the v0.13 release, it is not yet possible to calculate the topic-document probability matrix for unseen data (i.e., `.transform`) using cuML's HDBSCAN. 
+    However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., `.fit` and `.fit_tranform`).
+
+!!! note
+    If you want to install cuML together with BERTopic using Google Colab, you can run the following code:
+
+    ```bash
+    !pip install bertopic
+    !pip install cudf-cu11 dask-cudf-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip install cuml-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip install cugraph-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
+    !pip uninstall cupy-cuda115 -y
+    !pip uninstall cupy-cuda11x -y
+    !pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
+    ```
+
+
+## **Lightweight installation**
+
+The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely `"all-MiniLM-L6-v2"`. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires `pytorch` which often results in a rather large environment, memory-wise. 
+
+Fortunately, it is possible to install BERTopic without `sentence-transformers` and use it as a lightweight solution instead. The installation can be done as follows:
+
+```bash
+pip install --no-deps bertopic
+pip install --upgrade numpy hdbscan umap-learn pandas scikit-learn tqdm plotly pyyaml
+```
+
+Then, we can use BERTopic without `sentence-transformers` as follows using a CPU-based embedding technique:
+
+```python
+from sklearn.pipeline import make_pipeline
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+pipe = make_pipeline(
+    TfidfVectorizer(),
+    TruncatedSVD(100)
+)
+
+topic_model = BERTopic(embedding_model=pipe)
+```
+
+As a result, the entire package and resulting model can be run quickly on the CPU and no GPU is necessary!
+
 
 ## **Finding similar topics between models**
 

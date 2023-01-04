@@ -5,21 +5,20 @@ topic itself remains the same, environmental awareness, the exact representation
 
 BERTopic allows for DTM by calculating the topic representation at each timestep without the need to 
 run the entire model several times. To do this, we first need to fit BERTopic as if there were no temporal 
-aspect in the data. Thus, a general topic model will be created. We use the global representation as to the main 
-topics that can be found at, most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF 
-representation. This will result in a specific topic representation at each timestep without the need to create 
-clusters from embeddings as they were already created.
+aspect in the data. Thus, a general topic model will be created. We use the global representation as to the main topics that can be found at, most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF representation. This will result in a specific topic representation at each timestep without the need to create clusters from embeddings as they were already created.
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/topicsovertime/topicsovertime.svg"
+</div>
+<br>
 
 Next, there are two main ways to further fine-tune these specific topic representations, 
 namely **globally** and **evolutionary**.
 
-A topic representation at timestep *t* can fine-tuned **globally** by averaging its c-TF-IDF representation with 
-that of the global representation. This allows each topic representation to move slightly towards the global 
-representation whilst still keeping some its specific words. 
+A topic representation at timestep *t* can be fine-tuned **globally** by averaging its c-TF-IDF representation with that of the global representation. This allows each topic representation to move slightly towards the global representation whilst still keeping some of its specific words. 
 
-A topic representation at timestep *t* can be fine-tuned **evolutionary** by averaging its c-TF-IDF representation 
-with that of the c-TF-IDF representation at timestep *t-1*. This is done for each topic representation allowing for 
-the representations to evolve over time. 
+A topic representation at timestep *t* can be fine-tuned **evolutionary** by averaging its c-TF-IDF representation with that of the c-TF-IDF representation at timestep *t-1*. This is done for each topic representation allowing for the representations to evolve over time. 
 
 Both fine-tuning methods are set to `True` as a default and allow for interesting representations to be created. 
    
@@ -29,7 +28,7 @@ modeling on Twitter data. We can analyze how certain people have talked about ce
 they have been on Twitter. Due to the controversial nature of his tweets, we are going to be using all 
 tweets by Donald Trump.  
 
-First, we need to load in the data and do some very basic cleaning. For example, I am not interested in his 
+First, we need to load the data and do some very basic cleaning. For example, I am not interested in his 
 re-tweets for this use-case: 
 
 ```python
@@ -56,7 +55,7 @@ topics, probs = topic_model.fit_transform(tweets)
 ```
 
 From these topics, we are going to generate the topic representations at each timestamp for each topic. We do this 
-by simply calling `topics_over_time` and pass in his tweets, the corresponding timestamps, and the related topics:
+by simply calling `topics_over_time` and passing the tweets, the corresponding timestamps, and the related topics:
 
 ```python
 topics_over_time = topic_model.topics_over_time(tweets, timestamps, nr_bins=20)
@@ -99,7 +98,7 @@ topics_over_time = topic_model.topics_over_time(tweets, timestamps, datetime_for
 
 ## **Visualization**
 To me, DTM becomes truly interesting when you have a good way of visualizing how topics have changed over time. 
-A nice way of doing so is leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
+A nice way of doing so is by leveraging the interactive abilities of Plotly. Plotly allows us to show the frequency 
 of topics over time whilst giving the option of hovering over the points to show the time-specific topic representations. 
 Simply call `visualize_topics_over_time` with the newly created topics over time:
 

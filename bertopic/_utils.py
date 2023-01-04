@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 from collections.abc import Iterable
-from scipy.sparse.csr import csr_matrix
+from scipy.sparse import csr_matrix
 
 
 class MyLogger:

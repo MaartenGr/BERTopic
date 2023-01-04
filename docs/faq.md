@@ -6,9 +6,7 @@ hide:
 # Frequently Asked Questions
 
 ## **Why are the results not consistent between runs?**
-Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code
-multiple times. Using custom embeddings allows you to try out BERTopic several times until you find the 
-topics that suit you best. You only need to generate the embeddings itself once and run BERTopic several times
+Due to the stochastic nature of UMAP, the results from BERTopic might differ even if you run the same code multiple times. Using custom embeddings allows you to try out BERTopic several times until you find the topics that suit you best. You only need to generate the embeddings themselves once and run BERTopic several times
 with different parameters. 
 
 If you want to reproduce the results, at the expense of [performance](https://umap-learn.readthedocs.io/en/latest/reproducibility.html), you can set a `random_state` in UMAP to prevent 
@@ -24,12 +22,9 @@ topic_model = BERTopic(umap_model=umap_model)
 ```
 
 ## **Which embedding model should I choose?**
-Unfortunately, there is not a definitive list of the best models for each language, this highly depends 
-on your data, the model, and your specific use-case. However, the default model in BERTopic 
-(`"all-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** 
-documents or any other language, `"paraphrase-multilingual-MiniLM-L12-v2""` has shown great performance.  
+Unfortunately, there is not a definitive list of the best models for each language, this highly depends on your data, the model, and your specific use case. However, the default model in BERTopic (`"all-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** documents or any other language, `"paraphrase-multilingual-MiniLM-L12-v2"` has shown great performance.  
 
-If you want to use a model that provides a higher quality, but takes more compute time, then I would advise using `all-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead. 
+If you want to use a model that provides a higher quality, but takes more computing time, then I would advise using `all-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead. 
 
 **SentenceTransformers**  
 [SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models) work typically quite well 
@@ -37,15 +32,13 @@ and are the preferred models to use. They are great at generating document embed
 multi-lingual versions available.  
 
 **🤗 transformers**  
-BERTopic allows you to use any 🤗 transformers model. These models  are typically embeddings created on 
-a word/sentence level but can easily be pooled using Flair (see Guides/Embeddings). If you have a 
-specific language for which you want to generate embeddings, you can choose the model [here](https://huggingface.co/models).
+BERTopic allows you to use any 🤗 transformers model. These models are typically embeddings created on a word/sentence level but can easily be pooled using Flair (see Guides/Embeddings). If you have a specific language for which you want to generate embeddings, you can choose the model [here](https://huggingface.co/models).
 
 ## **How do I reduce topic outliers?**
-There are three ways in reducing outliers. 
+There are several ways we can reduce outliers.
 
 First, the amount of datapoint classified as outliers is handled by the `min_samples` parameters in HDBSCAN. This value is automatically set to the 
-same value of `min_cluster_size`. However, you can set it indepedently if you want to reduce the number of generated outliers. Lowering this value will 
+same value of `min_cluster_size`. However, you can set it independently if you want to reduce the number of generated outliers. Lowering this value will 
 result in less noise being generated. 
 
 ```python
@@ -62,22 +55,18 @@ topics, probs = topic_model.fit_transform(docs)
     Although this will lower outliers found in the data, this might force outliers to be put into topics where they do not belong. So make 
     sure to strike a balance between keeping noise and reducing outliers. 
 
-Second, after training our BERTopic model, we can assign outliers to topics. By setting `calculate_probabilities=True`, we calculate the probability 
-of a document belonging to any topic. That way, we can select, for each document, the topic with the the highest probability. Thus, although we do 
-generate an outlier class in our BERTopic model, we can assign documents to an actual topic. 
-
-To do this, we can set a probability threshold and assign each document to a topic based on their probabilities:
+Second, after training our BERTopic model, we can assign outliers to topics by making use of the `.reduce_outliers` function in BERTopic. An advantage of using this approach is that there are four built in strategies one can choose for reducing outliers. Moreover, this technique allows the user to experiment with reducing outliers across a number of strategies and parameters without actually having to re-train the topic model each time. You can learn more about the `.reduce_outlier` function [here](https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html). The following is a minimal example of how to use this function:
 
 ```python
-import numpy as np
-probability_threshold = 0.01
-new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for prob in probs]
-```
+from bertopic import BERTopic
 
-!!! note "Note"
-    The topics assigned using the above method can result in topics different from using `.fit_transform()`. This is expected
-    behavior as HDBSCAN is merely trying to imitate soft clustering after fitting the model and it is not a core component
-    of assigning points to clusters. 
+# Train your BERTopic model
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(docs)
+
+# Reduce outliers
+new_topics = topic_model.reduce_outliers(docs, topics)
+```
 
 Third, we can replace HDBSCAN with any other clustering algorithm that we want. So we can choose a clustering algorithm, like k-Means, that 
 does not produce any outliers at all. Using k-Means instead of HDBSCAN is straightforward:
@@ -90,18 +79,58 @@ cluster_model = KMeans(n_clusters=50)
 topic_model = BERTopic(hdbscan_model=cluster_model)
 ```
 
+
+## **How do I remove stop words?**
+At times, stop words might end up in our topic representations. This is something we typically want to avoid as they contribute little to the interpretation of the topics. However, removing stop words as a preprocessing step is not advised as the transformer-based embedding models that we use need the full context to create accurate embeddings. 
+
+Instead, we can use the `CountVectorizer` to preprocess our documents **after** having generated embeddings and clustered 
+our documents. I have found almost no disadvantages to using the `CountVectorizer` to remove stop words and 
+it is something I would strongly advise to try out:
+
+```python
+from bertopic import BERTopic
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer_model = CountVectorizer(stop_words="english")
+topic_model = BERTopic(vectorizer_model=vectorizer_model)
+```
+
+We can also use the `ClassTfidfTransformer` to reduce the impact of frequent words. The result is very similar to explicitly removing stop words but this process does this automatically:
+
+```python
+from bertopic import BERTopic
+from bertopic.vectorizers import ClassTfidfTransformer
+
+ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
+topic_model = BERTopic(ctfidf_model=ctfidf_model)
+```
+
 ## **How can I speed up BERTopic?**
 You can speed up BERTopic by either generating your embeddings beforehand or by 
-setting `calculate_probabilities` to False. Calculating the probabilities is quite expensive and can 
-significantly increase the computation time. Thus, only use it if you do not mind waiting a bit before 
-the model is done running or if you have less than 50_000 documents. 
+setting `calculate_probabilities` to False. Calculating the probabilities is quite expensive and can significantly increase the computation time. Thus, only use it if you do not mind waiting a bit before the model is done running or if you have less than a couple of hundred thousand documents. 
 
-Also, make sure to use a GPU when extracting the sentence/document embeddings. Transformer models 
-typically require a GPU and using only a CPU can slow down computation time quite a lot. 
-However, if you do not have access to a GPU, looking into quantization might help. 
+Also, make sure to use a GPU when extracting the sentence/document embeddings. Transformer models typically require a GPU and using only a CPU can slow down computation time quite a lot. However, if you do not have access to a GPU, looking into quantization might help. 
+
+Lastly, it is also possible to speed up BERTopic with [cuML's](https://rapids.ai/start.html#rapids-release-selector) GPU acceleration of UMAP and HDBSCAN: 
+
+
+```python
+from bertopic import BERTopic
+from cuml.cluster import HDBSCAN
+from cuml.manifold import UMAP
+
+# Create instances of GPU-accelerated UMAP and HDBSCAN
+umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
+hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True)
+
+# Pass the above models to be used in BERTopic
+topic_model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model)
+```
+
 
 ## **I am facing memory issues. Help!**
-There are several ways to perform computation with large datasets. 
+There are several ways to perform computation with large datasets:
+
 * First, you can set `low_memory` to True when instantiating BERTopic. 
 This may prevent blowing up the memory in UMAP. 
 
@@ -124,8 +153,7 @@ parameter is used to indicate the minimum frequency of words. Setting this value
 
 * Fourth, you can use <a href="/BERTopic/getting_started/online/online.html">online topic modeling</a> instead to use BERTopic on big data by training the model in chunks
 
-If the problem persists, then this could be an issue related to your available memory. The processing of 
-millions of documents is quite computationally expensive and sufficient RAM is necessary.  
+If the problem persists, then this could be an issue related to your available memory. The processing of millions of documents is quite computationally expensive and sufficient RAM is necessary.  
 
 ## **I have only a few topics, how do I increase them?**
 There are several reasons why your topic model may result in only a few topics:
@@ -139,34 +167,27 @@ the minimum size of topics, then you are much more likely to increase the number
 You could also decrease the `n_neighbors` parameter used in `UMAP` if this does not work. 
 
 * Third, although this does not happen very often, there simply aren't that many topics to be found 
-in your documents. You can often see this when you have many `-1` topics, which is actually not a topic 
+in your documents. You can often see this when you have many `-1` topics, which is not a topic 
 but a category of outliers.  
 
 ## **I have too many topics, how do I decrease them?**  
-If you have a large dataset, then it is possible to generate thousands of topics. Especially with large 
-datasets, there is a good chance they actually contain many small topics. In practice, you might want 
-a few hundred topics at most in order to interpret them nicely. 
+If you have a large dataset, then it is possible to generate thousands of topics. Especially with large datasets, there is a good chance they contain many small topics. In practice, you might want a few hundred topics at most to interpret them nicely. 
 
 There are a few ways of increasing the number of generated topics: 
 
-* First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) 
-to make sure that those small clusters will not be generated. This is a HDBSCAN parameter that 
-specifies what the minimum number of documents are needed in a cluster. More documents in a cluster 
-means less topics will be generated. 
+* First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) to make sure that those small clusters will not be generated. This is an HDBSCAN parameter that specifies the minimum number of documents needed in a cluster. More documents in a cluster mean fewer topics will be generated. 
 
-* Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). 
-This also prevents those micro clusters to be generated as it will needs quite a number of neighboring 
-documents to create a cluster. 
+* Second, you can create a custom UMAP model and set `n_neighbors` much higher than the default 15 (e.g., 200). This also prevents those micro clusters to be generated as it will need many neighboring documents to create a cluster. 
 
 * Third, we can set `nr_topics` to a value that seems logical to the user. Do note that topics are forced 
-to merge together which might result in a lower quality of topics. In practice, I would advise using 
-`nr_topic="auto"` as that will merge topics together that are very similar. Dissimilar topics will 
+to merge which might result in a lower quality of topics. In practice, I would advise using 
+`nr_topic="auto"` as that will merge topics that are very similar. Dissimilar topics will 
 therefore remain separated. 
 
 ## **How do I calculate the probabilities of all topics in a document?**
 Although it is possible to calculate all the probabilities, the process of doing so is quite computationally 
 inefficient and might significantly increase the computation time. To prevent this, the probabilities are 
-not calculated as a default. In order to calculate, you will have to set `calculate_probabilities` to True:
+not calculated as a default. To calculate them, you will have to set `calculate_probabilities` to True:
 
 ```python
 from bertopic import BERTopic
@@ -174,11 +195,13 @@ topic_model = BERTopic(calculate_probabilities=True)
 topics, probs = topic_model.fit_transform(docs) 
 ```  
 
+!!! note
+    The `calculate_probabilties` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`.approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
+ 
 ## **Numpy gives me an error when running BERTopic**
-With the release of Numpy 1.20.0, there have been significant issues with using that version (and previous) due 
-to compilation issues and pypi.   
+With the release of Numpy 1.20.0, there have been significant issues with using that version (and previous ones) due to compilation issues and pypi.   
   
-This is a known issue with the order of install using pypi. You can find more details about this issue 
+This is a known issue with the order of installation using pypi. You can find more details about this issue 
 [here](https://github.com/lmcinnes/umap/issues/567) and [here](https://github.com/scikit-learn-contrib/hdbscan/issues/457).
 
 I would suggest doing one of the following:
@@ -230,8 +253,7 @@ topic_model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model)
 topics, probs = topic_model.fit_transform(docs)
 ```
 
-Depending on the embeddings you are using, you might want to normalize them first in order to 
-force a cosine-related distance metric in UMAP:
+Depending on the embeddings you are using, you might want to normalize them first to force a cosine-related distance metric in UMAP:
 
 ```python
 from cuml.preprocessing import normalize
@@ -240,7 +262,7 @@ embeddings = normalize(embeddings)
 
 ## **How can I use BERTopic with Chinese documents?**  
 Currently, CountVectorizer tokenizes text by splitting whitespace which does not work for Chinese. 
-In order to get it to work, you will have to create a custom `CountVectorizer` with `jieba`:
+To get it to work, you will have to create a custom `CountVectorizer` with `jieba`:
 
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
@@ -272,7 +294,7 @@ issue can be found [here](https://github.com/lmcinnes/umap/issues/631).
 
 ## **Should I preprocess the data?**
 No. By using document embeddings there is typically no need to preprocess the data as all parts of a document 
-are important in understanding the general topic of the document. Although this holds true in 99% of cases, if you 
+are important in understanding the general topic of the document. Although this holds in 99% of cases, if you 
 have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
 typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
 topic modeling to HTML-code to extract topics of code, then it becomes important.
