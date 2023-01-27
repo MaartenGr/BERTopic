@@ -38,6 +38,15 @@ def check_documents_type(documents):
     else:
         raise TypeError("Make sure that the documents variable is an iterable containing strings only.")
 
+def check_document_ids_type(document_ids):
+    if not (isinstance(doc_ids, list) or isinstance(doc_ids, np.ndarray)):
+        raise ValueError("document_ids must be of type List[str] or List[int]")
+    if all((isinstance(doc_id, str) or isinstance(doc_id, np.str_)) for doc_id in document_ids):
+        pass
+    elif all((isinstance(doc_id, int) or isinstance(doc_id, np.int_)) for doc_id in document_ids):
+        pass
+    else:
+        raise ValueError("Document ids must contain elements of the same type")
 
 def check_embeddings_shape(embeddings, docs):
     """ Check if the embeddings have the correct shape """
@@ -69,6 +78,18 @@ def check_is_fitted(topic_model):
     if topic_model.topics_ is None:
         raise ValueError(msg % {'name': type(topic_model).__name__})
 
+def validate_document_ids(documents_df, document_ids):
+    doc_count = documents_df.shape[0]
+    if isinstance(document_ids, list):
+        if doc_count != len(document_ids):
+            raise ValueError("document_ids must be the same size as documents")
+        elif len(document_ids) != len(set(document_ids)):
+            raise ValueError("document_ids must contain unique values")
+    elif isinstance(document_ids, np.ndarray):
+        if doc_count != document_ids.shape[0]:
+            raise ValueError("document_ids must be the same size as documents")
+        elif document_ids.shape[0] != np.unique(document_ids).shape[0]:
+            raise ValueError("document_ids must contain unique values")
 
 class NotInstalled:
     """

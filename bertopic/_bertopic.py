@@ -36,7 +36,7 @@ from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.backend import BaseEmbedder
 from bertopic.backend._utils import select_backend
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
-from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from bertopic._utils import MyLogger, check_documents_type, check_document_ids_type, validate_document_ids, check_embeddings_shape, check_is_fitted
 
 # Visualization
 import plotly.graph_objects as go
@@ -111,6 +111,7 @@ class BERTopic:
                  calculate_probabilities: bool = False,
                  diversity: float = None,
                  seed_topic_list: List[List[str]] = None,
+                 document_ids: Union[List[str], List[int], np.ndarray] = None,
                  embedding_model=None,
                  umap_model: UMAP = None,
                  hdbscan_model: hdbscan.HDBSCAN = None,
@@ -190,6 +191,10 @@ class BERTopic:
         self.diversity = diversity
         self.verbose = verbose
         self.seed_topic_list = seed_topic_list
+        
+        # Document Ids
+        self.document_ids = document_ids
+        self.document_ids_provided = self.document_ids is not None
 
         # Embedding model
         self.language = language if not embedding_model else None
@@ -327,10 +332,16 @@ class BERTopic:
         """
         check_documents_type(documents)
         check_embeddings_shape(embeddings, documents)
-
+        
         documents = pd.DataFrame({"Document": documents,
-                                  "ID": range(len(documents)),
                                   "Topic": None})
+
+        if self.document_ids_provided:
+            check_document_ids_type(self.document_ids)
+            validate_document_ids(documents, document_ids)
+            documents.insert(1, "ID", document_ids)
+        else:
+            documents.insert(1, "ID", range(len(documents)))
 
         # Extract embeddings
         if embeddings is None:
@@ -523,8 +534,14 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
         documents = pd.DataFrame({"Document": documents,
-                                  "ID": range(len(documents)),
                                   "Topic": None})
+
+        if self.document_ids_provided:
+            check_document_ids_type(self.document_ids)
+            validate_document_ids(documents, document_ids)
+            documents.insert(1, "ID", document_ids)
+        else:
+            documents.insert(1, "ID", range(len(documents)))
 
         # Extract embeddings
         if embeddings is None:
@@ -873,8 +890,15 @@ class BERTopic:
 
         # Calculate basic bag-of-words to be iteratively merged later
         documents = pd.DataFrame({"Document": docs,
-                                  "ID": range(len(docs)),
                                   "Topic": self.topics_})
+
+        if self.document_ids_provided:
+            check_document_ids_type(self.document_ids)
+            validate_document_ids(documents, document_ids)
+            documents.insert(1, "ID", document_ids)
+        else:
+            documents.insert(1, "ID", range(len(documents)))
+
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
         documents = self._preprocess_text(documents_per_topic.Document.values)
