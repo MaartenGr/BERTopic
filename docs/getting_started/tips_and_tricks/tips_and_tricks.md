@@ -34,7 +34,7 @@ topic_model = BERTopic(ctfidf_model=ctfidf_model)
 
 ## **Diversify topic representation**
 After having calculated our top *n* words per topic there might be many words that essentially 
-mean the same thing. As a little bonus, we can use the `diversity` parameter in BERTopic to 
+mean the same thing. As a little bonus, we can use `bertopic.representation.MaximalMarginalRelevance` in BERTopic to 
 diversity words in each topic such that we limit the number of duplicate words we find in each topic. 
 This is done using an algorithm called Maximal Marginal Relevance which compares word embeddings 
 with the topic embedding. 
@@ -43,18 +43,23 @@ We do this by specifying a value between 0 and 1, with 0 being not at all divers
 
 ```python
 from bertopic import BERTopic
-topic_model = BERTopic(diversity=0.2)
+from bertopic.representation import MaximalMarginalRelevance
+
+representation_model = MaximalMarginalRelevance(diversity=0.2)
+topic_model = BERTopic(representation_model=representation_model)
 ```
 
 Since MMR is using word embeddings to diversify the topic representations, it is necessary to pass the embedding model to BERTopic if you are using pre-computed embeddings:
     
 ```python
 from bertopic import BERTopic
+from bertopic.representation import MaximalMarginalRelevance
 from sentence_transformers import SentenceTransformer
 
 sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
-topic_model = BERTopic(embedding_model=sentence_model, diversity=0.2)
+representation_model = MaximalMarginalRelevance(diversity=0.2)
+topic_model = BERTopic(embedding_model=sentence_model, representation_model=representation_model)
 ```
 
 
@@ -68,11 +73,6 @@ To extract the topic-term matrix (or c-TF-IDF matrix) with the corresponding wor
 topic_term_matrix = topic_model.c_tf_idf_
 words = topic_model.vectorizer_model.get_feature_names()
 ```
-
-!!! note
-    This only works if you have set `diversity=None`, for all other values the top *n* are 
-    further optimized using MMR which is not represented in the topic-term matrix as it does 
-    not optimize the entire matrix. 
 
 
 ## **Pre-compute embeddings**

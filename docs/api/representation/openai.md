@@ -1,0 +1,3 @@
+# `OpenAI`
+
+::: bertopic.representation.OpenAI

@@ -173,33 +173,7 @@ topic_model = BERTopic(embedding_model=pipe)
     be able to support online learning then you might want to explore
     the [scikit-partial](https://github.com/koaning/scikit-partial) project. 
     Moreover, since this backend does not generate representations on a word level, 
-    it does not support the `diversity` parameter.
-
-### **Word + Document Embeddings**
-You might want to be using different language models for creating document and word embeddings. For example, 
-while SentenceTransformers might be great in embedding sentences and documents, you might prefer to use 
-FastText to create the word embeddings.
-
-```python
-from bertopic.backend import WordDocEmbedder
-import gensim.downloader as api
-from sentence_transformers import SentenceTransformer
-
-# Word embedding model
-ft = api.load('fasttext-wiki-news-subwords-300')
-
-# Document embedding model
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-
-# Create a model that uses both language models and pass it through BERTopic
-word_doc_embedder = WordDocEmbedder(embedding_model=embedding_model, word_embedding_model=ft)
-topic_model = BERTopic(embedding_model=word_doc_embedder)
-```
-
-!!! note
-    The word embeddings are only created when applying MMR. In other words, 
-    to use this feature, you will have to select a value for `diversity`  between 0 and 1 when
-    instantiating BERTopic. 
+    it does not support the `bertopic.representation` models.
 
 ### **Custom Backend**
 If your backend or model cannot be found in the ones currently available, you can use the `bertopic.backend.BaseEmbedder` class to 

@@ -76,12 +76,15 @@ class NotInstalled:
     installed in order to use the string matching model.
     """
 
-    def __init__(self, tool, dep):
+    def __init__(self, tool, dep, custom_msg=None):
         self.tool = tool
         self.dep = dep
 
-        msg = f"In order to use {self.tool} you'll need to install via;\n\n"
-        msg += f"pip install bertopic[{self.dep}]\n\n"
+        msg = f"In order to use {self.tool} you will need to install via;\n\n"
+        if custom_msg is not None:
+            msg += custom_msg
+        else:
+            msg += f"pip install bertopic[{self.dep}]\n\n"
         self.msg = msg
 
     def __getattr__(self, *args, **kwargs):

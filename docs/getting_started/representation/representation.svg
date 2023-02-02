@@ -17,18 +17,18 @@
 <rect x="168" y="120" width="20" height="8" fill="#4DB6AC"/>
 <rect x="140" y="120" width="20" height="8" fill="#4DB6AC"/>
 <text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="141.342" y="157.939">HDBSCAN</tspan></text>
-<rect y="90" width="118" height="38" fill="#FFD54F"/>
-<rect x="92" y="80" width="20" height="8" fill="#FFD54F"/>
-<rect x="64" y="80" width="20" height="8" fill="#FFD54F"/>
-<rect x="36" y="80" width="20" height="8" fill="#FFD54F"/>
-<rect x="8" y="80" width="20" height="8" fill="#FFD54F"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="6.34619" y="114.161">CountVectorizer</tspan></text>
+<rect y="10" width="118" height="38" fill="#3F51B5"/>
+<rect x="92" width="20" height="8" fill="#3F51B5"/>
+<rect x="64" width="20" height="8" fill="#3F51B5"/>
+<rect x="36" width="20" height="8" fill="#3F51B5"/>
+<rect x="8" width="20" height="8" fill="#3F51B5"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="14.7324" y="35.9395">GPT / T5</tspan></text>
 <rect x="132" y="90" width="118" height="38" fill="#FFD54F"/>
 <rect x="224" y="80" width="20" height="8" fill="#FFD54F"/>
 <rect x="196" y="80" width="20" height="8" fill="#FFD54F"/>
 <rect x="168" y="80" width="20" height="8" fill="#FFD54F"/>
 <rect x="140" y="80" width="20" height="8" fill="#FFD54F"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="164.73" y="117.939">Jieba</tspan></text>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="138.346" y="113.161">CountVectorizer</tspan></text>
 <rect x="132" y="50" width="118" height="38" fill="#90A4AE"/>
 <rect x="224" y="40" width="20" height="8" fill="#90A4AE"/>
 <rect x="196" y="40" width="20" height="8" fill="#90A4AE"/>
@@ -40,14 +40,14 @@
 <rect x="196" width="20" height="8" fill="#3F51B5"/>
 <rect x="168" width="20" height="8" fill="#3F51B5"/>
 <rect x="140" width="20" height="8" fill="#3F51B5"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="161.065" y="26.0576">Optional&#10;</tspan><tspan x="150.271" y="43.0576">Fine-tuning</tspan></text>
-<rect x="327" y="90" width="118" height="38" fill="#FFD54F"/>
-<rect x="419" y="80" width="20" height="8" fill="#FFD54F"/>
-<rect x="391" y="80" width="20" height="8" fill="#FFD54F"/>
-<rect x="363" y="80" width="20" height="8" fill="#FFD54F"/>
-<rect x="335" y="80" width="20" height="8" fill="#FFD54F"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="365.385" y="117.939">POS</tspan></text>
-<circle cx="266.5" cy="108.5" r="5.5" fill="black"/>
-<circle cx="285.5" cy="108.5" r="5.5" fill="black"/>
-<circle cx="307.5" cy="108.5" r="5.5" fill="black"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="145.932" y="34.9395">KeyBERT</tspan></text>
+<rect x="327" y="10" width="118" height="38" fill="#3F51B5"/>
+<rect x="419" width="20" height="8" fill="#3F51B5"/>
+<rect x="391" width="20" height="8" fill="#3F51B5"/>
+<rect x="363" width="20" height="8" fill="#3F51B5"/>
+<rect x="335" width="20" height="8" fill="#3F51B5"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="360.863" y="34.9395">MMR</tspan></text>
+<circle cx="266.5" cy="28.5" r="5.5" fill="black"/>
+<circle cx="285.5" cy="28.5" r="5.5" fill="black"/>
+<circle cx="307.5" cy="28.5" r="5.5" fill="black"/>
 </svg>
