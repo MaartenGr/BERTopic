@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from packaging import version
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Union
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
+from sklearn import __version__ as sklearn_version
 
 
 class KeyBERTInspired(BaseRepresentation):
@@ -110,7 +112,14 @@ class KeyBERTInspired(BaseRepresentation):
             topics: The `self.top_n_words` per topic
         """
         labels = [int(label) for label in sorted(list(topics.keys()))]
-        words = topic_model.vectorizer_model.get_feature_names()
+
+        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
+        # and will be removed in 1.2. Please use get_feature_names_out instead.
+        if version.parse(sklearn_version) >= version.parse("1.0.0"):
+            words = topic_model.vectorizer_model.get_feature_names_out()
+        else:
+            words = topic_model.vectorizer_model.get_feature_names()
+
         indices = topic_model._top_n_idx_sparse(c_tf_idf, self.nr_candidate_words)
         scores = topic_model._top_n_values_sparse(c_tf_idf, indices)
         sorted_indices = np.argsort(scores, 1)

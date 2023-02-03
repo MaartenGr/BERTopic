@@ -126,8 +126,14 @@ class PartOfSpeech(BaseRepresentation):
                     updated_keywords.append(doc[start:end].text)
             candidate_topics[topic] = list(set(updated_keywords))
 
+        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
+        # and will be removed in 1.2. Please use get_feature_names_out instead.
+        if version.parse(sklearn_version) >= version.parse("1.0.0"):
+            words = list(topic_model.vectorizer_model.get_feature_names_out())
+        else:
+            words = list(topic_model.vectorizer_model.get_feature_names())
+
         # Match updated keywords with c-TF-IDF values
-        words = list(topic_model.vectorizer_model.get_feature_names_out())
         words_lookup = dict(zip(words, range(len(words))))
         updated_topics = {topic: [] for topic in topics.keys()}
 
