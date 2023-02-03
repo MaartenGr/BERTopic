@@ -19,30 +19,36 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         if isinstance(model, hdbscan.HDBSCAN):
             predictions, probabilities = hdbscan.approximate_predict(model, embeddings)
             return predictions, probabilities
-        elif "cuml" and "hdbscan" in str(type(model)).lower():
+
+        str_type_model = str(type(model)).lower()
+        if "cuml" in str_type_model and "hdbscan" in str_type_model:
             from cuml.cluster import hdbscan as cuml_hdbscan
             predictions, probabilities = cuml_hdbscan.approximate_predict(model, embeddings)
             return predictions, probabilities
-        else:
-            predictions = model.predict(embeddings)
-            return predictions, None
+
+        predictions = model.predict(embeddings)
+        return predictions, None
 
     # All points membership
     if func == "all_points_membership_vectors":
         if isinstance(model, hdbscan.HDBSCAN):
             return hdbscan.all_points_membership_vectors(model)
-        elif "cuml" and "hdbscan" in str(type(model)).lower():
+
+        str_type_model = str(type(model)).lower()
+        if "cuml" in str_type_model and "hdbscan" in str_type_model:
             from cuml.cluster import hdbscan as cuml_hdbscan
             return cuml_hdbscan.all_points_membership_vectors(model)
-        else:
-            return None
+
+        return None
 
 
 def is_supported_hdbscan(model):
     """ Check whether the input model is a supported HDBSCAN-like model """
     if isinstance(model, hdbscan.HDBSCAN):
         return True
-    elif "cuml" and "hdbscan" in str(type(model)).lower():
+
+    str_type_model = str(type(model)).lower()
+    if "cuml" in str_type_model and "hdbscan" in str_type_model:
         return True
-    else:
-        return False
+
+    return False
