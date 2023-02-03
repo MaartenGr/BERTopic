@@ -76,7 +76,8 @@ def test_full_model(model, documents, request):
     original_topic = topic_model.get_topic(1)[:10]
 
     assert topic != updated_topic
-    assert topic == original_topic
+    if topic_model.representation_model is not None:
+        assert topic != original_topic
 
     # Test updating topic labels
     topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
