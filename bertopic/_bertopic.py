@@ -3070,13 +3070,15 @@ class BERTopic:
         # Find and extract documents that are most similar to the topic
         repr_docs = []
         repr_docs_indices = []
-        for index, topic in enumerate(topics.keys()):
+        repr_docs_mappings = {}
+        labels = sorted(list(topics.keys()))
+        for index, topic in enumerate(labels):
 
             # Calculate similarity
             selected_docs = documents_per_topic.loc[documents_per_topic.Topic == topic, "Document"].values
             bow = self.vectorizer_model.transform(selected_docs)
             ctfidf = self.ctfidf_model.transform(bow)
-            sim_matrix = cosine_similarity(ctfidf, c_tf_idf[topic + self._outliers])
+            sim_matrix = cosine_similarity(ctfidf, c_tf_idf[index + self._outliers])
 
             # Extract top n most representative documents
             nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
