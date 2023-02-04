@@ -148,7 +148,7 @@ from cuml.manifold import UMAP
 
 # Create instances of GPU-accelerated UMAP and HDBSCAN
 umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
-hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True)
+hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True, prediction_data=True)
 
 # Pass the above models to be used in BERTopic
 topic_model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model)
