@@ -145,14 +145,14 @@ class BERTopic:
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
                         NOTE: This is only used in UMAP. For example, if you use PCA instead of UMAP
                         this parameter will not be used.
-            calculate_probabilities: Whether to calculate the probabilities of all topics
+            calculate_probabilities: Calculate the probabilities of all topics
                                      per document instead of the probability of the assigned
                                      topic per document. This could slow down the extraction
-                                     of topics if you have many documents (> 100_000). Set this
-                                     only to True if you have a low amount of documents or if
-                                     you do not mind more computation time.
+                                     of topics if you have many documents (> 100_000). 
                                      NOTE: If false you cannot use the corresponding
                                      visualization method `visualize_probabilities`.
+                                     NOTE: This is an approximation of topic probabilities
+                                     as used in HDBSCAN and not an exact representation.
             seed_topic_list: A list of seed words per topic to converge around
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
