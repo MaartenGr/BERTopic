@@ -179,8 +179,9 @@ class BERTopic:
                                   are supported.
         """
         # Topic-based parameters
-        if top_n_words > 30:
-            raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
+        if top_n_words > 100:
+            warnings.warn("Note that extracting more than 100 words from a sparse "
+                          "can slow down computation quite a bit.")
 
         self.top_n_words = top_n_words
         self.min_topic_size = min_topic_size
@@ -1285,8 +1286,9 @@ class BERTopic:
         if not n_gram_range:
             n_gram_range = self.n_gram_range
 
-        if top_n_words > 30:
-            raise ValueError("top_n_words should be lower or equal to 30. The preferred value is 10.")
+        if top_n_words > 100:
+            warnings.warn("Note that extracting more than 100 words from a sparse "
+                          "can slow down computation quite a bit.")
         self.top_n_words = top_n_words
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
@@ -3105,7 +3107,11 @@ class BERTopic:
         if self.embedding_model is not None and type(self.embedding_model) is not BaseEmbedder:
             topic_list = list(self.topic_representations_.keys())
             topic_list.sort()
-            n = self.top_n_words
+
+            # Only extract top n words
+            n = len(self.topic_representations_[topic_list[0]])
+            if self.top_n_words < n:
+                n = self.top_n_words
 
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
@@ -3210,8 +3216,9 @@ class BERTopic:
         labels = sorted(list(documents.Topic.unique()))
         labels = [int(label) for label in labels]
 
-        # Get the top 30 indices and values per row in a sparse c-TF-IDF matrix
-        indices = self._top_n_idx_sparse(c_tf_idf, 30)
+        # Get at least the top 30 indices and values per row in a sparse c-TF-IDF matrix
+        top_n_words = max(self.top_n_words, 30)
+        indices = self._top_n_idx_sparse(c_tf_idf, top_n_words)
         scores = self._top_n_values_sparse(c_tf_idf, indices)
         sorted_indices = np.argsort(scores, 1)
         indices = np.take_along_axis(indices, sorted_indices, axis=1)

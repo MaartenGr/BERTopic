@@ -210,6 +210,34 @@ topic_model = BERTopic(embedding_model=pipe)
 As a result, the entire package and resulting model can be run quickly on the CPU and no GPU is necessary!
 
 
+## **WordCloud**
+To minimize the number of dependencies in BERTopic, it is not possible to generate wordclouds out-of-the-box. However, 
+there is a minimal script that you can use to generate wordclouds in BERTopic. First, you will need to install 
+the [wordcloud](https://github.com/amueller/word_cloud) package with `pip install wordcloud`. Then, run the following code 
+to generate the wordcloud for a specific topic:
+
+```python
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+def create_wordcloud(model, topic):
+    text = {word: value for word, value in model.get_topic(topic)}
+    wc = WordCloud(background_color="white", max_words=1000)
+    wc.generate_from_frequencies(text)
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+
+# Show wordcloud
+create_wordcloud(topic_model, topic=1)
+```
+
+!!! tip Tip
+    To increase the number of words shown in the wordcloud, you can increase the `top_n_words` 
+    parameter when instantiating BERTopic. You can also increase the number of words in a topic
+    after training the model using `.update_topics()`. 
+
+
 ## **Finding similar topics between models**
 
 Whenever you have trained seperate BERTopic models on different datasets, it might 

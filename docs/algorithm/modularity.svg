@@ -106,42 +106,36 @@
 <circle cx="407.5" cy="189.5" r="5.5" fill="black"/>
 <circle cx="427.5" cy="189.5" r="5.5" fill="black"/>
 <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="44.9375" y="193.764">Tokenizer</tspan></text>
-<rect x="662" y="311" width="118" height="38" fill="#64B5F6"/>
-<rect x="754" y="301" width="20" height="8" fill="#64B5F6"/>
-<rect x="726" y="301" width="20" height="8" fill="#64B5F6"/>
-<rect x="698" y="301" width="20" height="8" fill="#64B5F6"/>
-<rect x="670" y="301" width="20" height="8" fill="#64B5F6"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="689.936" y="338.939">SpaCy</tspan></text>
-<rect x="662" y="271" width="118" height="38" fill="#E57373"/>
-<rect x="754" y="261" width="20" height="8" fill="#E57373"/>
-<rect x="726" y="261" width="20" height="8" fill="#E57373"/>
-<rect x="698" y="261" width="20" height="8" fill="#E57373"/>
-<rect x="670" y="261" width="20" height="8" fill="#E57373"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="700.902" y="298.939">PCA</tspan></text>
-<rect x="662" y="231" width="118" height="38" fill="#4DB6AC"/>
-<rect x="754" y="221" width="20" height="8" fill="#4DB6AC"/>
-<rect x="726" y="221" width="20" height="8" fill="#4DB6AC"/>
-<rect x="698" y="221" width="20" height="8" fill="#4DB6AC"/>
-<rect x="670" y="221" width="20" height="8" fill="#4DB6AC"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="678.246" y="258.939">k-Means</tspan></text>
-<rect x="662" y="191" width="118" height="38" fill="#FFD54F"/>
-<rect x="754" y="181" width="20" height="8" fill="#FFD54F"/>
-<rect x="726" y="181" width="20" height="8" fill="#FFD54F"/>
-<rect x="698" y="181" width="20" height="8" fill="#FFD54F"/>
-<rect x="670" y="181" width="20" height="8" fill="#FFD54F"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="668.346" y="215.161">CountVectorizer</tspan></text>
-<rect x="662" y="151" width="118" height="38" fill="#90A4AE"/>
-<rect x="754" y="141" width="20" height="8" fill="#90A4AE"/>
-<rect x="726" y="141" width="20" height="8" fill="#90A4AE"/>
-<rect x="698" y="141" width="20" height="8" fill="#90A4AE"/>
-<rect x="670" y="141" width="20" height="8" fill="#90A4AE"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="676.938" y="178.939">c-TF-IDF</tspan></text>
-<rect x="662" y="111" width="118" height="38" fill="#3F51B5"/>
-<rect x="754" y="101" width="20" height="8" fill="#3F51B5"/>
-<rect x="726" y="101" width="20" height="8" fill="#3F51B5"/>
-<rect x="698" y="101" width="20" height="8" fill="#3F51B5"/>
-<rect x="670" y="101" width="20" height="8" fill="#3F51B5"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="700.854" y="137.939">GPT</tspan></text>
+<rect x="662" y="289" width="118" height="38" fill="#64B5F6"/>
+<rect x="754" y="279" width="20" height="8" fill="#64B5F6"/>
+<rect x="726" y="279" width="20" height="8" fill="#64B5F6"/>
+<rect x="698" y="279" width="20" height="8" fill="#64B5F6"/>
+<rect x="670" y="279" width="20" height="8" fill="#64B5F6"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="689.936" y="316.939">SpaCy</tspan></text>
+<rect x="662" y="249" width="118" height="38" fill="#E57373"/>
+<rect x="754" y="239" width="20" height="8" fill="#E57373"/>
+<rect x="726" y="239" width="20" height="8" fill="#E57373"/>
+<rect x="698" y="239" width="20" height="8" fill="#E57373"/>
+<rect x="670" y="239" width="20" height="8" fill="#E57373"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="700.902" y="276.939">PCA</tspan></text>
+<rect x="662" y="209" width="118" height="38" fill="#4DB6AC"/>
+<rect x="754" y="199" width="20" height="8" fill="#4DB6AC"/>
+<rect x="726" y="199" width="20" height="8" fill="#4DB6AC"/>
+<rect x="698" y="199" width="20" height="8" fill="#4DB6AC"/>
+<rect x="670" y="199" width="20" height="8" fill="#4DB6AC"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="678.246" y="236.939">k-Means</tspan></text>
+<rect x="662" y="169" width="118" height="38" fill="#FFD54F"/>
+<rect x="754" y="159" width="20" height="8" fill="#FFD54F"/>
+<rect x="726" y="159" width="20" height="8" fill="#FFD54F"/>
+<rect x="698" y="159" width="20" height="8" fill="#FFD54F"/>
+<rect x="670" y="159" width="20" height="8" fill="#FFD54F"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="13" font-weight="bold" letter-spacing="0em"><tspan x="668.346" y="193.161">CountVectorizer</tspan></text>
+<rect x="662" y="129" width="118" height="38" fill="#90A4AE"/>
+<rect x="754" y="119" width="20" height="8" fill="#90A4AE"/>
+<rect x="726" y="119" width="20" height="8" fill="#90A4AE"/>
+<rect x="698" y="119" width="20" height="8" fill="#90A4AE"/>
+<rect x="670" y="119" width="20" height="8" fill="#90A4AE"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="676.938" y="156.939">c-TF-IDF</tspan></text>
 <circle cx="387.5" cy="110.5" r="5.5" fill="black"/>
 <circle cx="407.5" cy="110.5" r="5.5" fill="black"/>
 <circle cx="427.5" cy="110.5" r="5.5" fill="black"/>
@@ -222,7 +216,7 @@
 <rect x="929" y="98" width="20" height="8" fill="#3F51B5"/>
 <rect x="901" y="98" width="20" height="8" fill="#3F51B5"/>
 <rect x="873" y="98" width="20" height="8" fill="#3F51B5"/>
-<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="879.932" y="133.939">KeyBERT</tspan></text>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="20" font-weight="bold" letter-spacing="0em"><tspan x="904.854" y="133.939">GPT</tspan></text>
 <path d="M642.061 231.061C642.646 230.475 642.646 229.525 642.061 228.939L632.515 219.393C631.929 218.808 630.979 218.808 630.393 219.393C629.808 219.979 629.808 220.929 630.393 221.515L638.879 230L630.393 238.485C629.808 239.071 629.808 240.021 630.393 240.607C630.979 241.192 631.929 241.192 632.515 240.607L642.061 231.061ZM579 231.5L641 231.5L641 228.5L579 228.5L579 231.5Z" fill="black"/>
 <defs>
 <radialGradient id="paint0_radial_31_1943" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(466.944 429.845) scale(8.01)">
