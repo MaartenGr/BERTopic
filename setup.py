@@ -20,7 +20,6 @@ base_packages = [
     "tqdm>=4.41.1",
     "sentence-transformers>=0.4.1",
     "plotly>=4.7.0",
-    "pyyaml<6.0"
 ]
 
 flair_packages = [

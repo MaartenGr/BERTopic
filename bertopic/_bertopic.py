@@ -126,6 +126,7 @@ class BERTopic:
                       supported languages see bertopic.backend.languages. Select
                       "multilingual" to load in the `paraphrase-multilingual-MiniLM-L12-v2`
                       sentence-tranformers model that supports 50+ languages.
+                      NOTE: This is not used if `embedding_model` is used. 
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
                          are typically best represented by at most 10 words.
@@ -367,11 +368,10 @@ class BERTopic:
         if self.nr_topics:
             documents = self._reduce_topics(documents)
 
-        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-            self._map_representative_docs(original_topics=True)
-        else:
-            self._save_representative_docs(documents)
+        # Save the top 3 most representative documents per topic
+        self._save_representative_docs(documents)
 
+        # Resulting output
         self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
@@ -1808,7 +1808,7 @@ class BERTopic:
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents)
         self._update_topic_size(documents)
-        self._map_representative_docs()
+        self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
     def reduce_topics(self,
@@ -1846,15 +1846,14 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
+
         self.nr_topics = nr_topics
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_})
 
         # Reduce number of topics
         documents = self._reduce_topics(documents)
         self._merged_topics = None
-        self._map_representative_docs()
-
-        # Map probabilities
+        self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
         return self
@@ -1977,6 +1976,9 @@ class BERTopic:
 
         # Reduce outliers by finding the most similar topic embeddings
         elif strategy.lower() == "embeddings":
+            if self.embedding_model is None:
+                raise ValueError("To use this strategy, you will need to pass a model to `embedding_model`"
+                                  "when instantiating BERTopic.")
             outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
             outlier_docs = [documents[index] for index in outlier_ids]
 
@@ -2877,10 +2879,6 @@ class BERTopic:
         # track if there are outlier labels and act accordingly when slicing.
         self._outliers = 1 if -1 in set(labels) else 0
 
-        # Save representative docs
-        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-            self._save_representative_docs(documents)
-
         # Extract probabilities
         probabilities = None
         if hasattr(self.hdbscan_model, "probabilities_"):
@@ -2950,92 +2948,20 @@ class BERTopic:
                               self.topic_representations_.items()}
 
     def _save_representative_docs(self, documents: pd.DataFrame):
-        """ Save the most representative docs (3) per topic
-
-        The most representative docs are extracted by taking
-        the exemplars from the HDBSCAN-generated clusters.
-
-        Full instructions can be found here:
-            https://hdbscan.readthedocs.io/en/latest/soft_clustering_explanation.html
+        """ Save the 3 most representative docs per topic
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
+
+        Updates:
+            self.representative_docs_: Populate each topic with 3 representative docs
         """
-        smallest_cluster_size = min(self.topic_sizes_.items(), key=lambda x: x[1])[1]
-        if smallest_cluster_size < 3:
-            top_n_representative_docs = smallest_cluster_size
-        else:
-            top_n_representative_docs = 3
-
-        if isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-            # Prepare the condensed tree and luf clusters beneath a given cluster
-            condensed_tree = self.hdbscan_model.condensed_tree_
-            raw_tree = condensed_tree._raw_tree
-            clusters = sorted(condensed_tree._select_clusters())
-            cluster_tree = raw_tree[raw_tree['child_size'] > 1]
-
-            #  Find the points with maximum lambda value in each leaf
-            representative_docs = {}
-            for topic in documents['Topic'].unique():
-                if topic != -1:
-                    leaves = hdbscan.plots._recurse_leaf_dfs(cluster_tree, clusters[topic])
-
-                    result = np.array([])
-                    for leaf in leaves:
-                        max_lambda = raw_tree['lambda_val'][raw_tree['parent'] == leaf].max()
-                        points = raw_tree['child'][(raw_tree['parent'] == leaf) & (raw_tree['lambda_val'] == max_lambda)]
-                        result = np.hstack((result, points))
-
-                    representative_docs[topic] = list(np.random.choice(result, top_n_representative_docs, replace=False).astype(int))
-
-            # Convert indices to documents
-            self.representative_docs_ = {topic: [documents.iloc[doc_id].Document for doc_id in doc_ids]
-                                         for topic, doc_ids in
-                                         representative_docs.items()}
-        else:
-            documents_per_topic = documents.groupby('Topic').sample(n=500, replace=True, random_state=42).drop_duplicates()
-            self.representative_docs_ = {}
-            for topic in documents['Topic'].unique():
-
-                # Calculate similarity
-                selected_docs = documents_per_topic.loc[documents_per_topic.Topic == topic, "Document"].values
-                bow = self.vectorizer_model.transform(selected_docs)
-                ctfidf = self.ctfidf_model.transform(bow)
-                sim_matrix = cosine_similarity(ctfidf, self.c_tf_idf_[topic + self._outliers])
-
-                # Extract top 3 most representative documents
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0],
-                                          -top_n_representative_docs)[-top_n_representative_docs:]
-                self.representative_docs_[topic] = [selected_docs[index] for index in indices]
-
-    def _map_representative_docs(self, original_topics: bool = False):
-        """ Map the representative docs per topic to the correct topics
-
-        If topics were reduced, remove documents from topics that were
-        merged into larger topics as we assume that the documents from
-        larger topics are better representative of the entire merged
-        topic.
-
-        Arguments:
-            original_topics: Whether we want to map from the
-                             original topics to the most recent topics
-                             or from the second-most recent topics.
-        """
-        mappings = self.topic_mapper_.get_mappings(original_topics)
-        if self.representative_docs_ is not None:
-            representative_docs = self.representative_docs_.copy()
-        else:
-            representative_docs = {}
-
-        # Update the representative documents
-        updated_representative_docs = {mappings[old_topic]: []
-                                       for old_topic, _ in representative_docs.items()}
-        for old_topic, docs in representative_docs.items():
-            new_topic = mappings[old_topic]
-            updated_representative_docs[new_topic].extend(docs)
-
-        self.representative_docs_ = updated_representative_docs
-        self.representative_docs_.pop(-1, None)
+        repr_docs, _, _= self._extract_representative_docs(self.c_tf_idf_, 
+                                                           documents, 
+                                                           self.topic_representations_, 
+                                                           nr_samples=500, 
+                                                           nr_repr_docs=3)
+        self.representative_docs_ = repr_docs
 
     def _extract_representative_docs(self,
                                      c_tf_idf: csr_matrix,

@@ -2,9 +2,10 @@
 
 
 ## **Document length**
-As a default, we are using sentence-transformers to embed our documents. However, as the name implies, the embedding model works best for either sentences or paragraphs. This means that whenever you have a set of documents, where each documents contains several paragraphs, BERTopic will struggle getting accurately extracting a topic from that document. Several paragraphs typically means several topics and BERTopic will assign only one topic to a document. 
+As a default, we are using sentence-transformers to embed our documents. However, as the name implies, the embedding model works best for either sentences or paragraphs. This means that whenever you have a set of documents, where each documents contains several paragraphs, the document is truncated and the topic model is only trained on a small part of the data. 
 
-Therefore, it is advised to split up longer documents into either sentences or paragraphs before embedding them. That way, BERTopic will have a much easier job identifying topics in isolation. 
+One way to solve this issue is by splitting up longer documents into either sentences or paragraphs before embedding them. Another solution is to approximate the [topic distributions](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) of topics after having trained your topic model. 
+
 
 ## **Removing stop words**
 At times, stop words might end up in our topic representations. This is something we typically want to avoid as they contribute little to the interpretation of the topics. However, removing stop words as a preprocessing step is not advised as the transformer-based embedding models that we use need the full context in order to create accurate embeddings. 
@@ -31,6 +32,18 @@ ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
 topic_model = BERTopic(ctfidf_model=ctfidf_model)
 ```
 
+Lastly, we can use a KeyBERT-Inspired model to reduce the appearance of stop words. This also often improves the topic representation:
+
+```python
+from bertopic.representation import KeyBERTInspired
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = KeyBERTInspired()
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
 
 ## **Diversify topic representation**
 After having calculated our top *n* words per topic there might be many words that essentially 
@@ -231,6 +244,9 @@ def create_wordcloud(model, topic):
 # Show wordcloud
 create_wordcloud(topic_model, topic=1)
 ```
+
+![](wordcloud.jpg)
+
 
 !!! tip Tip
     To increase the number of words shown in the wordcloud, you can increase the `top_n_words` 
