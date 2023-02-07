@@ -12,6 +12,7 @@ def visualize_heatmap(topic_model,
                       top_n_topics: int = None,
                       n_clusters: int = None,
                       custom_labels: bool = False,
+                      title: str = "<b>Similarity Matrix</b>",
                       width: int = 800,
                       height: int = 800) -> go.Figure:
     """ Visualize a heatmap of the topic's similarity matrix
@@ -27,6 +28,7 @@ def visualize_heatmap(topic_model,
                     matrix by those clusters.
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -108,7 +110,7 @@ def visualize_heatmap(topic_model,
 
     fig.update_layout(
         title={
-            'text': "<b>Similarity Matrix",
+            'text': f"{title}",
             'y': .95,
             'x': 0.55,
             'xanchor': 'center',

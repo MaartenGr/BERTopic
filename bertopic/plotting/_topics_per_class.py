@@ -10,6 +10,7 @@ def visualize_topics_per_class(topic_model,
                                topics: List[int] = None,
                                normalize_frequency: bool = False,
                                custom_labels: bool = False,
+                               title: str = "<b>Topics per Class</b>",
                                width: int = 1250,
                                height: int = 900) -> go.Figure:
     """ Visualize topics per class
@@ -23,6 +24,7 @@ def visualize_topics_per_class(topic_model,
         normalize_frequency: Whether to normalize each topic's frequency individually
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -98,7 +100,7 @@ def visualize_topics_per_class(topic_model,
         xaxis_title="Normalized Frequency" if normalize_frequency else "Frequency",
         yaxis_title="Class",
         title={
-            'text': "<b>Topics per Class",
+            'text': f"{title}",
             'y': .95,
             'x': 0.40,
             'xanchor': 'center',

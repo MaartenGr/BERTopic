@@ -17,6 +17,7 @@ def visualize_hierarchical_documents(topic_model,
                                      hide_document_hover: bool = True,
                                      nr_levels: int = 10,
                                      custom_labels: bool = False,
+                                     title: str = "<b>Hierarchical Documents and Topics</b>",
                                      width: int = 1200,
                                      height: int = 750) -> go.Figure:
     """ Visualize documents and their topics in 2D at different levels of hierarchy
@@ -48,6 +49,7 @@ def visualize_hierarchical_documents(topic_model,
                        `topic_model.set_topic_labels`.
                        NOTE: Custom labels are only generated for the original 
                        un-merged topics.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -300,7 +302,7 @@ def visualize_hierarchical_documents(topic_model,
         sliders=sliders,
         template="simple_white",
         title={
-            'text': "<b>Hierarchical Documents and Topics",
+            'text': f"{title}",
             'x': 0.5,
             'xanchor': 'center',
             'yanchor': 'top',

@@ -15,6 +15,7 @@ def visualize_documents(topic_model,
                         hide_annotations: bool = False,
                         hide_document_hover: bool = False,
                         custom_labels: bool = False,
+                        title: str = "<b>Documents and Topics</b>",
                         width: int = 1200,
                         height: int = 750):
     """ Visualize documents and their topics in 2D
@@ -37,6 +38,7 @@ def visualize_documents(topic_model,
                              specific points. Helps to speed up generation of visualization.
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -203,7 +205,7 @@ def visualize_documents(topic_model,
     fig.update_layout(
         template="simple_white",
         title={
-            'text': "<b>Documents and Topics",
+            'text': f"{title}",
             'x': 0.5,
             'xanchor': 'center',
             'yanchor': 'top',

@@ -6,6 +6,7 @@ def visualize_distribution(topic_model,
                            probabilities: np.ndarray,
                            min_probability: float = 0.015,
                            custom_labels: bool = False,
+                           title: str = "<b>Topic Probability Distribution</b>",
                            width: int = 800,
                            height: int = 600) -> go.Figure:
     """ Visualize the distribution of topic probabilities
@@ -17,6 +18,7 @@ def visualize_distribution(topic_model,
                          All others are ignored.
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -80,7 +82,7 @@ def visualize_distribution(topic_model,
     fig.update_layout(
         xaxis_title="Probability",
         title={
-            'text': "<b>Topic Probability Distribution",
+            'text': f"{title}",
             'y': .95,
             'x': 0.5,
             'xanchor': 'center',

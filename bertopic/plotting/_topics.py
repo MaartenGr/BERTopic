@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 def visualize_topics(topic_model,
                      topics: List[int] = None,
                      top_n_topics: int = None,
+                     title: str = "<b>Intertopic Distance Map</b>",
                      width: int = 650,
                      height: int = 650) -> go.Figure:
     """ Visualize topics, their sizes, and their corresponding words
@@ -22,6 +23,7 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -67,11 +69,12 @@ def visualize_topics(topic_model,
     # Visualize with plotly
     df = pd.DataFrame({"x": embeddings[:, 0], "y": embeddings[:, 1],
                        "Topic": topic_list, "Words": words, "Size": frequencies})
-    return _plotly_topic_visualization(df, topic_list, width, height)
+    return _plotly_topic_visualization(df, topic_list, title, width, height)
 
 
 def _plotly_topic_visualization(df: pd.DataFrame,
                                 topic_list: List[str],
+                                title: str,
                                 width: int,
                                 height: int):
     """ Create plotly-based visualization of topics with a slider for topic selection """
@@ -104,7 +107,7 @@ def _plotly_topic_visualization(df: pd.DataFrame,
     # Stylize layout
     fig.update_layout(
         title={
-            'text': "<b>Intertopic Distance Map",
+            'text': f"{title}",
             'y': .95,
             'x': 0.5,
             'xanchor': 'center',
