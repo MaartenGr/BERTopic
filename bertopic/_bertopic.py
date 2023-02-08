@@ -26,6 +26,7 @@ import hdbscan
 from umap import UMAP
 from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
+from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
@@ -1813,12 +1814,17 @@ class BERTopic:
 
     def reduce_topics(self,
                       docs: List[str],
-                      nr_topics: int = 20) -> None:
-        """ Further reduce the number of topics to nr_topics.
+                      nr_topics: Union[int, str] = 20) -> None:
+        """ Reduce the number of topics to a fixed number of topics
+        or automatically.
 
-        The number of topics is further reduced by calculating the c-TF-IDF matrix
-        of the documents and then reducing them by iteratively merging the least
-        frequent topic with the most similar one based on their c-TF-IDF matrices.
+        If nr_topics is a integer, then the number of topics is reduced
+        to nr_topics using `AgglomerativeClustering` on the cosine distance matrix
+        of the topic embeddings.
+
+        If nr_topics is `"auto"`, then HDBSCAN is used to automatically
+        reduce the number of topics by running it on the topic embeddings.
+
         The topics, their sizes, and representations are updated.
 
         Arguments:
@@ -3200,30 +3206,26 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        # Track which topics where originally merged
-        if not self._merged_topics:
-            self._merged_topics = []
-
-        # Create topic similarity matrix
-        similarities = cosine_similarity(self.c_tf_idf_)
-        np.fill_diagonal(similarities, 0)
-
-        # Find most similar topic to least common topic
-        topics = documents.Topic.tolist().copy()
-        mapped_topics = {}
-        while len(self.get_topic_freq()) > self.nr_topics + self._outliers:
-            topic_to_merge = self.get_topic_freq().iloc[-1].Topic
-            topic_to_merge_into = np.argmax(similarities[topic_to_merge + self._outliers]) - self._outliers
-            similarities[:, topic_to_merge + self._outliers] = -self._outliers
-            self._merged_topics.append(topic_to_merge)
-
-            # Update Topic labels
-            documents.loc[documents.Topic == topic_to_merge, "Topic"] = topic_to_merge_into
-            mapped_topics[topic_to_merge] = topic_to_merge_into
-            self._update_topic_size(documents)
+        # Create topic distance matrix
+        if self.topic_embeddings_ is not None:
+            topic_embeddings = np.array(self.topic_embeddings_)[self._outliers:, ]
+        else:
+            topic_embeddings = self.c_tf_idf_[self._outliers:, ].toarray()
+        distance_matrix = 1-cosine_similarity(topic_embeddings)
+        np.fill_diagonal(distance_matrix, 0)
+        
+        # Cluster the topic embeddings using AgglomerativeClustering
+        if version.parse(sklearn_version) >= version.parse("1.4.0"):
+            cluster = AgglomerativeClustering(self.nr_topics + self._outliers, metric="precomputed", linkage="average")
+        else:
+            cluster = AgglomerativeClustering(self.nr_topics + self._outliers, affinity="precomputed", linkage="average")
+        cluster.fit(distance_matrix)
+        new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in self.topics_]
 
         # Map topics
-        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
+        documents.Topic = new_topics
+        self._update_topic_size(documents)
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(self.topics_, new_topics)}
         self.topic_mapper_.add_mappings(mapped_topics)
 
         # Update representations
