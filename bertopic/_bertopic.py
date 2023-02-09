@@ -3187,7 +3187,7 @@ class BERTopic:
         initial_nr_topics = len(self.get_topics())
 
         if isinstance(self.nr_topics, int):
-            if self.nr_topics < initial_nr_topics - 1:
+            if self.nr_topics < initial_nr_topics:
                 documents = self._reduce_to_n_topics(documents)
         elif isinstance(self.nr_topics, str):
             documents = self._auto_reduce_topics(documents)
@@ -3206,6 +3206,8 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        topics = documents.Topic.tolist().copy()
+
         # Create topic distance matrix
         if self.topic_embeddings_ is not None:
             topic_embeddings = np.array(self.topic_embeddings_)[self._outliers:, ]
@@ -3216,16 +3218,16 @@ class BERTopic:
 
         # Cluster the topic embeddings using AgglomerativeClustering
         if version.parse(sklearn_version) >= version.parse("1.4.0"):
-            cluster = AgglomerativeClustering(self.nr_topics, metric="precomputed", linkage="average")
+            cluster = AgglomerativeClustering(self.nr_topics - self._outliers, metric="precomputed", linkage="average")
         else:
-            cluster = AgglomerativeClustering(self.nr_topics, affinity="precomputed", linkage="average")
+            cluster = AgglomerativeClustering(self.nr_topics - self._outliers, affinity="precomputed", linkage="average")
         cluster.fit(distance_matrix)
-        new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in self.topics_]
+        new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in topics]
 
         # Map topics
         documents.Topic = new_topics
         self._update_topic_size(documents)
-        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(self.topics_, new_topics)}
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, new_topics)}
         self.topic_mapper_.add_mappings(mapped_topics)
 
         # Update representations

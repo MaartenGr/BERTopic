@@ -62,7 +62,7 @@ def test_full_model(model, documents, request):
     nr_topics = 2 if nr_topics < 2 else nr_topics - 1
     topic_model.reduce_topics(documents, nr_topics=nr_topics)
 
-    assert len(topic_model.get_topic_freq()) == nr_topics + topic_model._outliers
+    assert len(topic_model.get_topic_freq()) == nr_topics
     assert len(topic_model.topics_) == len(topics)
 
     # Test update topics
