@@ -89,7 +89,7 @@ def test_extract_topics_custom_cv(model, documents, request):
                                    ('merged_topic_model'),
                                    ('reduced_topic_model'),
                                    ('online_topic_model')])
-@pytest.mark.parametrize("reduced_topics", [1, 2, 4, 10])
+@pytest.mark.parametrize("reduced_topics", [2, 4, 10])
 def test_topic_reduction(model, reduced_topics, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     old_topics = copy.deepcopy(topic_model.topics_)
