@@ -3187,7 +3187,7 @@ class BERTopic:
         initial_nr_topics = len(self.get_topics())
 
         if isinstance(self.nr_topics, int):
-            if self.nr_topics < initial_nr_topics:
+            if self.nr_topics < initial_nr_topics - 1:
                 documents = self._reduce_to_n_topics(documents)
         elif isinstance(self.nr_topics, str):
             documents = self._auto_reduce_topics(documents)
@@ -3213,12 +3213,12 @@ class BERTopic:
             topic_embeddings = self.c_tf_idf_[self._outliers:, ].toarray()
         distance_matrix = 1-cosine_similarity(topic_embeddings)
         np.fill_diagonal(distance_matrix, 0)
-        
+
         # Cluster the topic embeddings using AgglomerativeClustering
         if version.parse(sklearn_version) >= version.parse("1.4.0"):
-            cluster = AgglomerativeClustering(self.nr_topics + self._outliers, metric="precomputed", linkage="average")
+            cluster = AgglomerativeClustering(self.nr_topics, metric="precomputed", linkage="average")
         else:
-            cluster = AgglomerativeClustering(self.nr_topics + self._outliers, affinity="precomputed", linkage="average")
+            cluster = AgglomerativeClustering(self.nr_topics, affinity="precomputed", linkage="average")
         cluster.fit(distance_matrix)
         new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in self.topics_]
 
