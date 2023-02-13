@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 
@@ -5,8 +6,10 @@ import spacy
 from spacy.matcher import Matcher
 from spacy.language import Language
 
+from packaging import version
 from scipy.sparse import csr_matrix
 from typing import List, Mapping, Tuple, Union
+from sklearn import __version__ as sklearn_version
 from bertopic.representation._base import BaseRepresentation
 
 
