@@ -5,12 +5,10 @@ As such, there are a number of representation models implemented in BERTopic tha
 and are **not used by default**. You are not restrained by the how the representation can be fine-tuned, from GPT-like models to fast keyword extraction 
 with KeyBERT-like models:
 
+<iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/218417067-a81cc179-9055-49ba-a2b0-f2c1db535159.mp4
+" title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-<figure markdown>
-  ![Image title](representation.svg)
-  <figcaption></figcaption>
-</figure>
-
+For each model below, an example will be shown on how it may change or improve upon the default topic keywords that are generated. The dataset used in these examples can be found [here](https://www.kaggle.com/datasets/maartengr/kurzgesagt-transcriptions). 
 
 ## **KeyBERTInspired**
 
@@ -39,6 +37,12 @@ representation_model = KeyBERTInspired()
 # Use the representation model in BERTopic on top of the default pipeline
 topic_model = BERTopic(representation_model=representation_model)
 ```
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/keybert.svg"
+</div>
+<br>
 
 ## **PartOfSpeech**
 Our candidate topics, as extracted with c-TF-IDF, do not take into account a keyword's part of speech as extracting noun-phrases from 
@@ -76,6 +80,12 @@ representation_model = PartOfSpeech("en_core_web_sm")
 # Use the representation model in BERTopic on top of the default pipeline
 topic_model = BERTopic(representation_model=representation_model)
 ```
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/pos.svg"
+</div>
+<br>
 
 You can define custom POS patterns to be extracted:
 
@@ -115,6 +125,12 @@ representation_model = MaximalMarginalRelevance(diversity=0.3)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/mmr_output.svg"
+</div>
+<br>
+
 ## **Zero-Shot Classification**
 
 For some use cases, you might already have a set of candidate labels that you would like to automatically assign to some of the topics. 
@@ -137,6 +153,12 @@ representation_model = ZeroShotClassification(candidate_topics, model="facebook/
 # Use the representation model in BERTopic on top of the default pipeline
 topic_model = BERTopic(representation_model=representation_model)
 ```
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/zero.svg"
+</div>
+<br>
 
 ## **Text Generation**
 
@@ -183,6 +205,12 @@ generator = pipeline('text2text-generation', model='google/flan-t5-base')
 representation_model = TextGeneration(generator)
 ```
 
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/hf.svg"
+</div>
+<br>
+
 As can be seen from the example above, if you would like to use a `text2text-generation` model, you will to 
 pass a `transformers.pipeline` with the `"text2text-generation"` parameter. 
 
@@ -211,6 +239,12 @@ representation_model = Cohere(co)
 # Use the representation model in BERTopic on top of the default pipeline
 topic_model = BERTopic(representation_model=representation_model)
 ```
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/cohere.svg"
+</div>
+<br>
 
 You can also use a custom prompt:
 
@@ -245,6 +279,12 @@ representation_model = OpenAI()
 # Use the representation model in BERTopic on top of the default pipeline
 topic_model = BERTopic(representation_model=representation_model)
 ```
+
+<br>
+<div class="svg_image">
+--8<-- "docs/getting_started/representation/openai.svg"
+</div>
+<br>
 
 You can also use a custom prompt:
 

@@ -104,7 +104,7 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 
 By default, the main steps for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, it assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic not only allows you to build your own topic model but to explore several topic modeling techniques on top of your customized topic model:
 
-<iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/205490350-cd9833e7-9cd5-44fa-8752-407d748de633.mp4
+<iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/218420473-4b2bb539-9dbe-407a-9674-a8317c7fb3bf.mp4
 " title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 You can swap out any of these models or even remove them entirely. Starting with the embedding step, you can find out how to do this [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) and more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 

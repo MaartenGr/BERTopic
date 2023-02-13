@@ -43,7 +43,7 @@ class TextGeneration(BaseRepresentation):
     representation_model = TextGeneration(generator)
 
     # Use the representation model in BERTopic on top of the default pipeline
-    topic_model = BERTopic(representation_model=representation_model)
+    topic_model = BERTo pic(representation_model=representation_model)
     ```
 
     You can use a custom prompt and decide where the keywords should
@@ -61,7 +61,7 @@ class TextGeneration(BaseRepresentation):
     """
     def __init__(self,
                  model: Union[str, pipeline],
-                 prompt: str = "",
+                 prompt: str = None,
                  pipeline_kwargs: Mapping[str, Any] = {},
                  random_state: int = 42):
         set_seed(random_state)
