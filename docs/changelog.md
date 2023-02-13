@@ -5,6 +5,239 @@ hide:
 
 # Changelog
 
+## **Version 0.14.0**
+*Release date: 14 February, 2023*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Fine-tune [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) with `bertopic.representation`
+    * Diverse range of models, including KeyBERT, MMR, POS, Transformers, OpenAI, and more!'
+    * Create your own prompts for text generation models, like GPT3:
+        * Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt to decide where the keywords and and set of representative documents need to be inserted.
+    * Chain models to perform fine-grained fine-tuning
+    * Create and customize your represention model
+* Improved the topic reduction technique when using `nr_topics=int`
+* Added `title` parameters for all graphs ([#800](https://github.com/MaartenGr/BERTopic/issues/800))
+
+
+<h3><b>Fixes:</a></b></h3>
+
+* Improve documentation ([#837](https://github.com/MaartenGr/BERTopic/issues/837), [#769](https://github.com/MaartenGr/BERTopic/issues/769), [#954](https://github.com/MaartenGr/BERTopic/issues/954), [#912](https://github.com/MaartenGr/BERTopic/issues/912), [#911](https://github.com/MaartenGr/BERTopic/issues/911))
+* Bump pyyaml ([#903](https://github.com/MaartenGr/BERTopic/issues/903))
+* Fix large number of representative docs ([#965](https://github.com/MaartenGr/BERTopic/issues/965))
+* Prevent stochastisch behavior in `.visualize_topics` ([#952](https://github.com/MaartenGr/BERTopic/issues/952))
+* Add custom labels parameter to `.visualize_topics` ([#976](https://github.com/MaartenGr/BERTopic/issues/976))
+* Fix cuML HDBSCAN type checks by [@FelSiq](https://github.com/FelSiq) in [#981](https://github.com/MaartenGr/BERTopic/pull/981)
+
+<h3><b>API Changes:</a></b></h3>
+* The `diversity` parameter was removed in favor of `bertopic.representation.MaximalMarginalRelevance`
+* The `representation_model` parameter was added to `bertopic.BERTopic`
+
+<br>  
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired">Representation Models</a></b></h3>
+
+Fine-tune the c-TF-IDF representation with a variety of models. Whether that is through a KeyBERT-Inspired model or GPT-3, the choice is up to you! 
+
+<iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/218417067-a81cc179-9055-49ba-a2b0-f2c1db535159.mp4
+" title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<br>  
+
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired">KeyBERTInspired</a></b></h3>
+
+The algorithm follows some principles of [KeyBERT](https://github.com/MaartenGr/KeyBERT) but does some optimization in order to speed up inference. Usage is straightforward:
+
+![keybertinspired](https://user-images.githubusercontent.com/25746895/216336376-d2c4e5d6-6cf7-435c-904c-fc195aae7dcd.svg)
+
+```python
+from bertopic.representation import KeyBERTInspired
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = KeyBERTInspired()
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![keybert](https://user-images.githubusercontent.com/25746895/218417161-bfd5980e-43c7-498a-904a-b6018ba58d45.svg)
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#partofspeech">PartOfSpeech</a></b></h3>
+
+Our candidate topics, as extracted with c-TF-IDF, do not take into account a keyword's part of speech as extracting noun-phrases from all documents can be computationally quite expensive. Instead, we can leverage c-TF-IDF to perform part of speech on a subset of keywords and documents that best represent a topic. 
+
+![partofspeech](https://user-images.githubusercontent.com/25746895/216336534-48ff400e-72e1-4c50-9030-414576bac01e.svg)
+
+
+```python
+from bertopic.representation import PartOfSpeech
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = PartOfSpeech("en_core_web_sm")
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![pos](https://user-images.githubusercontent.com/25746895/218417198-41c19b5c-251f-43c1-bfe2-0a480731565a.svg)
+
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#maximalmarginalrelevance">MaximalMarginalRelevance</a></b></h3>
+
+When we calculate the weights of keywords, we typically do not consider whether we already have similar keywords in our topic. Words like "car" and "cars" 
+essentially represent the same information and often redundant. We can use `MaximalMarginalRelevance` to improve diversity of our candidate topics:
+
+![mmr](https://user-images.githubusercontent.com/25746895/216336697-558f1409-8da3-4076-a21b-d87eec583ac7.svg)
+
+
+```python
+from bertopic.representation import MaximalMarginalRelevance
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = MaximalMarginalRelevance(diversity=0.3)
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![mmr (1)](https://user-images.githubusercontent.com/25746895/218417234-88b145e2-7293-43c0-888c-36abe469a48a.svg)
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#zero-shot-classification">Zero-Shot Classification</a></b></h3>
+
+To perform zero-shot classification, we feed the model with the keywords as generated through c-TF-IDF and a set of candidate labels. If, for a certain topic, we find a similar enough label, then it is assigned. If not, then we keep the original c-TF-IDF keywords. 
+
+We use it in BERTopic as follows:
+
+```python
+from bertopic.representation import ZeroShotClassification
+from bertopic import BERTopic
+
+# Create your representation model
+candidate_topics = ["space and nasa", "bicycles", "sports"]
+representation_model = ZeroShotClassification(candidate_topics, model="facebook/bart-large-mnli")
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![zero](https://user-images.githubusercontent.com/25746895/218417276-dcef3519-acba-4792-8601-45dc7ed39488.svg)
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#transformers">Text Generation: 🤗 Transformers</a></b></h3>
+
+Nearly every week, there are new and improved models released on the 🤗 [Model Hub](https://huggingface.co/models) that, with some creativity, allow for 
+further fine-tuning of our c-TF-IDF based topics. These models range from text generation to zero-classification. In BERTopic, wrappers around these 
+methods are created as a way to support whatever might be released in the future. 
+
+Using a GPT-like model from the huggingface hub is rather straightforward:
+
+```python
+from bertopic.representation import TextGeneration
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = TextGeneration('gpt2')
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![hf](https://user-images.githubusercontent.com/25746895/218417310-2b0eabc7-296d-499d-888b-0ab48a65a2fb.svg)
+
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#cohere">Text Generation: Cohere</a></b></h3>
+
+Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
+do the work for you. Here, we can use [Cohere](https://docs.cohere.ai/) to extract our topic labels from the candidate documents and keywords.
+To use this, you will need to install cohere first:
+
+```bash
+pip install cohere
+```
+
+Then, get yourself an API key and use Cohere's API as follows:
+
+```python
+import cohere
+from bertopic.representation import Cohere
+from bertopic import BERTopic
+
+# Create your representation model
+co = cohere.Client(my_api_key)
+representation_model = Cohere(co)
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![cohere](https://user-images.githubusercontent.com/25746895/218417337-294cb52a-93c9-4fd5-b981-29b40e4f0c1e.svg)
+
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#openai">Text Generation: OpenAI</a></b></h3>
+
+Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
+do the work for you. Here, we can use [OpenAI](https://openai.com/api/) to extract our topic labels from the candidate documents and keywords.
+To use this, you will need to install openai first:
+
+```
+pip install openai
+```
+
+Then, get yourself an API key and use OpenAI's API as follows:
+
+```python
+import openai
+from bertopic.representation import OpenAI
+from bertopic import BERTopic
+
+# Create your representation model
+openai.api_key = MY_API_KEY
+representation_model = OpenAI()
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+![openai](https://user-images.githubusercontent.com/25746895/218417357-cf8c0fab-4450-43d3-b4fd-219ed276d870.svg)
+
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#langchain">Text Generation: LangChain</a></b></h3>
+
+[Langchain](https://github.com/hwchase17/langchain) is a package that helps users with chaining large language models.
+In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this 
+external knowledge are the most representative documents in each topic. 
+
+To use langchain, you will need to install the langchain package first. Additionally, you will need an underlying LLM to support langchain,
+like openai:
+
+```bash
+pip install langchain, openai
+```
+
+Then, you can create your chain as follows:
+
+```python
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import OpenAI
+chain = load_qa_chain(OpenAI(temperature=0, openai_api_key=MY_API_KEY), chain_type="stuff")
+```
+
+Finally, you can pass the chain to BERTopic as follows:
+
+```python
+from bertopic.representation import LangChain
+
+# Create your representation model
+representation_model = LangChain(chain)
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+
 ## **Version 0.13.0**
 *Release date: 4 January, 2023*
 
