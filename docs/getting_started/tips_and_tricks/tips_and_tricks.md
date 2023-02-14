@@ -2,9 +2,10 @@
 
 
 ## **Document length**
-As a default, we are using sentence-transformers to embed our documents. However, as the name implies, the embedding model works best for either sentences or paragraphs. This means that whenever you have a set of documents, where each documents contains several paragraphs, BERTopic will struggle getting accurately extracting a topic from that document. Several paragraphs typically means several topics and BERTopic will assign only one topic to a document. 
+As a default, we are using sentence-transformers to embed our documents. However, as the name implies, the embedding model works best for either sentences or paragraphs. This means that whenever you have a set of documents, where each documents contains several paragraphs, the document is truncated and the topic model is only trained on a small part of the data. 
 
-Therefore, it is advised to split up longer documents into either sentences or paragraphs before embedding them. That way, BERTopic will have a much easier job identifying topics in isolation. 
+One way to solve this issue is by splitting up longer documents into either sentences or paragraphs before embedding them. Another solution is to approximate the [topic distributions](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) of topics after having trained your topic model. 
+
 
 ## **Removing stop words**
 At times, stop words might end up in our topic representations. This is something we typically want to avoid as they contribute little to the interpretation of the topics. However, removing stop words as a preprocessing step is not advised as the transformer-based embedding models that we use need the full context in order to create accurate embeddings. 
@@ -31,10 +32,22 @@ ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True)
 topic_model = BERTopic(ctfidf_model=ctfidf_model)
 ```
 
+Lastly, we can use a KeyBERT-Inspired model to reduce the appearance of stop words. This also often improves the topic representation:
+
+```python
+from bertopic.representation import KeyBERTInspired
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = KeyBERTInspired()
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
 
 ## **Diversify topic representation**
 After having calculated our top *n* words per topic there might be many words that essentially 
-mean the same thing. As a little bonus, we can use the `diversity` parameter in BERTopic to 
+mean the same thing. As a little bonus, we can use `bertopic.representation.MaximalMarginalRelevance` in BERTopic to 
 diversity words in each topic such that we limit the number of duplicate words we find in each topic. 
 This is done using an algorithm called Maximal Marginal Relevance which compares word embeddings 
 with the topic embedding. 
@@ -43,18 +56,23 @@ We do this by specifying a value between 0 and 1, with 0 being not at all divers
 
 ```python
 from bertopic import BERTopic
-topic_model = BERTopic(diversity=0.2)
+from bertopic.representation import MaximalMarginalRelevance
+
+representation_model = MaximalMarginalRelevance(diversity=0.2)
+topic_model = BERTopic(representation_model=representation_model)
 ```
 
 Since MMR is using word embeddings to diversify the topic representations, it is necessary to pass the embedding model to BERTopic if you are using pre-computed embeddings:
     
 ```python
 from bertopic import BERTopic
+from bertopic.representation import MaximalMarginalRelevance
 from sentence_transformers import SentenceTransformer
 
 sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
-topic_model = BERTopic(embedding_model=sentence_model, diversity=0.2)
+representation_model = MaximalMarginalRelevance(diversity=0.2)
+topic_model = BERTopic(embedding_model=sentence_model, representation_model=representation_model)
 ```
 
 
@@ -68,11 +86,6 @@ To extract the topic-term matrix (or c-TF-IDF matrix) with the corresponding wor
 topic_term_matrix = topic_model.c_tf_idf_
 words = topic_model.vectorizer_model.get_feature_names()
 ```
-
-!!! note
-    This only works if you have set `diversity=None`, for all other values the top *n* are 
-    further optimized using MMR which is not represented in the topic-term matrix as it does 
-    not optimize the entire matrix. 
 
 
 ## **Pre-compute embeddings**
@@ -148,7 +161,7 @@ from cuml.manifold import UMAP
 
 # Create instances of GPU-accelerated UMAP and HDBSCAN
 umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
-hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True)
+hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True, prediction_data=True)
 
 # Pass the above models to be used in BERTopic
 topic_model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model)
@@ -208,6 +221,37 @@ topic_model = BERTopic(embedding_model=pipe)
 ```
 
 As a result, the entire package and resulting model can be run quickly on the CPU and no GPU is necessary!
+
+
+## **WordCloud**
+To minimize the number of dependencies in BERTopic, it is not possible to generate wordclouds out-of-the-box. However, 
+there is a minimal script that you can use to generate wordclouds in BERTopic. First, you will need to install 
+the [wordcloud](https://github.com/amueller/word_cloud) package with `pip install wordcloud`. Then, run the following code 
+to generate the wordcloud for a specific topic:
+
+```python
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+def create_wordcloud(model, topic):
+    text = {word: value for word, value in model.get_topic(topic)}
+    wc = WordCloud(background_color="white", max_words=1000)
+    wc.generate_from_frequencies(text)
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+
+# Show wordcloud
+create_wordcloud(topic_model, topic=1)
+```
+
+![](wordcloud.jpg)
+
+
+!!! tip Tip
+    To increase the number of words shown in the wordcloud, you can increase the `top_n_words` 
+    parameter when instantiating BERTopic. You can also increase the number of words in a topic
+    after training the model using `.update_topics()`. 
 
 
 ## **Finding similar topics between models**

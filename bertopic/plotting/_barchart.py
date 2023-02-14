@@ -11,7 +11,7 @@ def visualize_barchart(topic_model,
                        top_n_topics: int = 8,
                        n_words: int = 5,
                        custom_labels: bool = False,
-                       title: str = "Topic Word Scores",
+                       title: str = "<b>Topic Word Scores</b>",
                        width: int = 250,
                        height: int = 250) -> go.Figure:
     """ Visualize a barchart of selected topics
@@ -99,7 +99,7 @@ def visualize_barchart(topic_model,
         template="plotly_white",
         showlegend=False,
         title={
-            'text': f"<b>{title}",
+            'text': f"{title}",
             'x': .5,
             'xanchor': 'center',
             'yanchor': 'top',

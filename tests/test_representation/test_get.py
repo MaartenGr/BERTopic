@@ -67,18 +67,11 @@ def test_get_representative_docs(model, request):
     unique_topics = set(topic_model.topics_)
     topics_in_mapper = set(np.array(topic_model.topic_mapper_.mappings_)[:, -1])
 
-    assert len(all_docs) == len(topic_model.topic_sizes_.keys()) - topic_model._outliers
-    assert len(all_docs) == len(topics_in_mapper) - topic_model._outliers
-    assert len(all_docs) == topic_model.c_tf_idf_.shape[0] - topic_model._outliers
-    assert len(all_docs) == len(topic_model.topic_labels_) - topic_model._outliers
-
-    if model == "merged_topic_model":
-        assert len([True for docs in all_docs.values() if len(docs) == 6]) == 2
-        assert len([True for docs in all_docs.values() if len(docs) == 9]) == 1
-    elif model == "reduced_topic_model":
-        assert any([True if len(docs) == 3 else False for docs in all_docs.values()])
-    else:
-        assert all([True if len(docs) == 3 else False for docs in all_docs.values()])
+    assert len(all_docs) == len(topic_model.topic_sizes_.keys())
+    assert len(all_docs) == len(topics_in_mapper)
+    assert len(all_docs) == topic_model.c_tf_idf_.shape[0]
+    assert len(all_docs) == len(topic_model.topic_labels_)
+    assert all([True if len(docs) == 3 else False for docs in all_docs.values()])
 
     topics = set(list(all_docs.keys()))
 

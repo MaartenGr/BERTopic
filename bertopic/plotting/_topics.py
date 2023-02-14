@@ -11,6 +11,8 @@ import plotly.graph_objects as go
 def visualize_topics(topic_model,
                      topics: List[int] = None,
                      top_n_topics: int = None,
+                     custom_labels: bool = False,
+                     title: str = "<b>Intertopic Distance Map</b>",
                      width: int = 650,
                      height: int = 650) -> go.Figure:
     """ Visualize topics, their sizes, and their corresponding words
@@ -22,6 +24,9 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -55,23 +60,27 @@ def visualize_topics(topic_model,
     # Extract topic words and their frequencies
     topic_list = sorted(topics)
     frequencies = [topic_model.topic_sizes_[topic] for topic in topic_list]
-    words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]
+    if custom_labels and topic_model.custom_labels_ is not None:
+        words = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in topic_list]
+    else:
+        words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]
 
     # Embed c-TF-IDF into 2D
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
     embeddings = topic_model.c_tf_idf_.toarray()[indices]
     embeddings = MinMaxScaler().fit_transform(embeddings)
-    embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger').fit_transform(embeddings)
+    embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger', random_state=42).fit_transform(embeddings)
 
     # Visualize with plotly
     df = pd.DataFrame({"x": embeddings[:, 0], "y": embeddings[:, 1],
                        "Topic": topic_list, "Words": words, "Size": frequencies})
-    return _plotly_topic_visualization(df, topic_list, width, height)
+    return _plotly_topic_visualization(df, topic_list, title, width, height)
 
 
 def _plotly_topic_visualization(df: pd.DataFrame,
                                 topic_list: List[str],
+                                title: str,
                                 width: int,
                                 height: int):
     """ Create plotly-based visualization of topics with a slider for topic selection """
@@ -94,7 +103,7 @@ def _plotly_topic_visualization(df: pd.DataFrame,
 
     # Update hover order
     fig.update_traces(hovertemplate="<br>".join(["<b>Topic %{customdata[0]}</b>",
-                                                 "Words: %{customdata[1]}",
+                                                 "%{customdata[1]}",
                                                  "Size: %{customdata[2]}"]))
 
     # Create a slider for topic selection
@@ -104,7 +113,7 @@ def _plotly_topic_visualization(df: pd.DataFrame,
     # Stylize layout
     fig.update_layout(
         title={
-            'text': "<b>Intertopic Distance Map",
+            'text': f"{title}",
             'y': .95,
             'x': 0.5,
             'xanchor': 'center',

@@ -7,6 +7,7 @@ def visualize_term_rank(topic_model,
                         topics: List[int] = None,
                         log_scale: bool = False,
                         custom_labels: bool = False,
+                        title: str = "<b>Term score decline per Topic</b>",
                         width: int = 800,
                         height: int = 500) -> go.Figure:
     """ Visualize the ranks of all terms across all topics
@@ -23,6 +24,7 @@ def visualize_term_rank(topic_model,
         log_scale: Whether to represent the ranking on a log scale
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -103,7 +105,7 @@ def visualize_term_rank(topic_model,
         showlegend=False,
         template="plotly_white",
         title={
-            'text': "<b>Term score decline per Topic</b>",
+            'text': f"{title}",
             'y': .9,
             'x': 0.5,
             'xanchor': 'center',

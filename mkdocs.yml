@@ -25,6 +25,7 @@ nav:
         - Clustering: getting_started/clustering/clustering.md
         - Vectorizers: getting_started/vectorizers/vectorizers.md
         - c-TF-IDF: getting_started/ctfidf/ctfidf.md
+        - (Optional) Representation: getting_started/representation/representation.md
       - Variations:
         - Topic Distributions: getting_started/distribution/distribution.md
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
@@ -38,7 +39,6 @@ nav:
   - FAQ: faq.md
   - API:
       - BERTopic: api/bertopic.md
-      - MMR: api/mmr.md
       - Sub-models:
         - Backends:
           - Base: api/backends/base.md
@@ -50,6 +50,17 @@ nav:
         - Vectorizers:
           - cTFIDF: api/ctfidf.md
           - OnlineCountVectorizer: api/onlinecv.md
+        - Topic Representation:
+          - Base: api/representation/base.md
+          - MaximalMarginalRelevance: api/representation/mmr.md
+          - KeyBERT: api/representation/keybert.md
+          - PartOfSpeech: api/representation/pos.md
+          - Text Generation:
+            - 🤗 Transformers: api/representation/generation.md
+            - LangChain: api/representation/langchain.md
+            - Cohere: api/representation/cohere.md
+            - OpenAI: api/representation/openai.md
+          - Zero-shot Classification: api/representation/zeroshot.md
       - Plotting:
         - Barchart: api/plotting/barchart.md
         - Documents: api/plotting/documents.md

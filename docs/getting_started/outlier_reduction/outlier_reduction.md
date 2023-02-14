@@ -103,6 +103,21 @@ new_topics = topic_model.reduce_outliers(docs, topics, strategy="embeddings")
     reduction process for the `"embeddings"` strategy as it will prevent re-calculating 
     the document embeddings.
 
+### **Chain Strategies**
+
+Since the `.reduce_outliers` function does not internally update the topics, we can easily try out different strategies but also chain them together. 
+You might want to do a first pass with the `"c-tf-idf"` strategy as it is quite fast. Then, we can perform the `"distributions"` strategy on the 
+outliers that are left since this method is typically much slower:
+
+```python
+# Use the "c-TF-IDF" strategy with a threshold
+new_topics = topic_model.reduce_outliers(docs, new_topics , strategy="c-tf-idf", threshold=0.1)
+
+# Reduce all outliers that are left with the "distributions" strategy
+new_topics = topic_model.reduce_outliers(docs, topics, strategy="distributions")
+```
+
+
 ## **Update Topics**
 
 After generating our updated topics, we can feed them back into BERTopic in one of two ways. We can either update the topic representations themselves based on the documents that now belong to new topics or we can only update the topic frequency without updating the topic representations themselves.
@@ -121,19 +136,6 @@ topic_model.update_topics(docs, topics=new_topics)
 ```
 
 As seen above, you will only need to pass the documents on which the model was trained including the new topics that were generated using one of the above four strategies. 
-
-
-### **Update Topic Frequency**
-
-```python
-import pandas as pd
-topic_model.topics_ = new_topics
-documents = pd.DataFrame({"Document": docs, "Topic": new_topics})
-topic_model._update_topic_size(documents)
-```
-
-topic_model.get_topic_info()
-
 
 ### **Exploration**
 

@@ -26,12 +26,15 @@ After going through the visual overview, this code overview demonstrates the alg
 
 
 ```python
-from sentence_transformers import SentenceTransformer
 from umap import UMAP
 from hdbscan import HDBSCAN
+from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-from bertopic.vectorizers import ClassTfidfTransformer
+
 from bertopic import BERTopic
+from bertopic.representation import KeyBERTInspired
+from bertopic.vectorizers import ClassTfidfTransformer
+
 
 # Step 1 - Extract embeddings
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -48,14 +51,18 @@ vectorizer_model = CountVectorizer(stop_words="english")
 # Step 5 - Create topic representation
 ctfidf_model = ClassTfidfTransformer()
 
+# Step 6 - (Optional) Fine-tune topic representations with 
+# a `bertopic.representation` model
+representation_model = KeyBERTInspired()
+
 # All steps together
 topic_model = BERTopic(
-  embedding_model=embedding_model,    # Step 1 - Extract embeddings
-  umap_model=umap_model,              # Step 2 - Reduce dimensionality
-  hdbscan_model=hdbscan_model,        # Step 3 - Cluster reduced embeddings
-  vectorizer_model=vectorizer_model,  # Step 4 - Tokenize topics
-  ctfidf_model=ctfidf_model,          # Step 5 - Extract topic words
-  diversity=0.5                       # Step 6 - Diversify topic words
+  embedding_model=embedding_model,          # Step 1 - Extract embeddings
+  umap_model=umap_model,                    # Step 2 - Reduce dimensionality
+  hdbscan_model=hdbscan_model,              # Step 3 - Cluster reduced embeddings
+  vectorizer_model=vectorizer_model,        # Step 4 - Tokenize topics
+  ctfidf_model=ctfidf_model,                # Step 5 - Extract topic words
+  representation_model=representation_model # Step 6 - (Optional) Fine-tune topic represenations
 )
 ```
 
@@ -128,17 +135,26 @@ Then, we take the logarithm of one plus the average number of words per class `A
 
     In the `ClassTfidfTransformer`, there are a few parameters that might be worth exploring, including an option to perform additional BM-25 weighting. You can find more information about that [here](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html).
 
-### **6. (Optional) Maximal Marginal Relevance**  
-After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. 
-Technically, this does not mean that this collection of words describes a coherent topic. In practice, we will 
-see that many of the words do describe a similar topic but some words will, in a way, overfit the documents. For 
-example, if you have a set of documents that are written by the same person whose signature will be in the topic 
-description. 
-<br>
-To improve the coherence of words, Maximal Marginal Relevance was used to find the most coherent words 
-without having too much overlap between the words themselves. This results in the removal of words that do not contribute 
-to a topic.  
-<br>
-You can also use this technique to diversify the words generated in the topic representation. At times, many variations 
-of the same word can end up in the topic representation. To reduce the number of synonyms, we can increase the diversity 
-among words whilst still being similar to the topic representation. 
+### **6. (Optional) Fine-tune Topic representation**  
+After having generated the c-TF-IDF representations, we have a set of words that describe a collection of documents. c-TF-IDF 
+is a method that can quickly generate accurate topic representations. However, with the fast developments in NLP-world, new 
+and exciting methods are released weekly. In order to keep up with what is happening, there is the possibility to further fine-tune 
+these c-TF-IDF topics using GPT, T5, KeyBERT, Spacy, and other techniques. Many are implemented in BERTopic for you to use and play around with. 
+
+More specifically, we can consider the c-TF-IDF generated topics to be candidate topics. They each contain a set of keywords and 
+representative documents that we can use to further fine-tune the topic representations. Having a set of representative documents 
+for each topic is huge advantage as it allows for fine-tuning on a reduced number of documents. This reduces computation for 
+large models as they only need to operate on that small set of representative documents for each topic. As a result, 
+large language models like GPT and T5 becomes feasible in production settings and typically take less wall time than the dimensionality reduction 
+and clustering steps. 
+
+The following models are implemented in `bertopic.representation`:
+
+* `MaximalMarginalRelevance`
+* `PartOfSpeech`
+* `KeyBERTInspired`
+* `ZeroShotClassification`
+* `TextGeneration`
+* `Cohere`
+* `OpenAI`
+* `LangChain`

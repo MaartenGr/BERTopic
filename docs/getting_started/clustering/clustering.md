@@ -98,7 +98,7 @@ we can use [cuML](https://rapids.ai/start.html#rapids-release-selector) to speed
 from bertopic import BERTopic
 from cuml.cluster import HDBSCAN
 
-hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True)
+hdbscan_model = HDBSCAN(min_samples=10, gen_min_span_tree=True, prediction_data=True)
 topic_model = BERTopic(hdbscan_model=hdbscan_model)
 ```
 

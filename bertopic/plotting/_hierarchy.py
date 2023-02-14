@@ -15,6 +15,7 @@ def visualize_hierarchy(topic_model,
                         topics: List[int] = None,
                         top_n_topics: int = None,
                         custom_labels: bool = False,
+                        title: str = "<b>Hierarchical Clustering</b>",
                         width: int = 1000,
                         height: int = 600,
                         hierarchical_topics: pd.DataFrame = None,
@@ -37,6 +38,7 @@ def visualize_hierarchy(topic_model,
                        `topic_model.set_topic_labels`.
                        NOTE: Custom labels are only generated for the original 
                        un-merged topics.
+        title: Title of the plot.
         width: The width of the figure. Only works if orientation is set to 'left'
         height: The height of the figure. Only works if orientation is set to 'bottom'
         hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -143,7 +145,7 @@ def visualize_hierarchy(topic_model,
         plot_bgcolor='#ECEFF1',
         template="plotly_white",
         title={
-            'text': "<b>Hierarchical Clustering",
+            'text': f"{title}",
             'x': 0.5,
             'xanchor': 'center',
             'yanchor': 'top',

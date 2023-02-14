@@ -20,7 +20,6 @@ base_packages = [
     "tqdm>=4.41.1",
     "sentence-transformers>=0.4.1",
     "plotly>=4.7.0",
-    "pyyaml<6.0"
 ]
 
 flair_packages = [
@@ -53,7 +52,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.13.0",
+    version="0.14.0",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",

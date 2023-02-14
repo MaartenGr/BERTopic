@@ -10,6 +10,7 @@ def visualize_topics_over_time(topic_model,
                                topics: List[int] = None,
                                normalize_frequency: bool = False,
                                custom_labels: bool = False,
+                               title: str = "<b>Topics over Time</b>",
                                width: int = 1250,
                                height: int = 450) -> go.Figure:
     """ Visualize topics over time
@@ -23,6 +24,7 @@ def visualize_topics_over_time(topic_model,
         normalize_frequency: Whether to normalize each topic's frequency individually
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+        title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
 
@@ -91,7 +93,7 @@ def visualize_topics_over_time(topic_model,
     fig.update_layout(
         yaxis_title="Normalized Frequency" if normalize_frequency else "Frequency",
         title={
-            'text': "<b>Topics over Time",
+            'text': f"{title}",
             'y': .95,
             'x': 0.40,
             'xanchor': 'center',

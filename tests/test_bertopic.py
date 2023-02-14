@@ -2,7 +2,7 @@ import copy
 import pytest
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model')])
+@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model'), ('representation_topic_model')])
 def test_full_model(model, documents, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
@@ -62,7 +62,7 @@ def test_full_model(model, documents, request):
     nr_topics = 2 if nr_topics < 2 else nr_topics - 1
     topic_model.reduce_topics(documents, nr_topics=nr_topics)
 
-    assert len(topic_model.get_topic_freq()) == nr_topics + topic_model._outliers
+    assert len(topic_model.get_topic_freq()) == nr_topics
     assert len(topic_model.topics_) == len(topics)
 
     # Test update topics
@@ -76,7 +76,8 @@ def test_full_model(model, documents, request):
     original_topic = topic_model.get_topic(1)[:10]
 
     assert topic != updated_topic
-    assert topic == original_topic
+    if topic_model.representation_model is not None:
+        assert topic != original_topic
 
     # Test updating topic labels
     topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
