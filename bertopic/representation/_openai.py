@@ -1,9 +1,8 @@
+import time
 import openai
-import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union, Any
-from sklearn.metrics.pairwise import cosine_similarity
+from typing import Mapping, List, Tuple, Any
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -46,6 +45,8 @@ class OpenAI(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        delay_in_seconds: The delay in seconds between consecutive prompts 
+                          in order to prevent RateLimitErrors. 
 
     Usage:
 
@@ -78,10 +79,13 @@ class OpenAI(BaseRepresentation):
                  model: str = "text-ada-001",
                  prompt: str = None,
                  generator_kwargs: Mapping[str, Any] = {},
+                 delay_in_seconds: float = None,
+
                  ):
         self.model = model
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.delay_in_seconds = delay_in_seconds
 
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
@@ -115,6 +119,11 @@ class OpenAI(BaseRepresentation):
         updated_topics = {}
         for topic, docs in repr_docs_mappings.items():
             prompt = self._create_prompt(docs, topic, topics)
+
+            # Delay
+            if self.delay_in_seconds:
+                time.sleep(self.delay_in_seconds)
+
             response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
             label = response["choices"][0]["text"].strip()
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]

@@ -1,8 +1,7 @@
-import numpy as np
+import time
 import pandas as pd
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union
-from sklearn.metrics.pairwise import cosine_similarity
+from typing import Mapping, List, Tuple
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -46,6 +45,8 @@ class Cohere(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        delay_in_seconds: The delay in seconds between consecutive prompts 
+                                in order to prevent RateLimitErrors. 
 
     Usage:
 
@@ -79,11 +80,13 @@ class Cohere(BaseRepresentation):
                  client,
                  model: str = "xlarge",
                  prompt: str = None,
+                 delay_in_seconds: float = None,
                  ):
         self.client = client
         self.model = model
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.delay_in_seconds = delay_in_seconds
 
     def extract_topics(self,
                        topic_model,
@@ -109,6 +112,11 @@ class Cohere(BaseRepresentation):
         updated_topics = {}
         for topic, docs in repr_docs_mappings.items():
             prompt = self._create_prompt(docs, topic, topics)
+
+            # Delay
+            if self.delay_in_seconds:
+                time.sleep(self.delay_in_seconds)
+
             request = self.client.generate(model=self.model,
                                            prompt=prompt,
                                            max_tokens=50,
