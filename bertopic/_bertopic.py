@@ -2005,6 +2005,8 @@ class BERTopic:
     def visualize_topics(self,
                          topics: List[int] = None,
                          top_n_topics: int = None,
+                         custom_labels: bool = False,
+                         title: str = "<b>Intertopic Distance Map</b>",
                          width: int = 650,
                          height: int = 650) -> go.Figure:
         """ Visualize topics, their sizes, and their corresponding words
@@ -2015,6 +2017,9 @@ class BERTopic:
         Arguments:
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
+            custom_labels: Whether to use custom topic labels that were defined using 
+                       `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2037,6 +2042,8 @@ class BERTopic:
         return plotting.visualize_topics(self,
                                          topics=topics,
                                          top_n_topics=top_n_topics,
+                                         custom_labels=custom_labels,
+                                         title=title,
                                          width=width,
                                          height=height)
 
@@ -2049,6 +2056,7 @@ class BERTopic:
                             hide_annotations: bool = False,
                             hide_document_hover: bool = False,
                             custom_labels: bool = False,
+                            title: str = "<b>Documents and Topics</b>",
                             width: int = 1200,
                             height: int = 750) -> go.Figure:
         """ Visualize documents and their topics in 2D
@@ -2071,6 +2079,7 @@ class BERTopic:
                                 specific points. Helps to speed up generation of visualization.
             custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2129,6 +2138,7 @@ class BERTopic:
                                             hide_annotations=hide_annotations,
                                             hide_document_hover=hide_document_hover,
                                             custom_labels=custom_labels,
+                                            title=title,
                                             width=width,
                                             height=height)
 
@@ -2143,6 +2153,7 @@ class BERTopic:
                                          hide_document_hover: bool = True,
                                          nr_levels: int = 10,
                                          custom_labels: bool = False,
+                                         title: str = "<b>Hierarchical Documents and Topics</b>",
                                          width: int = 1200,
                                          height: int = 750) -> go.Figure:
         """ Visualize documents and their topics in 2D at different levels of hierarchy
@@ -2174,6 +2185,7 @@ class BERTopic:
                            `topic_model.set_topic_labels`.
                            NOTE: Custom labels are only generated for the original
                            un-merged topics.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2235,6 +2247,7 @@ class BERTopic:
                                                          hide_document_hover=hide_document_hover,
                                                          nr_levels=nr_levels,
                                                          custom_labels=custom_labels,
+                                                         title=title,
                                                          width=width,
                                                          height=height)
 
@@ -2242,6 +2255,7 @@ class BERTopic:
                             topics: List[int] = None,
                             log_scale: bool = False,
                             custom_labels: bool = False,
+                            title: str = "<b>Term score decline per Topic</b>",
                             width: int = 800,
                             height: int = 500) -> go.Figure:
         """ Visualize the ranks of all terms across all topics
@@ -2257,6 +2271,7 @@ class BERTopic:
             log_scale: Whether to represent the ranking on a log scale
             custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2292,6 +2307,7 @@ class BERTopic:
                                             topics=topics,
                                             log_scale=log_scale,
                                             custom_labels=custom_labels,
+                                            title=title,
                                             width=width,
                                             height=height)
 
@@ -2301,6 +2317,7 @@ class BERTopic:
                                    topics: List[int] = None,
                                    normalize_frequency: bool = False,
                                    custom_labels: bool = False,
+                                   title: str = "<b>Topics over Time</b>",
                                    width: int = 1250,
                                    height: int = 450) -> go.Figure:
         """ Visualize topics over time
@@ -2313,6 +2330,7 @@ class BERTopic:
             normalize_frequency: Whether to normalize each topic's frequency individually
             custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2342,6 +2360,7 @@ class BERTopic:
                                                    topics=topics,
                                                    normalize_frequency=normalize_frequency,
                                                    custom_labels=custom_labels,
+                                                   title=title,
                                                    width=width,
                                                    height=height)
 
@@ -2351,6 +2370,7 @@ class BERTopic:
                                    topics: List[int] = None,
                                    normalize_frequency: bool = False,
                                    custom_labels: bool = False,
+                                   title: str = "<b>Topics per Class</b>",
                                    width: int = 1250,
                                    height: int = 900) -> go.Figure:
         """ Visualize topics per class
@@ -2363,6 +2383,7 @@ class BERTopic:
             normalize_frequency: Whether to normalize each topic's frequency individually
             custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2392,6 +2413,7 @@ class BERTopic:
                                                    topics=topics,
                                                    normalize_frequency=normalize_frequency,
                                                    custom_labels=custom_labels,
+                                                   title=title,
                                                    width=width,
                                                    height=height)
 
@@ -2399,6 +2421,7 @@ class BERTopic:
                                probabilities: np.ndarray,
                                min_probability: float = 0.015,
                                custom_labels: bool = False,
+                               title: str = "<b>Topic Probability Distribution</b>",
                                width: int = 800,
                                height: int = 600) -> go.Figure:
         """ Visualize the distribution of topic probabilities
@@ -2409,6 +2432,7 @@ class BERTopic:
                              All others are ignored.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2433,6 +2457,7 @@ class BERTopic:
                                                probabilities=probabilities,
                                                min_probability=min_probability,
                                                custom_labels=custom_labels,
+                                               title=title,
                                                width=width,
                                                height=height)
 
@@ -2492,6 +2517,7 @@ class BERTopic:
                             topics: List[int] = None,
                             top_n_topics: int = None,
                             custom_labels: bool = False,
+                            title: str = "<b>Hierarchical Clustering</b>",
                             width: int = 1000,
                             height: int = 600,
                             hierarchical_topics: pd.DataFrame = None,
@@ -2514,6 +2540,7 @@ class BERTopic:
                        `topic_model.set_topic_labels`.
                        NOTE: Custom labels are only generated for the original
                        un-merged topics.
+            title: Title of the plot.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
             hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -2570,6 +2597,7 @@ class BERTopic:
                                             topics=topics,
                                             top_n_topics=top_n_topics,
                                             custom_labels=custom_labels,
+                                            title=title,
                                             width=width,
                                             height=height,
                                             hierarchical_topics=hierarchical_topics,
@@ -2583,6 +2611,7 @@ class BERTopic:
                           top_n_topics: int = None,
                           n_clusters: int = None,
                           custom_labels: bool = False,
+                          title: str = "<b>Similarity Matrix</b>",
                           width: int = 800,
                           height: int = 800) -> go.Figure:
         """ Visualize a heatmap of the topic's similarity matrix
@@ -2597,6 +2626,7 @@ class BERTopic:
                         matrix by those clusters.
             custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
+            title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
 
@@ -2625,6 +2655,7 @@ class BERTopic:
                                           top_n_topics=top_n_topics,
                                           n_clusters=n_clusters,
                                           custom_labels=custom_labels,
+                                          title=title,
                                           width=width,
                                           height=height)
 
