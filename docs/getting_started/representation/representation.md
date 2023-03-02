@@ -160,7 +160,7 @@ topic_model = BERTopic(representation_model=representation_model)
 </div>
 <br>
 
-## **Text Generation**
+## **Text Generation & Prompts**
 
 Text generation models, like GPT-3 and the well-known ChatGPT, are becoming more and more capable of generating sensible output. 
 For that purpose, a number of models are exposed in BERTopic that allow topic labels to be created based on candidate documents and keywords
@@ -168,6 +168,34 @@ for each topic. These candidate documents and keywords are created from BERTopic
 describe a topic with only a few documents and we therefore do not need to pass all documents to the text generation model. Not only speeds 
 this the generation of topic labels up significantly, you also do not need a massive amount of credits when using an external API, such as Cohere or OpenAI.
 
+In most of the examples below, we use certain tags to customize our prompts. There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`. 
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
+For example, if we have the following prompt:
+
+```python
+prompt = """
+I have topic that contains the following documents: \n[DOCUMENTS]
+The topic is described by the following keywords: [KEYWORDS]
+
+Based on the above information, can you give a short label of the topic?
+"""
+```
+
+then that will be rendered as follows:
+
+```python
+"""
+I have a topic that contains the following documents: 
+- Our videos are also made possible by your support on patreon.co.
+- If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.
+- If you want to help us make more videos, you can do so there.
+- And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.
+
+The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch 
+
+Based on the above information, can you give a short label of the topic?
+"""
+```
 
 !!! tip Tip
     You can access the default prompts of these models with `representation_model.default_prompt_`
@@ -191,8 +219,8 @@ representation_model = TextGeneration('gpt2')
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-You can use a custom prompt and decide where the keywords should
-be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag:
+GPT2, however, is not the most accurate model out there on HuggingFace models. You can get 
+much better results with a `flan-T5` like model:
 
 ```python
 from transformers import pipeline
@@ -212,8 +240,8 @@ representation_model = TextGeneration(generator)
 <br>
 
 As can be seen from the example above, if you would like to use a `text2text-generation` model, you will to 
-pass a `transformers.pipeline` with the `"text2text-generation"` parameter. 
-
+pass a `transformers.pipeline` with the `"text2text-generation"` parameter. Moreover, you can use a custom prompt and decide where the keywords should
+be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag:
 
 ### **Cohere**
 
@@ -250,7 +278,7 @@ You can also use a custom prompt:
 
 ```python
 prompt = """
-I have topic that contains the following documents: [DOCUMENTS]. 
+I have topic that contains the following documents: [DOCUMENTS]
 The topic is described by the following keywords: [KEYWORDS].
 Based on the above information, can you give a short label of the topic?
 """
@@ -263,7 +291,9 @@ Instead of using a language model from 🤗 transformers, we can use external AP
 do the work for you. Here, we can use [OpenAI](https://openai.com/api/) to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install openai first:
 
-`pip install openai`
+```bash
+pip install openai
+```
 
 Then, get yourself an API key and use OpenAI's API as follows:
 
@@ -289,9 +319,42 @@ topic_model = BERTopic(representation_model=representation_model)
 You can also use a custom prompt:
 
 ```python
-prompt = "I have the following documents: [DOCUMENTS]. What topic do they contain?"
+prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
 representation_model = OpenAI(prompt=prompt)
 ```
+
+#### **ChatGPT**
+
+Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models. 
+In order to use ChatGPT with BERTopic, we need to define the model and make sure to enable `chat`:
+
+```python
+representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
+```
+
+Prompting with ChatGPT is very satisfying and is customizable as follows:
+
+```python
+prompt = """
+I have a topic that contains the following documents: 
+[DOCUMENTS]
+The topic is described by the following keywords: [KEYWORDS]
+
+Based on the information above, extract a short topic label in the following format:
+topic: <topic label>
+"""
+```
+
+!!! note 
+    Whenever you create a custom prompt, it is important to add 
+    ```
+    Based on the information above, extract a short topic label in the following format:
+    topic: <topic label>
+    ```
+    at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having 
+    said that, if `topic: ` is not in the output, then it will simply extract the entire response, so 
+    feel free to experiment with the prompts. 
+
 
 ### **LangChain**
 
@@ -336,7 +399,6 @@ representation_model = LangChain(chain, prompt=prompt)
 !!! note Note
     The prompt does not make use of `[KEYWORDS]` and `[DOCUMENTS]` tags as 
     the documents are already used within langchain's `load_qa_chain`. 
-
 
 ## **Chain Models**
 

@@ -1,8 +1,7 @@
-import numpy as np
+import time
 import pandas as pd
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union
-from sklearn.metrics.pairwise import cosine_similarity
+from typing import Mapping, List, Tuple
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -28,7 +27,11 @@ Sample texts from this topic:
 Keywords: deliver weeks product shipping long delivery received arrived arrive week
 Topic name: Shipping and delivery issues
 ---
-"""
+Topic:
+Sample texts from this topic:
+[DOCUMENTS]
+Keywords: [KEYWORDS]
+Topic name:"""
 
 
 class Cohere(BaseRepresentation):
@@ -46,6 +49,8 @@ class Cohere(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        delay_in_seconds: The delay in seconds between consecutive prompts 
+                                in order to prevent RateLimitErrors. 
 
     Usage:
 
@@ -79,11 +84,13 @@ class Cohere(BaseRepresentation):
                  client,
                  model: str = "xlarge",
                  prompt: str = None,
+                 delay_in_seconds: float = None,
                  ):
         self.client = client
         self.model = model
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.delay_in_seconds = delay_in_seconds
 
     def extract_topics(self,
                        topic_model,
@@ -109,6 +116,11 @@ class Cohere(BaseRepresentation):
         updated_topics = {}
         for topic, docs in repr_docs_mappings.items():
             prompt = self._create_prompt(docs, topic, topics)
+
+            # Delay
+            if self.delay_in_seconds:
+                time.sleep(self.delay_in_seconds)
+
             request = self.client.generate(model=self.model,
                                            prompt=prompt,
                                            max_tokens=50,
@@ -118,26 +130,30 @@ class Cohere(BaseRepresentation):
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics
-
+    
     def _create_prompt(self, docs, topic, topics):
         keywords = list(zip(*topics[topic]))[0]
 
-        # Use a prompt that leverages either keywords or documents in
-        # a custom location
-        prompt = ""
-        if "[KEYWORDS]" in self.prompt:
-            prompt += self.prompt.replace("[KEYWORDS]", keywords)
-        if "[DOCUMENTS]" in self.prompt:
-            to_replace = ""
-            for doc in docs:
-                to_replace += f"- {doc[:255]}\n"
-            prompt += self.prompt.replace("[DOCUMENTS]", to_replace)
+        # Use the Default Chat Prompt
+        if self.prompt == self.prompt == DEFAULT_PROMPT:
+            prompt = self.prompt.replace("[KEYWORDS]", " ".join(keywords))
+            prompt = self._replace_documents(prompt, docs)
 
-        # Use the default prompt
-        if "[KEYWORDS]" and "[DOCUMENTS]" not in self.prompt:
-            prompt = self.prompt + 'Topic:\nSample texts from this topic:\n'
-            for doc in docs:
-                prompt += f"- {doc[:255]}\n"
-            prompt += "Keywords: " + " ".join(keywords)
-            prompt += "\nTopic name:"
+        # Use a custom prompt that leverages keywords, documents or both using
+        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
+        else:
+            prompt = self.prompt
+            if "[KEYWORDS]" in prompt:
+                prompt = prompt.replace("[KEYWORDS]", " ".join(keywords))
+            if "[DOCUMENTS]" in prompt:
+                prompt = self._replace_documents(prompt, docs)
+
+        return prompt
+
+    @staticmethod
+    def _replace_documents(prompt, docs):
+        to_replace = ""
+        for doc in docs:
+            to_replace += f"- {doc[:255]}\n"
+        prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt

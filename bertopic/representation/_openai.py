@@ -1,9 +1,8 @@
+import time
 import openai
-import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union, Any
-from sklearn.metrics.pairwise import cosine_similarity
+from typing import Mapping, List, Tuple, Any
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -29,16 +28,38 @@ Sample texts from this topic:
 Keywords: deliver weeks product shipping long delivery received arrived arrive week
 Topic name: Shipping and delivery issues
 ---
+Topic:
+Sample texts from this topic:
+[DOCUMENTS]
+Keywords: [KEYWORDS]
+Topic name:"""
+
+DEFAULT_CHAT_PROMPT = """
+I have a topic that contains the following documents: 
+[DOCUMENTS]
+The topic is described by the following keywords: [KEYWORDS]
+
+Based on the information above, extract a short topic label in the following format:
+topic: <topic label>
 """
 
 
 class OpenAI(BaseRepresentation):
     """ Using the OpenAI API to generate topic labels based
-    on one of their GPT-3 models. For an overview see:
+    on one of their Completion of ChatCompletion models. 
 
-    https://platform.openai.com/docs/models/gpt-3
+    The default method is `openai.Completion` if `chat=False`. 
+    The prompts will also need to follow a completion task. If you 
+    are looking for a more interactive chats, use `chat=True`
+    with `model=gpt-3.5-turbo`. 
+    
+    For an overview see:
+    https://platform.openai.com/docs/models
 
     Arguments:
+        model: Model to use within OpenAI, defaults to `"text-ada-001"`.
+               NOTE: If a `gpt-3.5-turbo` model is used, make sure to set
+               `chat` to True.
         generator_kwargs: Kwargs passed to `openai.Completion.create`
                           for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
@@ -46,6 +67,10 @@ class OpenAI(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        delay_in_seconds: The delay in seconds between consecutive prompts 
+                          in order to prevent RateLimitErrors. 
+        chat: Set this to True if a GPT-3.5 model is used.
+              See: https://platform.openai.com/docs/models/gpt-3-5
 
     Usage:
 
@@ -61,7 +86,7 @@ class OpenAI(BaseRepresentation):
     from bertopic import BERTopic
 
     # Create your representation model
-    representation_model = OpenAI()
+    representation_model = OpenAI(delay_in_seconds=5)
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -70,25 +95,40 @@ class OpenAI(BaseRepresentation):
     You can also use a custom prompt:
 
     ```python
-    prompt = "I have the following documents: [DOCUMENTS]. What topic do they contain?"
-    representation_model = OpenAI(prompt=prompt)
+    prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
+    representation_model = OpenAI(prompt=prompt, delay_in_seconds=5)
+    ```
+
+    If you want to use OpenAI's ChatGPT model:
+    
+    ```python
+    representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
     ```
     """
     def __init__(self,
                  model: str = "text-ada-001",
                  prompt: str = None,
                  generator_kwargs: Mapping[str, Any] = {},
+                 delay_in_seconds: float = None,
+                 chat: bool = False
                  ):
         self.model = model
-        self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
+
+        if prompt is None:
+            self.prompt = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
+        else:
+            self.prompt = prompt
+
+        self.default_prompt_ = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
+        self.delay_in_seconds = delay_in_seconds
+        self.chat = chat
 
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
             self.model = generator_kwargs.get("model")
         if self.generator_kwargs.get("prompt"):
             del self.generator_kwargs["prompt"]
-        if not self.generator_kwargs.get("stop"):
+        if not self.generator_kwargs.get("stop") and not chat:
             self.generator_kwargs["stop"] = "\n"
 
     def extract_topics(self,
@@ -115,8 +155,23 @@ class OpenAI(BaseRepresentation):
         updated_topics = {}
         for topic, docs in repr_docs_mappings.items():
             prompt = self._create_prompt(docs, topic, topics)
-            response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
-            label = response["choices"][0]["text"].strip()
+
+            # Delay
+            if self.delay_in_seconds:
+                time.sleep(self.delay_in_seconds)
+
+            if self.chat:
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt}
+                ]
+                kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
+                response = openai.ChatCompletion.create(**kwargs)
+                label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
+            else:
+                response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
+                label = response["choices"][0]["text"].strip()
+
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics
@@ -124,22 +179,26 @@ class OpenAI(BaseRepresentation):
     def _create_prompt(self, docs, topic, topics):
         keywords = list(zip(*topics[topic]))[0]
 
-        # Use a prompt that leverages either keywords or documents in
-        # a custom location
-        prompt = ""
-        if "[KEYWORDS]" in self.prompt:
-            prompt += self.prompt.replace("[KEYWORDS]", " ".join(keywords))
-        if "[DOCUMENTS]" in self.prompt:
-            to_replace = ""
-            for doc in docs:
-                to_replace += f"- {doc[:255]}\n"
-            prompt += self.prompt.replace("[DOCUMENTS]", to_replace)
+        # Use the Default Chat Prompt
+        if self.prompt == DEFAULT_CHAT_PROMPT or self.prompt == DEFAULT_PROMPT:
+            prompt = self.prompt.replace("[KEYWORDS]", " ".join(keywords))
+            prompt = self._replace_documents(prompt, docs)
 
-        # Use the default prompt
-        if "[KEYWORDS]" and "[DOCUMENTS]" not in self.prompt:
-            prompt = self.prompt + 'Topic:\nSample texts from this topic:\n'
-            for doc in docs:
-                prompt += f"- {doc[:255]}\n"
-            prompt += "Keywords: " + " ".join(keywords)
-            prompt += "\nTopic name:"
+        # Use a custom prompt that leverages keywords, documents or both using
+        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
+        else:
+            prompt = self.prompt
+            if "[KEYWORDS]" in prompt:
+                prompt = prompt.replace("[KEYWORDS]", " ".join(keywords))
+            if "[DOCUMENTS]" in prompt:
+                prompt = self._replace_documents(prompt, docs)
+
+        return prompt
+
+    @staticmethod
+    def _replace_documents(prompt, docs):
+        to_replace = ""
+        for doc in docs:
+            to_replace += f"- {doc[:255]}\n"
+        prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt

@@ -5,6 +5,79 @@ hide:
 
 # Changelog
 
+## **Version 0.14.1**
+*Release date: 2 March, 2023*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Use [**ChatGPT**](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#chatgpt) to create topic representations!:
+* Added `delay_in_seconds` parameter to OpenAI and Cohere representation models for throttling the API
+    * Setting this between 5 and 10 allows for trial users now to use more easily without hitting RateLimitErrors
+* Fixed missing `title` param to visualization methods
+* Fixed probabilities not correctly aligning ([#1024](https://github.com/MaartenGr/BERTopic/issues/1024))
+* Fix typo in textgenerator  [@dkopljar27](https://github.com/dkopljar27) in [#1002](https://github.com/MaartenGr/BERTopic/pull/1002)
+
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#chatgpt">ChatGPT</a></b></h3>
+
+Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models. 
+In order to use ChatGPT with BERTopic, we need to define the model and make sure to set `chat=True`:
+
+```python
+import openai
+from bertopic import BERTopic
+from bertopic.representation import OpenAI
+
+# Create your representation model
+openai.api_key = MY_API_KEY
+representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+Prompting with ChatGPT is very satisfying and can be customized in BERTopic by using certain tags. 
+There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`. 
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
+For example, if we have the following prompt:
+
+```python
+prompt = """
+I have topic that contains the following documents: \n[DOCUMENTS]
+The topic is described by the following keywords: [KEYWORDS]
+
+Based on the information above, extract a short topic label in the following format:
+topic: <topic label>
+"""
+```
+
+then that will be rendered as follows and passed to OpenAI's API:
+
+```python
+"""
+I have a topic that contains the following documents: 
+- Our videos are also made possible by your support on patreon.co.
+- If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.
+- If you want to help us make more videos, you can do so there.
+- And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.
+
+The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch 
+
+Based on the information above, extract a short topic label in the following format:
+topic: <topic label>
+"""
+```
+
+!!! note 
+    Whenever you create a custom prompt, it is important to add 
+    ```
+    Based on the information above, extract a short topic label in the following format:
+    topic: <topic label>
+    ```
+    at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having 
+    said that, if `topic: ` is not in the output, then it will simply extract the entire response, so 
+    feel free to experiment with the prompts. 
+
+
 ## **Version 0.14.0**
 *Release date: 14 February, 2023*
 
