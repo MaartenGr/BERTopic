@@ -27,7 +27,11 @@ Sample texts from this topic:
 Keywords: deliver weeks product shipping long delivery received arrived arrive week
 Topic name: Shipping and delivery issues
 ---
-"""
+Topic:
+Sample texts from this topic:
+[DOCUMENTS]
+Keywords: [KEYWORDS]
+Topic name:"""
 
 
 class Cohere(BaseRepresentation):
@@ -126,26 +130,30 @@ class Cohere(BaseRepresentation):
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics
-
+    
     def _create_prompt(self, docs, topic, topics):
         keywords = list(zip(*topics[topic]))[0]
 
-        # Use a prompt that leverages either keywords or documents in
-        # a custom location
-        prompt = ""
-        if "[KEYWORDS]" in self.prompt:
-            prompt += self.prompt.replace("[KEYWORDS]", keywords)
-        if "[DOCUMENTS]" in self.prompt:
-            to_replace = ""
-            for doc in docs:
-                to_replace += f"- {doc[:255]}\n"
-            prompt += self.prompt.replace("[DOCUMENTS]", to_replace)
+        # Use the Default Chat Prompt
+        if self.prompt == self.prompt == DEFAULT_PROMPT:
+            prompt = self.prompt.replace("[KEYWORDS]", " ".join(keywords))
+            prompt = self._replace_documents(prompt, docs)
 
-        # Use the default prompt
-        if "[KEYWORDS]" and "[DOCUMENTS]" not in self.prompt:
-            prompt = self.prompt + 'Topic:\nSample texts from this topic:\n'
-            for doc in docs:
-                prompt += f"- {doc[:255]}\n"
-            prompt += "Keywords: " + " ".join(keywords)
-            prompt += "\nTopic name:"
+        # Use a custom prompt that leverages keywords, documents or both using
+        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
+        else:
+            prompt = self.prompt
+            if "[KEYWORDS]" in prompt:
+                prompt = prompt.replace("[KEYWORDS]", " ".join(keywords))
+            if "[DOCUMENTS]" in prompt:
+                prompt = self._replace_documents(prompt, docs)
+
+        return prompt
+
+    @staticmethod
+    def _replace_documents(prompt, docs):
+        to_replace = ""
+        for doc in docs:
+            to_replace += f"- {doc[:255]}\n"
+        prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt
