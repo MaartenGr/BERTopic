@@ -3364,9 +3364,9 @@ class BERTopic:
 
         # Map array of probabilities (probability for assigned topic per document)
         if probabilities is not None:
-            if len(probabilities.shape) == 2 and self.get_topic(-1):
+            if len(probabilities.shape) == 2:
                 mapped_probabilities = np.zeros((probabilities.shape[0],
-                                                 len(set(mappings.values())) - 1))
+                                                 len(set(mappings.values())) - self._outliers))
                 for from_topic, to_topic in mappings.items():
                     if to_topic != -1 and from_topic != -1:
                         mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
