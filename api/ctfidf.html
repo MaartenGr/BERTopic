@@ -1653,7 +1653,7 @@ across all classes.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ClassTfidfTransformer</span><span class="p">(</span><span class="n">TfidfTransformer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.</span>
 
 <span class="sd">    ![](../algorithm/c-TF-IDF.svg)</span>
@@ -1686,7 +1686,7 @@ across all classes.</p>
         <span class="nb">super</span><span class="p">(</span><span class="n">ClassTfidfTransformer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>
+        <span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            X: A matrix of term/token counts.</span>
@@ -1727,7 +1727,7 @@ across all classes.</p>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
+        <span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            X (sparse matrix): A matrix of term/token counts.</span>
@@ -1802,7 +1802,7 @@ across all classes.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>
+    <span class="sd">&quot;&quot;&quot;Learn the idf vector (global term weights).</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        X: A matrix of term/token counts.</span>
@@ -1900,7 +1900,7 @@ across all classes.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
+    <span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        X (sparse matrix): A matrix of term/token counts.</span>

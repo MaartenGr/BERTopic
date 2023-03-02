@@ -1633,6 +1633,13 @@ https://docs.cohere.ai/docs</p>
     inserted.</p></td>
         <td><code>None</code></td>
       </tr>
+      <tr>
+        <td><code>delay_in_seconds</code></td>
+        <td><code>float</code></td>
+        <td><p>The delay in seconds between consecutive prompts 
+                    in order to prevent RateLimitErrors. </p></td>
+        <td><code>None</code></td>
+      </tr>
   </tbody>
 </table>      <p>Usage:</p>
 <p>To use this, you will need to install cohere first:</p>
@@ -1657,7 +1664,7 @@ https://docs.cohere.ai/docs</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_cohere.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Cohere</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Use the Cohere API to generate topic labels based on their</span>
+    <span class="sd">&quot;&quot;&quot; Use the Cohere API to generate topic labels based on their</span>
 <span class="sd">    generative model.</span>
 
 <span class="sd">    Find more about their models here:</span>
@@ -1671,6 +1678,8 @@ https://docs.cohere.ai/docs</p>
 <span class="sd">                NOTE: Use `&quot;[KEYWORDS]&quot;` and `&quot;[DOCUMENTS]&quot;` in the prompt</span>
 <span class="sd">                to decide where the keywords and documents need to be</span>
 <span class="sd">                inserted.</span>
+<span class="sd">        delay_in_seconds: The delay in seconds between consecutive prompts </span>
+<span class="sd">                                in order to prevent RateLimitErrors. </span>
 
 <span class="sd">    Usage:</span>
 
@@ -1704,11 +1713,13 @@ https://docs.cohere.ai/docs</p>
                  <span class="n">client</span><span class="p">,</span>
                  <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xlarge&quot;</span><span class="p">,</span>
                  <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span> <span class="k">if</span> <span class="n">prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DEFAULT_PROMPT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_prompt_</span> <span class="o">=</span> <span class="n">DEFAULT_PROMPT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span> <span class="o">=</span> <span class="n">delay_in_seconds</span>
 
     <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                        <span class="n">topic_model</span><span class="p">,</span>
@@ -1716,7 +1727,7 @@ https://docs.cohere.ai/docs</p>
                        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+        <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: Not used</span>
@@ -1734,6 +1745,11 @@ https://docs.cohere.ai/docs</p>
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_prompt</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
+
+            <span class="c1"># Delay</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">)</span>
+
             <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
                                            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
                                            <span class="n">max_tokens</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
@@ -1747,24 +1763,28 @@ https://docs.cohere.ai/docs</p>
     <span class="k">def</span> <span class="nf">_create_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topics</span><span class="p">):</span>
         <span class="n">keywords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="c1"># Use a prompt that leverages either keywords or documents in</span>
-        <span class="c1"># a custom location</span>
-        <span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;[KEYWORDS]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
-            <span class="n">prompt</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[KEYWORDS]&quot;</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
-            <span class="n">to_replace</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
-                <span class="n">to_replace</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">doc</span><span class="p">[:</span><span class="mi">255</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">prompt</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[DOCUMENTS]&quot;</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">)</span>
+        <span class="c1"># Use the Default Chat Prompt</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">==</span> <span class="n">DEFAULT_PROMPT</span><span class="p">:</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[KEYWORDS]&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_documents</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">docs</span><span class="p">)</span>
 
-        <span class="c1"># Use the default prompt</span>
-        <span class="k">if</span> <span class="s2">&quot;[KEYWORDS]&quot;</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
-            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">+</span> <span class="s1">&#39;Topic:</span><span class="se">\n</span><span class="s1">Sample texts from this topic:</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
-                <span class="n">prompt</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">doc</span><span class="p">[:</span><span class="mi">255</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="n">prompt</span> <span class="o">+=</span> <span class="s2">&quot;Keywords: &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
-            <span class="n">prompt</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Topic name:&quot;</span>
+        <span class="c1"># Use a custom prompt that leverages keywords, documents or both using</span>
+        <span class="c1"># custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span>
+            <span class="k">if</span> <span class="s2">&quot;[KEYWORDS]&quot;</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
+                <span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[KEYWORDS]&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
+            <span class="k">if</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
+                <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_documents</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">docs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">prompt</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_replace_documents</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">docs</span><span class="p">):</span>
+        <span class="n">to_replace</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+            <span class="n">to_replace</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">doc</span><span class="p">[:</span><span class="mi">255</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[DOCUMENTS]&quot;</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">prompt</span>
 </code></pre></div>
         </details>
@@ -1856,7 +1876,7 @@ https://docs.cohere.ai/docs</p>
                    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: Not used</span>
@@ -1874,6 +1894,11 @@ https://docs.cohere.ai/docs</p>
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_prompt</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
+
+        <span class="c1"># Delay</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">)</span>
+
         <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
                                        <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
                                        <span class="n">max_tokens</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>

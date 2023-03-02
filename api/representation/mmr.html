@@ -1640,7 +1640,7 @@ that maximize their within diversity with respect to the document.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_mmr.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MaximalMarginalRelevance</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate Maximal Marginal Relevance (MMR)</span>
+    <span class="sd">&quot;&quot;&quot; Calculate Maximal Marginal Relevance (MMR)</span>
 <span class="sd">    between candidate keywords and the document.</span>
 
 <span class="sd">    MMR considers the similarity of keywords/keyphrases with the</span>
@@ -1677,7 +1677,7 @@ that maximize their within diversity with respect to the document.</p>
                        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topic representations</span>
+        <span class="sd">&quot;&quot;&quot; Extract topic representations</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: The BERTopic model</span>
@@ -1707,7 +1707,7 @@ that maximize their within diversity with respect to the document.</p>
              <span class="n">doc_embedding</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
              <span class="n">word_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
              <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            doc_embedding: The document embeddings</span>
 <span class="sd">            word_embeddings: The embeddings of the selected candidate keywords/phrases</span>
@@ -1830,7 +1830,7 @@ that maximize their within diversity with respect to the document.</p>
                    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topic representations</span>
+    <span class="sd">&quot;&quot;&quot; Extract topic representations</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: The BERTopic model</span>

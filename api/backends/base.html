@@ -1655,7 +1655,7 @@
         <details class="quote">
           <summary>Source code in <code>bertopic\backend\_base.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BaseEmbedder</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; The Base Embedder used for creating embedding models</span>
+    <span class="sd">&quot;&quot;&quot; The Base Embedder used for creating embedding models</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        embedding_model: The main embedding model to be used for extracting</span>
@@ -1674,7 +1674,7 @@
     <span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
               <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
               <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Embed a list of n documents/words into an n-dimensional</span>
+        <span class="sd">&quot;&quot;&quot; Embed a list of n documents/words into an n-dimensional</span>
 <span class="sd">        matrix of embeddings</span>
 
 <span class="sd">        Arguments:</span>
@@ -1690,7 +1690,7 @@
     <span class="k">def</span> <span class="nf">embed_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
+        <span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
 <span class="sd">        matrix of embeddings</span>
 
 <span class="sd">        Arguments:</span>
@@ -1707,7 +1707,7 @@
     <span class="k">def</span> <span class="nf">embed_documents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                         <span class="n">document</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
+        <span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
 <span class="sd">        matrix of embeddings</span>
 
 <span class="sd">        Arguments:</span>
@@ -1796,7 +1796,7 @@ that each have an embeddings size of <code>m</code></p></td>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
           <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
           <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Embed a list of n documents/words into an n-dimensional</span>
+    <span class="sd">&quot;&quot;&quot; Embed a list of n documents/words into an n-dimensional</span>
 <span class="sd">    matrix of embeddings</span>
 
 <span class="sd">    Arguments:</span>
@@ -1877,7 +1877,7 @@ that each have an embeddings size of <code>m</code></p></td>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed_documents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">document</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
+    <span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
 <span class="sd">    matrix of embeddings</span>
 
 <span class="sd">    Arguments:</span>
@@ -1958,7 +1958,7 @@ that each have an embeddings size of <code>m</code></p></td>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                 <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
+    <span class="sd">&quot;&quot;&quot; Embed a list of n words into an n-dimensional</span>
 <span class="sd">    matrix of embeddings</span>
 
 <span class="sd">    Arguments:</span>

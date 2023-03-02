@@ -657,11 +657,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#text-generation" class="md-nav__link">
-    Text Generation
+  <a href="#text-generation-prompts" class="md-nav__link">
+    Text Generation &amp; Prompts
   </a>
   
-    <nav class="md-nav" aria-label="Text Generation">
+    <nav class="md-nav" aria-label="Text Generation &amp; Prompts">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -682,6 +682,19 @@
   <a href="#openai" class="md-nav__link">
     OpenAI
   </a>
+  
+    <nav class="md-nav" aria-label="OpenAI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chatgpt" class="md-nav__link">
+    ChatGPT
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1643,11 +1656,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#text-generation" class="md-nav__link">
-    Text Generation
+  <a href="#text-generation-prompts" class="md-nav__link">
+    Text Generation &amp; Prompts
   </a>
   
-    <nav class="md-nav" aria-label="Text Generation">
+    <nav class="md-nav" aria-label="Text Generation &amp; Prompts">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1668,6 +1681,19 @@
   <a href="#openai" class="md-nav__link">
     OpenAI
   </a>
+  
+    <nav class="md-nav" aria-label="OpenAI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chatgpt" class="md-nav__link">
+    ChatGPT
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1984,12 +2010,35 @@ If, for a certain topic, we find a similar enough label, then it is assigned. If
 </svg>
 </div>
 <p><br></p>
-<h2 id="text-generation"><strong>Text Generation</strong><a class="headerlink" href="#text-generation" title="Permanent link">&para;</a></h2>
+<h2 id="text-generation-prompts"><strong>Text Generation &amp; Prompts</strong><a class="headerlink" href="#text-generation-prompts" title="Permanent link">&para;</a></h2>
 <p>Text generation models, like GPT-3 and the well-known ChatGPT, are becoming more and more capable of generating sensible output. 
 For that purpose, a number of models are exposed in BERTopic that allow topic labels to be created based on candidate documents and keywords
 for each topic. These candidate documents and keywords are created from BERTopic's c-TF-IDF calculation. A huge benefit of this is that we can
 describe a topic with only a few documents and we therefore do not need to pass all documents to the text generation model. Not only speeds 
 this the generation of topic labels up significantly, you also do not need a massive amount of credits when using an external API, such as Cohere or OpenAI.</p>
+<p>In most of the examples below, we use certain tags to customize our prompts. There are currently two tags, namely <code>"[KEYWORDS]"</code> and <code>"[DOCUMENTS]"</code>. 
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
+For example, if we have the following prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">I have topic that contains the following documents: </span><span class="se">\n</span><span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+
+<span class="s2">Based on the above information, can you give a short label of the topic?</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+<p>then that will be rendered as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">I have a topic that contains the following documents: </span>
+<span class="sd">- Our videos are also made possible by your support on patreon.co.</span>
+<span class="sd">- If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.</span>
+<span class="sd">- If you want to help us make more videos, you can do so there.</span>
+<span class="sd">- And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.</span>
+
+<span class="sd">The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch </span>
+
+<span class="sd">Based on the above information, can you give a short label of the topic?</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</code></pre></div>
 <div class="admonition tip tip">
 <p class="admonition-title">Tip</p>
 <p>You can access the default prompts of these models with <code>representation_model.default_prompt_</code></p>
@@ -2008,8 +2057,8 @@ methods are created as a way to support whatever might be released in the future
 <span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
 </code></pre></div>
-<p>You can use a custom prompt and decide where the keywords should
-be inserted by using the <code>[KEYWORDS]</code> or documents with the <code>[DOCUMENTS]</code> tag:</p>
+<p>GPT2, however, is not the most accurate model out there on HuggingFace models. You can get 
+much better results with a <code>flan-T5</code> like model:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">TextGeneration</span>
 
@@ -2037,12 +2086,13 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with the <code>[DO
 </div>
 <p><br></p>
 <p>As can be seen from the example above, if you would like to use a <code>text2text-generation</code> model, you will to 
-pass a <code>transformers.pipeline</code> with the <code>"text2text-generation"</code> parameter. </p>
+pass a <code>transformers.pipeline</code> with the <code>"text2text-generation"</code> parameter. Moreover, you can use a custom prompt and decide where the keywords should
+be inserted by using the <code>[KEYWORDS]</code> or documents with the <code>[DOCUMENTS]</code> tag:</p>
 <h3 id="cohere"><strong>Cohere</strong><a class="headerlink" href="#cohere" title="Permanent link">&para;</a></h3>
 <p>Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
 do the work for you. Here, we can use <a href="https://docs.cohere.ai/">Cohere</a> to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install cohere first:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>cohere
+<div class="highlight"><pre><span></span><code>pip install cohere
 </code></pre></div>
 <p>Then, get yourself an API key and use Cohere's API as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">cohere</span>
@@ -2075,7 +2125,7 @@ To use this, you will need to install cohere first:</p>
 <p><br></p>
 <p>You can also use a custom prompt:</p>
 <div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">I have topic that contains the following documents: [DOCUMENTS]. </span>
+<span class="s2">I have topic that contains the following documents: [DOCUMENTS]</span>
 <span class="s2">The topic is described by the following keywords: [KEYWORDS].</span>
 <span class="s2">Based on the above information, can you give a short label of the topic?</span>
 <span class="s2">&quot;&quot;&quot;</span>
@@ -2085,7 +2135,8 @@ To use this, you will need to install cohere first:</p>
 <p>Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
 do the work for you. Here, we can use <a href="https://openai.com/api/">OpenAI</a> to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install openai first:</p>
-<p><code>pip install openai</code></p>
+<div class="highlight"><pre><span></span><code>pip install openai
+</code></pre></div>
 <p>Then, get yourself an API key and use OpenAI's API as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">openai</span>
 <span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">OpenAI</span>
@@ -2116,16 +2167,41 @@ To use this, you will need to install openai first:</p>
 </div>
 <p><br></p>
 <p>You can also use a custom prompt:</p>
-<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;I have the following documents: [DOCUMENTS]. What topic do they contain?&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;I have the following documents: [DOCUMENTS] </span><span class="se">\n</span><span class="s2">These documents are about the following topic: &#39;&quot;</span>
 <span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
 </code></pre></div>
+<h4 id="chatgpt"><strong>ChatGPT</strong><a class="headerlink" href="#chatgpt" title="Permanent link">&para;</a></h4>
+<p>Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models. 
+In order to use ChatGPT with BERTopic, we need to define the model and make sure to enable <code>chat</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>Prompting with ChatGPT is very satisfying and is customizable as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">I have a topic that contains the following documents: </span>
+<span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+
+<span class="s2">Based on the information above, extract a short topic label in the following format:</span>
+<span class="s2">topic: &lt;topic label&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whenever you create a custom prompt, it is important to add 
+<div class="highlight"><pre><span></span><code>Based on the information above, extract a short topic label in the following format:
+topic: &lt;topic label&gt;
+</code></pre></div>
+at the end of your prompt as BERTopic extracts everything that comes after <code>topic:</code>. Having 
+said that, if <code>topic:</code> is not in the output, then it will simply extract the entire response, so 
+feel free to experiment with the prompts. </p>
+</div>
 <h3 id="langchain"><strong>LangChain</strong><a class="headerlink" href="#langchain" title="Permanent link">&para;</a></h3>
 <p><a href="https://github.com/hwchase17/langchain">Langchain</a> is a package that helps users with chaining large language models.
 In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this 
 external knowledge are the most representative documents in each topic. </p>
 <p>To use langchain, you will need to install the langchain package first. Additionally, you will need an underlying LLM to support langchain,
 like openai:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>langchain,<span class="w"> </span>openai
+<div class="highlight"><pre><span></span><code>pip install langchain, openai
 </code></pre></div>
 <p>Then, you can create your chain as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">langchain.chains.question_answering</span> <span class="kn">import</span> <span class="n">load_qa_chain</span>
@@ -2180,7 +2256,7 @@ calculated with c-TF-IDF:</p>
 
     <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic_model</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">topics</span>
                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+        <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: The BERTopic model</span>

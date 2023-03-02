@@ -2,267 +2,267 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://maartengr.github.io/BERTopic/index.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/changelog.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/faq.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/algorithm/algorithm.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/bertopic.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/ctfidf.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/onlinecv.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/backends/base.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/backends/word_doc.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/cluster/base.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/dimensionality/base.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/barchart.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/distribution.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/documents.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/dtm.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/heatmap.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/hierarchical_documents.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/hierarchy.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/term.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/topics.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/plotting/topics_per_class.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/base.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/cohere.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/generation.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/keybert.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/langchain.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/mmr.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/openai.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/pos.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/api/representation/zeroshot.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/dim_reduction/dim_reduction.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/guided/guided.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/manual/manual.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/online/online.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/parameter%20tuning/parametertuning.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/quickstart/quickstart.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/representation/representation.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/search/search.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/topicreduction/topicreduction.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/topicrepresentation/topicrepresentation.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html</loc>
-         <lastmod>2023-02-14</lastmod>
+         <lastmod>2023-03-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

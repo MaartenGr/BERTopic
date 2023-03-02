@@ -1667,7 +1667,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_textgeneration.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">TextGeneration</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Text2Text or text generation with transformers</span>
+    <span class="sd">&quot;&quot;&quot; Text2Text or text generation with transformers</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        model: A transformers pipeline that should be initialized as &quot;text-generation&quot;</span>
@@ -1736,7 +1736,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
                        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topic representations and return a single label</span>
+        <span class="sd">&quot;&quot;&quot; Extract topic representations and return a single label</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -1748,7 +1748,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 <span class="sd">            updated_topics: Updated topic representations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract the top 4 representative documents per topic</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">!=</span> <span class="n">DEFAULT_PROMPT</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENT]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">!=</span> <span class="n">DEFAULT_PROMPT</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
             <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">repr_docs_mappings</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
@@ -1880,7 +1880,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
                    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topic representations and return a single label</span>
+    <span class="sd">&quot;&quot;&quot; Extract topic representations and return a single label</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>
@@ -1892,7 +1892,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 <span class="sd">        updated_topics: Updated topic representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Extract the top 4 representative documents per topic</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">!=</span> <span class="n">DEFAULT_PROMPT</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENT]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">!=</span> <span class="n">DEFAULT_PROMPT</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
         <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">repr_docs_mappings</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>

@@ -1617,7 +1617,7 @@
                  <span class="n">nr_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
                  <span class="n">nr_candidate_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
                  <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Use a KeyBERT-like model to fine-tune the topic representations</span>
+        <span class="sd">&quot;&quot;&quot; Use a KeyBERT-like model to fine-tune the topic representations</span>
 
 <span class="sd">        The algorithm follows KeyBERT but does some optimization in</span>
 <span class="sd">        order to speed up inference.</span>
@@ -1670,7 +1670,7 @@
                        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+        <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -1701,7 +1701,7 @@
                                  <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                                  <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; For each topic, extract candidate words based on the c-TF-IDF</span>
+        <span class="sd">&quot;&quot;&quot; For each topic, extract candidate words based on the c-TF-IDF</span>
 <span class="sd">        representation.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1744,7 +1744,7 @@
                             <span class="n">representative_docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                             <span class="n">repr_doc_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
                             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract the representative document embeddings and create topic embeddings.</span>
+        <span class="sd">&quot;&quot;&quot; Extract the representative document embeddings and create topic embeddings.</span>
 <span class="sd">        Then extract word embeddings and calculate the cosine similarity between topic</span>
 <span class="sd">        embeddings and the word embeddings. Topic embeddings are the average of</span>
 <span class="sd">        representative document embeddings.</span>
@@ -1776,7 +1776,7 @@
                            <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
                            <span class="n">sim</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
                            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract the top n words per topic based on the</span>
+        <span class="sd">&quot;&quot;&quot; Extract the top n words per topic based on the</span>
 <span class="sd">        similarity matrix between topics and words.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1906,7 +1906,7 @@ calculating the cosine similarity between word and topic embeddings.</p>
              <span class="n">nr_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
              <span class="n">nr_candidate_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
              <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Use a KeyBERT-like model to fine-tune the topic representations</span>
+    <span class="sd">&quot;&quot;&quot; Use a KeyBERT-like model to fine-tune the topic representations</span>
 
 <span class="sd">    The algorithm follows KeyBERT but does some optimization in</span>
 <span class="sd">    order to speed up inference.</span>
@@ -2034,7 +2034,7 @@ calculating the cosine similarity between word and topic embeddings.</p>
                    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>

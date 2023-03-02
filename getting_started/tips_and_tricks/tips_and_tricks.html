@@ -1811,7 +1811,7 @@ and use that as a starting point. This can speed up the dimensionality reduction
 
 
 <span class="k">def</span> <span class="nf">rescale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Rescale an embedding so optimization will not have convergence issues.</span>
+    <span class="sd">&quot;&quot;&quot; Rescale an embedding so optimization will not have convergence issues.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1864,20 +1864,20 @@ However, it is still possible to calculate the topic-document probability matrix
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you want to install cuML together with BERTopic using Google Colab, you can run the following code:</p>
-<div class="highlight"><pre><span></span><code>!pip<span class="w"> </span>install<span class="w"> </span>bertopic
-!pip<span class="w"> </span>install<span class="w"> </span>cudf-cu11<span class="w"> </span>dask-cudf-cu11<span class="w"> </span>--extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
-!pip<span class="w"> </span>install<span class="w"> </span>cuml-cu11<span class="w"> </span>--extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
-!pip<span class="w"> </span>install<span class="w"> </span>cugraph-cu11<span class="w"> </span>--extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
-!pip<span class="w"> </span>uninstall<span class="w"> </span>cupy-cuda115<span class="w"> </span>-y
-!pip<span class="w"> </span>uninstall<span class="w"> </span>cupy-cuda11x<span class="w"> </span>-y
-!pip<span class="w"> </span>install<span class="w"> </span>cupy-cuda11x<span class="w"> </span>-f<span class="w"> </span>https://pip.cupy.dev/aarch64
+<div class="highlight"><pre><span></span><code>!pip install bertopic
+!pip install cudf-cu11 dask-cudf-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip install cuml-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip install cugraph-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip uninstall cupy-cuda115 -y
+!pip uninstall cupy-cuda11x -y
+!pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
 </code></pre></div>
 </div>
 <h2 id="lightweight-installation"><strong>Lightweight installation</strong><a class="headerlink" href="#lightweight-installation" title="Permanent link">&para;</a></h2>
 <p>The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely <code>"all-MiniLM-L6-v2"</code>. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires <code>pytorch</code> which often results in a rather large environment, memory-wise. </p>
 <p>Fortunately, it is possible to install BERTopic without <code>sentence-transformers</code> and use it as a lightweight solution instead. The installation can be done as follows:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>bertopic
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>numpy<span class="w"> </span>hdbscan<span class="w"> </span>umap-learn<span class="w"> </span>pandas<span class="w"> </span>scikit-learn<span class="w"> </span>tqdm<span class="w"> </span>plotly<span class="w"> </span>pyyaml
+<div class="highlight"><pre><span></span><code>pip install --no-deps bertopic
+pip install --upgrade numpy hdbscan umap-learn pandas scikit-learn tqdm plotly pyyaml
 </code></pre></div>
 <p>Then, we can use BERTopic without <code>sentence-transformers</code> as follows using a CPU-based embedding technique:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>

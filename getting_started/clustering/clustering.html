@@ -1702,13 +1702,13 @@ However, it is still possible to calculate the topic-document probability matrix
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you want to install cuML together with BERTopic using Google Colab, you can run the following code:</p>
-<div class="highlight"><pre><span></span><code>!pip<span class="w"> </span>install<span class="w"> </span>bertopic
-!pip<span class="w"> </span>install<span class="w"> </span>cudf-cu11<span class="w"> </span>dask-cudf-cu11<span class="w"> </span>--extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
-!pip<span class="w"> </span>install<span class="w"> </span>cuml-cu11<span class="w"> </span>--extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
-!pip<span class="w"> </span>install<span class="w"> </span>cugraph-cu11<span class="w"> </span>--extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
-!pip<span class="w"> </span>uninstall<span class="w"> </span>cupy-cuda115<span class="w"> </span>-y
-!pip<span class="w"> </span>uninstall<span class="w"> </span>cupy-cuda11x<span class="w"> </span>-y
-!pip<span class="w"> </span>install<span class="w"> </span>cupy-cuda11x<span class="w"> </span>-f<span class="w"> </span>https://pip.cupy.dev/aarch64
+<div class="highlight"><pre><span></span><code>!pip install bertopic
+!pip install cudf-cu11 dask-cudf-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip install cuml-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip install cugraph-cu11 --extra-index-url<span class="o">=</span>https://pypi.ngc.nvidia.com
+!pip uninstall cupy-cuda115 -y
+!pip uninstall cupy-cuda11x -y
+!pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
 </code></pre></div>
 </div>
 

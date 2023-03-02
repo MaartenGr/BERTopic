@@ -1662,7 +1662,7 @@ their respective c-TF-IDF values.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_pos.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">PartOfSpeech</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract Topic Keywords based on their Part-of-Speech</span>
+    <span class="sd">&quot;&quot;&quot; Extract Topic Keywords based on their Part-of-Speech</span>
 
 <span class="sd">    DEFAULT_PATTERNS = [</span>
 <span class="sd">                [{&#39;POS&#39;: &#39;ADJ&#39;}, {&#39;POS&#39;: &#39;NOUN&#39;}],</span>
@@ -1740,7 +1740,7 @@ their respective c-TF-IDF values.</p>
                        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+        <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -1889,7 +1889,7 @@ their respective c-TF-IDF values.</p>
                    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
                    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="sd">&quot;&quot;&quot; Extract topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>

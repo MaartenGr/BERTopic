@@ -1502,6 +1502,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-0141" class="md-nav__link">
+    Version 0.14.1
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-0140" class="md-nav__link">
     Version 0.14.0
   </a>
@@ -1727,6 +1734,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-0141" class="md-nav__link">
+    Version 0.14.1
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-0140" class="md-nav__link">
     Version 0.14.0
   </a>
@@ -1934,6 +1948,71 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="version-0141"><strong>Version 0.14.1</strong><a class="headerlink" href="#version-0141" title="Permanent link">&para;</a></h2>
+<p><em>Release date: 2 March, 2023</em></p>
+<h3><b>Highlights:</a></b></h3>
+
+<ul>
+<li>Use <a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#chatgpt"><strong>ChatGPT</strong></a> to create topic representations!:</li>
+<li>Added <code>delay_in_seconds</code> parameter to OpenAI and Cohere representation models for throttling the API<ul>
+<li>Setting this between 5 and 10 allows for trial users now to use more easily without hitting RateLimitErrors</li>
+</ul>
+</li>
+<li>Fixed missing <code>title</code> param to visualization methods</li>
+<li>Fixed probabilities not correctly aligning (<a href="https://github.com/MaartenGr/BERTopic/issues/1024">#1024</a>)</li>
+<li>Fix typo in textgenerator  <a href="https://github.com/dkopljar27">@dkopljar27</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1002">#1002</a></li>
+</ul>
+<h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#chatgpt">ChatGPT</a></b></h3>
+
+<p>Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models. 
+In order to use ChatGPT with BERTopic, we need to define the model and make sure to set <code>chat=True</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">openai</span>
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">openai</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">MY_API_KEY</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+</code></pre></div>
+<p>Prompting with ChatGPT is very satisfying and can be customized in BERTopic by using certain tags. 
+There are currently two tags, namely <code>"[KEYWORDS]"</code> and <code>"[DOCUMENTS]"</code>. 
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
+For example, if we have the following prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">I have topic that contains the following documents: </span><span class="se">\n</span><span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+
+<span class="s2">Based on the information above, extract a short topic label in the following format:</span>
+<span class="s2">topic: &lt;topic label&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+<p>then that will be rendered as follows and passed to OpenAI's API:</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">I have a topic that contains the following documents: </span>
+<span class="sd">- Our videos are also made possible by your support on patreon.co.</span>
+<span class="sd">- If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.</span>
+<span class="sd">- If you want to help us make more videos, you can do so there.</span>
+<span class="sd">- And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.</span>
+
+<span class="sd">The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch </span>
+
+<span class="sd">Based on the information above, extract a short topic label in the following format:</span>
+<span class="sd">topic: &lt;topic label&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whenever you create a custom prompt, it is important to add 
+<div class="highlight"><pre><span></span><code>Based on the information above, extract a short topic label in the following format:
+topic: &lt;topic label&gt;
+</code></pre></div>
+at the end of your prompt as BERTopic extracts everything that comes after <code>topic:</code>. Having 
+said that, if <code>topic:</code> is not in the output, then it will simply extract the entire response, so 
+feel free to experiment with the prompts. </p>
+</div>
 <h2 id="version-0140"><strong>Version 0.14.0</strong><a class="headerlink" href="#version-0140" title="Permanent link">&para;</a></h2>
 <p><em>Release date: 14 February, 2023</em></p>
 <h3><b>Highlights:</a></b></h3>
@@ -2054,7 +2133,7 @@ methods are created as a way to support whatever might be released in the future
 <p>Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
 do the work for you. Here, we can use <a href="https://docs.cohere.ai/">Cohere</a> to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install cohere first:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>cohere
+<div class="highlight"><pre><span></span><code>pip install cohere
 </code></pre></div>
 <p>Then, get yourself an API key and use Cohere's API as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">cohere</span>
@@ -2096,7 +2175,7 @@ In BERTopic, we can leverage this package in order to more efficiently combine e
 external knowledge are the most representative documents in each topic. </p>
 <p>To use langchain, you will need to install the langchain package first. Additionally, you will need an underlying LLM to support langchain,
 like openai:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>langchain,<span class="w"> </span>openai
+<div class="highlight"><pre><span></span><code>pip install langchain, openai
 </code></pre></div>
 <p>Then, you can create your chain as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">langchain.chains.question_answering</span> <span class="kn">import</span> <span class="n">load_qa_chain</span>
@@ -2238,8 +2317,8 @@ like openai:</p>
 
 <p>The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely <code>"all-MiniLM-L6-v2"</code>. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires <code>pytorch</code> which often results in a rather large environment, memory-wise. </p>
 <p>Fortunately, it is possible to install BERTopic without <code>sentence-transformers</code> and use it as a lightweight solution instead. The installation can be done as follows:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>bertopic
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>numpy<span class="w"> </span>hdbscan<span class="w"> </span>umap-learn<span class="w"> </span>pandas<span class="w"> </span>scikit-learn<span class="w"> </span>tqdm<span class="w"> </span>plotly<span class="w"> </span>pyyaml
+<div class="highlight"><pre><span></span><code>pip install --no-deps bertopic
+pip install --upgrade numpy hdbscan umap-learn pandas scikit-learn tqdm plotly pyyaml
 </code></pre></div>
 <p>Then, we can use BERTopic without <code>sentence-transformers</code> as follows using a CPU-based embedding technique:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>

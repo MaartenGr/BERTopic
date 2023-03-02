@@ -1704,7 +1704,7 @@ topic representations and allow for decay.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_online_cv.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">OnlineCountVectorizer</span><span class="p">(</span><span class="n">CountVectorizer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; An online variant of the CountVectorizer with updating vocabulary.</span>
+    <span class="sd">&quot;&quot;&quot; An online variant of the CountVectorizer with updating vocabulary.</span>
 
 <span class="sd">    At each `.partial_fit`, its vocabulary is updated based on any OOV words</span>
 <span class="sd">    it might find. Then, `.update_bow` can be used to track and update</span>
@@ -1772,7 +1772,7 @@ topic representations and allow for decay.</p>
         <span class="nb">super</span><span class="p">(</span><span class="n">OnlineCountVectorizer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Perform a partial fit and update vocabulary with OOV tokens</span>
+        <span class="sd">&quot;&quot;&quot; Perform a partial fit and update vocabulary with OOV tokens</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            raw_documents: A list of documents</span>
@@ -1793,7 +1793,7 @@ topic representations and allow for decay.</p>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">update_bow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">csr_matrix</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Create or update the bag-of-words matrix</span>
+        <span class="sd">&quot;&quot;&quot; Create or update the bag-of-words matrix</span>
 
 <span class="sd">        Update the bag-of-words matrix by adding the newly transformed</span>
 <span class="sd">        documents. This may add empty columns if new words are found and/or</span>
@@ -1835,7 +1835,7 @@ topic representations and allow for decay.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_</span>
 
     <span class="k">def</span> <span class="nf">_clean_bow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Remove words that do not exceed `self.delete_min_df` &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Remove words that do not exceed `self.delete_min_df` &quot;&quot;&quot;</span>
         <span class="c1"># Only keep words with a minimum frequency</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_min_df</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">indices_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">index</span><span class="p">:</span> <span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">}</span>
@@ -1901,7 +1901,7 @@ topic representations and allow for decay.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_online_cv.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Perform a partial fit and update vocabulary with OOV tokens</span>
+    <span class="sd">&quot;&quot;&quot; Perform a partial fit and update vocabulary with OOV tokens</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        raw_documents: A list of documents</span>
@@ -1986,7 +1986,7 @@ vocabulary and bag-of-words matrix.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_online_cv.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">update_bow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">csr_matrix</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create or update the bag-of-words matrix</span>
+    <span class="sd">&quot;&quot;&quot; Create or update the bag-of-words matrix</span>
 
 <span class="sd">    Update the bag-of-words matrix by adding the newly transformed</span>
 <span class="sd">    documents. This may add empty columns if new words are found and/or</span>
