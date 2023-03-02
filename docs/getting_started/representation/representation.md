@@ -219,8 +219,8 @@ representation_model = TextGeneration('gpt2')
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-You can use a custom prompt and decide where the keywords should
-be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag:
+GPT2, however, is not the most accurate model out there on HuggingFace models. You can get 
+much better results with a `flan-T5` like model:
 
 ```python
 from transformers import pipeline
@@ -240,8 +240,8 @@ representation_model = TextGeneration(generator)
 <br>
 
 As can be seen from the example above, if you would like to use a `text2text-generation` model, you will to 
-pass a `transformers.pipeline` with the `"text2text-generation"` parameter. 
-
+pass a `transformers.pipeline` with the `"text2text-generation"` parameter. Moreover, you can use a custom prompt and decide where the keywords should
+be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag:
 
 ### **Cohere**
 
