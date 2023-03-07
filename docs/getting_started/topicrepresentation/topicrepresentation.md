@@ -74,7 +74,7 @@ using the `_` separator. Although this is an informative label, in practice, thi
 `1_space_nasa_orbit` is informative, but we would prefer to have a bit more intuitive label, such as 
 `space travel`. The difficulty with creating such topic labels is that much of the interpretation is left to the user. Would `space travel` be more accurate or perhaps `space explorations`? To truly understand which labels are most suited, going into some of the documents in topics is especially helpful. 
 
-Although we can go through every single topic ourselves and try to label them, we can start by creating an overview of labels that have the length and number of words that we are looking for. To do so, we can generate our list of topic labels with `.get_topic_labels` and define the number of words, the separator, word length, etc:
+Although we can go through every single topic ourselves and try to label them, we can start by creating an overview of labels that have the length and number of words that we are looking for. To do so, we can generate our list of topic labels with `.generate_topic_labels` and define the number of words, the separator, word length, etc:
 
 ```python
 topic_labels = topic_model.generate_topic_labels(nr_words=3,

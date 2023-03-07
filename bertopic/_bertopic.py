@@ -1659,11 +1659,11 @@ class BERTopic:
 
         Examples:
 
-        First, we define our topic labels with `.get_topic_labels` in which
+        First, we define our topic labels with `.generate_topic_labels` in which
         we can customize our topic labels:
 
         ```python
-        topic_labels = topic_model.get_topic_labels(nr_words=2,
+        topic_labels = topic_model.generate_topic_labels(nr_words=2,
                                                     topic_prefix=True,
                                                     word_length=10,
                                                     separator=", ")
@@ -1736,7 +1736,7 @@ class BERTopic:
         To create our custom topic labels, usage is rather straightforward:
 
         ```python
-        topic_labels = topic_model.get_topic_labels(nr_words=2, separator=", ")
+        topic_labels = topic_model.generate_topic_labels(nr_words=2, separator=", ")
         ```
         """
         unique_topics = sorted(set(self.topics_))
