@@ -2152,6 +2152,7 @@ class BERTopic:
                                          hide_annotations: bool = False,
                                          hide_document_hover: bool = True,
                                          nr_levels: int = 10,
+                                         level_scale: str = 'linear', 
                                          custom_labels: bool = False,
                                          title: str = "<b>Hierarchical Documents and Topics</b>",
                                          width: int = 1200,
@@ -2181,6 +2182,11 @@ class BERTopic:
                     have a distance less or equal to the maximum distance of the selected list of distances.
                     NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
                     the length of `hierarchical_topics`.
+            level_scale: Whether to apply a linear or logarithmic ('log') scale levels of the distance 
+                         vector. Linear scaling will perform an equal number of merges at each level 
+                         while logarithmic scaling will perform more mergers in earlier levels to 
+                         provide more resolution at higher levels (this can be used for when the number 
+                         of topics is large). 
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
                            NOTE: Custom labels are only generated for the original
@@ -2246,6 +2252,7 @@ class BERTopic:
                                                          hide_annotations=hide_annotations,
                                                          hide_document_hover=hide_document_hover,
                                                          nr_levels=nr_levels,
+                                                         level_scale=level_scale, 
                                                          custom_labels=custom_labels,
                                                          title=title,
                                                          width=width,

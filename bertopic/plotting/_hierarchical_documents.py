@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import math 
 
 from umap import UMAP
 from typing import List, Union
@@ -16,6 +17,7 @@ def visualize_hierarchical_documents(topic_model,
                                      hide_annotations: bool = False,
                                      hide_document_hover: bool = True,
                                      nr_levels: int = 10,
+                                     level_scale: str = 'linear', 
                                      custom_labels: bool = False,
                                      title: str = "<b>Hierarchical Documents and Topics</b>",
                                      width: int = 1200,
@@ -40,11 +42,16 @@ def visualize_hierarchical_documents(topic_model,
         hide_document_hover: Hide the content of the documents when hovering over
                              specific points. Helps to speed up generation of visualizations.
         nr_levels: The number of levels to be visualized in the hierarchy. First, the distances
-                   in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances with
-                   equal length. Then, for each list of distances, the merged topics are selected that
-                   have a distance less or equal to the maximum distance of the selected list of distances.
+                   in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances. 
+                   Then, for each list of distances, the merged topics are selected that have a 
+                   distance less or equal to the maximum distance of the selected list of distances.
                    NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
                    the length of `hierarchical_topics`.
+        level_scale: Whether to apply a linear or logarithmic (log) scale levels of the distance 
+                     vector. Linear scaling will perform an equal number of merges at each level 
+                     while logarithmic scaling will perform more mergers in earlier levels to 
+                     provide more resolution at higher levels (this can be used for when the number 
+                     of topics is large). 
         custom_labels: Whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
                        NOTE: Custom labels are only generated for the original 
@@ -147,8 +154,15 @@ def visualize_hierarchical_documents(topic_model,
 
     # Create topic list for each level, levels are created by calculating the distance
     distances = hierarchical_topics.Distance.to_list()
-    max_distances = [distances[indices[-1]] for indices in np.array_split(range(len(hierarchical_topics)), nr_levels)][::-1]
-
+    if level_scale == 'log' or level_scale == 'logarithmic':
+        log_indices = np.round(np.logspace(start=math.log(1,10), stop=math.log(len(distances)-1,10), num=nr_levels)).astype(int).tolist()
+        log_indices.reverse()
+        max_distances = [distances[i] for i in log_indices]
+    elif level_scale == 'lin' or level_scale == 'linear':
+        max_distances = [distances[indices[-1]] for indices in np.array_split(range(len(hierarchical_topics)), nr_levels)][::-1]
+    else:
+        raise ValueError("level_scale needs to be one of 'log' or 'linear'")
+    
     for index, max_distance in enumerate(max_distances):
 
         # Get topics below `max_distance`
