@@ -20,7 +20,7 @@ def test_merge(model, documents, request):
     assert nr_topics == len(set(topic_model.topics_)) + 1
     assert topic_model.get_topic_info().Count.sum() == len(documents)
     if model == "online_topic_model":
-        assert mapped_labels == topic_model.topics_[450:]
+        assert mapped_labels == topic_model.topics_[950:]
     else:
         assert mapped_labels == topic_model.topics_
 
@@ -32,6 +32,6 @@ def test_merge(model, documents, request):
     assert nr_topics == len(set(topic_model.topics_)) + 2
     assert topic_model.get_topic_info().Count.sum() == len(documents)
     if model == "online_topic_model":
-        assert mapped_labels == topic_model.topics_[450:]
+        assert mapped_labels == topic_model.topics_[950:]
     else:
         assert mapped_labels == topic_model.topics_
