@@ -3,7 +3,7 @@ import pytest
 from sklearn.datasets import fetch_20newsgroups
 
 data = fetch_20newsgroups(subset="all",  remove=('headers', 'footers', 'quotes'))
-classes = [data["target_names"][i] for i in data["target"]][:500]
+classes = [data["target_names"][i] for i in data["target"]][:1000]
 
 
 @pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model')])

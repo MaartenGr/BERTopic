@@ -34,14 +34,14 @@ def reduced_embeddings(document_embeddings):
 
 @pytest.fixture(scope="session")
 def documents():
-    newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:500]
+    newsgroup_docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data'][:1000]
     return newsgroup_docs
 
 
 @pytest.fixture(scope="session")
 def targets():
     data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
-    y = data['target'][:500]
+    y = data['target'][:1000]
     return y
 
 
