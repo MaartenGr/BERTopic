@@ -101,7 +101,7 @@ class TextGeneration(BaseRepresentation):
             repr_docs_mappings = {topic: None for topic in topics.keys()}
 
         updated_topics = {}
-        for topic, topic_words in tqdm(topics.items(), disable=not topic_model.verbose):
+        for topic, _ in tqdm(topics.items(), disable=not topic_model.verbose):
 
             # Prepare prompt
             prompt = self._create_prompt(repr_docs_mappings[topic], topic, topics)
@@ -119,21 +119,21 @@ class TextGeneration(BaseRepresentation):
 
     def _create_prompt(self, docs, topic, topics):
         keywords = ", ".join(list(zip(*topics[topic]))[0])
-        prompt = ""
 
         # Use the default prompt and replace keywords
         if self.prompt == DEFAULT_PROMPT:
-            prompt += self.prompt.replace("[KEYWORDS]", keywords)
+            prompt = self.prompt.replace("[KEYWORDS]", keywords)
 
         # Use a prompt that leverages either keywords or documents in
         # a custom location
         else:
-            if "[KEYWORDS]" in self.prompt:
-                prompt += self.prompt.replace("[KEYWORDS]", keywords)
-            if "[DOCUMENTS]" in self.prompt:
+            prompt = self.prompt
+            if "[KEYWORDS]" in prompt:
+                prompt = prompt.replace("[KEYWORDS]", keywords)
+            if "[DOCUMENTS]" in prompt:
                 to_replace = ""
                 for doc in docs:
                     to_replace += f"- {doc[:255]}\n"
-                prompt += self.prompt.replace("[DOCUMENTS]", to_replace)
+                prompt = prompt.replace("[DOCUMENTS]", to_replace)
 
         return prompt
