@@ -65,8 +65,9 @@ languages = [
 ]
 
 
-def select_backend(embedding_model, language: str = None) -> BaseEmbedder:
-    """Select an embedding model based on language or a specific sentence transformer models.
+def select_backend(embedding_model,
+                   language: str = None) -> BaseEmbedder:
+    """ Select an embedding model based on language or a specific sentence transformer models.
     When selecting a language, we choose all-MiniLM-L6-v2 for English and
     paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
 
@@ -84,59 +85,46 @@ def select_backend(embedding_model, language: str = None) -> BaseEmbedder:
     # Flair word embeddings
     if "flair" in str(type(embedding_model)):
         from bertopic.backend._flair import FlairBackend
-
         return FlairBackend(embedding_model)
 
     # Spacy embeddings
     if "spacy" in str(type(embedding_model)):
         from bertopic.backend._spacy import SpacyBackend
-
         return SpacyBackend(embedding_model)
 
     # Gensim embeddings
     if "gensim" in str(type(embedding_model)):
         from bertopic.backend._gensim import GensimBackend
-
         return GensimBackend(embedding_model)
 
     # USE embeddings
     if "tensorflow" and "saved_model" in str(type(embedding_model)):
         from bertopic.backend._use import USEBackend
-
         return USEBackend(embedding_model)
 
     # Sentence Transformer embeddings
-    if "sentence_transformers" in str(type(embedding_model)) or isinstance(
-        embedding_model, str
-    ):
+    if "sentence_transformers" in str(type(embedding_model)) or isinstance(embedding_model, str):
         from ._sentencetransformers import SentenceTransformerBackend
-
         return SentenceTransformerBackend(embedding_model)
 
     # Hugging Face embeddings
     if "transformers" and "pipeline" in str(type(embedding_model)):
         from ._hftransformers import HFTransformerBackend
-
         return HFTransformerBackend(embedding_model)
 
     # Select embedding model based on language
     if language:
         try:
             from ._sentencetransformers import SentenceTransformerBackend
-
             if language.lower() in ["English", "english", "en"]:
                 return SentenceTransformerBackend("all-MiniLM-L6-v2")
             elif language.lower() in languages or language == "multilingual":
-                return SentenceTransformerBackend(
-                    "paraphrase-multilingual-MiniLM-L12-v2"
-                )
+                return SentenceTransformerBackend("paraphrase-multilingual-MiniLM-L12-v2")
             else:
-                raise ValueError(
-                    f"{language} is currently not supported. However, you can "
-                    f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
-                    "Else, please select a language from the following list:\n"
-                    f"{languages}"
-                )
+                raise ValueError(f"{language} is currently not supported. However, you can "
+                                f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
+                                "Else, please select a language from the following list:\n"
+                                f"{languages}")
 
         # Only for light-weight installation
         except ModuleNotFoundError:
@@ -144,5 +132,4 @@ def select_backend(embedding_model, language: str = None) -> BaseEmbedder:
             return SklearnEmbedder(pipe)
 
     from ._sentencetransformers import SentenceTransformerBackend
-
     return SentenceTransformerBackend("all-MiniLM-L6-v2")
