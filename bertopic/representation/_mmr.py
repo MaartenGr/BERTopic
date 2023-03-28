@@ -67,44 +67,50 @@ class MaximalMarginalRelevance(BaseRepresentation):
             words = [word[0] for word in topic_words]
             word_embeddings = topic_model._extract_embeddings(words, method="word", verbose=False)
             topic_embedding = topic_model._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(1, -1)
-            topic_words = self._mmr(topic_embedding, word_embeddings, words)
+            topic_words = mmr(topic_embedding, word_embeddings, words, self.diversity, self.top_n_words)
             updated_topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
         return updated_topics
 
-    def _mmr(self,
-             doc_embedding: np.ndarray,
-             word_embeddings: np.ndarray,
-             words: List[str]) -> List[str]:
-        """
-        Arguments:
-            doc_embedding: The document embeddings
-            word_embeddings: The embeddings of the selected candidate keywords/phrases
-            words: The selected candidate keywords/keyphrases
 
-        Returns:
-             List[str]: The selected keywords/keyphrases
-        """
+def mmr(doc_embedding: np.ndarray,
+        word_embeddings: np.ndarray,
+        words: List[str],
+        diversity: float = 0.1,
+        top_n: int = 10) -> List[str]:
+    """ Maximal Marginal Relevance
 
-        # Extract similarity within words, and between words and the document
-        word_doc_similarity = cosine_similarity(word_embeddings, doc_embedding)
-        word_similarity = cosine_similarity(word_embeddings)
+    Arguments:
+        doc_embedding: The document embeddings
+        word_embeddings: The embeddings of the selected candidate keywords/phrases
+        words: The selected candidate keywords/keyphrases
+        diversity: The diversity of the selected embeddings. 
+                   Values between 0 and 1.
+        top_n: The top n items to return
 
-        # Initialize candidates and already choose best keyword/keyphras
-        keywords_idx = [np.argmax(word_doc_similarity)]
-        candidates_idx = [i for i in range(len(words)) if i != keywords_idx[0]]
+    Returns:
+            List[str]: The selected keywords/keyphrases
+    """
 
-        for _ in range(self.top_n_words - 1):
-            # Extract similarities within candidates and
-            # between candidates and selected keywords/phrases
-            candidate_similarities = word_doc_similarity[candidates_idx, :]
-            target_similarities = np.max(word_similarity[candidates_idx][:, keywords_idx], axis=1)
+    # Extract similarity within words, and between words and the document
+    word_doc_similarity = cosine_similarity(word_embeddings, doc_embedding)
+    word_similarity = cosine_similarity(word_embeddings)
 
-            # Calculate MMR
-            mmr = (1-self.diversity) * candidate_similarities - self.diversity * target_similarities.reshape(-1, 1)
-            mmr_idx = candidates_idx[np.argmax(mmr)]
+    # Initialize candidates and already choose best keyword/keyphras
+    keywords_idx = [np.argmax(word_doc_similarity)]
+    candidates_idx = [i for i in range(len(words)) if i != keywords_idx[0]]
 
-            # Update keywords & candidates
-            keywords_idx.append(mmr_idx)
-            candidates_idx.remove(mmr_idx)
+    for _ in range(top_n - 1):
+        # Extract similarities within candidates and
+        # between candidates and selected keywords/phrases
+        candidate_similarities = word_doc_similarity[candidates_idx, :]
+        target_similarities = np.max(word_similarity[candidates_idx][:, keywords_idx], axis=1)
 
-        return [words[idx] for idx in keywords_idx]
+        # Calculate MMR
+        mmr = (1-diversity) * candidate_similarities - diversity * target_similarities.reshape(-1, 1)
+        mmr_idx = candidates_idx[np.argmax(mmr)]
+
+        # Update keywords & candidates
+        keywords_idx.append(mmr_idx)
+        candidates_idx.remove(mmr_idx)
+
+    return [words[idx] for idx in keywords_idx]

@@ -51,6 +51,12 @@ class Cohere(BaseRepresentation):
                 inserted.
         delay_in_seconds: The delay in seconds between consecutive prompts 
                                 in order to prevent RateLimitErrors. 
+        nr_docs: The number of documents to pass to OpenAI if a prompt
+                 with the `["DOCUMENTS"]` tag is used.
+        diversity: The diversity of documents to pass to OpenAI.
+                   Accepts values between 0 and 1. A higher 
+                   values results in passing more diverse documents
+                   whereas lower values passes more similar documents.
 
     Usage:
 
@@ -85,12 +91,16 @@ class Cohere(BaseRepresentation):
                  model: str = "xlarge",
                  prompt: str = None,
                  delay_in_seconds: float = None,
+                 nr_docs: int = 4,
+                 diversity: float = None
                  ):
         self.client = client
         self.model = model
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
         self.delay_in_seconds = delay_in_seconds
+        self.nr_docs = nr_docs
+        self.diversity = diversity
 
     def extract_topics(self,
                        topic_model,
@@ -110,7 +120,7 @@ class Cohere(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top 4 representative documents per topic
-        repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
+        repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
 
         # Generate using Cohere's Language Model
         updated_topics = {}

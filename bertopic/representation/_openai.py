@@ -71,6 +71,12 @@ class OpenAI(BaseRepresentation):
                           in order to prevent RateLimitErrors. 
         chat: Set this to True if a GPT-3.5 model is used.
               See: https://platform.openai.com/docs/models/gpt-3-5
+        nr_docs: The number of documents to pass to OpenAI if a prompt
+                 with the `["DOCUMENTS"]` tag is used.
+        diversity: The diversity of documents to pass to OpenAI.
+                   Accepts values between 0 and 1. A higher 
+                   values results in passing more diverse documents
+                   whereas lower values passes more similar documents.
 
     Usage:
 
@@ -110,10 +116,12 @@ class OpenAI(BaseRepresentation):
                  prompt: str = None,
                  generator_kwargs: Mapping[str, Any] = {},
                  delay_in_seconds: float = None,
-                 chat: bool = False
+                 chat: bool = False,
+                 nr_docs: int = 4,
+                 diversity: float = None
                  ):
         self.model = model
-
+        
         if prompt is None:
             self.prompt = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
         else:
@@ -122,6 +130,8 @@ class OpenAI(BaseRepresentation):
         self.default_prompt_ = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
         self.delay_in_seconds = delay_in_seconds
         self.chat = chat
+        self.nr_docs = nr_docs
+        self.diversity = diversity
 
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
@@ -148,8 +158,8 @@ class OpenAI(BaseRepresentation):
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top 4 representative documents per topic
-        repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
+        # Extract the top n representative documents per topic
+        repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
 
         # Generate using OpenAI's Language Model
         updated_topics = {}

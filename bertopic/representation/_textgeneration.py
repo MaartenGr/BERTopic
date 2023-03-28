@@ -29,6 +29,12 @@ class TextGeneration(BaseRepresentation):
         pipeline_kwargs: Kwargs that you can pass to the transformers.pipeline
                          when it is called.
         random_state: A random state to be passed to `transformers.set_seed`
+        nr_docs: The number of documents to pass to OpenAI if a prompt
+                 with the `["DOCUMENTS"]` tag is used.
+        diversity: The diversity of documents to pass to OpenAI.
+                   Accepts values between 0 and 1. A higher 
+                   values results in passing more diverse documents
+                   whereas lower values passes more similar documents.
 
     Usage:
 
@@ -63,7 +69,9 @@ class TextGeneration(BaseRepresentation):
                  model: Union[str, pipeline],
                  prompt: str = None,
                  pipeline_kwargs: Mapping[str, Any] = {},
-                 random_state: int = 42):
+                 random_state: int = 42,
+                 nr_docs: int = 4,
+                 diversity: float = None):
         set_seed(random_state)
         if isinstance(model, str):
             self.model = pipeline("text-generation", model=model)
@@ -76,6 +84,8 @@ class TextGeneration(BaseRepresentation):
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
         self.pipeline_kwargs = pipeline_kwargs
+        self.nr_docs = nr_docs
+        self.diversity = diversity
 
     def extract_topics(self,
                        topic_model,
@@ -96,7 +106,7 @@ class TextGeneration(BaseRepresentation):
         """
         # Extract the top 4 representative documents per topic
         if self.prompt != DEFAULT_PROMPT and "[DOCUMENTS]" in self.prompt:
-            repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
+            repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
         else:
             repr_docs_mappings = {topic: None for topic in topics.keys()}
 

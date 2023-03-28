@@ -38,6 +38,7 @@ from bertopic.backend._utils import select_backend
 from bertopic.representation import BaseRepresentation
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from bertopic.representation._mmr import mmr
 
 # Visualization
 import plotly.graph_objects as go
@@ -3013,6 +3014,7 @@ class BERTopic:
                                      topics: Mapping[str, List[Tuple[str, float]]],
                                      nr_samples: int = 500,
                                      nr_repr_docs: int = 5,
+                                     diversity: float = None
                                      ) -> Union[List[str], List[List[int]]]:
         """ Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
@@ -3025,6 +3027,8 @@ class BERTopic:
             topics: The candidate topics as calculated with c-TF-IDF
             nr_samples: The number of candidate documents to extract per topic
             nr_repr_docs: The number of representative documents to extract per topic
+            diversity: The diversity between the most representative documents.
+                       If None, no MMR is used. Otherwise, accepts values between 0 and 1.
 
         Returns:
             repr_docs_mappings: A dictionary from topic to representative documents
@@ -3048,15 +3052,21 @@ class BERTopic:
 
             # Calculate similarity
             selected_docs = documents_per_topic.loc[documents_per_topic.Topic == topic, "Document"].values
+            nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
             bow = self.vectorizer_model.transform(selected_docs)
             ctfidf = self.ctfidf_model.transform(bow)
             sim_matrix = cosine_similarity(ctfidf, c_tf_idf[index])
 
-            # Extract top n most representative documents
-            nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
-            indices = np.argpartition(sim_matrix.reshape(1, -1)[0],
-                                      -nr_docs)[-nr_docs:]
-            repr_docs.extend([selected_docs[index] for index in indices])
+            # Use MMR to find representative but diverse documents
+            if diversity:
+                docs = mmr(c_tf_idf[index], ctfidf, selected_docs, nr_docs, diversity=diversity)
+                repr_docs.extend(docs)
+
+            # Extract top n most representative documents    
+            else:
+                indices = np.argpartition(sim_matrix.reshape(1, -1)[0],
+                                        -nr_docs)[-nr_docs:]
+                repr_docs.extend([selected_docs[index] for index in indices])
             repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
         repr_docs_mappings = {topic: repr_docs[i[0]:i[-1]+1] for topic, i in zip(topics.keys(), repr_docs_indices)}
 
