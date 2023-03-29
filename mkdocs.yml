@@ -37,6 +37,7 @@ nav:
         - Online Topic Modeling: getting_started/online/online.md
         - Manual Topic Modeling: getting_started/manual/manual.md
   - FAQ: faq.md
+  - Use Cases: usecases.md
   - API:
       - BERTopic: api/bertopic.md
       - Sub-models:
