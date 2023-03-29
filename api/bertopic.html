@@ -14,8 +14,14 @@
       
         <link rel="canonical" href="https://maartengr.github.io/BERTopic/api/bertopic.html">
       
+      
+        <link rel="prev" href="../usecases.html">
+      
+      
+        <link rel="next" href="backends/base.html">
+      
       <link rel="icon" href="../icon.png">
-      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.9">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.4">
     
     
       
@@ -23,12 +29,13 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.120efc48.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.240905d7.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.9647289d.min.css">
-        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a0c5b2b5.min.css">
       
+      
+
     
     
     
@@ -45,10 +52,37 @@
     
       <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="BERTopic - BERTopic" >
+      
+        <meta  property="og:description"  content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." >
+      
+        <meta  property="og:image"  content="https://maartengr.github.io/BERTopic/assets/images/social/api/bertopic.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://maartengr.github.io/BERTopic/api/bertopic.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="BERTopic - BERTopic" >
+      
+        <meta  name="twitter:description"  content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." >
+      
+        <meta  name="twitter:image"  content="https://maartengr.github.io/BERTopic/assets/images/social/api/bertopic.png" >
+      
     
     
   </head>
@@ -89,7 +123,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
-  <img src="../icon_white.png" alt="logo">
+  <img src="../img/icon.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -115,7 +149,6 @@
       <form class="md-header__option" data-md-component="palette">
         
           
-          
           <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
@@ -123,7 +156,6 @@
             </label>
           
         
-          
           
           <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
           
@@ -150,7 +182,7 @@
       </label>
       <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
@@ -162,7 +194,7 @@
           <div class="md-search-result__meta">
             Initializing search
           </div>
-          <ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
       </div>
     </div>
@@ -174,7 +206,7 @@
         <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -193,7 +225,7 @@
           
             
 <nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
-  <div class="md-tabs__inner md-grid">
+  <div class="md-grid">
     <ul class="md-tabs__list">
       
         
@@ -313,7 +345,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
       
-  <img src="../icon_white.png" alt="logo">
+  <img src="../img/icon.png" alt="logo">
 
     </a>
     BERTopic
@@ -323,7 +355,7 @@
       <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -374,17 +406,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_3">
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
           Getting Started
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
           Getting Started
@@ -514,17 +547,18 @@
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_9" type="checkbox" id="__nav_3_9" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_9" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_3_9">
+        <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="0">
           Sub-models
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Sub-models" data-md-level="2">
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_9_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_3_9">
           <span class="md-nav__icon md-icon"></span>
           Sub-models
@@ -633,17 +667,18 @@
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_10" type="checkbox" id="__nav_3_10" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_10" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_3_10">
+        <label class="md-nav__link" for="__nav_3_10" id="__nav_3_10_label" tabindex="0">
           Variations
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Variations" data-md-level="2">
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_10_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_3_10">
           <span class="md-nav__icon md-icon"></span>
           Variations
@@ -832,17 +867,18 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6">
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
           API
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="API" data-md-level="1">
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
         <label class="md-nav__title" for="__nav_6">
           <span class="md-nav__icon md-icon"></span>
           API
@@ -858,7 +894,7 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
         
@@ -1181,17 +1217,18 @@
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2" type="checkbox" id="__nav_6_2" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2">
+        <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
           Sub-models
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Sub-models" data-md-level="2">
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2">
           <span class="md-nav__icon md-icon"></span>
           Sub-models
@@ -1207,17 +1244,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2_1" type="checkbox" id="__nav_6_2_1" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_1" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2_1">
+        <label class="md-nav__link" for="__nav_6_2_1" id="__nav_6_2_1_label" tabindex="0">
           Backends
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Backends" data-md-level="3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_1_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2_1">
           <span class="md-nav__icon md-icon"></span>
           Backends
@@ -1268,17 +1306,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2_2" type="checkbox" id="__nav_6_2_2" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_2" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2_2">
+        <label class="md-nav__link" for="__nav_6_2_2" id="__nav_6_2_2_label" tabindex="0">
           Dimensionality Reduction
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Dimensionality Reduction" data-md-level="3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_2_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2_2">
           <span class="md-nav__icon md-icon"></span>
           Dimensionality Reduction
@@ -1315,17 +1354,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2_3" type="checkbox" id="__nav_6_2_3" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_3" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2_3">
+        <label class="md-nav__link" for="__nav_6_2_3" id="__nav_6_2_3_label" tabindex="0">
           Clustering
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Clustering" data-md-level="3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_3_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2_3">
           <span class="md-nav__icon md-icon"></span>
           Clustering
@@ -1362,17 +1402,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2_4" type="checkbox" id="__nav_6_2_4" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_4" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2_4">
+        <label class="md-nav__link" for="__nav_6_2_4" id="__nav_6_2_4_label" tabindex="0">
           Vectorizers
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Vectorizers" data-md-level="3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_4_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2_4">
           <span class="md-nav__icon md-icon"></span>
           Vectorizers
@@ -1423,17 +1464,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2_5" type="checkbox" id="__nav_6_2_5" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2_5">
+        <label class="md-nav__link" for="__nav_6_2_5" id="__nav_6_2_5_label" tabindex="0">
           Topic Representation
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Topic Representation" data-md-level="3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_5_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2_5">
           <span class="md-nav__icon md-icon"></span>
           Topic Representation
@@ -1505,17 +1547,18 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_2_5_5" type="checkbox" id="__nav_6_2_5_5" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5_5" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_2_5_5">
+        <label class="md-nav__link" for="__nav_6_2_5_5" id="__nav_6_2_5_5_label" tabindex="0">
           Text Generation
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Text Generation" data-md-level="4">
+      <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_2_5_5_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_2_5_5">
           <span class="md-nav__icon md-icon"></span>
           Text Generation
@@ -1624,17 +1667,18 @@
     <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_3" type="checkbox" id="__nav_6_3" >
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
       
       
       
-      
-        <label class="md-nav__link" for="__nav_6_3">
+        <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
           Plotting
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Plotting" data-md-level="2">
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_6_3">
           <span class="md-nav__icon md-icon"></span>
           Plotting
@@ -2116,14 +2160,14 @@
               </div>
             
           
-          <div class="md-content" data-md-component="content">
-            <article class="md-content__inner md-typeset">
-              
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
                 
-  <a href="https://github.com/MaartenGr/BERTopic/edit/master/docs/api/bertopic.md" title="Edit this page" class="md-content__button md-icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+                  
 
+  
+  
 
 
 <h1 id="bertopic"><code>BERTopic</code><a class="headerlink" href="#bertopic" title="Permanent link">&para;</a></h1>
@@ -2237,7 +2281,7 @@ you best.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BERTopic</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;BERTopic is a topic modeling technique that leverages BERT embeddings and</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BERTopic is a topic modeling technique that leverages BERT embeddings and</span>
 <span class="sd">    c-TF-IDF to create dense clusters allowing for easily interpretable topics</span>
 <span class="sd">    whilst keeping important words in the topic descriptions.</span>
 
@@ -2310,7 +2354,7 @@ you best.</p>
                  <span class="n">representation_model</span><span class="p">:</span> <span class="n">BaseRepresentation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;BERTopic initialization</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;BERTopic initialization</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            language: The main language used in your documents. The default sentence-transformers</span>
@@ -2433,7 +2477,7 @@ you best.</p>
             <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
             <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A list of documents to fit on</span>
@@ -2476,7 +2520,7 @@ you best.</p>
                       <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
                                                                        <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A list of documents to fit on</span>
@@ -2572,7 +2616,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
                   <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A single document or a list of documents to fit on</span>
@@ -2650,7 +2694,7 @@ you best.</p>
                     <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                     <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Fit BERTopic on a subset of the data and perform online learning</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Fit BERTopic on a subset of the data and perform online learning</span>
 <span class="sd">        with batch-like data.</span>
 
 <span class="sd">        Online topic modeling in BERTopic is performed by using dimensionality</span>
@@ -2800,7 +2844,7 @@ you best.</p>
                          <span class="n">datetime_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="n">evolution_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                          <span class="n">global_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Create topics over time</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Create topics over time</span>
 
 <span class="sd">        To create the topics over time, BERTopic needs to be already fitted once.</span>
 <span class="sd">        From the fitted models, the c-TF-IDF representations are calculate at</span>
@@ -2930,7 +2974,7 @@ you best.</p>
                          <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                          <span class="n">classes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
                          <span class="n">global_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Create topics per class</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Create topics per class</span>
 
 <span class="sd">        To create the topics per class, BERTopic needs to be already fitted once.</span>
 <span class="sd">        From the fitted models, the c-TF-IDF representations are calculate at</span>
@@ -3003,7 +3047,7 @@ you best.</p>
                             <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
                             <span class="n">linkage_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">distance_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">csr_matrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Create a hierarchy of topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Create a hierarchy of topics</span>
 
 <span class="sd">        To create this hierarchy, BERTopic needs to be already fitted once.</span>
 <span class="sd">        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF</span>
@@ -3155,7 +3199,7 @@ you best.</p>
                                  <span class="n">calculate_tokens</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                  <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                                                 <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="kc">None</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; A post-hoc approximation of topic distributions across documents.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; A post-hoc approximation of topic distributions across documents.</span>
 
 <span class="sd">        In order to perform this approximation, each document is split into tokens</span>
 <span class="sd">        according to the provided tokenizer in the `CountVectorizer`. Then, a</span>
@@ -3368,7 +3412,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">find_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">search_term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                     <span class="n">top_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; Find topics most similar to a search_term</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Find topics most similar to a search_term</span>
 
 <span class="sd">        Creates an embedding for search_term and compares that with</span>
 <span class="sd">        the topic embeddings. The most similar topics are returned</span>
@@ -3425,7 +3469,7 @@ you best.</p>
                       <span class="n">vectorizer_model</span><span class="p">:</span> <span class="n">CountVectorizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">ctfidf_model</span><span class="p">:</span> <span class="n">ClassTfidfTransformer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">representation_model</span><span class="p">:</span> <span class="n">BaseRepresentation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Updates the topic representation by recalculating c-TF-IDF with the new</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Updates the topic representation by recalculating c-TF-IDF with the new</span>
 <span class="sd">        parameters as defined in this function.</span>
 
 <span class="sd">        When you have trained a model and viewed the topics and the words that represent them,</span>
@@ -3504,7 +3548,7 @@ you best.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_topic_size</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            self.topic_representations_: The top n words per topic and the corresponding c-TF-IDF score</span>
@@ -3519,7 +3563,7 @@ you best.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_representations_</span>
 
     <span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic: A specific topic for which you want its representation</span>
@@ -3540,7 +3584,7 @@ you best.</p>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">get_topic_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Get information about each topic including its ID, frequency, and name.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get information about each topic including its ID, frequency, and name.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic: A specific topic for which you want the frequency</span>
@@ -3570,7 +3614,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order)</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic: A specific topic for which you want the frequency</span>
@@ -3604,7 +3648,7 @@ you best.</p>
                           <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                           <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Get information about the documents on which the topic was trained</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get information about the documents on which the topic was trained</span>
 <span class="sd">        including the documents themselves, their respective topics, the name</span>
 <span class="sd">        of each topic, the top n words of each topic, whether it is a</span>
 <span class="sd">        representative document, and probability of the clustering if the cluster</span>
@@ -3689,7 +3733,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">document_info</span>
 
     <span class="k">def</span> <span class="nf">get_representative_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Extract the best representing documents per topic.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract the best representing documents per topic.</span>
 
 <span class="sd">        NOTE:</span>
 <span class="sd">            This does not extract all documents per topic as all documents</span>
@@ -3738,7 +3782,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">get_topic_tree</span><span class="p">(</span><span class="n">hier_topics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                        <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">tight_layout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Extract the topic tree such that it can be printed</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract the topic tree such that it can be printed</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            hier_topics: A dataframe containing the structure of the topic tree.</span>
@@ -3793,7 +3837,7 @@ you best.</p>
                 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">hier_topics</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()}</span>
 
         <span class="k">def</span> <span class="nf">get_tree</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot; Based on: https://stackoverflow.com/a/51920869/10532563 &quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot; Based on: https://stackoverflow.com/a/51920869/10532563 &quot;&quot;&quot;</span>
 
             <span class="k">def</span> <span class="nf">_tree</span><span class="p">(</span><span class="n">to_print</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">grandpa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 
@@ -3837,7 +3881,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">get_tree</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_topic_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Set custom topic labels in your fitted BERTopic model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Set custom topic labels in your fitted BERTopic model</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_labels: If a list of topic labels, it should contain the same number</span>
@@ -3901,7 +3945,7 @@ you best.</p>
                               <span class="n">topic_prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                               <span class="n">word_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Get labels for each topic in a user-defined format</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get labels for each topic in a user-defined format</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            original_labels:</span>
@@ -3953,7 +3997,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">merge_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                      <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                      <span class="n">topics_to_merge</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            docs: The documents you used when calling either `fit` or `fit_transform`</span>
 <span class="sd">            topics_to_merge: Either a list of topics or a list of list of topics</span>
@@ -4006,7 +4050,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">reduce_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                       <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                       <span class="n">nr_topics</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reduce the number of topics to a fixed number of topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reduce the number of topics to a fixed number of topics</span>
 <span class="sd">        or automatically.</span>
 
 <span class="sd">        If nr_topics is a integer, then the number of topics is reduced</span>
@@ -4063,7 +4107,7 @@ you best.</p>
                         <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                         <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">distributions_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Reduce outliers by merging them with their nearest topic according</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reduce outliers by merging them with their nearest topic according</span>
 <span class="sd">        to one of several strategies.</span>
 
 <span class="sd">        When using HDBSCAN, DBSCAN, or OPTICS, a number of outlier documents might be created</span>
@@ -4200,7 +4244,7 @@ you best.</p>
                          <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Intertopic Distance Map&lt;/b&gt;&quot;</span><span class="p">,</span>
                          <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
                          <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize topics, their sizes, and their corresponding words</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize topics, their sizes, and their corresponding words</span>
 
 <span class="sd">        This visualization is highly inspired by LDAvis, a great visualization</span>
 <span class="sd">        technique typically reserved for LDA.</span>
@@ -4250,7 +4294,7 @@ you best.</p>
                             <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
                             <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
                             <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A fitted BERTopic instance.</span>
@@ -4348,7 +4392,7 @@ you best.</p>
                                          <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Hierarchical Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
                                          <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
                                          <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D at different levels of hierarchy</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D at different levels of hierarchy</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            docs: The documents you used when calling either `fit` or `fit_transform`</span>
@@ -4456,7 +4500,7 @@ you best.</p>
                             <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Term score decline per Topic&lt;/b&gt;&quot;</span><span class="p">,</span>
                             <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                             <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize the ranks of all terms across all topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize the ranks of all terms across all topics</span>
 
 <span class="sd">        Each topic is represented by a set of words. These words, however,</span>
 <span class="sd">        do not all equally represent the topic. This visualization shows</span>
@@ -4518,7 +4562,7 @@ you best.</p>
                                    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topics over Time&lt;/b&gt;&quot;</span><span class="p">,</span>
                                    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">450</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize topics over time</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize topics over time</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topics_over_time: The topics you would like to be visualized with the</span>
@@ -4571,7 +4615,7 @@ you best.</p>
                                    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topics per Class&lt;/b&gt;&quot;</span><span class="p">,</span>
                                    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topics_per_class: The topics you would like to be visualized with the</span>
@@ -4622,7 +4666,7 @@ you best.</p>
                                <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topic Probability Distribution&lt;/b&gt;&quot;</span><span class="p">,</span>
                                <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                                <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            probabilities: An array of probability scores</span>
@@ -4663,7 +4707,7 @@ you best.</p>
                                            <span class="n">document</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                            <span class="n">topic_token_distribution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                            <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Visualize the topic distribution calculated by `.approximate_topic_distribution`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize the topic distribution calculated by `.approximate_topic_distribution`</span>
 <span class="sd">        on a token level. Thereby indicating the extend to which a certain word or phrases belong</span>
 <span class="sd">        to a specific topic. The assumption here is that a single word can belong to multiple</span>
 <span class="sd">        similar topics and as such give information about the broader set of topics within</span>
@@ -4722,7 +4766,7 @@ you best.</p>
                             <span class="n">linkage_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">distance_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">csr_matrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">color_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize a hierarchical structure of the topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize a hierarchical structure of the topics</span>
 
 <span class="sd">        A ward linkage function is used to perform the</span>
 <span class="sd">        hierarchical clustering based on the cosine distance</span>
@@ -4812,7 +4856,7 @@ you best.</p>
                           <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Similarity Matrix&lt;/b&gt;&quot;</span><span class="p">,</span>
                           <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                           <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize a heatmap of the topic&#39;s similarity matrix</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize a heatmap of the topic&#39;s similarity matrix</span>
 
 <span class="sd">        Based on the cosine similarity matrix between topic embeddings,</span>
 <span class="sd">        a heatmap is created showing the similarity between topics.</span>
@@ -4865,7 +4909,7 @@ you best.</p>
                            <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Topic Word Scores&quot;</span><span class="p">,</span>
                            <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
                            <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Visualize a barchart of selected topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Visualize a barchart of selected topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topics: A selection of topics to visualize.</span>
@@ -4909,7 +4953,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
              <span class="n">save_embedding_model</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Saves the model to the specified path</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Saves the model to the specified path</span>
 
 <span class="sd">        When saving the model, make sure to also keep track of the versions</span>
 <span class="sd">        of dependencies and Python used. Loading and saving the model should</span>
@@ -4952,7 +4996,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
              <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Loads the model from the specified path</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Loads the model from the specified path</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            path: the location and name of the BERTopic file you want to load</span>
@@ -4980,7 +5024,7 @@ you best.</p>
             <span class="k">return</span> <span class="n">topic_model</span>
 
     <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Get parameters for this estimator.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get parameters for this estimator.</span>
 
 <span class="sd">        Adapted from:</span>
 <span class="sd">            https://github.com/scikit-learn/scikit-learn/blob/b3ea3ed6a/sklearn/base.py#L178</span>
@@ -5006,7 +5050,7 @@ you best.</p>
                             <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
                             <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;document&quot;</span><span class="p">,</span>
                             <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Extract sentence/document embeddings through pre-trained embeddings</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract sentence/document embeddings through pre-trained embeddings</span>
 <span class="sd">        For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html</span>
 
 <span class="sd">        Arguments:</span>
@@ -5031,7 +5075,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">embeddings</span>
 
     <span class="k">def</span> <span class="nf">_map_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Map predictions to the correct topics if topics were reduced &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Map predictions to the correct topics if topics were reduced &quot;&quot;&quot;</span>
         <span class="n">mappings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_mapper_</span><span class="o">.</span><span class="n">get_mappings</span><span class="p">(</span><span class="n">original_topics</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">mapped_predictions</span> <span class="o">=</span> <span class="p">[</span><span class="n">mappings</span><span class="p">[</span><span class="n">prediction</span><span class="p">]</span>
                               <span class="k">if</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">mappings</span>
@@ -5043,7 +5087,7 @@ you best.</p>
                                <span class="n">embeddings</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">csr_matrix</span><span class="p">],</span>
                                <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                <span class="n">partial_fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reduce dimensionality of embeddings using UMAP and train a UMAP model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reduce dimensionality of embeddings using UMAP and train a UMAP model</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            embeddings: The extracted embeddings using the sentence transformer module.</span>
@@ -5079,7 +5123,7 @@ you best.</p>
                             <span class="n">partial_fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                             <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                                                            <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Cluster UMAP embeddings with HDBSCAN</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Cluster UMAP embeddings with HDBSCAN</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            umap_embeddings: The reduced sentence embeddings with UMAP</span>
@@ -5128,7 +5172,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">documents</span><span class="p">,</span> <span class="n">probabilities</span>
 
     <span class="k">def</span> <span class="nf">_guided_topic_modeling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Apply Guided Topic Modeling</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Apply Guided Topic Modeling</span>
 
 <span class="sd">        We transform the seeded topics to embeddings using the</span>
 <span class="sd">        same embedder as used for generating document embeddings.</span>
@@ -5166,7 +5210,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">embeddings</span>
 
     <span class="k">def</span> <span class="nf">_extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Extract topics from the clusters using a class-based TF-IDF</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics from the clusters using a class-based TF-IDF</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: Dataframe with documents and their corresponding IDs</span>
@@ -5183,7 +5227,7 @@ you best.</p>
                               <span class="bp">self</span><span class="o">.</span><span class="n">topic_representations_</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="k">def</span> <span class="nf">_save_representative_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Save the 3 most representative docs per topic</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Save the 3 most representative docs per topic</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: Dataframe with documents and their corresponding IDs</span>
@@ -5206,7 +5250,7 @@ you best.</p>
                                      <span class="n">nr_repr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                                      <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
                                      <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot; Approximate most representative documents per topic by sampling</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Approximate most representative documents per topic by sampling</span>
 <span class="sd">        a subset of the documents in each topic and calculating which are</span>
 <span class="sd">        most represenative to their topic based on the cosine similarity between</span>
 <span class="sd">        c-TF-IDF representations.</span>
@@ -5263,7 +5307,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">repr_docs</span><span class="p">,</span> <span class="n">repr_docs_indices</span>
 
     <span class="k">def</span> <span class="nf">_create_topic_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Creates embeddings per topics based on their topic representation</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Creates embeddings per topics based on their topic representation</span>
 
 <span class="sd">        We start by creating embeddings out of the topic representation. This</span>
 <span class="sd">        results in a number of embeddings per topic. Then, we take the weighted</span>
@@ -5307,7 +5351,7 @@ you best.</p>
                   <span class="n">documents_per_topic</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                   <span class="n">fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                   <span class="n">partial_fit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; Calculate a class-based TF-IDF where m is the number of total documents.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate a class-based TF-IDF where m is the number of total documents.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents_per_topic: The joined documents per topic such that each topic has a single</span>
@@ -5351,7 +5395,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">words</span>
 
     <span class="k">def</span> <span class="nf">_update_topic_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Calculate the topic sizes</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Calculate the topic sizes</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: Updated dataframe with documents and their corresponding IDs and newly added Topics</span>
@@ -5365,7 +5409,7 @@ you best.</p>
                                  <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                                  <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span>
                                                                          <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot; Based on tf_idf scores per topic, extract the top n words per topic</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Based on tf_idf scores per topic, extract the top n words per topic</span>
 
 <span class="sd">        If the top words per topic need to be extracted, then only the `words` parameter</span>
 <span class="sd">        needs to be passed. If the top words per topic in a specific timestamp, then it</span>
@@ -5414,7 +5458,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">topics</span>
 
     <span class="k">def</span> <span class="nf">_reduce_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reduce topics to self.nr_topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reduce topics to self.nr_topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: Dataframe with documents and their corresponding IDs and Topics</span>
@@ -5436,7 +5480,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">documents</span>
 
     <span class="k">def</span> <span class="nf">_reduce_to_n_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reduce topics to self.nr_topics</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reduce topics to self.nr_topics</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: Dataframe with documents and their corresponding IDs and Topics</span>
@@ -5475,7 +5519,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">documents</span>
 
     <span class="k">def</span> <span class="nf">_auto_reduce_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reduce the number of topics automatically using HDBSCAN</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reduce the number of topics automatically using HDBSCAN</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: Dataframe with documents and their corresponding IDs and Topics</span>
@@ -5513,7 +5557,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">documents</span>
 
     <span class="k">def</span> <span class="nf">_sort_mappings_by_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reorder mappings by their frequency.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Reorder mappings by their frequency.</span>
 
 <span class="sd">        For example, if topic 88 was mapped to topic</span>
 <span class="sd">        5 and topic 5 turns out to be the largest topic,</span>
@@ -5552,7 +5596,7 @@ you best.</p>
     <span class="k">def</span> <span class="nf">_map_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                            <span class="n">probabilities</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
                            <span class="n">original_topics</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Map the probabilities to the reduced topics.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Map the probabilities to the reduced topics.</span>
 <span class="sd">        This is achieved by adding the probabilities together</span>
 <span class="sd">        of all topics that were mapped to the same topic. Then,</span>
 <span class="sd">        the topics that were mapped from were set to 0 as they</span>
@@ -5583,7 +5627,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">probabilities</span>
 
     <span class="k">def</span> <span class="nf">_preprocess_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Basic preprocessing of text</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Basic preprocessing of text</span>
 
 <span class="sd">        Steps:</span>
 <span class="sd">            * Replace \n and \t with whitespace</span>
@@ -5598,7 +5642,7 @@ you best.</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_top_n_idx_sparse</span><span class="p">(</span><span class="n">matrix</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return indices of top n values in each row of a sparse matrix</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return indices of top n values in each row of a sparse matrix</span>
 
 <span class="sd">        Retrieved from:</span>
 <span class="sd">            https://stackoverflow.com/questions/49207275/finding-the-top-n-values-in-a-row-of-a-scipy-sparse-matrix</span>
@@ -5620,7 +5664,7 @@ you best.</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_top_n_values_sparse</span><span class="p">(</span><span class="n">matrix</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return the top n values for each row in a sparse matrix</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the top n values for each row in a sparse matrix</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            matrix: The sparse matrix from which to get the top n indices per row</span>
@@ -5637,7 +5681,7 @@ you best.</p>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_get_param_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get parameter names for the estimator</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameter names for the estimator</span>
 
 <span class="sd">        Adapted from:</span>
 <span class="sd">            https://github.com/scikit-learn/scikit-learn/blob/b3ea3ed6a/sklearn/base.py#L178</span>
@@ -5648,7 +5692,7 @@ you best.</p>
         <span class="k">return</span> <span class="n">parameters</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get a string representation of the current object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a string representation of the current object.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Human readable representation of the most important model parameters.</span>
@@ -5858,7 +5902,7 @@ you best.</p>
              <span class="n">representation_model</span><span class="p">:</span> <span class="n">BaseRepresentation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;BERTopic initialization</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BERTopic initialization</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        language: The main language used in your documents. The default sentence-transformers</span>
@@ -6020,7 +6064,7 @@ you best.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get a string representation of the current object.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the current object.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Human readable representation of the most important model parameters.</span>
@@ -6202,7 +6246,7 @@ As with <code>topic_distr</code>, it can contain multiple topics for a single to
                              <span class="n">calculate_tokens</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                              <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                                             <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="kc">None</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot; A post-hoc approximation of topic distributions across documents.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; A post-hoc approximation of topic distributions across documents.</span>
 
 <span class="sd">    In order to perform this approximation, each document is split into tokens</span>
 <span class="sd">    according to the provided tokenizer in the `CountVectorizer`. Then, a</span>
@@ -6494,7 +6538,7 @@ search_term consists of a phrase or multiple words.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">find_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">search_term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                 <span class="n">top_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot; Find topics most similar to a search_term</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Find topics most similar to a search_term</span>
 
 <span class="sd">    Creates an embedding for search_term and compares that with</span>
 <span class="sd">    the topic embeddings. The most similar topics are returned</span>
@@ -6625,7 +6669,7 @@ specific instance is specified.</p></td>
         <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        documents: A list of documents to fit on</span>
@@ -6768,7 +6812,7 @@ probabilities: The probability of the assigned topic per document.
                   <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
                                                                    <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot; Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Fit the models on a collection of documents, generate topics, and return the docs with topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        documents: A list of documents to fit on</span>
@@ -6962,7 +7006,7 @@ probabilities: The probability of the assigned topic per document.
                           <span class="n">topic_prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                           <span class="n">word_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; Get labels for each topic in a user-defined format</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get labels for each topic in a user-defined format</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        original_labels:</span>
@@ -7116,7 +7160,7 @@ the documents and extend it with the information retrieved from BERTopic:</p>
                       <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                       <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Get information about the documents on which the topic was trained</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get information about the documents on which the topic was trained</span>
 <span class="sd">    including the documents themselves, their respective topics, the name</span>
 <span class="sd">    of each topic, the top n words of each topic, whether it is a</span>
 <span class="sd">    representative document, and probability of the clustering if the cluster</span>
@@ -7262,7 +7306,7 @@ the documents and extend it with the information retrieved from BERTopic:</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; Get parameters for this estimator.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get parameters for this estimator.</span>
 
 <span class="sd">    Adapted from:</span>
 <span class="sd">        https://github.com/scikit-learn/scikit-learn/blob/b3ea3ed6a/sklearn/base.py#L178</span>
@@ -7364,7 +7408,7 @@ run the following:</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_representative_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; Extract the best representing documents per topic.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract the best representing documents per topic.</span>
 
 <span class="sd">    NOTE:</span>
 <span class="sd">        This does not extract all documents per topic as all documents</span>
@@ -7472,7 +7516,7 @@ run the following:</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_topic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">bool</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return top n words for a specific topic and their c-TF-IDF scores</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic: A specific topic for which you want its representation</span>
@@ -7560,7 +7604,7 @@ the frequencies of all topics</p></td>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_topic_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return the the size of topics (descending order)</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic: A specific topic for which you want the frequency</span>
@@ -7653,7 +7697,7 @@ the frequencies of all topics</p></td>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_topic_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Get information about each topic including its ID, frequency, and name.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get information about each topic including its ID, frequency, and name.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic: A specific topic for which you want the frequency</span>
@@ -7784,7 +7828,7 @@ from <code>topic_model.get_topic</code>. In other words, they are the original u
 <span class="k">def</span> <span class="nf">get_topic_tree</span><span class="p">(</span><span class="n">hier_topics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                    <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">tight_layout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Extract the topic tree such that it can be printed</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract the topic tree such that it can be printed</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        hier_topics: A dataframe containing the structure of the topic tree.</span>
@@ -7839,7 +7883,7 @@ from <code>topic_model.get_topic</code>. In other words, they are the original u
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">hier_topics</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()}</span>
 
     <span class="k">def</span> <span class="nf">get_tree</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Based on: https://stackoverflow.com/a/51920869/10532563 &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Based on: https://stackoverflow.com/a/51920869/10532563 &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">_tree</span><span class="p">(</span><span class="n">to_print</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">grandpa</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 
@@ -7926,7 +7970,7 @@ from <code>topic_model.get_topic</code>. In other words, they are the original u
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Return topics with top n words and their c-TF-IDF score</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        self.topic_representations_: The top n words per topic and the corresponding c-TF-IDF score</span>
@@ -8041,7 +8085,7 @@ topic representation.</p>
                         <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
                         <span class="n">linkage_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">distance_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">csr_matrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Create a hierarchy of topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create a hierarchy of topics</span>
 
 <span class="sd">    To create this hierarchy, BERTopic needs to be already fitted once.</span>
 <span class="sd">    Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF</span>
@@ -8246,7 +8290,7 @@ topic representation.</p>
 <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
          <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
          <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Loads the model from the specified path</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Loads the model from the specified path</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        path: the location and name of the BERTopic file you want to load</span>
@@ -8340,7 +8384,7 @@ merge topics 3 and 4:</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">merge_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                  <span class="n">topics_to_merge</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Arguments:</span>
 <span class="sd">        docs: The documents you used when calling either `fit` or `fit_transform`</span>
 <span class="sd">        topics_to_merge: Either a list of topics or a list of list of topics</span>
@@ -8494,7 +8538,7 @@ specific instance is specified.</p></td>
                 <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                 <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Fit BERTopic on a subset of the data and perform online learning</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Fit BERTopic on a subset of the data and perform online learning</span>
 <span class="sd">    with batch-like data.</span>
 
 <span class="sd">    Online topic modeling in BERTopic is performed by using dimensionality</span>
@@ -8785,7 +8829,7 @@ as generated through HDBSCAN:</p>
                     <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                     <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">distributions_params</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{})</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; Reduce outliers by merging them with their nearest topic according</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Reduce outliers by merging them with their nearest topic according</span>
 <span class="sd">    to one of several strategies.</span>
 
 <span class="sd">    When using HDBSCAN, DBSCAN, or OPTICS, a number of outlier documents might be created</span>
@@ -8989,7 +9033,7 @@ topics and probabilities (if they were calculated):</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">reduce_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                   <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                   <span class="n">nr_topics</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Reduce the number of topics to a fixed number of topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Reduce the number of topics to a fixed number of topics</span>
 <span class="sd">    or automatically.</span>
 
 <span class="sd">    If nr_topics is a integer, then the number of topics is reduced</span>
@@ -9103,7 +9147,7 @@ saved in one version of BERTopic should not be loaded in other versions.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
          <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
          <span class="n">save_embedding_model</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Saves the model to the specified path</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Saves the model to the specified path</span>
 
 <span class="sd">    When saving the model, make sure to also keep track of the versions</span>
 <span class="sd">    of dependencies and Python used. Loading and saving the model should</span>
@@ -9212,7 +9256,7 @@ its keys the topic labels:</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_topic_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Set custom topic labels in your fitted BERTopic model</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Set custom topic labels in your fitted BERTopic model</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_labels: If a list of topic labels, it should contain the same number</span>
@@ -9402,7 +9446,7 @@ in topic representations over more than 100 different timestamps.</p>
                      <span class="n">datetime_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">evolution_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                      <span class="n">global_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Create topics over time</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create topics over time</span>
 
 <span class="sd">    To create the topics over time, BERTopic needs to be already fitted once.</span>
 <span class="sd">    From the fitted models, the c-TF-IDF representations are calculate at</span>
@@ -9624,7 +9668,7 @@ Having a large number of unique classes can take some time to be calculated.</p>
                      <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                      <span class="n">classes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
                      <span class="n">global_tuning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Create topics per class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create topics per class</span>
 
 <span class="sd">    To create the topics per class, BERTopic needs to be already fitted once.</span>
 <span class="sd">    From the fitted models, the c-TF-IDF representations are calculate at</span>
@@ -9788,7 +9832,7 @@ probabilities: The topic probability distribution which is returned by default.
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
               <span class="n">documents</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
               <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; After having fit a model, use transform to predict new instances</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        documents: A single document or a list of documents to fit on</span>
@@ -9977,7 +10021,7 @@ You can update them as follows:</p>
                   <span class="n">vectorizer_model</span><span class="p">:</span> <span class="n">CountVectorizer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="n">ctfidf_model</span><span class="p">:</span> <span class="n">ClassTfidfTransformer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="n">representation_model</span><span class="p">:</span> <span class="n">BaseRepresentation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Updates the topic representation by recalculating c-TF-IDF with the new</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Updates the topic representation by recalculating c-TF-IDF with the new</span>
 <span class="sd">    parameters as defined in this function.</span>
 
 <span class="sd">    When you have trained a model and viewed the topics and the words that represent them,</span>
@@ -10160,7 +10204,7 @@ you can run the following:</p>
                                        <span class="n">document</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                        <span class="n">topic_token_distribution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                                        <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Visualize the topic distribution calculated by `.approximate_topic_distribution`</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize the topic distribution calculated by `.approximate_topic_distribution`</span>
 <span class="sd">    on a token level. Thereby indicating the extend to which a certain word or phrases belong</span>
 <span class="sd">    to a specific topic. The assumption here is that a single word can belong to multiple</span>
 <span class="sd">    similar topics and as such give information about the broader set of topics within</span>
@@ -10320,7 +10364,7 @@ simply run:</p>
                        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Topic Word Scores&quot;</span><span class="p">,</span>
                        <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
                        <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">250</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize a barchart of selected topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize a barchart of selected topics</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topics: A selection of topics to visualize.</span>
@@ -10453,7 +10497,7 @@ probabilities of a single document:</p>
                            <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topic Probability Distribution&lt;/b&gt;&quot;</span><span class="p">,</span>
                            <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                            <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        probabilities: An array of probability scores</span>
@@ -10654,7 +10698,7 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
                         <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
                         <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
                         <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
@@ -10853,7 +10897,7 @@ topics simply run:</p>
                       <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Similarity Matrix&lt;/b&gt;&quot;</span><span class="p">,</span>
                       <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                       <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize a heatmap of the topic&#39;s similarity matrix</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize a heatmap of the topic&#39;s similarity matrix</span>
 
 <span class="sd">    Based on the cosine similarity matrix between topic embeddings,</span>
 <span class="sd">    a heatmap is created showing the similarity between topics.</span>
@@ -11090,7 +11134,7 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
                                      <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Hierarchical Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
                                      <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
                                      <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D at different levels of hierarchy</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D at different levels of hierarchy</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        docs: The documents you used when calling either `fit` or `fit_transform`</span>
@@ -11365,7 +11409,7 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
                         <span class="n">linkage_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">distance_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">csr_matrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">color_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize a hierarchical structure of the topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize a hierarchical structure of the topics</span>
 
 <span class="sd">    A ward linkage function is used to perform the</span>
 <span class="sd">    hierarchical clustering based on the cosine distance</span>
@@ -11564,7 +11608,7 @@ Reference to that specific analysis can be found
                         <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Term score decline per Topic&lt;/b&gt;&quot;</span><span class="p">,</span>
                         <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
                         <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize the ranks of all terms across all topics</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize the ranks of all terms across all topics</span>
 
 <span class="sd">    Each topic is represented by a set of words. These words, however,</span>
 <span class="sd">    do not all equally represent the topic. This visualization shows</span>
@@ -11709,7 +11753,7 @@ technique typically reserved for LDA.</p>
                      <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Intertopic Distance Map&lt;/b&gt;&quot;</span><span class="p">,</span>
                      <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
                      <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize topics, their sizes, and their corresponding words</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize topics, their sizes, and their corresponding words</span>
 
 <span class="sd">    This visualization is highly inspired by LDAvis, a great visualization</span>
 <span class="sd">    technique typically reserved for LDA.</span>
@@ -11868,7 +11912,7 @@ technique typically reserved for LDA.</p>
                                <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topics over Time&lt;/b&gt;&quot;</span><span class="p">,</span>
                                <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">450</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize topics over time</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize topics over time</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topics_over_time: The topics you would like to be visualized with the</span>
@@ -12033,7 +12077,7 @@ technique typically reserved for LDA.</p>
                                <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topics per Class&lt;/b&gt;&quot;</span><span class="p">,</span>
                                <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
                                <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topics_per_class: The topics you would like to be visualized with the</span>
@@ -12092,61 +12136,32 @@ technique typically reserved for LDA.</p>
 
   </div>
 
-              
-            </article>
-          </div>
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
         </div>
         
-          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
             Back to top
-          </a>
+          </button>
         
       </main>
       
         <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        
-        <a href="../usecases.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Use Cases" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Use Cases
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="backends/base.html" class="md-footer__link md-footer__link--next" aria-label="Next: Base" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Base
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+      Copyright &copy; 2023 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
     </div>
   
   
@@ -12165,10 +12180,11 @@ technique typically reserved for LDA.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.6e54b5cd.min.js"></script>
+      <script src="../assets/javascripts/bundle.19047be9.min.js"></script>
       
     
   </body>
