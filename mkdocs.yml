@@ -80,7 +80,8 @@ plugins:
       watch:
         - bertopic
   - search
-copyright: Copyright &copy; 2021 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+  - social
+copyright: Copyright &copy; 2023 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
 
 theme:
   custom_dir: images/
@@ -91,7 +92,7 @@ theme:
     text: Ubuntu
     code: Ubuntu Mono
   favicon: icon.png
-  logo: icon_white.png
+  logo: img/icon.png
   feature:
     tabs: true
   features:
