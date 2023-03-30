@@ -138,7 +138,7 @@ Below are a number of use cases that have been applied in practice. These use ca
         •••<br>Cascha van Wanrooij<br><b>PhD Student</b><br>Tilburg University<br>
     </p>
 
-#### Revolutionizing PR Industry with BERTopic
+#### Revolutionizing PR Strategies with BERTopic
 
 !!! quote ""
 <p align="center" style="font-size:15px;">
