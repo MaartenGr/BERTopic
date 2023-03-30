@@ -138,6 +138,15 @@ Below are a number of use cases that have been applied in practice. These use ca
         •••<br>Cascha van Wanrooij<br><b>PhD Student</b><br>Tilburg University<br>
     </p>
 
+#### Analyzing Customer Reviews for Retail Brands
+
+!!! quote ""
+<p align="center" style="font-size:15px;">
+<img src="https://i.imgur.com/mVfn6y1.png" width="300"/><br><i>
+"By harnessing the power of data analytics and AI, we at SnowHeap LLC are transforming industries with our cutting-edge solutions, such as BERTopic for topic modeling. One remarkable example is in the PR industry, where we helped a leading global PR consultancy uncover hidden insights and trends from vast amounts of unstructured text data, enabling them to make data-driven decisions and devise targeted strategies for their clients. Our commitment to innovation and excellence continually drives us to deliver exceptional results and exceed our clients' expectations."
+</i><br>
+        •••<br>Abdulwahab Sahyoun<br><b>Founder & CTAIO</b><br>SnowHeap LLC<br>
+</p>
 
 ## **Papers**
 
