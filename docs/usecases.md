@@ -34,11 +34,11 @@ Below are a number of use cases that have been applied in practice. These use ca
 
 !!! quote ""
     <p align="center" style="font-size:15px;">
-        <img src="https://www.telefonica.de/static/layout/2021_telefonica/header/logo_telefonica_o2_blue.png" width="100"/><br><i>
+        <img src="https://www.telefonica.de/static/layout/2021_telefonica/header/logo_telefonica_o2_blue.png" width="250"/><br><i>
         "Analyzing user reviews from the App Store and Play Store helps us reveal valuable customer information, fix technical or usability issues, and help constantly improve customer experience. We utilize BERTopic for topic modeling and supervised classification of predefined categories."
         </i><br>
-        •••<br>Tibor Fabian, Ph.D.<br><b>Lead Data Scientist</b><br>Telefonica Germany<br>
-    </p> -->
+        •••<br>Tibor Fabian, Ph.D.<br><b>Lead/Master Data Scientist</b><br>Telefónica Germany<br>
+    </p>
 
 #### Employee Surveys
 
