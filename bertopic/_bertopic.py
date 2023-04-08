@@ -37,7 +37,10 @@ from bertopic.backend import BaseEmbedder
 from bertopic.backend._utils import select_backend
 from bertopic.representation import BaseRepresentation
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
-from bertopic._utils import MyLogger, check_documents_type, check_embeddings_shape, check_is_fitted
+from bertopic._utils import (
+    MyLogger, check_documents_type, check_embeddings_shape,
+    check_is_fitted, validate_distance_matrix
+)
 from bertopic.representation._mmr import mmr
 
 # Visualization
@@ -829,7 +832,12 @@ class BERTopic:
             linkage_function: The linkage function to use. Default is:
                             `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
-                                `lambda x: 1 - cosine_similarity(x)`
+                                `lambda x: 1 - cosine_similarity(x)`. 
+                                You can pass any function that returns either a square matrix of 
+                                shape (n_samples, n_samples) with zeros on the diagonal and 
+                                non-negative values or condensed distance matrix of shape 
+                                (n_samples * (n_samples - 1) / 2,) containing the upper 
+                                triangular of the distance matrix.
 
         Returns:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -866,10 +874,7 @@ class BERTopic:
         # Calculate distance
         embeddings = self.c_tf_idf_[self._outliers:]
         X = distance_function(embeddings)
-
-        # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal
-        np.fill_diagonal(X, 0)
-        X = squareform(X)
+        X = validate_distance_matrix(X, embeddings.shape[0])
 
         # Use the 1-D condensed distance matrix as an input instead of the raw distance matrix
         Z = linkage_function(X)
@@ -2153,7 +2158,7 @@ class BERTopic:
                                          hide_annotations: bool = False,
                                          hide_document_hover: bool = True,
                                          nr_levels: int = 10,
-                                         level_scale: str = 'linear', 
+                                         level_scale: str = 'linear',
                                          custom_labels: bool = False,
                                          title: str = "<b>Hierarchical Documents and Topics</b>",
                                          width: int = 1200,
@@ -2253,7 +2258,7 @@ class BERTopic:
                                                          hide_annotations=hide_annotations,
                                                          hide_document_hover=hide_document_hover,
                                                          nr_levels=nr_levels,
-                                                         level_scale=level_scale, 
+                                                         level_scale=level_scale,
                                                          custom_labels=custom_labels,
                                                          title=title,
                                                          width=width,
@@ -3001,10 +3006,10 @@ class BERTopic:
         Updates:
             self.representative_docs_: Populate each topic with 3 representative docs
         """
-        repr_docs, _, _= self._extract_representative_docs(self.c_tf_idf_, 
-                                                           documents, 
-                                                           self.topic_representations_, 
-                                                           nr_samples=500, 
+        repr_docs, _, _= self._extract_representative_docs(self.c_tf_idf_,
+                                                           documents,
+                                                           self.topic_representations_,
+                                                           nr_samples=500,
                                                            nr_repr_docs=3)
         self.representative_docs_ = repr_docs
 
@@ -3062,7 +3067,7 @@ class BERTopic:
                 docs = mmr(c_tf_idf[index], ctfidf, selected_docs, nr_docs, diversity=diversity)
                 repr_docs.extend(docs)
 
-            # Extract top n most representative documents    
+            # Extract top n most representative documents
             else:
                 indices = np.argpartition(sim_matrix.reshape(1, -1)[0],
                                         -nr_docs)[-nr_docs:]
