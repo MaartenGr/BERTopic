@@ -76,19 +76,23 @@ class SpacyBackend(BaseEmbedder):
         # Handle empty documents, spaCy models automatically map
         # empty strings to the zero vector
         empty_document = " "
+        embeddings = []
 
         # Extract embeddings from a transformer model
         if "transformer" in self.embedding_model.component_names:
-            embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
                 embeddings.append(self.embedding_model(doc or empty_document)._.trf_data.tensors[-1][0].tolist())
-            embeddings = np.array(embeddings)
 
         # Extract embeddings from a general spacy model
         else:
-            embeddings = []
             for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
                 embeddings.append(self.embedding_model(doc or empty_document).vector)
+
+        # See https://github.com/MaartenGr/BERTopic/issues/744 for context
+        # Convert to numpy arrays depending on whether cupy was used or not
+        if isinstance(embeddings, np.ndarray):
             embeddings = np.array(embeddings)
+        else:
+            embeddings = np.array([embedding.get() for embedding in embeddings])
 
         return embeddings
