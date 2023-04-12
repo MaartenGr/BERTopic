@@ -59,6 +59,12 @@ class SpacyBackend(BaseEmbedder):
             raise ValueError("Please select a correct Spacy model by either using a string such as 'en_core_web_md' "
                              "or create a nlp model using: `nlp = spacy.load('en_core_web_md')")
 
+    def _get_if_cupy(embedding):
+        """Convert to numpy arrays depending on whether cupy was used or not"""
+        if (method := getattr(embedding, 'get', None) and callable(method):
+            embedding = embedding.get()
+        return embedding
+
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
@@ -78,21 +84,18 @@ class SpacyBackend(BaseEmbedder):
         empty_document = " "
         embeddings = []
 
-        # Extract embeddings from a transformer model
-        if "transformer" in self.embedding_model.component_names:
-            for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-                embeddings.append(self.embedding_model(doc or empty_document)._.trf_data.tensors[-1][0].tolist())
+        for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
+            spacy_embedding = self.emebdding_model(doc or empty_document)
 
-        # Extract embeddings from a general spacy model
-        else:
-            for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-                embeddings.append(self.embedding_model(doc or empty_document).vector)
+            # Extract embeddings from a transformer model
+            if "transformer" in self.embedding_model.component_names:
+                embedding = spacy_embedding._.trf_data.tensors[-1][0]
+                embedding = self._get_if_cupy(embedding).tolist()
 
-        # See https://github.com/MaartenGr/BERTopic/issues/744 for context
-        # Convert to numpy arrays depending on whether cupy was used or not
-        if isinstance(embeddings, np.ndarray):
-            embeddings = np.array(embeddings)
-        else:
-            embeddings = np.array([embedding.get() for embedding in embeddings])
+            # Extract embeddings from a general spacy model
+            else:
+                embedding = self._get_if_cupy(embedding.vector)
 
-        return embeddings
+            embeddings.append(embedding.tolist())
+
+        return np.array(embeddings)
