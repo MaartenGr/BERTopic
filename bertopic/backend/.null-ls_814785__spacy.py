@@ -20,7 +20,7 @@ class SpacyBackend(BaseEmbedder):
 
     ```python
     import spacy
-    from bertopic.backend._spacy import SpacyBackend
+    from bertopic.backend import SpacyBackend
 
     nlp = spacy.load("en_core_web_md", exclude=['tagger', 'parser', 'ner', 'attribute_ruler', 'lemmatizer'])
     spacy_model = SpacyBackend(nlp)
@@ -31,7 +31,7 @@ class SpacyBackend(BaseEmbedder):
     ```python
     import spacy
     from thinc.api import set_gpu_allocator, require_gpu
-    from bertopic.backend._spacy import SpacyBackend
+    from bertopic.backend import SpacyBackend
 
     nlp = spacy.load("en_core_web_trf", exclude=['tagger', 'parser', 'ner', 'attribute_ruler', 'lemmatizer'])
     set_gpu_allocator("pytorch")
@@ -43,7 +43,7 @@ class SpacyBackend(BaseEmbedder):
 
     ```python
     import spacy
-    from bertopic.backend._spacy import SpacyBackend
+    from bertopic.backend import SpacyBackend
 
     spacy.prefer_gpu()
     nlp = spacy.load("en_core_web_trf", exclude=['tagger', 'parser', 'ner', 'attribute_ruler', 'lemmatizer'])
@@ -59,10 +59,9 @@ class SpacyBackend(BaseEmbedder):
             raise ValueError("Please select a correct Spacy model by either using a string such as 'en_core_web_md' "
                              "or create a nlp model using: `nlp = spacy.load('en_core_web_md')")
 
-    @staticmethod
     def _get_if_cupy(embedding):
         """Convert to numpy arrays depending on whether cupy was used or not"""
-        if (method := getattr(embedding, 'get', None)) and callable(method):
+        if (method := getattr(embedding, 'get', None) and callable(method):
             embedding = embedding.get()
         return embedding
 
@@ -86,7 +85,7 @@ class SpacyBackend(BaseEmbedder):
         embeddings = []
 
         for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-            spacy_embedding = self.embedding_model(doc or empty_document)
+            spacy_embedding = self.emebdding_model(doc or empty_document)
 
             # Extract embeddings from a transformer model
             if "transformer" in self.embedding_model.component_names:
@@ -95,7 +94,7 @@ class SpacyBackend(BaseEmbedder):
 
             # Extract embeddings from a general spacy model
             else:
-                embedding = self._get_if_cupy(spacy_embedding.vector)
+                embedding = self._get_if_cupy(embedding.vector)
 
             embeddings.append(embedding.tolist())
 

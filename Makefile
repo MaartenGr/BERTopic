@@ -5,8 +5,9 @@ install:
 	python -m pip install -e .
 
 install-test:
-	python -m pip install -e ".[test]"
+	python -m pip install -e ".[test,spacy]"
 	python -m pip install -e "."
+	python -m spacy download en_core_web_sm
 
 pypi:
 	python setup.py sdist
