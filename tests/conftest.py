@@ -1,6 +1,5 @@
 import copy
 import pytest
-import spacy
 from umap import UMAP
 from hdbscan import HDBSCAN
 from bertopic import BERTopic
@@ -127,8 +126,3 @@ def online_topic_model(documents, document_embeddings, embedding_model):
         topics.extend(model.topics_)
     model.topics_ = topics
     return model
-
-@pytest.fixture(scope="session")
-def spacy_nlp_model():
-    nlp = spacy.load("en_core_web_sm", exclude=['tagger', 'parser', 'ner', 'attribute_ruler', 'lemmatizer'])
-    return nlp
