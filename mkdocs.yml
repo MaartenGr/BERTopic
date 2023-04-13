@@ -44,6 +44,7 @@ nav:
         - Backends:
           - Base: api/backends/base.md
           - Word Doc: api/backends/word_doc.md
+          - OpenAI: api/backends/openai.md
         - Dimensionality Reduction:
           - Base: api/dimensionality/base.md
         - Clustering:

@@ -143,7 +143,6 @@ topic_model = BERTopic(embedding_model=ft)
     Gensim is primarily used for Word Embedding models. This works typically best for short documents since the word embeddings are pooled.
 
 
-
 ### **Scikit-Learn Embeddings**
 Scikit-Learn is a framework for more than just machine learning. 
 It offers many preprocessing tools, some of which can be used to create representations 
@@ -174,6 +173,21 @@ topic_model = BERTopic(embedding_model=pipe)
     the [scikit-partial](https://github.com/koaning/scikit-partial) project. 
     Moreover, since this backend does not generate representations on a word level, 
     it does not support the `bertopic.representation` models.
+
+
+### OpenAI
+To use OpenAI's external API, we need to define our key and explicitly call `bertopic.backend.OpenAIBackend`
+to be used in our topic model:
+
+```python
+import openai
+from bertopic.backend import OpenAIBackend
+
+openai.api_key = MY_API_KEY
+embedding_model = OpenAIBackend("text-embedding-ada-002")
+
+topic_model = BERTopic(embedding_model=embedding_model)
+```
 
 ### **Custom Backend**
 If your backend or model cannot be found in the ones currently available, you can use the `bertopic.backend.BaseEmbedder` class to 
