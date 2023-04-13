@@ -83,15 +83,12 @@ class SpacyBackend(BaseEmbedder):
             embedding = self.embedding_model(doc or empty_document)
             if embedding.has_vector:
                 embedding = embedding.vector
-                it not isinstance(embedding, np.ndarray) and hasattr(embedding, 'get'):
-                    # Convert cupy array to numpy array
-                    embedding = embedding.get()
             else:
                 embedding = embedding._.trf_data.tensors[-1][0]
-                it not isinstance(embedding, np.ndarray) and hasattr(embedding, 'get'):
-                    # Convert cupy array to numpy array
-                    embedding = embedding.get()
 
+            if not isinstance(embedding, np.ndarray) and hasattr(embedding, 'get'):
+                # Convert cupy array to numpy array
+                embedding = embedding.get()
             embeddings.append(embedding)
 
         return np.array(embeddings)
