@@ -120,24 +120,21 @@ def validate_distance_matrix(X, n_samples):
         n = s[0]
         if n != (n_samples * (n_samples -1) / 2):
             raise ValueError("The condensed distance matrix must have "
-                                "shape (n*(n-1)/2,).")
+                            "shape (n*(n-1)/2,).")
     elif len(s) == 2:
-        # check it is square
-        if s[0] != s[1]:
-            raise ValueError("The distance matrix must be square.")
         # check it has correct size
-        if s[0] != n_samples:
+        if (s[0] != n_samples) or (s[1] != n_samples):
             raise ValueError("The distance matrix must be of shape "
-                                "(n, n) where n is the number of documents.")
+                            "(n, n) where n is the number of samples.")
         # force zero diagonal and convert to condensed
         np.fill_diagonal(X, 0)
         X = squareform(X)
     else:
         raise ValueError("The distance matrix must be either a 1-D condensed "
-                            "distance matrix of shape (n*(n-1)/2,) or a "
-                            "2-D square distance matrix of shape (n, n)."
-                            "where n is the number of documents."
-                            "Got a distance matrix of shape %s" % str(s))
+                        "distance matrix of shape (n*(n-1)/2,) or a "
+                        "2-D square distance matrix of shape (n, n)."
+                        "where n is the number of documents."
+                        "Got a distance matrix of shape %s" % str(s))
 
     # Make sure its entries are non-negative
     if np.any(X < 0):

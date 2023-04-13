@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
-from .._utils import validate_distance_matrix
+from bertopic._utils import validate_distance_matrix
 
 def visualize_hierarchy(topic_model,
                         orientation: str = "left",
