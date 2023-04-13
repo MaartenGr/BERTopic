@@ -32,7 +32,7 @@ def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
-    pd.testing.assert_frame_equal(old_df.drop("Topic", 1), new_df.drop("Topic", 1))
+    pd.testing.assert_frame_equal(old_df.drop("Topic", axis=1), new_df.drop("Topic", axis=1))
 
 
 @pytest.mark.parametrize("cluster_model", ["hdbscan", "kmeans"])
@@ -57,4 +57,4 @@ def test_custom_hdbscan_cluster_embeddings(cluster_model, samples, features, cen
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
-    pd.testing.assert_frame_equal(old_df.drop("Topic", 1), new_df.drop("Topic", 1))
+    pd.testing.assert_frame_equal(old_df.drop("Topic", axis=1), new_df.drop("Topic", axis=1))
