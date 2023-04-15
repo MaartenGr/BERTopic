@@ -77,18 +77,18 @@ class SpacyBackend(BaseEmbedder):
         # empty strings to the zero vector
         empty_document = " "
 
-        # Extract embeddings from a transformer model
-        if "transformer" in self.embedding_model.component_names:
-            embeddings = []
-            for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-                embeddings.append(self.embedding_model(doc or empty_document)._.trf_data.tensors[-1][0].tolist())
-            embeddings = np.array(embeddings)
+        # Extract embeddings
+        embeddings = []
+        for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
+            embedding = self.embedding_model(doc or empty_document)
+            if embedding.has_vector:
+                embedding = embedding.vector
+            else:
+                embedding = embedding._.trf_data.tensors[-1][0]
 
-        # Extract embeddings from a general spacy model
-        else:
-            embeddings = []
-            for doc in tqdm(documents, position=0, leave=True, disable=not verbose):
-                embeddings.append(self.embedding_model(doc or empty_document).vector)
-            embeddings = np.array(embeddings)
+            if not isinstance(embedding, np.ndarray) and hasattr(embedding, 'get'):
+                # Convert cupy array to numpy array
+                embedding = embedding.get()
+            embeddings.append(embedding)
 
-        return embeddings
+        return np.array(embeddings)
