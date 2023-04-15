@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
+from bertopic._utils import validate_distance_matrix
 
 def visualize_hierarchy(topic_model,
                         orientation: str = "left",
@@ -50,7 +51,12 @@ def visualize_hierarchy(topic_model,
                           NOTE: Make sure to use the same `linkage_function` as used
                           in `topic_model.hierarchical_topics`.
         distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
-                           `lambda x: 1 - cosine_similarity(x)`
+                           `lambda x: 1 - cosine_similarity(x)`.
+                            You can pass any function that returns either a square matrix of 
+                            shape (n_samples, n_samples) with zeros on the diagonal and 
+                            non-negative values or condensed distance matrix of shape 
+                            (n_samples * (n_samples - 1) / 2,) containing the upper 
+                            triangular of the distance matrix.
                            NOTE: Make sure to use the same `distance_function` as used
                            in `topic_model.hierarchical_topics`.
         color_threshold: Value at which the separation of clusters will be made which
@@ -122,10 +128,13 @@ def visualize_hierarchy(topic_model,
     else:
         annotations = None
 
+    # wrap distance function to validate input and return a condensed distance matrix
+    distance_function_viz = lambda x: validate_distance_matrix(
+        distance_function(x), embeddings.shape[0])
     # Create dendogram
     fig = ff.create_dendrogram(embeddings,
                                orientation=orientation,
-                               distfun=distance_function,
+                               distfun=distance_function_viz,
                                linkagefun=linkage_function,
                                hovertext=annotations,
                                color_threshold=color_threshold)
@@ -213,7 +222,12 @@ def _get_annotations(topic_model,
                           NOTE: Make sure to use the same `linkage_function` as used
                           in `topic_model.hierarchical_topics`.
         distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
-                           `lambda x: 1 - cosine_similarity(x)`
+                           `lambda x: 1 - cosine_similarity(x)`.
+                            You can pass any function that returns either a square matrix of 
+                            shape (n_samples, n_samples) with zeros on the diagonal and 
+                            non-negative values or condensed distance matrix of shape 
+                            (n_samples * (n_samples - 1) / 2,) containing the upper 
+                            triangular of the distance matrix.
                            NOTE: Make sure to use the same `distance_function` as used
                            in `topic_model.hierarchical_topics`.
         orientation: The orientation of the figure.
@@ -230,10 +244,7 @@ def _get_annotations(topic_model,
 
     # Calculate distance
     X = distance_function(embeddings)
-
-    # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal 
-    np.fill_diagonal(X, 0)
-    X = squareform(X)
+    X = validate_distance_matrix(X, embeddings.shape[0])
 
     # Calculate linkage and generate dendrogram
     Z = linkage_function(X)

@@ -2,6 +2,7 @@ import numpy as np
 import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
+from scipy.spatial.distance import squareform
 
 
 class MyLogger:
@@ -92,3 +93,51 @@ class NotInstalled:
 
     def __call__(self, *args, **kwargs):
         raise ModuleNotFoundError(self.msg)
+
+def validate_distance_matrix(X, n_samples):
+    """ Validate the distance matrix and convert it to a condensed distance matrix
+    if necessary.
+
+    A valid distance matrix is either a square matrix of shape (n_samples, n_samples) 
+    with zeros on the diagonal and non-negative values or condensed distance matrix 
+    of shape (n_samples * (n_samples - 1) / 2,) containing the upper triangular of the 
+    distance matrix.
+    
+    Arguments:
+        X: Distance matrix to validate.
+        n_samples: Number of samples in the dataset.
+
+    Returns:
+        X: Validated distance matrix.
+
+    Raises:
+        ValueError: If the distance matrix is not valid.
+    """
+    # Make sure it is the 1-D condensed distance matrix with zeros on the diagonal
+    s = X.shape
+    if len(s) == 1:
+        # check it has correct size
+        n = s[0]
+        if n != (n_samples * (n_samples -1) / 2):
+            raise ValueError("The condensed distance matrix must have "
+                            "shape (n*(n-1)/2,).")
+    elif len(s) == 2:
+        # check it has correct size
+        if (s[0] != n_samples) or (s[1] != n_samples):
+            raise ValueError("The distance matrix must be of shape "
+                            "(n, n) where n is the number of samples.")
+        # force zero diagonal and convert to condensed
+        np.fill_diagonal(X, 0)
+        X = squareform(X)
+    else:
+        raise ValueError("The distance matrix must be either a 1-D condensed "
+                        "distance matrix of shape (n*(n-1)/2,) or a "
+                        "2-D square distance matrix of shape (n, n)."
+                        "where n is the number of documents."
+                        "Got a distance matrix of shape %s" % str(s))
+
+    # Make sure its entries are non-negative
+    if np.any(X < 0):
+        raise ValueError("Distance matrix cannot contain negative values.")
+
+    return X
