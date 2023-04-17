@@ -11,7 +11,9 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         func: The function to use. Options:
                 - "approximate_predict"
                 - "all_points_membership_vectors"
+                - "membership_vector"
         embeddings: Input embeddings for "approximate_predict"
+                    and "membership_vector"
     """
 
     # Approximate predict
@@ -38,6 +40,20 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         if "cuml" in str_type_model and "hdbscan" in str_type_model:
             from cuml.cluster import hdbscan as cuml_hdbscan
             return cuml_hdbscan.all_points_membership_vectors(model)
+
+        return None
+    
+    # membership_vector
+    if func == "membership_vector":
+        if isinstance(model, hdbscan.HDBSCAN):
+            probabilities = hdbscan.membership_vector(model, embeddings)
+            return probabilities
+
+        str_type_model = str(type(model)).lower()
+        if "cuml" in str_type_model and "hdbscan" in str_type_model:
+            from cuml.cluster.hdbscan.prediction import approximate_predict
+            probabilities = approximate_predict(model, embeddings)
+            return probabilities
 
         return None
 

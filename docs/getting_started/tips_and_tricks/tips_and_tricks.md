@@ -185,12 +185,10 @@ embeddings = normalize(embeddings)
 
     ```bash
     !pip install bertopic
-    !pip install cudf-cu11 dask-cudf-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
-    !pip install cuml-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
-    !pip install cugraph-cu11 --extra-index-url=https://pypi.ngc.nvidia.com
-    !pip uninstall cupy-cuda115 -y
-    !pip uninstall cupy-cuda11x -y
-    !pip install cupy-cuda11x -f https://pip.cupy.dev/aarch64
+    !pip install cudf-cu11 dask-cudf-cu11 --extra-index-url=https://pypi.nvidia.com
+    !pip install cuml-cu11 --extra-index-url=https://pypi.nvidia.com
+    !pip install cugraph-cu11 --extra-index-url=https://pypi.nvidia.com
+    !pip install --upgrade cupy-cuda11x -f https://pip.cupy.dev/aarch64
     ```
 
 

@@ -446,8 +446,8 @@ class BERTopic:
             predictions, probabilities = hdbscan_delegator(self.hdbscan_model, "approximate_predict", umap_embeddings)
 
             # Calculate probabilities
-            if self.calculate_probabilities and isinstance(self.hdbscan_model, hdbscan.HDBSCAN):
-                probabilities = hdbscan.membership_vector(self.hdbscan_model, umap_embeddings)
+            if self.calculate_probabilities:
+                probabilities = hdbscan_delegator(self.hdbscan_model, "membership_vector", umap_embeddings)
                 logger.info("Calculated probabilities with HDBSCAN")
         else:
             predictions = self.hdbscan_model.predict(umap_embeddings)
