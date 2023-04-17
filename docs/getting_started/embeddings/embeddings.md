@@ -189,6 +189,22 @@ embedding_model = OpenAIBackend("text-embedding-ada-002")
 topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
+
+### Cohere
+To use Cohere's external API, we need to define our key and explicitly call `bertopic.backend.CohereBackend`
+to be used in our topic model:
+
+```python
+import cohere
+from bertopic.backend import CohereBackend
+
+client = cohere.Client("MY_API_KEY")
+embedding_model = CohereBackend(client)
+
+topic_model = BERTopic(embedding_model=embedding_model)
+```
+
+
 ### **Custom Backend**
 If your backend or model cannot be found in the ones currently available, you can use the `bertopic.backend.BaseEmbedder` class to 
 create your backend. Below, you will find an example of creating a SentenceTransformer backend for BERTopic:
