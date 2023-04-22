@@ -26,7 +26,7 @@ from typing import Union, Mapping, Any
 
 # Safetensors check
 try:
-    import safetensors.torch
+    import safetensors
     _has_safetensors = True
 except ImportError:
     _has_safetensors = False
@@ -159,10 +159,10 @@ def load_files_from_hf(path):
         ctfidf_config = load_cfg_from_json(hf_hub_download(path, CTFIDF_CFG_NAME, revision=None))
         try:
             ctfidf_tensors = hf_hub_download(path, CTFIDF_SAFE_WEIGHTS_NAME, revision=None)
-            ctfidf_tensors = safetensors.torch.load_file(tensors, device="cpu")
+            ctfidf_tensors = safetensors.torch.load_file(ctfidf_tensors, device="cpu")
         except:
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
-            ctfidf_tensors = torch.load(tensors, map_location="cpu")
+            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu")
     except:
         ctfidf_config, ctfidf_tensors = None, None
 
