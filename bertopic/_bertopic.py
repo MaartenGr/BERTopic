@@ -14,6 +14,7 @@ import joblib
 import inspect
 import numpy as np
 import pandas as pd
+import scipy.sparse as sp
 
 from tqdm import tqdm
 from pathlib import Path
@@ -47,6 +48,7 @@ from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
+from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger, check_documents_type, check_embeddings_shape,
@@ -2868,7 +2870,7 @@ class BERTopic:
         else:
             raise ValueError("Make sure...")
 
-        return save_utils.create_model(topics, params, tensors, ctfidf_tensors, ctfidf_config)
+        return _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config)
 
     def push_to_hf_hub(
             self,
@@ -3703,3 +3705,68 @@ class TopicMapper:
         for key, value in mappings.items():
             to_append = [key] + ([None] * (length-2)) + [value]
             self.mappings_.append(to_append)
+
+
+def _create_model_from_files(
+        topics: Mapping[str: Any],
+        params: Mapping[str: Any],
+        tensors: Mapping[str: np.array],
+        ctfidf_tensors: Mapping[str: Any] = None,
+        ctfidf_config: Mapping[str: Any] = None):
+    """ Create a BERTopic model from a variety of inputs
+
+    Arguments:
+        topics: A dictionary containing topic metadata, including:
+                - Topic representations, labels, sizes, custom labels, etc.
+        params: BERTopic-specific hyperparams, including HF embedding_model ID
+                if given.
+        tensors: The topic embeddings
+        ctfidf_tensors: The c-TF-IDF representations
+        ctfidf_config: The config for CountVectorizer and c-TF-IDF
+    """
+    from sentence_transformers import SentenceTransformer
+    params["n_gram_range"] = tuple(params["n_gram_range"])
+
+    # Select HF model through SentenceTransformers
+    try:
+        embedding_model = select_backend(SentenceTransformer(params['embedding_model']))
+    except:
+        embedding_model = BaseEmbedder()
+    del params['embedding_model']
+
+    # Prepare our empty sub-models
+    empty_dimensionality_model = BaseDimensionalityReduction()
+    empty_cluster_model = BaseCluster()
+
+    # Fit BERTopic without actually performing any clustering
+    topic_model = BERTopic(
+            embedding_model=embedding_model,
+            umap_model=empty_dimensionality_model,
+            hdbscan_model=empty_cluster_model,
+            **params
+    )
+    topic_model.topic_embeddings_ = tensors["topic_embeddings"].numpy()
+    topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
+    topic_model.topics_ = topics["topics"]
+    topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
+    topic_model.topic_labels_ = {int(key): val for key, val in topics["topic_labels"].items()}
+    topic_model.custom_labels_ = topics["custom_labels"]
+    topic_model._outliers = topics["_outliers"]
+
+    # Topic Mapper
+    topic_model.topic_mapper_ = TopicMapper([0])
+    topic_model.topic_mapper_.mappings_ = topics["topic_mapper"]
+
+    if ctfidf_tensors is not None:
+        topic_model.c_tf_idf_ = csr_matrix((ctfidf_tensors["data"], ctfidf_tensors["indices"], ctfidf_tensors["indptr"]), shape=ctfidf_tensors["shape"])
+
+        # CountVectorizer
+        topic_model.vectorizer_model = CountVectorizer(**ctfidf_config["vectorizer_model"]["params"])
+        topic_model.vectorizer_model.vocabulary_ = ctfidf_config["vectorizer_model"]["vocab"]
+
+        # ClassTfidfTransformer
+        topic_model.ctfidf_model.reduce_frequent_words = ctfidf_config["ctfidf_model"]["reduce_frequent_words"]
+        topic_model.ctfidf_model.bm25_weighting = ctfidf_config["ctfidf_model"]["bm25_weighting"]
+        idf = ctfidf_tensors["diag"].numpy()
+        topic_model.ctfidf_model._idf_diag = sp.diags(idf, offsets=0, shape=(len(idf), len(idf)), format='csr', dtype=np.float64)
+    return topic_model
