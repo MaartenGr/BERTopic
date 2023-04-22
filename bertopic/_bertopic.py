@@ -14,11 +14,20 @@ import joblib
 import inspect
 import numpy as np
 import pandas as pd
+
 from tqdm import tqdm
+from pathlib import Path
 from packaging import version
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from scipy.spatial.distance import squareform
+
+# Typing
+import sys
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
@@ -32,16 +41,19 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 # BERTopic
 from bertopic import plotting
-from bertopic.vectorizers import ClassTfidfTransformer
+from bertopic.cluster import BaseCluster
 from bertopic.backend import BaseEmbedder
+from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
+from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger, check_documents_type, check_embeddings_shape,
     check_is_fitted, validate_distance_matrix
 )
-from bertopic.representation._mmr import mmr
+import bertopic._save_utils as save_utils
+
 
 # Visualization
 import plotly.graph_objects as go
@@ -438,25 +450,37 @@ class BERTopic:
                                                   method="document",
                                                   verbose=self.verbose)
 
-        umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("Reduced dimensionality")
-
-        # Extract predictions and probabilities if it is a HDBSCAN-like model
-        if is_supported_hdbscan(self.hdbscan_model):
-            predictions, probabilities = hdbscan_delegator(self.hdbscan_model, "approximate_predict", umap_embeddings)
-
-            # Calculate probabilities
+        # Transform without hdbscan_model and umap_model using only cosine similarity
+        if type(self.hdbscan_model) == BaseCluster:
+            sim_matrix = cosine_similarity(embeddings, self.topic_embeddings_)
+            predictions = np.argmax(sim_matrix, axis=1) - self._outliers
+            
             if self.calculate_probabilities:
-                probabilities = hdbscan_delegator(self.hdbscan_model, "membership_vector", umap_embeddings)
-                logger.info("Calculated probabilities with HDBSCAN")
-        else:
-            predictions = self.hdbscan_model.predict(umap_embeddings)
-            probabilities = None
-        logger.info("Predicted clusters")
+                probabilities = sim_matrix
+            else:
+                probabilities = np.max(sim_matrix, axis=1)
 
-        # Map probabilities and predictions
-        probabilities = self._map_probabilities(probabilities, original_topics=True)
-        predictions = self._map_predictions(predictions)
+        # Transform with full pipeline
+        else:
+            umap_embeddings = self.umap_model.transform(embeddings)
+            logger.info("Reduced dimensionality")
+            
+            # Extract predictions and probabilities if it is a HDBSCAN-like model
+            if is_supported_hdbscan(self.hdbscan_model):
+                predictions, probabilities = hdbscan_delegator(self.hdbscan_model, "approximate_predict", umap_embeddings)
+
+                # Calculate probabilities
+                if self.calculate_probabilities:
+                    probabilities = hdbscan_delegator(self.hdbscan_model, "membership_vector", umap_embeddings)
+                    logger.info("Calculated probabilities with HDBSCAN")
+            else:
+                predictions = self.hdbscan_model.predict(umap_embeddings)
+                probabilities = None
+            logger.info("Predicted clusters")
+
+            # Map probabilities and predictions
+            probabilities = self._map_probabilities(probabilities, original_topics=True)
+            predictions = self._map_predictions(predictions)
         return predictions, probabilities
 
     def partial_fit(self,
@@ -832,11 +856,11 @@ class BERTopic:
             linkage_function: The linkage function to use. Default is:
                             `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
-                                `lambda x: 1 - cosine_similarity(x)`. 
-                                You can pass any function that returns either a square matrix of 
-                                shape (n_samples, n_samples) with zeros on the diagonal and 
-                                non-negative values or condensed distance matrix of shape 
-                                (n_samples * (n_samples - 1) / 2,) containing the upper 
+                                `lambda x: 1 - cosine_similarity(x)`.
+                                You can pass any function that returns either a square matrix of
+                                shape (n_samples, n_samples) with zeros on the diagonal and
+                                non-negative values or condensed distance matrix of shape
+                                (n_samples * (n_samples - 1) / 2,) containing the upper
                                 triangular of the distance matrix.
 
         Returns:
@@ -1261,7 +1285,7 @@ class BERTopic:
             n_gram_range: The n-gram range for the CountVectorizer.
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
             ctfidf_model: Pass in your own c-TF-IDF model to update the representations
-            representation_model: Pass in a model that fine-tunes the topic representations 
+            representation_model: Pass in a model that fine-tunes the topic representations
                         calculated through c-TF-IDF. Models from `bertopic.representation`
                         are supported.
 
@@ -2188,11 +2212,11 @@ class BERTopic:
                     have a distance less or equal to the maximum distance of the selected list of distances.
                     NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
                     the length of `hierarchical_topics`.
-            level_scale: Whether to apply a linear or logarithmic ('log') scale levels of the distance 
-                         vector. Linear scaling will perform an equal number of merges at each level 
-                         while logarithmic scaling will perform more mergers in earlier levels to 
-                         provide more resolution at higher levels (this can be used for when the number 
-                         of topics is large). 
+            level_scale: Whether to apply a linear or logarithmic ('log') scale levels of the distance
+                         vector. Linear scaling will perform an equal number of merges at each level
+                         while logarithmic scaling will perform more mergers in earlier levels to
+                         provide more resolution at higher levels (this can be used for when the number
+                         of topics is large).
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
                            NOTE: Custom labels are only generated for the original
@@ -2722,9 +2746,11 @@ class BERTopic:
                                            height=height)
 
     def save(self,
-             path: str,
-             save_embedding_model: bool = True) -> None:
-        """ Saves the model to the specified path
+             path,
+             serialization: Literal["safetensors", "pickle", "pytorch"],
+             save_embedding_model: Union[bool, str] = True,
+             save_ctfidf: bool = False):
+        """ Saves the model to the specified path or folder
 
         When saving the model, make sure to also keep track of the versions
         of dependencies and Python used. Loading and saving the model should
@@ -2732,67 +2758,179 @@ class BERTopic:
         saved in one version of BERTopic should not be loaded in other versions.
 
         Arguments:
-            path: the location and name of the file you want to save
-            save_embedding_model: Whether to save the embedding model in this class
-                                  as you might have selected a local model or one that
-                                  is downloaded automatically from the cloud.
+            path: If `serialization` is 'safetensors' or `pytorch`, this is a directory.
+                  If `serialization` is `pickle`, then this is file.
+            serialization: If `pickle`, the entire model will be pickled. If `safetensors`
+                           or `pytorch` the model will be saved without the embedding,
+                           dimensionality reduction, and clustering algorithms.
+                           This is a very efficient format and typically advised.
+            save_embedding_model: If serialization `pickle`, then you can choose to skip
+                                  saving the embedding model. If serialization `safetensors`
+                                  or `pytorch`, this variable can be used as a string pointing
+                                  towards a huggingface model.
+            save_ctfidf: Whether to save c-TF-IDF information if serialization is `safetensors`
+                         or `pytorch`
 
         Examples:
+
+        To save the model in an efficient and safe format (safetensors) with c-TF-IDF information:
+
+        ```python
+        topic_model.save("model_dir", serialization="safetensors", save_ctfidf=True)
+        ```
+
+        If you wish to also add a pointer to the embedding model, which will be downloaded from
+        HuggingFace upon loading:
+
+        ```python
+        embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+        topic_model.save("model_dir", serialization="safetensors", save_embedding_model=embedding_model)
+        ```
+
+        or if you want save the full model with pickle:
 
         ```python
         topic_model.save("my_model")
         ```
 
-        or if you do not want the embedding_model to be saved locally:
-
-        ```python
-        topic_model.save("my_model", save_embedding_model=False)
-        ```
+        NOTE: Pickle can run arbitrary code and is generally considered to be less safe than
+        safetensors.
         """
-        with open(path, 'wb') as file:
+        if serialization == "pickle":
+            with open(path, 'wb') as file:
 
-            # This prevents the vectorizer from being too large in size if `min_df` was
-            # set to a value higher than 1
-            self.vectorizer_model.stop_words_ = None
+                # This prevents the vectorizer from being too large in size if `min_df` was
+                # set to a value higher than 1
+                self.vectorizer_model.stop_words_ = None
 
-            if not save_embedding_model:
-                embedding_model = self.embedding_model
-                self.embedding_model = None
-                joblib.dump(self, file)
-                self.embedding_model = embedding_model
-            else:
-                joblib.dump(self, file)
+                if not save_embedding_model:
+                    embedding_model = self.embedding_model
+                    self.embedding_model = None
+                    joblib.dump(self, file)
+                    self.embedding_model = embedding_model
+                else:
+                    joblib.dump(self, file)
+        elif serialization == "safetensors" or serialization == "pytorch":
+            save_directory = Path(path)
+            save_directory.mkdir(exist_ok=True, parents=True)
+
+            # Minimal
+            save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
+            save_utils.save_topics(model=self, path=save_directory / "topics.json")
+            save_utils.save_config(model=self, path=save_directory / 'config.json', embedding_model=save_embedding_model)
+
+            # Additional
+            if save_ctfidf:
+                save_utils.save_ctfidf(model=self, save_directory=save_directory, serialization=serialization)
+                save_utils.save_ctfidf_config(model=self, path=save_directory / 'ctfidf_config.json')
 
     @classmethod
     def load(cls,
              path: str,
              embedding_model=None):
-        """ Loads the model from the specified path
+        """ Loads the model from the specified path or directory
 
         Arguments:
-            path: the location and name of the BERTopic file you want to load
-            embedding_model: If the embedding_model was not saved to save space or to load
-                             it in from the cloud, you can load it in by specifying it here.
+            path: Either load a BERTopic model from a file (`.pickle`) or a folder containing
+                  `.safetensors` or `.bin` files.
+            embedding_model: Additionally load in an embedding model if it was not saved
+                             in the BERTopic model file or directory.
 
         Examples:
 
         ```python
-        BERTopic.load("my_model")
+        BERTopic.load("model_dir")
         ```
 
         or if you did not save the embedding model:
 
         ```python
-        BERTopic.load("my_model", embedding_model="all-MiniLM-L6-v2")
+        BERTopic.load("model_dir", embedding_model="all-MiniLM-L6-v2")
         ```
         """
-        with open(path, 'rb') as file:
-            if embedding_model:
-                topic_model = joblib.load(file)
-                topic_model.embedding_model = select_backend(embedding_model)
-            else:
-                topic_model = joblib.load(file)
-            return topic_model
+        path = Path(path)
+
+        # Load from Pickle
+        if path.is_file():
+            with open(path, 'rb') as file:
+                if embedding_model:
+                    topic_model = joblib.load(file)
+                    topic_model.embedding_model = select_backend(embedding_model)
+                else:
+                    topic_model = joblib.load(file)
+                return topic_model
+
+        # Load from directory or HF
+        if path.is_dir():
+            topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_local_files(path)
+        elif "/" in str(path):
+            topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_files_from_hf(path)
+        else:
+            raise ValueError("Make sure...")
+
+        return save_utils.create_model(topics, params, tensors, ctfidf_tensors, ctfidf_config)
+
+    def push_to_hf_hub(
+            self,
+            repo_id: str,
+            commit_message: str = 'Add BERTopic model',
+            token: str = None,
+            revision: str = None,
+            private: bool = False,
+            create_pr: bool = False,
+            model_card: Mapping[str, Any] = None,
+            serialization: str = "safetensors",
+            save_embedding_model: str = None,
+            save_ctfidf: bool = False,
+            ):
+        """ Push your BERTopic model to a HuggingFace Hub
+
+        Whenever you want to upload files to the Hub, you need to log in to your Hugging Face account:
+
+        * Log in to your Hugging Face account with the following command:
+            ```bash
+            huggingface-cli login
+
+            # or using an environment variable
+            huggingface-cli login --token $HUGGINGFACE_TOKEN
+            ```
+        * Alternatively, you can programmatically login using login() in a notebook or a script:
+            ```python
+            from huggingface_hub import login
+            login()
+            ```
+        * Or you can give a token with the `token` variable
+
+        Arguments:
+            repo_id: The name of your HuggingFace repository
+            commit_message: A commit message
+            token: Token to add if not already logged in
+            revision: Repository revision
+            private: Whether to create a private repository
+            create_pr: Whether to upload the model as a Pull Request
+            model_card: Create a model card when creating the repository
+            serialization: The type of serialization.
+                        Either `safetensors` or `pytorch`
+            save_embedding_model: A pointer towards a HuggingFace model to be loaded in with
+                                    SentenceTransformers. E.g.,
+                                    `sentence-transformers/all-MiniLM-L6-v2`
+            save_ctfidf: Whether to save c-TF-IDF information
+
+
+        Examples:
+
+        ```python
+        topic_model.push_to_hf_hub(
+            repo_id="ArXiv",
+            save_ctfidf=True,
+            save_embedding_model="sentence-transformers/all-MiniLM-L6-v2"
+        )
+        ```
+        """
+        return save_utils.push_to_hf_hub(model=self, repo_id=repo_id, commit_message=commit_message,
+                                         token=token, revision=revision, private=private, create_pr=create_pr,
+                                         model_card=model_card, serialization=serialization,
+                                         save_embedding_model=save_embedding_model, save_ctfidf=save_ctfidf)
 
     def get_params(self, deep: bool = False) -> Mapping[str, Any]:
         """ Get parameters for this estimator.
