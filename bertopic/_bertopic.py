@@ -3727,6 +3727,13 @@ def _create_model_from_files(
     from sentence_transformers import SentenceTransformer
     params["n_gram_range"] = tuple(params["n_gram_range"])
 
+    if ctfidf_config is not None:
+        ngram_range = ctfidf_config["vectorizer_model"]["params"]["ngram_range"]
+        ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
+
+    params["n_gram_range"] = tuple(params["n_gram_range"])
+    ctfidf_config
+
     # Select HF model through SentenceTransformers
     try:
         embedding_model = select_backend(SentenceTransformer(params['embedding_model']))
