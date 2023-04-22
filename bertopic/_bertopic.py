@@ -454,9 +454,9 @@ class BERTopic:
 
         # Transform without hdbscan_model and umap_model using only cosine similarity
         if type(self.hdbscan_model) == BaseCluster:
-            sim_matrix = cosine_similarity(embeddings, self.topic_embeddings_)
+            sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
             predictions = np.argmax(sim_matrix, axis=1) - self._outliers
-            
+
             if self.calculate_probabilities:
                 probabilities = sim_matrix
             else:
@@ -466,7 +466,7 @@ class BERTopic:
         else:
             umap_embeddings = self.umap_model.transform(embeddings)
             logger.info("Reduced dimensionality")
-            
+
             # Extract predictions and probabilities if it is a HDBSCAN-like model
             if is_supported_hdbscan(self.hdbscan_model):
                 predictions, probabilities = hdbscan_delegator(self.hdbscan_model, "approximate_predict", umap_embeddings)
@@ -2749,7 +2749,7 @@ class BERTopic:
 
     def save(self,
              path,
-             serialization: Literal["safetensors", "pickle", "pytorch"],
+             serialization: Literal["safetensors", "pickle", "pytorch"] = "pickle",
              save_embedding_model: Union[bool, str] = True,
              save_ctfidf: bool = False):
         """ Saves the model to the specified path or folder
@@ -3708,11 +3708,11 @@ class TopicMapper:
 
 
 def _create_model_from_files(
-        topics: Mapping[str: Any],
-        params: Mapping[str: Any],
-        tensors: Mapping[str: np.array],
-        ctfidf_tensors: Mapping[str: Any] = None,
-        ctfidf_config: Mapping[str: Any] = None):
+        topics: Mapping[str, Any],
+        params: Mapping[str, Any],
+        tensors: Mapping[str, np.array],
+        ctfidf_tensors: Mapping[str, Any] = None,
+        ctfidf_config: Mapping[str, Any] = None):
     """ Create a BERTopic model from a variety of inputs
 
     Arguments:

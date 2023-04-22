@@ -79,6 +79,8 @@ def push_to_hf_hub(
                                 `sentence-transformers/all-MiniLM-L6-v2`
         save_ctfidf: Whether to save c-TF-IDF information
     """
+    if not _has_hf_hub:
+        raise ValueError("Make sure you have the huggingface hub installed via `pip install --upgrade huggingface_hub`")
 
     # Create repo if it doesn't exist yet and infer complete repo_id
     repo_url = create_repo(repo_id, token=token, private=private, exist_ok=True)
@@ -109,8 +111,6 @@ def push_to_hf_hub(
 
 def load_local_files(path):
     """ Load local BERTopic files """
-    path = path.name
-
     # Load json configs
     topics = load_cfg_from_json(path / TOPICS_NAME)
     params = load_cfg_from_json(path / CONFIG_NAME)
@@ -205,7 +205,7 @@ def generate_readme(model_card: dict, model_name: str):
 
 def save_hf(model, save_directory, serialization: str):
     """ Save topic embeddings, either safely (using safetensors) or using legacy pytorch """
-    tensors = torch.from_numpy(np.array(model.topic_embeddings_))
+    tensors = torch.from_numpy(np.array(model.topic_embeddings_, dtype=np.float32))
     tensors = {"topic_embeddings": tensors}
 
     if serialization == "safetensors":
@@ -287,12 +287,12 @@ def save_topics(model, path: str):
     path = Path(path)
     topics = {
         "topic_representations": model.topic_representations_,
-        "topics": model.topics_,
+        "topics": [int(topic) for topic in model.topics_],
         "topic_sizes": model.topic_sizes_,
-        "topic_mapper": model.topic_mapper_.mappings_,
+        "topic_mapper": np.array(model.topic_mapper_.mappings_, dtype=int).tolist(),
         "topic_labels": model.topic_labels_,
         "custom_labels": model.custom_labels_,
-        "_outliers": model._outliers
+        "_outliers": int(model._outliers)
     }
 
     with path.open('w') as f:

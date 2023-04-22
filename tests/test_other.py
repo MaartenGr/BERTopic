@@ -3,7 +3,7 @@ from bertopic import BERTopic
 
 def test_load_save_model():
     model = BERTopic(language="Dutch", embedding_model=None)
-    model.save("test")
+    model.save("test", serialization="pickle")
     loaded_model = BERTopic.load("test")
     assert type(model) == type(loaded_model)
     assert model.language == loaded_model.language
