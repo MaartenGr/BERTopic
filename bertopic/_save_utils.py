@@ -212,7 +212,7 @@ def save_hf(model, save_directory, serialization: str):
         assert _has_safetensors, "`pip install safetensors` to use .safetensors"
         safetensors.torch.save_file(tensors, save_directory / HF_SAFE_WEIGHTS_NAME)
     if serialization == "pytorch":
-        assert _has_safetensors, "`pip install pytorch` to save as bin"
+        assert _has_torch, "`pip install pytorch` to save as bin"
         torch.save(tensors, save_directory / HF_WEIGHTS_NAME)
 
 
@@ -237,7 +237,7 @@ def save_ctfidf(model,
         assert _has_safetensors, "`pip install safetensors` to use .safetensors"
         safetensors.torch.save_file(tensors, save_directory / CTFIDF_SAFE_WEIGHTS_NAME)
     if serialization == "pytorch":
-        assert _has_safetensors, "`pip install pytorch` to save as .bin"
+        assert _has_torch, "`pip install pytorch` to save as .bin"
         torch.save(tensors, save_directory / CTFIDF_WEIGHTS_NAME)
 
 
