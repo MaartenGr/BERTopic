@@ -12,7 +12,7 @@ try:
     from huggingface_hub import (
         create_repo, get_hf_file_metadata,
         hf_hub_download, hf_hub_url,
-        repo_type_and_id_from_hf_id, upload_folder)
+        ModelCardData, repo_type_and_id_from_hf_id, upload_folder)
     _has_hf_hub = True
 except ImportError:
     _has_hf_hub = False
@@ -23,13 +23,6 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 from typing import Union, Mapping, Any
-
-# Safetensors check
-try:
-    import safetensors
-    _has_safetensors = True
-except ImportError:
-    _has_safetensors = False
 
 # Pytorch check
 try:
@@ -48,6 +41,57 @@ CTFIDF_WEIGHTS_NAME = "ctfidf.bin"  # default pytorch pkl
 CTFIDF_SAFE_WEIGHTS_NAME = "ctfidf.safetensors"  # safetensors version
 CTFIDF_CFG_NAME = "ctfidf_config.json"
 
+MODEL_CARD_TEMPLATE = """
+---
+tags:
+- bertopic
+library_name: bertopic
+---
+
+# {MODEL_NAME}
+
+This is a [BERTopic](https://github.com/MaartenGr/BERTopic) model. 
+BERTopic is a flexible and modular topic modeling framework that allows for the generation of easily interpretable topics from large datasets. 
+
+## Usage 
+
+To use this model, please install BERTopic:
+
+```
+pip install -U bertopic
+```
+
+You can use the model as follows:
+
+```python
+from bertopic import BERTopic
+topic_model = BERTopic.load("{PATH}")
+
+topic_model.get_topic_info()
+```
+
+## Topic overview
+
+* Number of topics: {NR_TOPICS}
+* Number of training documents: {NR_DOCUMENTS}
+
+<details>
+  <summary>Click here for an overview of all topics.</summary>
+  
+  {TOPICS}
+  
+</details>
+
+## Training hyperparameters
+
+{HYPERPARAMS}
+
+## Framework versions
+
+{FRAMEWORKS}
+"""
+
+
 
 def push_to_hf_hub(
         model,
@@ -57,7 +101,7 @@ def push_to_hf_hub(
         revision: str = None,
         private: bool = False,
         create_pr: bool = False,
-        model_card: Mapping[str, Any] = None,
+        model_card: bool = True,
         serialization: str = "safetensors",
         save_embedding_model: str = None,
         save_ctfidf: bool = False,
@@ -71,7 +115,7 @@ def push_to_hf_hub(
         revision: Repository revision
         private: Whether to create a private repository
         create_pr: Whether to upload the model as a Pull Request
-        model_card: Create a model card when creating the repository
+        model_card: Whether to automatically create a modelcard
         serialization: The type of serialization.
                        Either `safetensors` or `pytorch`
         save_embedding_model: A pointer towards a HuggingFace model to be loaded in with
@@ -97,12 +141,10 @@ def push_to_hf_hub(
         try:
             get_hf_file_metadata(hf_hub_url(repo_id=repo_id, filename="README.md", revision=revision))
         except:
-            model_card = model_card or {}
-            model_name = repo_id.split('/')[-1]
-
-            readme_text = generate_readme(model_card, model_name)
-            readme_path = Path(tmpdir) / "README.md"
-            readme_path.write_text(readme_text)
+            if model_card:
+                readme_text = generate_readme(model, repo_id)
+                readme_path = Path(tmpdir) / "README.md"
+                readme_path.write_text(readme_text, encoding='utf8')
 
         # Upload model
         return upload_folder(repo_id=repo_id, folder_path=tmpdir, revision=revision,
@@ -169,38 +211,37 @@ def load_files_from_hf(path):
     return topics, params, tensors, ctfidf_tensors, ctfidf_config
 
 
-def generate_readme(model_card: dict, model_name: str):
+def generate_readme(model, repo_id: str):
     """ Generate README for HuggingFace model card """
-    readme_text = "---\n"
-    readme_text += "tags:\n- image-classification\n- bertopic\n"
-    readme_text += "library_name: bertopic\n"
-    readme_text += f"license: {model_card.get('license', 'mit')}\n"
-    readme_text += "---\n"
-    readme_text += f"# Model card for {model_name}\n"
+    model_card = MODEL_CARD_TEMPLATE
+    topic_table_head = "| Topic ID | Topic Keywords | Topic Frequency | Label | \n|----------|----------------|-----------------|-------| \n"
 
-    if 'description' in model_card:
-        readme_text += f"\n{model_card['description']}\n"
+    # Get Statistics
+    model_name = repo_id.split("/")[-1]
+    params = {param: value for param, value in model.get_params().items() if "model" not in param}
+    params = "\n".join([f"* {param}: {value}" for param, value in params.items()])
+    topics = sorted(list(set(model.topics_)))
+    nr_topics = str(len(set(model.topics_)))
+    nr_documents = str(model.c_tf_idf_.shape[1])
 
-    if 'details' in model_card:
-        readme_text += "\n## Model Details\n\n"
-        for k, v in model_card['details'].items():
-            if isinstance(v, (list, tuple)):
-                readme_text += f"- **{k}:**\n"
-                for vi in v:
-                    readme_text += f"  - {vi}\n"
-            elif isinstance(v, dict):
-                readme_text += f"- **{k}:**\n"
-                for ki, vi in v.items():
-                    readme_text += f"  - {ki}: {vi}\n"
-            else:
-                readme_text += f"- **{k}:** {v}\n"
+    # Topic information
+    topic_keywords = [" - ".join(list(zip(*model.get_topic(topic)))[0][:5]) for topic in topics]
+    topic_freq = [model.get_topic_freq(topic) for topic in topics]
+    topic_labels = model.custom_labels_ if model.custom_labels_ else [model.topic_labels_[topic] for topic in topics]
+    topics = [f"| {topic} | {topic_keywords[index]} | {topic_freq[topic]} | {topic_labels[index]} | \n" for index, topic in enumerate(topics)]
+    topics = topic_table_head + "".join(topics)
+    frameworks = "\n".join([f"* {param}: {value}" for param, value in get_package_versions().items()])
 
-    if 'usage' in model_card:
-        readme_text += "\n## Model Usage\n"
-        readme_text += model_card['usage']
-        readme_text += '\n'
-
-    return readme_text
+    # Fill Statistics into model card
+    model_card = model_card.replace("{MODEL_NAME}", model_name)
+    model_card = model_card.replace("{PATH}", repo_id)
+    model_card = model_card.replace("{NR_TOPICS}",  nr_topics)
+    model_card = model_card.replace("{TOPICS}",  topics.strip())
+    model_card = model_card.replace("{NR_DOCUMENTS}", nr_documents)
+    model_card = model_card.replace("{HYPERPARAMS}", params)
+    model_card = model_card.replace("{FRAMEWORKS}", frameworks)
+    
+    return model_card
 
 
 def save_hf(model, save_directory, serialization: str):
@@ -209,7 +250,11 @@ def save_hf(model, save_directory, serialization: str):
     tensors = {"topic_embeddings": tensors}
 
     if serialization == "safetensors":
-        assert _has_safetensors, "`pip install safetensors` to use .safetensors"
+        try:
+            import safetensors
+            safetensors.torch.save_file(tensors, save_directory / HF_SAFE_WEIGHTS_NAME)
+        except ImportError:
+            raise ValueError("`pip install safetensors` to use .safetensors")
         safetensors.torch.save_file(tensors, save_directory / HF_SAFE_WEIGHTS_NAME)
     if serialization == "pytorch":
         assert _has_torch, "`pip install pytorch` to save as bin"
@@ -234,8 +279,11 @@ def save_ctfidf(model,
     }
 
     if serialization == "safetensors":
-        assert _has_safetensors, "`pip install safetensors` to use .safetensors"
-        safetensors.torch.save_file(tensors, save_directory / CTFIDF_SAFE_WEIGHTS_NAME)
+        try:
+            import safetensors
+            safetensors.torch.save_file(tensors, save_directory / CTFIDF_SAFE_WEIGHTS_NAME)
+        except ImportError:
+            raise ValueError("`pip install safetensors` to use .safetensors")
     if serialization == "pytorch":
         assert _has_torch, "`pip install pytorch` to save as .bin"
         torch.save(tensors, save_directory / CTFIDF_WEIGHTS_NAME)
@@ -313,3 +361,32 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.floating):
             return float(obj)
         return super(NumpyEncoder, self).default(obj)
+
+
+
+def get_package_versions():
+    """ Get versions of main dependencies of BERTopic """
+    try:
+        import platform
+        from numpy import __version__ as np_version
+        
+        try:
+            from importlib.metadata import version
+            hdbscan_version = version('hdbscan')
+        except:
+            hdbscan_version = None
+
+        from umap import __version__ as umap_version
+        from pandas import __version__ as pandas_version
+        from sklearn import __version__ as sklearn_version
+        from sentence_transformers import __version__ as sbert_version
+        from numba import __version__ as numba_version
+        from transformers import __version__ as transformers_version
+        
+        from plotly import __version__ as plotly_version
+        return {"Numpy": np_version, "HDBSCAN": hdbscan_version, "UMAP": umap_version, 
+                "Pandas": pandas_version, "Scikit-Learn": sklearn_version, 
+                "Sentence-transformers": sbert_version, "Transformers": transformers_version,
+                "Numba": numba_version, "Plotly": plotly_version, "Python": platform.python_version()}
+    except Exception as e:
+        return e

@@ -2850,11 +2850,11 @@ class BERTopic:
         BERTopic.load("model_dir", embedding_model="all-MiniLM-L6-v2")
         ```
         """
-        path = Path(path)
+        file_or_dir = Path(path)
 
         # Load from Pickle
-        if path.is_file():
-            with open(path, 'rb') as file:
+        if file_or_dir.is_file():
+            with open(file_or_dir, 'rb') as file:
                 if embedding_model:
                     topic_model = joblib.load(file)
                     topic_model.embedding_model = select_backend(embedding_model)
@@ -2863,8 +2863,8 @@ class BERTopic:
                 return topic_model
 
         # Load from directory or HF
-        if path.is_dir():
-            topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_local_files(path)
+        if file_or_dir.is_dir():
+            topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_local_files(file_or_dir)
         elif "/" in str(path):
             topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_files_from_hf(path)
         else:
@@ -2880,7 +2880,7 @@ class BERTopic:
             revision: str = None,
             private: bool = False,
             create_pr: bool = False,
-            model_card: Mapping[str, Any] = None,
+            model_card: bool = True,
             serialization: str = "safetensors",
             save_embedding_model: str = None,
             save_ctfidf: bool = False,
@@ -2910,7 +2910,7 @@ class BERTopic:
             revision: Repository revision
             private: Whether to create a private repository
             create_pr: Whether to upload the model as a Pull Request
-            model_card: Create a model card when creating the repository
+            model_card: Whether to automatically create a modelcard
             serialization: The type of serialization.
                         Either `safetensors` or `pytorch`
             save_embedding_model: A pointer towards a HuggingFace model to be loaded in with
