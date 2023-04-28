@@ -12,7 +12,7 @@ try:
     from huggingface_hub import (
         create_repo, get_hf_file_metadata,
         hf_hub_download, hf_hub_url,
-        ModelCardData, repo_type_and_id_from_hf_id, upload_folder)
+        repo_type_and_id_from_hf_id, upload_folder)
     _has_hf_hub = True
 except ImportError:
     _has_hf_hub = False
@@ -160,7 +160,7 @@ def load_local_files(path):
     # Load Topic Embeddings
     safetensor_path = path / HF_SAFE_WEIGHTS_NAME
     if safetensor_path.is_file():
-        tensors = safetensors.torch.load_file(safetensor_path, device="cpu")
+        tensors = load_safetensors(safetensor_path)
     else:
         torch_path = path / HF_WEIGHTS_NAME
         if torch_path.is_file():
@@ -170,7 +170,7 @@ def load_local_files(path):
     ctfidf_tensors = None
     safetensor_path = path / CTFIDF_SAFE_WEIGHTS_NAME
     if safetensor_path.is_file():
-        ctfidf_tensors = safetensors.torch.load_file(safetensor_path, device="cpu")
+        ctfidf_tensors = load_safetensors(safetensor_path)
     else:
         torch_path = path / CTFIDF_WEIGHTS_NAME
         if torch_path.is_file():
@@ -191,7 +191,7 @@ def load_files_from_hf(path):
     # Topic Embeddings
     try:
         tensors = hf_hub_download(path, HF_SAFE_WEIGHTS_NAME, revision=None)
-        tensors = safetensors.torch.load_file(tensors, device="cpu")
+        tensors = load_safetensors(tensors)
     except:
         tensors = hf_hub_download(path, HF_WEIGHTS_NAME, revision=None)
         tensors = torch.load(tensors, map_location="cpu")
@@ -201,7 +201,7 @@ def load_files_from_hf(path):
         ctfidf_config = load_cfg_from_json(hf_hub_download(path, CTFIDF_CFG_NAME, revision=None))
         try:
             ctfidf_tensors = hf_hub_download(path, CTFIDF_SAFE_WEIGHTS_NAME, revision=None)
-            ctfidf_tensors = safetensors.torch.load_file(ctfidf_tensors, device="cpu")
+            ctfidf_tensors = load_safetensors(ctfidf_tensors)
         except:
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
             ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu")
@@ -250,12 +250,7 @@ def save_hf(model, save_directory, serialization: str):
     tensors = {"topic_embeddings": tensors}
 
     if serialization == "safetensors":
-        try:
-            import safetensors
-            safetensors.torch.save_file(tensors, save_directory / HF_SAFE_WEIGHTS_NAME)
-        except ImportError:
-            raise ValueError("`pip install safetensors` to use .safetensors")
-        safetensors.torch.save_file(tensors, save_directory / HF_SAFE_WEIGHTS_NAME)
+        save_safetensors(save_directory / HF_SAFE_WEIGHTS_NAME, tensors)
     if serialization == "pytorch":
         assert _has_torch, "`pip install pytorch` to save as bin"
         torch.save(tensors, save_directory / HF_WEIGHTS_NAME)
@@ -279,11 +274,7 @@ def save_ctfidf(model,
     }
 
     if serialization == "safetensors":
-        try:
-            import safetensors
-            safetensors.torch.save_file(tensors, save_directory / CTFIDF_SAFE_WEIGHTS_NAME)
-        except ImportError:
-            raise ValueError("`pip install safetensors` to use .safetensors")
+        save_safetensors(save_directory / CTFIDF_SAFE_WEIGHTS_NAME, tensors)
     if serialization == "pytorch":
         assert _has_torch, "`pip install pytorch` to save as .bin"
         torch.save(tensors, save_directory / CTFIDF_WEIGHTS_NAME)
@@ -321,7 +312,7 @@ def save_config(model, path: str, embedding_model):
     config = {param: value for param, value in params.items() if "model" not in param}
 
     # Embedding model tag to be used in sentence-transformers
-    if embedding_model:
+    if isinstance(embedding_model, str):
         config["embedding_model"] = embedding_model
 
     with path.open('w') as f:
@@ -390,3 +381,21 @@ def get_package_versions():
                 "Numba": numba_version, "Plotly": plotly_version, "Python": platform.python_version()}
     except Exception as e:
         return e
+    
+
+def load_safetensors(path):
+    """ Load safetensors and check whether it is installed """
+    try:
+        import safetensors
+        return safetensors.torch.load_file(path, device="cpu")
+    except ImportError:
+        raise ValueError("`pip install safetensors` to load .safetensors")
+
+
+def save_safetensors(path, tensors):
+    """ Save safetensors and check whether it is installed """
+    try:
+        import safetensors
+        safetensors.torch.save_file(tensors, path)
+    except ImportError:
+        raise ValueError("`pip install safetensors` to save as .safetensors")

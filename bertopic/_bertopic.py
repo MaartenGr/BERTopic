@@ -2813,8 +2813,14 @@ class BERTopic:
                 else:
                     joblib.dump(self, file)
         elif serialization == "safetensors" or serialization == "pytorch":
+
+            # Directory
             save_directory = Path(path)
             save_directory.mkdir(exist_ok=True, parents=True)
+
+            # Check embedding model
+            if save_embedding_model and hasattr(self.embedding_model, '_hf_model') and not isinstance(save_embedding_model, str):
+                save_embedding_model = self.embedding_model._hf_model
 
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)

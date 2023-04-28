@@ -117,9 +117,9 @@ def select_backend(embedding_model,
         try:
             from ._sentencetransformers import SentenceTransformerBackend
             if language.lower() in ["English", "english", "en"]:
-                return SentenceTransformerBackend("all-MiniLM-L6-v2")
+                return SentenceTransformerBackend("sentence-transformers/all-MiniLM-L6-v2")
             elif language.lower() in languages or language == "multilingual":
-                return SentenceTransformerBackend("paraphrase-multilingual-MiniLM-L12-v2")
+                return SentenceTransformerBackend("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
             else:
                 raise ValueError(f"{language} is currently not supported. However, you can "
                                 f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
@@ -132,4 +132,4 @@ def select_backend(embedding_model,
             return SklearnEmbedder(pipe)
 
     from ._sentencetransformers import SentenceTransformerBackend
-    return SentenceTransformerBackend("all-MiniLM-L6-v2")
+    return SentenceTransformerBackend("sentence-transformers/all-MiniLM-L6-v2")
