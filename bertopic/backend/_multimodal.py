@@ -121,7 +121,7 @@ class MultiModalBackend(BaseEmbedder):
                 start_index = i * self.batch_size
                 end_index = (i * self.batch_size) + self.batch_size
 
-                images_to_embed = [Image.open(filepath) for filepath in images[start_index:end_index]]
+                images_to_embed = [Image.open(image) if isinstance(image, str) else image for image in images[start_index:end_index]]
                 img_emb = self.embedding_model.encode(images_to_embed, show_progress_bar=False)
                 embeddings.extend(img_emb.tolist())
 

@@ -367,6 +367,7 @@ class BERTopic:
             self.embedding_model = select_backend(self.embedding_model,
                                                   language=self.language)
             embeddings = self._extract_embeddings(documents.Document,
+                                                  images=images,
                                                   method="document",
                                                   verbose=self.verbose)
             logger.info("Transformed documents to Embeddings")
@@ -396,6 +397,8 @@ class BERTopic:
 
         # Save the top 3 most representative documents per topic
         self._save_representative_docs(documents)
+        if images is not None:
+            self._save_representative_images(documents, images)
 
         # Resulting output
         self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
@@ -1822,7 +1825,8 @@ class BERTopic:
 
     def merge_topics(self,
                      docs: List[str],
-                     topics_to_merge: List[Union[Iterable[int], int]]) -> None:
+                     topics_to_merge: List[Union[Iterable[int], int]],
+                     images: List[str] = None) -> None:
         """
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
@@ -1871,11 +1875,14 @@ class BERTopic:
         self._extract_topics(documents)
         self._update_topic_size(documents)
         self._save_representative_docs(documents)
+        if images is not None:
+            self._save_representative_images(documents, images)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
     def reduce_topics(self,
                       docs: List[str],
-                      nr_topics: Union[int, str] = 20) -> None:
+                      nr_topics: Union[int, str] = 20,
+                      images: List[str] = None) -> None:
         """ Reduce the number of topics to a fixed number of topics
         or automatically.
 
@@ -1921,6 +1928,8 @@ class BERTopic:
         documents = self._reduce_topics(documents)
         self._merged_topics = None
         self._save_representative_docs(documents)
+        if images is not None:
+            self._save_representative_images(documents, images)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
         return self
@@ -2994,6 +3003,7 @@ class BERTopic:
 
     def _extract_embeddings(self,
                             documents: Union[List[str], str],
+                            images: List[str] = None,
                             method: str = "document",
                             verbose: bool = None) -> np.ndarray:
         """ Extract sentence/document embeddings through pre-trained embeddings
@@ -3009,11 +3019,14 @@ class BERTopic:
         """
         if isinstance(documents, str):
             documents = [documents]
-
-        if method == "word":
-            embeddings = self.embedding_model.embed_words(documents, verbose)
+        
+        if images is not None and hasattr(self.embedding_model, "embed_images"):
+            print("embedding both documents and images")
+            embeddings = self.embedding_model.embed(documents=documents, images=images, verbose=verbose)
+        elif method == "word":
+            embeddings = self.embedding_model.embed_words(words=documents, verbose=verbose)
         elif method == "document":
-            embeddings = self.embedding_model.embed_documents(documents, verbose)
+            embeddings = self.embedding_model.embed_documents(documents=documents, verbose=verbose)
         else:
             raise ValueError("Wrong method for extracting document/word embeddings. "
                              "Either choose 'word' or 'document' as the method. ")
@@ -3206,7 +3219,10 @@ class BERTopic:
             
             sliced_examplars = repr_docs_ids[topic+self._outliers]
             sliced_examplars = [sliced_examplars[i:i + 3] for i in range(0, len(sliced_examplars), 3)]
-            images_to_combine = [[vision_utils.open_image(images[index]) for index in sub_indices] for sub_indices in sliced_examplars]
+            images_to_combine = [
+                    [vision_utils.open_image(images[index]) if isinstance(images[index], str) else images[index] for index in sub_indices]
+                for sub_indices in sliced_examplars
+            ]
             representative_image = vision_utils.get_concat_tile_resize(images_to_combine)
             representative_images[topic] = representative_image
 
