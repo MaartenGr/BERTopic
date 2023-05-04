@@ -167,7 +167,7 @@ Below, you will find an overview of common functions in BERTopic.
 | Reduce nr of topics | `.reduce_topics(docs, nr_topics=30)` |
 | Reduce outliers | `.reduce_outliers(docs, topics)` |
 | Find topics | `.find_topics("vehicle")` |
-| Save model    |  `.save("my_model")` |
+| Save model    |  `.save("my_model", serialization="safetensors")` |
 | Load model    |  `BERTopic.load("my_model")` |
 | Get parameters |  `.get_params()` |
 

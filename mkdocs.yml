@@ -18,6 +18,7 @@ nav:
       - Search Topics: getting_started/search/search.md
       - Parameter tuning: getting_started/parameter tuning/parametertuning.md       
       - Outlier reduction: getting_started/outlier_reduction/outlier_reduction.md       
+      - Serialization: getting_started/serialization/serialization.md       
       - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md       
       - Sub-models:
         - Embeddings: getting_started/embeddings/embeddings.md

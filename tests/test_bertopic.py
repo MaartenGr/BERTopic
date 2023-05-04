@@ -1,8 +1,9 @@
 import copy
 import pytest
+from bertopic import BERTopic
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model'), ('representation_topic_model')])
+@pytest.mark.parametrize('model', [("base_topic_model"), ('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model'), ('representation_topic_model')])
 def test_full_model(model, documents, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
@@ -10,6 +11,9 @@ def test_full_model(model, documents, request):
     NOTE: This does not cover all cases but merely combines it all together
     """
     topic_model = copy.deepcopy(request.getfixturevalue(model))
+    if model == "base_topic_model":
+        topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True, save_embedding_model="sentence-transformers/all-MiniLM-L6-v2")
+        topic_model = BERTopic.load("model_dir")
     topics = topic_model.topics_
 
     for topic in set(topics):
@@ -29,9 +33,9 @@ def test_full_model(model, documents, request):
 
     # Test transform
     doc = "This is a new document to predict."
-    topics_test, probs_test = topic_model.transform([doc])
+    topics_test, probs_test = topic_model.transform([doc, doc])
 
-    assert len(topics_test) == 1
+    assert len(topics_test) == 2
 
     # Test topics over time
     timestamps = [i % 10 for i in range(len(documents))]
@@ -102,4 +106,7 @@ def test_full_model(model, documents, request):
         if topic_model._outliers == 1:
             assert nr_outliers_topic_model > nr_outliers_new_topics
 
-    
+    # # Save and load model
+    # if topic_model.topic_embeddings_ is not None:
+    #     topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True)
+    #     loaded_model = BERTopic.load("model_dir")
