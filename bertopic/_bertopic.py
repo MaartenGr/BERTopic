@@ -55,7 +55,7 @@ from bertopic._utils import (
     check_is_fitted, validate_distance_matrix
 )
 import bertopic._save_utils as save_utils
-
+import bertopic._vision_utils as vision_utils
 
 # Visualization
 import plotly.graph_objects as go
@@ -246,8 +246,9 @@ class BERTopic:
         self.topic_embeddings_ = None
         self.topic_labels_ = None
         self.custom_labels_ = None
-        self.representative_docs_ = {}
         self.c_tf_idf_ = None
+        self.representative_images_ = None
+        self.representative_docs_ = {}
         self.topic_aspects_ = {}
 
         # Private attributes for internal tracking purposes
@@ -260,6 +261,7 @@ class BERTopic:
     def fit(self,
             documents: List[str],
             embeddings: np.ndarray = None,
+            images: List[str] = None,
             y: Union[List[int], np.ndarray] = None):
         """ Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics
 
@@ -267,6 +269,7 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            images: A list of paths to the images to fit on
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -296,20 +299,23 @@ class BERTopic:
         topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
-        self.fit_transform(documents, embeddings, y)
+        self.fit_transform(documents=documents, embeddings=embeddings, y=y, images=images)
         return self
 
     def fit_transform(self,
                       documents: List[str],
                       embeddings: np.ndarray = None,
+                      images: List[str] = None,
                       y: Union[List[int], np.ndarray] = None) -> Tuple[List[int],
                                                                        Union[np.ndarray, None]]:
-        """ Fit the models on a collection of documents, generate topics, and return the docs with topics
+        """ Fit the models on a collection of documents, generate topics, 
+        and return the probabilities and topic per document.
 
         Arguments:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            images: A list of paths to the images to fit on
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -1421,9 +1427,11 @@ class BERTopic:
                         values = {topic: " ".join(value).strip() for topic, value in values.items()}
                 info[aspect] = info["Topic"].map(values)
 
-        # Representative Docs
+        # Representative Docs / Images
         if self.representative_docs_ is not None:
             info["Representative_Docs"] = info["Topic"].map(self.representative_docs_)
+        if self.representative_images_ is not None:
+            info["Representative_Images"] = info["Topic"].map(self.representative_images_)
 
         # Select specific topic to return
         if topic is not None:
@@ -3173,13 +3181,42 @@ class BERTopic:
         Updates:
             self.representative_docs_: Populate each topic with 3 representative docs
         """
-        repr_docs, _, _= self._extract_representative_docs(self.c_tf_idf_,
+        repr_docs, _, _, _= self._extract_representative_docs(self.c_tf_idf_,
                                                            documents,
                                                            self.topic_representations_,
                                                            nr_samples=500,
                                                            nr_repr_docs=3)
         self.representative_docs_ = repr_docs
 
+    def _save_representative_images(self, documents: pd.DataFrame, images):
+        _, _, _, repr_docs_ids = self._extract_representative_docs(self.c_tf_idf_,
+                                                                   documents,
+                                                                   self.topic_representations_,
+                                                                   nr_samples=500,
+                                                                   nr_repr_docs=9)
+        if not vision_utils._has_vision:
+            raise ValueError("To use multi-modal topic modeling, Pillow needs to be installed."
+                             "You can install Pillow with `pip install bertopic[vision]` or"
+                             "with `pip install --upgrade pillow`")
+        unique_topics = sorted(list(set(self.topics_)))
+
+        # Combine representative images into a single representation
+        representative_images = {}
+        for topic in tqdm(unique_topics):
+            
+            sliced_examplars = repr_docs_ids[topic+self._outliers]
+            sliced_examplars = [sliced_examplars[i:i + 3] for i in range(0, len(sliced_examplars), 3)]
+            images_to_combine = [[vision_utils.open_image(images[index]) for index in sub_indices] for sub_indices in sliced_examplars]
+            representative_image = vision_utils.get_concat_tile_resize(images_to_combine)
+            representative_images[topic] = representative_image
+
+            # Make sure to properly close images
+            for image_list in images_to_combine:
+                for image in image_list:
+                    image.close()
+                    
+        self.representative_images_ = representative_images
+        
     def _extract_representative_docs(self,
                                      c_tf_idf: csr_matrix,
                                      documents: pd.DataFrame,
@@ -3205,7 +3242,9 @@ class BERTopic:
         Returns:
             repr_docs_mappings: A dictionary from topic to representative documents
             representative_docs: A flat list of representative documents
-            repr_doc_indices: The indices of representative documents
+            repr_doc_indices: Orrdere indices of representative documents
+                              that belong to each topic
+            repr_doc_ids: The indices of representative documents
                               that belong to each topic
         """
         # Sample documents per topic
@@ -3219,11 +3258,16 @@ class BERTopic:
         repr_docs = []
         repr_docs_indices = []
         repr_docs_mappings = {}
+        repr_docs_ids = []
         labels = sorted(list(topics.keys()))
         for index, topic in enumerate(labels):
 
+            # Slice data
+            selection = documents_per_topic.loc[documents_per_topic.Topic == topic, :]
+            selected_docs = selection["Document"].values
+            selected_docs_ids = selection.index.tolist()
+            
             # Calculate similarity
-            selected_docs = documents_per_topic.loc[documents_per_topic.Topic == topic, "Document"].values
             nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
             bow = self.vectorizer_model.transform(selected_docs)
             ctfidf = self.ctfidf_model.transform(bow)
@@ -3236,13 +3280,16 @@ class BERTopic:
 
             # Extract top n most representative documents
             else:
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0],
-                                        -nr_docs)[-nr_docs:]
-                repr_docs.extend([selected_docs[index] for index in indices])
+                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
+                docs = [selected_docs[index] for index in indices]
+                
+            doc_ids = [selected_docs_ids[index] for index, doc in enumerate(selected_docs) if doc in docs]
+            repr_docs_ids.append(doc_ids)
+            repr_docs.extend(docs)
             repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
         repr_docs_mappings = {topic: repr_docs[i[0]:i[-1]+1] for topic, i in zip(topics.keys(), repr_docs_indices)}
 
-        return repr_docs_mappings, repr_docs, repr_docs_indices
+        return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
 
     def _create_topic_vectors(self):
         """ Creates embeddings per topics based on their topic representation

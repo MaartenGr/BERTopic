@@ -81,7 +81,7 @@ class LangChain(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top 4 representative documents per topic
-        repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
+        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
 
         # Generate label using langchain
         updated_topics = {}

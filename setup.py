@@ -42,6 +42,10 @@ gensim_packages = [
     "gensim>=4.0.0"
 ]
 
+vision_packages = [
+    "Pillow>=9.2.0"
+]
+
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 
 dev_packages = docs_packages + test_packages + extra_packages
@@ -88,7 +92,8 @@ setup(
         "flair": flair_packages,
         "spacy": spacy_packages,
         "use": use_packages,
-        "gensim": gensim_packages
+        "gensim": gensim_packages,
+        "vision": vision_packages
     },
     python_requires='>=3.7',
 )

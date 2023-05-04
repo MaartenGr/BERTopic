@@ -106,7 +106,7 @@ class TextGeneration(BaseRepresentation):
         """
         # Extract the top 4 representative documents per topic
         if self.prompt != DEFAULT_PROMPT and "[DOCUMENTS]" in self.prompt:
-            repr_docs_mappings, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
+            repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
         else:
             repr_docs_mappings = {topic: None for topic in topics.keys()}
 
