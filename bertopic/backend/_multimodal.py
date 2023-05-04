@@ -126,8 +126,9 @@ class MultiModalBackend(BaseEmbedder):
                 embeddings.extend(img_emb.tolist())
 
                 # Close images
-                for image in images_to_embed:
-                    image.close()
+                if isinstance(images[0], str):
+                    for image in images_to_embed:
+                        image.close()
             embeddings = np.array(embeddings)
         else:
             images_to_embed = [Image.open(filepath) for filepath in images]

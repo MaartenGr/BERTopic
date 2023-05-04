@@ -3026,7 +3026,7 @@ class BERTopic:
         elif method == "word":
             embeddings = self.embedding_model.embed_words(words=documents, verbose=verbose)
         elif method == "document":
-            embeddings = self.embedding_model.embed_documents(documents=documents, verbose=verbose)
+            embeddings = self.embedding_model.embed_documents(documents, verbose=verbose)
         else:
             raise ValueError("Wrong method for extracting document/word embeddings. "
                              "Either choose 'word' or 'document' as the method. ")
@@ -3227,9 +3227,10 @@ class BERTopic:
             representative_images[topic] = representative_image
 
             # Make sure to properly close images
-            for image_list in images_to_combine:
-                for image in image_list:
-                    image.close()
+            if isinstance(images[0], str):
+                for image_list in images_to_combine:
+                    for image in image_list:
+                        image.close()
                     
         self.representative_images_ = representative_images
         
