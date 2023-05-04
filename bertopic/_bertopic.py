@@ -3021,7 +3021,6 @@ class BERTopic:
             documents = [documents]
         
         if images is not None and hasattr(self.embedding_model, "embed_images"):
-            print("embedding both documents and images")
             embeddings = self.embedding_model.embed(documents=documents, images=images, verbose=verbose)
         elif method == "word":
             embeddings = self.embedding_model.embed_words(words=documents, verbose=verbose)
