@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.decomposition import PCA, IncrementalPCA
 from bertopic.vectorizers import OnlineCountVectorizer
-from bertopic.representation import KeyBERTInspired
+from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
 from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
@@ -65,8 +65,8 @@ def custom_topic_model(documents, document_embeddings, embedding_model):
 def representation_topic_model(documents, document_embeddings, embedding_model):
     umap_model = UMAP(n_neighbors=15, n_components=6, min_dist=0.0, metric='cosine', random_state=42)
     hdbscan_model = HDBSCAN(min_cluster_size=3, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
-    keybert_model = KeyBERTInspired()
-    model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model, embedding_model=embedding_model, representation_model=keybert_model,
+    representation_model = {"Main": KeyBERTInspired(), "MMR": [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance()]}
+    model = BERTopic(umap_model=umap_model, hdbscan_model=hdbscan_model, embedding_model=embedding_model, representation_model=representation_model,
                      calculate_probabilities=True).fit(documents, document_embeddings)
     return model
 

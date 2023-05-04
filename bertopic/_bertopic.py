@@ -248,6 +248,7 @@ class BERTopic:
         self.custom_labels_ = None
         self.representative_docs_ = {}
         self.c_tf_idf_ = None
+        self.topic_aspects_ = {}
 
         # Private attributes for internal tracking purposes
         self._outliers = 1
@@ -608,7 +609,7 @@ class BERTopic:
 
         # Update topic representations
         self.c_tf_idf_, updated_words = self._c_tf_idf(documents_per_topic, partial_fit=True)
-        self.topic_representations_ = self._extract_words_per_topic(updated_words, documents, self.c_tf_idf_)
+        self.topic_representations_ = self._extract_words_per_topic(updated_words, documents, self.c_tf_idf_, calculate_aspects=False)
         self._create_topic_vectors()
         self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                               for key, values in self.topic_representations_.items()}
@@ -748,7 +749,7 @@ class BERTopic:
                 c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
             # Extract the words per topic
-            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf)
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
             topic_frequency = pd.Series(documents_per_topic.Timestamps.values,
                                         index=documents_per_topic.Topic).to_dict()
 
@@ -823,7 +824,7 @@ class BERTopic:
                 c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + self._outliers] + c_tf_idf) / 2.0
 
             # Extract the words per topic
-            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf)
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
             topic_frequency = pd.Series(documents_per_topic.Class.values,
                                         index=documents_per_topic.Topic).to_dict()
 
@@ -949,7 +950,7 @@ class BERTopic:
             c_tf_idf = self.ctfidf_model.transform(grouped)
             selection = documents.loc[documents.Topic.isin(clustered_topics), :]
             selection.Topic = 0
-            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf)
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
 
             # Extract parent's name and ID
             parent_id = index + len(clusters)
@@ -1400,11 +1401,31 @@ class BERTopic:
         info = pd.DataFrame(self.topic_sizes_.items(), columns=["Topic", "Count"]).sort_values("Topic")
         info["Name"] = info.Topic.map(self.topic_labels_)
 
+        # Custom label
         if self.custom_labels_ is not None:
             if len(self.custom_labels_) == len(info):
                 labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels_)}
                 info["CustomName"] = info["Topic"].map(labels)
 
+        # Main Keywords
+        values = {topic: list(list(zip(*values))[0]) for topic, values in self.topic_representations_.items()}
+        info["Representation"] = info["Topic"].map(values)
+
+        # Extract all topic aspects
+        if self.topic_aspects_:
+            for aspect, values in self.topic_aspects_.items():
+                if isinstance(list(values.values())[-1], list):
+                    if isinstance(list(values.values())[-1][0], tuple):
+                        values = {topic: list(list(zip(*value))[0]) for topic, value in values.items()}
+                    elif isinstance(list(values.values())[-1][0], str):
+                        values = {topic: " ".join(value).strip() for topic, value in values.items()}
+                info[aspect] = info["Topic"].map(values)
+
+        # Representative Docs
+        if self.representative_docs_ is not None:
+            info["Representative_Docs"] = info["Topic"].map(self.representative_docs_)
+
+        # Select specific topic to return
         if topic is not None:
             info = info.loc[info.Topic == topic, :]
 
@@ -3324,8 +3345,9 @@ class BERTopic:
     def _extract_words_per_topic(self,
                                  words: List[str],
                                  documents: pd.DataFrame,
-                                 c_tf_idf: csr_matrix = None) -> Mapping[str,
-                                                                         List[Tuple[str, float]]]:
+                                 c_tf_idf: csr_matrix = None,
+                                 calculate_aspects: bool = True) -> Mapping[str,
+                                                                            List[Tuple[str, float]]]:
         """ Based on tf_idf scores per topic, extract the top n words per topic
 
         If the top words per topic need to be extracted, then only the `words` parameter
@@ -3369,8 +3391,22 @@ class BERTopic:
                 topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
         elif isinstance(self.representation_model, BaseRepresentation):
             topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics)
-
+        elif isinstance(self.representation_model, dict):
+            if self.representation_model.get("Main"):
+                topics = self.representation_model["Main"].extract_topics(self, documents, c_tf_idf, topics)
         topics = {label: values[:self.top_n_words] for label, values in topics.items()}
+
+        # Extract additional topic aspects
+        if calculate_aspects and isinstance(self.representation_model, dict):
+            for aspect, aspect_model in self.representation_model.items():
+                aspects = topics.copy()
+                if aspect != "Main":
+                    if isinstance(aspect_model, list):
+                        for tuner in aspect_model:
+                            aspects = tuner.extract_topics(self, documents, c_tf_idf, aspects)
+                        self.topic_aspects_[aspect] = aspects
+                    elif isinstance(aspect_model, BaseRepresentation):
+                        self.topic_aspects_[aspect] = aspect_model.extract_topics(self, documents, c_tf_idf, aspects)
 
         return topics
 
