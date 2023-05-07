@@ -3227,7 +3227,7 @@ class BERTopic:
         """
         # Sample documents per topic
         documents_per_topic = (
-            documents.drop("Image", axis=1)
+            documents.drop("Image", axis=1, errors="ignore")
                      .groupby('Topic')
                      .sample(n=nr_samples, replace=True, random_state=42)
                      .drop_duplicates()
