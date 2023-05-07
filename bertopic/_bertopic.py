@@ -357,9 +357,11 @@ class BERTopic:
         check_documents_type(documents)
         check_embeddings_shape(embeddings, documents)
 
+        doc_ids = range(len(documents)) if documents is not None else range(len(images))
         documents = pd.DataFrame({"Document": documents,
-                                  "ID": range(len(documents)),
-                                  "Topic": None})
+                                  "ID": doc_ids,
+                                  "Topic": None,
+                                  "Image": images})
 
         # Extract embeddings
         if embeddings is None:
@@ -3225,7 +3227,8 @@ class BERTopic:
         """
         # Sample documents per topic
         documents_per_topic = (
-            documents.groupby('Topic')
+            documents.drop("Image", axis=1)
+                     .groupby('Topic')
                      .sample(n=nr_samples, replace=True, random_state=42)
                      .drop_duplicates()
         )
