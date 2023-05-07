@@ -55,7 +55,6 @@ from bertopic._utils import (
     check_is_fitted, validate_distance_matrix
 )
 import bertopic._save_utils as save_utils
-import bertopic._vision_utils as vision_utils
 
 # Visualization
 import plotly.graph_objects as go
@@ -397,9 +396,7 @@ class BERTopic:
 
         # Save the top 3 most representative documents per topic
         self._save_representative_docs(documents)
-        if images is not None:
-            self._save_representative_images(documents, images)
-
+        
         # Resulting output
         self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
@@ -1875,8 +1872,6 @@ class BERTopic:
         self._extract_topics(documents)
         self._update_topic_size(documents)
         self._save_representative_docs(documents)
-        if images is not None:
-            self._save_representative_images(documents, images)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
     def reduce_topics(self,
@@ -1928,8 +1923,6 @@ class BERTopic:
         documents = self._reduce_topics(documents)
         self._merged_topics = None
         self._save_representative_docs(documents)
-        if images is not None:
-            self._save_representative_images(documents, images)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
         return self
@@ -3199,39 +3192,6 @@ class BERTopic:
                                                            nr_samples=500,
                                                            nr_repr_docs=3)
         self.representative_docs_ = repr_docs
-
-    def _save_representative_images(self, documents: pd.DataFrame, images):
-        _, _, _, repr_docs_ids = self._extract_representative_docs(self.c_tf_idf_,
-                                                                   documents,
-                                                                   self.topic_representations_,
-                                                                   nr_samples=500,
-                                                                   nr_repr_docs=9)
-        if not vision_utils._has_vision:
-            raise ValueError("To use multi-modal topic modeling, Pillow needs to be installed."
-                             "You can install Pillow with `pip install bertopic[vision]` or"
-                             "with `pip install --upgrade pillow`")
-        unique_topics = sorted(list(set(self.topics_)))
-
-        # Combine representative images into a single representation
-        representative_images = {}
-        for topic in tqdm(unique_topics):
-            
-            sliced_examplars = repr_docs_ids[topic+self._outliers]
-            sliced_examplars = [sliced_examplars[i:i + 3] for i in range(0, len(sliced_examplars), 3)]
-            images_to_combine = [
-                    [vision_utils.open_image(images[index]) if isinstance(images[index], str) else images[index] for index in sub_indices]
-                for sub_indices in sliced_examplars
-            ]
-            representative_image = vision_utils.get_concat_tile_resize(images_to_combine)
-            representative_images[topic] = representative_image
-
-            # Make sure to properly close images
-            if isinstance(images[0], str):
-                for image_list in images_to_combine:
-                    for image in image_list:
-                        image.close()
-                    
-        self.representative_images_ = representative_images
         
     def _extract_representative_docs(self,
                                      c_tf_idf: csr_matrix,
