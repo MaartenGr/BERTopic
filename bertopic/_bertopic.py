@@ -354,8 +354,9 @@ class BERTopic:
         topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
-        check_documents_type(documents)
-        check_embeddings_shape(embeddings, documents)
+        if documents is not None:
+            check_documents_type(documents)
+            check_embeddings_shape(embeddings, documents)
 
         doc_ids = range(len(documents)) if documents is not None else range(len(images))
         documents = pd.DataFrame({"Document": documents,
@@ -388,6 +389,10 @@ class BERTopic:
         # Sort and Map Topic IDs by their frequency
         if not self.nr_topics:
             documents = self._sort_mappings_by_frequency(documents)
+
+        # Create documents from images if we have images only
+        if documents.Document.values[0] is None:
+            documents = self._images_to_text(documents, embeddings)    
 
         # Extract topics by calculating c-TF-IDF
         self._extract_topics(documents)
@@ -3026,6 +3031,18 @@ class BERTopic:
                              "Either choose 'word' or 'document' as the method. ")
 
         return embeddings
+
+    def _images_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
+        """ Convert images to text """
+        if isinstance(self.representation_model, dict):
+            for tuner in self.representation_model.values():
+                if getattr(tuner, 'text_to_image_model', False):
+                    documents = tuner.image_to_text(documents, embeddings)
+        elif isinstance(self.representation_model, list):
+            for tuner in self.representation_model:
+                if getattr(tuner, 'text_to_image_model', False):
+                    documents = tuner.image_to_text(documents, embeddings)
+        return documents
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
         """ Map predictions to the correct topics if topics were reduced """

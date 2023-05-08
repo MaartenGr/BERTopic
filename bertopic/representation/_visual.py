@@ -1,10 +1,13 @@
+import numpy as np
 import pandas as pd
 
 from PIL import Image
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple
+from typing import Mapping, List, Tuple, Union
+from transformers.pipelines import Pipeline, pipeline
 
+from bertopic.representation._mmr import mmr
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -38,10 +41,22 @@ class VisualRepresentation(BaseRepresentation):
     def __init__(self,
                  nr_repr_images: int = 9,
                  nr_samples: int = 500,
-                 image_size: Tuple[int, int] = (600, 600)):
+                 image_size: Tuple[int, int] = (600, 600),
+                 text_to_image_model: Union[str, Pipeline] = None,
+                 batch_size: int = 32):
         self.nr_repr_images = nr_repr_images
         self.nr_samples = nr_samples
         self.image_size = image_size
+
+        # Text-to-image model
+        if isinstance(text_to_image_model, Pipeline):
+            self.text_to_image_model = text_to_image_model
+        elif isinstance(text_to_image_model, str):
+            self.text_to_image_model = pipeline("image-to-text", model=text_to_image_model)
+        else:
+            raise ValueError("Please select a correct transformers pipeline. For example:"
+                             "pipeline('image-to-text', model='nlpconnect/vit-gpt2-image-captioning')")
+        self.batch_size = batch_size
 
     def extract_topics(self,
                        topic_model,
@@ -92,6 +107,72 @@ class VisualRepresentation(BaseRepresentation):
                         image.close()
         
         return representative_images
+    
+    def _convert_image_to_text(self,
+                      images: List[str],
+                      verbose: bool = False) -> List[str]:
+        """ Convert a list of images to captions. 
+
+        Arguments:
+            images: A list of images or words to be converted to text.
+            verbose: Controls the verbosity of the process
+
+        Returns:
+            List of captions
+        """
+        # Batch-wise image conversion
+        if self.batch_size is not None:
+            documents = []
+            for batch in tqdm(self._chunks(images), disable=not verbose):
+                outputs = self.text_to_image_model(batch)
+                captions = [output[0]["generated_text"] for output in outputs]
+                documents.extend(captions)
+
+        # Convert images to text
+        else:
+            outputs = self.text_to_image_model(images)
+            documents = [output[0]["generated_text"] for output in outputs]
+
+        return documents
+    
+    def image_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
+        """ Convert images to text """
+        # Create image topic embeddings
+        topics = documents.Topic.values.tolist()
+        images = documents.Image.values.tolist()
+        df = pd.DataFrame(np.hstack([np.array(topics).reshape(-1, 1), embeddings]))
+        image_topic_embeddings = df.groupby(0).mean().values
+        
+        # Extract image centroids
+        image_centroids = {}
+        unique_topics = sorted(list(set(topics)))
+        for topic, topic_embedding in zip(unique_topics, image_topic_embeddings):
+            indices = np.array([index for index, t in enumerate(topics) if t == topic])
+            indices = mmr(topic_embedding.reshape(1, -1), embeddings[indices], indices, top_n=self.nr_repr_images, diversity=0.1)
+            image_centroids[topic] = indices
+            
+        # Extract documents
+        from tqdm import tqdm
+        documents = pd.DataFrame(columns=["Document", "ID", "Topic", "Image"])
+        current_id = 0
+        for topic, image_ids in tqdm(image_centroids.items()):
+            selected_images = [Image.open(images[index]) if isinstance(images[index], str) else images[index] for index in image_ids]
+            text = self._convert_image_to_text(selected_images)
+            
+            for doc, image_id in zip(text, image_ids):
+                documents.loc[len(documents), :] = [doc, current_id, topic, images[image_id]]
+                current_id += 1
+            
+            # Properly close images
+            if isinstance(images[image_ids[0]], str):
+                for image in selected_images:
+                    image.close()
+
+        return documents
+
+    def _chunks(self, images):     
+        for i in range(0, len(images), self.batch_size):
+            yield images[i:i + self.batch_size]
     
 
 def get_concat_h_multi_resize(im_list):
