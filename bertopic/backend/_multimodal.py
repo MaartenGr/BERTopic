@@ -70,13 +70,27 @@ class MultiModalBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        embeddings = self.embed_documents(documents)
-        
+        # Embed documents
+        doc_embeddings = None
+        if documents is not None:
+            doc_embeddings = self.embed_documents(documents)
+
+        # Embed images
+        image_embeddings = None
         if isinstance(images, list):
             image_embeddings = self.embed_images(images, verbose)
-            embeddings = np.mean([embeddings, image_embeddings], axis=0)
-            
-        return embeddings
+
+        # Average embeddings
+        averaged_embeddings = None
+        if doc_embeddings is not None and image_embeddings is not None:
+            averaged_embeddings = np.mean([doc_embeddings, image_embeddings], axis=0)
+
+        if averaged_embeddings is not None:
+            return averaged_embeddings
+        elif doc_embeddings is not None:
+            return doc_embeddings
+        elif image_embeddings is not None:
+            return image_embeddings
     
     def embed_documents(self,
               documents: List[str],
