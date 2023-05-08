@@ -3029,7 +3029,6 @@ class BERTopic:
         else:
             raise ValueError("Wrong method for extracting document/word embeddings. "
                              "Either choose 'word' or 'document' as the method. ")
-
         return embeddings
 
     def _images_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
@@ -3041,6 +3040,9 @@ class BERTopic:
         elif isinstance(self.representation_model, list):
             for tuner in self.representation_model:
                 if getattr(tuner, 'text_to_image_model', False):
+                    documents = tuner.image_to_text(documents, embeddings)
+        elif isinstance(self.representation_model, BaseRepresentation): 
+                if getattr(self.representation_model, 'text_to_image_model', False):
                     documents = tuner.image_to_text(documents, embeddings)
         return documents
 

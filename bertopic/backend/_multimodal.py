@@ -72,7 +72,7 @@ class MultiModalBackend(BaseEmbedder):
         """
         # Embed documents
         doc_embeddings = None
-        if documents is not None:
+        if documents[0] is not None:
             doc_embeddings = self.embed_documents(documents)
 
         # Embed images
