@@ -3043,7 +3043,7 @@ class BERTopic:
                     documents = tuner.image_to_text(documents, embeddings)
         elif isinstance(self.representation_model, BaseRepresentation): 
                 if getattr(self.representation_model, 'text_to_image_model', False):
-                    documents = tuner.image_to_text(documents, embeddings)
+                    documents = self.representation_model.image_to_text(documents, embeddings)
         return documents
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
