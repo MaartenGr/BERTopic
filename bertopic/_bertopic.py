@@ -368,7 +368,7 @@ class BERTopic:
         if embeddings is None:
             self.embedding_model = select_backend(self.embedding_model,
                                                   language=self.language)
-            embeddings = self._extract_embeddings(documents.Document,
+            embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   images=images,
                                                   method="document",
                                                   verbose=self.verbose)
@@ -579,7 +579,7 @@ class BERTopic:
             if self.topic_representations_ is None:
                 self.embedding_model = select_backend(self.embedding_model,
                                                       language=self.language)
-            embeddings = self._extract_embeddings(documents.Document,
+            embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   method="document",
                                                   verbose=self.verbose)
         else:
