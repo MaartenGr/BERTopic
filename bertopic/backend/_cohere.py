@@ -32,8 +32,7 @@ class CohereBackend(BaseEmbedder):
                  client,
                  embedding_model: str = "large",
                  delay_in_seconds: float = None,
-                 batch_size: int = None
-):
+                 batch_size: int = None):
         super().__init__()
         self.client = client
         self.embedding_model = embedding_model

@@ -27,16 +27,18 @@ nav:
         - Vectorizers: getting_started/vectorizers/vectorizers.md
         - c-TF-IDF: getting_started/ctfidf/ctfidf.md
         - (Optional) Representation: getting_started/representation/representation.md
+        - (Optional) Multi-Aspects: getting_started/multiaspect/multiaspect.md
       - Variations:
-        - Topic Distributions: getting_started/distribution/distribution.md
-        - Topics per Class: getting_started/topicsperclass/topicsperclass.md
-        - Supervised Topic Modeling: getting_started/supervised/supervised.md
-        - Semi-supervised Topic Modeling: getting_started/semisupervised/semisupervised.md
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
         - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
-        - Online Topic Modeling: getting_started/online/online.md
         - Manual Topic Modeling: getting_started/manual/manual.md
+        - Multimodal Topic Modeling: getting_started/multimodal/multimodal.md
+        - Online Topic Modeling: getting_started/online/online.md
+        - Semi-supervised Topic Modeling: getting_started/semisupervised/semisupervised.md
+        - Supervised Topic Modeling: getting_started/supervised/supervised.md
+        - Topic Distributions: getting_started/distribution/distribution.md
+        - Topics per Class: getting_started/topicsperclass/topicsperclass.md
   - FAQ: faq.md
   - Use Cases: usecases.md
   - API:
@@ -46,6 +48,7 @@ nav:
           - Base: api/backends/base.md
           - Word Doc: api/backends/word_doc.md
           - OpenAI: api/backends/openai.md
+          - Cohere: api/backends/cohere.md
         - Dimensionality Reduction:
           - Base: api/dimensionality/base.md
         - Clustering:
@@ -96,7 +99,7 @@ theme:
   favicon: icon.png
   logo: img/icon.png
   feature:
-    tabs: true
+    tabs: true  
   features:
     - navigation.tabs
     - navigation.sections
@@ -104,6 +107,7 @@ theme:
     - navigation.top
     - navigation.tracking
     - toc.follow
+    - content.code.copy
   palette:
   - media: "(prefers-color-scheme: light)"
     scheme: black

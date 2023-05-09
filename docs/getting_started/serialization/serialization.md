@@ -1,8 +1,6 @@
-## **Serialization**
-
 Saving, loading, and sharing a BERTopic model can be done in several ways. It is generally advised to go with `.safetensors` as that allows for a small, safe, and fast method for saving your BERTopic model. However, other formats, such as `.pickle` and pytorch `.bin` are also possible.
 
-### **Saving**
+## **Saving**
 
 There are three methods for saving BERTopic:
 
@@ -10,23 +8,12 @@ There are three methods for saving BERTopic:
 2. A light model with pytorch `.bin` and config files
 3. A full model with `.pickle`
 
-Method 3 allows for saving the entire topic model but has several drawbacks:
 
-* Arbitrary code can be run from `.pickle` files
-* The resulting model is rather large (often > 500MB) since all sub-models need to be saved
-* Explicit and specific version control is needed as they typically only run if the environment is exactly the same
- 
-> **It is advised to use methods 1 or 2 for saving.**
+!!! Tip "Tip"
+    It is advised to use methods 1 or 2 for saving as they generated very small models. Especially method 1 (`safetensors`) 
+    allows for a relatively safe format compared to the other methods. 
 
-These methods have a number of advantages:
-
-* `.safetensors` is a relatively **safe format**
-* The resulting model can be **very small** (often < 20MB>) since no sub-models need to be saved
-* Although version control is important, there is a bit more **flexibility** with respect to specific versions of packages
-* More easily used in **production**
-* **Share** models with the HuggingFace Hub
-
-The methods are as used as follows:
+The methods are used as follows:
 
 ```python
 topic_model = BERTopic().fit(my_docs)
@@ -49,14 +36,29 @@ topic_model.save("my_model", serialization="pickle")
     saved in one version of BERTopic are not guaranteed to load in other versions. 
 
 
-### **HuggingFace Hub**
+### **Pickle Drawbacks**
+Saving the model with `pickle` allows for saving the entire topic model, including dimensionality reduction and clustering algorithms, but has several drawbacks:
 
-When you have created a BERTopic model, you can easily share it with other through the HuggingFace Hub.
+* Arbitrary code can be run from `.pickle` files
+* The resulting model is rather large (often > 500MB) since all sub-models need to be saved
+* Explicit and specific version control is needed as they typically only run if the environment is exactly the same
+ 
+
+### **Safetensors and Pytorch Advantages**
+Saving the topic modeling with `.safetensors` or `pytorch` has a number of advantages:
+
+* `.safetensors` is a relatively **safe format**
+* The resulting model can be **very small** (often < 20MB>) since no sub-models need to be saved
+* Although version control is important, there is a bit more **flexibility** with respect to specific versions of packages
+* More easily used in **production**
+* **Share** models with the HuggingFace Hub
 
 
-First, you need to log in to your HuggingFace account:
+## **HuggingFace Hub**
 
-* Log in to your Hugging Face account with the following command:
+When you have created a BERTopic model, you can easily share it with other through the HuggingFace Hub. First, you need to log in to your HuggingFace account which you can do in a number of ways:
+
+* Log in to your Hugging Face account with the command below
 
 ```bash
 huggingface-cli login
@@ -65,7 +67,7 @@ huggingface-cli login
 huggingface-cli login --token $HUGGINGFACE_TOKEN
 ```
 
-* Alternatively, you can programmatically login using login() in a notebook or a script:
+* Alternatively, you can programmatically login using login() in a notebook or a script
 
 ```python
 from huggingface_hub import login
@@ -92,6 +94,7 @@ topic_model.push_to_hf_hub(
 loaded_model = BERTopic.load("MaartenGr/BERTopic_ArXiv")
 ```
 
+### **Parameters**
 There are number of parameters that may be worthwile to know:
 
 * `private`
@@ -104,7 +107,7 @@ There are number of parameters that may be worthwile to know:
     * Whether to save c-TF-IDF information
 
 
-### **Loading**
+## **Loading**
 
 To load a model:
 

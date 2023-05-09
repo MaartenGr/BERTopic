@@ -183,12 +183,13 @@ public attributes that can be used to access model information.
 | `.probabilities_` | The probabilities that are generated for each document if HDBSCAN is used. |
 | `.topic_sizes_`           | The size of each topic                                                                      |
 | `.topic_mapper_`          | A class for tracking topics and their mappings anytime they are merged/reduced.             |
-| `.topic_representations_` | The top *n* terms per topic and their respective c-TF-IDF values.                             |
+| `.topic_representations_` | The top *n* terms per topic and their respective c-TF-IDF values.                           |
 | `.c_tf_idf_`              | The topic-term matrix as calculated through c-TF-IDF.                                       |
+| `.topic_aspects_`          | The different aspects, or representations, of each topic.                                  |
 | `.topic_labels_`          | The default labels for each topic.                                                          |
-| `.custom_labels_`         | Custom labels for each topic as generated through `.set_topic_labels`.                                                               |
-| `.topic_embeddings_`      | The embeddings for each topic if `embedding_model` was used.                                                              |
-| `.representative_docs_`   | The representative documents for each topic if HDBSCAN is used.                                                |
+| `.custom_labels_`         | Custom labels for each topic as generated through `.set_topic_labels`.                      |
+| `.topic_embeddings_`      | The embeddings for each topic if `embedding_model` was used.                                |
+| `.representative_docs_`   | The representative documents for each topic if HDBSCAN is used.                             |
 
 
 ### Variations

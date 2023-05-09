@@ -53,6 +53,8 @@ class VisualRepresentation(BaseRepresentation):
             self.text_to_image_model = text_to_image_model
         elif isinstance(text_to_image_model, str):
             self.text_to_image_model = pipeline("image-to-text", model=text_to_image_model)
+        elif text_to_image_model is None:
+            self.text_to_image_model = None
         else:
             raise ValueError("Please select a correct transformers pipeline. For example:"
                              "pipeline('image-to-text', model='nlpconnect/vit-gpt2-image-captioning')")
