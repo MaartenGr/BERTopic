@@ -1,11 +1,12 @@
 import numpy as np
+from typing import Union
 import plotly.graph_objects as go
 
 
 def visualize_distribution(topic_model,
                            probabilities: np.ndarray,
                            min_probability: float = 0.015,
-                           custom_labels: bool = False,
+                           custom_labels: Union[bool, str] = False,
                            title: str = "<b>Topic Probability Distribution</b>",
                            width: int = 800,
                            height: int = 600) -> go.Figure:
@@ -16,8 +17,9 @@ def visualize_distribution(topic_model,
         probabilities: An array of probability scores
         min_probability: The minimum probability score to visualize.
                          All others are ignored.
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
@@ -52,7 +54,11 @@ def visualize_distribution(topic_model,
     vals = probabilities[labels_idx].tolist()
 
     # Create labels
-    if topic_model.custom_labels_ is not None and custom_labels:
+    if isinstance(custom_labels, str):
+        labels = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in labels_idx]
+        labels = ["_".join([label[0] for label in l[:4]]) for l in labels]
+        labels = [label if len(label) < 30 else label[:27] + "..." for label in labels]
+    elif topic_model.custom_labels_ is not None and custom_labels:
         labels = [topic_model.custom_labels_[idx + topic_model._outliers] for idx in labels_idx]
     else:
         labels = []

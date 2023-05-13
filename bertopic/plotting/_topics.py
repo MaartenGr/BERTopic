@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from umap import UMAP
-from typing import List
+from typing import List, Union
 from sklearn.preprocessing import MinMaxScaler
 
 import plotly.express as px
@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 def visualize_topics(topic_model,
                      topics: List[int] = None,
                      top_n_topics: int = None,
-                     custom_labels: bool = False,
+                     custom_labels: Union[bool, str] = False,
                      title: str = "<b>Intertopic Distance Map</b>",
                      width: int = 650,
                      height: int = 650) -> go.Figure:
@@ -24,8 +24,9 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
@@ -60,7 +61,11 @@ def visualize_topics(topic_model,
     # Extract topic words and their frequencies
     topic_list = sorted(topics)
     frequencies = [topic_model.topic_sizes_[topic] for topic in topic_list]
-    if custom_labels and topic_model.custom_labels_ is not None:
+    if isinstance(custom_labels, str):
+        words = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topic_list]
+        words = ["_".join([label[0] for label in labels[:4]]) for labels in words]
+        words = [label if len(label) < 30 else label[:27] + "..." for label in words]
+    elif custom_labels and topic_model.custom_labels_ is not None:
         words = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in topic_list]
     else:
         words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]

@@ -1,6 +1,6 @@
 import itertools
 import numpy as np
-from typing import List
+from typing import List, Union
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -10,7 +10,7 @@ def visualize_barchart(topic_model,
                        topics: List[int] = None,
                        top_n_topics: int = 8,
                        n_words: int = 5,
-                       custom_labels: bool = False,
+                       custom_labels: Union[bool, str] = False,
                        title: str = "<b>Topic Word Scores</b>",
                        width: int = 250,
                        height: int = 250) -> go.Figure:
@@ -21,8 +21,9 @@ def visualize_barchart(topic_model,
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of each figure.
         height: The height of each figure.
@@ -61,7 +62,11 @@ def visualize_barchart(topic_model,
         topics = sorted(freq_df.Topic.to_list()[0:6])
 
     # Initialize figure
-    if topic_model.custom_labels_ is not None and custom_labels:
+    if isinstance(custom_labels, str):
+        subplot_titles = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        subplot_titles = ["_".join([label[0] for label in labels[:4]]) for labels in subplot_titles]
+        subplot_titles = [label if len(label) < 30 else label[:27] + "..." for label in subplot_titles]
+    elif topic_model.custom_labels_ is not None and custom_labels:
         subplot_titles = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in topics]
     else:
         subplot_titles = [f"Topic {topic}" for topic in topics]

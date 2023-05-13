@@ -18,7 +18,7 @@ def visualize_hierarchical_documents(topic_model,
                                      hide_document_hover: bool = True,
                                      nr_levels: int = 10,
                                      level_scale: str = 'linear', 
-                                     custom_labels: bool = False,
+                                     custom_labels: Union[bool, str] = False,
                                      title: str = "<b>Hierarchical Documents and Topics</b>",
                                      width: int = 1200,
                                      height: int = 750) -> go.Figure:
@@ -52,8 +52,9 @@ def visualize_hierarchical_documents(topic_model,
                      while logarithmic scaling will perform more mergers in earlier levels to 
                      provide more resolution at higher levels (this can be used for when the number 
                      of topics is large). 
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
                        NOTE: Custom labels are only generated for the original 
                        un-merged topics.
         title: Title of the plot.
@@ -194,7 +195,9 @@ def visualize_hierarchical_documents(topic_model,
     for topic in range(hierarchical_topics.Parent_ID.astype(int).max()):
         if topic < hierarchical_topics.Parent_ID.astype(int).min():
             if topic_model.get_topic(topic):
-                if topic_model.custom_labels_ is not None and custom_labels:
+                if isinstance(custom_labels, str):
+                    trace_name = f"{topic}_" + "_".join(list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3])
+                elif topic_model.custom_labels_ is not None and custom_labels:
                     trace_name = topic_model.custom_labels_[topic + topic_model._outliers]
                 else:
                     trace_name = f"{topic}_" + "_".join([word[:20] for word, _ in topic_model.get_topic(topic)][:3])
