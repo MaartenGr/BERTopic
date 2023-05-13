@@ -25,7 +25,7 @@ docs = ds["train"]["caption"]
 
 The `docs` variable contains the captions for each image in `images`. We can now use these variables to run our multi-modal example:
 
-!!! Note
+!!! Tip
     Do note that it is better to pass the paths of the images instead of the images themselves as there is no need to keep all images in memory. When passing the paths of the images, they are only opened temporarily when they are needed.
 
 ```python
@@ -103,14 +103,33 @@ Traditional topic modeling techniques can only be run on textual data, as is sho
   <figcaption></figcaption>
 </figure>
 
-To run BERTopic on images only, we first need to embed our images and then define a model that convert images to text. To do so, we are going to be using pokemon images instead and see what kind of topics we can create from those. We first need to load in our data:
+To run BERTopic on images only, we first need to embed our images and then define a model that convert images to text. To do so, we are going to need some images. We will take the same images as the above but instead save them locally and pass the paths to the images instead. As mentioned before, this will make sure that we do not hold too many images in memory whilst only a small subset is needed:
+
 
 ```python
-from datasets import load_dataset
+import os
+import glob
+import zipfile
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from sentence_transformers import util
 
-ds = load_dataset("lambdalabs/pokemon-blip-captions")
-images = ds["train"]["image"]
-docs = ds["train"]["text"]
+# Flickr 8k images
+img_folder = 'photos/'
+caps_folder = 'captions/'
+if not os.path.exists(img_folder) or len(os.listdir(img_folder)) == 0:
+    os.makedirs(img_folder, exist_ok=True)
+
+    if not os.path.exists('Flickr8k_Dataset.zip'):   #Download dataset if does not exist
+        util.http_get('https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip', 'Flickr8k_Dataset.zip')
+        util.http_get('https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip', 'Flickr8k_text.zip')
+
+    for folder, file in [(img_folder, 'Flickr8k_Dataset.zip'), (caps_folder, 'Flickr8k_text.zip')]:
+        with zipfile.ZipFile(file, 'r') as zf:
+            for member in tqdm(zf.infolist(), desc='Extracting'):
+                zf.extract(member, folder)
+images = list(glob.glob('photos/Flicker8k_Dataset/*.jpg'))
 ```
 
 Next, we can run our pipeline:
@@ -136,7 +155,7 @@ Using these models, we can run our pipeline:
 from bertopic import BERTopic
 
 # Train our model with images only
-topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model, min_topic_size=3)
+topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model, min_topic_size=30)
 topics, probs = topic_model.fit_transform(documents=None, images=images)
 ```
 

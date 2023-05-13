@@ -3323,6 +3323,7 @@ class BERTopic:
             topics = documents.sort_values("Topic").Topic.unique()
             for topic in topics:
                 indices = documents.loc[documents.Topic == topic, "ID"].values
+                indices = [int(index) for index in indices]
                 topic_embedding = np.mean(embeddings[indices], axis=0)
                 topic_embeddings.append(topic_embedding)
             self.topic_embeddings_ = np.array(topic_embeddings)

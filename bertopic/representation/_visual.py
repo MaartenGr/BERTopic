@@ -163,7 +163,8 @@ class VisualRepresentation(BaseRepresentation):
         unique_topics = sorted(list(set(topics)))
         for topic, topic_embedding in zip(unique_topics, image_topic_embeddings):
             indices = np.array([index for index, t in enumerate(topics) if t == topic])
-            indices = mmr(topic_embedding.reshape(1, -1), embeddings[indices], indices, top_n=self.nr_repr_images, diversity=0.1)
+            top_n = min([self.nr_repr_images, len(indices)])
+            indices = mmr(topic_embedding.reshape(1, -1), embeddings[indices], indices, top_n=top_n, diversity=0.1)
             image_centroids[topic] = indices
             
         # Extract documents
