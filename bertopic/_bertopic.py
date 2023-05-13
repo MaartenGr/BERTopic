@@ -19,6 +19,7 @@ import scipy.sparse as sp
 from tqdm import tqdm
 from pathlib import Path
 from packaging import version
+from collections import defaultdict
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from scipy.spatial.distance import squareform
@@ -395,7 +396,7 @@ class BERTopic:
             documents = self._images_to_text(documents, embeddings)    
 
         # Extract topics by calculating c-TF-IDF
-        self._extract_topics(documents)
+        self._extract_topics(documents, embeddings=embeddings)
 
         # Reduce topics
         if self.nr_topics:
@@ -1346,13 +1347,16 @@ class BERTopic:
         else:
             warnings.warn("Using a custom list of topic assignments may lead to errors if "
                           "topic reduction techniques are used afterwards. Make sure that "
-                          "manually assigning topics is the last step in the pipeline.")
+                          "manually assigning topics is the last step in the pipeline."
+                          "Note that topic embeddings will also be created through weighted"
+                          "c-TF-IDF embeddings instead of centroid embeddings.")
         # Extract words
         documents = pd.DataFrame({"Document": docs, "Topic": topics})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
-        self._create_topic_vectors()
+        if set(topics) != self.topics_:
+            self._create_topic_vectors()
         self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                               for key, values in
                               self.topic_representations_.items()}
@@ -1872,11 +1876,21 @@ class BERTopic:
         else:
             raise ValueError("Make sure that `topics_to_merge` is either"
                              "a list of topics or a list of list of topics.")
+        
+        # Track mappings and sizes of topics for merging topic embeddings
+        mappings = defaultdict(list)
+        for key, val in sorted(mapping.items()):
+            mappings[val].append(key)
+        mappings = {topic_from: 
+                    {"topics_to": topics_to,
+                     "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to]} 
+                   for topic_from, topics_to in mappings.items()}
 
+        # Update topics
         documents.Topic = documents.Topic.map(mapping)
         self.topic_mapper_.add_mappings(mapping)
         documents = self._sort_mappings_by_frequency(documents)
-        self._extract_topics(documents)
+        self._extract_topics(documents, mappings=mappings)
         self._update_topic_size(documents)
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
@@ -3181,7 +3195,7 @@ class BERTopic:
             embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
         return y, embeddings
 
-    def _extract_topics(self, documents: pd.DataFrame):
+    def _extract_topics(self, documents: pd.DataFrame, embeddings: np.ndarray = None, mappings=None):
         """ Extract topics from the clusters using a class-based TF-IDF
 
         Arguments:
@@ -3193,7 +3207,7 @@ class BERTopic:
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
-        self._create_topic_vectors()
+        self._create_topic_vectors(documents=documents, embeddings=embeddings, mappings=mappings)
         self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                               for key, values in
                               self.topic_representations_.items()}
@@ -3289,19 +3303,51 @@ class BERTopic:
 
         return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
 
-    def _create_topic_vectors(self):
+    def _create_topic_vectors(self, documents: pd.DataFrame = None, embeddings: np.ndarray = None, mappings=None):
         """ Creates embeddings per topics based on their topic representation
 
-        We start by creating embeddings out of the topic representation. This
-        results in a number of embeddings per topic. Then, we take the weighted
-        average of embeddings in a topic by their c-TF-IDF score. This will put
-        more emphasis to words that represent a topic best.
+        As a default, topic vectors (topic embeddings) or created by taking 
+        the average of all document embeddings within a topic. If topics are 
+        merged, then a weighted average of topic embeddings is taken based on 
+        the initial topic sizes.
 
-        Only allow topic vectors to be created if there are no custom embeddings and therefore
-        a sentence-transformer model to be used or there are custom embeddings but it is allowed
-        to use a different multi-lingual sentence-transformer model
+        For the `.partial_fit` and `.update_topics` method, the average 
+        of all document embeddings is not taken since those are not known.
+        Instead, the weighted average of the embeddings of the top n words 
+        is taken for each topic. The weighting is done based on the c-TF-IDF
+        score. This will put more emphasis to words that represent a topic best.
         """
-        if self.embedding_model is not None and type(self.embedding_model) is not BaseEmbedder:
+        # Topic embeddings based on input embeddings
+        if embeddings is not None and documents is not None:
+            topic_embeddings = []
+            topics = documents.sort_values("Topic").Topic.unique()
+            for topic in topics:
+                indices = documents.loc[documents.Topic == topic, "ID"].values
+                topic_embedding = np.mean(embeddings[indices], axis=0)
+                topic_embeddings.append(topic_embedding)
+            self.topic_embeddings_ = np.array(topic_embeddings)
+
+        # Topic embeddings when merging topics
+        elif self.topic_embeddings_ is not None and mappings is not None:
+            topic_embeddings_dict = {}
+            for topic_from, topics_to in mappings.items():
+                topic_ids = topics_to["topics_to"]
+                topic_sizes = topics_to["topic_sizes"]
+                if topic_ids:
+                    embds = np.array(self.topic_embeddings_)[np.array(topic_ids) + self._outliers]
+                    topic_embedding = np.average(embds, axis=0, weights=topic_sizes)
+                    topic_embeddings_dict[topic_from] = topic_embedding
+
+            # Re-order topic embeddings
+            topics_to_map = {topic_mapping[0]: topic_mapping[1] for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]}
+            topic_embeddings = {}
+            for topic, embds in topic_embeddings_dict.items():
+                topic_embeddings[topics_to_map[topic]] = embds
+            unique_topics = sorted(list(topic_embeddings.keys()))
+            self.topic_embeddings_ = np.array([topic_embeddings[topic] for topic in unique_topics])
+
+        # Topic embeddings based on keyword representations
+        elif self.embedding_model is not None and type(self.embedding_model) is not BaseEmbedder:
             topic_list = list(self.topic_representations_.keys())
             topic_list.sort()
 
@@ -3313,7 +3359,7 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            embeddings = self._extract_embeddings(topic_words,
+            word_embeddings = self._extract_embeddings(topic_words,
                                                   method="word",
                                                   verbose=False)
 
@@ -3325,10 +3371,10 @@ class BERTopic:
                 word_importance = [val[1] for val in self.get_topic(topic)]
                 if sum(word_importance) == 0:
                     word_importance = [1 for _ in range(len(self.get_topic(topic)))]
-                topic_embedding = np.average(embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
+                topic_embedding = np.average(word_embeddings[i * n: n + (i * n)], weights=word_importance, axis=0)
                 topic_embeddings.append(topic_embedding)
 
-            self.topic_embeddings_ = topic_embeddings
+            self.topic_embeddings_ = np.array(topic_embeddings)
 
     def _c_tf_idf(self,
                   documents_per_topic: pd.DataFrame,
@@ -3490,7 +3536,7 @@ class BERTopic:
 
         # Create topic distance matrix
         if self.topic_embeddings_ is not None:
-            topic_embeddings = np.array(self.topic_embeddings_)[self._outliers:, ]
+            topic_embeddings = self.topic_embeddings_[self._outliers:, ]
         else:
             topic_embeddings = self.c_tf_idf_[self._outliers:, ].toarray()
         distance_matrix = 1-cosine_similarity(topic_embeddings)
@@ -3504,15 +3550,24 @@ class BERTopic:
         cluster.fit(distance_matrix)
         new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in topics]
 
+        # Track mappings and sizes of topics for merging topic embeddings
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, new_topics)}
+        mappings = defaultdict(list)
+        for key, val in sorted(mapped_topics.items()):
+            mappings[val].append(key)
+        mappings = {topic_from: 
+                    {"topics_to": topics_to,
+                     "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to]} 
+                   for topic_from, topics_to in mappings.items()}
+
         # Map topics
         documents.Topic = new_topics
         self._update_topic_size(documents)
-        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, new_topics)}
         self.topic_mapper_.add_mappings(mapped_topics)
 
         # Update representations
         documents = self._sort_mappings_by_frequency(documents)
-        self._extract_topics(documents)
+        self._extract_topics(documents, mappings=mappings)
         self._update_topic_size(documents)
         return documents
 
@@ -3547,10 +3602,19 @@ class BERTopic:
         documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
         mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
 
+        # Track mappings and sizes of topics for merging topic embeddings
+        mappings = defaultdict(list)
+        for key, val in sorted(mapped_topics.items()):
+            mappings[val].append(key)
+        mappings = {topic_from: 
+                    {"topics_to": topics_to,
+                     "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to]} 
+                   for topic_from, topics_to in mappings.items()}
+
         # Update documents and topics
         self.topic_mapper_.add_mappings(mapped_topics)
         documents = self._sort_mappings_by_frequency(documents)
-        self._extract_topics(documents)
+        self._extract_topics(documents, mappings=mappings)
         self._update_topic_size(documents)
         return documents
 
