@@ -25,6 +25,9 @@ docs = ds["train"]["caption"]
 
 The `docs` variable contains the captions for each image in `images`. We can now use these variables to run our multi-modal example:
 
+!!! Note
+    Do note that it is better to pass the paths of the images instead of the images themselves as there is no need to keep all images in memory. When passing the paths of the images, they are only opened temporarily when they are needed.
+
 ```python
 from bertopic import BERTopic
 from bertopic.representation import VisualRepresentation
@@ -67,8 +70,9 @@ df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
 HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
 ```
 
-[IMAGES]
-
+<br><br>
+<img src="images_and_text.jpg">
+<br><br>
 
 !!! Tip
     In the example above, we are clustering the documents but since you have 
@@ -99,7 +103,18 @@ Traditional topic modeling techniques can only be run on textual data, as is sho
   <figcaption></figcaption>
 </figure>
 
-To run BERTopic on images only, we first need to embed our images and then define a model that convert images to text:
+To run BERTopic on images only, we first need to embed our images and then define a model that convert images to text. To do so, we are going to be using pokemon images instead and see what kind of topics we can create from those. We first need to load in our data:
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("lambdalabs/pokemon-blip-captions")
+images = ds["train"]["image"]
+docs = ds["train"]["text"]
+```
+
+Next, we can run our pipeline:
+
 
 ```python
 from bertopic.representation import KeyBERTInspired, VisualRepresentation
@@ -109,7 +124,10 @@ from bertopic.backend import MultiModalBackend
 embedding_model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
 
 # Image to text representation model
-representation_model= VisualRepresentation(text_to_image_model="nlpconnect/vit-gpt2-image-captioning")
+representation_model = {
+    "Visual_Aspect": VisualRepresentation(image_to_text_model="nlpconnect/vit-gpt2-image-captioning")
+}
+
 ```
 
 Using these models, we can run our pipeline:
@@ -118,8 +136,36 @@ Using these models, we can run our pipeline:
 from bertopic import BERTopic
 
 # Train our model with images only
-topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model)
+topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model, min_topic_size=3)
 topics, probs = topic_model.fit_transform(documents=None, images=images)
 ```
 
-[IMAGES]
+We can now access our image representations for each topic with `topic_model.topic_aspects_["Visual_Aspect"]`.
+If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
+
+```python
+import base64
+from io import BytesIO
+from IPython.display import HTML
+
+def image_base64(im):
+    if isinstance(im, str):
+        im = get_thumbnail(im)
+    with BytesIO() as buffer:
+        im.save(buffer, 'jpeg')
+        return base64.b64encode(buffer.getvalue()).decode()
+
+
+def image_formatter(im):
+    return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
+
+# Extract dataframe
+df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
+
+# Visualize the images
+HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
+```
+
+<br><br>
+<img src="images_only.jpg">
+<br><br>

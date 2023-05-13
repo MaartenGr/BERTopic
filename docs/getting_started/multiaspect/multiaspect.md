@@ -39,6 +39,8 @@ The main pipeline, that is used in most visualization options, is defined with t
 
 After we have fitted our model, we can access all representations with `topic_model.get_topic_info()`:
 
-[TABLE]
+<br><br>
+<img src="table.PNG">
+<br><br>
 
 As you can see, there are a number of different representations for our topics that we can inspect. All aspects are found in `topic_model.topic_aspects_`. 

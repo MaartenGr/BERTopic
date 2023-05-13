@@ -3049,14 +3049,14 @@ class BERTopic:
         """ Convert images to text """
         if isinstance(self.representation_model, dict):
             for tuner in self.representation_model.values():
-                if getattr(tuner, 'text_to_image_model', False):
+                if getattr(tuner, 'image_to_text_model', False):
                     documents = tuner.image_to_text(documents, embeddings)
         elif isinstance(self.representation_model, list):
             for tuner in self.representation_model:
-                if getattr(tuner, 'text_to_image_model', False):
+                if getattr(tuner, 'image_to_text_model', False):
                     documents = tuner.image_to_text(documents, embeddings)
         elif isinstance(self.representation_model, BaseRepresentation): 
-                if getattr(self.representation_model, 'text_to_image_model', False):
+                if getattr(self.representation_model, 'image_to_text_model', False):
                     documents = self.representation_model.image_to_text(documents, embeddings)
         return documents
 
