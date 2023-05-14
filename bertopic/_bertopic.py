@@ -505,7 +505,6 @@ class BERTopic:
     def partial_fit(self,
                     documents: List[str],
                     embeddings: np.ndarray = None,
-                    images: List[str] = None,
                     y: Union[List[int], np.ndarray] = None):
         """ Fit BERTopic on a subset of the data and perform online learning
         with batch-like data.
@@ -536,9 +535,6 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
-            images: A list of paths to the images to fit on or the images themselves
-                    Do note that `.partial_fit` only works when you have both images 
-                    and documents
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -577,11 +573,9 @@ class BERTopic:
         # Prepare documents
         if isinstance(documents, str):
             documents = [documents]
-        doc_ids = range(len(documents)) if documents is not None else range(len(images))
         documents = pd.DataFrame({"Document": documents,
-                                  "ID": doc_ids,
-                                  "Topic": None,
-                                  "Image": images})
+                                  "ID": range(len(documents)),
+                                  "Topic": None})
 
         # Extract embeddings
         if embeddings is None:
@@ -589,7 +583,6 @@ class BERTopic:
                 self.embedding_model = select_backend(self.embedding_model,
                                                       language=self.language)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
-                                                  images=images,
                                                   method="document",
                                                   verbose=self.verbose)
         else:
