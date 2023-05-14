@@ -269,7 +269,7 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
-            images: A list of paths to the images to fit on
+            images: A list of paths to the images to fit on or the images themselves
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -315,7 +315,7 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
-            images: A list of paths to the images to fit on
+            images: A list of paths to the images to fit on or the images themselves
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -413,13 +413,15 @@ class BERTopic:
 
     def transform(self,
                   documents: Union[str, List[str]],
-                  embeddings: np.ndarray = None) -> Tuple[List[int], np.ndarray]:
+                  embeddings: np.ndarray = None, 
+                  images: List[str] = None) -> Tuple[List[int], np.ndarray]:
         """ After having fit a model, use transform to predict new instances
 
         Arguments:
-            documents: A single document or a list of documents to fit on
+            documents: A single document or a list of documents to predict on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model.
+            images: A list of paths to the images to predict on or the images themselves
 
         Returns:
             predictions: Topic predictions for each documents
@@ -503,6 +505,7 @@ class BERTopic:
     def partial_fit(self,
                     documents: List[str],
                     embeddings: np.ndarray = None,
+                    images: List[str] = None,
                     y: Union[List[int], np.ndarray] = None):
         """ Fit BERTopic on a subset of the data and perform online learning
         with batch-like data.
@@ -533,6 +536,9 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
+            images: A list of paths to the images to fit on or the images themselves
+                    Do note that `.partial_fit` only works when you have both images 
+                    and documents
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -571,9 +577,11 @@ class BERTopic:
         # Prepare documents
         if isinstance(documents, str):
             documents = [documents]
+        doc_ids = range(len(documents)) if documents is not None else range(len(images))
         documents = pd.DataFrame({"Document": documents,
-                                  "ID": range(len(documents)),
-                                  "Topic": None})
+                                  "ID": doc_ids,
+                                  "Topic": None,
+                                  "Image": images})
 
         # Extract embeddings
         if embeddings is None:
@@ -581,6 +589,7 @@ class BERTopic:
                 self.embedding_model = select_backend(self.embedding_model,
                                                       language=self.language)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
+                                                  images=images,
                                                   method="document",
                                                   verbose=self.verbose)
         else:
@@ -1222,7 +1231,8 @@ class BERTopic:
         return topic_distributions, topic_token_distributions
 
     def find_topics(self,
-                    search_term: str,
+                    search_term: str = None,
+                    image: str = None,
                     top_n: int = 5) -> Tuple[List[int], List[float]]:
         """ Find topics most similar to a search_term
 
@@ -1235,7 +1245,7 @@ class BERTopic:
         below 5 words.
 
         Arguments:
-            search_term: the term you want to use to search for topics
+            search_term: the term you want to use to search for topics. 
             top_n: the number of topics to return
 
         Returns:
@@ -1261,9 +1271,15 @@ class BERTopic:
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
-        search_embedding = self._extract_embeddings([search_term],
-                                                    method="word",
-                                                    verbose=False).flatten()
+        if search_term is not None:
+            search_embedding = self._extract_embeddings([search_term],
+                                                        method="word",
+                                                        verbose=False).flatten()
+        elif image is not None:
+            search_embedding = self._extract_embeddings([""],
+                                                        images=[image],
+                                                        method="document",
+                                                        verbose=False).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings_).flatten()
 
         # Extract topics most similar to search_term
@@ -1362,8 +1378,12 @@ class BERTopic:
                               self.topic_representations_.items()}
         self._update_topic_size(documents)
 
-    def get_topics(self) -> Mapping[str, Tuple[str, float]]:
+    def get_topics(self, full: bool = False) -> Mapping[str, Tuple[str, float]]:
         """ Return topics with top n words and their c-TF-IDF score
+
+        Arguments:
+            full: If True, returns all different forms of topic representations
+                  for each topic, including aspects
 
         Returns:
             self.topic_representations_: The top n words per topic and the corresponding c-TF-IDF score
@@ -1375,13 +1395,19 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        return self.topic_representations_
 
-    def get_topic(self, topic: int) -> Union[Mapping[str, Tuple[str, float]], bool]:
+        if full:
+            return {"Main": self.topic_representations_}.update(self.topic_aspects_)
+        else:
+            return self.topic_representations_
+
+    def get_topic(self, topic: int, full: bool = False) -> Union[Mapping[str, Tuple[str, float]], bool]:
         """ Return top n words for a specific topic and their c-TF-IDF scores
 
         Arguments:
             topic: A specific topic for which you want its representation
+            full: If True, returns all different forms of topic representations
+                  for a topic, including aspects
 
         Returns:
             The top n words for a specific word and its respective c-TF-IDF scores
@@ -1394,7 +1420,12 @@ class BERTopic:
         """
         check_is_fitted(self)
         if topic in self.topic_representations_:
-            return self.topic_representations_[topic]
+            if full:
+                representations = {"Main": self.topic_representations_[topic]}
+                aspects = {aspect: representations[topic] for aspect, representations in self.topic_aspects_.items()}
+                return representations.update(aspects)
+            else:
+                return self.topic_representations_[topic]
         else:
             return False
 
@@ -1781,22 +1812,23 @@ class BERTopic:
                               nr_words: int = 3,
                               topic_prefix: bool = True,
                               word_length: int = None,
-                              separator: str = "_") -> List[str]:
+                              separator: str = "_",
+                              aspect: str = None) -> List[str]:
         """ Get labels for each topic in a user-defined format
 
         Arguments:
-            original_labels:
             nr_words: Top `n` words per topic to use
             topic_prefix: Whether to use the topic ID as a prefix.
-                        If set to True, the topic ID will be separated
-                        using the `separator`
+                          If set to True, the topic ID will be separated
+                          using the `separator`
             word_length: The maximum length of each word in the topic label.
-                        Some words might be relatively long and setting this
-                        value helps to make sure that all labels have relatively
-                        similar lengths.
+                         Some words might be relatively long and setting this
+                         value helps to make sure that all labels have relatively
+                         similar lengths.
             separator: The string with which the words and topic prefix will be
-                    separated. Underscores are the default but a nice alternative
-                    is `", "`.
+                       separated. Underscores are the default but a nice alternative
+                       is `", "`.
+            aspect: The aspect from which to generate topic labels
 
         Returns:
             topic_labels: A list of topic labels sorted from the lowest topic ID to the highest.
@@ -1815,7 +1847,10 @@ class BERTopic:
 
         topic_labels = []
         for topic in unique_topics:
-            words, _ = zip(*self.get_topic(topic))
+            if aspect:
+                words, _ = zip(*self.topic_aspects_(topic))
+            else:
+                words, _ = zip(*self.get_topic(topic))
 
             if word_length:
                 words = [word[:word_length] for word in words][:nr_words]
@@ -1843,6 +1878,8 @@ class BERTopic:
                                 [1, 2, 3] will merge topics 1, 2 and 3
                                 [[1, 2], [3, 4]] will merge topics 1 and 2, and
                                 separately merge topics 3 and 4.
+            images: A list of paths to the images used when calling either 
+                    `fit` or `fit_transform`
 
         Examples:
 
@@ -1863,7 +1900,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_})
+        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images})
 
         mapping = {topic: topic for topic in set(self.topics_)}
         if isinstance(topics_to_merge[0], int):
@@ -1938,7 +1975,7 @@ class BERTopic:
         check_is_fitted(self)
 
         self.nr_topics = nr_topics
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_})
+        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images})
 
         # Reduce number of topics
         documents = self._reduce_topics(documents)
@@ -1951,6 +1988,7 @@ class BERTopic:
     def reduce_outliers(self,
                         documents: List[str],
                         topics: List[int],
+                        images: List[str] = None,
                         strategy: str = "distributions",
                         probabilities: np.ndarray = None,
                         threshold: int = 0,
@@ -2031,6 +2069,8 @@ class BERTopic:
         new_topics = topic_model.reduce_outliers(docs, topics, probabilities=probs, strategy="probabilities")
         ```
         """
+        if images is not None:
+            strategy = "embeddings"
 
         # Check correct use of parameters
         if strategy.lower() == "probabilities" and probabilities is None:
@@ -2075,6 +2115,9 @@ class BERTopic:
             # Extract or calculate embeddings for outlier documents
             if embeddings is not None:
                 outlier_embeddings = np.array([embeddings[index] for index in outlier_ids])
+            elif images is not None:
+                outlier_images = [images[index] for index in outlier_ids]
+                outlier_embeddings = self.embedding_model.embed_images(outlier_images)
             else:
                 outlier_embeddings = self.embedding_model.embed_documents(outlier_docs)
             similarity = cosine_similarity(outlier_embeddings, self.topic_embeddings_[self._outliers:])
@@ -3025,6 +3068,7 @@ class BERTopic:
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
+            images: A list of paths to the images to fit on or the images themselves
             method: Whether to extract document or word-embeddings, options are "document" and "word"
             verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
