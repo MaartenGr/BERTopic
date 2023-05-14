@@ -1390,7 +1390,9 @@ class BERTopic:
         check_is_fitted(self)
 
         if full:
-            return {"Main": self.topic_representations_}.update(self.topic_aspects_)
+            topic_representations = {"Main": self.topic_representations_} 
+            topic_representations.update(self.topic_aspects_)
+            return topic_representations
         else:
             return self.topic_representations_
 
@@ -1416,7 +1418,8 @@ class BERTopic:
             if full:
                 representations = {"Main": self.topic_representations_[topic]}
                 aspects = {aspect: representations[topic] for aspect, representations in self.topic_aspects_.items()}
-                return representations.update(aspects)
+                representations.update(aspects)
+                return representations
             else:
                 return self.topic_representations_[topic]
         else:
@@ -1841,7 +1844,7 @@ class BERTopic:
         topic_labels = []
         for topic in unique_topics:
             if aspect:
-                words, _ = zip(*self.topic_aspects_(topic))
+                words, _ = zip(*self.topic_aspects_[aspect][topic])
             else:
                 words, _ = zip(*self.get_topic(topic))
 

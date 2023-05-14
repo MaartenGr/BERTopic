@@ -1,10 +1,10 @@
-Documents or text are often accompanied by imagery or the other way around. For example, social media images with captions and products with descriptions. Topic modeling has traditionally focused on creating topics from textual representations. However, as more multi-modal representations are created, the need for multi-modal topics increases.
+Documents or text are often accompanied by imagery or the other way around. For example, social media images with captions and products with descriptions. Topic modeling has traditionally focused on creating topics from textual representations. However, as more multimodal representations are created, the need for multimodal topics increases.
 
-BERTopic can perform **multi-modal topic modeling** in a number of ways during `.fit` and `.fit_transform` stages. 
+BERTopic can perform **multimodal topic modeling** in a number of ways during `.fit` and `.fit_transform` stages. 
 
 ## **Text + Images**
 
-The most basic example of multi-modal topic modeling in BERTopic is when you have images that accompany your documents. This means that it is expected that each document has an image and vice versa. Instagram pictures, for example, almost always have some descriptions to them. 
+The most basic example of multimodal topic modeling in BERTopic is when you have images that accompany your documents. This means that it is expected that each document has an image and vice versa. Instagram pictures, for example, almost always have some descriptions to them. 
 
 <figure markdown>
   ![Image title](images_and_text.svg)
@@ -23,7 +23,7 @@ images = ds["train"]["image"]
 docs = ds["train"]["caption"]
 ```
 
-The `docs` variable contains the captions for each image in `images`. We can now use these variables to run our multi-modal example:
+The `docs` variable contains the captions for each image in `images`. We can now use these variables to run our multimodal example:
 
 !!! Tip
     Do note that it is better to pass the paths of the images instead of the images themselves as there is no need to keep all images in memory. When passing the paths of the images, they are only opened temporarily when they are needed.

@@ -9,7 +9,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class MultiModalBackend(BaseEmbedder):
-    """ Multi-modal backend using Sentence-transformers
+    """ Multimodal backend using Sentence-transformers
 
     The sentence-transformers embedding model used for 
     generating word, document, and image embeddings.  

@@ -38,7 +38,7 @@ try:
 except ModuleNotFoundError:
     PartOfSpeech = NotInstalled("Part of Speech with Spacy", "spacy")
 
-# Multi-modal
+# Multimodal
 try:
     from bertopic.representation._visual import VisualRepresentation
 except ModuleNotFoundError:

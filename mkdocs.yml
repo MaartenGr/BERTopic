@@ -27,7 +27,7 @@ nav:
         - Vectorizers: getting_started/vectorizers/vectorizers.md
         - c-TF-IDF: getting_started/ctfidf/ctfidf.md
         - (Optional) Representation: getting_started/representation/representation.md
-        - (Optional) Multi-Aspects: getting_started/multiaspect/multiaspect.md
+        - (Optional) Multi-Aspect: getting_started/multiaspect/multiaspect.md
       - Variations:
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
