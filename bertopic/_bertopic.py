@@ -3343,7 +3343,6 @@ class BERTopic:
             # Use MMR to find representative but diverse documents
             if diversity:
                 docs = mmr(c_tf_idf[index], ctfidf, selected_docs, top_n=nr_docs, diversity=diversity)
-                repr_docs.extend(docs)
 
             # Extract top n most representative documents
             else:
@@ -3966,6 +3965,9 @@ def _create_model_from_files(
     topic_model.topic_labels_ = {int(key): val for key, val in topics["topic_labels"].items()}
     topic_model.custom_labels_ = topics["custom_labels"]
     topic_model._outliers = topics["_outliers"]
+
+    if topics.get("topic_aspects"):
+        topic_model.topic_aspects_ = topics["topic_aspects"]
 
     # Topic Mapper
     topic_model.topic_mapper_ = TopicMapper([0])
