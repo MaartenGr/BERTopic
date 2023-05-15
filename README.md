@@ -39,10 +39,14 @@ pip install bertopic
 If you want to install BERTopic with other embedding models, you can choose one of the following:
 
 ```bash
+# Embedding models
 pip install bertopic[flair]
 pip install bertopic[gensim]
 pip install bertopic[spacy]
 pip install bertopic[use]
+
+# Vision topic modeling
+pip install bertopic[vision]
 ```
 
 ## Getting Started
@@ -73,7 +77,7 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 ```
 
-After generating topics and their probabilities, we can access the frequent topics that were generated:
+After generating topics and their probabilities, we can access all of the topics together with their topic representations:
 
 ```python
 >>> topic_model.get_topic_info()
@@ -84,10 +88,11 @@ Topic	Count	Name
 1	466	32_jesus_bible_christian_faith
 2	441	2_space_launch_orbit_lunar
 3	381	22_key_encryption_keys_encrypted
+...
 ```
 
-The `-1` topic refers to all outlier documents and are typically ignored. Next, let's take a look at the most 
-frequent topic that was generated:
+The `-1` topic refers to all outlier documents and are typically ignored. Each word in a topic describes the underlying theme of that topic and can be used 
+for interpreting that topic. Next, let's take a look at the most frequent topic that was generated:
 
 ```python
 >>> topic_model.get_topic(0)
@@ -121,10 +126,31 @@ Think! It's the SCSI card doing...	49     49_windows_drive_dos_file	windows - dr
 >
 > Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
-## Visualize Topics
+ In BERTopic, there are a number of different [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) that we can choose from. Instead of iterating over all of these different topic representations, we can model them simultaneousnly and derive a multiple different perspectives for a single topic:
+
+ ```python
+from bertopic.representation import KeyBERTInspired
+from bertopic.representation import PartOfSpeech
+from bertopic.representation import MaximalMarginalRelevance
+
+# Additional ways of representing a topic
+aspect_model1 = KeyBERTInspired()
+aspect_model2 = PartOfSpeech("en_core_web_sm")
+aspect_model3 = [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance(diversity=.5)]
+
+# Add all models together to be run in a single `fit`
+representation_model = {
+   "Aspect1": main_representation,
+   "Aspect2":  aspect_model1,
+   "Aspect3":  aspect_model2 
+}
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+## Visualizations
 After having trained our BERTopic model, we can iteratively go through hundreds of topics to get a good 
-understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
-Instead, we can visualize the topics that were generated in a way very similar to 
+understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. Instead, we can use one of the [many visualization options](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html) in BERTopic. 
+For example, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis):
 
 ```python
@@ -133,16 +159,21 @@ topic_model.visualize_topics()
 
 <img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
 
-Find all possible visualizations with interactive examples in the documentation 
-[here](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html). 
-
-
 ## Modularity
 By default, the main steps for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, it assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic not only allows you to build your own topic model but to explore several topic modeling techniques on top of your customized topic model:
 
 https://user-images.githubusercontent.com/25746895/218420473-4b2bb539-9dbe-407a-9674-a8317c7fb3bf.mp4
 
-You can swap out any of these models or even remove them entirely. Starting with the embedding step, you can find out how to do this [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) and more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
+You can swap out any of these models or even remove them entirely. The following steps are completely modular:
+
+1. [Embedding](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) documents
+2. [Reducing dimensionality](https://maartengr.github.io/BERTopic/getting_started/dim_reduction/dim_reduction.html) of embeddings
+3. [Clustering](https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html) reduced embeddings into topics
+4. [Tokenization](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html) of topics
+5. [Weight](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html) tokens
+6. [Represent topics]((https://maartengr.github.io/BERTopic/getting_started/representation/representation.html)) with one or [multiple]((https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html)) representations
+
+To find more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
 ## Functionality
 BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 

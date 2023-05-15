@@ -10,10 +10,14 @@ You may want to install more depending on the transformers and language backends
 The possible installations are: 
 
 ```bash
+# Embedding models
 pip install bertopic[flair]
 pip install bertopic[gensim]
 pip install bertopic[spacy]
 pip install bertopic[use]
+
+# Vision topic modeling
+pip install bertopic[vision]
 ```
 
 ## **Quick Start**
@@ -76,10 +80,30 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 !!! Tip "Tip!"
     Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
-## **Visualize Topics**
-After having trained our `BERTopic` model, we can iteratively go through perhaps a hundred topics to get a good 
-understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. 
-Instead, we can visualize the topics that were generated in a way very similar to 
+ In BERTopic, there are a number of different [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) that we can choose from. Instead of iterating over all of these different topic representations, we can model them simultaneousnly and derive a multiple different perspectives for a single topic:
+
+ ```python
+from bertopic.representation import KeyBERTInspired
+from bertopic.representation import PartOfSpeech
+from bertopic.representation import MaximalMarginalRelevance
+
+# Additional ways of representing a topic
+aspect_model1 = KeyBERTInspired()
+aspect_model2 = PartOfSpeech("en_core_web_sm")
+aspect_model3 = [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance(diversity=.5)]
+
+# Add all models together to be run in a single `fit`
+representation_model = {
+   "Aspect1": main_representation,
+   "Aspect2":  aspect_model1,
+   "Aspect3":  aspect_model2 
+}
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+## Visualizations
+After having trained our BERTopic model, we can iteratively go through hundreds of topics to get a good 
+understanding of the topics that were extracted. However, that takes quite some time and lacks a global representation. Instead, we can use one of the [many visualization options](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html) in BERTopic. For example, we can visualize the topics that were generated in a way very similar to 
 [LDAvis](https://github.com/cpsievert/LDAvis):
 
 ```python

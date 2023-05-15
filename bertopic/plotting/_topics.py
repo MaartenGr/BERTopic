@@ -73,9 +73,14 @@ def visualize_topics(topic_model,
     # Embed c-TF-IDF into 2D
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
-    embeddings = topic_model.c_tf_idf_.toarray()[indices]
-    embeddings = MinMaxScaler().fit_transform(embeddings)
-    embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger', random_state=42).fit_transform(embeddings)
+
+    if topic_model.topic_embeddings_ is not None:
+        embeddings = topic_model.topic_embeddings_[indices]
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric='cosine', random_state=42).fit_transform(embeddings)
+    else:
+        embeddings = topic_model.c_tf_idf_.toarray()[indices]
+        embeddings = MinMaxScaler().fit_transform(embeddings)
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger', random_state=42).fit_transform(embeddings)
 
     # Visualize with plotly
     df = pd.DataFrame({"x": embeddings[:, 0], "y": embeddings[:, 1],

@@ -331,7 +331,8 @@ def save_topics(model, path: str):
         "topic_mapper": np.array(model.topic_mapper_.mappings_, dtype=int).tolist(),
         "topic_labels": model.topic_labels_,
         "custom_labels": model.custom_labels_,
-        "_outliers": int(model._outliers)
+        "_outliers": int(model._outliers),
+        "topic_aspects": model.topic_aspects_
     }
 
     with path.open('w') as f:

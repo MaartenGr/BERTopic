@@ -38,10 +38,14 @@ You may want to install more depending on the transformers and language backends
 The possible installations are: 
 
 ```bash
+# Embedding models
 pip install bertopic[flair]
 pip install bertopic[gensim]
 pip install bertopic[spacy]
 pip install bertopic[use]
+
+# Vision topic modeling
+pip install bertopic[vision]
 ```
 
 ## **Quick Start**
@@ -103,6 +107,28 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 
 **NOTE**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
+
+ In BERTopic, there are a number of different [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) that we can choose from. Instead of iterating over all of these different topic representations, we can model them simultaneousnly and derive a multiple different perspectives for a single topic:
+
+ ```python
+from bertopic.representation import KeyBERTInspired
+from bertopic.representation import PartOfSpeech
+from bertopic.representation import MaximalMarginalRelevance
+
+# Additional ways of representing a topic
+aspect_model1 = KeyBERTInspired()
+aspect_model2 = PartOfSpeech("en_core_web_sm")
+aspect_model3 = [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance(diversity=.5)]
+
+# Add all models together to be run in a single `fit`
+representation_model = {
+   "Aspect1": main_representation,
+   "Aspect2":  aspect_model1,
+   "Aspect3":  aspect_model2 
+}
+topic_model = BERTopic(representation_model=representation_model)
+```
+
 ## **Modularity**
 
 By default, the main steps for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, it assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic not only allows you to build your own topic model but to explore several topic modeling techniques on top of your customized topic model:
@@ -110,7 +136,16 @@ By default, the main steps for topic modeling with BERTopic are sentence-transfo
 <iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/218420473-4b2bb539-9dbe-407a-9674-a8317c7fb3bf.mp4
 " title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-You can swap out any of these models or even remove them entirely. Starting with the embedding step, you can find out how to do this [here](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) and more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
+You can swap out any of these models or even remove them entirely. The following steps are completely modular:
+
+1. [Embedding](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) documents
+2. [Reducing dimensionality](https://maartengr.github.io/BERTopic/getting_started/dim_reduction/dim_reduction.html) of embeddings
+3. [Clustering](https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html) reduced embeddings into topics
+4. [Tokenization](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html) of topics
+5. [Weight](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html) tokens
+6. [Represent topics]((https://maartengr.github.io/BERTopic/getting_started/representation/representation.html)) with one or [multiple]((https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html)) representations
+
+To find more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
 
 ## **Overview**

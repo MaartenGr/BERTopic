@@ -83,6 +83,9 @@ topic_labels = topic_model.generate_topic_labels(nr_words=3,
                                                  separator=", ")
 ```
 
+!!! Tip
+    If you created [**multiple topic representations**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) or aspects, you can choose one of these aspects with `aspect="Aspect1"` or whatever you named the aspect.
+
 In the above example, `1_space_nasa_orbit` would turn into `space, nasa, orbit` since we selected 3 words, no topic prefix, and the `, ` separator. We can then either change our `topic_labels` to whatever we want or directly pass them to `.set_topic_labels` so that they can be used across most visualization functions:
 
 ```python

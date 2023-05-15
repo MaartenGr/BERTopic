@@ -393,18 +393,29 @@ class BERTopic:
 
         # Create documents from images if we have images only
         if documents.Document.values[0] is None:
-            documents = self._images_to_text(documents, embeddings)    
-
-        # Extract topics by calculating c-TF-IDF
-        self._extract_topics(documents, embeddings=embeddings)
-
-        # Reduce topics
-        if self.nr_topics:
-            documents = self._reduce_topics(documents)
-
-        # Save the top 3 most representative documents per topic
-        self._save_representative_docs(documents)
+            custom_documents = self._images_to_text(documents, embeddings)    
         
+            # Extract topics by calculating c-TF-IDF
+            self._extract_topics(custom_documents, embeddings=embeddings)
+            self._create_topic_vectors(documents=documents, embeddings=embeddings)
+
+            # Reduce topics
+            if self.nr_topics:
+                custom_documents = self._reduce_topics(custom_documents)
+
+            # Save the top 3 most representative documents per topic
+            self._save_representative_docs(custom_documents)
+        else:
+             # Extract topics by calculating c-TF-IDF
+            self._extract_topics(documents, embeddings=embeddings)
+
+            # Reduce topics
+            if self.nr_topics:
+                documents = self._reduce_topics(documents)
+
+            # Save the top 3 most representative documents per topic
+            self._save_representative_docs(documents)
+            
         # Resulting output
         self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
@@ -461,11 +472,12 @@ class BERTopic:
         check_is_fitted(self)
         check_embeddings_shape(embeddings, documents)
 
-        if isinstance(documents, str):
+        if isinstance(documents, str) or documents is None:
             documents = [documents]
 
         if embeddings is None:
             embeddings = self._extract_embeddings(documents,
+                                                  images=images,
                                                   method="document",
                                                   verbose=self.verbose)
 
@@ -2106,14 +2118,17 @@ class BERTopic:
                 raise ValueError("To use this strategy, you will need to pass a model to `embedding_model`"
                                   "when instantiating BERTopic.")
             outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
-            outlier_docs = [documents[index] for index in outlier_ids]
+            if images is not None:
+                outlier_docs = [images[index] for index in outlier_ids]
+            else:
+                outlier_docs = [documents[index] for index in outlier_ids]
 
             # Extract or calculate embeddings for outlier documents
             if embeddings is not None:
                 outlier_embeddings = np.array([embeddings[index] for index in outlier_ids])
             elif images is not None:
                 outlier_images = [images[index] for index in outlier_ids]
-                outlier_embeddings = self.embedding_model.embed_images(outlier_images)
+                outlier_embeddings = self.embedding_model.embed_images(outlier_images, verbose=self.verbose)
             else:
                 outlier_embeddings = self.embedding_model.embed_documents(outlier_docs)
             similarity = cosine_similarity(outlier_embeddings, self.topic_embeddings_[self._outliers:])
@@ -3327,7 +3342,7 @@ class BERTopic:
 
             # Use MMR to find representative but diverse documents
             if diversity:
-                docs = mmr(c_tf_idf[index], ctfidf, selected_docs, nr_docs, diversity=diversity)
+                docs = mmr(c_tf_idf[index], ctfidf, selected_docs, top_n=nr_docs, diversity=diversity)
                 repr_docs.extend(docs)
 
             # Extract top n most representative documents

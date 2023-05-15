@@ -115,8 +115,13 @@ def visualize_hierarchy(topic_model,
     # Select embeddings
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
-    embeddings = topic_model.c_tf_idf_[indices]
 
+    # Select topic embeddings
+    if topic_model.c_tf_idf_ is not None:
+        embeddings = topic_model.c_tf_idf_[indices]
+    else:
+        embeddings = np.array(topic_model.topic_embeddings_)[indices]
+        
     # Annotations
     if hierarchical_topics is not None and len(topics) == len(freq_df.Topic.to_list()):
         annotations = _get_annotations(topic_model=topic_model,
