@@ -1281,7 +1281,7 @@ class BERTopic:
                                                         method="word",
                                                         verbose=False).flatten()
         elif image is not None:
-            search_embedding = self._extract_embeddings([""],
+            search_embedding = self._extract_embeddings([None],
                                                         images=[image],
                                                         method="document",
                                                         verbose=False).flatten()
@@ -1296,6 +1296,7 @@ class BERTopic:
 
     def update_topics(self,
                       docs: List[str],
+                      images: List[str] = None,
                       topics: List[int] = None,
                       top_n_words: int = 10,
                       n_gram_range: Tuple[int, int] = None,
@@ -1312,6 +1313,7 @@ class BERTopic:
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
+            images: The images you used when calling either `fit` or `fit_transform`
             topics: A list of topics where each topic is related to a document in `docs`.
                     Use this variable to change or map the topics.
                     NOTE: Using a custom list of topic assignments may lead to errors if
@@ -1372,7 +1374,7 @@ class BERTopic:
                           "Note that topic embeddings will also be created through weighted"
                           "c-TF-IDF embeddings instead of centroid embeddings.")
         # Extract words
-        documents = pd.DataFrame({"Document": docs, "Topic": topics})
+        documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
@@ -1908,7 +1910,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images})
+        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images, "ID": range(len(docs))})
 
         mapping = {topic: topic for topic in set(self.topics_)}
         if isinstance(topics_to_merge[0], int):
@@ -1959,6 +1961,8 @@ class BERTopic:
         Arguments:
             docs: The docs you used when calling either `fit` or `fit_transform`
             nr_topics: The number of topics you want reduced to
+            images: A list of paths to the images used when calling either 
+                    `fit` or `fit_transform`
 
         Updates:
             topics_ : Assigns topics to their merged representations.
@@ -1983,7 +1987,7 @@ class BERTopic:
         check_is_fitted(self)
 
         self.nr_topics = nr_topics
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images})
+        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images, "ID": range(len(docs))})
 
         # Reduce number of topics
         documents = self._reduce_topics(documents)
@@ -2030,6 +2034,8 @@ class BERTopic:
         Arguments:
             documents: A list of documents for which we reduce or remove the outliers.
             topics: The topics that correspond to the documents
+            images: A list of paths to the images used when calling either 
+                    `fit` or `fit_transform`
             strategy: The strategy used for reducing outliers.
                     Options:
                         * "probabilities"
@@ -2114,7 +2120,7 @@ class BERTopic:
 
         # Reduce outliers by finding the most similar topic embeddings
         elif strategy.lower() == "embeddings":
-            if self.embedding_model is None:
+            if self.embedding_model is None and embeddings is None:
                 raise ValueError("To use this strategy, you will need to pass a model to `embedding_model`"
                                   "when instantiating BERTopic.")
             outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
@@ -2931,7 +2937,9 @@ class BERTopic:
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
             save_utils.save_topics(model=self, path=save_directory / "topics.json")
+            save_utils.save_images(model=self, path=save_directory / "images")
             save_utils.save_config(model=self, path=save_directory / 'config.json', embedding_model=save_embedding_model)
+            
 
             # Additional
             if save_ctfidf:
@@ -3095,6 +3103,9 @@ class BERTopic:
             embeddings = self.embedding_model.embed_words(words=documents, verbose=verbose)
         elif method == "document":
             embeddings = self.embedding_model.embed_documents(documents, verbose=verbose)
+        elif documents[0] is None and images is None:
+            raise ValueError("Make sure to use an embedding model that can either embed documents"
+                             "or images depending on which you want to embed.")
         else:
             raise ValueError("Wrong method for extracting document/word embeddings. "
                              "Either choose 'word' or 'document' as the method. ")
@@ -3484,7 +3495,7 @@ class BERTopic:
         Arguments:
             documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
         """
-        sizes = documents.groupby(['Topic']).count().sort_values("Document", ascending=False).reset_index()
+        sizes = documents.groupby(['Topic']).count().sort_values("ID", ascending=False).reset_index()
         self.topic_sizes_ = dict(zip(sizes.Topic, sizes.Document))
         self.topics_ = documents.Topic.astype(int).tolist()
 

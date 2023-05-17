@@ -31,6 +31,14 @@ try:
 except ImportError:
     _has_torch = False
 
+# Image check
+try:
+    from PIL import Image
+    _has_vision = True
+except:
+    _has_vision = False
+
+
 TOPICS_NAME = "topics.json"
 CONFIG_NAME = "config.json"
 
@@ -321,9 +329,33 @@ def save_config(model, path: str, embedding_model):
     return config
 
 
+def save_images(model, path: str):
+    """ Save topic images """
+    if _has_vision:
+        visual_aspects = None
+        for aspect, value in model.topic_aspects_.items():
+            if isinstance(value[0], Image.Image):
+                visual_aspects = model.topic_aspects_[aspect]
+                break
+        
+        if visual_aspects is not None:
+            path.mkdir(exist_ok=True, parents=True)
+            for topic, image in visual_aspects.items():
+                image.save(path / f"{topic}.jpg")
+
+
 def save_topics(model, path: str):
     """ Save Topic-specific information """
     path = Path(path)
+
+    if _has_vision:
+        selected_topic_aspects = {}
+        for aspect, value in model.topic_aspects_.items():
+            if not isinstance(value[0], Image.Image):
+                selected_topic_aspects[aspect] = value
+    else:
+        selected_topic_aspects = model.topic_aspects_
+
     topics = {
         "topic_representations": model.topic_representations_,
         "topics": [int(topic) for topic in model.topics_],
@@ -332,7 +364,7 @@ def save_topics(model, path: str):
         "topic_labels": model.topic_labels_,
         "custom_labels": model.custom_labels_,
         "_outliers": int(model._outliers),
-        "topic_aspects": model.topic_aspects_
+        "topic_aspects": selected_topic_aspects
     }
 
     with path.open('w') as f:

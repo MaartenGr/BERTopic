@@ -10,6 +10,9 @@ with KeyBERT-like models:
 
 For each model below, an example will be shown on how it may change or improve upon the default topic keywords that are generated. The dataset used in these examples can be found [here](https://www.kaggle.com/datasets/maartengr/kurzgesagt-transcriptions). 
 
+If you want to have multiple representations of a single topic, it might be worthwhile to also check out [**multi-aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling with BERTopic.
+
+
 ## **KeyBERTInspired**
 
 After having generated our topics with c-TF-IDF, we might want to do some fine-tuning based on the semantic
@@ -354,6 +357,27 @@ topic: <topic label>
     at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having 
     said that, if `topic: ` is not in the output, then it will simply extract the entire response, so 
     feel free to experiment with the prompts. 
+
+#### **Summarization**
+
+Due to the structure of the prompts in OpenAI's chat models, we can extract different types of topic representations from their GPT models. 
+Instead of extracting a topic label, we can instead ask it to extract a short description of the topic instead:
+
+```python
+summarization_prompt = """
+I have a topic that is described by the following keywords: [KEYWORDS]
+In this topic, the following documents are a small but representative subset of all documents in the topic:
+[DOCUMENTS]
+
+Based on the information above, please give a description of this topic in the following format:
+topic: <description>
+"""
+
+representation_model = OpenAI(model="gpt-3.5-turbo", chat=True, prompt=summarization_prompt, nr_docs=5, delay_in_seconds=3)
+```
+
+The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!
+If you want to have multiple representations of a single topic, it might be worthwhile to also check out [**multi-aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling with BERTopic.
 
 
 ### **LangChain**
