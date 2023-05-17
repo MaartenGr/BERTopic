@@ -2911,6 +2911,11 @@ class BERTopic:
         safetensors.
         """
         if serialization == "pickle":
+            warnings.warn("When you use `pickle` to save/load a BERTopic model,"
+                          "please make sure that the environments in which you save"
+                          "and load the model are **exactly** the same. The version of BERTopic,"
+                          "its dependencies, and python need to remain the same.")
+
             with open(path, 'wb') as file:
 
                 # This prevents the vectorizer from being too large in size if `min_df` was

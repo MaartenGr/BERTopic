@@ -186,6 +186,7 @@ def load_local_files(path):
     ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
 
     # Load images
+    images = None
     if _has_vision:
         try:
             Image.open(path / "images/0.jpg")
@@ -199,8 +200,6 @@ def load_local_files(path):
             for topic in topic_list:
                 image = Image.open(path / f"images/{topic}.jpg")
                 images[int(topic)] = image
-    else:
-        images = None
 
     return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
@@ -234,6 +233,7 @@ def load_files_from_hf(path):
         ctfidf_config, ctfidf_tensors = None, None
 
     # Load images if they exist
+    images = None
     if _has_vision:
         try:
             hf_hub_download(path, "images/0.jpg", revision=None)
@@ -247,8 +247,6 @@ def load_files_from_hf(path):
             for topic in topic_list:
                 image = Image.open(hf_hub_download(path, f"images/{topic}.jpg", revision=None))
                 images[int(topic)] = image
-    else:
-        images = None
 
     return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
