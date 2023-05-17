@@ -2984,13 +2984,13 @@ class BERTopic:
 
         # Load from directory or HF
         if file_or_dir.is_dir():
-            topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_local_files(file_or_dir)
+            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_local_files(file_or_dir)
         elif "/" in str(path):
-            topics, params, tensors, ctfidf_tensors, ctfidf_config = save_utils.load_files_from_hf(path)
+            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(path)
         else:
             raise ValueError("Make sure...")
 
-        return _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config)
+        return _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
 
     def push_to_hf_hub(
             self,
@@ -3929,7 +3929,8 @@ def _create_model_from_files(
         params: Mapping[str, Any],
         tensors: Mapping[str, np.array],
         ctfidf_tensors: Mapping[str, Any] = None,
-        ctfidf_config: Mapping[str, Any] = None):
+        ctfidf_config: Mapping[str, Any] = None,
+        images: Mapping[int, Any] = None):
     """ Create a BERTopic model from a variety of inputs
 
     Arguments:
@@ -3956,7 +3957,8 @@ def _create_model_from_files(
         embedding_model = select_backend(SentenceTransformer(params['embedding_model']))
     except:
         embedding_model = BaseEmbedder()
-    del params['embedding_model']
+    if params.get("embedding_model") is not None:
+        del params['embedding_model']
 
     # Prepare our empty sub-models
     empty_dimensionality_model = BaseDimensionalityReduction()
@@ -3978,7 +3980,13 @@ def _create_model_from_files(
     topic_model._outliers = topics["_outliers"]
 
     if topics.get("topic_aspects"):
-        topic_model.topic_aspects_ = topics["topic_aspects"]
+        topic_aspects = {}
+        for aspect, values in topics["topic_aspects"].items():
+            topic_aspects[aspect] = {int(topic): value for topic, value in values.items()}
+        topic_model.topic_aspects_ = topic_aspects
+
+        if images is not None:
+            topic_model.topic_aspects_["Visual_Aspect"] = images
 
     # Topic Mapper
     topic_model.topic_mapper_ = TopicMapper([0])

@@ -185,7 +185,24 @@ def load_local_files(path):
             ctfidf_tensors = torch.load(torch_path, map_location="cpu")
     ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
 
-    return topics, params, tensors, ctfidf_tensors, ctfidf_config
+    # Load images
+    if _has_vision:
+        try:
+            Image.open(path / "images/0.jpg")
+            _has_images = True
+        except:
+            _has_images = False
+
+        if _has_images:
+            topic_list = list(topics["topic_representations"].keys())
+            images = {}
+            for topic in topic_list:
+                image = Image.open(path / f"images/{topic}.jpg")
+                images[int(topic)] = image
+    else:
+        images = None
+
+    return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
 
 def load_files_from_hf(path):
@@ -216,7 +233,24 @@ def load_files_from_hf(path):
     except:
         ctfidf_config, ctfidf_tensors = None, None
 
-    return topics, params, tensors, ctfidf_tensors, ctfidf_config
+    # Load images if they exist
+    if _has_vision:
+        try:
+            hf_hub_download(path, "images/0.jpg", revision=None)
+            _has_images = True
+        except:
+            _has_images = False
+
+        if _has_images:
+            topic_list = list(topics["topic_representations"].keys())
+            images = {}
+            for topic in topic_list:
+                image = Image.open(hf_hub_download(path, f"images/{topic}.jpg", revision=None))
+                images[int(topic)] = image
+    else:
+        images = None
+
+    return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
 
 def generate_readme(model, repo_id: str):
