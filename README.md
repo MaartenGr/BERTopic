@@ -122,30 +122,23 @@ Think! It's the SCSI card doing...	49     49_windows_drive_dos_file	windows - dr
 1) I have an old Jasmine drive...	49     49_windows_drive_dos_file	windows - drive - docs...	0.038983       ...
 ```
 
-> **Note**
->
+> 🔥 **Tip**  
 > Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
- In BERTopic, there are a number of different [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) that we can choose from. Instead of iterating over all of these different topic representations, we can model them simultaneousnly and derive a multiple different perspectives for a single topic:
+## Fine-tune Topic Representations
+
+In BERTopic, there are a number of different [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) that we can choose from. They are all quite different from one another and give interesting perspectives and variations of topic representations. A great start is `KeyBERTInspired`, which for many users increases the coherence and reduces stopwords from the resulting topic representations:
 
  ```python
 from bertopic.representation import KeyBERTInspired
-from bertopic.representation import PartOfSpeech
-from bertopic.representation import MaximalMarginalRelevance
 
-# Additional ways of representing a topic
-aspect_model1 = KeyBERTInspired()
-aspect_model2 = PartOfSpeech("en_core_web_sm")
-aspect_model3 = [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance(diversity=.5)]
-
-# Add all models together to be run in a single `fit`
-representation_model = {
-   "Aspect1": main_representation,
-   "Aspect2":  aspect_model1,
-   "Aspect3":  aspect_model2 
-}
+# Fine-tune your topic representations
+representation_model = KeyBERTInspired()
 topic_model = BERTopic(representation_model=representation_model)
 ```
+
+> 🔥 **Tip**  
+> Instead of iterating over all of these different topic representations, you can model them simultaneously with [multi-aspect topic representations](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) in BERTopic. 
 
 ## Visualizations
 After having trained our BERTopic model, we can iteratively go through hundreds of topics to get a good 
@@ -171,7 +164,7 @@ You can swap out any of these models or even remove them entirely. The following
 3. [Clustering](https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html) reduced embeddings into topics
 4. [Tokenization](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html) of topics
 5. [Weight](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html) tokens
-6. [Represent topics]((https://maartengr.github.io/BERTopic/getting_started/representation/representation.html)) with one or [multiple]((https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html)) representations
+6. [Represent topics](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) with one or [multiple](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) representations
 
 To find more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
