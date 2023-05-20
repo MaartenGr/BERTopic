@@ -204,6 +204,24 @@ embedding_model = CohereBackend(client)
 topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
+### Multimodal
+To create embeddings for both text and images in the same vector space, we can use the `MultiModalBackend`. 
+This model uses a clip-vit based model that is capable of embedding text, images, or both:
+
+```python
+from bertopic.backend import MultiModalBackend
+model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
+
+# Embed documents only
+doc_embeddings = model.embed_documents(docs)
+
+# Embeding images only
+image_embeddings = model.embed_images(images)
+
+# Embed both images and documents, then average them
+doc_image_embeddings = model.embed(docs, images)
+```
+
 
 ### **Custom Backend**
 If your backend or model cannot be found in the ones currently available, you can use the `bertopic.backend.BaseEmbedder` class to 

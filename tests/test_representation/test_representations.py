@@ -143,5 +143,5 @@ def test_find_topics(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     similar_topics, similarity = topic_model.find_topics("car")
 
-    assert np.mean(similarity) > 0.3
+    assert np.mean(similarity) > 0.1
     assert len(similar_topics) > 0

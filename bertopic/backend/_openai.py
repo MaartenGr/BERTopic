@@ -30,8 +30,7 @@ class OpenAIBackend(BaseEmbedder):
     def __init__(self, 
                  embedding_model: str = "text-embedding-ada-002",
                  delay_in_seconds: float = None,
-                 batch_size: int = None
-):
+                 batch_size: int = None):
         super().__init__()
         self.embedding_model = embedding_model
         self.delay_in_seconds = delay_in_seconds

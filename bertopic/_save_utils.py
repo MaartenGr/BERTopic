@@ -31,6 +31,14 @@ try:
 except ImportError:
     _has_torch = False
 
+# Image check
+try:
+    from PIL import Image
+    _has_vision = True
+except:
+    _has_vision = False
+
+
 TOPICS_NAME = "topics.json"
 CONFIG_NAME = "config.json"
 
@@ -167,17 +175,36 @@ def load_local_files(path):
             tensors = torch.load(torch_path, map_location="cpu")
 
     # c-TF-IDF
-    ctfidf_tensors = None
-    safetensor_path = path / CTFIDF_SAFE_WEIGHTS_NAME
-    if safetensor_path.is_file():
-        ctfidf_tensors = load_safetensors(safetensor_path)
-    else:
-        torch_path = path / CTFIDF_WEIGHTS_NAME
-        if torch_path.is_file():
-            ctfidf_tensors = torch.load(torch_path, map_location="cpu")
-    ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
+    try:
+        ctfidf_tensors = None
+        safetensor_path = path / CTFIDF_SAFE_WEIGHTS_NAME
+        if safetensor_path.is_file():
+            ctfidf_tensors = load_safetensors(safetensor_path)
+        else:
+            torch_path = path / CTFIDF_WEIGHTS_NAME
+            if torch_path.is_file():
+                ctfidf_tensors = torch.load(torch_path, map_location="cpu")
+        ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
+    except:
+        ctfidf_config, ctfidf_tensors = None, None
 
-    return topics, params, tensors, ctfidf_tensors, ctfidf_config
+    # Load images
+    images = None
+    if _has_vision:
+        try:
+            Image.open(path / "images/0.jpg")
+            _has_images = True
+        except:
+            _has_images = False
+
+        if _has_images:
+            topic_list = list(topics["topic_representations"].keys())
+            images = {}
+            for topic in topic_list:
+                image = Image.open(path / f"images/{topic}.jpg")
+                images[int(topic)] = image
+
+    return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
 
 def load_files_from_hf(path):
@@ -208,7 +235,23 @@ def load_files_from_hf(path):
     except:
         ctfidf_config, ctfidf_tensors = None, None
 
-    return topics, params, tensors, ctfidf_tensors, ctfidf_config
+    # Load images if they exist
+    images = None
+    if _has_vision:
+        try:
+            hf_hub_download(path, "images/0.jpg", revision=None)
+            _has_images = True
+        except:
+            _has_images = False
+
+        if _has_images:
+            topic_list = list(topics["topic_representations"].keys())
+            images = {}
+            for topic in topic_list:
+                image = Image.open(hf_hub_download(path, f"images/{topic}.jpg", revision=None))
+                images[int(topic)] = image
+
+    return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
 
 def generate_readme(model, repo_id: str):
@@ -321,9 +364,35 @@ def save_config(model, path: str, embedding_model):
     return config
 
 
+def save_images(model, path: str):
+    """ Save topic images """
+    if _has_vision:
+        visual_aspects = None
+        for aspect, value in model.topic_aspects_.items():
+            if isinstance(value[0], Image.Image):
+                visual_aspects = model.topic_aspects_[aspect]
+                break
+        
+        if visual_aspects is not None:
+            path.mkdir(exist_ok=True, parents=True)
+            for topic, image in visual_aspects.items():
+                image.save(path / f"{topic}.jpg")
+
+
 def save_topics(model, path: str):
     """ Save Topic-specific information """
     path = Path(path)
+
+    if _has_vision:
+        selected_topic_aspects = {}
+        for aspect, value in model.topic_aspects_.items():
+            if not isinstance(value[0], Image.Image):
+                selected_topic_aspects[aspect] = value
+            else:
+                selected_topic_aspects["Visual_Aspect"] = True
+    else:
+        selected_topic_aspects = model.topic_aspects_
+
     topics = {
         "topic_representations": model.topic_representations_,
         "topics": [int(topic) for topic in model.topics_],
@@ -331,7 +400,8 @@ def save_topics(model, path: str):
         "topic_mapper": np.array(model.topic_mapper_.mappings_, dtype=int).tolist(),
         "topic_labels": model.topic_labels_,
         "custom_labels": model.custom_labels_,
-        "_outliers": int(model._outliers)
+        "_outliers": int(model._outliers),
+        "topic_aspects": selected_topic_aspects
     }
 
     with path.open('w') as f:
@@ -386,6 +456,7 @@ def get_package_versions():
 def load_safetensors(path):
     """ Load safetensors and check whether it is installed """
     try:
+        import safetensors.torch
         import safetensors
         return safetensors.torch.load_file(path, device="cpu")
     except ImportError:
@@ -395,6 +466,7 @@ def load_safetensors(path):
 def save_safetensors(path, tensors):
     """ Save safetensors and check whether it is installed """
     try:
+        import safetensors.torch
         import safetensors
         safetensors.torch.save_file(tensors, path)
     except ImportError:

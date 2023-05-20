@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List
+from typing import List, Union
 import plotly.graph_objects as go
 from sklearn.preprocessing import normalize
 
@@ -9,7 +9,7 @@ def visualize_topics_per_class(topic_model,
                                top_n_topics: int = 10,
                                topics: List[int] = None,
                                normalize_frequency: bool = False,
-                               custom_labels: bool = False,
+                               custom_labels: Union[bool, str] = False,
                                title: str = "<b>Topics per Class</b>",
                                width: int = 1250,
                                height: int = 900) -> go.Figure:
@@ -22,8 +22,9 @@ def visualize_topics_per_class(topic_model,
         top_n_topics: To visualize the most frequent topics instead of all
         topics: Select which topics you would like to be visualized
         normalize_frequency: Whether to normalize each topic's frequency individually
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
@@ -62,7 +63,12 @@ def visualize_topics_per_class(topic_model,
         selected_topics = sorted(freq_df.Topic.to_list())
 
     # Prepare data
-    if topic_model.custom_labels_ is not None and custom_labels:
+    if isinstance(custom_labels, str):
+        topic_names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        topic_names = ["_".join([label[0] for label in labels[:4]]) for labels in topic_names]
+        topic_names = [label if len(label) < 30 else label[:27] + "..." for label in topic_names]
+        topic_names = {key: topic_names[index] for index, key in enumerate(topic_model.topic_labels_.keys())}
+    elif topic_model.custom_labels_ is not None and custom_labels:
         topic_names = {key: topic_model.custom_labels_[key + topic_model._outliers] for key, _ in topic_model.topic_labels_.items()}
     else:
         topic_names = {key: value[:40] + "..." if len(value) > 40 else value

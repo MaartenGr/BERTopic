@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Union
 from scipy.cluster.hierarchy import fcluster, linkage
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -11,7 +11,7 @@ def visualize_heatmap(topic_model,
                       topics: List[int] = None,
                       top_n_topics: int = None,
                       n_clusters: int = None,
-                      custom_labels: bool = False,
+                      custom_labels: Union[bool, str] = False,
                       title: str = "<b>Similarity Matrix</b>",
                       width: int = 800,
                       height: int = 800) -> go.Figure:
@@ -26,8 +26,9 @@ def visualize_heatmap(topic_model,
         top_n_topics: Only select the top n most frequent topics.
         n_clusters: Create n clusters and order the similarity
                     matrix by those clusters.
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
@@ -94,7 +95,11 @@ def visualize_heatmap(topic_model,
     distance_matrix = cosine_similarity(embeddings)
 
     # Create labels
-    if topic_model.custom_labels_ is not None and custom_labels:
+    if isinstance(custom_labels, str):
+        new_labels = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in sorted_topics]
+        new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+        new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
+    elif topic_model.custom_labels_ is not None and custom_labels:
         new_labels = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in sorted_topics]
     else:
         new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]

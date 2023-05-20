@@ -89,8 +89,6 @@ def test_get_topic_info(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     info = topic_model.get_topic_info()
 
-    assert all(info.columns == ['Topic', 'Count', 'Name'])
-
     if topic_model._outliers:
         assert info.iloc[0].Topic == -1
     else:

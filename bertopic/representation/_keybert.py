@@ -81,7 +81,7 @@ class KeyBERTInspired(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # We extract the top n representative documents per class
-        _, representative_docs, repr_doc_indices = topic_model._extract_representative_docs(c_tf_idf, documents, topics, self.nr_samples, self.nr_repr_docs)
+        _, representative_docs, repr_doc_indices, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, self.nr_samples, self.nr_repr_docs)
 
         # We extract the top n words per class
         topics = self._extract_candidate_words(topic_model, c_tf_idf, topics)

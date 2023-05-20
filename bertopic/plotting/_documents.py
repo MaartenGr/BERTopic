@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from umap import UMAP
-from typing import List
+from typing import List, Union
 
 
 def visualize_documents(topic_model,
@@ -14,7 +14,7 @@ def visualize_documents(topic_model,
                         sample: float = None,
                         hide_annotations: bool = False,
                         hide_document_hover: bool = False,
-                        custom_labels: bool = False,
+                        custom_labels: Union[bool, str] = False,
                         title: str = "<b>Documents and Topics</b>",
                         width: int = 1200,
                         height: int = 750):
@@ -36,8 +36,9 @@ def visualize_documents(topic_model,
         hide_annotations: Hide the names of the traces on top of each cluster.
         hide_document_hover: Hide the content of the documents when hovering over
                              specific points. Helps to speed up generation of visualization.
-        custom_labels: Whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
+                       If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of the figure.
         height: The height of the figure.
@@ -134,7 +135,11 @@ def visualize_documents(topic_model,
     df["y"] = embeddings_2d[:, 1]
 
     # Prepare text and names
-    if topic_model.custom_labels_ is not None and custom_labels:
+    if isinstance(custom_labels, str):
+        names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in unique_topics]
+        names = ["_".join([label[0] for label in labels[:4]]) for labels in names]
+        names = [label if len(label) < 30 else label[:27] + "..." for label in names]
+    elif topic_model.custom_labels_ is not None and custom_labels:
         names = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in unique_topics]
     else:
         names = [f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]

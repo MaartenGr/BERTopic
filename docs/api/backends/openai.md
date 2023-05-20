@@ -1,3 +1,3 @@
-# `OpenAI`
+# `OpenAIBackend`
 
-::: bertopic.backend._openai.OpenAI
+::: bertopic.backend._openai.OpenAIBackend

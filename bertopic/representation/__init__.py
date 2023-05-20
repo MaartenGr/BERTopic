@@ -38,6 +38,13 @@ try:
 except ModuleNotFoundError:
     PartOfSpeech = NotInstalled("Part of Speech with Spacy", "spacy")
 
+# Multimodal
+try:
+    from bertopic.representation._visual import VisualRepresentation
+except ModuleNotFoundError:
+    VisualRepresentation = NotInstalled("a visual representation model", "vision")
+
+
 
 __all__ = [
     "BaseRepresentation",
@@ -48,5 +55,6 @@ __all__ = [
     "MaximalMarginalRelevance",
     "Cohere",
     "OpenAI",
-    "LangChain"
+    "LangChain",
+    "VisualRepresentation"
 ]
