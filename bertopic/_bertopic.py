@@ -2993,7 +2993,7 @@ class BERTopic:
         elif "/" in str(path):
             topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(path)
         else:
-            raise ValueError("Make sure...")
+            raise ValueError("Make sure to either pass a valid directory or HF model.")
 
         return _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
 
@@ -3987,7 +3987,8 @@ def _create_model_from_files(
     if topics.get("topic_aspects"):
         topic_aspects = {}
         for aspect, values in topics["topic_aspects"].items():
-            topic_aspects[aspect] = {int(topic): value for topic, value in values.items()}
+            if aspect != "Visual_Aspect":
+                topic_aspects[aspect] = {int(topic): value for topic, value in values.items()}
         topic_model.topic_aspects_ = topic_aspects
 
         if images is not None:

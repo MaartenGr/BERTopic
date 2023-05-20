@@ -175,15 +175,18 @@ def load_local_files(path):
             tensors = torch.load(torch_path, map_location="cpu")
 
     # c-TF-IDF
-    ctfidf_tensors = None
-    safetensor_path = path / CTFIDF_SAFE_WEIGHTS_NAME
-    if safetensor_path.is_file():
-        ctfidf_tensors = load_safetensors(safetensor_path)
-    else:
-        torch_path = path / CTFIDF_WEIGHTS_NAME
-        if torch_path.is_file():
-            ctfidf_tensors = torch.load(torch_path, map_location="cpu")
-    ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
+    try:
+        ctfidf_tensors = None
+        safetensor_path = path / CTFIDF_SAFE_WEIGHTS_NAME
+        if safetensor_path.is_file():
+            ctfidf_tensors = load_safetensors(safetensor_path)
+        else:
+            torch_path = path / CTFIDF_WEIGHTS_NAME
+            if torch_path.is_file():
+                ctfidf_tensors = torch.load(torch_path, map_location="cpu")
+        ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
+    except:
+        ctfidf_config, ctfidf_tensors = None, None
 
     # Load images
     images = None
@@ -385,6 +388,8 @@ def save_topics(model, path: str):
         for aspect, value in model.topic_aspects_.items():
             if not isinstance(value[0], Image.Image):
                 selected_topic_aspects[aspect] = value
+            else:
+                selected_topic_aspects["Visual_Aspect"] = True
     else:
         selected_topic_aspects = model.topic_aspects_
 
