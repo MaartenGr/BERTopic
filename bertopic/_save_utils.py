@@ -451,6 +451,7 @@ def get_package_versions():
 def load_safetensors(path):
     """ Load safetensors and check whether it is installed """
     try:
+        import safetensors.torch
         import safetensors
         return safetensors.torch.load_file(path, device="cpu")
     except ImportError:
@@ -460,6 +461,7 @@ def load_safetensors(path):
 def save_safetensors(path, tensors):
     """ Save safetensors and check whether it is installed """
     try:
+        import safetensors.torch
         import safetensors
         safetensors.torch.save_file(tensors, path)
     except ImportError:
