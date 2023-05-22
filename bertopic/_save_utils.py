@@ -54,7 +54,7 @@ MODEL_CARD_TEMPLATE = """
 tags:
 - bertopic
 library_name: bertopic
-pipeline_tag: text-classification
+pipeline_tag: {PIPELINE_TAG}
 ---
 
 # {MODEL_NAME}
@@ -285,6 +285,13 @@ def generate_readme(model, repo_id: str):
     model_card = model_card.replace("{HYPERPARAMS}", params)
     model_card = model_card.replace("{FRAMEWORKS}", frameworks)
     
+    # Fill Pipeline tag
+    has_visual_aspect = check_has_visual_aspect(model)
+    if not has_visual_aspect:
+        model_card = model_card.replace("{PIPELINE_TAG}", "text-classification")
+    else:
+        model_card = model_card.replace("pipeline_tag: {PIPELINE_TAG} /n","") # TODO add proper tag for this instance 
+        
     return model_card
 
 
@@ -364,6 +371,13 @@ def save_config(model, path: str, embedding_model):
 
     return config
 
+def check_has_visual_aspect(model):
+    """Check if model has visual aspect"""
+    if _has_vision:
+        for aspect, value in model.topic_aspects_.items():
+            if isinstance(value[0], Image.Image):
+                visual_aspects = model.topic_aspects_[aspect]
+                return True
 
 def save_images(model, path: str):
     """ Save topic images """
