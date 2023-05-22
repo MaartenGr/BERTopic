@@ -54,6 +54,7 @@ MODEL_CARD_TEMPLATE = """
 tags:
 - bertopic
 library_name: bertopic
+pipeline_tag: text-classification
 ---
 
 # {MODEL_NAME}
