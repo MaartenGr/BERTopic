@@ -480,9 +480,15 @@ class BERTopic:
                                                   images=images,
                                                   method="document",
                                                   verbose=self.verbose)
+            
+        # Check if an embedding model was found
+        if embeddings is None:
+            raise ValueError("No embedding model was found to embed the documents."
+                             "Make sure when loading in the model using BERTopic.load()"
+                             "to also specify the embedding model.")
 
         # Transform without hdbscan_model and umap_model using only cosine similarity
-        if type(self.hdbscan_model) == BaseCluster:
+        elif type(self.hdbscan_model) == BaseCluster:
             sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
             predictions = np.argmax(sim_matrix, axis=1) - self._outliers
 
@@ -2938,6 +2944,11 @@ class BERTopic:
             # Check embedding model
             if save_embedding_model and hasattr(self.embedding_model, '_hf_model') and not isinstance(save_embedding_model, str):
                 save_embedding_model = self.embedding_model._hf_model
+            elif not save_embedding_model:
+                warnings.warn("You are saving a BERTopic model without explicitly defining an embedding model."
+                              "If you are using a sentence-transformers model or a HuggingFace model supported"
+                              "by sentence-transformers, please save the model by using a pointer towards that model."
+                              "For example, `save_embedding_model=sentence-transformers/all-mpnet-base-v2`")
 
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
@@ -2945,7 +2956,6 @@ class BERTopic:
             save_utils.save_images(model=self, path=save_directory / "images")
             save_utils.save_config(model=self, path=save_directory / 'config.json', embedding_model=save_embedding_model)
             
-
             # Additional
             if save_ctfidf:
                 save_utils.save_ctfidf(model=self, save_directory=save_directory, serialization=serialization)
@@ -3962,6 +3972,10 @@ def _create_model_from_files(
         embedding_model = select_backend(SentenceTransformer(params['embedding_model']))
     except:
         embedding_model = BaseEmbedder()
+        warnings.warn("You are loading a BERTopic model without explicitly defining an embedding model."
+                      "If you want to also load in an embedding model, make sure to use"
+                      "BERTopic.load(my_model, embedding_model=my_embedding_model).")
+
     if params.get("embedding_model") is not None:
         del params['embedding_model']
 

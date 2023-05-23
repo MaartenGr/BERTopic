@@ -111,7 +111,7 @@ def push_to_hf_hub(
         create_pr: bool = False,
         model_card: bool = True,
         serialization: str = "safetensors",
-        save_embedding_model: str = None,
+        save_embedding_model: Union[str, bool] = True,
         save_ctfidf: bool = False,
         ):
     """ Push your BERTopic model to a HuggingFace Hub
