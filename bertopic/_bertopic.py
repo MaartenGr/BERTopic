@@ -3004,8 +3004,13 @@ class BERTopic:
             topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(path)
         else:
             raise ValueError("Make sure to either pass a valid directory or HF model.")
+        topic_model = _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
+        
+        # Replace embedding model if one is specifically chosen
+        if embedding_model is not None and type(topic_model.embedding_model) == BaseEmbedder:
+            topic_model.embedding_model = select_backend(embedding_model)
 
-        return _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
+        return topic_model
 
     def push_to_hf_hub(
             self,
