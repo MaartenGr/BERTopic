@@ -14,7 +14,7 @@ nav:
       - getting_started/quickstart/quickstart.md
       - Topic Visualization: getting_started/visualization/visualization.md
       - Topic Reduction: getting_started/topicreduction/topicreduction.md
-      - Topic Representation: getting_started/topicrepresentation/topicrepresentation.md
+      - Update Topics: getting_started/topicrepresentation/topicrepresentation.md
       - Search Topics: getting_started/search/search.md
       - Parameter tuning: getting_started/parameter tuning/parametertuning.md       
       - Outlier reduction: getting_started/outlier_reduction/outlier_reduction.md       
