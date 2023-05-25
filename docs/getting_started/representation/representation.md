@@ -459,9 +459,6 @@ from bertopic.representation._base import BaseRepresentation
 
 
 class CustomRepresentationModel(BaseRepresentation):
-    def __init__(self):
-        pass
-
     def extract_topics(self, topic_model, documents, c_tf_idf, topics
                       ) -> Mapping[str, List[Tuple[str, float]]]:
         """ Extract topics
@@ -494,8 +491,16 @@ topic_model = BERTopic(representation_model=representation_model)
 There are a few things to take into account when creating your custom model:
 
 * It needs to have the exact same parameter input: `topic_model`, `documents`, `c_tf_idf`, `topics`.
-* You can change the `__init__` however you want, it does not influence the underlying structure
 * Make sure that `updated_topics` has the exact same structure as `topics`:
-    * For example: `updated_topics = {"1", [("space", 0.9), ("nasa", 0.7)], "2": [("science", 0.66), ("article", 0.6)]`}
-    * Thus, it is a dictionary where each topic is represented by a list of keyword,value tuples.
-* Lastly, make sure that `updated_topics` contains at least 5 keywords, even if they are empty: `[("", 0), ("", 0), ...]`
+
+```python
+updated_topics = {
+    "1", [("space", 0.9), ("nasa", 0.7)], 
+    "2": [("science", 0.66), ("article", 0.6)]
+}
+```
+
+!!! Tip
+    You can change the `__init__` however you want, it does not influence the underlying structure. This
+    also means that you can save data/embeddings/representations/sentiment in your custom representation 
+    model. 

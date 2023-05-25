@@ -130,8 +130,7 @@ Think! It's the SCSI card doing...	49     49_windows_drive_dos_file	windows - dr
 1) I have an old Jasmine drive...	49     49_windows_drive_dos_file	windows - drive - docs...	0.038983       ...
 ```
 
-> 🔥 **Tip**  
-> Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
+**`🔥 Tip`**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
 
 ## Fine-tune Topic Representations
 
@@ -157,8 +156,7 @@ representation_model = OpenAI(model="gpt-3.5-turbo", chat=True)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-> 🔥 **Tip**  
-> Instead of iterating over all of these different topic representations, you can model them simultaneously with [multi-aspect topic representations](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) in BERTopic. 
+**`🔥 Tip`**: Instead of iterating over all of these different topic representations, you can model them simultaneously with [multi-aspect topic representations](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) in BERTopic. 
 
 
 ## Visualizations

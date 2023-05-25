@@ -21,13 +21,13 @@ nav:
       - Serialization: getting_started/serialization/serialization.md       
       - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md       
       - Sub-models:
-        - Embeddings: getting_started/embeddings/embeddings.md
-        - Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
-        - Clustering: getting_started/clustering/clustering.md
-        - Vectorizers: getting_started/vectorizers/vectorizers.md
-        - c-TF-IDF: getting_started/ctfidf/ctfidf.md
-        - (Optional) Representation: getting_started/representation/representation.md
-        - (Optional) Multi-Aspect: getting_started/multiaspect/multiaspect.md
+        - 1. Embeddings: getting_started/embeddings/embeddings.md
+        - 2. Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
+        - 3. Clustering: getting_started/clustering/clustering.md
+        - 4. Vectorizers: getting_started/vectorizers/vectorizers.md
+        - 5. c-TF-IDF: getting_started/ctfidf/ctfidf.md
+        - 6A. Fine-tune Representation: getting_started/representation/representation.md
+        - 6B. Multiple Representations: getting_started/multiaspect/multiaspect.md
       - Variations:
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Guided Topic Modeling: getting_started/guided/guided.md
