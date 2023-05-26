@@ -12,6 +12,7 @@ import re
 import math
 import joblib
 import inspect
+import collections
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -3515,8 +3516,7 @@ class BERTopic:
         Arguments:
             documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
         """
-        sizes = documents.groupby(['Topic']).count().sort_values("ID", ascending=False).reset_index()
-        self.topic_sizes_ = dict(zip(sizes.Topic, sizes.Document))
+        self.topic_sizes_ = collections.Counter(documents.Topic.values.tolist())
         self.topics_ = documents.Topic.astype(int).tolist()
 
     def _extract_words_per_topic(self,
