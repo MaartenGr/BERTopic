@@ -48,7 +48,7 @@ vision_packages = [
 
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 
-dev_packages = docs_packages + test_packages + extra_packages
+dev_packages = docs_packages + test_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

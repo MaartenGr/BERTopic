@@ -136,10 +136,14 @@ Method 3 allows for saving the entire topic model but has several drawbacks:
 These methods have a number of advantages:
 
 * `.safetensors` is a relatively **safe format**
-* The resulting model can be **very small** (often < 20MB>) since no sub-models need to be saved
+* The resulting model can be **very small** (often < 20MB) since no sub-models need to be saved
 * Although version control is important, there is a bit more **flexibility** with respect to specific versions of packages
 * More easily used in **production**
 * **Share** models with the HuggingFace Hub
+
+
+!!! Tip "Tip"
+    For more detail about how to load in a custom vectorizer, representation model, and more, it is highly advised to checkout the [serialization](https://maartengr.github.io/BERTopic/getting_started/serialization/serialization.html) page. It contains more examples, details, and some tips and tricks for loading and saving your environment. 
 
 
 The methods are as used as follows:
