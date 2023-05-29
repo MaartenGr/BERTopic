@@ -1,4 +1,4 @@
-tests:
+test:
 	pytest
 
 coverage:

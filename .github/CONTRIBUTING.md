@@ -36,7 +36,7 @@ If you are using conda, you can approach it as follows:
 2. Install requirements (e.g., `pip install .[dev]`)
   * This makes sure to also install documentation and testing packages
 3. (Optional) Run `make docs` to build your documentation
-4. (Optional) Run `make tests` to run the unit tests and `make coverage` to check the coverage of unit tests
+4. (Optional) Run `make test` to run the unit tests and `make coverage` to check the coverage of unit tests
 
 ❗Note: Unit testing the package can take quite some time since it needs to run several variants of the BERTopic pipeline.
 
