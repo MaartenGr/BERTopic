@@ -266,7 +266,11 @@ def generate_readme(model, repo_id: str):
     params = "\n".join([f"* {param}: {value}" for param, value in params.items()])
     topics = sorted(list(set(model.topics_)))
     nr_topics = str(len(set(model.topics_)))
-    nr_documents = str(model.c_tf_idf_.shape[1])
+
+    if model.topic_sizes_ is not None:
+        nr_documents = str(sum(model.topic_sizes_.values()))
+    else:
+        nr_documents = ""
 
     # Topic information
     topic_keywords = [" - ".join(list(zip(*model.get_topic(topic)))[0][:5]) for topic in topics]
