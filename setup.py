@@ -44,7 +44,7 @@ gensim_packages = [
 
 vision_packages = [
     "Pillow>=9.2.0",
-    "accelerate>=0.16.0"
+    "accelerate>=0.19.0"  # To prevent "cannot import name 'PartialState' from 'accelerate'"
 ]
 
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
