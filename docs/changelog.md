@@ -29,6 +29,7 @@ hide:
 * Added cuML support for probability calculation in `.transform`
 * Updated **topic embeddings**
     * Centroids by default and c-TF-IDF weighted embeddings for `partial_fit` and `.update_topics`
+* Added `exponential_backoff` parameter to `OpenAI` model
 
 <h3><b>Fixes:</a></b></h3>
 
