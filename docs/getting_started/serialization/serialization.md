@@ -53,6 +53,12 @@ Saving the topic modeling with `.safetensors` or `pytorch` has a number of advan
 * More easily used in **production**
 * **Share** models with the HuggingFace Hub
 
+<br><br>
+<img src="serialization.png">
+<br><br>
+
+The above image, a model trained on 100,000 documents, demonstrates the differences in sizes comparing `safetensors`, `pytorch`, and `pickle`. The difference in sizes can mostly be explained due to the efficient saving procedure and that the clustering and dimensionality reductions are not saved in safetensors/pytorch since inference can be done based on the topic embeddings. 
+
 
 ## **HuggingFace Hub**
 

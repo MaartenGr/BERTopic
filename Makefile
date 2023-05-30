@@ -1,12 +1,17 @@
 test:
 	pytest
 
+coverage:
+	pytest --cov
+
 install:
 	python -m pip install -e .
 
 install-test:
-	python -m pip install -e ".[test]"
-	python -m pip install -e "."
+	python -m pip install -e ".[dev]"
+
+docs:
+	mkdocs serve
 
 pypi:
 	python setup.py sdist

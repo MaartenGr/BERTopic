@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any
 from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._utils import retry_with_exponential_backoff
 
 
 DEFAULT_PROMPT = """
@@ -69,6 +70,11 @@ class OpenAI(BaseRepresentation):
                 inserted.
         delay_in_seconds: The delay in seconds between consecutive prompts 
                           in order to prevent RateLimitErrors. 
+        exponential_backoff: Retry requests with a random exponential backoff. 
+                             A short sleep is used when a rate limit error is hit, 
+                             then the requests is retried. Increase the sleep length
+                             if errors are hit until 10 unsuccesfull requests. 
+                             If True, overrides `delay_in_seconds`.
         chat: Set this to True if a GPT-3.5 model is used.
               See: https://platform.openai.com/docs/models/gpt-3-5
         nr_docs: The number of documents to pass to OpenAI if a prompt
@@ -116,6 +122,7 @@ class OpenAI(BaseRepresentation):
                  prompt: str = None,
                  generator_kwargs: Mapping[str, Any] = {},
                  delay_in_seconds: float = None,
+                 exponential_backoff: bool = False,
                  chat: bool = False,
                  nr_docs: int = 4,
                  diversity: float = None
@@ -129,6 +136,7 @@ class OpenAI(BaseRepresentation):
 
         self.default_prompt_ = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
         self.delay_in_seconds = delay_in_seconds
+        self.exponential_backoff = exponential_backoff
         self.chat = chat
         self.nr_docs = nr_docs
         self.diversity = diversity
@@ -176,10 +184,16 @@ class OpenAI(BaseRepresentation):
                     {"role": "user", "content": prompt}
                 ]
                 kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
-                response = openai.ChatCompletion.create(**kwargs)
+                if self.exponential_backoff:
+                    response = chat_completions_with_backoff(**kwargs)
+                else:
+                    response = openai.ChatCompletion.create(**kwargs)
                 label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
             else:
-                response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
+                if self.exponential_backoff:
+                    response = completions_with_backoff(model=self.model, prompt=prompt, **self.generator_kwargs)
+                else:
+                    response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
                 label = response["choices"][0]["text"].strip()
 
             updated_topics[topic] = [(label, 1)]
@@ -212,3 +226,11 @@ class OpenAI(BaseRepresentation):
             to_replace += f"- {doc[:255]}\n"
         prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt
+
+
+def completions_with_backoff(**kwargs):
+    return retry_with_exponential_backoff(openai.Completion.create, errors=(openai.error.RateLimitError,))(**kwargs)
+
+
+def chat_completions_with_backoff(**kwargs):
+    return retry_with_exponential_backoff(openai.ChatCompletion.create, errors=(openai.error.RateLimitError,))(**kwargs)

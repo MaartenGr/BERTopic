@@ -10,13 +10,10 @@ You may want to install more depending on the transformers and language backends
 The possible installations are: 
 
 ```bash
-# Embedding models
-pip install bertopic[flair]
-pip install bertopic[gensim]
-pip install bertopic[spacy]
-pip install bertopic[use]
+# Choose an embedding backend
+pip install bertopic[flair, gensim, spacy, use]
 
-# Vision topic modeling
+# Topic modeling with images
 pip install bertopic[vision]
 ```
 
@@ -93,6 +90,18 @@ representation_model = KeyBERTInspired()
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
+However, you might want to use something more powerful to describe your clusters. You can even use ChatGPT or other models from OpenAI to generate labels, summaries, phrases, keywords, and more:
+
+```python
+import openai
+from bertopic.representation import OpenAI
+
+# Fine-tune topic representations with GPT
+openai.api_key = "sk-..."
+representation_model = OpenAI(model="gpt-3.5-turbo", chat=True)
+topic_model = BERTopic(representation_model=representation_model)
+```
+
 !!! tip "Multi-aspect Topic Modeling"
     Instead of iterating over all of these different topic representations, you can model them simultaneously with [multi-aspect topic representations](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) in BERTopic. 
 
@@ -127,10 +136,14 @@ Method 3 allows for saving the entire topic model but has several drawbacks:
 These methods have a number of advantages:
 
 * `.safetensors` is a relatively **safe format**
-* The resulting model can be **very small** (often < 20MB>) since no sub-models need to be saved
+* The resulting model can be **very small** (often < 20MB) since no sub-models need to be saved
 * Although version control is important, there is a bit more **flexibility** with respect to specific versions of packages
 * More easily used in **production**
 * **Share** models with the HuggingFace Hub
+
+
+!!! Tip "Tip"
+    For more detail about how to load in a custom vectorizer, representation model, and more, it is highly advised to checkout the [serialization](https://maartengr.github.io/BERTopic/getting_started/serialization/serialization.html) page. It contains more examples, details, and some tips and tricks for loading and saving your environment. 
 
 
 The methods are as used as follows:

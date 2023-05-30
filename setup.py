@@ -43,12 +43,13 @@ gensim_packages = [
 ]
 
 vision_packages = [
-    "Pillow>=9.2.0"
+    "Pillow>=9.2.0",
+    "accelerate>=0.19.0"  # To prevent "cannot import name 'PartialState' from 'accelerate'"
 ]
 
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 
-dev_packages = docs_packages + test_packages + extra_packages
+dev_packages = docs_packages + test_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -56,7 +57,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.14.1",
+    version="0.15.0",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",

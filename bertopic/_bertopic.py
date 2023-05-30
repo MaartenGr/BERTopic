@@ -12,6 +12,7 @@ import re
 import math
 import joblib
 import inspect
+import collections
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -3004,8 +3005,13 @@ class BERTopic:
             topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(path)
         else:
             raise ValueError("Make sure to either pass a valid directory or HF model.")
+        topic_model = _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
+        
+        # Replace embedding model if one is specifically chosen
+        if embedding_model is not None and type(topic_model.embedding_model) == BaseEmbedder:
+            topic_model.embedding_model = select_backend(embedding_model)
 
-        return _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
+        return topic_model
 
     def push_to_hf_hub(
             self,
@@ -3510,8 +3516,7 @@ class BERTopic:
         Arguments:
             documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
         """
-        sizes = documents.groupby(['Topic']).count().sort_values("ID", ascending=False).reset_index()
-        self.topic_sizes_ = dict(zip(sizes.Topic, sizes.Document))
+        self.topic_sizes_ = collections.Counter(documents.Topic.values.tolist())
         self.topics_ = documents.Topic.astype(int).tolist()
 
     def _extract_words_per_topic(self,

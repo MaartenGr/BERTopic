@@ -10,19 +10,29 @@ hide:
 BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions.
 
-BERTopic supports [**guided**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html), 
-[**supervised**](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html), 
-[**semi-supervised**](https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html), 
-[**manual**](https://maartengr.github.io/BERTopic/getting_started/manual/manual.html), 
-[**long-document**](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html),
-[**hierarchical**](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html), 
-[**class-based**](https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html),
-[**dynamic**](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html), 
-[**online**](https://maartengr.github.io/BERTopic/getting_started/online/online.html),
-[**multimodal**](https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html), and 
-[**multi-aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling. 
-
-It even supports visualizations similar to LDAvis!
+BERTopic supports all kinds of topic modeling techniques:  
+<table>
+  <tr>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/guided/guided.html">Guided</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html">Supervised</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html">Semi-supervised</a></td>
+ </tr>
+   <tr>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/manual/manual.html">Manual</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html">Multi-topic distributions</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html">Hierarchical</a></td>
+ </tr>
+ <tr>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html">Class-based</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html">Dynamic</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/online/online.html">Online/Incremental</a></td>
+ </tr>
+ <tr>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html">Multimodal</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html">Multi-aspect</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#text-generation-prompts">Text Generation</a></td>
+ </tr>
+</table>
 
 Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99), [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4) and [here](https://towardsdatascience.com/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
@@ -38,13 +48,10 @@ You may want to install more depending on the transformers and language backends
 The possible installations are: 
 
 ```bash
-# Embedding models
-pip install bertopic[flair]
-pip install bertopic[gensim]
-pip install bertopic[spacy]
-pip install bertopic[use]
+# Choose an embedding backend
+pip install bertopic[flair, gensim, spacy, use]
 
-# Vision topic modeling
+# Topic modeling with images
 pip install bertopic[vision]
 ```
 
@@ -119,6 +126,18 @@ from bertopic.representation import KeyBERTInspired
 
 # Fine-tune your topic representations
 representation_model = KeyBERTInspired()
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+However, you might want to use something more powerful to describe your clusters. You can even use ChatGPT or other models from OpenAI to generate labels, summaries, phrases, keywords, and more:
+
+```python
+import openai
+from bertopic.representation import OpenAI
+
+# Fine-tune topic representations with GPT
+openai.api_key = "sk-..."
+representation_model = OpenAI(model="gpt-3.5-turbo", chat=True)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
@@ -204,10 +223,12 @@ There are many different use cases in which topic modeling can be used. As such,
 | [Semi-supervised Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/semisupervised/semisupervised.html) | `.fit(docs, y=y)` |
 | [Supervised Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/supervised/supervised.html) | `.fit(docs, y=y)` |
 | [Manual Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/manual/manual.html) | `.fit(docs, y=y)` |
+| [Multimodal Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html) | ``.fit(docs, images=images)`` |
 | [Topic Modeling per Class](https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html) | `.topics_per_class(docs, classes)` |
 | [Dynamic Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) | `.topics_over_time(docs, timestamps)` |
 | [Hierarchical Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) | `.hierarchical_topics(docs)` |
 | [Guided Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) | `BERTopic(seed_topic_list=seed_topic_list)` |
+
 
 ### Visualizations
 Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation. 
