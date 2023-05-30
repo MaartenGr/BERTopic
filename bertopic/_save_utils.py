@@ -294,7 +294,7 @@ def generate_readme(model, repo_id: str):
     if not has_visual_aspect:
         model_card = model_card.replace("{PIPELINE_TAG}", "text-classification")
     else:
-        model_card = model_card.replace("pipeline_tag: {PIPELINE_TAG} /n","") # TODO add proper tag for this instance 
+        model_card = model_card.replace("pipeline_tag: {PIPELINE_TAG}/n","") # TODO add proper tag for this instance 
         
     return model_card
 
