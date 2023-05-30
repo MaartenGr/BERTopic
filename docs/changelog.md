@@ -300,7 +300,7 @@ topic: <topic label>
 * Fine-tune [topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) with `bertopic.representation`
     * Diverse range of models, including KeyBERT, MMR, POS, Transformers, OpenAI, and more!'
     * Create your own prompts for text generation models, like GPT3:
-        * Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt to decide where the keywords and and set of representative documents need to be inserted.
+        * Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt to decide where the keywords and set of representative documents need to be inserted.
     * Chain models to perform fine-grained fine-tuning
     * Create and customize your represention model
 * Improved the topic reduction technique when using `nr_topics=int`
