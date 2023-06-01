@@ -127,3 +127,18 @@ loaded_model = BERTopic.load("my_model")
 # Load from HuggingFace
 loaded_model = BERTopic.load("MaartenGr/BERTopic_Wikipedia")
 ```
+
+The embedding model cannot always be saved using a non-pickle method if, for example, you are using OpenAI embeddings. Instead, you can load them in as follows:
+
+
+```python
+# Define embedding model
+import openai
+from bertopic.backend import OpenAIBackend
+
+openai.api_key = MY_API_KEY
+embedding_model = OpenAIBackend("text-embedding-ada-002")
+
+# Load model and add embedding model
+loaded_model = BERTopic.load("path/to/my/model_dir", embedding_model=embedding_model)
+```
