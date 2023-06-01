@@ -145,7 +145,7 @@ class BERTopic:
                       model for "english" is `all-MiniLM-L6-v2`. For a full overview of
                       supported languages see bertopic.backend.languages. Select
                       "multilingual" to load in the `paraphrase-multilingual-MiniLM-L12-v2`
-                      sentence-tranformers model that supports 50+ languages.
+                      sentence-transformers model that supports 50+ languages.
                       NOTE: This is not used if `embedding_model` is used. 
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
