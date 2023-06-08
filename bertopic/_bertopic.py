@@ -3180,7 +3180,8 @@ class BERTopic:
         # Regular fit
         else:
             try:
-                self.umap_model.fit(embeddings, y=y)
+                # cuml umap needs y to be an numpy array
+                self.umap_model.fit(embeddings, y=np.array(y))
             except TypeError:
                 logger.info("The dimensionality reduction algorithm did not contain the `y` parameter and"
                             " therefore the `y` parameter was not used")
