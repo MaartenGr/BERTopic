@@ -3,7 +3,7 @@ import pytest
 from bertopic import BERTopic
 
 
-@pytest.mark.parametrize('model', [("base_topic_model"), ('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model'), ('representation_topic_model')])
+@pytest.mark.parametrize('model', [("base_topic_model"), ('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model'), ('supervised_topic_model'), ('representation_topic_model'), ('cuml_base_topic_model')])
 def test_full_model(model, documents, request):
     """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
@@ -110,3 +110,12 @@ def test_full_model(model, documents, request):
     # if topic_model.topic_embeddings_ is not None:
     #     topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True)
     #     loaded_model = BERTopic.load("model_dir")
+
+def test_cuml(cuml_base_topic_model, documents, request, monkeypatch):
+    """Specific tests for cuml-based models."""
+
+    # make sure calculating probabilities does not fail if the cuml version
+    # does not yet support membership_vector (cuml 23.04 and higher)
+    with monkeypatch.context() as m:
+        m.delattr('cuml.cluster.hdbscan.prediction.membership_vector', raising=False)
+        predictions, probabilities = cuml_base_topic_model.transform(documents)
