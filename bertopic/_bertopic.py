@@ -3181,7 +3181,8 @@ class BERTopic:
         else:
             try:
                 # cuml umap needs y to be an numpy array
-                self.umap_model.fit(embeddings, y=np.array(y))
+                y = np.array(y) if y is not None else None
+                self.umap_model.fit(embeddings, y=y)
             except TypeError:
                 logger.info("The dimensionality reduction algorithm did not contain the `y` parameter and"
                             " therefore the `y` parameter was not used")
