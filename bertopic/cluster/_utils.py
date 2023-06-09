@@ -2,9 +2,7 @@ import hdbscan
 import numpy as np
 
 
-def hdbscan_delegator(model, func: str,
-                      embeddings: np.ndarray = None,
-                      batch_size: int = 4096 ):
+def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
     """ Function used to select the HDBSCAN-like model for generating
     predictions and probabilities.
 
@@ -16,7 +14,6 @@ def hdbscan_delegator(model, func: str,
                 - "membership_vector"
         embeddings: Input embeddings for "approximate_predict"
                     and "membership_vector"
-        batch_size: batch_size for cuml hdbscan
     """
 
     # Approximate predict
@@ -59,7 +56,8 @@ def hdbscan_delegator(model, func: str,
                 probabilities = prediction.membership_vector(
                     model, embeddings,
                     # bacth size cannot be larger than the number of docs
-                    batch_size=min(embeddings.shape[0], batch_size))
+                    # this will be unnecessary in cuml 23.08
+                    batch_size=min(embeddings.shape[0], 4096))
             # membership_vector available in cuml 23.04 and up
             except ImportError:
                 probabilities = prediction.approximate_predict(model, embeddings)
