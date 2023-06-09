@@ -59,7 +59,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
                     # this will be unnecessary in cuml 23.08
                     batch_size=min(embeddings.shape[0], 4096))
             # membership_vector available in cuml 23.04 and up
-            except ImportError:
+            except AttributeError:
                 probabilities = prediction.approximate_predict(model, embeddings)
             return probabilities
 
