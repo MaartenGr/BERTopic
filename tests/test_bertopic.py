@@ -11,6 +11,9 @@ def test_full_model(model, documents, request):
     NOTE: This does not cover all cases but merely combines it all together
     """
     topic_model = copy.deepcopy(request.getfixturevalue(model))
+    if model == 'cuml_base_topic_model' and topic_model is None:
+        # cuml not installed, can't run test
+        return
     if model == "base_topic_model":
         topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True, save_embedding_model="sentence-transformers/all-MiniLM-L6-v2")
         topic_model = BERTopic.load("model_dir")
@@ -114,6 +117,9 @@ def test_full_model(model, documents, request):
 def test_cuml(cuml_base_topic_model, documents, request, monkeypatch):
     """Specific tests for cuml-based models."""
 
+    if cuml_base_topic_model is None:
+        # cuml not installed, can't run test
+        return
     # make sure calculating probabilities does not fail if the cuml version
     # does not yet support membership_vector (cuml 23.04 and higher)
     with monkeypatch.context() as m:
