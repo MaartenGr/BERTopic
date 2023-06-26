@@ -875,7 +875,7 @@ class BERTopic:
         return topics_per_class
 
     def hierarchical_topics(self,
-                            docs: List[int],
+                            docs: List[str],
                             linkage_function: Callable[[csr_matrix], np.ndarray] = None,
                             distance_function: Callable[[csr_matrix], csr_matrix] = None) -> pd.DataFrame:
         """ Create a hierarchy of topics
