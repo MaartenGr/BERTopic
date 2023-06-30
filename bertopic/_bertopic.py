@@ -2010,7 +2010,7 @@ class BERTopic:
                         images: List[str] = None,
                         strategy: str = "distributions",
                         probabilities: np.ndarray = None,
-                        threshold: int = 0,
+                        threshold: float = 0,
                         embeddings: np.ndarray = None,
                         distributions_params: Mapping[str, Any] = {}) -> List[int]:
         """ Reduce outliers by merging them with their nearest topic according
