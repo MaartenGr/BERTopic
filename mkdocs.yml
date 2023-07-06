@@ -14,6 +14,7 @@ nav:
       - Quick Start: getting_started/quickstart/quickstart.md
       - Serialization: getting_started/serialization/serialization.md       
       - Search Topics: getting_started/search/search.md
+      - Best Practices: getting_started/best_practices/best_practices.md
       - In-depth:
         - Visualizations:
           - Topics:  getting_started/visualization/visualize_topics.md
