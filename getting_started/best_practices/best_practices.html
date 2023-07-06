@@ -1,0 +1,2491 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/best_practices/best_practices.html">
+      
+      
+        <link rel="prev" href="../search/search.html">
+      
+      
+        <link rel="next" href="../visualization/visualize_topics.html">
+      
+      <link rel="icon" href="../../icon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.4">
+    
+    
+      
+        <title>Best Practices - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.240905d7.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CUbuntu+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="Best Practices - BERTopic" >
+      
+        <meta  property="og:description"  content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." >
+      
+        <meta  property="og:image"  content="https://maartengr.github.io/BERTopic/assets/images/social/getting_started/best_practices/best_practices.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://maartengr.github.io/BERTopic/getting_started/best_practices/best_practices.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="Best Practices - BERTopic" >
+      
+        <meta  name="twitter:description"  content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." >
+      
+        <meta  name="twitter:image"  content="https://maartengr.github.io/BERTopic/assets/images/social/getting_started/best_practices/best_practices.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#data" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BERTopic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Best Practices
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../index.html" class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../algorithm/algorithm.html" class="md-tabs__link">
+      The Algorithm
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart/quickstart.html" class="md-tabs__link md-tabs__link--active">
+        Getting Started
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../faq.html" class="md-tabs__link">
+      FAQ
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../usecases.html" class="md-tabs__link">
+      Use Cases
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/bertopic.html" class="md-tabs__link">
+        API
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../changelog.html" class="md-tabs__link">
+      Changelog
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    BERTopic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithm/algorithm.html" class="md-nav__link">
+        The Algorithm
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/quickstart.html" class="md-nav__link">
+        Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serialization/serialization.html" class="md-nav__link">
+        Serialization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../search/search.html" class="md-nav__link">
+        Search Topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Best Practices
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="best_practices.html" class="md-nav__link md-nav__link--active">
+        Best Practices
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pre-calculate-embeddings" class="md-nav__link">
+    Pre-calculate Embeddings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preventing-stochastic-behavior" class="md-nav__link">
+    Preventing Stochastic Behavior
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#controlling-number-of-topics" class="md-nav__link">
+    Controlling Number of Topics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improving-default-representation" class="md-nav__link">
+    Improving Default Representation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-representations" class="md-nav__link">
+    Additional Representations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training" class="md-nav__link">
+    Training
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-labels" class="md-nav__link">
+    (Custom) Labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#topic-document-distribution" class="md-nav__link">
+    Topic-Document Distribution
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outlier-reduction" class="md-nav__link">
+    Outlier Reduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics" class="md-nav__link">
+    Visualize Topics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-documents" class="md-nav__link">
+    Visualize Documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#serialization" class="md-nav__link">
+    Serialization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inference" class="md-nav__link">
+    Inference
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          In-depth
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_5">
+          <span class="md-nav__icon md-icon"></span>
+          In-depth
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_5_1" id="__nav_3_5_1_label" tabindex="0">
+          Visualizations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_5_1">
+          <span class="md-nav__icon md-icon"></span>
+          Visualizations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_topics.html" class="md-nav__link">
+        Topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_terms.html" class="md-nav__link">
+        Terms
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_hierarchy.html" class="md-nav__link">
+        Hierarchy
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_5_2" id="__nav_3_5_2_label" tabindex="0">
+          Update Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Update Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicreduction/topicreduction.html" class="md-nav__link">
+        Topic Reduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        Update Topic Representations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        Outlier reduction
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter%20tuning/parametertuning.html" class="md-nav__link">
+        Parameter tuning
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
+        Tips & Tricks
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+          Sub-models
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_6">
+          <span class="md-nav__icon md-icon"></span>
+          Sub-models
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embeddings/embeddings.html" class="md-nav__link">
+        1. Embeddings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dim_reduction/dim_reduction.html" class="md-nav__link">
+        2. Dimensionality Reduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clustering/clustering.html" class="md-nav__link">
+        3. Clustering
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        4. Vectorizers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        5. c-TF-IDF
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_6_6" id="__nav_3_6_6_label" tabindex="0">
+          6. Fine-tune Topics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_6_6">
+          <span class="md-nav__icon md-icon"></span>
+          6. Fine-tune Topics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../representation/representation.html" class="md-nav__link">
+        6A. Representation Models
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../representation/llm.html" class="md-nav__link">
+        6B. LLM & Generative AI
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multiaspect/multiaspect.html" class="md-nav__link">
+        6C. Multiple Representations
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+          Variations
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_7">
+          <span class="md-nav__icon md-icon"></span>
+          Variations
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+        Dynamic Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        Hierarchical Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multimodal/multimodal.html" class="md-nav__link">
+        Multimodal Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        Online Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_7_5" id="__nav_3_7_5_label" tabindex="0">
+          (semi)-supervised
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_7_5">
+          <span class="md-nav__icon md-icon"></span>
+          (semi)-supervised
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semisupervised/semisupervised.html" class="md-nav__link">
+        Semi-supervised Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supervised/supervised.html" class="md-nav__link">
+        Supervised Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/manual.html" class="md-nav__link">
+        Manual Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guided/guided.html" class="md-nav__link">
+        Guided Topic Modeling
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distribution/distribution.html" class="md-nav__link">
+        Topic Distributions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq.html" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usecases.html" class="md-nav__link">
+        Use Cases
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/bertopic.html" class="md-nav__link">
+        BERTopic
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+          Sub-models
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2">
+          <span class="md-nav__icon md-icon"></span>
+          Sub-models
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2_1" id="__nav_6_2_1_label" tabindex="0">
+          Backends
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2_1">
+          <span class="md-nav__icon md-icon"></span>
+          Backends
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/word_doc.html" class="md-nav__link">
+        Word Doc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/openai.html" class="md-nav__link">
+        OpenAI
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/cohere.html" class="md-nav__link">
+        Cohere
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2_2" id="__nav_6_2_2_label" tabindex="0">
+          Dimensionality Reduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          Dimensionality Reduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dimensionality/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2_3" id="__nav_6_2_3_label" tabindex="0">
+          Clustering
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Clustering
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cluster/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2_4" id="__nav_6_2_4_label" tabindex="0">
+          Vectorizers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          Vectorizers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        cTFIDF
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        OnlineCountVectorizer
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2_5" id="__nav_6_2_5_label" tabindex="0">
+          Topic Representation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Topic Representation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/base.html" class="md-nav__link">
+        Base
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/mmr.html" class="md-nav__link">
+        MaximalMarginalRelevance
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/keybert.html" class="md-nav__link">
+        KeyBERT
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/pos.html" class="md-nav__link">
+        PartOfSpeech
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_2_5_5" id="__nav_6_2_5_5_label" tabindex="0">
+          Text Generation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_2_5_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_2_5_5">
+          <span class="md-nav__icon md-icon"></span>
+          Text Generation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/generation.html" class="md-nav__link">
+        🤗 Transformers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/langchain.html" class="md-nav__link">
+        LangChain
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/cohere.html" class="md-nav__link">
+        Cohere
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/openai.html" class="md-nav__link">
+        OpenAI
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/zeroshot.html" class="md-nav__link">
+        Zero-shot Classification
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+          Plotting
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Plotting
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/barchart.html" class="md-nav__link">
+        Barchart
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/documents.html" class="md-nav__link">
+        Documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        DTM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchical_documents.html" class="md-nav__link">
+        Hierarchical documents
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        Hierarchical topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/distribution.html" class="md-nav__link">
+        Distribution
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/heatmap.html" class="md-nav__link">
+        Heatmap
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/term.html" class="md-nav__link">
+        Term Scores
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics.html" class="md-nav__link">
+        Topics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics_per_class.html" class="md-nav__link">
+        Topics per Class
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog.html" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data" class="md-nav__link">
+    Data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pre-calculate-embeddings" class="md-nav__link">
+    Pre-calculate Embeddings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preventing-stochastic-behavior" class="md-nav__link">
+    Preventing Stochastic Behavior
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#controlling-number-of-topics" class="md-nav__link">
+    Controlling Number of Topics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#improving-default-representation" class="md-nav__link">
+    Improving Default Representation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-representations" class="md-nav__link">
+    Additional Representations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training" class="md-nav__link">
+    Training
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-labels" class="md-nav__link">
+    (Custom) Labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#topic-document-distribution" class="md-nav__link">
+    Topic-Document Distribution
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outlier-reduction" class="md-nav__link">
+    Outlier Reduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-topics" class="md-nav__link">
+    Visualize Topics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualize-documents" class="md-nav__link">
+    Visualize Documents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#serialization" class="md-nav__link">
+    Serialization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inference" class="md-nav__link">
+    Inference
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Best Practices</h1>
+
+<p><a href="https://colab.research.google.com/drive/1BoQ_vakEVtojsd2x_U6-_x52OOuqruj2?usp=sharing"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> - Overview of Best Practices</p>
+<p>Through the nature of BERTopic, its modularity, many variations of the topic modeling technique is possible. However, during the development and through the usage of the package, a set of best practices have been developed that generally lead to great results.</p>
+<p>The following are a number of steps, parameters, and settings that you can use that will generally improve the quality of the resulting topics. In other words, after going through the quick start and getting a feeling for the API these steps should get you to the next level of performance.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although these are called <em>best practices</em>, it does not necessarily mean that they work across all use cases perfectly. The underlying modular nature of BERTopic is meant to take different use cases into account. After going through these practices it is advised to fine-tune wherever necessary. </p>
+</div>
+<p>To showcase how these "best practices" work, we will go through an example dataset and apply all practices to it.</p>
+<h2 id="data"><strong>Data</strong><a class="headerlink" href="#data" title="Permanent link">&para;</a></h2>
+<p>For this example, we will use a dataset containing abstracts and metadata from <a href="https://huggingface.co/datasets/arxiv_dataset">ArXiv articles</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;CShorten/ML-ArXiv-Papers&quot;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+
+<span class="c1"># Extract abstracts to train on and corresponding titles</span>
+<span class="n">abstracts</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;abstract&quot;</span><span class="p">]</span>
+<span class="n">titles</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Sentence Splitter</p>
+<p>Whenever you have large documents, you typically want to split them up into either paragraphs or sentences. A nice way to do so is by using NLTK's sentence splitter which is nothing more than:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">sent_tokenize</span><span class="p">,</span> <span class="n">word_tokenize</span>
+<span class="n">sentences</span> <span class="o">=</span> <span class="p">[</span><span class="n">sent_tokenize</span><span class="p">(</span><span class="n">abstract</span><span class="p">)</span> <span class="k">for</span> <span class="n">abstract</span> <span class="ow">in</span> <span class="n">abstracts</span><span class="p">]</span>
+<span class="n">sentences</span> <span class="o">=</span> <span class="p">[</span><span class="n">sentence</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">sentences</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">]</span>
+</code></pre></div>
+</div>
+<h2 id="pre-calculate-embeddings"><strong>Pre-calculate Embeddings</strong><a class="headerlink" href="#pre-calculate-embeddings" title="Permanent link">&para;</a></h2>
+<p>After having created our data, namely <code>abstracts</code>, we can dive into the very first best practice, <strong>pre-calculating embeddings</strong>.</p>
+<p>BERTopic works by converting documents into numerical values, called embeddings. This process can be very costly, especially if we want to iterate over parameters. Instead, we can calculate those embeddings once and feed them to BERTopic to skip calculating embeddings each time.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Pre-calculate embeddings</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">)</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">embedding_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">abstracts</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="preventing-stochastic-behavior"><strong>Preventing Stochastic Behavior</strong><a class="headerlink" href="#preventing-stochastic-behavior" title="Permanent link">&para;</a></h2>
+<p>In BERTopic, we generally use a dimensionality reduction algorithm to reduce the size of the embeddings. This is done to prevent the <a href="https://en.wikipedia.org/wiki/Curse_of_dimensionality">curse of dimensionality</a> to a certain degree.</p>
+<p>As a default, this is done with <a href="https://github.com/lmcinnes/umap">UMAP</a> which is an incredible algorithm for reducing dimensional space. However, by default, it shows stochastic behavior which creates different results each time you run it. To prevent that, we will need to set a <code>random_state</code> of the model before passing it to BERTopic.</p>
+<p>As a result, we can now fully reproduce the results each time we run the model.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">umap</span> <span class="kn">import</span> <span class="n">UMAP</span>
+
+<span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="controlling-number-of-topics"><strong>Controlling Number of Topics</strong><a class="headerlink" href="#controlling-number-of-topics" title="Permanent link">&para;</a></h2>
+<p>There is a parameter to control the number of topics, namely <code>nr_topics</code>. This parameter, however, merges topics <strong>after</strong> they have been created. It is a parameter that supports creating a fixed number of topics.</p>
+<p>However, it is advised to control the number of topics through the cluster model which is by default HDBSCAN. HDBSCAN has a parameter, namely <code>min_topic_size</code> that indirectly controls the number of topics that will be created.</p>
+<p>A higher <code>min_topic_size</code> will generate fewer topics and a lower <code>min_topic_size</code> will generate more topics.</p>
+<p>Here, we will go with <code>min_topic_size=40</code> to get around XXX topics.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">hdbscan</span> <span class="kn">import</span> <span class="n">HDBSCAN</span>
+
+<span class="n">hdbscan_model</span> <span class="o">=</span> <span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> <span class="n">cluster_selection_method</span><span class="o">=</span><span class="s1">&#39;eom&#39;</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="improving-default-representation"><strong>Improving Default Representation</strong><a class="headerlink" href="#improving-default-representation" title="Permanent link">&para;</a></h2>
+<p>The default representation of topics is calculated through <a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html#5-topic-representation">c-TF-IDF</a>. However, c-TF-IDF is powered by the <a href="https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html">CountVectorizer</a> which converts text into tokens. Using the CountVectorizer, we can do a number of things:</p>
+<ul>
+<li>Remove stopwords</li>
+<li>Ignore infrequent words</li>
+<li>Increase</li>
+</ul>
+<p>In other words, we can preprocess the topic representations <strong>after</strong> documents are assigned to topics. This will not influence the clustering process in any way.</p>
+<p>Here, we will ignore English stopwords and infrequent words. Moreover, by increasing the n-gram range we will consider topic representations that are made up of one or two words.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">stop_words</span><span class="o">=</span><span class="s2">&quot;english&quot;</span><span class="p">,</span> <span class="n">min_df</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ngram_range</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="additional-representations"><strong>Additional Representations</strong><a class="headerlink" href="#additional-representations" title="Permanent link">&para;</a></h2>
+<p>Previously, we have tuned the default representation but there are quite a number of <a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html">other topic representations</a> in BERTopic that we can choose from. From <a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired">KeyBERTInspired</a> and <a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#partofspeech">PartOfSpeech</a>, to <a href="https://maartengr.github.io/BERTopic/getting_started/representation/llm.html#chatgpt">OpenAI's ChatGPT</a> and <a href="https://maartengr.github.io/BERTopic/getting_started/representation/llm.html#langchain">open-source</a> alternatives, many representations are possible. </p>
+<p>In BERTopic, you can model many different topic representations simultanously to test them out and get different perspectives of topic descriptions. This is called <a href="https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html">multi-aspect</a> topic modeling.</p>
+<p>Here, we will demonstrate a number of interesting and useful representations in BERTopic:</p>
+<ul>
+<li>KeyBERTInspired</li>
+<li>A method that derives inspiration from how KeyBERT works</li>
+<li>PartOfSpeech</li>
+<li>Using SpaCy's POS tagging to extract words</li>
+<li>MaximalMarginalRelevance</li>
+<li>Diversify the topic words</li>
+<li>OpenAI</li>
+<li>Use ChatGPT to label our topics</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">openai</span>
+<span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">KeyBERTInspired</span><span class="p">,</span> <span class="n">MaximalMarginalRelevance</span><span class="p">,</span> <span class="n">OpenAI</span><span class="p">,</span> <span class="n">PartOfSpeech</span>
+
+<span class="c1"># KeyBERT</span>
+<span class="n">keybert_model</span> <span class="o">=</span> <span class="n">KeyBERTInspired</span><span class="p">()</span>
+
+<span class="c1"># Part-of-Speech</span>
+<span class="n">pos_model</span> <span class="o">=</span> <span class="n">PartOfSpeech</span><span class="p">(</span><span class="s2">&quot;en_core_web_sm&quot;</span><span class="p">)</span>
+
+<span class="c1"># MMR</span>
+<span class="n">mmr_model</span> <span class="o">=</span> <span class="n">MaximalMarginalRelevance</span><span class="p">(</span><span class="n">diversity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="c1"># GPT-3.5</span>
+<span class="n">openai</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="s2">&quot;sk-...&quot;</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">I have a topic that contains the following documents: </span>
+<span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+
+<span class="s2">Based on the information above, extract a short but highly descriptive topic label of at most 5 words. Make sure it is in the following format:</span>
+<span class="s2">topic: &lt;topic label&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="n">openai_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span> <span class="n">exponential_backoff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">chat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+
+<span class="c1"># All representation models</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;KeyBERT&quot;</span><span class="p">:</span> <span class="n">keybert_model</span><span class="p">,</span>
+    <span class="c1"># &quot;OpenAI&quot;: openai_model,  # Uncomment if you will use OpenAI</span>
+    <span class="s2">&quot;MMR&quot;</span><span class="p">:</span> <span class="n">mmr_model</span><span class="p">,</span>
+    <span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="n">pos_model</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="training"><strong>Training</strong><a class="headerlink" href="#training" title="Permanent link">&para;</a></h2>
+<p>Now that we have a set of best practices, we can use them in our training loop. Here, several different representations, keywords and labels for our topics will be created. If you want to iterate over the topic model it is advised to use the pre-calculated embeddings as that significantly speeds up training. </p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span>
+
+  <span class="c1"># Pipeline models</span>
+  <span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">,</span>
+  <span class="n">umap_model</span><span class="o">=</span><span class="n">umap_model</span><span class="p">,</span>
+  <span class="n">hdbscan_model</span><span class="o">=</span><span class="n">hdbscan_model</span><span class="p">,</span>
+  <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">,</span>
+  <span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">,</span>
+
+  <span class="c1"># Hyperparameters</span>
+  <span class="n">top_n_words</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Train model</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">abstracts</span><span class="p">,</span> <span class="n">embeddings</span><span class="p">)</span>
+
+<span class="c1"># Show topics</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_info</span><span class="p">()</span>
+</code></pre></div>
+<p>To get all representations for a single topic, we simply run the following:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">{</span><span class="s1">&#39;Main&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;adversarial&#39;</span><span class="p">,</span> <span class="mf">0.028838938990764302</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;attacks&#39;</span><span class="p">,</span> <span class="mf">0.021726302042463556</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;attack&#39;</span><span class="p">,</span> <span class="mf">0.016803574415028524</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;robustness&#39;</span><span class="p">,</span> <span class="mf">0.013046135743326167</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial examples&#39;</span><span class="p">,</span> <span class="mf">0.01151254557995679</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="mf">0.009920962487998853</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;perturbations&#39;</span><span class="p">,</span> <span class="mf">0.009053305826870773</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial attacks&#39;</span><span class="p">,</span> <span class="mf">0.008747627064844006</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;malware&#39;</span><span class="p">,</span> <span class="mf">0.007675131707700338</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;defense&#39;</span><span class="p">,</span> <span class="mf">0.007365955840313783</span><span class="p">)],</span>
+ <span class="s1">&#39;KeyBERT&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;adversarial training&#39;</span><span class="p">,</span> <span class="mf">0.76427937</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial attack&#39;</span><span class="p">,</span> <span class="mf">0.74271905</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;vulnerable adversarial&#39;</span><span class="p">,</span> <span class="mf">0.73302543</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial&#39;</span><span class="p">,</span> <span class="mf">0.7311052</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial examples&#39;</span><span class="p">,</span> <span class="mf">0.7179245</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial attacks&#39;</span><span class="p">,</span> <span class="mf">0.7082</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarially&#39;</span><span class="p">,</span> <span class="mf">0.7005141</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial robustness&#39;</span><span class="p">,</span> <span class="mf">0.69911957</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial perturbations&#39;</span><span class="p">,</span> <span class="mf">0.6588783</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversary&#39;</span><span class="p">,</span> <span class="mf">0.4467769</span><span class="p">)],</span>
+ <span class="s1">&#39;OpenAI&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;Adversarial attacks and defense&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+ <span class="s1">&#39;MMR&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;adversarial&#39;</span><span class="p">,</span> <span class="mf">0.028838938990764302</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;attacks&#39;</span><span class="p">,</span> <span class="mf">0.021726302042463556</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;attack&#39;</span><span class="p">,</span> <span class="mf">0.016803574415028524</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;robustness&#39;</span><span class="p">,</span> <span class="mf">0.013046135743326167</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial examples&#39;</span><span class="p">,</span> <span class="mf">0.01151254557995679</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="mf">0.009920962487998853</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;perturbations&#39;</span><span class="p">,</span> <span class="mf">0.009053305826870773</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial attacks&#39;</span><span class="p">,</span> <span class="mf">0.008747627064844006</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;malware&#39;</span><span class="p">,</span> <span class="mf">0.007675131707700338</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;defense&#39;</span><span class="p">,</span> <span class="mf">0.007365955840313783</span><span class="p">)],</span>
+ <span class="s1">&#39;POS&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;adversarial&#39;</span><span class="p">,</span> <span class="mf">0.028838938990764302</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;attacks&#39;</span><span class="p">,</span> <span class="mf">0.021726302042463556</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;attack&#39;</span><span class="p">,</span> <span class="mf">0.016803574415028524</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;robustness&#39;</span><span class="p">,</span> <span class="mf">0.013046135743326167</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial examples&#39;</span><span class="p">,</span> <span class="mf">0.01151254557995679</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="mf">0.009920962487998853</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;perturbations&#39;</span><span class="p">,</span> <span class="mf">0.009053305826870773</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;adversarial attacks&#39;</span><span class="p">,</span> <span class="mf">0.008747627064844006</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;malware&#39;</span><span class="p">,</span> <span class="mf">0.007675131707700338</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;defense&#39;</span><span class="p">,</span> <span class="mf">0.007365955840313783</span><span class="p">)]}</span>
+</code></pre></div>
+<p><strong>NOTE</strong>: The labels generated by OpenAI's <strong>ChatGPT</strong> are especially interesting to use throughout your model. Below, we will go into more detail how to set that as a custom label.</p>
+<div class="admonition tip">
+<p class="admonition-title">Parameters</p>
+<p>If you would like to return the topic-document probability matrix, then it is advised to use <code>calculate_probabilities=True</code>. Do note that this can significantly slow down training. To speed it up, use <a href="https://maartengr.github.io/BERTopic/getting_started/clustering/clustering.html#cuml-hdbscan">cuML's HDBSCAN</a> instead. You could also approximate the topic-document probability matrix with <code>.approximate_distribution</code> which will be discussed later.</p>
+</div>
+<h2 id="custom-labels"><strong>(Custom) Labels</strong><a class="headerlink" href="#custom-labels" title="Permanent link">&para;</a></h2>
+<p>The default label of each topic are the top 3 words in each topic combined with an underscore between them.</p>
+<p>This, of course, might not be the best label that you can think of for a certain topic. Instead, we can use <code>.set_topic_labels</code> to manually label all or certain topics.</p>
+<p>We can also use <code>.set_topic_labels</code> to use one of the other topic representations that we had before, like <code>KeyBERTInspired</code> or even <code>OpenAI</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Label the topics yourself</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">set_topic_labels</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Space Travel&quot;</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="s2">&quot;Religion&quot;</span><span class="p">})</span>
+
+<span class="c1"># or use one of the other topic representations, like KeyBERTInspired</span>
+<span class="n">keybert_topic_labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">))[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">])</span> <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="s2">&quot;KeyBERT&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">set_topic_labels</span><span class="p">(</span><span class="n">keybert_topic_labels</span><span class="p">)</span>
+
+<span class="c1"># or ChatGPT&#39;s labels</span>
+<span class="n">chatgpt_topic_labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="s2">&quot;OpenAI&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">chatgpt_topic_labels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Outlier Topic&quot;</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">set_topic_labels</span><span class="p">(</span><span class="n">chatgpt_topic_labels</span><span class="p">)</span>
+</code></pre></div>
+<p>Now that we have set the updated topic labels, we can access them with the many functions used throughout BERTopic. Most notably, you can show the updated labels in visualizations with the <code>custom_labels=True</code> parameters.</p>
+<p>If we were to run <code>topic_model.get_topic_info()</code> it will now include the column <code>CustomName</code>. That is the custom label that we just created for each topic.</p>
+<h2 id="topic-document-distribution"><strong>Topic-Document Distribution</strong><a class="headerlink" href="#topic-document-distribution" title="Permanent link">&para;</a></h2>
+<p>If using <code>calculate_probabilities=True</code> is not possible, than you can <a href="https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html">approximate the topic-document distributions</a> using <code>.approximate_distribution</code>. It is a fast and flexible method for creating different topic-document distributions.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># `topic_distr` contains the distribution of topics in each document</span>
+<span class="n">topic_distr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">approximate_distribution</span><span class="p">(</span><span class="n">abstracts</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div>
+<p>Next, lets take a look at a specific abstract and see how the topic distribution was extracted:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Visualize the topic-document distribution for a single document</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_distribution</span><span class="p">(</span><span class="n">topic_distr</span><span class="p">[</span><span class="n">abstract_id</span><span class="p">],</span> <span class="n">custom_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>It seems to have extracted a number of topics that are relevant and shows the distributions of these topics across the abstract. We can go one step further and visualize them on a token-level:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Calculate the topic distributions on a token-level</span>
+<span class="n">topic_distr</span><span class="p">,</span> <span class="n">topic_token_distr</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">approximate_distribution</span><span class="p">(</span><span class="n">abstracts</span><span class="p">[</span><span class="n">abstract_id</span><span class="p">],</span> <span class="n">calculate_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Visualize the token-level distributions</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_approximate_distribution</span><span class="p">(</span><span class="n">abstracts</span><span class="p">[</span><span class="n">abstract_id</span><span class="p">],</span> <span class="n">topic_token_distr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">df</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">use_embedding_model</p>
+<p>As a default, we compare the c-TF-IDF calculations between the token sets and all topics. Due to its bag-of-word representation, this is quite fast. However, you might want to use the selected embedding_model instead to do this comparison. Do note that due to the many token sets, it is often computationally quite a bit slower:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_distr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">approximate_distribution</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">use_embedding_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<h2 id="outlier-reduction"><strong>Outlier Reduction</strong><a class="headerlink" href="#outlier-reduction" title="Permanent link">&para;</a></h2>
+<p>By default, HDBSCAN generates outliers which is a helpful mechanic in creating accurate topic representations. However, you might want to assign every single document to a topic. We can use <code>.reduce_outliers</code> to map some or all outliers to a topic:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Reduce outliers</span>
+<span class="n">new_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">reduce_outliers</span><span class="p">(</span><span class="n">abstracts</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
+
+<span class="c1"># Reduce outliers with pre-calculate embeddings instead</span>
+<span class="n">new_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">reduce_outliers</span><span class="p">(</span><span class="n">abstracts</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;embeddings&quot;</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Update Topics with Outlier Reduction</p>
+<p>After having generated updated topic assignments, we can pass them to BERTopic in order to update the topic representations:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="n">new_topics</span><span class="p">)</span>
+</code></pre></div>
+<p>It is important to realize that updating the topics this way may lead to errors if topic reduction or topic merging techniques are used afterwards. The reason for this is that when you assign a -1 document to topic 1 and another -1 document to topic 2, it is unclear how you map the -1 documents. Is it matched to topic 1 or 2.</p>
+</div>
+<h2 id="visualize-topics"><strong>Visualize Topics</strong><a class="headerlink" href="#visualize-topics" title="Permanent link">&para;</a></h2>
+<p>With visualizations, we are closing into the realm of subjective "best practices". These are things that I generally do because I like the representations but your experience might differ.</p>
+<p>Having said that, there are two visualizations that are my go-to when visualizing the topics themselves:</p>
+<ul>
+<li><code>topic_model.visualize_topics()</code></li>
+<li><code>topic_model.visualize_hierarchy()</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Visualize topics with custom labels</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_topics</span><span class="p">(</span><span class="n">custom_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Visualize hierarchy with custom labels</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_hierarchy</span><span class="p">(</span><span class="n">custom_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="visualize-documents"><strong>Visualize Documents</strong><a class="headerlink" href="#visualize-documents" title="Permanent link">&para;</a></h2>
+<p>When visualizing documents, it helps to have embedded the documents beforehand to speed up computation. Fortunately, we have already done that as a "best practice".</p>
+<p>Visualizing documents in 2-dimensional space helps in understanding the underlying structure of the documents and topics.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Reduce dimensionality of embeddings, this step is optional but much faster to perform iteratively:</span>
+<span class="n">reduced_embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+</code></pre></div>
+<p>The following plot is <strong>interactive</strong> which means that you can zoom in, double click on a label to only see that one and generally interact with the plot:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Visualize the documents in 2-dimensional space and show the titles on hover instead of the abstracts</span>
+<span class="c1"># NOTE: You can hide the hover with `hide_document_hover=True` which is especially helpful if you have a large dataset</span>
+<span class="c1"># NOTE: You can also hide the annotations with `hide_annotations=True` which is helpful to see the larger structure</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">visualize_documents</span><span class="p">(</span><span class="n">titles</span><span class="p">,</span> <span class="n">reduced_embeddings</span><span class="o">=</span><span class="n">reduced_embeddings</span><span class="p">,</span> <span class="n">custom_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">2-dimensional space</p>
+<p>Although visualizing the documents in 2-dimensional gives an idea of their underlying structure, there is a risk involved.</p>
+<p>Visualizing the documents in 2-dimensional space means that we have lost significant information since the original embeddings were more than 384 dimensions. Condensing all that information in 2 dimensions is simply not possible. In other words, it is merely an <strong>approximation</strong>, albeit quite an accurate one.</p>
+</div>
+<h2 id="serialization"><strong>Serialization</strong><a class="headerlink" href="#serialization" title="Permanent link">&para;</a></h2>
+<p>When saving a BERTopic model, there are several ways in doing so. You can either save the entire model with <code>pickle</code>, <code>pytorch</code>, or <code>safetensors</code>.</p>
+<p>Personally, I would advise going with <code>safetensors</code> whenever possible. The reason for this is that the format allows for a very small topic model to be saved and shared.</p>
+<p>When saving a model with <code>safetensors</code>, it skips over saving the dimensionality reduction and clustering models. The <code>.transform</code> function will still work without these models but instead assign topics based on the similarity between document embeddings and the topic embeddings.</p>
+<p>As a result, the <code>.transform</code> step might give different results but it is generally worth it considering the smaller and significantly faster model.</p>
+<div class="highlight"><pre><span></span><code><span class="n">embedding_model</span> <span class="o">=</span> <span class="s2">&quot;sentence-transformers/all-MiniLM-L6-v2&quot;</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_model_dir&quot;</span><span class="p">,</span> <span class="n">serialization</span><span class="o">=</span><span class="s2">&quot;safetensors&quot;</span><span class="p">,</span> <span class="n">save_ctfidf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Embedding Model</p>
+<p>Using <code>safetensors</code>, we are not saving the underlying embedding model but merely a pointer to the model. For example, in the above example we are saving the string <code>"sentence-transformers/all-MiniLM-L6-v2"</code> so that we can load in the embedding model alongside the topic model.</p>
+<p>This currently only works if you are using a sentence transformer model. If you are using a different model, you can load it in when loading the topic model like this:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="c1"># Define embedding model</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;all-MiniLM-L6-v2&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load model and add embedding model</span>
+<span class="n">loaded_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_model_dir&quot;</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<h2 id="inference"><strong>Inference</strong><a class="headerlink" href="#inference" title="Permanent link">&para;</a></h2>
+<p>To speed up the inference, we can leverage a "best practice" that we used before, namely serialization. When you save a model as <code>safetensors</code> and then load it in, we are removing the dimensionality reduction and clustering steps from the pipeline. </p>
+<p>Instead, the assignment of topics is done through cosine similarity of document embeddings and topic embeddings. This speeds up inferences significantly. </p>
+<p>To show its effect, let's start by disabling the logger:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic._utils</span> <span class="kn">import</span> <span class="n">MyLogger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">MyLogger</span><span class="p">(</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+<span class="n">loaded_model</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div>
+<p>Then, we run inference on both the loaded model and the non-loaded model:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="o">%</span><span class="n">timeit</span> <span class="n">loaded_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">abstracts</span><span class="p">[:</span><span class="mi">100</span><span class="p">])</span>
+<span class="mi">343</span> <span class="n">ms</span> <span class="err">±</span> <span class="mf">31.1</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span> <span class="p">(</span><span class="n">mean</span> <span class="err">±</span> <span class="n">std</span><span class="o">.</span> <span class="n">dev</span><span class="o">.</span> <span class="n">of</span> <span class="mi">7</span> <span class="n">runs</span><span class="p">,</span> <span class="mi">1</span> <span class="n">loop</span> <span class="n">each</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="o">%</span><span class="n">timeit</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">abstracts</span><span class="p">[:</span><span class="mi">100</span><span class="p">])</span>
+<span class="mf">1.37</span> <span class="n">s</span> <span class="err">±</span> <span class="mi">166</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span> <span class="p">(</span><span class="n">mean</span> <span class="err">±</span> <span class="n">std</span><span class="o">.</span> <span class="n">dev</span><span class="o">.</span> <span class="n">of</span> <span class="mi">7</span> <span class="n">runs</span><span class="p">,</span> <span class="mi">1</span> <span class="n">loop</span> <span class="n">each</span><span class="p">)</span>
+</code></pre></div>
+<p>Based on the above, the <code>loaded_model</code> seems to be quite a bit faster for inference than the original <code>topic_model</code>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.19047be9.min.js"></script>
+      
+    
+  </body>
+</html>
