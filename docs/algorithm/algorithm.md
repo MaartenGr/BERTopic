@@ -115,7 +115,7 @@ To do this, we first combine all documents in a cluster into a single document. 
 
 !!! tip Bag-of-words and tokenization
 
-    There are many ways you can tune or change the bag-of-words step. This step allows for processing the documents however you want without affecting the first step, embedding the documents. You can follow the guide [here](https://maartengr.github.io/BERTopic/getting_started/countvectorizer/countvectorizer.html) for more information about tokenization options in BERTopic.
+    There are many ways you can tune or change the bag-of-words step. This step allows for processing the documents however you want without affecting the first step, embedding the documents. You can follow the guide [here](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html) for more information about tokenization options in BERTopic.
 
 ###  **5. Topic representation**
 From the generated bag-of-words representation, we want to know what makes one cluster different from another. Which words are typical for cluster 1 and not so much for all other clusters? To solve this, we need to modify TF-IDF such that it considers topics (i.e., clusters) instead of documents. 
