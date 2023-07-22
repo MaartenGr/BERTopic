@@ -229,8 +229,20 @@ class OpenAI(BaseRepresentation):
 
 
 def completions_with_backoff(**kwargs):
-    return retry_with_exponential_backoff(openai.Completion.create, errors=(openai.error.RateLimitError,))(**kwargs)
+    return retry_with_exponential_backoff(
+        openai.Completion.create,
+        errors=(
+            openai.error.RateLimitError,
+            openai.error.ServiceUnavailableError,
+        ),
+    )(**kwargs)
 
 
 def chat_completions_with_backoff(**kwargs):
-    return retry_with_exponential_backoff(openai.ChatCompletion.create, errors=(openai.error.RateLimitError,))(**kwargs)
+    return retry_with_exponential_backoff(
+        openai.ChatCompletion.create,
+        errors=(
+            openai.error.RateLimitError,
+            openai.error.ServiceUnavailableError,
+        ),
+    )(**kwargs)
