@@ -183,7 +183,7 @@ class OpenAI(BaseRepresentation):
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ]
-                kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
+                kwargs = {"engine": self.model, "messages": messages, **self.generator_kwargs}
                 if self.exponential_backoff:
                     response = chat_completions_with_backoff(**kwargs)
                 else:
@@ -191,9 +191,9 @@ class OpenAI(BaseRepresentation):
                 label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
             else:
                 if self.exponential_backoff:
-                    response = completions_with_backoff(model=self.model, prompt=prompt, **self.generator_kwargs)
+                    response = completions_with_backoff(engine=self.model, prompt=prompt, **self.generator_kwargs)
                 else:
-                    response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
+                    response = openai.Completion.create(engine=self.model, prompt=prompt, **self.generator_kwargs)
                 label = response["choices"][0]["text"].strip()
 
             updated_topics[topic] = [(label, 1)]
