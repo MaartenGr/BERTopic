@@ -48,7 +48,7 @@ topic_model = BERTopic(representation_model=representation_model)
 ## **Diversify topic representation**
 After having calculated our top *n* words per topic there might be many words that essentially 
 mean the same thing. As a little bonus, we can use `bertopic.representation.MaximalMarginalRelevance` in BERTopic to 
-diversity words in each topic such that we limit the number of duplicate words we find in each topic. 
+diversify words in each topic such that we limit the number of duplicate words we find in each topic. 
 This is done using an algorithm called Maximal Marginal Relevance which compares word embeddings 
 with the topic embedding. 
 
