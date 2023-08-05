@@ -64,16 +64,16 @@ umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine',
 ## **Controlling Number of Topics**
 There is a parameter to control the number of topics, namely `nr_topics`. This parameter, however, merges topics **after** they have been created. It is a parameter that supports creating a fixed number of topics.
 
-However, it is advised to control the number of topics through the cluster model which is by default HDBSCAN. HDBSCAN has a parameter, namely `min_topic_size` that indirectly controls the number of topics that will be created.
+However, it is advised to control the number of topics through the cluster model which is by default HDBSCAN. HDBSCAN has a parameter, namely `min_cluster_size` that indirectly controls the number of topics that will be created.
 
-A higher `min_topic_size` will generate fewer topics and a lower `min_topic_size` will generate more topics.
+A higher `min_cluster_size` will generate fewer topics and a lower `min_cluster_size` will generate more topics.
 
-Here, we will go with `min_topic_size=40` to get around XXX topics.
+Here, we will go with `min_cluster_size=40` to get around XXX topics.
 
 ```python
 from hdbscan import HDBSCAN
 
-hdbscan_model = HDBSCAN(min_cluster_size=150, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
+hdbscan_model = HDBSCAN(min_cluster_size=40, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
 ```
 
 ## **Improving Default Representation**
