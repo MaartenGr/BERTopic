@@ -1380,6 +1380,8 @@ class BERTopic:
                           "manually assigning topics is the last step in the pipeline."
                           "Note that topic embeddings will also be created through weighted"
                           "c-TF-IDF embeddings instead of centroid embeddings.")
+
+        self._outliers = 1 if -1 in set(topics) else 0
         # Extract words
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
