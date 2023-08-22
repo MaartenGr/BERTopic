@@ -81,7 +81,7 @@ The default representation of topics is calculated through [c-TF-IDF](https://ma
 
 * Remove stopwords
 * Ignore infrequent words
-* Increase
+* Increase the n-gram range
 
 In other words, we can preprocess the topic representations **after** documents are assigned to topics. This will not influence the clustering process in any way.
 
@@ -93,9 +93,9 @@ vectorizer_model = CountVectorizer(stop_words="english", min_df=2, ngram_range=(
 ```
 
 ## **Additional Representations**
-Previously, we have tuned the default representation but there are quite a number of [other topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) in BERTopic that we can choose from. From [KeyBERTInspired](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired) and [PartOfSpeech](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#partofspeech), to [OpenAI's ChatGPT](https://maartengr.github.io/BERTopic/getting_started/representation/llm.html#chatgpt) and [open-source](https://maartengr.github.io/BERTopic/getting_started/representation/llm.html#langchain) alternatives, many representations are possible. 
+Previously, we have tuned the default representation but there are quite a number of [other topic representations](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) in BERTopic that we can choose from. From [KeyBERTInspired](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired) and [PartOfSpeech](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#partofspeech), to [OpenAI's ChatGPT](https://maartengr.github.io/BERTopic/getting_started/representation/llm.html#chatgpt) and [open-source](https://maartengr.github.io/BERTopic/getting_started/representation/llm.html#langchain) alternatives, many representations are possible.
 
-In BERTopic, you can model many different topic representations simultanously to test them out and get different perspectives of topic descriptions. This is called [multi-aspect](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling.
+In BERTopic, you can model many different topic representations simultaneously to test them out and get different perspectives of topic descriptions. This is called [multi-aspect](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling.
 
 Here, we will demonstrate a number of interesting and useful representations in BERTopic:
 
@@ -144,7 +144,7 @@ representation_model = {
 ```
 
 ## **Training**
-Now that we have a set of best practices, we can use them in our training loop. Here, several different representations, keywords and labels for our topics will be created. If you want to iterate over the topic model it is advised to use the pre-calculated embeddings as that significantly speeds up training. 
+Now that we have a set of best practices, we can use them in our training loop. Here, several different representations, keywords and labels for our topics will be created. If you want to iterate over the topic model it is advised to use the pre-calculated embeddings as that significantly speeds up training.
 
 ```python
 from bertopic import BERTopic
@@ -249,7 +249,7 @@ Now that we have set the updated topic labels, we can access them with the many 
 If we were to run `topic_model.get_topic_info()` it will now include the column `CustomName`. That is the custom label that we just created for each topic.
 
 ## **Topic-Document Distribution**
-If using `calculate_probabilities=True` is not possible, than you can [approximate the topic-document distributions](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) using `.approximate_distribution`. It is a fast and flexible method for creating different topic-document distributions.
+If using `calculate_probabilities=True` is not possible, then you can [approximate the topic-document distributions](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) using `.approximate_distribution`. It is a fast and flexible method for creating different topic-document distributions.
 
 ```python
 # `topic_distr` contains the distribution of topics in each document
