@@ -67,7 +67,7 @@ The topic model will be much more attuned to the categories that were defined pr
 
 ## **Partial labels**
 
-At times, you might only have labels for a subset of documents. Fortunately, we can still use those labels to at least nudge the documents for which those labels exist. The documents for which we do not have labels are assigned a -1. For this example, imagine we only the labels of categories that are related to computers and we want to create a topic model using semi-supervised modeling: 
+At times, you might only have labels for a subset of documents. Fortunately, we can still use those labels to at least nudge the documents for which those labels exist. The documents for which we do not have labels are assigned a -1. For this example, imagine we only have the labels of categories that are related to computers and we want to create a topic model using semi-supervised modeling:
 
 ```python
 labels_to_add = ['comp.graphics', 'comp.os.ms-windows.misc',
