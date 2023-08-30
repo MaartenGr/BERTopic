@@ -1480,7 +1480,7 @@ class BERTopic:
         if self.topic_aspects_:
             for aspect, values in self.topic_aspects_.items():
                 if isinstance(list(values.values())[-1], list):
-                    if isinstance(list(values.values())[-1][0], tuple):
+                    if isinstance(list(values.values())[-1][0], tuple) or isinstance(list(values.values())[-1][0], list):
                         values = {topic: list(list(zip(*value))[0]) for topic, value in values.items()}
                     elif isinstance(list(values.values())[-1][0], str):
                         values = {topic: " ".join(value).strip() for topic, value in values.items()}
