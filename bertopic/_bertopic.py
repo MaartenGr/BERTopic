@@ -2101,7 +2101,7 @@ class BERTopic:
 
         # Reduce outliers by extracting most likely topics through the topic-term probability matrix
         if strategy.lower() == "probabilities":
-            new_topics = [np.argmax(prob) if max(prob) >= threshold and topic == -1 else topic
+            new_topics = [np.argmax(prob) if np.max(prob) >= threshold and topic == -1 else topic
                           for topic, prob in zip(topics, probabilities)]
 
         # Reduce outliers by extracting most frequent topics through calculating of Topic Distributions
