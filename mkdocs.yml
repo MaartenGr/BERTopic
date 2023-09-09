@@ -42,6 +42,7 @@ nav:
         - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
         - Multimodal Topic Modeling: getting_started/multimodal/multimodal.md
         - Online Topic Modeling: getting_started/online/online.md
+        - Merge Multiple Models: getting_started/merge/merge.md
         - (semi)-supervised:
           - Semi-supervised Topic Modeling: getting_started/semisupervised/semisupervised.md
           - Supervised Topic Modeling: getting_started/supervised/supervised.md

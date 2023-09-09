@@ -106,7 +106,9 @@ def test_full_model(model, documents, request):
         if topic_model._outliers == 1:
             assert nr_outliers_topic_model > nr_outliers_new_topics
 
-    # # Save and load model
-    # if topic_model.topic_embeddings_ is not None:
-    #     topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True)
-    #     loaded_model = BERTopic.load("model_dir")
+    # Combine models
+    topic_model1 = BERTopic.load("model_dir")
+    merged_model = BERTopic.load_models([topic_model, topic_model1])
+
+    assert len(merged_model.get_topic_info()) > len(topic_model1.get_topic_info())
+    assert len(merged_model.get_topic_info()) > len(topic_model.get_topic_info())
