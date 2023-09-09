@@ -108,7 +108,7 @@ def test_full_model(model, documents, request):
 
     # Combine models
     topic_model1 = BERTopic.load("model_dir")
-    merged_model = BERTopic.load_models([topic_model, topic_model1])
+    merged_model = BERTopic.merge_models([topic_model, topic_model1])
 
     assert len(merged_model.get_topic_info()) > len(topic_model1.get_topic_info())
     assert len(merged_model.get_topic_info()) > len(topic_model.get_topic_info())
