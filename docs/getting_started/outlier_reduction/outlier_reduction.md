@@ -27,7 +27,8 @@ new_topics = topic_model.reduce_outliers(docs, topics)
 The default method for reducing outliers is by calculating the c-TF-IDF representations of outlier documents and assigning them 
 to the best matching c-TF-IDF representations of non-outlier topics. 
 
-However, there are a number of other strategies one can use, either seperately or in conjunction that are worthwhile to explore:
+However, there are a number of other strategies one can use, either separately or in conjunction that are worthwhile to explore:
+
 * Using the topic-document probabilities to assign topics
 * Using the topic-document distributions to assign topics
 * Using c-TF-IDF representations to assign topics
