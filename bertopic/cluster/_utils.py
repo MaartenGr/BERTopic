@@ -1,9 +1,9 @@
 import hdbscan
 import numpy as np
 
-        
+
 def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
-    """ Function used to select the HDBSCAN-like model for generating 
+    """ Function used to select the HDBSCAN-like model for generating
     predictions and probabilities.
 
     Arguments:
@@ -42,7 +42,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
             return cuml_hdbscan.all_points_membership_vectors(model)
 
         return None
-    
+
     # membership_vector
     if func == "membership_vector":
         if isinstance(model, hdbscan.HDBSCAN):
@@ -51,8 +51,16 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
 
         str_type_model = str(type(model)).lower()
         if "cuml" in str_type_model and "hdbscan" in str_type_model:
-            from cuml.cluster.hdbscan.prediction import approximate_predict
-            probabilities = approximate_predict(model, embeddings)
+            from cuml.cluster.hdbscan import prediction
+            try:
+                probabilities = prediction.membership_vector(
+                    model, embeddings,
+                    # bacth size cannot be larger than the number of docs
+                    # this will be unnecessary in cuml 23.08
+                    batch_size=min(embeddings.shape[0], 4096))
+            # membership_vector available in cuml 23.04 and up
+            except AttributeError:
+                _, probabilities = prediction.approximate_predict(model, embeddings)
             return probabilities
 
         return None

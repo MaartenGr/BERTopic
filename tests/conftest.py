@@ -126,3 +126,19 @@ def online_topic_model(documents, document_embeddings, embedding_model):
         topics.extend(model.topics_)
     model.topics_ = topics
     return model
+
+
+@pytest.fixture(scope="session")
+def cuml_base_topic_model(documents, document_embeddings, embedding_model):
+    try:
+        from cuml import HDBSCAN as cuml_hdbscan, UMAP as cuml_umap
+        model = BERTopic(embedding_model=embedding_model,
+                         calculate_probabilities=True,
+                         umap_model=cuml_umap(random_state=42),
+                         hdbscan_model=cuml_hdbscan(
+                             min_cluster_size=3,
+                             prediction_data=True))
+        model.fit(documents, document_embeddings)
+        return model
+    except ModuleNotFoundError:
+        return None
