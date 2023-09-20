@@ -72,7 +72,7 @@ However, it is advised to control the number of topics through the cluster model
 
 A higher `min_cluster_size` will generate fewer topics and a lower `min_cluster_size` will generate more topics.
 
-Here, we will go with `min_cluster_size=40` to get around XXX topics.
+Here, we will go with `min_cluster_size=40` to get around prevent too many micro-clusters from being created:
 
 ```python
 from hdbscan import HDBSCAN
