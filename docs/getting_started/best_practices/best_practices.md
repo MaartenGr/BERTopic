@@ -48,6 +48,10 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 embeddings = embedding_model.encode(abstracts, show_progress_bar=True)
 ```
 
+!!! Tip
+    New embedding models are released frequently and their performance keeps getting better. To keep track of the best embedding models out there, you can visit the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard). It is an excellent place for selecting the embedding that works best for you. For example, if you want the best of the best, then the top 5 models might the place to look. 
+
+
 ## **Preventing Stochastic Behavior**
 In BERTopic, we generally use a dimensionality reduction algorithm to reduce the size of the embeddings. This is done to prevent the [curse of dimensionality](https://en.wikipedia.org/wiki/Curse_of_dimensionality) to a certain degree.
 
