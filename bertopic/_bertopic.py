@@ -20,7 +20,8 @@ import scipy.sparse as sp
 from tqdm import tqdm
 from pathlib import Path
 from packaging import version
-from collections import defaultdict
+from tempfile import TemporaryDirectory
+from collections import defaultdict, Counter
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from scipy.spatial.distance import squareform
@@ -3014,6 +3015,124 @@ class BERTopic:
             topic_model.embedding_model = select_backend(embedding_model)
 
         return topic_model
+
+    @classmethod
+    def merge_models(cls, models, min_similarity: float = .7, embedding_model=None):
+        """ Merge multiple pre-trained BERTopic models into a single model.
+
+        The models are merged as if they were all saved using pytorch or
+        safetensors, so a minimal version without c-TF-IDF.
+
+        To do this, we choose the first model in the list of
+        models as a baseline. Then, we check for each model
+        whether they contain topics that are not in the baseline.
+        This check if based on the cosine similarity between
+        topics embeddings. If topic embeddings between two models
+        are similar, then the topic of the second model are re-assigned
+        to the first. If they are dissimilar, the topic of the second
+        model is assigned to the first.
+
+        In essence, we simply check whether sufficiently "new"
+        topics emerge and add them.
+
+        Arguments:
+            models: A list of fitted BERTopic models
+            min_similarity: The minimum similarity for when topics are merged.
+            embedding_model: Additionally load in an embedding model if necessary.
+
+        Returns:
+            A new BERTopic model that was created as if you were
+            loading a model from the HuggingFace Hub without c-TF-IDF
+
+        Examples:
+
+        ```python
+        from bertopic import BERTopic
+        from sklearn.datasets import fetch_20newsgroups
+
+        docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+
+        # Create three separate models
+        topic_model_1 = BERTopic(min_topic_size=5).fit(docs[:4000])
+        topic_model_2 = BERTopic(min_topic_size=5).fit(docs[4000:8000])
+        topic_model_3 = BERTopic(min_topic_size=5).fit(docs[8000:])
+
+        # Combine all models into one
+        merged_model = BERTopic.merge_models([topic_model_1, topic_model_2, topic_model_3])
+        ```
+        """
+        import torch
+
+        # Temporarily save model and push to HF
+        with TemporaryDirectory() as tmpdir:
+
+            # Save model weights and config.
+            all_topics, all_params, all_tensors  = [], [], []
+            for index, model in enumerate(models):
+                model.save(tmpdir, serialization="pytorch")
+                topics, params, tensors, _, _, _ = save_utils.load_local_files(Path(tmpdir))
+                all_topics.append(topics)
+                all_params.append(params)
+                all_tensors.append(np.array(tensors["topic_embeddings"]))
+
+                # Create a base set of parameters
+                if index == 0:
+                    merged_topics = topics
+                    merged_params = params
+                    merged_tensors = np.array(tensors["topic_embeddings"])
+                    merged_topics["custom_labels"] = None
+
+        for tensors, selected_topics in zip(all_tensors[1:], all_topics[1:]):
+            # Calculate similarity matrix
+            sim_matrix = cosine_similarity(tensors, merged_tensors)
+            sims = np.max(sim_matrix, axis=1)
+            min_similarity = 0.7
+
+            # Extract new topics
+            new_topics = sorted([index - selected_topics["_outliers"] for index, sim in enumerate(sims) if sim < min_similarity])
+            max_topic = max(set(merged_topics["topics"]))
+
+            # Merge Topic Representations
+            new_topics_dict = {}
+            for index, new_topic in enumerate(new_topics):
+                new_topic_val = max_topic + index + 1
+                new_topics_dict[new_topic] = new_topic_val
+                merged_topics["topic_representations"][str(new_topic_val)] = selected_topics["topic_representations"][str(new_topic)]
+                merged_topics["topic_labels"][str(new_topic_val)] = selected_topics["topic_labels"][str(new_topic)]
+
+                if selected_topics["topic_aspects"]:
+                    merged_topics["topic_aspects"][str(new_topic_val)] = selected_topics["topic_aspects"][str(new_topic)]
+
+                # Add new embeddings
+                new_tensors = tensors[new_topic - selected_topics["_outliers"]]
+                merged_tensors = np.vstack([merged_tensors, new_tensors])
+
+            # Topic Mapper
+            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, new_topic_val+1, 1)))
+
+            # Find similar topics and re-assign those from the new models
+            sims_idx = np.argmax(sim_matrix, axis=1)
+            sims = np.max(sim_matrix, axis=1)
+            to_merge = {
+                a- selected_topics["_outliers"]: 
+                b - merged_topics["_outliers"] for a, (b, val) in enumerate(zip(sims_idx, sims)) 
+                if val >= min_similarity
+            }
+            to_merge.update(new_topics_dict)
+            to_merge[-1] = -1
+            topics  = [to_merge[topic] for topic in selected_topics["topics"]]
+            merged_topics["topics"].extend(topics)
+            merged_topics["topic_sizes"] = dict(Counter(merged_topics["topics"]))
+
+        # Create a new model from the merged parameters
+        merged_tensors = {"topic_embeddings": torch.from_numpy(merged_tensors)}
+        merged_model = _create_model_from_files(merged_topics, merged_params, merged_tensors, None, None, None)
+        merged_model.embedding_model = models[0].embedding_model
+
+        # Replace embedding model if one is specifically chosen
+        if embedding_model is not None and type(merged_model.embedding_model) == BaseEmbedder:
+            merged_model.embedding_model = select_backend(embedding_model)
+        return merged_model
 
     def push_to_hf_hub(
             self,
