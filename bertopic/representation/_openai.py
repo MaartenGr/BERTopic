@@ -1,10 +1,11 @@
 import time
 import openai
 import pandas as pd
+from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any
+from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import retry_with_exponential_backoff
+from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document
 
 
 DEFAULT_PROMPT = """
@@ -47,13 +48,13 @@ topic: <topic label>
 
 class OpenAI(BaseRepresentation):
     """ Using the OpenAI API to generate topic labels based
-    on one of their Completion of ChatCompletion models. 
+    on one of their Completion of ChatCompletion models.
 
-    The default method is `openai.Completion` if `chat=False`. 
-    The prompts will also need to follow a completion task. If you 
+    The default method is `openai.Completion` if `chat=False`.
+    The prompts will also need to follow a completion task. If you
     are looking for a more interactive chats, use `chat=True`
-    with `model=gpt-3.5-turbo`. 
-    
+    with `model=gpt-3.5-turbo`.
+
     For an overview see:
     https://platform.openai.com/docs/models
 
@@ -83,6 +84,21 @@ class OpenAI(BaseRepresentation):
                    Accepts values between 0 and 1. A higher 
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
+        doc_length: The maximum length of each document. If a document is longer,
+                    it will be truncated. If None, the entire document is passed.
+        tokenizer: The tokenizer used to calculate to split the document into segments
+                   used to count the length of a document. 
+                       * If tokenizer is 'char', then the document is split up 
+                         into characters which are counted to adhere to `doc_length`
+                       * If tokenizer is 'whitespace', the the document is split up
+                         into words separated by whitespaces. These words are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                         is used to tokenize the document. These tokens are counted
+                         and trunctated depending on `doc_length`
+                       * If tokenizer is a callable, then that callable is used to tokenize
+                         the document. These tokens are counted and truncated depending
+                         on `doc_length`
 
     Usage:
 
@@ -112,7 +128,7 @@ class OpenAI(BaseRepresentation):
     ```
 
     If you want to use OpenAI's ChatGPT model:
-    
+
     ```python
     representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
     ```
@@ -125,10 +141,12 @@ class OpenAI(BaseRepresentation):
                  exponential_backoff: bool = False,
                  chat: bool = False,
                  nr_docs: int = 4,
-                 diversity: float = None
+                 diversity: float = None,
+                 doc_length: int = None,
+                 tokenizer: Union[str, Callable] = None
                  ):
         self.model = model
-        
+
         if prompt is None:
             self.prompt = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
         else:
@@ -140,6 +158,8 @@ class OpenAI(BaseRepresentation):
         self.chat = chat
         self.nr_docs = nr_docs
         self.diversity = diversity
+        self.doc_length = doc_length
+        self.tokenizer = tokenizer
 
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
@@ -171,15 +191,16 @@ class OpenAI(BaseRepresentation):
 
         # Generate using OpenAI's Language Model
         updated_topics = {}
-        for topic, docs in repr_docs_mappings.items():
-            prompt = self._create_prompt(docs, topic, topics)
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+            prompt = self._create_prompt(truncated_docs, topic, topics)
 
             # Delay
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
             if self.chat:
-                messages=[
+                messages = [
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ]
@@ -223,7 +244,7 @@ class OpenAI(BaseRepresentation):
     def _replace_documents(prompt, docs):
         to_replace = ""
         for doc in docs:
-            to_replace += f"- {doc[:255]}\n"
+            to_replace += f"- {doc}\n"
         prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt
 
