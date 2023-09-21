@@ -26,6 +26,19 @@ Unfortunately, there is not a definitive list of the best models for each langua
 
 If you want to use a model that provides a higher quality, but takes more computing time, then I would advise using `all-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead. 
 
+**MTEB Leaderboard**  
+New embedding models are released frequently and their performance keeps getting better. To keep track of the best embedding models out there, you can visit the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard). It is an excellent place for selecting the embedding that works best for you. For example, if you want the best of the best, then the top 5 models might the place to look. 
+
+Many of these models can be used with `SentenceTransformers` in BERTopic, like so:
+
+```python
+from bertopic import BERTopic
+from sentence_transformers import SentenceTransformer
+
+embedding_model = SentenceTransformer("BAAI/bge-base-en-v1.5")
+topic_model = BERTopic(embedding_model=embedding_model)
+```
+
 **SentenceTransformers**  
 [SentenceTransformers](https://www.sbert.net/docs/pretrained_models.html#sentence-embedding-models) work typically quite well 
 and are the preferred models to use. They are great at generating document embeddings and have several 
