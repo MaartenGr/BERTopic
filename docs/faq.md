@@ -186,7 +186,7 @@ but a category of outliers.
 ## **I have too many topics, how do I decrease them?**  
 If you have a large dataset, then it is possible to generate thousands of topics. Especially with large datasets, there is a good chance they contain many small topics. In practice, you might want a few hundred topics at most to interpret them nicely. 
 
-There are a few ways of increasing the number of generated topics: 
+There are a few ways of decreasing the number of generated topics: 
 
 * First, we can set the `min_topic_size` in the BERTopic initialization much higher (e.g., 300) to make sure that those small clusters will not be generated. This is an HDBSCAN parameter that specifies the minimum number of documents needed in a cluster. More documents in a cluster mean fewer topics will be generated. 
 
