@@ -59,7 +59,7 @@ instead:
 
 ```python
 from sklearn.feature_extraction.text import CountVectorizer
-vectorizer_model = CountVectorizer(stop_words="English", ngram_range=(1, 5))
+vectorizer_model = CountVectorizer(stop_words="english", ngram_range=(1, 5))
 topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
