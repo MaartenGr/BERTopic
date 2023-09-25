@@ -5,6 +5,21 @@ import time
 def truncate_document(topic_model, doc_length, tokenizer, document: str):
     """ Truncate a document to a certain length
 
+    If you want to add a custom tokenizer, then it will need to have a `decode` and
+    `encode` method. An example would be the following custom tokenizer:
+
+    ```python
+    class Tokenizer:
+        'A custom tokenizer that splits on commas'
+        def encode(self, doc):
+            return doc.split(",")
+
+        def decode(self, doc_chuncks):
+            return ",".join(doc_chuncks)
+    ```
+
+    You can use this tokenizer by passing it to the `tokenizer` parameter.
+
     Arguments:
         topic_model: A BERTopic model
         doc_length: The maximum length of each document. If a document is longer,
@@ -39,8 +54,6 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         elif hasattr(tokenizer, 'encode') and hasattr(tokenizer, 'decode'):
             encoded_document = tokenizer.encode(document)
             truncated_document = tokenizer.decode(encoded_document[:doc_length])
-        elif isinstance(tokenizer, str):
-            truncated_document = f"{tokenizer}".join(document.split(tokenizer)[:doc_length])
         return truncated_document
     return document
 
