@@ -168,7 +168,7 @@ class Cohere(BaseRepresentation):
 
         # Use the Default Chat Prompt
         if self.prompt == DEFAULT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", " ".join(keywords))
+            prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
             prompt = self._replace_documents(prompt, docs)
 
         # Use a custom prompt that leverages keywords, documents or both using
@@ -176,7 +176,7 @@ class Cohere(BaseRepresentation):
         else:
             prompt = self.prompt
             if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", " ".join(keywords))
+                prompt = prompt.replace("[KEYWORDS]", ", ".join(keywords))
             if "[DOCUMENTS]" in prompt:
                 prompt = self._replace_documents(prompt, docs)
 
