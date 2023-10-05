@@ -1,9 +1,10 @@
 import pandas as pd
-from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple
 from langchain.docstore.document import Document
-from bertopic.representation._base import BaseRepresentation
+from langchain.schema.runnable import Runnable, RunnableConfig
+from scipy.sparse import csr_matrix
+from typing import Any, Dict, Mapping, List, Optional, Tuple, Union
 
+from bertopic.representation._base import BaseRepresentation
 
 DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
@@ -55,13 +56,24 @@ class LangChain(BaseRepresentation):
     representation_model = LangChain(chain, prompt=prompt)
     ```
     """
+    # TODO: update docstring
     def __init__(self,
-                 chain,
+                 chain: Runnable,
                  prompt: str = None,
+                 config: Optional[Union[RunnableConfig, Dict[str, Any]]] = None,
+                 nr_samples: int = 500,
+                 nr_repr_docs: int = 4,
+                 diversity: float = None,
+                 truncate_len: Union[int, None] = 1000,
                  ):
         self.chain = chain
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.config = config
+        self.nr_samples = nr_samples
+        self.nr_repr_docs = nr_repr_docs
+        self.diversity = diversity
+        self.truncate_len = truncate_len
 
     def extract_topics(self,
                        topic_model,
@@ -80,14 +92,42 @@ class LangChain(BaseRepresentation):
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top 4 representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
+        # Extract the top `nr_repr_docs` representative documents per topic
+        # Use all documents if `nr_repr_docs` is None
+        nr_repr_docs = self.nr_repr_docs if self.nr_repr_docs is not None else len(documents)
+        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+            c_tf_idf=c_tf_idf,
+            documents=documents,
+            topics=topics,
+            nr_samples=self.nr_samples,
+            nr_repr_docs=nr_repr_docs,
+            diversity=self.diversity,
+        )
 
-        # Generate label using langchain
-        updated_topics = {}
-        for topic, docs in repr_docs_mappings.items():
-            chain_docs = [Document(page_content=doc[:1000]) for doc in docs]
-            label = self.chain.run(input_documents=chain_docs, question=self.prompt).strip()
-            updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
+        # Generate label using langchain's batch functionality
+        chain_docs: List[List[Document]] = [
+            [
+                Document(
+                    page_content=doc if self.truncate_len is None else doc[:self.truncate_len]
+                )
+                for doc in docs
+            ]
+            for docs in repr_docs_mappings.values()
+        ]
+
+        # `self.chain` must take `input_documents` and `question` as input keys
+        inputs: List[Dict[str, str]] = [
+            {"input_documents": docs, "question": self.prompt}
+            for docs in chain_docs
+        ]
+
+        # `self.chain` must return a dict with a `text` key
+        outputs: List[Dict[str, str]] = self.chain.batch(inputs=inputs, config=self.config)
+        labels: List[str] = [output["text"].strip() for output in outputs]
+
+        updated_topics = {
+            topic: [(label, 1)] + [("", 0) for _ in range(9)]
+            for topic, label in zip(repr_docs_mappings.keys(), labels)
+        }
 
         return updated_topics
