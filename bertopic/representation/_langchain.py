@@ -59,11 +59,11 @@ class LangChain(BaseRepresentation):
     # TODO: update docstring
     def __init__(self,
                  chain: Runnable,
-                 prompt: str = None,
-                 config: Optional[Union[RunnableConfig, Dict[str, Any]]] = None,
+                 prompt: Optional[str] = None,
+                 config: Union[RunnableConfig, Dict[str, Any], None] = None,
                  nr_samples: int = 500,
                  nr_repr_docs: int = 4,
-                 diversity: float = None,
+                 diversity: Optional[float] = None,
                  truncate_len: Union[int, None] = 1000,
                  ):
         self.chain = chain
@@ -80,7 +80,7 @@ class LangChain(BaseRepresentation):
                        documents: pd.DataFrame,
                        c_tf_idf: csr_matrix,
                        topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
+                       ) -> Mapping[str, List[Tuple[str, int]]]:
         """ Extract topics
 
         Arguments:
@@ -116,7 +116,7 @@ class LangChain(BaseRepresentation):
         ]
 
         # `self.chain` must take `input_documents` and `question` as input keys
-        inputs: List[Dict[str, str]] = [
+        inputs: List[Dict[str, Union[List[str], str]]] = [
             {"input_documents": docs, "question": self.prompt}
             for docs in chain_docs
         ]
