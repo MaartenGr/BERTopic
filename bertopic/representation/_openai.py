@@ -160,6 +160,7 @@ class OpenAI(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
+        self.prompts_ = []
 
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
@@ -194,6 +195,7 @@ class OpenAI(BaseRepresentation):
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
             prompt = self._create_prompt(truncated_docs, topic, topics)
+            self.prompts_.append(prompt)
 
             # Delay
             if self.delay_in_seconds:

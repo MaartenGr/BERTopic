@@ -108,6 +108,8 @@ class TextGeneration(BaseRepresentation):
         self.doc_length = doc_length
         self.tokenizer = tokenizer
 
+        self.prompts_ = []
+
     def extract_topics(self,
                        topic_model,
                        documents: pd.DataFrame,
@@ -144,6 +146,7 @@ class TextGeneration(BaseRepresentation):
             # Prepare prompt
             truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
             prompt = self._create_prompt(truncated_docs, topic, topics)
+            self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
             topic_description = self.model(prompt, **self.pipeline_kwargs)
