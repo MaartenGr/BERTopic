@@ -121,8 +121,9 @@ class LangChain(BaseRepresentation):
             for docs in chain_docs
         ]
 
-        # `self.chain` must return a dict with a `text` key
+        # `self.chain` must return a dict with an `output_text` key
         outputs: List[Dict[str, str]] = self.chain.batch(inputs=inputs, config=self.config)
+        # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
         labels: List[str] = [output["output_text"].strip() for output in outputs]
 
         updated_topics = {
