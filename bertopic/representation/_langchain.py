@@ -123,7 +123,7 @@ class LangChain(BaseRepresentation):
 
         # `self.chain` must return a dict with a `text` key
         outputs: List[Dict[str, str]] = self.chain.batch(inputs=inputs, config=self.config)
-        labels: List[str] = [output["text"].strip() for output in outputs]
+        labels: List[str] = [output["output_text"].strip() for output in outputs]
 
         updated_topics = {
             topic: [(label, 1)] + [("", 0) for _ in range(9)]
