@@ -55,6 +55,16 @@ def base_topic_model(documents, document_embeddings, embedding_model):
 
 
 @pytest.fixture(scope="session")
+def zeroshot_topic_model(documents, document_embeddings, embedding_model):
+    zeroshot_topic_list = ["religion", "cars", "electronics"]
+    model = BERTopic(embedding_model=embedding_model, calculate_probabilities=True, zeroshot_topic_list=zeroshot_topic_list)
+    model.umap_model.random_state = 42
+    model.hdbscan_model.min_cluster_size = 2
+    model.fit(documents, document_embeddings)
+    return model
+
+
+@pytest.fixture(scope="session")
 def custom_topic_model(documents, document_embeddings, embedding_model):
     umap_model = UMAP(n_neighbors=15, n_components=6, min_dist=0.0, metric='cosine', random_state=42)
     hdbscan_model = HDBSCAN(min_cluster_size=3, metric='euclidean', cluster_selection_method='eom', prediction_data=True)

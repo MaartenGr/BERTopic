@@ -1,0 +1,63 @@
+Zeroshot Topic Modeling is a technique that allows you to find topics in large amounts of documents that were predefined. When faced with many documents, you often have an idea of which topics will definitely be in there. Whether that is a result of simply knowing your data or if a domain expert is involved in defining those topics.
+
+This method allows you to not only find those specific topics but also create new topics for documents that would not fit with your predefined topics. 
+This allows for extensive flexibility as there are three scenario's to explore.
+
+First, both zeroshot topics and clustered topics were detected. This means that some documents would fit with the predefined topics where others would not. For the latter, new topics were found.
+
+Second, only zeroshot topics were detected. Here, we would not need to find additional topics since all original documents were assigned to one of the predefined topics.
+
+Third, no zeroshot topics were detected. This means that none of the documents would fit with the predefined topics and a regular BERTopic would be run. 
+
+<div class="svg_image">
+--8<-- "docs/getting_started/zeroshot/zeroshot.svg"
+</div>
+
+This method works as follows. First, we create a number of labels for our predefined topics and embed them using any embedding model. Then, we compare the embeddings of the documents with the predefined labels using cosine similarity. If they pass a user-defined threshold, the zeroshot topic is assigned to a document. If it does not, then that document, along with others, will be put through a regular BERTopic model.
+
+This creates two models. One for the zeroshot topics and one for the non-zeroshot topics. We combine these two BERTopic models to create a single model that contains both zeroshot and non-zeroshot topics.
+   
+### **Example**
+To demonstrate Guided BERTopic, we use the 20 Newsgroups dataset as our example. We have frequently used this
+dataset in BERTopic examples and we sometimes see a topic generated about health with words such as `drug` and `cancer` 
+being important. However, due to the stochastic nature of UMAP, this topic is not always found. 
+
+In order to guide BERTopic to that topic, we create a seed topic list that we pass through our model. However, 
+there may be several other topics that we know should be in the documents. Let's also initialize those:
+
+```python
+from bertopic import BERTopic
+from datasets import load_dataset
+
+# We select a subsample of 5000 abstracts from ArXiv
+dataset = load_dataset("CShorten/ML-ArXiv-Papers")["train"]
+docs = dataset["abstract"][:5_000]
+
+# We define a number of topics that we know are in the documents
+zeroshot_topic_list = ["Clustering", "Topic Modeling", "Large Language Models"]
+
+# We fit our model using the zeroshot topics
+# and we define a minimum similarity. For each document,
+# if the similarity does not exceed that value, it will be used
+# for clustering instead.
+topic_model = BERTopic(
+    embedding_model="thenlper/gte-small", 
+    min_topic_size=15,
+    zeroshot_topic_list=zeroshot_topic_list,
+    zeroshot_min_similarity=.85
+)
+topics, probs = topic_model.fit_transform(docs)
+```
+
+When we run `topic_model.get_topic_info()` you will see something like this:
+
+<img src="zeroshot_output.png">
+<br>
+
+The `zeroshot_min_similarity` parameter controls how many of the documents are assigned to the predefined zeroshot topics. Lower this value and you will have more documents assigned to zeroshot topics and fewer documents will be clustered. Increase this value you will have fewer documents assigned to zeroshot topics and more documents will be clustered.
+
+!!! Note
+    Setting the `zeroshot_min_similarity` parameter requires a bit of experimentation. Some embedding
+    models have different similarity distributions, so trying out the values manually and exploring the results
+    is highly advised.
+

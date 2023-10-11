@@ -36,8 +36,8 @@ BERTopic supports all kinds of topic modeling techniques:
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#text-generation-prompts">Text Generation/LLM</a></td>
  </tr>
  <tr>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models</a></td>
-    <td></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models *new!*</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zeroshot *new!*</a></td>
     <td></td>
  </tr>
 </table>
@@ -259,6 +259,7 @@ There are many different use cases in which topic modeling can be used. As such,
 | [Dynamic Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) | `.topics_over_time(docs, timestamps)` |
 | [Hierarchical Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) | `.hierarchical_topics(docs)` |
 | [Guided Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) | `BERTopic(seed_topic_list=seed_topic_list)` |
+| [Zeroshot Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html) | `BERTopic(zeroshot_topic_list=zeroshot_topic_list)` |
 | [Merge Multiple Models](https://maartengr.github.io/BERTopic/getting_started/merge/merge.html) | `BERTopic.merge_models([topic_model_1, topic_model_2])` |
 
 
