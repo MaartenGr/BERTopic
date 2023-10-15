@@ -38,7 +38,7 @@ BERTopic supports all kinds of topic modeling techniques:
  <tr>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models *new!*</a></td>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zeroshot *new!*</a></td>
-    <td></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/seed_words/seed_words.html">Seed Words *new!*</a></td>
  </tr>
 </table>
 

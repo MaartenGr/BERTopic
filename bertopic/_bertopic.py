@@ -3800,11 +3800,17 @@ class BERTopic:
         else:
             words = self.vectorizer_model.get_feature_names()
 
-        if self.seed_topic_list:
+        multiplier = None
+        if self.ctfidf_model.seed_words and self.seed_topic_list:
+            seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
+            multiplier = np.array([self.ctfidf_model.seed_multiplier if word in self.ctfidf_model.seed_words else 1 for word in words])
+            multiplier = np.array([1.2 if word in seed_topic_list else value for value, word in zip(multiplier,words)])
+        elif self.ctfidf_model.seed_words:
+            multiplier = np.array([self.ctfidf_model.seed_multiplier if word in self.ctfidf_model.seed_words else 1 for word in words])
+        elif self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
             multiplier = np.array([1.2 if word in seed_topic_list else 1 for word in words])
-        else:
-            multiplier = None
+        
 
         if fit:
             self.ctfidf_model = self.ctfidf_model.fit(X, multiplier=multiplier)
