@@ -30,12 +30,12 @@ BERTopic supports all kinds of topic modeling techniques:
  <tr>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html">Multimodal</a></td>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html">Multi-aspect</a></td>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#text-generation-prompts">Text Generation</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/llm">Text Generation</a></td>
  </tr>
  <tr>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models *new!*</a></td>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zeroshot *new!*</a></td>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/seed_words/seed_words.html">Seed Words *new!*</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zeroshot <b>(new!)</b></a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models <b>(new!)</b></a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/seed_words/seed_words.html">Seed Words <b>(new!)</b></a></td>
  </tr>
 </table>
 

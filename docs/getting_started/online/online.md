@@ -13,7 +13,7 @@ In BERTopic, online topic modeling can be a bit tricky as there are several step
 3. Cluster reduced embeddings
 4. Tokenize topics
 5. Extract topic words
-6. Diversify topic words
+6. (Optional) Fine-tune topic words
 
 For some steps, an online variant is more important than others. Typically, in step 1 we use pre-trained language models that are in less need of continuous updates. This means that we can use an embedding model like Sentence-Transformers for extracting the embeddings and still use it in an online setting. Similarly, steps 5 and 6 do not necessarily need online variants since they are built upon step 4, tokenization. If that tokenization is by itself incremental, then so will steps 5 and 6. 
 
@@ -27,6 +27,10 @@ This means that we will need online variants for steps 2 through 4. Steps 2 and 
 
 Lastly, we need to develop an online variant for step 5, tokenization. In this step, a Bag-of-words representation is created through the `CountVectorizer`. However, as new data comes in, its vocabulary will need to be updated. For that purpose, `bertopic.vectorizers.OnlineCountVectorizer` was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large. Most notably, the `decay` parameter is a value between 0 and 1 to weigh the percentage of frequencies that the previous bag-of-words matrix should be reduced to. For example, a value of `.1` will decrease the frequencies in the bag-of-words matrix by 10% at each iteration. This will make sure that recent data has more weight than previous iterations. Similarly, `delete_min_df` will remove certain words from its vocabulary if their frequency is lower than a set value. This ties together with the `decay` parameter as some words will decay over time if not used. For more information regarding the `OnlineCountVectorizer`, please see the [vectorizers documentation](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html#onlinecountvectorizer).
 
+
+!!! Tip
+    If you want to use the original UMAP and HDBSCAN models instead, consider using the [**merge model**](https://maartengr.github.io/BERTopic/getting_started/merge/merge.html)
+    functionality of BERTopic. It allows for merging multiple BERTopic models to create a single new one. This method can be used to discover new topics by training a new model and exploring whether that new model added new topics to the original model when merging.
 
 ## **Example**
 
