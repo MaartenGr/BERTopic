@@ -30,7 +30,7 @@ BERTopic supports all kinds of topic modeling techniques:
  <tr>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html">Multimodal</a></td>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html">Multi-aspect</a></td>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/llm">Text Generation</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/llm">Text Generation/LLM</a></td>
  </tr>
  <tr>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zeroshot <b>(new!)</b></a></td>

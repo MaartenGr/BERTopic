@@ -123,6 +123,7 @@ theme:
     - content.code.copy
   palette:
   - media: "(prefers-color-scheme: light)"
+    primary: custom
     scheme: black
     toggle:
       icon: material/weather-sunny
