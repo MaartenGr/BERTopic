@@ -5,7 +5,7 @@ Using these techniques, we can further fine-tune topics to generate labels, summ
 A huge benefit of this is that we can describe a topic with only a few documents and we therefore do not need to pass all documents to the text generation model. Not only speeds this the generation of topic labels up significantly, you also do not need a massive amount of credits when using an external API, such as Cohere or OpenAI.
 
 
-## **Prompts**
+## **Prompt Engineering**
 
 In most of the examples below, we use certain tags to customize our prompts. There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`. 
 These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
@@ -80,6 +80,56 @@ representation_model = OpenAI(tokenizer=tokenizer, document_length=50)
 ```
 
 In this example, each document will be at most 50 tokens, anything more will get truncated.
+
+
+### **Document Truncation**
+
+We can truncate the input documents in `[DOCUMENTS]` in order to reduce the number of tokens that we have in our input prompt. To do so, all text generation modules have two parameters that we can tweak:
+
+* `doc_length`
+    * The maximum length of each document. If a document is longer, it will be truncated. If None, the entire document is passed.
+* `tokenizer`
+    * The tokenizer used to calculate to split the document into segments used to count the length of a document. 
+        * If tokenizer is  `'char'`, then the document is split up into characters which are counted to adhere to `doc_length`
+        * If tokenizer is `'whitespace'`, the the document is split up into words separated by whitespaces. These words are counted       and truncated depending on `doc_length`
+        * If tokenizer is `'vectorizer'`, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and trunctated depending on `doc_length`
+        * If tokenizer is a callable, then that callable is used to tokenized the document. These tokens are counted and truncated depending on `doc_length`
+
+This means that the definition of `doc_length` changes depending on what constitutes a token in the `tokenizer` parameter. If a token is a character, then `doc_length` refers to max length in characters. If a token is a word, then `doc_length` refers to the max length in words.
+
+Let's illustrate this with an example. In the code below, we will use [`tiktoken`](https://github.com/openai/tiktoken) to count the number of tokens in each document and limit them to 100 tokens. All documents that have more than 100 tokens will be truncated.
+
+We start by installing the relevant packages:
+
+```bash
+pip install tiktoken openai
+```
+
+Then, we use `bertopic.representation.OpenAI` to represent our topics with nicely written labels. We specify that documents that we put in the prompt cannot exceed 100 tokens each. Since we will put 4 documents in the prompt, they will total roughly 400 tokens:
+
+```python
+import openai
+import tiktoken
+from bertopic.representation import OpenAI
+from bertopic import BERTopic
+
+# Tokenizer
+tokenizer= tiktoken.encoding_for_model("gpt-3.5-turbo")
+
+# Create your representation model
+openai.api_key = MY_API_KEY
+representation_model = OpenAI(
+    model="gpt-3.5-turbo", 
+    delay_in_seconds=2, 
+    chat=True,
+    nr_docs=4,
+    doc_length=100,
+    tokenizer=tokenizer
+)
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
 
 ## **🤗 Transformers**
 
@@ -190,7 +240,110 @@ representation_model = {"Zephyr": zephyr}
 topic_model = BERTopic(representation_model=representation_model, verbose=True)
 ```
 
-From 
+### **Llama 2**
+
+Full Llama 2 Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QCERSMUjqGetGGujdrvv_6_EeoIcd_9M?usp=sharing)
+
+Open-source LLMs are starting to become more and more popular. Here, we will go through a minimal example of using [Llama 2](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) together with BERTopic. 
+
+First, we need to load in our Llama 2 model:
+
+```python
+from torch import bfloat16
+import transformers
+
+# set quantization configuration to load large model with less GPU memory
+# this requires the `bitsandbytes` library
+bnb_config = transformers.BitsAndBytesConfig(
+    load_in_4bit=True,  # 4-bit quantization
+    bnb_4bit_quant_type='nf4',  # Normalized float 4
+    bnb_4bit_use_double_quant=True,  # Second quantization after the first
+    bnb_4bit_compute_dtype=bfloat16  # Computation type
+)
+
+# Llama 2 Tokenizer
+tokenizer = transformers.AutoTokenizer.from_pretrained(model_id)
+
+# Llama 2 Model
+model = transformers.AutoModelForCausalLM.from_pretrained(
+    model_id,
+    trust_remote_code=True,
+    quantization_config=bnb_config,
+    device_map='auto',
+)
+model.eval()
+
+# Our text generator
+generator = transformers.pipeline(
+    model=model, tokenizer=tokenizer,
+    task='text-generation',
+    temperature=0.1,
+    max_new_tokens=500,
+    repetition_penalty=1.1
+)
+```
+
+After doing so, we will need to define a prompt that works with both Llama 2 as well as BERTopic:
+
+
+```python
+# System prompt describes information given to all conversations
+system_prompt = """
+<s>[INST] <<SYS>>
+You are a helpful, respectful and honest assistant for labeling topics.
+<</SYS>>
+"""
+
+# Example prompt demonstrating the output we are looking for
+example_prompt = """
+I have a topic that contains the following documents:
+- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
+- Meat, but especially beef, is the word food in terms of emissions.
+- Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
+
+The topic is described by the following keywords: 'meat, beef, eat, eating, emissions, steak, food, health, processed, chicken'.
+
+Based on the information about the topic above, please create a short label of this topic. Make sure you to only return the label and nothing more.
+
+[/INST] Environmental impacts of eating meat
+"""
+
+# Our main prompt with documents ([DOCUMENTS]) and keywords ([KEYWORDS]) tags
+main_prompt = """
+[INST]
+I have a topic that contains the following documents:
+[DOCUMENTS]
+
+The topic is described by the following keywords: '[KEYWORDS]'.
+
+Based on the information about the topic above, please create a short label of this topic. Make sure you to only return the label and nothing more.
+[/INST]
+"""
+
+prompt = system_prompt + example_prompt + main_prompt
+```
+
+Three pieces of the prompt were created:  
+  
+* `system_prompt` helps us guide the model during a conversation. For example, we can say that it is a helpful assisant that is specialized in labeling topics.
+* `example_prompt` gives an example of a correctly labeled topic to guide Llama 2
+* `main_prompt` contains the main question we are going to ask it, namely to label a topic. Note that it uses the `[DOCUMENTS]`  and `[KEYWORDS]` to provide the most relevant documents and keywords as additional context
+
+After having generated our prompt template, we can start running our topic model:
+
+```python
+from bertopic.representation import TextGeneration
+from bertopic import BERTopic
+
+# Text generation with Llama 2
+llama2 = TextGeneration(generator, prompt=prompt)
+representation_model = {
+    "Llama2": llama2,
+}
+
+# Create our BERTopic model
+topic_model = BERTopic(representation_model=representation_model,  verbose=True)
+```
 
 ## **OpenAI**
 

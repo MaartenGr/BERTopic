@@ -1,8 +1,10 @@
 import pandas as pd
+from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple
+from typing import Mapping, List, Tuple, Union, Callable
 from langchain.docstore.document import Document
 from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._utils import truncate_document
 
 
 DEFAULT_PROMPT = "What are these documents about? Please give a single label."
@@ -18,7 +20,28 @@ class LangChain(BaseRepresentation):
         chain: A langchain chain that has two input parameters, `input_documents` and `query`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
-
+        nr_docs: The number of documents to pass to LangChain if a prompt
+                 with the `["DOCUMENTS"]` tag is used.
+        diversity: The diversity of documents to pass to LangChain.
+                   Accepts values between 0 and 1. A higher 
+                   values results in passing more diverse documents
+                   whereas lower values passes more similar documents.
+        doc_length: The maximum length of each document. If a document is longer,
+                    it will be truncated. If None, the entire document is passed.
+        tokenizer: The tokenizer used to calculate to split the document into segments
+                   used to count the length of a document. 
+                       * If tokenizer is 'char', then the document is split up 
+                         into characters which are counted to adhere to `doc_length`
+                       * If tokenizer is 'whitespace', the the document is split up
+                         into words separated by whitespaces. These words are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                         is used to tokenize the document. These tokens are counted
+                         and trunctated depending on `doc_length`. They are decoded with 
+                         whitespaces.
+                       * If tokenizer is a callable, then that callable is used to tokenize
+                         the document. These tokens are counted and truncated depending
+                         on `doc_length`
     Usage:
 
     To use this, you will need to install the langchain package first.
@@ -58,10 +81,18 @@ class LangChain(BaseRepresentation):
     def __init__(self,
                  chain,
                  prompt: str = None,
+                 nr_docs: int = 4,
+                 diversity: float = None,
+                 doc_length: int = None,
+                 tokenizer: Union[str, Callable] = None
                  ):
         self.chain = chain
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.nr_docs = nr_docs
+        self.diversity = diversity
+        self.doc_length = doc_length
+        self.tokenizer = tokenizer
 
     def extract_topics(self,
                        topic_model,
@@ -81,12 +112,20 @@ class LangChain(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top 4 representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, 4)
+        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+            c_tf_idf=c_tf_idf,
+            documents=documents,
+            topics=topics,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity
+        )
 
         # Generate label using langchain
         updated_topics = {}
-        for topic, docs in repr_docs_mappings.items():
-            chain_docs = [Document(page_content=doc[:1000]) for doc in docs]
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+            chain_docs = [Document(page_content=doc) for doc in truncated_docs]
             label = self.chain.run(input_documents=chain_docs, question=self.prompt).strip()
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 

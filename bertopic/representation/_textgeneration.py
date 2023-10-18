@@ -3,8 +3,9 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
-from typing import Mapping, List, Tuple, Any, Union
+from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._utils import truncate_document
 
 
 DEFAULT_PROMPT = """
@@ -32,9 +33,24 @@ class TextGeneration(BaseRepresentation):
         nr_docs: The number of documents to pass to OpenAI if a prompt
                  with the `["DOCUMENTS"]` tag is used.
         diversity: The diversity of documents to pass to OpenAI.
-                   Accepts values between 0 and 1. A higher 
+                   Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
+        doc_length: The maximum length of each document. If a document is longer,
+                    it will be truncated. If None, the entire document is passed.
+        tokenizer: The tokenizer used to calculate to split the document into segments
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
+                         into characters which are counted to adhere to `doc_length`
+                       * If tokenizer is 'whitespace', the the document is split up
+                         into words separated by whitespaces. These words are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                         is used to tokenize the document. These tokens are counted
+                         and trunctated depending on `doc_length`
+                       * If tokenizer is a callable, then that callable is used to tokenize
+                         the document. These tokens are counted and truncated depending
+                         on `doc_length`
 
     Usage:
 
@@ -71,7 +87,10 @@ class TextGeneration(BaseRepresentation):
                  pipeline_kwargs: Mapping[str, Any] = {},
                  random_state: int = 42,
                  nr_docs: int = 4,
-                 diversity: float = None):
+                 diversity: float = None,
+                 doc_length: int = None,
+                 tokenizer: Union[str, Callable] = None
+                 ):
         set_seed(random_state)
         if isinstance(model, str):
             self.model = pipeline("text-generation", model=model)
@@ -86,6 +105,10 @@ class TextGeneration(BaseRepresentation):
         self.pipeline_kwargs = pipeline_kwargs
         self.nr_docs = nr_docs
         self.diversity = diversity
+        self.doc_length = doc_length
+        self.tokenizer = tokenizer
+
+        self.prompts_ = []
 
     def extract_topics(self,
                        topic_model,
@@ -106,15 +129,24 @@ class TextGeneration(BaseRepresentation):
         """
         # Extract the top 4 representative documents per topic
         if self.prompt != DEFAULT_PROMPT and "[DOCUMENTS]" in self.prompt:
-            repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
+            repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+                c_tf_idf,
+                documents,
+                topics,
+                500,
+                self.nr_docs,
+                self.diversity
+            )
         else:
             repr_docs_mappings = {topic: None for topic in topics.keys()}
 
         updated_topics = {}
-        for topic, _ in tqdm(topics.items(), disable=not topic_model.verbose):
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
 
             # Prepare prompt
-            prompt = self._create_prompt(repr_docs_mappings[topic], topic, topics)
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+            prompt = self._create_prompt(truncated_docs, topic, topics)
+            self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
             topic_description = self.model(prompt, **self.pipeline_kwargs)
@@ -143,7 +175,7 @@ class TextGeneration(BaseRepresentation):
             if "[DOCUMENTS]" in prompt:
                 to_replace = ""
                 for doc in docs:
-                    to_replace += f"- {doc[:255]}\n"
+                    to_replace += f"- {doc}\n"
                 prompt = prompt.replace("[DOCUMENTS]", to_replace)
 
         return prompt
