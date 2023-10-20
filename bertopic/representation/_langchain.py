@@ -1,6 +1,5 @@
 import pandas as pd
 from langchain.docstore.document import Document
-from langchain.schema.runnable import Runnable, RunnableConfig
 from scipy.sparse import csr_matrix
 from typing import Callable, Dict, Mapping, List, Tuple, Union
 
