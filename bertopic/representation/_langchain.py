@@ -2,8 +2,7 @@ import pandas as pd
 from langchain.docstore.document import Document
 from langchain.schema.runnable import Runnable, RunnableConfig
 from scipy.sparse import csr_matrix
-from tqdm import tqdm
-from typing import Any, Callable, Dict, Mapping, List, Optional, Tuple, Union
+from typing import Callable, Dict, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
@@ -142,15 +141,15 @@ class LangChain(BaseRepresentation):
         ]
 
         # `self.chain` must take `input_documents` and `question` as input keys
-        inputs: List[Dict[str, Union[List[str], str]]] = [
+        inputs = [
             {"input_documents": docs, "question": self.prompt}
             for docs in chain_docs
         ]
 
         # `self.chain` must return a dict with an `output_text` key
-        outputs: List[Dict[str, str]] = self.chain.batch(inputs=inputs, config=self.chain_config)
         # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
-        labels: List[str] = [output["output_text"].strip() for output in outputs]
+        outputs = self.chain.batch(inputs=inputs, config=self.chain_config)
+        labels = [output["output_text"].strip() for output in outputs]
 
         updated_topics = {
             topic: [(label, 1)] + [("", 0) for _ in range(9)]
