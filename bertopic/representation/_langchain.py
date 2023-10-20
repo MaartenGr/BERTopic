@@ -81,11 +81,11 @@ class LangChain(BaseRepresentation):
     def __init__(self,
                  chain,
                  prompt: str = None,
-                 chain_config = None,
                  nr_docs: int = 4,
                  diversity: float = None,
                  doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None
+                 tokenizer: Union[str, Callable] = None,
+                 chain_config = None,
                  ):
         self.chain = chain
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
