@@ -2,9 +2,11 @@ import pandas as pd
 from langchain.docstore.document import Document
 from langchain.schema.runnable import Runnable, RunnableConfig
 from scipy.sparse import csr_matrix
-from typing import Any, Dict, Mapping, List, Optional, Tuple, Union
+from tqdm import tqdm
+from typing import Any, Callable, Dict, Mapping, List, Optional, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._utils import truncate_document
 
 DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
@@ -19,7 +21,28 @@ class LangChain(BaseRepresentation):
         chain: A langchain chain that has two input parameters, `input_documents` and `query`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
-
+        nr_docs: The number of documents to pass to LangChain if a prompt
+                 with the `["DOCUMENTS"]` tag is used.
+        diversity: The diversity of documents to pass to LangChain.
+                   Accepts values between 0 and 1. A higher 
+                   values results in passing more diverse documents
+                   whereas lower values passes more similar documents.
+        doc_length: The maximum length of each document. If a document is longer,
+                    it will be truncated. If None, the entire document is passed.
+        tokenizer: The tokenizer used to calculate to split the document into segments
+                   used to count the length of a document. 
+                       * If tokenizer is 'char', then the document is split up 
+                         into characters which are counted to adhere to `doc_length`
+                       * If tokenizer is 'whitespace', the the document is split up
+                         into words separated by whitespaces. These words are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                         is used to tokenize the document. These tokens are counted
+                         and trunctated depending on `doc_length`. They are decoded with 
+                         whitespaces.
+                       * If tokenizer is a callable, then that callable is used to tokenize
+                         the document. These tokens are counted and truncated depending
+                         on `doc_length`
     Usage:
 
     To use this, you will need to install the langchain package first.
@@ -58,22 +81,22 @@ class LangChain(BaseRepresentation):
     """
     # TODO: update docstring
     def __init__(self,
-                 chain: Runnable,
-                 prompt: Optional[str] = None,
-                 config: Union[RunnableConfig, Dict[str, Any], None] = None,
-                 nr_samples: int = 500,
-                 nr_repr_docs: int = 4,
-                 diversity: Optional[float] = None,
-                 truncate_len: Union[int, None] = 1000,
+                 chain,
+                 prompt: str = None,
+                 chain_config = None,
+                 nr_docs: int = 4,
+                 diversity: float = None,
+                 doc_length: int = None,
+                 tokenizer: Union[str, Callable] = None
                  ):
         self.chain = chain
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
-        self.config = config
-        self.nr_samples = nr_samples
-        self.nr_repr_docs = nr_repr_docs
+        self.chain_config = chain_config
+        self.nr_docs = nr_docs
         self.diversity = diversity
-        self.truncate_len = truncate_len
+        self.doc_length = doc_length
+        self.tokenizer = tokenizer
 
     def extract_topics(self,
                        topic_model,
@@ -92,23 +115,26 @@ class LangChain(BaseRepresentation):
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top `nr_repr_docs` representative documents per topic
-        # Use all documents if `nr_repr_docs` is None
-        nr_repr_docs = self.nr_repr_docs if self.nr_repr_docs is not None else len(documents)
+        # Extract the top 4 representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
             c_tf_idf=c_tf_idf,
             documents=documents,
             topics=topics,
-            nr_samples=self.nr_samples,
-            nr_repr_docs=nr_repr_docs,
-            diversity=self.diversity,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity
         )
 
         # Generate label using langchain's batch functionality
         chain_docs: List[List[Document]] = [
             [
                 Document(
-                    page_content=doc if self.truncate_len is None else doc[:self.truncate_len]
+                    page_content=truncate_document(
+                        topic_model,
+                        self.doc_length,
+                        self.tokenizer,
+                        doc
+                    )
                 )
                 for doc in docs
             ]
@@ -122,7 +148,7 @@ class LangChain(BaseRepresentation):
         ]
 
         # `self.chain` must return a dict with an `output_text` key
-        outputs: List[Dict[str, str]] = self.chain.batch(inputs=inputs, config=self.config)
+        outputs: List[Dict[str, str]] = self.chain.batch(inputs=inputs, config=self.chain_config)
         # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
         labels: List[str] = [output["output_text"].strip() for output in outputs]
 
