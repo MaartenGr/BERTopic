@@ -12,11 +12,15 @@ DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 class LangChain(BaseRepresentation):
     """ Using chains in langchain to generate topic labels.
 
-    Currently, only chains from question answering is implemented. See:
-    https://langchain.readthedocs.io/en/latest/modules/chains/combine_docs_examples/question_answering.html
+    The classic example uses `langchain.chains.question_answering.load_qa_chain`.
+    This returns a chain that takes a list of documents and a question as input.
+
+    You can also use Runnables such as those composed using the LangChain Expression Language.
 
     Arguments:
-        chain: A langchain chain that has two input parameters, `input_documents` and `query`.
+        chain: A langchain chain or Runnable with a `batch` method.
+            Input keys must be `input_documents` and `question`.
+            Output key must be `output_text`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
         nr_docs: The number of documents to pass to LangChain if a prompt
@@ -41,6 +45,9 @@ class LangChain(BaseRepresentation):
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
+        chain_config : RunnableConfig, optional
+            Configuration for the langchain chain. Can be used to set
+            options like max_concurrency to avoid rate limiting errors.
     Usage:
 
     To use this, you will need to install the langchain package first.
@@ -76,8 +83,47 @@ class LangChain(BaseRepresentation):
     prompt = "What are these documents about? Please give a single label."
     representation_model = LangChain(chain, prompt=prompt)
     ```
+
+    You can also use a Runnable instead of a chain.
+    The example below uses the LangChain Expression Language:
+
+    ```python
+    from bertopic.representation import LangChain
+    from langchain.chains.question_answering import load_qa_chain
+    from langchain.chat_models import ChatAnthropic
+    from langchain.schema.document import Document
+    from langchain.schema.runnable import RunnablePassthrough
+    from langchain_experimental.data_anonymizer.presidio import PresidioReversibleAnonymizer
+
+    prompt = ...
+    llm = ...
+
+    # We will construct a special privacy-preserving chain using Microsoft Presidio
+
+    pii_handler = PresidioReversibleAnonymizer(analyzed_fields=["PERSON"])
+
+    chain = (
+        {
+            "input_documents": (
+                lambda inp: [
+                    Document(
+                        page_content=pii_handler.anonymize(
+                            d.page_content,
+                            language="en",
+                        ),
+                    )
+                    for d in inp["input_documents"]
+                ]
+            ),
+            "question": RunnablePassthrough(),
+        }
+        | load_qa_chain(representation_llm, chain_type="stuff")
+        | (lambda output: {"output_text": pii_handler.deanonymize(output["output_text"])})
+    )
+
+    representation_model = LangChain(chain, prompt=representation_prompt)
+    ```
     """
-    # TODO: update docstring
     def __init__(self,
                  chain,
                  prompt: str = None,
