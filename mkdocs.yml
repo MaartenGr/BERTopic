@@ -48,7 +48,7 @@ nav:
           - Supervised Topic Modeling: getting_started/supervised/supervised.md
           - Manual Topic Modeling: getting_started/manual/manual.md
           - Guided Topic Modeling: getting_started/guided/guided.md
-          - Zeroshot Topic Modeling: getting_started/zeroshot/zeroshot.md
+          - Zero-shot Topic Modeling: getting_started/zeroshot/zeroshot.md
         - Topic Distributions: getting_started/distribution/distribution.md
         - Topics per Class: getting_started/topicsperclass/topicsperclass.md
         - Seed Words: getting_started/seed_words/seed_words.md

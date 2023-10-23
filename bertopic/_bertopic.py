@@ -178,9 +178,9 @@ class BERTopic:
                                      as used in HDBSCAN and not an exact representation.
             seed_topic_list: A list of seed words per topic to converge around
             zeroshot_topic_list: A list of topic names to use for zero-shot classification
-            zeroshot_min_similarity: The minimum similarity between a zeroshot topic and
+            zeroshot_min_similarity: The minimum similarity between a zero-shot topic and
                                      a document for assignment. The higher this value, the more
-                                     confident the model needs to be to assign a zeroshot topic to a document.
+                                     confident the model needs to be to assign a zero-shot topic to a document.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
             embedding_model: Use a custom embedding model.
@@ -392,7 +392,7 @@ class BERTopic:
         if self.seed_topic_list is not None and self.embedding_model is not None:
             y, embeddings = self._guided_topic_modeling(embeddings)
 
-        # Zeroshot Topic Modeling
+        # Zero-shot Topic Modeling
         if self._is_zeroshot():
             documents, embeddings, assigned_documents, assigned_embeddings = self._zeroshot_topic_modeling(documents, embeddings)
             if documents is None:
@@ -437,7 +437,7 @@ class BERTopic:
         self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
-        # Combine Zeroshot with outliers
+        # Combine Zero-shot with outliers
         if self._is_zeroshot() and len(documents) != len(doc_ids):
             predictions = self._combine_zeroshot_topics(documents, assigned_documents, assigned_embeddings)
 
@@ -3402,7 +3402,7 @@ class BERTopic:
             documents: The leftover documents that were not assigned to any topic
             embeddings: The leftover embeddings that were not assigned to any topic
         """
-        # Similarity between document and zeroshot topic embeddings
+        # Similarity between document and zero-shot topic embeddings
         zeroshot_embeddings = self._extract_embeddings(self.zeroshot_topic_list)
         cosine_similarities = cosine_similarity(embeddings, zeroshot_embeddings)
         assignment = np.argmax(cosine_similarities, 1)
@@ -3430,11 +3430,11 @@ class BERTopic:
         return documents, embeddings, assigned_documents, assigned_embeddings
 
     def _is_zeroshot(self):
-        """ Check whether zeroshot topic modeling is possible
+        """ Check whether zero-shot topic modeling is possible
 
         * There should be a cluster model used
-        * Embedding model is necessary to convert zeroshot topics to embeddings
-        * Zeroshot topics should be defined
+        * Embedding model is necessary to convert zero-shot topics to embeddings
+        * Zero-shot topics should be defined
         """
         if self.zeroshot_topic_list is not None and self.embedding_model is not None and type(self.hdbscan_model) != BaseCluster:
             return True
@@ -3444,19 +3444,19 @@ class BERTopic:
                                  documents: pd.DataFrame,
                                  assigned_documents: pd.DataFrame,
                                  embeddings: np.ndarray) -> Union[Tuple[np.ndarray, np.ndarray], np.ndarray]:
-        """ Combine the zeroshot topics with the clustered topics
+        """ Combine the zero-shot topics with the clustered topics
 
         There are three cases considered:
-        * Only zeroshot topics were found which will only return the zeroshot topic model
+        * Only zero-shot topics were found which will only return the zero-shot topic model
         * Only clustered topics were found which will only return the clustered topic model
-        * Both zeroshot and clustered topics were found which will return a merged model
+        * Both zero-shot and clustered topics were found which will return a merged model
           * This merged model is created using the `merge_models` function which will ignore
             the underlying UMAP and HDBSCAN models
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
             assigned_documents: Dataframe with documents and their corresponding IDs
-                                that were assigned to a zeroshot topic
+                                that were assigned to a zero-shot topic
             embeddings: The document embeddings
 
         Returns:
@@ -3492,7 +3492,7 @@ class BERTopic:
         labels = [zeroshot_model.topic_labels_[zeroshot_model.topics_[index]] for index in indices]
         labels = {label: self.zeroshot_topic_list[topic] for label, topic in zip(labels, topics)}
 
-        # If only zeroshot matches were found and clustering was not performed
+        # If only zero-shot matches were found and clustering was not performed
         if documents is None:
             for topic in range(len(set(y))):
                 if zeroshot_model.topic_labels_.get(topic):
@@ -3505,7 +3505,7 @@ class BERTopic:
         # Merge the two topic models
         merged_model = BERTopic.merge_models([zeroshot_model, self], min_similarity=1)
 
-        # Update topic labels and representative docs of the zeroshot model
+        # Update topic labels and representative docs of the zero-shot model
         for topic in range(len(set(y))):
             if merged_model.topic_labels_.get(topic):
                 if labels.get(merged_model.topic_labels_[topic]):

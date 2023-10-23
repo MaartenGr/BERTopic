@@ -211,7 +211,13 @@ class OpenAI(BaseRepresentation):
                     response = chat_completions_with_backoff(**kwargs)
                 else:
                     response = openai.ChatCompletion.create(**kwargs)
-                label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
+
+                # Check whether content was actually generated
+                # Adresses #1570 for potential issues with OpenAI's content filter
+                if response["choices"][0]["message"].get("content"):
+                    label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
+                else:
+                    label = "No label returned"
             else:
                 if self.exponential_backoff:
                     response = completions_with_backoff(model=self.model, prompt=prompt, **self.generator_kwargs)
