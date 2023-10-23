@@ -42,7 +42,7 @@ class TextGeneration(BaseRepresentation):
                    used to count the length of a document.
                        * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
-                       * If tokenizer is 'whitespace', the the document is split up
+                       * If tokenizer is 'whitespace', the document is split up
                          into words separated by whitespaces. These words are counted
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer

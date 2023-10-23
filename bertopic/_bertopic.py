@@ -1502,7 +1502,7 @@ class BERTopic:
         return info.reset_index(drop=True)
 
     def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
-        """ Return the the size of topics (descending order)
+        """ Return the size of topics (descending order)
 
         Arguments:
             topic: A specific topic for which you want the frequency
