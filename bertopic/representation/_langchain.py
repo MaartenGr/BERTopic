@@ -18,9 +18,9 @@ class LangChain(BaseRepresentation):
     You can also use Runnables such as those composed using the LangChain Expression Language.
 
     Arguments:
-        chain: A langchain chain or Runnable with a `batch` method.
-            Input keys must be `input_documents` and `question`.
-            Output key must be `output_text`.
+        chain: The langchain chain or Runnable with a `batch` method.
+               Input keys must be `input_documents` and `question`.
+               Output key must be `output_text`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
         nr_docs: The number of documents to pass to LangChain if a prompt
@@ -45,9 +45,8 @@ class LangChain(BaseRepresentation):
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
-        chain_config : RunnableConfig, optional
-            Configuration for the langchain chain. Can be used to set
-            options like max_concurrency to avoid rate limiting errors.
+        chain_config: The configuration for the langchain chain. Can be used to set options
+                      like max_concurrency to avoid rate limiting errors.
     Usage:
 
     To use this, you will need to install the langchain package first.
