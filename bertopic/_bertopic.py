@@ -378,14 +378,14 @@ class BERTopic:
 
         # Extract embeddings
         if embeddings is None:
-            logger.info("EMBED: Transforming documents to embeddings.")
+            logger.info("Embedding - Transforming documents to embeddings.")
             self.embedding_model = select_backend(self.embedding_model,
                                                   language=self.language)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   images=images,
                                                   method="document",
                                                   verbose=self.verbose)
-            logger.info("EMBED: Finished!")
+            logger.info("Embedding - Completed \u2713")
         else:
             if self.embedding_model is not None:
                 self.embedding_model = select_backend(self.embedding_model,
@@ -523,24 +523,24 @@ class BERTopic:
 
         # Transform with full pipeline
         else:
-            logger.info("DIMENSIONALITY: Reducing dimensionality of input embeddings.")
+            logger.info("Dimensionality - Reducing dimensionality of input embeddings.")
             umap_embeddings = self.umap_model.transform(embeddings)
-            logger.info("DIMENSIONALITY: Finished!")
+            logger.info("Dimensionality - Completed \u2713")
 
             # Extract predictions and probabilities if it is a HDBSCAN-like model
-            logger.info("CLUSTER: Approximating new points with `hdbscan_model`")
+            logger.info("Clustering - Approximating new points with `hdbscan_model`")
             if is_supported_hdbscan(self.hdbscan_model):
                 predictions, probabilities = hdbscan_delegator(self.hdbscan_model, "approximate_predict", umap_embeddings)
 
                 # Calculate probabilities
                 if self.calculate_probabilities:
-                    logger.info("PROBABILITIES: Start calculation of probabilities with HDBSCAN")
+                    logger.info("Probabilities - Start calculation of probabilities with HDBSCAN")
                     probabilities = hdbscan_delegator(self.hdbscan_model, "membership_vector", umap_embeddings)
-                    logger.info("PROBABILITIES: Finished!")
+                    logger.info("Probabilities - Completed \u2713")
             else:
                 predictions = self.hdbscan_model.predict(umap_embeddings)
                 probabilities = None
-            logger.info("CLUSTER: Finished!")
+            logger.info("Cluster - Completed \u2713")
 
             # Map probabilities and predictions
             probabilities = self._map_probabilities(probabilities, original_topics=True)
@@ -3168,7 +3168,7 @@ class BERTopic:
 
         # Create a new model from the merged parameters
         merged_tensors = {"topic_embeddings": torch.from_numpy(merged_tensors)}
-        merged_model = _create_model_from_files(merged_topics, merged_params, merged_tensors, None, None, None)
+        merged_model = _create_model_from_files(merged_topics, merged_params, merged_tensors, None, None, None, warn_no_backend=False)
         merged_model.embedding_model = models[0].embedding_model
 
         # Replace embedding model if one is specifically chosen
@@ -3297,7 +3297,7 @@ class BERTopic:
 
     def _images_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
         """ Convert images to text """
-        logger.info("IMAGES: Converting images to text. This might take a while.")
+        logger.info("Images - Converting images to text. This might take a while.")
         if isinstance(self.representation_model, dict):
             for tuner in self.representation_model.values():
                 if getattr(tuner, 'image_to_text_model', False):
@@ -3309,7 +3309,7 @@ class BERTopic:
         elif isinstance(self.representation_model, BaseRepresentation):
             if getattr(self.representation_model, 'image_to_text_model', False):
                 documents = self.representation_model.image_to_text(documents, embeddings)
-        logger.info("IMAGES: Finished!")
+        logger.info("Images - Completed \u2713")
         return documents
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
@@ -3335,7 +3335,7 @@ class BERTopic:
         Returns:
             umap_embeddings: The reduced embeddings
         """
-        logger.info("DIMENSIONALITY: Fitting the dimensionality reduction algorithm")
+        logger.info("Dimensionality - Fitting the dimensionality reduction algorithm")
         # Partial fit
         if partial_fit:
             if hasattr(self.umap_model, "partial_fit"):
@@ -3354,7 +3354,7 @@ class BERTopic:
                 self.umap_model.fit(embeddings)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("DIMENSIONALITY: Finished!")
+        logger.info("Dimensionality - Completed \u2713")
         return np.nan_to_num(umap_embeddings)
 
     def _cluster_embeddings(self,
@@ -3375,7 +3375,7 @@ class BERTopic:
                        and newly added Topics
             probabilities: The distribution of probabilities
         """
-        logger.info("CLUSTER: Start clustering the reduced embeddings")
+        logger.info("Cluster - Start clustering the reduced embeddings")
         if partial_fit:
             self.hdbscan_model = self.hdbscan_model.partial_fit(umap_embeddings)
             labels = self.hdbscan_model.labels_
@@ -3409,7 +3409,7 @@ class BERTopic:
 
         if not partial_fit:
             self.topic_mapper_ = TopicMapper(self.topics_)
-        logger.info("CLUSTER: Finished!")
+        logger.info("Cluster - Completed \u2713")
         return documents, probabilities
 
     def _zeroshot_topic_modeling(self, documents: pd.DataFrame, embeddings: np.ndarray) -> Tuple[pd.DataFrame, np.array,
@@ -3428,6 +3428,7 @@ class BERTopic:
             documents: The leftover documents that were not assigned to any topic
             embeddings: The leftover embeddings that were not assigned to any topic
         """
+        logger.info("Zeroshot Step 1 - Finding documents that could be assigned to either one of the zero-shot topics")
         # Similarity between document and zero-shot topic embeddings
         zeroshot_embeddings = self._extract_embeddings(self.zeroshot_topic_list)
         cosine_similarities = cosine_similarity(embeddings, zeroshot_embeddings)
@@ -3452,7 +3453,7 @@ class BERTopic:
         # If only matches were found
         if len(non_assigned_ids) == 0:
             return None, None, assigned_documents, assigned_embeddings
-
+        logger.info("Zeroshot Step 1 - Completed \u2713")
         return documents, embeddings, assigned_documents, assigned_embeddings
 
     def _is_zeroshot(self):
@@ -3489,7 +3490,7 @@ class BERTopic:
             topics: The topics for each document
             probabilities: The probabilities for each document
         """
-        logger.info("ZEROSHOT: Clustering documents that were not found in the zero-shot model")
+        logger.info("Zeroshot Step 2 - Clustering documents that were not found in the zero-shot model...")
 
         # Fit BERTopic without actually performing any clustering
         docs = assigned_documents.Document.tolist()
@@ -3508,6 +3509,8 @@ class BERTopic:
                 representation_model=self.representation_model,
                 verbose=self.verbose
         ).fit(docs, embeddings=embeddings, y=y)
+        logger.info("Zeroshot Step 2 - Completed \u2713")
+        logger.info("Zeroshot Step 3 - Combining clustered topics with the zeroshot model")
 
         # Update model
         self.umap_model = BaseDimensionalityReduction()
@@ -3568,7 +3571,7 @@ class BERTopic:
         # Update the class internally
         self.__dict__.clear()
         self.__dict__.update(merged_model.__dict__)
-        logger.info("ZEROSHOT: Finished!")
+        logger.info("Zeroshot Step 3 - Completed \u2713")
         return self.topics_
 
     def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
@@ -3592,7 +3595,7 @@ class BERTopic:
             y: The labels for each seeded topic
             embeddings: Updated embeddings
         """
-        logger.info("GUIDED: Find embeddings highly related to seeded topics.")
+        logger.info("Guided - Find embeddings highly related to seeded topics.")
         # Create embeddings from the seeded topics
         seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
         seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
@@ -3608,7 +3611,7 @@ class BERTopic:
         for seed_topic in range(len(seed_topic_list)):
             indices = [index for index, topic in enumerate(y) if topic == seed_topic]
             embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
-        logger.info("GUIDED: Finished!")
+        logger.info("Guided - Completed \u2713")
         return y, embeddings
 
     def _extract_topics(self, documents: pd.DataFrame, embeddings: np.ndarray = None, mappings=None, verbose: bool = False):
@@ -3624,7 +3627,7 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         if verbose:
-            logger.info("REPRESENTATION: Extracting topics from clusters using representation models.")
+            logger.info("Representation - Extracting topics from clusters using representation models.")
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
@@ -3633,7 +3636,7 @@ class BERTopic:
                               for key, values in
                               self.topic_representations_.items()}
         if verbose:
-            logger.info("REPRESENTATION: Finished!")
+            logger.info("Representation - Completed \u2713")
 
     def _save_representative_docs(self, documents: pd.DataFrame):
         """ Save the 3 most representative docs per topic
@@ -3941,7 +3944,7 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
-        logger.info(f"TOPIC REDUCTION: Reducing number of topics to  {len(self.get_topic_freq())}")
+        logger.info("Topic reduction - Reducing number of topics")
         initial_nr_topics = len(self.get_topics())
 
         if isinstance(self.nr_topics, int):
@@ -3952,7 +3955,7 @@ class BERTopic:
         else:
             raise ValueError("nr_topics needs to be an int or 'auto'! ")
 
-        logger.info(f"TOPIC REDUCTION: Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
+        logger.info(f"Topic reduction - Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
         return documents
 
     def _reduce_to_n_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
@@ -4296,7 +4299,8 @@ def _create_model_from_files(
         tensors: Mapping[str, np.array],
         ctfidf_tensors: Mapping[str, Any] = None,
         ctfidf_config: Mapping[str, Any] = None,
-        images: Mapping[int, Any] = None):
+        images: Mapping[int, Any] = None,
+        warn_no_backend: bool = True):
     """ Create a BERTopic model from a variety of inputs
 
     Arguments:
@@ -4307,6 +4311,8 @@ def _create_model_from_files(
         tensors: The topic embeddings
         ctfidf_tensors: The c-TF-IDF representations
         ctfidf_config: The config for CountVectorizer and c-TF-IDF
+        images: The images per topic
+        warn_no_backend: Whether to warn the user if no backend is given
     """
     from sentence_transformers import SentenceTransformer
     params["n_gram_range"] = tuple(params["n_gram_range"])
@@ -4323,9 +4329,11 @@ def _create_model_from_files(
         embedding_model = select_backend(SentenceTransformer(params['embedding_model']))
     except:
         embedding_model = BaseEmbedder()
-        logger.warning("You are loading a BERTopic model without explicitly defining an embedding model."
-                       "If you want to also load in an embedding model, make sure to use"
-                       "BERTopic.load(my_model, embedding_model=my_embedding_model).")
+
+        if warn_no_backend:
+            logger.warning("You are loading a BERTopic model without explicitly defining an embedding model."
+                        "If you want to also load in an embedding model, make sure to use"
+                        "BERTopic.load(my_model, embedding_model=my_embedding_model).")
 
     if params.get("embedding_model") is not None:
         del params['embedding_model']
