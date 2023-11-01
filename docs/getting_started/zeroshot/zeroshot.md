@@ -26,8 +26,10 @@ In order to guide BERTopic to that topic, we create a seed topic list that we pa
 there may be several other topics that we know should be in the documents. Let's also initialize those:
 
 ```python
-from bertopic import BERTopic
 from datasets import load_dataset
+
+from bertopic import BERTopic
+from bertopic.representation import KeyBERTInspired
 
 # We select a subsample of 5000 abstracts from ArXiv
 dataset = load_dataset("CShorten/ML-ArXiv-Papers")["train"]
@@ -44,7 +46,8 @@ topic_model = BERTopic(
     embedding_model="thenlper/gte-small", 
     min_topic_size=15,
     zeroshot_topic_list=zeroshot_topic_list,
-    zeroshot_min_similarity=.85
+    zeroshot_min_similarity=.85,
+    representation_model=KeyBERTInspired()
 )
 topics, _ = topic_model.fit_transform(docs)
 ```
