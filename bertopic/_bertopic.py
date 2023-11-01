@@ -90,7 +90,7 @@ class BERTopic:
         topic_labels_ (Mapping[int, str]) : The default labels for each topic.
         custom_labels_ (List[str]) : Custom labels for each topic.
         topic_embeddings_ (np.ndarray) : The embeddings for each topic. It is calculated by taking the
-                                         weighted average of word embeddings in a topic based on their c-TF-IDF values.
+                                         centroid embedding of each cluster.
         representative_docs_ (Mapping[int, str]) : The representative documents for each topic.
 
     Examples:
@@ -859,6 +859,7 @@ class BERTopic:
         topics_per_class = topic_model.topics_per_class(docs, classes)
         ```
         """
+        check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Class": classes})
         global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm='l1', copy=False)
 
@@ -947,6 +948,7 @@ class BERTopic:
         hierarchical_topics = topic_model.hierarchical_topics(docs, linkage_function=linkage_function)
         ```
         """
+        check_documents_type(docs)
         if distance_function is None:
             distance_function = lambda x: 1 - cosine_similarity(x)
 
@@ -1380,6 +1382,7 @@ class BERTopic:
         topic_model.update_topics(docs, my_updated_topics)
         ```
         """
+        check_documents_type(docs)
         check_is_fitted(self)
         if not n_gram_range:
             n_gram_range = self.n_gram_range
@@ -1605,6 +1608,7 @@ class BERTopic:
                                                       metadata={"Topic_distribution": distributions})
         ```
         """
+        check_documents_type(docs)
         if df is not None:
             document_info = df.copy()
             document_info["Document"] = docs
@@ -1939,6 +1943,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
+        check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images, "ID": range(len(docs))})
 
         mapping = {topic: topic for topic in set(self.topics_)}
@@ -2014,6 +2019,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
+        check_documents_type(docs)
 
         self.nr_topics = nr_topics
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images, "ID": range(len(docs))})
@@ -2302,6 +2308,7 @@ class BERTopic:
         style="width:1000px; height: 800px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
+        check_documents_type(docs)
         return plotting.visualize_documents(self,
                                             docs=docs,
                                             topics=topics,
@@ -2415,6 +2422,7 @@ class BERTopic:
         style="width:1000px; height: 770px; border: 0px;""></iframe>
         """
         check_is_fitted(self)
+        check_documents_type(docs)
         return plotting.visualize_hierarchical_documents(self,
                                                          docs=docs,
                                                          hierarchical_topics=hierarchical_topics,
@@ -3127,7 +3135,7 @@ class BERTopic:
                 merged_tensors = np.vstack([merged_tensors, new_tensors])
 
             # Topic Mapper
-            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, new_topic_val+1, 1)))
+            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, new_topic_val+1, 1))).mappings_
 
             # Find similar topics and re-assign those from the new models
             sims_idx = np.argmax(sim_matrix, axis=1)
@@ -3810,7 +3818,7 @@ class BERTopic:
         elif self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
             multiplier = np.array([1.2 if word in seed_topic_list else 1 for word in words])
-        
+
         if fit:
             self.ctfidf_model = self.ctfidf_model.fit(X, multiplier=multiplier)
 
