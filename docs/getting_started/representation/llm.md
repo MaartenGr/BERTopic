@@ -49,7 +49,7 @@ We can truncate the input documents in `[DOCUMENTS]` in order to reduce the numb
 * `tokenizer`
     * The tokenizer used to calculate to split the document into segments used to count the length of a document. 
         * If tokenizer is  `'char'`, then the document is split up into characters which are counted to adhere to `doc_length`
-        * If tokenizer is `'whitespace'`, the the document is split up into words separated by whitespaces. These words are counted       and truncated depending on `doc_length`
+        * If tokenizer is `'whitespace'`, the document is split up into words separated by whitespaces. These words are counted       and truncated depending on `doc_length`
         * If tokenizer is `'vectorizer'`, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and trunctated depending on `doc_length`
         * If tokenizer is a callable, then that callable is used to tokenized the document. These tokens are counted and truncated depending on `doc_length`
 
