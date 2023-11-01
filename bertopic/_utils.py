@@ -14,7 +14,10 @@ class MyLogger:
         self.logger.propagate = False
 
     def info(self, message):
-        self.logger.info("{}".format(message))
+        self.logger.info(f"{message}")
+
+    def warning(self, message):
+        self.logger.warning(f"WARNING: {message}")
 
     def set_level(self, level):
         levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]

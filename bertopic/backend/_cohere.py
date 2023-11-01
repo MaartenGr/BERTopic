@@ -1,5 +1,4 @@
 import time
-import cohere
 import numpy as np
 from tqdm import tqdm
 from typing import List
@@ -8,7 +7,7 @@ from bertopic.backend import BaseEmbedder
 
 class CohereBackend(BaseEmbedder):
     """ Cohere Embedding Model
-    
+
     Arguments:
         client: A `cohere` client.
         embedding_model: A Cohere model. Default is "large".
@@ -28,7 +27,7 @@ class CohereBackend(BaseEmbedder):
     cohere_model = CohereBackend(client)
     ```
     """
-    def __init__(self, 
+    def __init__(self,
                  client,
                  embedding_model: str = "large",
                  delay_in_seconds: float = None,
@@ -59,7 +58,7 @@ class CohereBackend(BaseEmbedder):
             for batch in tqdm(self._chunks(documents), disable=not verbose):
                 response = self.client.embed(batch, model=self.embedding_model)
                 embeddings.extend(response.embeddings)
-                
+
                 # Delay subsequent calls
                 if self.delay_in_seconds:
                     time.sleep(self.delay_in_seconds)
@@ -69,7 +68,7 @@ class CohereBackend(BaseEmbedder):
             response = self.client.embed(documents, model=self.embedding_model)
             embeddings = response.embeddings
         return np.array(embeddings)
-    
-    def _chunks(self, documents):     
+
+    def _chunks(self, documents):
         for i in range(0, len(documents), self.batch_size):
             yield documents[i:i + self.batch_size]

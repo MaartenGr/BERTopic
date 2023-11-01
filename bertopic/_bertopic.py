@@ -207,8 +207,8 @@ class BERTopic:
         """
         # Topic-based parameters
         if top_n_words > 100:
-            warnings.warn("Note that extracting more than 100 words from a sparse "
-                          "can slow down computation quite a bit.")
+            logger.warning("Note that extracting more than 100 words from a sparse "
+                           "can slow down computation quite a bit.")
 
         self.top_n_words = top_n_words
         self.min_topic_size = min_topic_size
@@ -266,6 +266,8 @@ class BERTopic:
 
         if verbose:
             logger.set_level("DEBUG")
+        else:
+            logger.set_level("WARNING")
 
     def fit(self,
             documents: List[str],
@@ -383,7 +385,7 @@ class BERTopic:
                                                   images=images,
                                                   method="document",
                                                   verbose=self.verbose)
-            logger.info("EMBED: Finished embedding!")
+            logger.info("EMBED: Finished!")
         else:
             if self.embedding_model is not None:
                 self.embedding_model = select_backend(self.embedding_model,
@@ -523,7 +525,7 @@ class BERTopic:
         else:
             logger.info("DIMENSIONALITY: Reducing dimensionality of input embeddings.")
             umap_embeddings = self.umap_model.transform(embeddings)
-            logger.info("DIMENSIONALITY: Finished dimensionality reduction!")
+            logger.info("DIMENSIONALITY: Finished!")
 
             # Extract predictions and probabilities if it is a HDBSCAN-like model
             logger.info("CLUSTER: Approximating new points with `hdbscan_model`")
@@ -534,11 +536,11 @@ class BERTopic:
                 if self.calculate_probabilities:
                     logger.info("PROBABILITIES: Start calculation of probabilities with HDBSCAN")
                     probabilities = hdbscan_delegator(self.hdbscan_model, "membership_vector", umap_embeddings)
-                    logger.info("PROBABILITIES: Finished calculation of probabilities with HDBSCAN")
+                    logger.info("PROBABILITIES: Finished!")
             else:
                 predictions = self.hdbscan_model.predict(umap_embeddings)
                 probabilities = None
-            logger.info("CLUSTER: Finished approximation!")
+            logger.info("CLUSTER: Finished!")
 
             # Map probabilities and predictions
             probabilities = self._map_probabilities(probabilities, original_topics=True)
@@ -778,9 +780,9 @@ class BERTopic:
         documents = documents.sort_values("Timestamps")
         timestamps = documents.Timestamps.unique()
         if len(timestamps) > 100:
-            warnings.warn(f"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "
-                          "which significantly slows down the application. Consider setting `nr_bins` "
-                          "to a value lower than 100 to speed up calculation. ")
+            logger.warning(f"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "
+                           "which significantly slows down the application. Consider setting `nr_bins` "
+                           "to a value lower than 100 to speed up calculation. ")
 
         # For each unique timestamp, create topic representations
         topics_over_time = []
@@ -1398,8 +1400,8 @@ class BERTopic:
             n_gram_range = self.n_gram_range
 
         if top_n_words > 100:
-            warnings.warn("Note that extracting more than 100 words from a sparse "
-                          "can slow down computation quite a bit.")
+            logger.warning("Note that extracting more than 100 words from a sparse "
+                           "can slow down computation quite a bit.")
         self.top_n_words = top_n_words
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
@@ -1408,11 +1410,11 @@ class BERTopic:
         if topics is None:
             topics = self.topics_
         else:
-            warnings.warn("Using a custom list of topic assignments may lead to errors if "
-                          "topic reduction techniques are used afterwards. Make sure that "
-                          "manually assigning topics is the last step in the pipeline."
-                          "Note that topic embeddings will also be created through weighted"
-                          "c-TF-IDF embeddings instead of centroid embeddings.")
+            logger.warning("Using a custom list of topic assignments may lead to errors if "
+                           "topic reduction techniques are used afterwards. Make sure that "
+                           "manually assigning topics is the last step in the pipeline."
+                           "Note that topic embeddings will also be created through weighted"
+                           "c-TF-IDF embeddings instead of centroid embeddings.")
 
         self._outliers = 1 if -1 in set(topics) else 0
         # Extract words
@@ -2961,10 +2963,10 @@ class BERTopic:
         safetensors.
         """
         if serialization == "pickle":
-            warnings.warn("When you use `pickle` to save/load a BERTopic model,"
-                          "please make sure that the environments in which you save"
-                          "and load the model are **exactly** the same. The version of BERTopic,"
-                          "its dependencies, and python need to remain the same.")
+            logger.warning("When you use `pickle` to save/load a BERTopic model,"
+                           "please make sure that the environments in which you save"
+                           "and load the model are **exactly** the same. The version of BERTopic,"
+                           "its dependencies, and python need to remain the same.")
 
             with open(path, 'wb') as file:
 
@@ -2989,10 +2991,10 @@ class BERTopic:
             if save_embedding_model and hasattr(self.embedding_model, '_hf_model') and not isinstance(save_embedding_model, str):
                 save_embedding_model = self.embedding_model._hf_model
             elif not save_embedding_model:
-                warnings.warn("You are saving a BERTopic model without explicitly defining an embedding model."
-                              "If you are using a sentence-transformers model or a HuggingFace model supported"
-                              "by sentence-transformers, please save the model by using a pointer towards that model."
-                              "For example, `save_embedding_model=sentence-transformers/all-mpnet-base-v2`")
+                logger.warning("You are saving a BERTopic model without explicitly defining an embedding model."
+                               "If you are using a sentence-transformers model or a HuggingFace model supported"
+                               "by sentence-transformers, please save the model by using a pointer towards that model."
+                               "For example, `save_embedding_model=sentence-transformers/all-mpnet-base-v2`", RuntimeWarning)
 
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
@@ -3295,6 +3297,7 @@ class BERTopic:
 
     def _images_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
         """ Convert images to text """
+        logger.info("IMAGES: Converting images to text. This might take a while.")
         if isinstance(self.representation_model, dict):
             for tuner in self.representation_model.values():
                 if getattr(tuner, 'image_to_text_model', False):
@@ -3306,6 +3309,7 @@ class BERTopic:
         elif isinstance(self.representation_model, BaseRepresentation):
             if getattr(self.representation_model, 'image_to_text_model', False):
                 documents = self.representation_model.image_to_text(documents, embeddings)
+        logger.info("IMAGES: Finished!")
         return documents
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
@@ -3346,12 +3350,11 @@ class BERTopic:
                 y = np.array(y) if y is not None else None
                 self.umap_model.fit(embeddings, y=y)
             except TypeError:
-                logger.info("The dimensionality reduction algorithm did not contain the `y` parameter and"
-                            " therefore the `y` parameter was not used")
+
                 self.umap_model.fit(embeddings)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("DIMENSIONALITY: Finished fitting!")
+        logger.info("DIMENSIONALITY: Finished!")
         return np.nan_to_num(umap_embeddings)
 
     def _cluster_embeddings(self,
@@ -3406,7 +3409,7 @@ class BERTopic:
 
         if not partial_fit:
             self.topic_mapper_ = TopicMapper(self.topics_)
-        logger.info("CLUSTER: Finished clustering!")
+        logger.info("CLUSTER: Finished!")
         return documents, probabilities
 
     def _zeroshot_topic_modeling(self, documents: pd.DataFrame, embeddings: np.ndarray) -> Tuple[pd.DataFrame, np.array,
@@ -3565,7 +3568,7 @@ class BERTopic:
         # Update the class internally
         self.__dict__.clear()
         self.__dict__.update(merged_model.__dict__)
-        logger.info("ZEROSHOT: Finished zero-shot!")
+        logger.info("ZEROSHOT: Finished!")
         return self.topics_
 
     def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
@@ -3589,6 +3592,7 @@ class BERTopic:
             y: The labels for each seeded topic
             embeddings: Updated embeddings
         """
+        logger.info("GUIDED: Find embeddings highly related to seeded topics.")
         # Create embeddings from the seeded topics
         seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
         seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
@@ -3604,6 +3608,7 @@ class BERTopic:
         for seed_topic in range(len(seed_topic_list)):
             indices = [index for index, topic in enumerate(y) if topic == seed_topic]
             embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
+        logger.info("GUIDED: Finished!")
         return y, embeddings
 
     def _extract_topics(self, documents: pd.DataFrame, embeddings: np.ndarray = None, mappings=None, verbose: bool = False):
@@ -3628,7 +3633,7 @@ class BERTopic:
                               for key, values in
                               self.topic_representations_.items()}
         if verbose:
-            logger.info("REPRESENTATION: Finished topic extraction!")
+            logger.info("REPRESENTATION: Finished!")
 
     def _save_representative_docs(self, documents: pd.DataFrame):
         """ Save the 3 most representative docs per topic
@@ -3936,6 +3941,7 @@ class BERTopic:
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+        logger.info(f"TOPIC REDUCTION: Reducing number of topics to  {len(self.get_topic_freq())}")
         initial_nr_topics = len(self.get_topics())
 
         if isinstance(self.nr_topics, int):
@@ -4317,9 +4323,9 @@ def _create_model_from_files(
         embedding_model = select_backend(SentenceTransformer(params['embedding_model']))
     except:
         embedding_model = BaseEmbedder()
-        warnings.warn("You are loading a BERTopic model without explicitly defining an embedding model."
-                      "If you want to also load in an embedding model, make sure to use"
-                      "BERTopic.load(my_model, embedding_model=my_embedding_model).")
+        logger.warning("You are loading a BERTopic model without explicitly defining an embedding model."
+                       "If you want to also load in an embedding model, make sure to use"
+                       "BERTopic.load(my_model, embedding_model=my_embedding_model).")
 
     if params.get("embedding_model") is not None:
         del params['embedding_model']
