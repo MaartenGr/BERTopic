@@ -376,14 +376,14 @@ class BERTopic:
 
         # Extract embeddings
         if embeddings is None:
-            logger.info("EMBED: Transforming documents to embeddings")
+            logger.info("EMBED: Transforming documents to embeddings.")
             self.embedding_model = select_backend(self.embedding_model,
                                                   language=self.language)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   images=images,
                                                   method="document",
                                                   verbose=self.verbose)
-            logger.info("EMBED: Transformed documents to embeddings")
+            logger.info("EMBED: Finished embedding!")
         else:
             if self.embedding_model is not None:
                 self.embedding_model = select_backend(self.embedding_model,
@@ -521,9 +521,9 @@ class BERTopic:
 
         # Transform with full pipeline
         else:
-            logger.info("DIMENSIONALITY: Reducing dimensionality of input embeddings")
+            logger.info("DIMENSIONALITY: Reducing dimensionality of input embeddings.")
             umap_embeddings = self.umap_model.transform(embeddings)
-            logger.info("DIMENSIONALITY: Finished reducing dimensionality of input embeddings")
+            logger.info("DIMENSIONALITY: Finished dimensionality reduction!")
 
             # Extract predictions and probabilities if it is a HDBSCAN-like model
             logger.info("CLUSTER: Approximating new points with `hdbscan_model`")
@@ -538,7 +538,7 @@ class BERTopic:
             else:
                 predictions = self.hdbscan_model.predict(umap_embeddings)
                 probabilities = None
-            logger.info("CLUSTER: Predicted new points")
+            logger.info("CLUSTER: Finished approximation!")
 
             # Map probabilities and predictions
             probabilities = self._map_probabilities(probabilities, original_topics=True)
@@ -695,6 +695,7 @@ class BERTopic:
                          docs: List[str],
                          timestamps: Union[List[str],
                                            List[int]],
+                         topics: List[int] = None,
                          nr_bins: int = None,
                          datetime_format: str = None,
                          evolution_tuning: bool = True,
@@ -720,6 +721,10 @@ class BERTopic:
                         If it is a list of strings, then the datetime format will be automatically
                         inferred. If it is a list of ints, then the documents will be ordered by
                         ascending order.
+            topics: A list of topics where each topic is related to a document in `docs` and
+                    a timestamp in `timestamps`. You can use this to apply topics_over_time on
+                    a subset of the data. Make sure that `docs`, `timestamps`, and `topics`
+                    all correspond to one another and have the same size.
             nr_bins: The number of bins you want to create for the timestamps. The left interval will
                      be chosen as the timestamp. An additional column will be created with the
                      entire interval.
@@ -752,7 +757,8 @@ class BERTopic:
         """
         check_is_fitted(self)
         check_documents_type(docs)
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Timestamps": timestamps})
+        selected_topics = topics if topics else self.topics_
+        documents = pd.DataFrame({"Document": docs, "Topic": selected_topics, "Timestamps": timestamps})
         global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm='l1', copy=False)
 
         all_topics = sorted(list(documents.Topic.unique()))
@@ -2199,6 +2205,9 @@ class BERTopic:
 
         Arguments:
             topics: A selection of topics to visualize
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`.
             top_n_topics: Only select the top n most frequent topics
             custom_labels: Whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
@@ -3342,7 +3351,7 @@ class BERTopic:
                 self.umap_model.fit(embeddings)
 
         umap_embeddings = self.umap_model.transform(embeddings)
-        logger.info("DIMENSIONALITY: Finished fitting the dimensionality reduction algorithm")
+        logger.info("DIMENSIONALITY: Finished fitting!")
         return np.nan_to_num(umap_embeddings)
 
     def _cluster_embeddings(self,
@@ -3397,7 +3406,7 @@ class BERTopic:
 
         if not partial_fit:
             self.topic_mapper_ = TopicMapper(self.topics_)
-        logger.info("CLUSTER: Finished clustering the reduced embeddings")
+        logger.info("CLUSTER: Finished clustering!")
         return documents, probabilities
 
     def _zeroshot_topic_modeling(self, documents: pd.DataFrame, embeddings: np.ndarray) -> Tuple[pd.DataFrame, np.array,
@@ -3556,7 +3565,7 @@ class BERTopic:
         # Update the class internally
         self.__dict__.clear()
         self.__dict__.update(merged_model.__dict__)
-        logger.info("ZEROSHOT: Finished zero-shot modeling")
+        logger.info("ZEROSHOT: Finished zero-shot!")
         return self.topics_
 
     def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
@@ -3610,7 +3619,7 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         if verbose:
-            logger.info("REPRESENTATION: Extracting topics from clusters")
+            logger.info("REPRESENTATION: Extracting topics from clusters using representation models.")
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
@@ -3619,7 +3628,7 @@ class BERTopic:
                               for key, values in
                               self.topic_representations_.items()}
         if verbose:
-            logger.info("REPRESENTATION: Finished extracting topics from clusters")
+            logger.info("REPRESENTATION: Finished topic extraction!")
 
     def _save_representative_docs(self, documents: pd.DataFrame):
         """ Save the 3 most representative docs per topic
