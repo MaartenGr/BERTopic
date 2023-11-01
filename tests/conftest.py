@@ -57,7 +57,7 @@ def base_topic_model(documents, document_embeddings, embedding_model):
 @pytest.fixture(scope="session")
 def zeroshot_topic_model(documents, document_embeddings, embedding_model):
     zeroshot_topic_list = ["religion", "cars", "electronics"]
-    model = BERTopic(embedding_model=embedding_model, calculate_probabilities=True, zeroshot_topic_list=zeroshot_topic_list)
+    model = BERTopic(embedding_model=embedding_model, calculate_probabilities=True, zeroshot_topic_list=zeroshot_topic_list, zeroshot_min_similarity=0.5)
     model.umap_model.random_state = 42
     model.hdbscan_model.min_cluster_size = 2
     model.fit(documents, document_embeddings)
