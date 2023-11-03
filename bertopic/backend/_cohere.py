@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from tqdm import tqdm
-from typing import List
+from typing import Any, List, Mapping
 from bertopic.backend import BaseEmbedder
 
 
@@ -16,6 +16,9 @@ class CohereBackend(BaseEmbedder):
         delay_in_seconds: If a `batch_size` is given, use this set
                           the delay in seconds between batches.
         batch_size: The size of each batch.
+        embed_kwargs: Kwargs passed to `cohere.Client.embed`.
+                            Can be used to define additional parameters
+                            such as `input_type`
 
     Examples:
 
@@ -26,17 +29,34 @@ class CohereBackend(BaseEmbedder):
     client = cohere.Client("APIKEY")
     cohere_model = CohereBackend(client)
     ```
+
+    If you want to specify `input_type`:
+
+    ```python
+    cohere_model = CohereBackend(
+        client,
+        embedding_model="embed-english-v3.0",
+        embed_kwargs={"input_type": "clustering"}
+    )
+    ```
     """
     def __init__(self,
                  client,
                  embedding_model: str = "large",
                  delay_in_seconds: float = None,
-                 batch_size: int = None):
+                 batch_size: int = None,
+                 embed_kwargs: Mapping[str, Any] = {}):
         super().__init__()
         self.client = client
         self.embedding_model = embedding_model
         self.delay_in_seconds = delay_in_seconds
         self.batch_size = batch_size
+        self.embed_kwargs = embed_kwargs
+
+        if self.embed_kwargs.get("model"):
+            self.embedding_model = embed_kwargs.get("model")
+        else:
+            self.embed_kwargs["model"] = self.embedding_model
 
     def embed(self,
               documents: List[str],
@@ -56,7 +76,7 @@ class CohereBackend(BaseEmbedder):
         if self.batch_size is not None:
             embeddings = []
             for batch in tqdm(self._chunks(documents), disable=not verbose):
-                response = self.client.embed(batch, model=self.embedding_model)
+                response = self.client.embed(batch, **self.embed_kwargs)
                 embeddings.extend(response.embeddings)
 
                 # Delay subsequent calls
@@ -65,7 +85,7 @@ class CohereBackend(BaseEmbedder):
 
         # Extract embeddings all at once
         else:
-            response = self.client.embed(documents, model=self.embedding_model)
+            response = self.client.embed(documents, **self.embed_kwargs)
             embeddings = response.embeddings
         return np.array(embeddings)
 
