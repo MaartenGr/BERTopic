@@ -1,6 +1,8 @@
 
 import copy
 import pytest
+
+from bertopic import BERTopic
 from bertopic.vectorizers import OnlineCountVectorizer
 
 
@@ -28,3 +30,14 @@ def test_clean_bow(model, request):
 
     assert original_shape[0] == topic_model.vectorizer_model.X_.shape[0]
     assert original_shape[1] > topic_model.vectorizer_model.X_.shape[1]
+
+@pytest.mark.parametrize('model', [('online_topic_model')])
+def test_load_save(model, request):
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+    original_vectorizer = topic_model.vectorizer_model
+    topic_model.save("test")
+    loaded_model = BERTopic.load("test")
+    loaded_vectorizer = loaded_model.vectorizer_model
+
+    assert isinstance(loaded_vectorizer, OnlineCountVectorizer)
+    assert loaded_vectorizer.decay == original_vectorizer.decay
