@@ -3492,7 +3492,13 @@ class BERTopic:
             # Calculate similarity
             nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
             bow = self.vectorizer_model.transform(selected_docs)
-            ctfidf = self.ctfidf_model.transform(bow)
+            try:
+                ctfidf = self.ctfidf_model.transform(bow)
+            except ValueError:
+                repr_docs_ids.append([])
+                repr_docs_indices.append([])
+                continue
+
             sim_matrix = cosine_similarity(ctfidf, c_tf_idf[index])
 
             # Use MMR to find representative but diverse documents
@@ -3507,8 +3513,8 @@ class BERTopic:
             doc_ids = [selected_docs_ids[index] for index, doc in enumerate(selected_docs) if doc in docs]
             repr_docs_ids.append(doc_ids)
             repr_docs.extend(docs)
-            repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
-        repr_docs_mappings = {topic: repr_docs[i[0]:i[-1]+1] for topic, i in zip(topics.keys(), repr_docs_indices)}
+            repr_docs_indices.append([(repr_docs_indices[-1][-1] if len(repr_docs_indices[-1]) != 0 else 0) + i + 1 if index != 0 else i for i in range(nr_docs)])
+        repr_docs_mappings = {topic: repr_docs[i[0]:i[-1]+1] if len(i) > 0 else [] for topic, i in zip(topics.keys(), repr_docs_indices)}
 
         return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
 
