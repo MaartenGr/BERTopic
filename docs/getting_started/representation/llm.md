@@ -75,8 +75,8 @@ from bertopic import BERTopic
 tokenizer = tiktoken.get_encoding("cl100k_base")
 
 # Create your representation model
-openai.api_key = MY_API_KEY
-representation_model = OpenAI(tokenizer=tokenizer, document_length=50)
+client = openai.OpenAI(api_key="sk-...")
+representation_model = OpenAI(client, tokenizer=tokenizer, document_length=50)
 ```
 
 In this example, each document will be at most 50 tokens, anything more will get truncated.
@@ -117,8 +117,9 @@ from bertopic import BERTopic
 tokenizer= tiktoken.encoding_for_model("gpt-3.5-turbo")
 
 # Create your representation model
-openai.api_key = MY_API_KEY
+client = openai.OpenAI(api_key="sk-...")
 representation_model = OpenAI(
+    client,
     model="gpt-3.5-turbo", 
     delay_in_seconds=2, 
     chat=True,
@@ -363,8 +364,8 @@ from bertopic.representation import OpenAI
 from bertopic import BERTopic
 
 # Create your representation model
-openai.api_key = MY_API_KEY
-representation_model = OpenAI()
+client = openai.OpenAI(api_key="sk-...")
+representation_model = OpenAI(client)
 
 # Use the representation model in BERTopic on top of the default pipeline
 topic_model = BERTopic(representation_model=representation_model)
@@ -380,7 +381,7 @@ You can also use a custom prompt:
 
 ```python
 prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-representation_model = OpenAI(prompt=prompt)
+representation_model = OpenAI(client, prompt=prompt)
 ```
 
 ### **ChatGPT**
@@ -389,7 +390,7 @@ Within OpenAI's API, the ChatGPT models use a different API structure compared t
 In order to use ChatGPT with BERTopic, we need to define the model and make sure to enable `chat`:
 
 ```python
-representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
+representation_model = OpenAI(client, model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
 ```
 
 Prompting with ChatGPT is very satisfying and is customizable as follows:
@@ -430,7 +431,7 @@ Based on the information above, please give a description of this topic in the f
 topic: <description>
 """
 
-representation_model = OpenAI(model="gpt-3.5-turbo", chat=True, prompt=summarization_prompt, nr_docs=5, delay_in_seconds=3)
+representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True, prompt=summarization_prompt, nr_docs=5, delay_in_seconds=3)
 ```
 
 The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!

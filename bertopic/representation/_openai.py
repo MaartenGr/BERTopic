@@ -59,6 +59,7 @@ class OpenAI(BaseRepresentation):
     https://platform.openai.com/docs/models
 
     Arguments:
+        client: A `openai.OpenAI` client
         model: Model to use within OpenAI, defaults to `"text-ada-001"`.
                NOTE: If a `gpt-3.5-turbo` model is used, make sure to set
                `chat` to True.
@@ -69,26 +70,26 @@ class OpenAI(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
-        delay_in_seconds: The delay in seconds between consecutive prompts 
-                          in order to prevent RateLimitErrors. 
-        exponential_backoff: Retry requests with a random exponential backoff. 
-                             A short sleep is used when a rate limit error is hit, 
+        delay_in_seconds: The delay in seconds between consecutive prompts
+                          in order to prevent RateLimitErrors.
+        exponential_backoff: Retry requests with a random exponential backoff.
+                             A short sleep is used when a rate limit error is hit,
                              then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests. 
+                             if errors are hit until 10 unsuccesfull requests.
                              If True, overrides `delay_in_seconds`.
         chat: Set this to True if a GPT-3.5 model is used.
               See: https://platform.openai.com/docs/models/gpt-3-5
         nr_docs: The number of documents to pass to OpenAI if a prompt
                  with the `["DOCUMENTS"]` tag is used.
         diversity: The diversity of documents to pass to OpenAI.
-                   Accepts values between 0 and 1. A higher 
+                   Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
         doc_length: The maximum length of each document. If a document is longer,
                     it will be truncated. If None, the entire document is passed.
         tokenizer: The tokenizer used to calculate to split the document into segments
-                   used to count the length of a document. 
-                       * If tokenizer is 'char', then the document is split up 
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
                        * If tokenizer is 'whitespace', the the document is split up
                          into words separated by whitespaces. These words are counted
@@ -114,7 +115,8 @@ class OpenAI(BaseRepresentation):
     from bertopic import BERTopic
 
     # Create your representation model
-    representation_model = OpenAI(delay_in_seconds=5)
+    client = openai.OpenAI(api_key=MY_API_KEY)
+    representation_model = OpenAI(client, delay_in_seconds=5)
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -124,16 +126,17 @@ class OpenAI(BaseRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = OpenAI(prompt=prompt, delay_in_seconds=5)
+    representation_model = OpenAI(client, prompt=prompt, delay_in_seconds=5)
     ```
 
     If you want to use OpenAI's ChatGPT model:
 
     ```python
-    representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
+    representation_model = OpenAI(client, model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
     ```
     """
     def __init__(self,
+                 client,
                  model: str = "text-ada-001",
                  prompt: str = None,
                  generator_kwargs: Mapping[str, Any] = {},
@@ -145,6 +148,7 @@ class OpenAI(BaseRepresentation):
                  doc_length: int = None,
                  tokenizer: Union[str, Callable] = None
                  ):
+        self.client = client
         self.model = model
 
         if prompt is None:
@@ -208,22 +212,22 @@ class OpenAI(BaseRepresentation):
                 ]
                 kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
                 if self.exponential_backoff:
-                    response = chat_completions_with_backoff(**kwargs)
+                    response = chat_completions_with_backoff(self.client, **kwargs)
                 else:
-                    response = openai.ChatCompletion.create(**kwargs)
+                    response = self.client.chat.completions.create(self.client, **kwargs)
 
                 # Check whether content was actually generated
                 # Adresses #1570 for potential issues with OpenAI's content filter
-                if response["choices"][0]["message"].get("content"):
-                    label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
+                if hasattr(response.choices[0].message, "content"):
+                    label = response.choices[0].message.content.strip().replace("topic: ", "")
                 else:
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
-                    response = completions_with_backoff(model=self.model, prompt=prompt, **self.generator_kwargs)
+                    response = completions_with_backoff(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
                 else:
-                    response = openai.Completion.create(model=self.model, prompt=prompt, **self.generator_kwargs)
-                label = response["choices"][0]["text"].strip()
+                    response = self.client.completions.create(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
+                label = response.choices[0].message.content.strip()
 
             updated_topics[topic] = [(label, 1)]
 
@@ -257,21 +261,19 @@ class OpenAI(BaseRepresentation):
         return prompt
 
 
-def completions_with_backoff(**kwargs):
+def completions_with_backoff(client, **kwargs):
     return retry_with_exponential_backoff(
-        openai.Completion.create,
+        client.completions.create,
         errors=(
-            openai.error.RateLimitError,
-            openai.error.ServiceUnavailableError,
+            openai.RateLimitError,
         ),
     )(**kwargs)
 
 
-def chat_completions_with_backoff(**kwargs):
+def chat_completions_with_backoff(client, **kwargs):
     return retry_with_exponential_backoff(
-        openai.ChatCompletion.create,
+        client.chat.completions.create,
         errors=(
-            openai.error.RateLimitError,
-            openai.error.ServiceUnavailableError,
+            openai.RateLimitError,
         ),
     )(**kwargs)

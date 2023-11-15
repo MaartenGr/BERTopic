@@ -10,6 +10,7 @@ class OpenAIBackend(BaseEmbedder):
     """ OpenAI Embedding Model
 
     Arguments:
+        client: A `openai.OpenAI` client.
         embedding_model: An OpenAI model. Default is
                          For an overview of models see:
                          https://platform.openai.com/docs/models/embeddings
@@ -26,8 +27,8 @@ class OpenAIBackend(BaseEmbedder):
     import openai
     from bertopic.backend import OpenAIBackend
 
-    openai.api_key = MY_API_KEY
-    openai_embedder = OpenAIBackend("text-embedding-ada-002")
+    client = openai.OpenAI(api_key="sk-...")
+    openai_embedder = OpenAIBackend(client, "text-embedding-ada-002")
     ```
     """
     def __init__(self,

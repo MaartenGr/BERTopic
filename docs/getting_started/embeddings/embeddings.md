@@ -195,8 +195,8 @@ to be used in our topic model:
 import openai
 from bertopic.backend import OpenAIBackend
 
-openai.api_key = MY_API_KEY
-embedding_model = OpenAIBackend("text-embedding-ada-002")
+client = openai.OpenAI(api_key="sk-...")
+embedding_model = OpenAIBackend(client, "text-embedding-ada-002")
 
 topic_model = BERTopic(embedding_model=embedding_model)
 ```

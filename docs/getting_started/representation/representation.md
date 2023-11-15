@@ -177,8 +177,8 @@ from bertopic import BERTopic
 import openai
 
 # Create your representation models
-openai.api_key = MY_API_KEY
-openai_generator = OpenAI()
+client = openai.OpenAI(api_key="sk-...")
+openai_generator = OpenAI(client)
 mmr = MaximalMarginalRelevance(diversity=0.3)
 representation_models = [mmr, openai_generator]
 
