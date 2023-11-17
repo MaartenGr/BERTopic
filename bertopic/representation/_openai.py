@@ -214,7 +214,7 @@ class OpenAI(BaseRepresentation):
                 if self.exponential_backoff:
                     response = chat_completions_with_backoff(self.client, **kwargs)
                 else:
-                    response = self.client.chat.completions.create(self.client, **kwargs)
+                    response = self.client.chat.completions.create(**kwargs)
 
                 # Check whether content was actually generated
                 # Adresses #1570 for potential issues with OpenAI's content filter
@@ -226,7 +226,7 @@ class OpenAI(BaseRepresentation):
                 if self.exponential_backoff:
                     response = completions_with_backoff(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
                 else:
-                    response = self.client.completions.create(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
+                    response = self.client.completions.create(model=self.model, prompt=prompt, **self.generator_kwargs)
                 label = response.choices[0].message.content.strip()
 
             updated_topics[topic] = [(label, 1)]
