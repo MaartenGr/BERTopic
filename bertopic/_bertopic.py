@@ -4030,7 +4030,7 @@ class TopicMapper:
 
         To get mappings, simply call:
         ```python
-        mapper = TopicMapper(hdbscan_model)
+        mapper = TopicMapper(topics)
         mappings = mapper.get_mappings(original_topics=False)
         ```
         """
