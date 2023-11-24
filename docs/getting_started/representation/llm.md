@@ -346,6 +346,66 @@ representation_model = {
 topic_model = BERTopic(representation_model=representation_model,  verbose=True)
 ```
 
+## **llama.cpp**
+
+An amazing framework for using LLMs for inference is [`llama.cpp`](https://github.com/ggerganov/llama.cpp) which has [python bindings](https://github.com/abetlen/llama-cpp-python) that we can use in BERTopic. To start with, we first need to install `llama-cpp-python`:
+
+```bash
+pip install llama-cpp-python
+```
+
+!!! Note
+    There are a number of [installation options](https://github.com/abetlen/llama-cpp-python#installation-with-hardware-acceleration) depending on your hardware and OS. Make sure that you select the correct one to optimize your performance.
+
+After installation, you need to download your LLM locally before we use it in BERTopic, like so:
+
+```bash
+wget https://huggingface.co/TheBloke/zephyr-7B-alpha-GGUF/resolve/main/zephyr-7b-alpha.Q4_K_M.gguf
+```
+
+Finally, we can now use the model the model with BERTopic in just a couple of lines:
+
+```python
+from bertopic import BERTopic
+from bertopic.representation import LlamaCPP
+
+# Use llama.cpp to load in a 4-bit quantized version of Zephyr 7B Alpha
+representation_model = LlamaCPP("zephyr-7b-alpha.Q4_K_M.gguf")
+
+# Create our BERTopic model
+topic_model = BERTopic(representation_model=representation_model,  verbose=True)
+```
+
+If you want to have more control over the LLMs parameters, you can run it like so:
+
+```python
+from bertopic import BERTopic
+from bertopic.representation import LlamaCPP
+from llama_cpp import Llama
+
+# Use llama.cpp to load in a 4-bit quantized version of Zephyr 7B Alpha
+llm = Llama(model_path="zephyr-7b-alpha.Q4_K_M.gguf", n_gpu_layers=-1, n_ctx=4096, stop="Q:")
+representation_model = LlamaCPP(llm)
+
+# Create our BERTopic model
+topic_model = BERTopic(representation_model=representation_model,  verbose=True)
+```
+
+!!! Note
+    The default template that is being used uses a "Q: ... A: ... " type of structure which is why the `stop` is set at `"Q:"`. 
+    The default template is:
+    ```python
+    """
+    Q: I have a topic that contains the following documents: 
+    [DOCUMENTS]
+
+    The topic is described by the following keywords: '[KEYWORDS]'.
+
+    Based on the above information, can you give a short label of the topic?
+    A: 
+    """
+    ```
+
 ## **OpenAI**
 
 Instead of using a language model from 🤗 transformers, we can use external APIs instead that 

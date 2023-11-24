@@ -158,13 +158,16 @@ class BERTopic:
                           NOTE: This param will not be used if you pass in your own
                           CountVectorizer.
             min_topic_size: The minimum size of the topic. Increasing this value will lead
-                            to a lower number of clusters/topics.
-                            NOTE: This param will not be used if you are not using HDBSCAN.
+                            to a lower number of clusters/topics and vice versa. 
+                            It is the same parameter as `min_cluster_size` in HDBSCAN.
+                            NOTE: This param will not be used if you are `hdbscan_model`.
             nr_topics: Specifying the number of topics will reduce the initial
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
                        calculation. If this is set to None, no reduction is applied. Use
                        "auto" to automatically reduce topics using HDBSCAN.
+                       NOTE: Controlling the number of topics is best done by adjusting
+                       `min_topic_size` first before adjusting this parameter.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
                         NOTE: This is only used in UMAP. For example, if you use PCA instead of UMAP
                         this parameter will not be used.
@@ -513,6 +516,7 @@ class BERTopic:
 
         # Transform without hdbscan_model and umap_model using only cosine similarity
         elif type(self.hdbscan_model) == BaseCluster:
+            logger.info("Predicting topic assignments through cosine similarity of topic and document embeddings.")
             sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
             predictions = np.argmax(sim_matrix, axis=1) - self._outliers
 

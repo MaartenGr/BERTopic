@@ -1,5 +1,8 @@
 Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic. 
 
+!!! Tip
+    Another method for online topic modeling can be found with the [**.merge_models**](https://maartengr.github.io/BERTopic/getting_started/merge/merge.html) functionality of BERTopic. It allows for merging multiple BERTopic models to create a single new one. This method can be used to discover new topics by training a new model and exploring whether that new model added new topics to the original model when merging. A major benefit, compared to `.partial_fit` is that you can keep using the original UMAP and HDBSCAN models which tends result in improved performance and gives you significant more flexibility.
+
 In BERTopic, there are three main goals for using this technique.
 
 * To reduce the memory necessary for training a topic model. 
@@ -28,9 +31,6 @@ This means that we will need online variants for steps 2 through 4. Steps 2 and 
 Lastly, we need to develop an online variant for step 5, tokenization. In this step, a Bag-of-words representation is created through the `CountVectorizer`. However, as new data comes in, its vocabulary will need to be updated. For that purpose, `bertopic.vectorizers.OnlineCountVectorizer` was created that not only updates out-of-vocabulary words but also implements decay and cleaning functions to prevent the sparse bag-of-words matrix to become too large. Most notably, the `decay` parameter is a value between 0 and 1 to weigh the percentage of frequencies that the previous bag-of-words matrix should be reduced to. For example, a value of `.1` will decrease the frequencies in the bag-of-words matrix by 10% at each iteration. This will make sure that recent data has more weight than previous iterations. Similarly, `delete_min_df` will remove certain words from its vocabulary if their frequency is lower than a set value. This ties together with the `decay` parameter as some words will decay over time if not used. For more information regarding the `OnlineCountVectorizer`, please see the [vectorizers documentation](https://maartengr.github.io/BERTopic/getting_started/vectorizers/vectorizers.html#onlinecountvectorizer).
 
 
-!!! Tip
-    If you want to use the original UMAP and HDBSCAN models instead, consider using the [**merge model**](https://maartengr.github.io/BERTopic/getting_started/merge/merge.html)
-    functionality of BERTopic. It allows for merging multiple BERTopic models to create a single new one. This method can be used to discover new topics by training a new model and exploring whether that new model added new topics to the original model when merging.
 
 ## **Example**
 
