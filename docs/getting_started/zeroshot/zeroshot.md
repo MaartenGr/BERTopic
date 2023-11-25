@@ -18,12 +18,17 @@ This method works as follows. First, we create a number of labels for our predef
 This creates two models. One for the zero-shot topics and one for the non-zero-shot topics. We combine these two BERTopic models to create a single model that contains both zero-shot and non-zero-shot topics.
    
 ### **Example**
-To demonstrate Guided BERTopic, we use the 20 Newsgroups dataset as our example. We have frequently used this
-dataset in BERTopic examples and we sometimes see a topic generated about health with words such as `drug` and `cancer` 
-being important. However, due to the stochastic nature of UMAP, this topic is not always found. 
+In order to use zero-shot BERTopic, we create a list of topics that we want to assign to our documents. However, 
+there may be several other topics that we know should be in the documents. The dataset that we use is small subset of ArXiv papers.
+We know the data and believe there to be at least the following topics: *clustering*, *topic modeling*, and *large language models*. 
+However, we are not sure whether other topics exist and want to explore those.
 
-In order to guide BERTopic to that topic, we create a seed topic list that we pass through our model. However, 
-there may be several other topics that we know should be in the documents. Let's also initialize those:
+Zero-shot BERTopic needs two parameters:
+* `zeroshot_topic_list` - The names of the topics to assign documents to. Making sure this is as descriptive as possible helps improve the assignment since they are based on cosine similarities between embeddings.
+* `zeroshot_min_similarity` - The minimum cosine similarity needed to match a document to a document. It is a value between 0 and 1.
+
+
+Using this feature is straightforward:
 
 ```python
 from datasets import load_dataset
