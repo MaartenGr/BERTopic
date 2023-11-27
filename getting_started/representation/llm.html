@@ -1152,13 +1152,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#document-truncation" class="md-nav__link">
-    Document Truncation
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2709,13 +2702,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#document-truncation" class="md-nav__link">
-    Document Truncation
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2852,32 +2838,6 @@ For example, if we have the following prompt:</p>
 <p>To increase the number of documents passed to <code>[DOCUMENTS]</code>, we can use the <code>nr_docs</code> parameter which is accessible in all LLMs on this page. Using this value allows you to select the top <em>n</em> most representative documents instead. If you have a long enough context length, then you could even give the LLM dozens of documents.</p>
 <p>However, some of these documents might be very similar to one another and might be near duplicates. They will not provide much additional information about the content of the topic. Instead, we can use the <code>diversity</code> parameter in each LLM to only select documents that are sufficiently diverse. It takes values between 0 and 1 but a value of 0.1 already does wonders!</p>
 <h3 id="truncating-documents"><strong>Truncating Documents</strong><a class="headerlink" href="#truncating-documents" title="Permanent link">&para;</a></h3>
-<p>If you increase the number of documents passed to <code>[DOCUMENTS]</code>, then the token limit can quickly be filled. Instead, we could only pass a part of the document by truncating it to a specific length. For that, we use two parameters that are accessible in all LLMs on this page, namely <code>document_length</code> and <code>tokenizer</code>. </p>
-<p>Let's start with the <code>tokenizer</code>. It is used to split a document up into tokens/segments. Each segment can then be used to calculate the complete document length. 
-The methods for tokenization are as follows:</p>
-<ul>
-<li>If tokenizer is <code>char</code>, then the document is split up into characters.</li>
-<li>If tokenizer is <code>whitespace</code>, the the document is split up into words separated by whitespaces. </li>
-<li>If tokenizer is <code>vectorizer</code>, then the internal CountVectorizer is used to tokenize the document.</li>
-<li>If tokenizer is a <code>callable</code>, then that callable is used to tokenize the document.</li>
-</ul>
-<p>After having tokenized the document according one of the strategies above, the <code>document_length</code> is used to truncate the document to its specified value. </p>
-<p>For example, if the tokenizer is <code>whitespace</code> then a document is split up into individual words and the length of the document is counted by the total number of words. In contrast, if the tokenizer is <code>callable</code> we can use any callable that has an <code>.encode</code> and <code>.decode</code> function. If we were to use <a href="https://github.com/openai/tiktoken">tiktoken</a>, then the document would be split up into tokens and the length of the document is counted by the total number tokens.</p>
-<p>To give an example, using tiktoken would work as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">openai</span>
-<span class="kn">import</span> <span class="nn">tiktoken</span>
-<span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">OpenAI</span>
-<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
-
-<span class="c1"># Create tokenizer</span>
-<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tiktoken</span><span class="o">.</span><span class="n">get_encoding</span><span class="p">(</span><span class="s2">&quot;cl100k_base&quot;</span><span class="p">)</span>
-
-<span class="c1"># Create your representation model</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;sk-...&quot;</span><span class="p">)</span>
-<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">document_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</code></pre></div>
-<p>In this example, each document will be at most 50 tokens, anything more will get truncated.</p>
-<h3 id="document-truncation"><strong>Document Truncation</strong><a class="headerlink" href="#document-truncation" title="Permanent link">&para;</a></h3>
 <p>We can truncate the input documents in <code>[DOCUMENTS]</code> in order to reduce the number of tokens that we have in our input prompt. To do so, all text generation modules have two parameters that we can tweak:</p>
 <ul>
 <li><code>doc_length</code><ul>
