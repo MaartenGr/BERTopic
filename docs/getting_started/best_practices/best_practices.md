@@ -127,7 +127,7 @@ pos_model = PartOfSpeech("en_core_web_sm")
 mmr_model = MaximalMarginalRelevance(diversity=0.3)
 
 # GPT-3.5
-openai.api_key = "sk-..."
+client = openai.OpenAI(api_key="sk-...")
 prompt = """
 I have a topic that contains the following documents: 
 [DOCUMENTS]
@@ -136,7 +136,7 @@ The topic is described by the following keywords: [KEYWORDS]
 Based on the information above, extract a short but highly descriptive topic label of at most 5 words. Make sure it is in the following format:
 topic: <topic label>
 """
-openai_model = OpenAI(model="gpt-3.5-turbo", exponential_backoff=True, chat=True, prompt=prompt)
+openai_model = OpenAI(client, model="gpt-3.5-turbo", exponential_backoff=True, chat=True, prompt=prompt)
 
 # All representation models
 representation_model = {

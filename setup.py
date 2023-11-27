@@ -57,7 +57,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.15.0",
+    version="0.16.0",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",

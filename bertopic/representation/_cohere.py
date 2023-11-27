@@ -44,7 +44,7 @@ class Cohere(BaseRepresentation):
     https://docs.cohere.ai/docs
 
     Arguments:
-        client: A cohere.Client
+        client: A `cohere.Client`
         model: Model to use within Cohere, defaults to `"xlarge"`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.

@@ -33,12 +33,12 @@ BERTopic supports all kinds of topic modeling techniques:
  <tr>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html">Multimodal</a></td>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html">Multi-aspect</a></td>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#text-generation-prompts">Text Generation/LLM</a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/representation/llm.html">Text Generation/LLM</a></td>
  </tr>
  <tr>
-    <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models</a></td>
-    <td></td>
-    <td></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zero-shot <b>(new!)</b></a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/merge/merge.html">Merge Models <b>(new!)</b></a></td>
+    <td><a href="https://maartengr.github.io/BERTopic/getting_started/seed_words/seed_words.html">Seed Words <b>(new!)</b></a></td>
  </tr>
 </table>
 
@@ -159,8 +159,8 @@ import openai
 from bertopic.representation import OpenAI
 
 # Fine-tune topic representations with GPT
-openai.api_key = "sk-..."
-representation_model = OpenAI(model="gpt-3.5-turbo", chat=True)
+client = openai.OpenAI(api_key="sk-...")
+representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
@@ -259,6 +259,7 @@ There are many different use cases in which topic modeling can be used. As such,
 | [Dynamic Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html) | `.topics_over_time(docs, timestamps)` |
 | [Hierarchical Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) | `.hierarchical_topics(docs)` |
 | [Guided Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) | `BERTopic(seed_topic_list=seed_topic_list)` |
+| [Zero-shot Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html) | `BERTopic(zeroshot_topic_list=zeroshot_topic_list)` |
 | [Merge Multiple Models](https://maartengr.github.io/BERTopic/getting_started/merge/merge.html) | `BERTopic.merge_models([topic_model_1, topic_model_2])` |
 
 

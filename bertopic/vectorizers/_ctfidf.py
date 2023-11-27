@@ -1,3 +1,4 @@
+from typing import List
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.preprocessing import normalize
 from sklearn.utils import check_array
@@ -26,6 +27,11 @@ class ClassTfidfTransformer(TfidfTransformer):
                         `log(1+((avg_nr_samples - df + 0.5) / (df+0.5)))`
         reduce_frequent_words: Takes the square root of the bag-of-words after normalizing the matrix.
                                Helps to reduce the impact of words that appear too frequently.
+        seed_words: Specific words that will have their idf value increased by 
+                    the value of `seed_multiplier`. 
+                    NOTE: This will only increase the value of words that have an exact match.
+        seed_multiplier: The value with which the idf values of the words in `seed_words`
+                         are multiplied.
 
     Examples:
 
@@ -33,9 +39,16 @@ class ClassTfidfTransformer(TfidfTransformer):
     transformer = ClassTfidfTransformer()
     ```
     """
-    def __init__(self, bm25_weighting: bool = False, reduce_frequent_words: bool = False):
+    def __init__(self, 
+                 bm25_weighting: bool = False, 
+                 reduce_frequent_words: bool = False,
+                 seed_words: List[str] = None,
+                 seed_multiplier: bool = 2
+                 ):
         self.bm25_weighting = bm25_weighting
         self.reduce_frequent_words = reduce_frequent_words
+        self.seed_words = seed_words
+        self.seed_multiplier = seed_multiplier
         super(ClassTfidfTransformer, self).__init__()
 
     def fit(self, X: sp.csr_matrix, multiplier: np.ndarray = None):

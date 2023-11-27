@@ -4,6 +4,14 @@ from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._keybert import KeyBERTInspired
 from bertopic.representation._mmr import MaximalMarginalRelevance
 
+
+# Llama CPP Generator
+try:
+    from bertopic.representation._llamacpp import LlamaCPP
+except ModuleNotFoundError:
+    msg = "`pip install llama-cpp-python` \n\n"
+    LlamaCPP = NotInstalled("llama.cpp", "llama-cpp-python", custom_msg=msg)
+
 # Text Generation using transformers
 try:
     from bertopic.representation._textgeneration import TextGeneration
@@ -25,7 +33,7 @@ except ModuleNotFoundError:
     msg = "`pip install openai` \n\n"
     OpenAI = NotInstalled("OpenAI", "openai", custom_msg=msg)
 
-# OpenAI Generator
+# LangChain Generator
 try:
     from bertopic.representation._langchain import LangChain
 except ModuleNotFoundError:
@@ -45,7 +53,6 @@ except ModuleNotFoundError:
     VisualRepresentation = NotInstalled("a visual representation model", "vision")
 
 
-
 __all__ = [
     "BaseRepresentation",
     "TextGeneration",
@@ -56,5 +63,6 @@ __all__ = [
     "Cohere",
     "OpenAI",
     "LangChain",
+    "LlamaCPP",
     "VisualRepresentation"
 ]

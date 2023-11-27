@@ -136,8 +136,8 @@ The embedding model cannot always be saved using a non-pickle method if, for exa
 import openai
 from bertopic.backend import OpenAIBackend
 
-openai.api_key = MY_API_KEY
-embedding_model = OpenAIBackend("text-embedding-ada-002")
+client = openai.OpenAI(api_key="sk-...")
+embedding_model = OpenAIBackend(client, "text-embedding-ada-002")
 
 # Load model and add embedding model
 loaded_model = BERTopic.load("path/to/my/model_dir", embedding_model=embedding_model)
