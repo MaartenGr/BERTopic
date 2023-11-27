@@ -3214,9 +3214,10 @@ However, we are not sure whether other topics exist and want to explore those.</
 <span class="n">tokenizer</span><span class="o">=</span> <span class="n">tiktoken</span><span class="o">.</span><span class="n">encoding_for_model</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">)</span>
 
 <span class="c1"># Create your representation model</span>
-<span class="n">openai</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">MY_API_KEY</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;sk-...&quot;</span><span class="p">)</span>
 <span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span> 
+    <span class="n">client</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span>
     <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
     <span class="n">chat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">nr_docs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
