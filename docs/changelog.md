@@ -214,9 +214,10 @@ from bertopic import BERTopic
 tokenizer= tiktoken.encoding_for_model("gpt-3.5-turbo")
 
 # Create your representation model
-openai.api_key = MY_API_KEY
+client = openai.OpenAI(api_key="sk-...")
 representation_model = OpenAI(
-    model="gpt-3.5-turbo", 
+    client,
+    model="gpt-3.5-turbo",
     delay_in_seconds=2, 
     chat=True,
     nr_docs=4,
