@@ -49,41 +49,6 @@ However, some of these documents might be very similar to one another and might 
 
 ### **Truncating Documents**
 
-If you increase the number of documents passed to `[DOCUMENTS]`, then the token limit can quickly be filled. Instead, we could only pass a part of the document by truncating it to a specific length. For that, we use two parameters that are accessible in all LLMs on this page, namely `document_length` and `tokenizer`. 
-
-Let's start with the `tokenizer`. It is used to split a document up into tokens/segments. Each segment can then be used to calculate the complete document length. 
-The methods for tokenization are as follows:
-
-* If tokenizer is `char`, then the document is split up into characters.
-* If tokenizer is `whitespace`, the the document is split up into words separated by whitespaces. 
-* If tokenizer is `vectorizer`, then the internal CountVectorizer is used to tokenize the document.
-* If tokenizer is a `callable`, then that callable is used to tokenize the document.
-
-After having tokenized the document according one of the strategies above, the `document_length` is used to truncate the document to its specified value. 
-
-For example, if the tokenizer is `whitespace` then a document is split up into individual words and the length of the document is counted by the total number of words. In contrast, if the tokenizer is `callable` we can use any callable that has an `.encode` and `.decode` function. If we were to use [tiktoken](https://github.com/openai/tiktoken), then the document would be split up into tokens and the length of the document is counted by the total number tokens.
-
-To give an example, using tiktoken would work as follows:
-
-```python
-import openai
-import tiktoken
-from bertopic.representation import OpenAI
-from bertopic import BERTopic
-
-# Create tokenizer
-tokenizer = tiktoken.get_encoding("cl100k_base")
-
-# Create your representation model
-client = openai.OpenAI(api_key="sk-...")
-representation_model = OpenAI(client, tokenizer=tokenizer, document_length=50)
-```
-
-In this example, each document will be at most 50 tokens, anything more will get truncated.
-
-
-### **Document Truncation**
-
 We can truncate the input documents in `[DOCUMENTS]` in order to reduce the number of tokens that we have in our input prompt. To do so, all text generation modules have two parameters that we can tweak:
 
 * `doc_length`
