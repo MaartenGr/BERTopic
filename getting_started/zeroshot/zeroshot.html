@@ -1,0 +1,3013 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">
+      
+      
+        <link rel="prev" href="../guided/guided.html">
+      
+      
+        <link rel="next" href="../distribution/distribution.html">
+      
+      
+      <link rel="icon" href="../../icon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>Zero-shot Topic Modeling - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CUbuntu+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="Zero-shot Topic Modeling - BERTopic" >
+      
+        <meta  property="og:description"  content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." >
+      
+        <meta  property="og:image"  content="https://maartengr.github.io/BERTopic/assets/images/social/getting_started/zeroshot/zeroshot.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="Zero-shot Topic Modeling - BERTopic" >
+      
+        <meta  name="twitter:description"  content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics." >
+      
+        <meta  name="twitter:image"  content="https://maartengr.github.io/BERTopic/assets/images/social/getting_started/zeroshot/zeroshot.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#example" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BERTopic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Zero-shot Topic Modeling
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../algorithm/algorithm.html" class="md-tabs__link">
+        
+  
+    
+  
+  The Algorithm
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../quickstart/quickstart.html" class="md-tabs__link">
+          
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq.html" class="md-tabs__link">
+        
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../usecases.html" class="md-tabs__link">
+        
+  
+    
+  
+  Use Cases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/bertopic.html" class="md-tabs__link">
+          
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog.html" class="md-tabs__link">
+        
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    BERTopic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithm/algorithm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Algorithm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/quickstart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serialization/serialization.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Serialization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../search/search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Search Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best_practices/best_practices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Best Practices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    In-depth
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            In-depth
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_1" id="__nav_3_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Visualizations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Visualizations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_terms.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_2" id="__nav_3_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Update Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Update Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicreduction/topicreduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Update Topic Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Outlier reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter%20tuning/parametertuning.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameter tuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tips & Tricks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embeddings/embeddings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Embeddings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dim_reduction/dim_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clustering/clustering.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6_6" id="__nav_3_6_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6. Fine-tune Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            6. Fine-tune Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../representation/representation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6A. Representation Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../representation/llm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6B. LLM & Generative AI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multiaspect/multiaspect.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6C. Multiple Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Variations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            Variations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dynamic Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multimodal/multimodal.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodal Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Online Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../merge/merge.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Merge Multiple Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_6" id="__nav_3_7_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    (semi)-supervised
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            (semi)-supervised
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semisupervised/semisupervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Semi-supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supervised/supervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/manual.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guided/guided.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guided Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Zero-shot Topic Modeling
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="zeroshot.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Zero-shot Topic Modeling
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distribution/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Distributions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../seed_words/seed_words.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Seed Words
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usecases.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use Cases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/bertopic.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BERTopic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_1" id="__nav_6_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Backends
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Backends
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/base.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/word_doc.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Word Doc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/openai.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OpenAI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends/cohere.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cohere
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_2" id="__nav_6_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Dimensionality Reduction
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Dimensionality Reduction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dimensionality/base.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_3" id="__nav_6_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Clustering
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Clustering
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cluster/base.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_4" id="__nav_6_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Vectorizers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Vectorizers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    cTFIDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/onlinecv.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OnlineCountVectorizer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_5" id="__nav_6_2_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Topic Representation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            Topic Representation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/base.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/mmr.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MaximalMarginalRelevance
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/keybert.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    KeyBERT
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/pos.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PartOfSpeech
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2_5_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2_5_5" id="__nav_6_2_5_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Text Generation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_2_5_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2_5_5">
+            <span class="md-nav__icon md-icon"></span>
+            Text Generation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/generation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    🤗 Transformers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/langchain.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LangChain
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/cohere.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cohere
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/openai.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OpenAI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representation/zeroshot.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zero-shot Classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Plotting
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Plotting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/barchart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Barchart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DTM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchical_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/heatmap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Heatmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/term.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Term Scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics_per_class.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Zero-shot Topic Modeling</h1>
+
+<p>Zero-shot Topic Modeling is a technique that allows you to find topics in large amounts of documents that were predefined. When faced with many documents, you often have an idea of which topics will definitely be in there. Whether that is a result of simply knowing your data or if a domain expert is involved in defining those topics.</p>
+<p>This method allows you to not only find those specific topics but also create new topics for documents that would not fit with your predefined topics. 
+This allows for extensive flexibility as there are three scenario's to explore.</p>
+<p>First, both zero-shot topics and clustered topics were detected. This means that some documents would fit with the predefined topics where others would not. For the latter, new topics were found.</p>
+<p>Second, only zero-shot topics were detected. Here, we would not need to find additional topics since all original documents were assigned to one of the predefined topics.</p>
+<p>Third, no zero-shot topics were detected. This means that none of the documents would fit with the predefined topics and a regular BERTopic would be run. </p>
+<div class="svg_image">
+<svg width="492" height="417" viewBox="0 0 492 417" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="15.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="29.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="43.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="57.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="71.5" y="101.5" width="14" height="14" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="33.3438" y="94.1758">&#34;Religion&#34;&#10;</tspan></text>
+<rect x="47.5" y="154.5" width="249" height="68" rx="2.5" fill="#F5F5F5" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="370.248" y="108.97"> the labels</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="336" y="108.97">Embed</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="349.291" y="185.97">cosine similarity</tspan><tspan x="306" y="197.97">document</tspan><tspan x="378.803" y="197.97">zeroshot</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="306" y="173.97">For each document, assign topics &#10;</tspan><tspan x="306" y="185.97">based on </tspan><tspan x="431.176" y="185.97"> between </tspan><tspan x="356.195" y="197.97"> and </tspan><tspan x="422.396" y="197.97"> embeddings</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="303" y="289.97">Manual</tspan><tspan x="342.863" y="289.97">BERTopic</tspan><tspan x="303" y="301.97">BERTopic</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="288" y="277.97">Create two models:&#10;</tspan><tspan x="339.738" y="289.97"> </tspan><tspan x="390.031" y="289.97"> (zeroshot documents)&#10;</tspan><tspan x="350.168" y="301.97"> (non-zeroshot documents)</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="304.445" y="386.97"> the models into one</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="273" y="386.97">Merge</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="385.484" y="28.9697">zeroshot topics</tspan><tspan x="391.764" y="40.9697">labels</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="354" y="28.9697">Define </tspan><tspan x="462.076" y="28.9697"> </tspan><tspan x="354" y="40.9697">through </tspan><tspan x="421.188" y="40.9697">.</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="26.5186" y="37.4697">&#34;Clustering&#34;</tspan></text>
+<text fill="#8F1313" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="14" y="9.96973">Zeroshot topic 1</tspan></text>
+<rect x="0.5" y="15.5" width="104" height="36" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="135.273" y="37.4697">&#34;Topic Modeling&#34;</tspan></text>
+<text fill="#8F1313" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="134" y="9.96973">Zeroshot topic 2</tspan></text>
+<rect x="120.5" y="15.5" width="104" height="36" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="255.137" y="31.4697">&#34;Large Language </tspan><tspan x="260.933" y="43.4697">Models (LLM)&#34;</tspan></text>
+<text fill="#8F1313" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="254" y="9.96973">Zeroshot topic 3</tspan></text>
+<rect x="240.5" y="15.5" width="104" height="36" stroke="black"/>
+<path d="M172.293 147.707C172.683 148.098 173.317 148.098 173.707 147.707L180.071 141.343C180.462 140.953 180.462 140.319 180.071 139.929C179.681 139.538 179.047 139.538 178.657 139.929L173 145.586L167.343 139.929C166.953 139.538 166.319 139.538 165.929 139.929C165.538 140.319 165.538 140.953 165.929 141.343L172.293 147.707ZM172 122L172 147L174 147L174 122L172 122Z" fill="black"/>
+<path d="M172.293 251.707C172.683 252.098 173.317 252.098 173.707 251.707L180.071 245.343C180.462 244.953 180.462 244.319 180.071 243.929C179.681 243.538 179.047 243.538 178.657 243.929L173 249.586L167.343 243.929C166.953 243.538 166.319 243.538 165.929 243.929C165.538 244.319 165.538 244.953 165.929 245.343L172.293 251.707ZM172 226L172 251L174 251L174 226L172 226Z" fill="black"/>
+<path d="M172.293 351.707C172.683 352.098 173.317 352.098 173.707 351.707L180.071 345.343C180.462 344.953 180.462 344.319 180.071 343.929C179.681 343.538 179.047 343.538 178.657 343.929L173 349.586L167.343 343.929C166.953 343.538 166.319 343.538 165.929 343.929C165.538 344.319 165.538 344.953 165.929 345.343L172.293 351.707ZM172 326L172 351L174 351L174 326L172 326Z" fill="black"/>
+<path d="M51.2929 79.7071C51.6834 80.0976 52.3166 80.0976 52.7071 79.7071L59.0711 73.3431C59.4616 72.9526 59.4616 72.3195 59.0711 71.9289C58.6805 71.5384 58.0474 71.5384 57.6569 71.9289L52 77.5858L46.3431 71.9289C45.9526 71.5384 45.3195 71.5384 44.9289 71.9289C44.5384 72.3195 44.5384 72.9526 44.9289 73.3431L51.2929 79.7071ZM51 55L51 79L53 79L53 55L51 55Z" fill="black"/>
+<rect x="136.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="150.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="164.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="178.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="192.5" y="101.5" width="14" height="14" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="143.219" y="94.1758">&#34;Topic Modeling&#34;&#10;</tspan></text>
+<path d="M172.293 79.7071C172.683 80.0976 173.317 80.0976 173.707 79.7071L180.071 73.3431C180.462 72.9526 180.462 72.3195 180.071 71.9289C179.681 71.5384 179.047 71.5384 178.657 71.9289L173 77.5858L167.343 71.9289C166.953 71.5384 166.319 71.5384 165.929 71.9289C165.538 72.3195 165.538 72.9526 165.929 73.3431L172.293 79.7071ZM172 55L172 79L174 79L174 55L172 55Z" fill="black"/>
+<rect x="256.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="270.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="284.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="298.5" y="101.5" width="14" height="14" stroke="black"/>
+<rect x="312.5" y="101.5" width="14" height="14" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="247.984" y="94.1758">&#34;Large Language Models&#34;&#10;</tspan></text>
+<path d="M292.293 79.7071C292.683 80.0976 293.317 80.0976 293.707 79.7071L300.071 73.3431C300.462 72.9526 300.462 72.3195 300.071 71.9289C299.681 71.5384 299.047 71.5384 298.657 71.9289L293 77.5858L287.343 71.9289C286.953 71.5384 286.319 71.5384 285.929 71.9289C285.538 72.3195 285.538 72.9526 285.929 73.3431L292.293 79.7071ZM292 55L292 79L294 79L294 55L292 55Z" fill="black"/>
+<path d="M84.9508 147.912C85.495 147.818 85.8598 147.301 85.7656 146.757L84.2307 137.888C84.1365 137.344 83.619 136.979 83.0748 137.074C82.5306 137.168 82.1658 137.685 82.26 138.229L83.6244 146.112L75.7416 147.477C75.1974 147.571 74.8326 148.088 74.9268 148.632C75.0209 149.177 75.5384 149.541 76.0826 149.447L84.9508 147.912ZM47.4238 121.817L84.2041 147.744L85.3564 146.11L48.5762 120.183L47.4238 121.817Z" fill="black"/>
+<path d="M256.049 147.912C255.505 147.818 255.14 147.301 255.234 146.757L256.769 137.888C256.863 137.344 257.381 136.979 257.925 137.074C258.469 137.168 258.834 137.685 258.74 138.229L257.376 146.112L265.258 147.477C265.803 147.571 266.167 148.088 266.073 148.632C265.979 149.177 265.462 149.541 264.917 149.447L256.049 147.912ZM293.576 121.817L256.796 147.744L255.644 146.11L292.424 120.183L293.576 121.817Z" fill="black"/>
+<path d="M90.8315 184H68.7801C68.3493 184 68 184.349 68 184.78V213.22C68 213.651 68.3493 214 68.7801 214H90.8315C91.2624 214 91.6117 213.651 91.6117 213.22V184.78C91.6117 184.349 91.2624 184 90.8315 184Z" fill="white" stroke="#8F1313"/>
+<path d="M71.049 188.447H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M75.4047 191.496H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 191.496H73.7534" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 194.399H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M74.5335 197.303H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 197.303H72.8822" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.2268 200.207H78.6898" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 200.207H71.7207" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M80.1959 200.207H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 203.111H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 206.015H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M71.049 208.918H88.4175" stroke="#8F1313" stroke-linecap="round"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="68.2695" y="170.176">Topic &#10;</tspan><tspan x="63.1602" y="180.176">Modeling</tspan></text>
+<rect x="184.5" y="260.5" width="96" height="59" rx="2.5" fill="#F5F5F5" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" font-weight="bold" letter-spacing="0em"><tspan x="193.133" y="257.176">BERTopic</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="16" letter-spacing="0em"><tspan x="166.18" y="293.852">+</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="191.709" y="304.882">Topic X</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="221.724" y="304.882">Topic Y</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="249.773" y="304.882">Topic Z</tspan></text>
+<path d="M212.832 267H190.78C190.349 267 190 267.349 190 267.78V296.22C190 296.651 190.349 297 190.78 297H212.832C213.262 297 213.612 296.651 213.612 296.22V267.78C213.612 267.349 213.262 267 212.832 267Z" fill="white" stroke="#138F83"/>
+<path d="M193.049 271.447H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M197.405 274.496H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 274.496H195.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 277.399H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M196.534 280.303H210.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 280.303H194.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M195.227 283.207H200.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 283.207H193.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M202.196 283.207H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 286.111H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 289.015H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 291.918H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M240.832 267H218.78C218.349 267 218 267.349 218 267.78V296.22C218 296.651 218.349 297 218.78 297H240.832C241.262 297 241.612 296.651 241.612 296.22V267.78C241.612 267.349 241.262 267 240.832 267Z" fill="white" stroke="#138F83"/>
+<path d="M221.049 271.447H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M225.405 274.496H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 274.496H223.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 277.399H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M224.534 280.303H238.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 280.303H222.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M223.227 283.207H228.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 283.207H221.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M230.196 283.207H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 286.111H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 289.015H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M221.049 291.918H238.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M269.832 267H247.78C247.349 267 247 267.349 247 267.78V296.22C247 296.651 247.349 297 247.78 297H269.832C270.262 297 270.612 296.651 270.612 296.22V267.78C270.612 267.349 270.262 267 269.832 267Z" fill="white" stroke="#138F83"/>
+<path d="M250.049 271.447H267.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M254.405 274.496H267.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 274.496H252.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 277.399H267.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M253.534 280.303H267.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 280.303H251.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M252.227 283.207H257.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 283.207H250.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M259.196 283.207H267.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 286.111H267.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 289.015H267.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M250.049 291.918H267.418" stroke="#138F83" stroke-linecap="round"/>
+<rect x="64.5" y="261.5" width="96" height="59" rx="2.5" fill="#F5F5F5" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" font-weight="bold" letter-spacing="0em"><tspan x="68.2656" y="258.176">Manual BERTopic</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="74.3896" y="305.882">Topic&#10;</tspan><tspan x="69.6201" y="312.882">Modeling</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="106.2" y="305.882">LLM</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="126.319" y="305.882">Clustering</tspan></text>
+<path d="M92.8315 268H70.7801C70.3493 268 70 268.349 70 268.78V297.22C70 297.651 70.3493 298 70.7801 298H92.8315C93.2624 298 93.6117 297.651 93.6117 297.22V268.78C93.6117 268.349 93.2624 268 92.8315 268Z" fill="white" stroke="#8F1313"/>
+<path d="M73.049 272.447H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M77.4047 275.496H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 275.496H75.7534" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 278.399H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M76.5335 281.303H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 281.303H74.8822" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M75.2268 284.207H80.6898" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 284.207H73.7207" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M82.1959 284.207H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 287.111H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 290.015H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M73.049 292.918H90.4175" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M120.832 268H98.7801C98.3493 268 98 268.349 98 268.78V297.22C98 297.651 98.3493 298 98.7801 298H120.832C121.262 298 121.612 297.651 121.612 297.22V268.78C121.612 268.349 121.262 268 120.832 268Z" fill="white" stroke="#8F1313"/>
+<path d="M101.049 272.447H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M105.405 275.496H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 275.496H103.753" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 278.399H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M104.534 281.303H118.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 281.303H102.882" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M103.227 284.207H108.69" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 284.207H101.721" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M110.196 284.207H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 287.111H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 290.015H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M101.049 292.918H118.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M149.832 268H127.78C127.349 268 127 268.349 127 268.78V297.22C127 297.651 127.349 298 127.78 298H149.832C150.262 298 150.612 297.651 150.612 297.22V268.78C150.612 268.349 150.262 268 149.832 268Z" fill="white" stroke="#8F1313"/>
+<path d="M130.049 272.447H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M134.405 275.496H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 275.496H132.753" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 278.399H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M133.534 281.303H147.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 281.303H131.882" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M132.227 284.207H137.69" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 284.207H130.721" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M139.196 284.207H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 287.111H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 290.015H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 292.918H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<rect x="77.5" y="357.5" width="189" height="59" rx="2.5" fill="#F5F5F5" stroke="black"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" font-weight="bold" letter-spacing="0em"><tspan x="80.8633" y="354.176">Merged BERTopic</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="87.3896" y="401.882">Topic&#10;</tspan><tspan x="82.6201" y="408.882">Modeling</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="119.2" y="401.882">LLM</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="139.319" y="401.882">Clustering</tspan></text>
+<path d="M105.832 364H83.7801C83.3493 364 83 364.349 83 364.78V393.22C83 393.651 83.3493 394 83.7801 394H105.832C106.262 394 106.612 393.651 106.612 393.22V364.78C106.612 364.349 106.262 364 105.832 364Z" fill="white" stroke="#8F1313"/>
+<path d="M86.049 368.447H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M90.4047 371.496H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 371.496H88.7534" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 374.399H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M89.5335 377.303H103.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 377.303H87.8822" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M88.2268 380.207H93.6898" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 380.207H86.7207" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M95.1959 380.207H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 383.111H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 386.015H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M86.049 388.918H103.418" stroke="#8F1313" stroke-linecap="round"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="175.709" y="401.882">Topic X</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="205.724" y="401.882">Topic Y</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="6" letter-spacing="0em"><tspan x="233.773" y="401.882">Topic Z</tspan></text>
+<path d="M196.832 364H174.78C174.349 364 174 364.349 174 364.78V393.22C174 393.651 174.349 394 174.78 394H196.832C197.262 394 197.612 393.651 197.612 393.22V364.78C197.612 364.349 197.262 364 196.832 364Z" fill="white" stroke="#138F83"/>
+<path d="M177.049 368.447H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M181.405 371.496H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 371.496H179.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 374.399H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M180.534 377.303H194.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 377.303H178.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M179.227 380.207H184.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 380.207H177.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M186.196 380.207H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 383.111H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 386.015H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M177.049 388.918H194.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M224.832 364H202.78C202.349 364 202 364.349 202 364.78V393.22C202 393.651 202.349 394 202.78 394H224.832C225.262 394 225.612 393.651 225.612 393.22V364.78C225.612 364.349 225.262 364 224.832 364Z" fill="white" stroke="#138F83"/>
+<path d="M205.049 368.447H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M209.405 371.496H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 371.496H207.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 374.399H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M208.534 377.303H222.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 377.303H206.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M207.227 380.207H212.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 380.207H205.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M214.196 380.207H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 383.111H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 386.015H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M205.049 388.918H222.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M253.832 364H231.78C231.349 364 231 364.349 231 364.78V393.22C231 393.651 231.349 394 231.78 394H253.832C254.262 394 254.612 393.651 254.612 393.22V364.78C254.612 364.349 254.262 364 253.832 364Z" fill="white" stroke="#138F83"/>
+<path d="M234.049 368.447H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M238.405 371.496H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 371.496H236.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 374.399H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M237.534 377.303H251.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 377.303H235.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M236.227 380.207H241.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 380.207H234.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M243.196 380.207H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 383.111H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 386.015H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M234.049 388.918H251.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M133.832 364H111.78C111.349 364 111 364.349 111 364.78V393.22C111 393.651 111.349 394 111.78 394H133.832C134.262 394 134.612 393.651 134.612 393.22V364.78C134.612 364.349 134.262 364 133.832 364Z" fill="white" stroke="#8F1313"/>
+<path d="M114.049 368.447H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M118.405 371.496H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 371.496H116.753" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 374.399H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M117.534 377.303H131.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 377.303H115.882" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M116.227 380.207H121.69" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 380.207H114.721" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M123.196 380.207H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 383.111H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 386.015H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M114.049 388.918H131.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M162.832 364H140.78C140.349 364 140 364.349 140 364.78V393.22C140 393.651 140.349 394 140.78 394H162.832C163.262 394 163.612 393.651 163.612 393.22V364.78C163.612 364.349 163.262 364 162.832 364Z" fill="white" stroke="#8F1313"/>
+<path d="M143.049 368.447H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M147.405 371.496H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 371.496H145.753" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 374.399H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M146.534 377.303H160.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 377.303H144.882" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M145.227 380.207H150.69" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 380.207H143.721" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M152.196 380.207H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 383.111H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 386.015H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M143.049 388.918H160.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M149.832 184H127.78C127.349 184 127 184.349 127 184.78V213.22C127 213.651 127.349 214 127.78 214H149.832C150.262 214 150.612 213.651 150.612 213.22V184.78C150.612 184.349 150.262 184 149.832 184Z" fill="white" stroke="#8F1313"/>
+<path d="M130.049 188.447H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M134.405 191.496H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 191.496H132.753" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 194.399H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M133.534 197.303H147.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 197.303H131.882" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M132.227 200.207H137.69" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 200.207H130.721" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M139.196 200.207H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 203.111H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 206.015H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M130.049 208.918H147.418" stroke="#8F1313" stroke-linecap="round"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="111.215" y="171.176">Large Language </tspan><tspan x="127.23" y="181.176">Models</tspan></text>
+<path d="M212.832 184H190.78C190.349 184 190 184.349 190 184.78V213.22C190 213.651 190.349 214 190.78 214H212.832C213.262 214 213.612 213.651 213.612 213.22V184.78C213.612 184.349 213.262 184 212.832 184Z" fill="white" stroke="#138F83"/>
+<path d="M193.049 188.447H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M197.405 191.496H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 191.496H195.753" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 194.399H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M196.534 197.303H210.417" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 197.303H194.882" stroke="#138F83" stroke-linecap="round"/>
+<path d="M195.227 200.207H200.69" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 200.207H193.721" stroke="#138F83" stroke-linecap="round"/>
+<path d="M202.196 200.207H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 203.111H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 206.015H210.418" stroke="#138F83" stroke-linecap="round"/>
+<path d="M193.049 208.918H210.418" stroke="#138F83" stroke-linecap="round"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="173.16" y="180.176">No match found</tspan></text>
+<path d="M281.832 184H259.78C259.349 184 259 184.349 259 184.78V213.22C259 213.651 259.349 214 259.78 214H281.832C282.262 214 282.612 213.651 282.612 213.22V184.78C282.612 184.349 282.262 184 281.832 184Z" fill="white" stroke="#8F1313"/>
+<path d="M262.049 188.447H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M266.405 191.496H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 191.496H264.753" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 194.399H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M265.534 197.303H279.417" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 197.303H263.882" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M264.227 200.207H269.69" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 200.207H262.721" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M271.196 200.207H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 203.111H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 206.015H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<path d="M262.049 208.918H279.418" stroke="#8F1313" stroke-linecap="round"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="252.426" y="180.176">Clustering</tspan></text>
+<circle cx="227" cy="198" r="1" fill="black"/>
+<circle cx="237" cy="198" r="1" fill="black"/>
+<circle cx="247" cy="198" r="1" fill="black"/>
+</svg>
+</div>
+
+<p>This method works as follows. First, we create a number of labels for our predefined topics and embed them using any embedding model. Then, we compare the embeddings of the documents with the predefined labels using cosine similarity. If they pass a user-defined threshold, the zero-shot topic is assigned to a document. If it does not, then that document, along with others, will be put through a regular BERTopic model.</p>
+<p>This creates two models. One for the zero-shot topics and one for the non-zero-shot topics. We combine these two BERTopic models to create a single model that contains both zero-shot and non-zero-shot topics.</p>
+<h3 id="example"><strong>Example</strong><a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
+<p>In order to use zero-shot BERTopic, we create a list of topics that we want to assign to our documents. However, 
+there may be several other topics that we know should be in the documents. The dataset that we use is small subset of ArXiv papers.
+We know the data and believe there to be at least the following topics: <em>clustering</em>, <em>topic modeling</em>, and <em>large language models</em>. 
+However, we are not sure whether other topics exist and want to explore those.</p>
+<p>Zero-shot BERTopic needs two parameters:
+* <code>zeroshot_topic_list</code> - The names of the topics to assign documents to. Making sure this is as descriptive as possible helps improve the assignment since they are based on cosine similarities between embeddings.
+* <code>zeroshot_min_similarity</code> - The minimum cosine similarity needed to match a document to a document. It is a value between 0 and 1.</p>
+<p>Using this feature is straightforward:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">KeyBERTInspired</span>
+
+<span class="c1"># We select a subsample of 5000 abstracts from ArXiv</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;CShorten/ML-ArXiv-Papers&quot;</span><span class="p">)[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;abstract&quot;</span><span class="p">][:</span><span class="mi">5_000</span><span class="p">]</span>
+
+<span class="c1"># We define a number of topics that we know are in the documents</span>
+<span class="n">zeroshot_topic_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Clustering&quot;</span><span class="p">,</span> <span class="s2">&quot;Topic Modeling&quot;</span><span class="p">,</span> <span class="s2">&quot;Large Language Models&quot;</span><span class="p">]</span>
+
+<span class="c1"># We fit our model using the zero-shot topics</span>
+<span class="c1"># and we define a minimum similarity. For each document,</span>
+<span class="c1"># if the similarity does not exceed that value, it will be used</span>
+<span class="c1"># for clustering instead.</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span>
+    <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;thenlper/gte-small&quot;</span><span class="p">,</span> 
+    <span class="n">min_topic_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">zeroshot_topic_list</span><span class="o">=</span><span class="n">zeroshot_topic_list</span><span class="p">,</span>
+    <span class="n">zeroshot_min_similarity</span><span class="o">=</span><span class="mf">.85</span><span class="p">,</span>
+    <span class="n">representation_model</span><span class="o">=</span><span class="n">KeyBERTInspired</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>When we run <code>topic_model.get_topic_info()</code> you will see something like this:</p>
+<p><img src="zeroshot_output.png">
+<br></p>
+<p>The <code>zeroshot_min_similarity</code> parameter controls how many of the documents are assigned to the predefined zero-shot topics. Lower this value and you will have more documents assigned to zero-shot topics and fewer documents will be clustered. Increase this value you will have fewer documents assigned to zero-shot topics and more documents will be clustered.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Setting the <code>zeroshot_min_similarity</code> parameter requires a bit of experimentation. Some embedding
+models have different similarity distributions, so trying out the values manually and exploring the results
+is highly advised.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Because zero-shot topic modeling is essentially merging two different topic models, the 
+<code>probs</code> will be empty initially. If you want to have the probabilities of topics across documents, 
+you can run <code>topic_model.transform</code> on your documents to extract the updated <code>probs</code>.</p>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>
