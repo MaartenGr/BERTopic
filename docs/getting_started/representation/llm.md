@@ -354,6 +354,12 @@ An amazing framework for using LLMs for inference is [`llama.cpp`](https://githu
 pip install llama-cpp-python
 ```
 
+or using the following for hardware acceleration:
+
+```bash
+CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install llama-cpp-python
+```
+
 !!! Note
     There are a number of [installation options](https://github.com/abetlen/llama-cpp-python#installation-with-hardware-acceleration) depending on your hardware and OS. Make sure that you select the correct one to optimize your performance.
 
