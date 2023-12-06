@@ -53,7 +53,12 @@ class MultiModalBackend(BaseEmbedder):
                              "`from sentence_transformers import SentenceTransformer` \n"
                              "`model = SentenceTransformer('clip-ViT-B-32')`")
             
-        self.tokenizer = self.embedding_model._first_module().processor.tokenizer
+        try:
+            self.tokenizer = self.embedding_model._first_module().processor.tokenizer
+        except AttributeError:
+            self.tokenizer = self.embedding_model.tokenizer
+        except:
+            self.tokenizer = None
 
     def embed(self,
               documents: List[str],
@@ -150,15 +155,15 @@ class MultiModalBackend(BaseEmbedder):
         return embeddings
     
     def _truncate_document(self, document):
-        tokens = self.tokenizer.encode(document)
+        if self.tokenizer:
+            tokens = self.tokenizer.encode(document)
 
-        if len(tokens) > 77:
-            # Skip the starting token, only include 75 tokens
-            truncated_tokens = tokens[1:76]
-            document = self.tokenizer.decode(truncated_tokens)
+            if len(tokens) > 77:
+                # Skip the starting token, only include 75 tokens
+                truncated_tokens = tokens[1:76]
+                document = self.tokenizer.decode(truncated_tokens)
 
-            # Recursive call here, because the encode(decode()) can have different result
-            return self._truncate_document(document)
+                # Recursive call here, because the encode(decode()) can have different result
+                return self._truncate_document(document)
 
-        else:
-            return document
+        return document
