@@ -88,8 +88,8 @@ so that the user can identify which topics were newly added which you could insp
 The way the models are merged is through comparison of their topic embeddings. If topics between models are similar enough, then they will be regarded as the same topics 
 and the topic of the first model in the list will be chosen. However, if topics between models are dissimilar enough, then the topic of the latter model will be added to the former.
 
-This (dis)similarity is can be tweaked using the `min_similarity` parameter. Increasing this value will increase the change of adding new topics. In contrast, decreasing this value 
-will make it more strict and threfore decrease the change of adding new topics. The value is set to `0.7` by default, so let's see what happens if we were to increase this value to
+This (dis)similarity is can be tweaked using the `min_similarity` parameter. Increasing this value will increase the chance of adding new topics. In contrast, decreasing this value 
+will make it more strict and threfore decrease the chance of adding new topics. The value is set to `0.7` by default, so let's see what happens if we were to increase this value to
 `0.9``:
 
 ```python
