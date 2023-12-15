@@ -123,7 +123,7 @@ much better results with a `flan-T5` like model:
 from transformers import pipeline
 from bertopic.representation import TextGeneration
 
-prompt = "I have a topic described by the following keywords: [KEYWORDS]. Based on the previous keywords, what is this topic about?""
+prompt = "I have a topic described by the following keywords: [KEYWORDS]. Based on the previous keywords, what is this topic about?"
 
 # Create your representation model
 generator = pipeline('text2text-generation', model='google/flan-t5-base')
