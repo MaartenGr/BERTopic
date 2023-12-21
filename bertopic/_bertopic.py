@@ -224,7 +224,7 @@ class BERTopic:
         self.zeroshot_min_similarity = zeroshot_min_similarity
 
         # Embedding model
-        self.language = language if not embedding_model else None
+        self.language = language if embedding_model is None else None
         self.embedding_model = embedding_model
 
         # Vectorizer
