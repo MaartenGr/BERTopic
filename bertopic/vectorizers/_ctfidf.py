@@ -79,7 +79,7 @@ class ClassTfidfTransformer(TfidfTransformer):
             # Divide the average number of samples by the word frequency
             # +1 is added to force values to be positive
             else:
-                idf = np.log((avg_nr_samples / df)+1)
+                idf = np.log((avg_nr_samples / np.maximum(df, 1))+1)
 
             # Multiplier to increase/decrease certain idf scores
             if multiplier is not None:
