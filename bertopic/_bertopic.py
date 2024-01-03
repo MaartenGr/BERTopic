@@ -79,7 +79,7 @@ class BERTopic:
                                       only calculated if a HDBSCAN model is used for the clustering step.
                                       When `calculate_probabilities=True`, then it is the probabilities
                                       of all topics per document.
-        topic_sizes_ (Mapping[int, int]) : The size of each topic
+        topic_sizes_ (Mapping[int, int]) : The size of each topic.
         topic_mapper_ (TopicMapper) : A class for tracking topics and their mappings anytime they are
                                       merged, reduced, added, or removed.
         topic_representations_ (Mapping[int, Tuple[int, float]]) : The top n terms per topic and their respective
@@ -89,7 +89,7 @@ class BERTopic:
                                  `.vectorizer_model.get_feature_names_out()`
         topic_labels_ (Mapping[int, str]) : The default labels for each topic.
         custom_labels_ (List[str]) : Custom labels for each topic.
-        topic_embeddings_ (np.ndarray) : The embeddings for each topic. It is calculated by taking the
+        topic_embeddings_ (np.ndarray) : The embeddings for each topic. They are calculated by taking the
                                          centroid embedding of each cluster.
         representative_docs_ (Mapping[int, str]) : The representative documents for each topic.
 
@@ -116,7 +116,7 @@ class BERTopic:
     topic_model = BERTopic(embedding_model=sentence_model)
     ```
 
-    Due to the stochastisch nature of UMAP, the results from BERTopic might differ
+    Due to the stochastic nature of UMAP, the results from BERTopic might differ
     and the quality can degrade. Using your own embeddings allows you to
     try out BERTopic several times until you find the topics that suit
     you best.
@@ -160,7 +160,7 @@ class BERTopic:
             min_topic_size: The minimum size of the topic. Increasing this value will lead
                             to a lower number of clusters/topics and vice versa. 
                             It is the same parameter as `min_cluster_size` in HDBSCAN.
-                            NOTE: This param will not be used if you are `hdbscan_model`.
+                            NOTE: This param will not be used if you are using `hdbscan_model`.
             nr_topics: Specifying the number of topics will reduce the initial
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
@@ -718,14 +718,14 @@ class BERTopic:
             Make sure to use a limited number of unique timestamps (<100) as the
             c-TF-IDF representation will be calculated at each single unique timestamp.
             Having a large number of unique timestamps can take some time to be calculated.
-            Moreover, there aren't many use-cased where you would like to see the difference
+            Moreover, there aren't many use-cases where you would like to see the difference
             in topic representations over more than 100 different timestamps.
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             timestamps: The timestamp of each document. This can be either a list of strings or ints.
                         If it is a list of strings, then the datetime format will be automatically
-                        inferred. If it is a list of ints, then the documents will be ordered by
+                        inferred. If it is a list of ints, then the documents will be ordered in
                         ascending order.
             topics: A list of topics where each topic is related to a document in `docs` and
                     a timestamp in `timestamps`. You can use this to apply topics_over_time on
@@ -751,7 +751,7 @@ class BERTopic:
 
         Examples:
 
-        The timestamps variable represent the timestamp of each document. If you have over
+        The timestamps variable represents the timestamp of each document. If you have over
         100 unique timestamps, it is advised to bin the timestamps as shown below:
 
         ```python
@@ -844,7 +844,7 @@ class BERTopic:
         """ Create topics per class
 
         To create the topics per class, BERTopic needs to be already fitted once.
-        From the fitted models, the c-TF-IDF representations are calculate at
+        From the fitted models, the c-TF-IDF representations are calculated at
         each class c. Then, the c-TF-IDF representations at class c are
         averaged with the global c-TF-IDF representations in order to fine-tune the
         local representations. This can be turned off if the pure representation is
@@ -858,7 +858,7 @@ class BERTopic:
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             classes: The class of each document. This can be either a list of strings or ints.
-            global_tuning: Fine-tune each topic representation for class c t by averaging its c-TF-IDF matrix
+            global_tuning: Fine-tune each topic representation for class c by averaging its c-TF-IDF matrix
                            with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                            topic representations that could not be found in the documents for class c.
 
@@ -929,18 +929,18 @@ class BERTopic:
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             linkage_function: The linkage function to use. Default is:
-                            `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
+                              `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
-                                `lambda x: 1 - cosine_similarity(x)`.
-                                You can pass any function that returns either a square matrix of
-                                shape (n_samples, n_samples) with zeros on the diagonal and
-                                non-negative values or condensed distance matrix of shape
-                                (n_samples * (n_samples - 1) / 2,) containing the upper
-                                triangular of the distance matrix.
+                               `lambda x: 1 - cosine_similarity(x)`.
+                               You can pass any function that returns either a square matrix of 
+                               shape (n_samples, n_samples) with zeros on the diagonal and 
+                               non-negative values or condensed distance matrix of shape
+                               (n_samples * (n_samples - 1) / 2,) containing the upper
+                               triangular of the distance matrix.
 
         Returns:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
-                                represented by their parents and their children
+                                 represented by their parents and their children
 
         Examples:
 
@@ -1081,7 +1081,7 @@ class BERTopic:
         and `problem is difficult`. These are called tokensets. For each of these
         tokensets, we calculate their c-TF-IDF representation and find out
         how similar they are to the previously generated topics. Then, the
-        similarities to the topics for each tokenset are summed in order to
+        similarities to the topics for each tokenset are summed up in order to
         create a topic distribution for the entire document.
 
         We can also dive into this a bit deeper by then splitting these tokensets
@@ -1096,7 +1096,7 @@ class BERTopic:
 
         Arguments:
             documents: A single document or a list of documents for which we
-                    approximate their topic distributions
+                       approximate their topic distributions
             window: Size of the moving window which indicates the number of
                     tokens being considered.
             stride: How far the window should move at each step.
@@ -1109,21 +1109,21 @@ class BERTopic:
             padding: Whether to pad the beginning and ending of a document with
                      empty tokens.
             use_embedding_model: Whether to use the topic model's embedding
-                                model to calculate the similarity between
-                                tokensets and topics instead of using c-TF-IDF.
+                                 model to calculate the similarity between
+                                 tokensets and topics instead of using c-TF-IDF.
             calculate_tokens: Calculate the similarity of tokens with all topics.
-                            NOTE: This is computation-wise more expensive and
-                            can require more memory. Using this over batches of
-                            documents might be preferred.
+                              NOTE: This is computation-wise more expensive and
+                              can require more memory. Using this over batches of
+                              documents might be preferred.
             separator: The separator used to merge tokens into tokensets.
 
         Returns:
             topic_distributions: A `n` x `m` matrix containing the topic distributions
-                                for all input documents with `n` being the documents
-                                and `m` the topics.
+                                 for all input documents with `n` being the documents
+                                 and `m` the topics.
             topic_token_distributions: A list of `t` x `m` arrays with `t` being the
-                                    number of tokens for the respective document
-                                    and `m` the topics.
+                                       number of tokens for the respective document
+                                       and `m` the topics.
 
         Examples:
 
@@ -1136,7 +1136,7 @@ class BERTopic:
         ```
 
         As a result, the topic distributions are calculated in `topic_distr` for the
-        entire document based on token set with a specific window size and stride.
+        entire document based on a token set with a specific window size and stride.
 
         If you want to calculate the topic distributions on a token-level:
 
@@ -1288,7 +1288,7 @@ class BERTopic:
         the topic embeddings. The most similar topics are returned
         along with their similarity values.
 
-        The search_term can be of any size but since it compares
+        The search_term can be of any size but since it is compared
         with the topic representation it is advised to keep it
         below 5 words.
 
@@ -1369,8 +1369,8 @@ class BERTopic:
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
             ctfidf_model: Pass in your own c-TF-IDF model to update the representations
             representation_model: Pass in a model that fine-tunes the topic representations
-                        calculated through c-TF-IDF. Models from `bertopic.representation`
-                        are supported.
+                                  calculated through c-TF-IDF. Models from `bertopic.representation`
+                                  are supported.
 
         Examples:
 
@@ -1586,11 +1586,11 @@ class BERTopic:
             df: A dataframe containing the metadata and the documents on which
                 the topic model was originally trained on.
             metadata: A dictionary with meta data for each document in the form
-                    of column name (key) and the respective values (value).
+                      of column name (key) and the respective values (value).
 
         Returns:
             document_info: A dataframe with several statistics regarding
-                        the documents on which the topic model was trained.
+                           the documents on which the topic model was trained.
 
         Usage:
 
@@ -1609,7 +1609,7 @@ class BERTopic:
         from sklearn.datasets import fetch_20newsgroups
 
         # The original data in a dataframe format to include the target variable
-        data= fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
+        data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
         df = pd.DataFrame({"Document": data['data'], "Class": data['target']})
 
         # Add information about the percentage of the document that relates to the topic
@@ -1711,11 +1711,11 @@ class BERTopic:
 
         Arguments:
             hier_topics: A dataframe containing the structure of the topic tree.
-                        This is the output of `topic_model.hierachical_topics()`
+                         This is the output of `topic_model.hierachical_topics()`
             max_distance: The maximum distance between two topics. This value is
-                        based on the Distance column in `hier_topics`.
+                          based on the Distance column in `hier_topics`.
             tight_layout: Whether to use a tight layout (narrow width) for
-                        easier readability if you have hundreds of topics.
+                          easier readability if you have hundreds of topics.
 
         Returns:
             A tree that has the following structure when printed:
@@ -1810,12 +1810,12 @@ class BERTopic:
 
         Arguments:
             topic_labels: If a list of topic labels, it should contain the same number
-                        of labels as there are topics. This must be ordered
-                        from the topic with the lowest ID to the highest ID,
-                        including topic -1 if it exists.
-                        If a dictionary of `topic ID`: `topic_label`, it can have
-                        any number of topics as it will only map the topics found
-                        in the dictionary.
+                          of labels as there are topics. This must be ordered
+                          from the topic with the lowest ID to the highest ID,
+                          including topic -1 if it exists.
+                          If a dictionary of `topic ID`: `topic_label`, it can have
+                          any number of topics as it will only map the topics found
+                          in the dictionary.
 
         Examples:
 
@@ -1861,7 +1861,7 @@ class BERTopic:
                 custom_labels = topic_labels
             else:
                 raise ValueError("Make sure that `topic_labels` contains the same number "
-                                 "of labels as that there are topics.")
+                                 "of labels as there are topics.")
 
         self.custom_labels_ = custom_labels
 
@@ -1889,8 +1889,8 @@ class BERTopic:
 
         Returns:
             topic_labels: A list of topic labels sorted from the lowest topic ID to the highest.
-                        If the topic model was trained using HDBSCAN, the lowest topic ID is -1,
-                        otherwise it is 0.
+                          If the topic model was trained using HDBSCAN, the lowest topic ID is -1,
+                          otherwise it is 0.
 
         Examples:
 
@@ -1931,7 +1931,7 @@ class BERTopic:
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             topics_to_merge: Either a list of topics or a list of list of topics
-                            to merge. For example:
+                             to merge. For example:
                                 [1, 2, 3] will merge topics 1, 2 and 3
                                 [[1, 2], [3, 4]] will merge topics 1 and 2, and
                                 separately merge topics 3 and 4.
@@ -1951,7 +1951,7 @@ class BERTopic:
         merge topics 3 and 4:
 
         ```python
-        topics_to_merge = [[1, 2]
+        topics_to_merge = [[1, 2],
                             [3, 4]]
         topic_model.merge_topics(docs, topics_to_merge)
         ```
@@ -1997,7 +1997,7 @@ class BERTopic:
         """ Reduce the number of topics to a fixed number of topics
         or automatically.
 
-        If nr_topics is a integer, then the number of topics is reduced
+        If nr_topics is an integer, then the number of topics is reduced
         to nr_topics using `AgglomerativeClustering` on the cosine distance matrix
         of the topic embeddings.
 
@@ -2018,7 +2018,7 @@ class BERTopic:
 
         Examples:
 
-        You can further reduce the topics by passing the documents with its
+        You can further reduce the topics by passing the documents with their
         topics and probabilities (if they were calculated):
 
         ```python
@@ -2103,8 +2103,8 @@ class BERTopic:
                             Calculate the embeddings for outlier documents and
                             find the best matching topic embedding.
             threshold: The threshold for assigning topics to outlier documents. This value
-                    represents the minimum probability when `strategy="probabilities"`.
-                    For all other strategies, it represents the minimum similarity.
+                       represents the minimum probability when `strategy="probabilities"`.
+                       For all other strategies, it represents the minimum similarity.
             embeddings: The pre-computed embeddings to be used when `strategy="embeddings"`.
                         If this is None, then it will compute the embeddings for the outlier documents.
             distributions_params: The parameters used in `.approximate_distribution` when using
@@ -2214,7 +2214,7 @@ class BERTopic:
                     `topics = [1, 2, 3, 4, 5]`.
             top_n_topics: Only select the top n most frequent topics
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
@@ -2274,7 +2274,7 @@ class BERTopic:
             hide_document_hover: Hide the content of the documents when hovering over
                                 specific points. Helps to speed up generation of visualization.
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
@@ -2372,13 +2372,13 @@ class BERTopic:
                     millions of documents as a subset is chosen.
             hide_annotations: Hide the names of the traces on top of each cluster.
             hide_document_hover: Hide the content of the documents when hovering over
-                                specific points. Helps to speed up generation of visualizations.
+                                 specific points. Helps to speed up generation of visualizations.
             nr_levels: The number of levels to be visualized in the hierarchy. First, the distances
-                    in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances with
-                    equal length. Then, for each list of distances, the merged topics are selected that
-                    have a distance less or equal to the maximum distance of the selected list of distances.
-                    NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
-                    the length of `hierarchical_topics`.
+                       in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances with
+                       equal length. Then, for each list of distances, the merged topics, that have 
+                       a distance less or equal to the maximum distance of the selected list of distances, are selected.
+                       NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to
+                       the length of `hierarchical_topics`.
             level_scale: Whether to apply a linear or logarithmic ('log') scale levels of the distance
                          vector. Linear scaling will perform an equal number of merges at each level
                          while logarithmic scaling will perform more mergers in earlier levels to
@@ -2475,7 +2475,7 @@ class BERTopic:
                     red where all others will be colored black.
             log_scale: Whether to represent the ranking on a log scale
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
@@ -2534,7 +2534,7 @@ class BERTopic:
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
@@ -2587,7 +2587,7 @@ class BERTopic:
             topics: Select which topics you would like to be visualized
             normalize_frequency: Whether to normalize each topic's frequency individually
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
@@ -2671,19 +2671,19 @@ class BERTopic:
                                            topic_token_distribution: np.ndarray,
                                            normalize: bool = False):
         """ Visualize the topic distribution calculated by `.approximate_topic_distribution`
-        on a token level. Thereby indicating the extend to which a certain word or phrases belong
+        on a token level. Thereby indicating the extent to which a certain word or phrase belongs
         to a specific topic. The assumption here is that a single word can belong to multiple
-        similar topics and as such give information about the broader set of topics within
+        similar topics and as such can give information about the broader set of topics within
         a single document.
 
         Arguments:
             topic_model: A fitted BERTopic instance.
             document: The document for which you want to visualize
-                    the approximated topic distribution.
+                      the approximated topic distribution.
             topic_token_distribution: The topic-token distribution of the document as
-                                    extracted by `.approximate_topic_distribution`
-            normalize: Whether to normalize, between 0 and 1 (summing to 1), the
-                    topic distribution values.
+                                      extracted by `.approximate_topic_distribution`
+            normalize: Whether to normalize, between 0 and 1 (summing up to 1), the
+                       topic distribution values.
 
         Returns:
             df: A stylized dataframe indicating the best fitting topics
@@ -2738,31 +2738,31 @@ class BERTopic:
         Arguments:
             topic_model: A fitted BERTopic instance.
             orientation: The orientation of the figure.
-                        Either 'left' or 'bottom'
+                         Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
-                       NOTE: Custom labels are only generated for the original
-                       un-merged topics.
+                           `topic_model.set_topic_labels`.
+                           NOTE: Custom labels are only generated for the original
+                           un-merged topics.
             title: Title of the plot.
             width: The width of the figure. Only works if orientation is set to 'left'
             height: The height of the figure. Only works if orientation is set to 'bottom'
             hierarchical_topics: A dataframe that contains a hierarchy of topics
-                                represented by their parents and their children.
-                                NOTE: The hierarchical topic names are only visualized
-                                if both `topics` and `top_n_topics` are not set.
+                                 represented by their parents and their children.
+                                 NOTE: The hierarchical topic names are only visualized
+                                 if both `topics` and `top_n_topics` are not set.
             linkage_function: The linkage function to use. Default is:
-                            `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
-                            NOTE: Make sure to use the same `linkage_function` as used
-                            in `topic_model.hierarchical_topics`.
+                              `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
+                              NOTE: Make sure to use the same `linkage_function` as used
+                              in `topic_model.hierarchical_topics`.
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
-                            `lambda x: 1 - cosine_similarity(x)`
-                            NOTE: Make sure to use the same `distance_function` as used
-                            in `topic_model.hierarchical_topics`.
+                               `lambda x: 1 - cosine_similarity(x)`
+                               NOTE: Make sure to use the same `distance_function` as used
+                               in `topic_model.hierarchical_topics`.
             color_threshold: Value at which the separation of clusters will be made which
-                         will result in different colors for different clusters.
-                         A higher value will typically lead in less colored clusters.
+                             will result in different colors for different clusters.
+                             A higher value will typically lead to less colored clusters.
 
         Returns:
             fig: A plotly figure
@@ -2776,7 +2776,7 @@ class BERTopic:
         topic_model.visualize_hierarchy()
         ```
 
-        If you also want the labels visualized of hierarchical topics,
+        If you also want the labels of hierarchical topics visualized,
         run the following:
 
         ```python
@@ -2830,7 +2830,7 @@ class BERTopic:
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
@@ -2879,7 +2879,7 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_words: Number of words to show in a topic
             custom_labels: Whether to use custom topic labels that were defined using
-                       `topic_model.set_topic_labels`.
+                           `topic_model.set_topic_labels`.
             title: Title of the plot.
             width: The width of each figure.
             height: The height of each figure.
@@ -2927,13 +2927,13 @@ class BERTopic:
 
         Arguments:
             path: If `serialization` is 'safetensors' or `pytorch`, this is a directory.
-                  If `serialization` is `pickle`, then this is file.
+                  If `serialization` is `pickle`, then this is a file.
             serialization: If `pickle`, the entire model will be pickled. If `safetensors`
                            or `pytorch` the model will be saved without the embedding,
                            dimensionality reduction, and clustering algorithms.
                            This is a very efficient format and typically advised.
-            save_embedding_model: If serialization `pickle`, then you can choose to skip
-                                  saving the embedding model. If serialization `safetensors`
+            save_embedding_model: If serialization is `pickle`, then you can choose to skip
+                                  saving the embedding model. If serialization is `safetensors`
                                   or `pytorch`, this variable can be used as a string pointing
                                   towards a huggingface model.
             save_ctfidf: Whether to save c-TF-IDF information if serialization is `safetensors`
@@ -2996,7 +2996,7 @@ class BERTopic:
                 logger.warning("You are saving a BERTopic model without explicitly defining an embedding model."
                                "If you are using a sentence-transformers model or a HuggingFace model supported"
                                "by sentence-transformers, please save the model by using a pointer towards that model."
-                               "For example, `save_embedding_model=sentence-transformers/all-mpnet-base-v2`", RuntimeWarning)
+                               "For example, `save_embedding_model='sentence-transformers/all-mpnet-base-v2'`", RuntimeWarning)
 
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
@@ -3068,11 +3068,11 @@ class BERTopic:
         safetensors, so a minimal version without c-TF-IDF.
 
         To do this, we choose the first model in the list of
-        models as a baseline. Then, we check for each model
-        whether they contain topics that are not in the baseline.
-        This check if based on the cosine similarity between
+        models as a baseline. Then, we check each model whether
+        they contain topics that are not in the baseline.
+        This check is based on the cosine similarity between
         topics embeddings. If topic embeddings between two models
-        are similar, then the topic of the second model are re-assigned
+        are similar, then the topic of the second model is re-assigned
         to the first. If they are dissimilar, the topic of the second
         model is assigned to the first.
 
@@ -3193,9 +3193,9 @@ class BERTopic:
             ):
         """ Push your BERTopic model to a HuggingFace Hub
 
-        Whenever you want to upload files to the Hub, you need to log in to your Hugging Face account:
+        Whenever you want to upload files to the Hub, you need to log in to your HuggingFace account:
 
-        * Log in to your Hugging Face account with the following command:
+        * Log in to your HuggingFace account with the following command:
             ```bash
             huggingface-cli login
 
@@ -3218,10 +3218,10 @@ class BERTopic:
             create_pr: Whether to upload the model as a Pull Request
             model_card: Whether to automatically create a modelcard
             serialization: The type of serialization.
-                        Either `safetensors` or `pytorch`
+                           Either `safetensors` or `pytorch`
             save_embedding_model: A pointer towards a HuggingFace model to be loaded in with
-                                    SentenceTransformers. E.g.,
-                                    `sentence-transformers/all-MiniLM-L6-v2`
+                                  SentenceTransformers. E.g.,
+                                  `sentence-transformers/all-MiniLM-L6-v2`
             save_ctfidf: Whether to save c-TF-IDF information
 
 
@@ -3418,8 +3418,8 @@ class BERTopic:
                                                                                                  pd.DataFrame, np.array]:
         """ Find documents that could be assigned to either one of the topics in self.zeroshot_topic_list
 
-        We transform the the topics in `self.zeroshot_topic_list` to embeddings and
-        through cosine similarity compare them with the document embeddings.
+        We transform the topics in `self.zeroshot_topic_list` to embeddings and
+        compare them through cosine similarity with the document embeddings.
         If they pass the `self.zeroshot_min_similarity` threshold, they are assigned.
 
         Arguments:
@@ -3584,7 +3584,7 @@ class BERTopic:
 
         Then, we apply cosine similarity between the embeddings
         and set labels for documents that are more similar to
-        one of the topics, then the average document.
+        one of the topics than the average document.
 
         If a document is more similar to the average document
         than any of the topics, it gets the -1 label and is
@@ -3623,7 +3623,7 @@ class BERTopic:
             documents: Dataframe with documents and their corresponding IDs
             embeddings: The document embeddings
             mappings: The mappings from topic to word
-            verbose: Whether log the process of extracting topics
+            verbose: Whether to log the process of extracting topics
 
         Returns:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
@@ -3683,10 +3683,10 @@ class BERTopic:
         Returns:
             repr_docs_mappings: A dictionary from topic to representative documents
             representative_docs: A flat list of representative documents
-            repr_doc_indices: Orrdere indices of representative documents
+            repr_doc_indices: Ordered indices of representative documents
                               that belong to each topic
             repr_doc_ids: The indices of representative documents
-                              that belong to each topic
+                          that belong to each topic
         """
         # Sample documents per topic
         documents_per_topic = (
@@ -3735,7 +3735,7 @@ class BERTopic:
     def _create_topic_vectors(self, documents: pd.DataFrame = None, embeddings: np.ndarray = None, mappings=None):
         """ Creates embeddings per topics based on their topic representation
 
-        As a default, topic vectors (topic embeddings) or created by taking
+        As a default, topic vectors (topic embeddings) are created by taking
         the average of all document embeddings within a topic. If topics are
         merged, then a weighted average of topic embeddings is taken based on
         the initial topic sizes.
@@ -4060,7 +4060,7 @@ class BERTopic:
 
         For example, if topic 88 was mapped to topic
         5 and topic 5 turns out to be the largest topic,
-        then topic 5 will be topic 0. The second largest,
+        then topic 5 will be topic 0. The second largest
         will be topic 1, etc.
 
         If there are no mappings since no reduction of topics
@@ -4096,9 +4096,9 @@ class BERTopic:
                            probabilities: Union[np.ndarray, None],
                            original_topics: bool = False) -> Union[np.ndarray, None]:
         """ Map the probabilities to the reduced topics.
-        This is achieved by adding the probabilities together
-        of all topics that were mapped to the same topic. Then,
-        the topics that were mapped from were set to 0 as they
+        This is achieved by adding together the probabilities
+        of all topics that are mapped to the same topic. Then,
+        the topics that were mapped from are set to 0 as they
         were reduced.
 
         Arguments:
@@ -4217,9 +4217,9 @@ class TopicMapper:
     topics.
 
     These mappings are tracked in the `self.mappings_`
-    attribute where each set of topic are stacked horizontally.
+    attribute where each set of topic is stacked horizontally.
     For example, the most recent topics can be found in the
-    last column. To get a mapping, simply take the two columns
+    last column. To get a mapping, simply take two columns
     of topics.
 
     In other words, it is represented as graph:
@@ -4334,8 +4334,8 @@ def _create_model_from_files(
 
         if warn_no_backend:
             logger.warning("You are loading a BERTopic model without explicitly defining an embedding model."
-                        "If you want to also load in an embedding model, make sure to use"
-                        "BERTopic.load(my_model, embedding_model=my_embedding_model).")
+                           "If you want to also load in an embedding model, make sure to use"
+                           "`BERTopic.load(my_model, embedding_model=my_embedding_model)`.")
 
     if params.get("embedding_model") is not None:
         del params['embedding_model']
