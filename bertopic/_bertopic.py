@@ -1004,8 +1004,6 @@ class BERTopic:
 
             # Find clustered documents
             clusters = sch.fcluster(Z, t=Z[index][2], criterion='distance') - self._outliers
-            cluster_df = pd.DataFrame({"Topic": range(len(clusters)), "Cluster": clusters})
-            cluster_df = cluster_df.groupby("Cluster").agg({'Topic': lambda x: list(x)}).reset_index()
             nr_clusters = len(clusters)
 
             # Extract first topic we find to get the set of topics in a merged topic
