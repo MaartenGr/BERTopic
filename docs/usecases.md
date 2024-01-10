@@ -14,7 +14,7 @@ Over the last few years, BERTopic has been used on a wide variety of use cases a
 Below are a number of use cases that have been applied in practice. These use cases are collected from and written by data-professionals.
 
 !!! note
-    If you would like to add your use case, feel free open up a PR! You only need to update [this file](https://github.com/MaartenGr/BERTopic/blob/master/docs/changelog.md) and add your example. 
+    If you would like to add your use case, feel free open up a PR! You only need to update [this file](https://github.com/MaartenGr/BERTopic/blob/master/docs/usecases.md) and add your example. 
     You can just copy-paste one of the existing examples and adjust it contain a description of your use case.
 
 
