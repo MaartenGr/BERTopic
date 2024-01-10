@@ -32,11 +32,13 @@ class OpenAIBackend(BaseEmbedder):
     ```
     """
     def __init__(self,
+                 client: openai.OpenAI,
                  embedding_model: str = "text-embedding-ada-002",
                  delay_in_seconds: float = None,
                  batch_size: int = None,
                  generator_kwargs: Mapping[str, Any] = {}):
         super().__init__()
+        self.client = client
         self.embedding_model = embedding_model
         self.delay_in_seconds = delay_in_seconds
         self.batch_size = batch_size
@@ -65,8 +67,8 @@ class OpenAIBackend(BaseEmbedder):
         if self.batch_size is not None:
             embeddings = []
             for batch in tqdm(self._chunks(documents), disable=not verbose):
-                response = openai.Embedding.create(input=batch, **self.generator_kwargs)
-                embeddings.extend([r["embedding"] for r in response["data"]])
+                response = self.client.embeddings.create(input=batch, **self.generator_kwargs)
+                embeddings.extend([r.embedding for r in response.data])
 
                 # Delay subsequent calls
                 if self.delay_in_seconds:
@@ -74,8 +76,8 @@ class OpenAIBackend(BaseEmbedder):
 
         # Extract embeddings all at once
         else:
-            response = openai.Embedding.create(input=documents, **self.generator_kwargs)
-            embeddings = [r["embedding"] for r in response["data"]]
+            response = self.client.embeddings.create(input=documents, **self.generator_kwargs)
+            embeddings = [r.embedding for r in response.data]
         return np.array(embeddings)
 
     def _chunks(self, documents):
