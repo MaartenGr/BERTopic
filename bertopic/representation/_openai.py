@@ -14,7 +14,7 @@ This is a list of texts where each collection of texts describe a topic. After e
 Topic:
 Sample texts from this topic:
 - Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
-- Meat, but especially beef, is the word food in terms of emissions.
+- Meat, but especially beef, is the worst food in terms of emissions.
 - Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
 
 Keywords: meat beef eat eating emissions steak food health processed chicken
@@ -169,6 +169,7 @@ class OpenAI(BaseRepresentation):
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
             self.model = generator_kwargs.get("model")
+            del self.generator_kwargs["model"]
         if self.generator_kwargs.get("prompt"):
             del self.generator_kwargs["prompt"]
         if not self.generator_kwargs.get("stop") and not chat:
