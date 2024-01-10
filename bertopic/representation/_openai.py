@@ -169,6 +169,7 @@ class OpenAI(BaseRepresentation):
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
             self.model = generator_kwargs.get("model")
+            del self.generator_kwargs["model"]
         if self.generator_kwargs.get("prompt"):
             del self.generator_kwargs["prompt"]
         if not self.generator_kwargs.get("stop") and not chat:
