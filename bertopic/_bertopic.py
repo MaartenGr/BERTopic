@@ -2996,7 +2996,7 @@ class BERTopic:
                 logger.warning("You are saving a BERTopic model without explicitly defining an embedding model."
                                "If you are using a sentence-transformers model or a HuggingFace model supported"
                                "by sentence-transformers, please save the model by using a pointer towards that model."
-                               "For example, `save_embedding_model='sentence-transformers/all-mpnet-base-v2'`", RuntimeWarning)
+                               "For example, `save_embedding_model='sentence-transformers/all-mpnet-base-v2'`")
 
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
