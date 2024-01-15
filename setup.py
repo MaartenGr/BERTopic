@@ -47,6 +47,11 @@ vision_packages = [
     "accelerate>=0.19.0"  # To prevent "cannot import name 'PartialState' from 'accelerate'"
 ]
 
+datamap_packages = [
+    "matplotlib>=3.8",
+    "datamapplot>=0.1"
+]
+
 extra_packages = flair_packages + spacy_packages + use_packages + gensim_packages
 
 dev_packages = docs_packages + test_packages
@@ -94,7 +99,8 @@ setup(
         "spacy": spacy_packages,
         "use": use_packages,
         "gensim": gensim_packages,
-        "vision": vision_packages
+        "vision": vision_packages,
+        "datamap": datamap_packages,
     },
     python_requires='>=3.7',
 )

@@ -2339,6 +2339,95 @@ class BERTopic:
                                             width=width,
                                             height=height)
 
+    def visualize_document_datamap(self,
+                                   docs: List[str],
+                                   topics: List[int] = None,
+                                   embeddings: np.ndarray = None,
+                                   reduced_embeddings: np.ndarray = None,
+                                   custom_labels: Union[bool, str] = False,
+                                   title: str = "Documents and Topics",
+                                   sub_title: Union[str, None] = None,
+                                   width: int = 1200,
+                                   height: int = 1200,
+                                   **datamap_kwds):
+        """ Visualize documents and their topics in 2D as a static plot for publication using
+        DataMapPlot. This works best if there are between 5 and 60 topics. It is therefore best
+        to use a sufficiently large `min_topic_size` or set `nr_topics` when building the model.
+
+        Arguments:
+            topic_model:  A fitted BERTopic instance.
+            docs: The documents you used when calling either `fit` or `fit_transform`
+            embeddings:  The embeddings of all documents in `docs`.
+            reduced_embeddings:  The 2D reduced embeddings of all documents in `docs`.
+            custom_labels:  If bool, whether to use custom topic labels that were defined using
+                           `topic_model.set_topic_labels`.
+                           If `str`, it uses labels from other aspects, e.g., "Aspect1".
+            title: Title of the plot.
+            sub_title: Sub-title of the plot.
+            width: The width of the figure.
+            height: The height of the figure.
+            **datamap_kwds:  All further keyword args will be passed on to DataMapPlot's
+                             `create_plot` function. See the DataMapPlot documentation
+                             for more details.
+
+        Returns:
+            figure: A Matplotlib Figure object.
+
+        Examples:
+
+        To visualize the topics simply run:
+
+        ```python
+        topic_model.visualize_document_datamap(docs)
+        ```
+
+        Do note that this re-calculates the embeddings and reduces them to 2D.
+        The advised and prefered pipeline for using this function is as follows:
+
+        ```python
+        from sklearn.datasets import fetch_20newsgroups
+        from sentence_transformers import SentenceTransformer
+        from bertopic import BERTopic
+        from umap import UMAP
+
+        # Prepare embeddings
+        docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = sentence_model.encode(docs, show_progress_bar=False)
+
+        # Train BERTopic
+        topic_model = BERTopic(min_topic_size=36).fit(docs, embeddings)
+
+        # Reduce dimensionality of embeddings, this step is optional
+        # reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
+
+        # Run the visualization with the original embeddings
+        topic_model.visualize_document_datamap(docs, embeddings=embeddings)
+
+        # Or, if you have reduced the original embeddings already:
+        topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_embeddings)
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_embeddings)
+        fig.savefig("path/to/file.png", bbox_inches="tight")
+        ```
+        """
+        check_is_fitted(self)
+        check_documents_type(docs)
+        return plotting.visualize_document_datamap(self,
+                                                   docs,
+                                                   topics,
+                                                   embeddings,
+                                                   reduced_embeddings,
+                                                   custom_labels,
+                                                   title,
+                                                   sub_title,
+                                                   width,
+                                                   height,
+                                                   **datamap_kwds)
     def visualize_hierarchical_documents(self,
                                          docs: List[str],
                                          hierarchical_topics: pd.DataFrame,
