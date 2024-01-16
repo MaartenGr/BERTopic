@@ -14,6 +14,7 @@ except ImportError:
 
 def visualize_document_datamap(topic_model,
                                docs: List[str],
+                               topics: List[int] = None,
                                embeddings: np.ndarray = None,
                                reduced_embeddings: np.ndarray = None,
                                custom_labels: Union[bool, str] = False,
@@ -28,6 +29,11 @@ def visualize_document_datamap(topic_model,
     Arguments:
         topic_model:  A fitted BERTopic instance.
         docs: The documents you used when calling either `fit` or `fit_transform`
+        topics: A selection of topics to visualize.
+                Not to be confused with the topics that you get from `.fit_transform`.
+                For example, if you want to visualize only topics 1 through 5:
+                `topics = [1, 2, 3, 4, 5]`. Documents not in these topics will be shown
+                as noise points.
         embeddings:  The embeddings of all documents in `docs`.
         reduced_embeddings:  The 2D reduced embeddings of all documents in `docs`.
         custom_labels:  If bool, whether to use custom topic labels that were defined using
@@ -53,7 +59,7 @@ def visualize_document_datamap(topic_model,
     ```
 
     Do note that this re-calculates the embeddings and reduces them to 2D.
-    The advised and prefered pipeline for using this function is as follows:
+    The advised and preferred pipeline for using this function is as follows:
 
     ```python
     from sklearn.datasets import fetch_20newsgroups
@@ -122,6 +128,15 @@ def visualize_document_datamap(topic_model,
 
     topic_name_mapping = {topic_num: topic_name for topic_num, topic_name in zip(unique_topics, names)}
     topic_name_mapping[-1] = "Unlabelled"
+
+    # If a set of topics is chosen, set everything else to "Unlabelled"
+    if topics is not None:
+        selected_topics = set(topics)
+        for topic_num in topic_name_mapping:
+            if topic_num not in selected_topics:
+                topic_name_mapping[topic_num] = "Unlabelled"
+
+    # Map in topic names and plot
     named_topic_per_doc = pd.Series(topic_per_doc).map(topic_name_mapping).values
 
     figure, axes = datamapplot.create_plot(
