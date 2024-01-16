@@ -8,6 +8,9 @@ try:
     from matplotlib.figure import Figure
 except ImportError:
     warn("Data map plotting is unavailble unless datamapplot is installed.")
+    # Create a dummy figure type for typing
+    class Figure (object):
+        pass
 
 def visualize_document_datamap(topic_model,
                                docs: List[str],
