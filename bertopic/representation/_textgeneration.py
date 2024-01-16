@@ -138,7 +138,7 @@ class TextGeneration(BaseRepresentation):
                 self.diversity
             )
         else:
-            repr_docs_mappings = {topic: None for topic in topics.keys()}
+            repr_docs_mappings = {topic: [] for topic in topics.keys()}
 
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
