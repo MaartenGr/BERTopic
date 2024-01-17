@@ -144,7 +144,7 @@ class TextGeneration(BaseRepresentation):
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
 
             # Prepare prompt
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs] if docs is not None else docs
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
