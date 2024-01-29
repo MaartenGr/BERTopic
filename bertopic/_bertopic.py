@@ -3141,7 +3141,8 @@ class BERTopic:
             topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(path)
         else:
             raise ValueError("Make sure to either pass a valid directory or HF model.")
-        topic_model = _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
+        topic_model = _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images,
+                                               warn_no_backend=(embedding_model is None))
 
         # Replace embedding model if one is specifically chosen
         if embedding_model is not None and type(topic_model.embedding_model) == BaseEmbedder:
@@ -4423,8 +4424,8 @@ def _create_model_from_files(
 
         if warn_no_backend:
             logger.warning("You are loading a BERTopic model without explicitly defining an embedding model."
-                           "If you want to also load in an embedding model, make sure to use"
-                           "`BERTopic.load(my_model, embedding_model=my_embedding_model)`.")
+                           " If you want to also load in an embedding model, make sure to use"
+                           " `BERTopic.load(my_model, embedding_model=my_embedding_model)`.")
 
     if params.get("embedding_model") is not None:
         del params['embedding_model']
