@@ -2288,7 +2288,7 @@ class BERTopic:
         ```
 
         Do note that this re-calculates the embeddings and reduces them to 2D.
-        The advised and prefered pipeline for using this function is as follows:
+        The advised and preferred pipeline for using this function is as follows:
 
         ```python
         from sklearn.datasets import fetch_20newsgroups
@@ -2382,7 +2382,7 @@ class BERTopic:
         ```
 
         Do note that this re-calculates the embeddings and reduces them to 2D.
-        The advised and prefered pipeline for using this function is as follows:
+        The advised and preferred pipeline for using this function is as follows:
 
         ```python
         from sklearn.datasets import fetch_20newsgroups
@@ -2490,7 +2490,7 @@ class BERTopic:
         ```
 
         Do note that this re-calculates the embeddings and reduces them to 2D.
-        The advised and prefered pipeline for using this function is as follows:
+        The advised and preferred pipeline for using this function is as follows:
 
         ```python
         from sklearn.datasets import fetch_20newsgroups
@@ -4322,7 +4322,7 @@ class TopicMapper:
                                       of topics.
     """
     def __init__(self, topics: List[int]):
-        """ Initalization of Topic Mapper
+        """ Initialization of Topic Mapper
 
         Arguments:
             topics: A list of topics per document
