@@ -27,8 +27,8 @@ class OnlineCountVectorizer(CountVectorizer):
                the previous bag-of-words should be decreased. For example,
                a value of `.1` will decrease the frequencies in the bag-of-words
                matrix with 10% at each iteration.
-        delete_min_df: Delete words eat each iteration from its vocabulary
-                       that do not exceed a minimum frequency.
+        delete_min_df: Delete words at each iteration from its vocabulary
+                       that are below a minimum frequency.
                        This will keep the resulting bag-of-words matrix small
                        such that it does not explode in size with increasing
                        vocabulary. If `decay` is None then this equals `min_df`.
