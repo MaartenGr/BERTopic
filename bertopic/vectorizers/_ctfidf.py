@@ -43,7 +43,7 @@ class ClassTfidfTransformer(TfidfTransformer):
                  bm25_weighting: bool = False, 
                  reduce_frequent_words: bool = False,
                  seed_words: List[str] = None,
-                 seed_multiplier: bool = 2
+                 seed_multiplier: float = 2
                  ):
         self.bm25_weighting = bm25_weighting
         self.reduce_frequent_words = reduce_frequent_words
