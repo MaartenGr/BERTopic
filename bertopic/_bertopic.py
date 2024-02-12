@@ -3237,7 +3237,7 @@ class BERTopic:
                     merged_topics["topic_aspects"][str(new_topic_val)] = selected_topics["topic_aspects"][str(new_topic)]
 
                 # Add new embeddings
-                new_tensors = tensors[new_topic - selected_topics["_outliers"]]
+                new_tensors = tensors[new_topic + selected_topics["_outliers"]]
                 merged_tensors = np.vstack([merged_tensors, new_tensors])
 
             # Topic Mapper
@@ -3663,6 +3663,32 @@ class BERTopic:
         self.__dict__.clear()
         self.__dict__.update(merged_model.__dict__)
         logger.info("Zeroshot Step 3 - Completed \u2713")
+
+        # Move -1 topic back to position 0 if it exists
+        if self._outliers:
+            nr_zeroshot_topics = len(set(y))
+
+            # Re-map the topics such that the -1 topic is at position 0
+            new_mappings = {}
+            for topic in self.topics_:
+                if topic < nr_zeroshot_topics:
+                    new_mappings[topic] = topic
+                elif topic == nr_zeroshot_topics:
+                    new_mappings[topic] = -1
+                else:
+                    new_mappings[topic] = topic - 1
+
+            # Re-map the topics including all representations (labels, sizes, embeddings, etc.)
+            self.topics_ = [new_mappings[topic] for topic in self.topics_]
+            self.topic_representations_ = {new_mappings[topic]: repr for topic, repr in self.topic_representations_.items()}
+            self.topic_labels_ = {new_mappings[topic]: label for topic, label in self.topic_labels_.items()}
+            self.topic_sizes_ = collections.Counter(self.topics_)
+            self.topic_embeddings_ = np.vstack([
+                self.topic_embeddings_[nr_zeroshot_topics],
+                self.topic_embeddings_[:nr_zeroshot_topics],
+                self.topic_embeddings_[nr_zeroshot_topics+1:]
+            ])
+
         return self.topics_
 
     def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
