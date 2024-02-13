@@ -114,7 +114,7 @@ class PartOfSpeech(BaseRepresentation):
             candidate_documents = []
             for keyword in keywords:
                 selection = documents.loc[documents.Topic == topic, :]
-                selection = selection.loc[selection.Document.str.contains(keyword), "Document"]
+                selection = selection.loc[selection.Document.str.contains(keyword, regex=False), "Document"]
                 if len(selection) > 0:
                     for document in selection[:2]:
                         candidate_documents.append(document)
