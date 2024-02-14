@@ -3144,7 +3144,7 @@ class BERTopic:
         topic_model = _create_model_from_files(topics, params, tensors, ctfidf_tensors, ctfidf_config, images)
 
         # Replace embedding model if one is specifically chosen
-        if embedding_model is not None and type(topic_model.embedding_model) == BaseEmbedder:
+        if embedding_model is not None:
             topic_model.embedding_model = select_backend(embedding_model)
 
         return topic_model
