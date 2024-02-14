@@ -3660,12 +3660,13 @@ class BERTopic:
         merged_model.topics_ = df.Label.values
 
         # Update the class internally
+        has_outliers = bool(self._outliers)
         self.__dict__.clear()
         self.__dict__.update(merged_model.__dict__)
         logger.info("Zeroshot Step 3 - Completed \u2713")
 
         # Move -1 topic back to position 0 if it exists
-        if self._outliers:
+        if has_outliers:
             nr_zeroshot_topics = len(set(y))
 
             # Re-map the topics such that the -1 topic is at position 0
@@ -3688,6 +3689,7 @@ class BERTopic:
                 self.topic_embeddings_[:nr_zeroshot_topics],
                 self.topic_embeddings_[nr_zeroshot_topics+1:]
             ])
+            self._outliers = 1
 
         return self.topics_
 
