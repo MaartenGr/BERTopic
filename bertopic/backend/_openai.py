@@ -63,10 +63,13 @@ class OpenAIBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
+        # Prepare documents, replacing empty strings with a single space
+        prepared_documents = [" " if doc == "" else doc for doc in documents]
+
         # Batch-wise embedding extraction
         if self.batch_size is not None:
             embeddings = []
-            for batch in tqdm(self._chunks(documents), disable=not verbose):
+            for batch in tqdm(self._chunks(prepared_documents), disable=not verbose):
                 response = self.client.embeddings.create(input=batch, **self.generator_kwargs)
                 embeddings.extend([r.embedding for r in response.data])
 
@@ -76,7 +79,7 @@ class OpenAIBackend(BaseEmbedder):
 
         # Extract embeddings all at once
         else:
-            response = self.client.embeddings.create(input=documents, **self.generator_kwargs)
+            response = self.client.embeddings.create(input=prepared_documents, **self.generator_kwargs)
             embeddings = [r.embedding for r in response.data]
         return np.array(embeddings)
 
