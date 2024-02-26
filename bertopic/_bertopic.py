@@ -1427,11 +1427,11 @@ class BERTopic:
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
 
         # Update topic vectors
-        if set(topics) != set(self.topics_):
+        if set(topics) != self.topics_:
 
             # Remove outlier topic embedding if all that has changed is the outlier class
             same_position = all([True if old_topic == new_topic else False for old_topic, new_topic in zip(self.topics_, topics) if old_topic != -1])
-            if same_position:
+            if same_position and -1 not in topics and -1 in self.topics_:
                 self.topic_embeddings_ = self.topic_embeddings_[1:]
             else:
                 self._create_topic_vectors()
