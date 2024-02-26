@@ -1419,13 +1419,24 @@ class BERTopic:
                            "c-TF-IDF embeddings instead of centroid embeddings.")
 
         self._outliers = 1 if -1 in set(topics) else 0
+
         # Extract words
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
-        if set(topics) != self.topics_:
-            self._create_topic_vectors()
+
+        # Update topic vectors
+        if set(topics) != set(self.topics_):
+
+            # Remove outlier topic embedding if all that has changed is the outlier class
+            same_position = all([True if old_topic == new_topic else False for old_topic, new_topic in zip(self.topics_, topics) if old_topic != -1])
+            if same_position:
+                self.topic_embeddings_ = self.topic_embeddings_[1:]
+            else:
+                self._create_topic_vectors()
+
+        # Update topic labels
         self.topic_labels_ = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
                               for key, values in
                               self.topic_representations_.items()}
