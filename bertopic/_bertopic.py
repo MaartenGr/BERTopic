@@ -3145,7 +3145,7 @@ class BERTopic:
                                                warn_no_backend=(embedding_model is None))
 
         # Replace embedding model if one is specifically chosen
-        if embedding_model is not None and type(topic_model.embedding_model) == BaseEmbedder:
+        if embedding_model is not None:
             topic_model.embedding_model = select_backend(embedding_model)
 
         return topic_model
@@ -3234,8 +3234,23 @@ class BERTopic:
                 merged_topics["topic_representations"][str(new_topic_val)] = selected_topics["topic_representations"][str(new_topic)]
                 merged_topics["topic_labels"][str(new_topic_val)] = selected_topics["topic_labels"][str(new_topic)]
 
+                # Add new aspects
                 if selected_topics["topic_aspects"]:
-                    merged_topics["topic_aspects"][str(new_topic_val)] = selected_topics["topic_aspects"][str(new_topic)]
+                    aspects_1 = set(merged_topics["topic_aspects"].keys())
+                    aspects_2 = set(selected_topics["topic_aspects"].keys())
+                    aspects_diff = aspects_2.difference(aspects_1)
+                    if aspects_diff:
+                        for aspect in aspects_diff:
+                            merged_topics["topic_aspects"][aspect] = {}
+
+                    # If the original model does not have topic aspects but the to be added model does
+                    if not merged_topics.get("topic_aspects"):
+                        merged_topics["topic_aspects"] = selected_topics["topic_aspects"]
+
+                    # If they both contain topic aspects, add to the existing set of aspects
+                    else:
+                        for aspect, values in selected_topics["topic_aspects"].items():
+                            merged_topics["topic_aspects"][aspect][str(new_topic_val)] = values[str(new_topic)]
 
                 # Add new embeddings
                 new_tensors = tensors[new_topic + selected_topics["_outliers"]]
