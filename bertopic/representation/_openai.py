@@ -137,7 +137,7 @@ class OpenAI(BaseRepresentation):
     """
     def __init__(self,
                  client,
-                 model: str = "text-ada-001",
+                 model: str = "text-embedding-3-small",
                  prompt: str = None,
                  generator_kwargs: Mapping[str, Any] = {},
                  delay_in_seconds: float = None,
