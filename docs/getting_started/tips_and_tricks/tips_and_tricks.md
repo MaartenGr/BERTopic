@@ -22,7 +22,7 @@ vectorizer_model = CountVectorizer(stop_words="english")
 topic_model = BERTopic(vectorizer_model=vectorizer_model)
 ```
 
-We can also use the `ClassTfidfTransformer` to reduce the impact of frequent words. The end result is very similar to explictly removing stopwords but this process does this automatically:
+We can also use the `ClassTfidfTransformer` to reduce the impact of frequent words. The end result is very similar to explicitly removing stopwords but this process does this automatically:
 
 ```python
 from bertopic import BERTopic
@@ -178,7 +178,7 @@ embeddings = normalize(embeddings)
 
 !!! note
     As of the v0.13 release, it is not yet possible to calculate the topic-document probability matrix for unseen data (i.e., `.transform`) using cuML's HDBSCAN. 
-    However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., `.fit` and `.fit_tranform`).
+    However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., `.fit` and `.fit_transform`).
 
 !!! note
     If you want to install cuML together with BERTopic using Google Colab, you can run the following code:
@@ -254,7 +254,7 @@ create_wordcloud(topic_model, topic=1)
 
 ## **Finding similar topics between models**
 
-Whenever you have trained seperate BERTopic models on different datasets, it might 
+Whenever you have trained separate BERTopic models on different datasets, it might 
 be worthful to find the similarities among these models. Is there overlap between 
 topics in model A and topic in model B? In other words, can we find topics in model A that are similar to those in model B? 
 

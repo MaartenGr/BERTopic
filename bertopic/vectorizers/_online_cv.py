@@ -13,7 +13,7 @@ class OnlineCountVectorizer(CountVectorizer):
 
     At each `.partial_fit`, its vocabulary is updated based on any OOV words
     it might find. Then, `.update_bow` can be used to track and update
-    the Bag-of-Words representation. These functions are seperated such that
+    the Bag-of-Words representation. These functions are separated such that
     the vectorizer can be used in iteration without updating the Bag-of-Words
     representation can might speed up the fitting process. However, the
     `.update_bow` function is used in BERTopic to track changes in the

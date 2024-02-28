@@ -70,7 +70,7 @@ def visualize_hierarchical_documents(topic_model,
     ```
 
     Do note that this re-calculates the embeddings and reduces them to 2D.
-    The advised and prefered pipeline for using this function is as follows:
+    The advised and preferred pipeline for using this function is as follows:
 
     ```python
     from sklearn.datasets import fetch_20newsgroups
