@@ -56,7 +56,7 @@ If you want to install BERTopic with other embedding models, you can choose one 
 
 ```bash
 # Choose an embedding backend
-pip install bertopic[flair, gensim, spacy, use]
+pip install bertopic[flair,gensim,spacy,use]
 
 # Topic modeling with images
 pip install bertopic[vision]
