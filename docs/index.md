@@ -246,6 +246,7 @@ to tweak the model to your liking.
 |-----------------------|---|
 | Visualize Topics    |  `.visualize_topics()` |
 | Visualize Documents    |  `.visualize_documents()` |
+| Visualize Document with DataMapPlot | `.visualize_document_datamap()` |
 | Visualize Document Hierarchy    |  `.visualize_hierarchical_documents()` |
 | Visualize Topic Hierarchy    |  `.visualize_hierarchy()` |
 | Visualize Topic Tree   |  `.get_topic_tree(hierarchical_topics)` |
@@ -254,7 +255,8 @@ to tweak the model to your liking.
 | Visualize Term Score Decline  |  `.visualize_term_rank()` |
 | Visualize Topic Probability Distribution    |  `.visualize_distribution(probs[0])` |
 | Visualize Topics over Time   |  `.visualize_topics_over_time(topics_over_time)` |
-| Visualize Topics per Class | `.visualize_topics_per_class(topics_per_class)` | 
+| Visualize Topics per Class | `.visualize_topics_per_class(topics_per_class)` |
+
 
   
 ## **Citation**
