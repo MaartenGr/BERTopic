@@ -42,7 +42,7 @@ cohere_model = CohereBackend(
 
 * Fixed n-gram Keywords need delimiting in OpenAI() [#1546](https://github.com/MaartenGr/BERTopic/issues/1546)
 * Fixed OpenAI v1.0 issues [#1629](https://github.com/MaartenGr/BERTopic/issues/1629)
-* Improved documentation/logging to adress [#1589](https://github.com/MaartenGr/BERTopic/issues/1589), [#1591](https://github.com/MaartenGr/BERTopic/issues/1591)
+* Improved documentation/logging to address [#1589](https://github.com/MaartenGr/BERTopic/issues/1589), [#1591](https://github.com/MaartenGr/BERTopic/issues/1591)
 * Fixed engine support for Azure OpenAI embeddings [#1577](https://github.com/MaartenGr/BERTopic/issues/1487)
 * Fixed OpenAI Representation: KeyError: 'content' [#1570](https://github.com/MaartenGr/BERTopic/issues/1570)
 * Fixed Loading topic model with multiple topic aspects changes their format [#1487](https://github.com/MaartenGr/BERTopic/issues/1487)
@@ -72,7 +72,7 @@ The new `.merge_models` feature allows for any number of fitted BERTopic models 
 * **Incremental topic modeling** -- Continuously merge models together to detect whether new topics have appeared
 * **Federated Learning** - Train BERTopic models on different clients and combine them on a central server
 * **Minimal compute** - We can essentially batch the training process into multiple instances to reduce compute
-* **Different datasets** - When you have different datasets that you want to train seperately on, for example with different languages, you can train each model separately and join them after training
+* **Different datasets** - When you have different datasets that you want to train separately on, for example with different languages, you can train each model separately and join them after training
 
 To demonstrate merging different topic models with BERTopic, we use the ArXiv paper abstracts to see which topics they generally contain.
 

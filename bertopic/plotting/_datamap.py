@@ -7,7 +7,7 @@ try:
     import datamapplot
     from matplotlib.figure import Figure
 except ImportError:
-    warn("Data map plotting is unavailble unless datamapplot is installed.")
+    warn("Data map plotting is unavailable unless datamapplot is installed.")
     # Create a dummy figure type for typing
     class Figure (object):
         pass
