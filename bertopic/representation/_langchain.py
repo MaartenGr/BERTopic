@@ -185,10 +185,24 @@ class LangChain(BaseRepresentation):
         ]
 
         # `self.chain` must take `input_documents` and `question` as input keys
-        inputs = [
-            {"input_documents": docs, "question": self.prompt}
-            for docs in chain_docs
-        ]
+        # Use a custom prompt that leverages keywords, using the tag: [KEYWORDS]
+        if "[KEYWORDS]" in self.prompt:
+            prompts = []
+            for topic in topics:
+                keywords = list(zip(*topics[topic]))[0]
+                prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
+                prompts.append(prompt)
+
+            inputs = [
+                {"input_documents": docs, "question": prompt}
+                for docs, prompt in zip(chain_docs, prompts)
+            ]
+            
+        else:
+            inputs = [
+                {"input_documents": docs, "question": self.prompt}
+                for docs in chain_docs
+            ]
 
         # `self.chain` must return a dict with an `output_text` key
         # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
