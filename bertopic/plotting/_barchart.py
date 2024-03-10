@@ -93,6 +93,14 @@ def visualize_barchart(topic_model,
                    marker_color=next(colors)),
             row=row, col=column)
 
+        if len(words) > 12:
+            height = 250 + (len(words) - 12) * 11
+
+        if len(words) > 9:
+            fig.update_yaxes(
+                tickfont=dict(size=(height - 140) // len(words))
+            )
+
         if column == columns:
             column = 1
             row += 1
