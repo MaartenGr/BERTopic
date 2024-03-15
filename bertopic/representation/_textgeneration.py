@@ -91,6 +91,7 @@ class TextGeneration(BaseRepresentation):
                  doc_length: int = None,
                  tokenizer: Union[str, Callable] = None
                  ):
+        self.random_state = random_state
         set_seed(random_state)
         if isinstance(model, str):
             self.model = pipeline("text-generation", model=model)
