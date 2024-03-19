@@ -51,8 +51,8 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
 
         str_type_model = str(type(model)).lower()
         if "cuml" in str_type_model and "hdbscan" in str_type_model:
-            from cuml.cluster.hdbscan.prediction import approximate_predict
-            probabilities = approximate_predict(model, embeddings)
+            from cuml.cluster.hdbscan.prediction import membership_vector
+            probabilities = membership_vector(model, embeddings)
             return probabilities
 
         return None
