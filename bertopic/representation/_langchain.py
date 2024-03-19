@@ -23,8 +23,14 @@ class LangChain(BaseRepresentation):
                Output key must be `output_text`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
-        nr_docs: The number of documents to pass to LangChain if a prompt
-                 with the `["DOCUMENTS"]` tag is used.
+                 NOTE: Use `"[KEYWORDS]"` in the prompt
+                 to decide where the keywords need to be
+                 inserted. Keywords won't be included unless
+                 indicated. Unlike other representation models,
+                 Langchain does not use the `"[DOCUMENTS]"` tag
+                 to insert documents into the prompt. The load_qa_chain function
+                 formats the representative documents within the prompt.
+        nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher 
                    values results in passing more diverse documents
