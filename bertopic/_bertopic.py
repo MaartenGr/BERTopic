@@ -2960,7 +2960,8 @@ class BERTopic:
                            custom_labels: bool = False,
                            title: str = "Topic Word Scores",
                            width: int = 250,
-                           height: int = 250) -> go.Figure:
+                           height: int = 250,
+                           autoscale: bool=False) -> go.Figure:
         """ Visualize a barchart of selected topics
 
         Arguments:
@@ -2972,6 +2973,7 @@ class BERTopic:
             title: Title of the plot.
             width: The width of each figure.
             height: The height of each figure.
+            autoscale: Whether to automatically calculate the height of the figures to fit the whole bar text
 
         Returns:
             fig: A plotly figure
@@ -3000,7 +3002,8 @@ class BERTopic:
                                            custom_labels=custom_labels,
                                            title=title,
                                            width=width,
-                                           height=height)
+                                           height=height,
+                                           autoscale=autoscale)
 
     def save(self,
              path,

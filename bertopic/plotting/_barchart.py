@@ -13,7 +13,8 @@ def visualize_barchart(topic_model,
                        custom_labels: Union[bool, str] = False,
                        title: str = "<b>Topic Word Scores</b>",
                        width: int = 250,
-                       height: int = 250) -> go.Figure:
+                       height: int = 250,
+                       autoscale: bool=False) -> go.Figure:
     """ Visualize a barchart of selected topics
 
     Arguments:
@@ -27,6 +28,7 @@ def visualize_barchart(topic_model,
         title: Title of the plot.
         width: The width of each figure.
         height: The height of each figure.
+        autoscale: Whether to automatically calculate the height of the figures to fit the whole bar text
 
     Returns:
         fig: A plotly figure
@@ -93,13 +95,14 @@ def visualize_barchart(topic_model,
                    marker_color=next(colors)),
             row=row, col=column)
 
-        if len(words) > 12:
-            height = 250 + (len(words) - 12) * 11
+        if autoscale:
+            if len(words) > 12:
+                height = 250 + (len(words) - 12) * 11
 
-        if len(words) > 9:
-            fig.update_yaxes(
-                tickfont=dict(size=(height - 140) // len(words))
-            )
+            if len(words) > 9:
+                fig.update_yaxes(
+                    tickfont=dict(size=(height - 140) // len(words))
+                )
 
         if column == columns:
             column = 1
