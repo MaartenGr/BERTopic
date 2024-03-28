@@ -913,12 +913,13 @@ class BERTopic:
 
     def hierarchical_topics(self,
                             docs: List[str],
+                            use_c_tf_idf: bool = True,
                             linkage_function: Callable[[csr_matrix], np.ndarray] = None,
                             distance_function: Callable[[csr_matrix], csr_matrix] = None) -> pd.DataFrame:
         """ Create a hierarchy of topics
 
         To create this hierarchy, BERTopic needs to be already fitted once.
-        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF
+        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF or topic embedding
         representation using `scipy.cluster.hierarchy.linkage`.
 
         Based on that hierarchy, we calculate the topic representation at each
@@ -928,12 +929,14 @@ class BERTopic:
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
+            use_c_tf_idf: Whether the distances between topics are calculated based on the c-TF-IDF representation.
+                          If False, topic embeddings are used.
             linkage_function: The linkage function to use. Default is:
                               `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
                                `lambda x: 1 - cosine_similarity(x)`.
-                               You can pass any function that returns either a square matrix of 
-                               shape (n_samples, n_samples) with zeros on the diagonal and 
+                               You can pass any function that returns either a square matrix of
+                               shape (n_samples, n_samples) with zeros on the diagonal and
                                non-negative values or condensed distance matrix of shape
                                (n_samples * (n_samples - 1) / 2,) containing the upper
                                triangular of the distance matrix.
@@ -972,7 +975,7 @@ class BERTopic:
             linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
 
         # Calculate distance
-        embeddings = self.c_tf_idf_[self._outliers:]
+        embeddings = self.c_tf_idf_[self._outliers:] if use_c_tf_idf else self.topic_embeddings_[self._outliers:]
         X = distance_function(embeddings)
         X = validate_distance_matrix(X, embeddings.shape[0])
 
