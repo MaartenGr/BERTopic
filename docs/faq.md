@@ -346,3 +346,5 @@ The CUDA-enabled Data Science Dev Containers require the following in addition t
 * Windows: [GPU support in Docker Desktop](https://docs.docker.com/desktop/gpu/)
 
 ℹ️ The host running the GPU accelerated Dev Containers only requires the NVIDIA driver, the CUDA toolkit does not have to be installed.
+
+See the [CUDA Version Matrix](https://github.com/b-data/jupyterlab-python-docker-stack/blob/main/CUDA_VERSION_MATRIX.md) regarding Ubuntu/CUDA/Python versions and recommended NVIDIA drivers.
