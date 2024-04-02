@@ -333,3 +333,16 @@ Using the pre-configured [Data Science Dev Containers](https://github.com/b-data
   * Python packages are installed to the home directory by default  
     👉 This is due to env variable `PIP_USER=1`
   * Note that the directory `/workspaces` is also persisted
+
+## **Speaking of Dev Containers: Do they support GPU acceleration?**
+
+Yes, but only on Linux and Windows.
+
+The CUDA-enabled Data Science Dev Containers require the following in addition to Docker:
+
+* NVIDIA GPU
+* NVIDIA driver
+* Linux: [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+* Windows: [GPU support in Docker Desktop](https://docs.docker.com/desktop/gpu/)
+
+ℹ️ The host running the GPU accelerated Dev Containers only requires the NVIDIA driver, the CUDA toolkit does not have to be installed.
