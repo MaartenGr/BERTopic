@@ -313,7 +313,7 @@ typically do not contribute to the meaning of a document and should therefore be
 topic modeling to HTML-code to extract topics of code, then it becomes important.
 
 ## **I run into issues running on Apple Silicon. What should I do?**
-Apple Silicon chips (M1 & M2) are based on arm64 (aka [AArch64](https://apple.stackexchange.com/questions/451238/is-m1-chip-aarch64-or-amd64), not to be confused with amd64/x86_64). There are known issues with upstream dependencies for this architecture, for example [numba](https://github.com/numba/numba/issues/5520). You may not always run into this issue, depending on the extras that you need.
+Apple Silicon chips (M1 & M2) are based on `arm64` (aka [`AArch64`](https://apple.stackexchange.com/questions/451238/is-m1-chip-aarch64-or-amd64), not to be confused with `amd64`/`x86_64`). There are known issues with upstream dependencies for this architecture, for example [numba](https://github.com/numba/numba/issues/5520). You may not always run into this issue, depending on the extras that you need.
 
 One possible solution is to use [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers), which allow you to setup a Linux-based environment. To run BERTopic effectively you need to be aware of two things:
 
@@ -325,7 +325,7 @@ Using the pre-configured [Data Science Dev Containers](https://github.com/b-data
 
 * Install and run Docker
 * Clone repository [data-science-devcontainers](https://github.com/b-data/data-science-devcontainers)
-* Open VS Code, build the `python-base` or `python-scipy` container and start working  
+* Open VS Code, build the `Python base` or `Python scipy` container and start working  
   ℹ️ Change `PYTHON_VERSION` to `3.11` in the respective `devcontainer.json` to work with the latest patch release of Python 3.11
 * Note that data is persisted in the container
   * When using an unmodified `devcontainer.json`: Work in `/home/vscode`  
