@@ -313,21 +313,23 @@ typically do not contribute to the meaning of a document and should therefore be
 topic modeling to HTML-code to extract topics of code, then it becomes important.
 
 ## **I run into issues running on Apple Silicon. What should I do?**
-Apple Silicon chips (M1 & M2) are based on the ARM64 (aka [AArch64](https://apple.stackexchange.com/questions/451238/is-m1-chip-aarch64-or-amd64), not to be confused with AMD64). There are known issues with upstream dependencies for this architecture, for example [numba](https://github.com/numba/numba/issues/5520). You may not always run into this issue, depending on the extras that you need.
+Apple Silicon chips (M1 & M2) are based on arm64 (aka [AArch64](https://apple.stackexchange.com/questions/451238/is-m1-chip-aarch64-or-amd64), not to be confused with amd64/x86_64). There are known issues with upstream dependencies for this architecture, for example [numba](https://github.com/numba/numba/issues/5520). You may not always run into this issue, depending on the extras that you need.
 
-One possible solution to this is to use [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers), which allows you to setup a Linux-based environment. To run BERTopic effectively you need to be aware of two things:
+One possible solution is to use [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers), which allow you to setup a Linux-based environment. To run BERTopic effectively you need to be aware of two things:
 
-- Make sure to use a Docker image specifically compiled for ARM64
-- Make sure to use `volume` instead of `mount-bind`, since the latter significantly reduces I/O speeds to disk
+1. Make sure to use a Docker image specifically built for arm64
+2. Make sure to use a *volume* instead of a *bind-mount*  
+   ℹ️ the latter significantly reduces disk I/O
 
-Using the pre-configured [Data Science Devcontainers](https://github.com/b-data/data-science-devcontainers) makes sure these setting are optimized. To start using them, do the following:
+Using the pre-configured [Data Science Dev Containers](https://github.com/b-data/data-science-devcontainers) makes sure these setting are optimized. To start using them, do the following:
 
-- Install and run Docker
-- Install `python-base` or `python-scipy` [devcontainer](https://github.com/b-data/data-science-devcontainers)
-- ℹ️ Change PYTHON_VERSION to 3.11 in the `devcontainer.json` to work with the latest version of Python 3.11 (currently 3.11.8)
-- Open VS Code, build the container and start working
-- Note that data is persisted in the container
-    - When using an unmodified devcontainer.json: work in `/home/vscode` which is the `home` directory of user `vscode`
-    - Python packages are installed to the home directory by default. This is due to env variable `PIP_USER=1`
-    - Note that the directory `/workspaces` is also persisted
-
+* Install and run Docker
+* Clone repository [data-science-devcontainers](https://github.com/b-data/data-science-devcontainers)
+* Open VS Code, build the `python-base` or `python-scipy` container and start working  
+  ℹ️ Change `PYTHON_VERSION` to `3.11` in the respective `devcontainer.json` to work with the latest patch release of Python 3.11
+* Note that data is persisted in the container
+  * When using an unmodified `devcontainer.json`: Work in `/home/vscode`  
+    👉 This is the *home directory* of user `vscode`
+  * Python packages are installed to the home directory by default  
+    👉 This is due to env variable `PIP_USER=1`
+  * Note that the directory `/workspaces` is also persisted
