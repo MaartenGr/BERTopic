@@ -334,11 +334,11 @@ Using the pre-configured [Data Science Dev Containers](https://github.com/b-data
     👉 This is due to env variable `PIP_USER=1`
   * Note that the directory `/workspaces` is also persisted
 
-## **Speaking of Dev Containers: Do they support GPU acceleration?**
+### **Do these Data Science Dev Containers support GPU acceleration?**
 
 Yes, but only on Linux and Windows.
 
-The CUDA-enabled Data Science Dev Containers require the following in addition to Docker:
+The CUDA-enabled variants require the following in addition to Docker:
 
 * NVIDIA GPU
 * NVIDIA driver
