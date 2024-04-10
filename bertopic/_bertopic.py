@@ -3237,7 +3237,7 @@ class BERTopic:
 
             # Extract new topics
             new_topics = sorted([index - selected_topics["_outliers"] for index, sim in enumerate(sims) if sim < min_similarity])
-            max_topic = max(set(merged_topics["topics"])) + 1
+            max_topic = max(set(merged_topics["topics"]))
 
             # Merge Topic Representations
             new_topics_dict = {}
