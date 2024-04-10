@@ -76,7 +76,7 @@ class CohereBackend(BaseEmbedder):
         if self.batch_size is not None:
             embeddings = []
             for batch in tqdm(self._chunks(documents), disable=not verbose):
-                response = self.client.embed(batch, **self.embed_kwargs)
+                response = self.client.embed(texts=batch, **self.embed_kwargs)
                 embeddings.extend(response.embeddings)
 
                 # Delay subsequent calls
@@ -85,7 +85,7 @@ class CohereBackend(BaseEmbedder):
 
         # Extract embeddings all at once
         else:
-            response = self.client.embed(documents, **self.embed_kwargs)
+            response = self.client.embed(texts=documents, **self.embed_kwargs)
             embeddings = response.embeddings
         return np.array(embeddings)
 
