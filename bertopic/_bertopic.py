@@ -54,7 +54,7 @@ from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger, check_documents_type, check_embeddings_shape,
-    check_is_fitted, validate_distance_matrix
+    check_is_fitted, validate_distance_matrix, get_unique_distances
 )
 import bertopic._save_utils as save_utils
 
@@ -978,6 +978,11 @@ class BERTopic:
 
         # Use the 1-D condensed distance matrix as an input instead of the raw distance matrix
         Z = linkage_function(X)
+
+        # Ensuring that the distances between clusters are unique otherwise the flatting of the hierarchy with
+        # `sch.fcluster(...)` would produce incorrect values for "Topics" for these clusters
+        if len(Z[:, 2]) != len(np.unique(Z[:, 2])):
+            Z[:, 2] = get_unique_distances(Z[:, 2])
 
         # Calculate basic bag-of-words to be iteratively merged later
         documents = pd.DataFrame({"Document": docs,

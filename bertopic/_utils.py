@@ -147,3 +147,29 @@ def validate_distance_matrix(X, n_samples):
         raise ValueError("Distance matrix cannot contain negative values.")
 
     return X
+
+
+def get_unique_distances(dists: np.array, noise_min=1e-3, noise_max=1e-1) -> np.array:
+    """Check if the consecutive elements in the distance array are the same. If so, a small noise
+    is added to one of the elements to make sure that the array does not contain duplicates.
+
+    Arguments:
+        dists: distance array.
+        noise_min: the minimal magnitude of noise to be added.
+        noise_max: the maximal magnitude of noise to be added.
+
+    Returns:
+         Unique distances sorted in the preserved increasing order.
+
+    Raises:
+          ValueError: If the distance array is not sorted in the increasing order.
+    """
+
+    if not np.all(np.diff(dists) >= 0):
+        raise ValueError("The distances must be sorted in the increasing order")
+    dists_cp = dists.copy()
+
+    for i in range(dists.shape[0] - 1):
+        if dists[i] == dists[i + 1]:
+            dists_cp[i + 1] += np.random.uniform(low=noise_min, high=noise_max)
+    return dists_cp
