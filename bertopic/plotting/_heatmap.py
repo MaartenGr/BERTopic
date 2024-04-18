@@ -2,6 +2,7 @@ import numpy as np
 from typing import List, Union
 from scipy.cluster.hierarchy import fcluster, linkage
 from sklearn.metrics.pairwise import cosine_similarity
+from bertopic._utils import select_topic_representation
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -11,13 +12,14 @@ def visualize_heatmap(topic_model,
                       topics: List[int] = None,
                       top_n_topics: int = None,
                       n_clusters: int = None,
+                      use_ctfidf: bool = False,
                       custom_labels: Union[bool, str] = False,
                       title: str = "<b>Similarity Matrix</b>",
                       width: int = 800,
                       height: int = 800) -> go.Figure:
     """ Visualize a heatmap of the topic's similarity matrix
 
-    Based on the cosine similarity matrix between topic embeddings,
+    Based on the cosine similarity matrix between topic embeddings (either c-TF-IDF or semantic embeddings),
     a heatmap is created showing the similarity between topics.
 
     Arguments:
@@ -26,6 +28,8 @@ def visualize_heatmap(topic_model,
         top_n_topics: Only select the top n most frequent topics.
         n_clusters: Create n clusters and order the similarity
                     matrix by those clusters.
+        use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
+                    embedding are used.
         custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
@@ -55,11 +59,9 @@ def visualize_heatmap(topic_model,
     style="width:1000px; height: 720px; border: 0px;""></iframe>
     """
 
-    # Select topic embeddings
-    if topic_model.topic_embeddings_ is not None:
-        embeddings = np.array(topic_model.topic_embeddings_)[topic_model._outliers:]
-    else:
-        embeddings = topic_model.c_tf_idf_[topic_model._outliers:]
+    embeddings = select_topic_representation(
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
+    )[0][topic_model._outliers:]
 
     # Select topics based on top_n and topics args
     freq_df = topic_model.get_topic_freq()

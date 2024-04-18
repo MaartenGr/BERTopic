@@ -6,6 +6,8 @@ from scipy.cluster import hierarchy as sch
 from scipy.spatial.distance import squareform
 from sklearn.metrics.pairwise import cosine_similarity
 
+from bertopic._utils import select_topic_representation
+
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
@@ -15,6 +17,7 @@ def visualize_hierarchy(topic_model,
                         orientation: str = "left",
                         topics: List[int] = None,
                         top_n_topics: int = None,
+                        use_ctfidf: bool = True,
                         custom_labels: Union[bool, str] = False,
                         title: str = "<b>Hierarchical Clustering</b>",
                         width: int = 1000,
@@ -27,7 +30,7 @@ def visualize_hierarchy(topic_model,
 
     A ward linkage function is used to perform the
     hierarchical clustering based on the cosine distance
-    matrix between topic embeddings.
+    matrix between topic embeddings (either c-TF-IDF or semantic embeddings).
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -35,6 +38,8 @@ def visualize_hierarchy(topic_model,
                      Either 'left' or 'bottom'
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
+                    embedding are used.
         custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
@@ -117,11 +122,10 @@ def visualize_hierarchy(topic_model,
     indices = np.array([all_topics.index(topic) for topic in topics])
 
     # Select topic embeddings
-    if topic_model.c_tf_idf_ is not None:
-        embeddings = topic_model.c_tf_idf_[indices]
-    else:
-        embeddings = np.array(topic_model.topic_embeddings_)[indices]
-        
+    embeddings = select_topic_representation(
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
+    )[0][indices]
+
     # Annotations
     if hierarchical_topics is not None and len(topics) == len(freq_df.Topic.to_list()):
         annotations = _get_annotations(topic_model=topic_model,
