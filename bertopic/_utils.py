@@ -149,7 +149,7 @@ def validate_distance_matrix(X, n_samples):
     return X
 
 
-def get_unique_distances(dists: np.array, noise_min=1e-3, noise_max=1e-1) -> np.array:
+def get_unique_distances(dists: np.array, noise_min=1e-10, noise_max=1e-7) -> np.array:
     """Check if the consecutive elements in the distance array are the same. If so, a small noise
     is added to one of the elements to make sure that the array does not contain duplicates.
 
