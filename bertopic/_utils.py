@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import logging
+from typing import Union
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
@@ -149,13 +150,12 @@ def validate_distance_matrix(X, n_samples):
     return X
 
 
-def get_unique_distances(dists: np.array, noise_min=1e-10, noise_max=1e-7) -> np.array:
+def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
     """Check if the consecutive elements in the distance array are the same. If so, a small noise
     is added to one of the elements to make sure that the array does not contain duplicates.
 
     Arguments:
         dists: distance array.
-        noise_min: the minimal magnitude of noise to be added.
         noise_max: the maximal magnitude of noise to be added.
 
     Returns:
@@ -165,11 +165,29 @@ def get_unique_distances(dists: np.array, noise_min=1e-10, noise_max=1e-7) -> np
           ValueError: If the distance array is not sorted in the increasing order.
     """
 
+    def get_next_diff_value(array: np.array, ix: int) -> Union[float, None]:
+        """Get the next different value from `array[ix]` in the array."""
+        for j in range(ix + 1, array.shape[0]):
+            if array[j] != array[ix]:
+                return array[j]
+        return None
+
     if not np.all(np.diff(dists) >= 0):
         raise ValueError("The distances must be sorted in the increasing order")
     dists_cp = dists.copy()
 
     for i in range(dists.shape[0] - 1):
         if dists[i] == dists[i + 1]:
-            dists_cp[i + 1] += np.random.uniform(low=noise_min, high=noise_max)
+            next_unique_dist = get_next_diff_value(dists, i)
+            # if there is no different distance further in the array, the `next_unique_dist` is set to be a lightly
+            # larger than the current (also the max) distance in the array
+            next_unique_dist = dists[i] + noise_max if next_unique_dist is None else next_unique_dist
+
+            # when the max noise is smaller than `curr_max_noise`, then we can be sure that order is preserved.
+            # `dists_cp` must be used since it contains the noise-added values.
+            curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
+            dists_cp[i + 1] += np.random.uniform(
+                low=dists_cp[i] + curr_max_noise / 2,
+                high=dists_cp[i] + curr_max_noise
+            )
     return dists_cp

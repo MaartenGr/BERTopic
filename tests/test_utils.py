@@ -35,8 +35,15 @@ def test_check_embeddings_shape():
 
 
 def test_make_unique_distances():
-    dists = np.array([0, 0, 0.5, 0.75, 1, 1])
-    unique_dists = get_unique_distances(dists)
+    def check_dists(dists: list[float], noise_max: float):
+        unique_dists = get_unique_distances(np.array(dists, dtype=float), noise_max=noise_max)
+        assert len(unique_dists) == len(dists), "The number of elements must be the same"
+        assert len(dists) == len(np.unique(unique_dists)), "The distances must be unique"
 
-    assert len(unique_dists) == len(dists), "The number of elements must be the same"
-    assert len(dists) == len(np.unique(unique_dists)), "The distances must be unique"
+    check_dists([0, 0, 0.5, 0.75, 1, 1], noise_max=1e-7)
+
+    # testing whether the distances are sorted in ascending order when if the noise is extremely high
+    check_dists([0, 0, 0, 0.5, 0.75, 1, 1], noise_max=20)
+
+    # test whether the distances are sorted in ascending order when the distances are all the same
+    check_dists([0, 0, 0, 0, 0, 0, 0], noise_max=1e-7)
