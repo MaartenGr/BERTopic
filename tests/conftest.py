@@ -12,7 +12,7 @@ from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
 from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
-
+import torch
 
 @pytest.fixture(scope="session")
 def embedding_model():
@@ -135,4 +135,19 @@ def online_topic_model(documents, document_embeddings, embedding_model):
         model.partial_fit(documents[index: index+50], document_embeddings[index: index+50])
         topics.extend(model.topics_)
     model.topics_ = topics
+    return model
+
+@pytest.fixture(scope="session")
+def cuml_base_topic_model(documents, document_embeddings, embedding_model):
+    from cuml.cluster import HDBSCAN as cuml_hdbscan
+    from cuml.manifold import UMAP as cuml_umap
+    model = BERTopic(
+        embedding_model=embedding_model,
+        calculate_probabilities=True,
+        umap_model=cuml_umap(random_state=42),
+        hdbscan_model=cuml_hdbscan(
+            min_cluster_size=3,
+            prediction_data=True
+            ))
+    model.fit(documents, document_embeddings)
     return model
