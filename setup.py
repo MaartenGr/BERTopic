@@ -6,9 +6,10 @@ test_packages = [
 ]
 
 docs_packages = [
-    "mkdocs==1.1",
-    "mkdocs-material==4.6.3",
-    "mkdocstrings==0.8.0",
+    "mkdocs==1.5.3",
+    "mkdocs-material==9.5.18",
+    "mkdocstrings==0.24.3",
+    "mkdocstrings-python==1.10.0"
 ]
 
 base_packages = [
