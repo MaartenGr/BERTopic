@@ -6,9 +6,10 @@ test_packages = [
 ]
 
 docs_packages = [
-    "mkdocs==1.1",
-    "mkdocs-material==4.6.3",
-    "mkdocstrings==0.8.0",
+    "mkdocs==1.5.3",
+    "mkdocs-material==9.5.18",
+    "mkdocstrings==0.24.3",
+    "mkdocstrings-python==1.10.0"
 ]
 
 base_packages = [
@@ -62,7 +63,7 @@ with open("README.md", "r") as fh:
 setup(
     name="bertopic",
     packages=find_packages(exclude=["notebooks", "docs"]),
-    version="0.16.0",
+    version="0.16.1",
     author="Maarten P. Grootendorst",
     author_email="maartengrootendorst@gmail.com",
     description="BERTopic performs topic Modeling with state-of-the-art transformer models.",
