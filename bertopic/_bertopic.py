@@ -3977,8 +3977,7 @@ class BERTopic:
         if partial_fit:
             X = self.vectorizer_model.partial_fit(documents).update_bow(documents)
         elif fit:
-            self.vectorizer_model.fit(documents)
-            X = self.vectorizer_model.transform(documents)
+            X = self.vectorizer_model.fit_transform(documents)
         else:
             X = self.vectorizer_model.transform(documents)
 
