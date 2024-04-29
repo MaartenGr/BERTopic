@@ -25,7 +25,7 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
-        use_ctfidf: Whether to use c-TF-IDF representations instead of semantic embeddings.
+        use_ctfidf: Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.
         custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".

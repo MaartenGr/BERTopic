@@ -19,8 +19,8 @@ def visualize_heatmap(topic_model,
                       height: int = 800) -> go.Figure:
     """ Visualize a heatmap of the topic's similarity matrix
 
-    Based on the cosine similarity matrix between topic embeddings (either c-TF-IDF or semantic embeddings),
-    a heatmap is created showing the similarity between topics.
+    Based on the cosine similarity matrix between topic embeddings (either c-TF-IDF or the embeddings from the embedding
+    model), a heatmap is created showing the similarity between topics.
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -28,8 +28,8 @@ def visualize_heatmap(topic_model,
         top_n_topics: Only select the top n most frequent topics.
         n_clusters: Create n clusters and order the similarity
                     matrix by those clusters.
-        use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
-                    embedding are used.
+        use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the embeddings
+                    from the embedding model are used.
         custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".

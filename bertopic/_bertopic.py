@@ -929,8 +929,8 @@ class BERTopic:
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
-            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
-                        embeddings are used.
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
             linkage_function: The linkage function to use. Default is:
                               `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
@@ -2027,8 +2027,8 @@ class BERTopic:
             nr_topics: The number of topics you want reduced to
             images: A list of paths to the images used when calling either
                     `fit` or `fit_transform`
-            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
-                        embeddings are used.
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
 
         Updates:
             topics_ : Assigns topics to their merged representations.
@@ -2849,8 +2849,8 @@ class BERTopic:
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
-            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
-                        embeddings are used.
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
                            NOTE: Custom labels are only generated for the original
@@ -2941,8 +2941,8 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
-            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
-                        embeddings are used.
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
             title: Title of the plot.
@@ -4179,8 +4179,8 @@ class BERTopic:
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
-            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
-                        embedding are used.
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
