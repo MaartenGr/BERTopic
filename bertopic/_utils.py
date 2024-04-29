@@ -186,7 +186,7 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
             # when the max noise is smaller than `curr_max_noise`, then we can be sure that order is preserved.
             # `dists_cp` must be used since it contains the noise-added values.
             curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
-            dists_cp[i + 1] += np.random.uniform(
+            dists_cp[i + 1] = np.random.uniform(
                 low=dists_cp[i] + curr_max_noise / 2,
                 high=dists_cp[i] + curr_max_noise
             )
