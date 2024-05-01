@@ -1,7 +1,6 @@
 import copy
 import pytest
 from bertopic import BERTopic
-import torch
 
 def cuml_available():
     try:
@@ -23,7 +22,7 @@ def cuml_available():
         ('representation_topic_model'),
         ('zeroshot_topic_model'),
         pytest.param(
-            "cuml_topic_model", marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available")
+            "cuml_base_topic_model", marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available")
         ),
     ])
 def test_full_model(model, documents, request):
@@ -37,7 +36,7 @@ def test_full_model(model, documents, request):
         topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True, save_embedding_model="sentence-transformers/all-MiniLM-L6-v2")
         topic_model = BERTopic.load("model_dir")
 
-    if model == "cuml_topic_model":
+    if model == "cuml_base_topic_model":
         assert "cuml" in str(type(topic_model.umap_model)).lower()
         assert "cuml" in str(type(topic_model.hdbscan_model)).lower()
 
