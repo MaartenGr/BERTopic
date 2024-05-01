@@ -141,14 +141,12 @@ def online_topic_model(documents, document_embeddings, embedding_model):
 def cuml_base_topic_model(documents, document_embeddings, embedding_model):
     from cuml.cluster import HDBSCAN as cuml_hdbscan
     from cuml.manifold import UMAP as cuml_umap
+
     model = BERTopic(
         embedding_model=embedding_model,
         calculate_probabilities=True,
         umap_model=cuml_umap(n_components=5, n_neighbors=5, random_state=42),
-        hdbscan_model=cuml_hdbscan(
-            min_cluster_size=3,
-            prediction_data=True
-            )
-            )
+        hdbscan_model=cuml_hdbscan(min_cluster_size=3, prediction_data=True),
+    )
     model.fit(documents, document_embeddings)
     return model
