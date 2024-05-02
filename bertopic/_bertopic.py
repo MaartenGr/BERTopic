@@ -3692,7 +3692,7 @@ class BERTopic:
         if self._outliers:
             reverse_topic_labels["Outliers"] = -1
         df.Label = df.Label.map(reverse_topic_labels)
-        merged_model.topics_ = df.Label.values
+        merged_model.topics_ = df.Label.astype(int).tolist()
 
         # Update the class internally
         has_outliers = bool(self._outliers)
