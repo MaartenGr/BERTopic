@@ -3689,10 +3689,10 @@ class BERTopic:
             "Label": zeroshot_topics + cluster_topics}
         ).sort_values("Indices")
         reverse_topic_labels = dict((v, k) for k, v in merged_model.topic_labels_.items())
-        df.Label = df.Label.map(reverse_topic_labels)
-        merged_model.topics_ = df.Label.values
         if self._outliers:
             reverse_topic_labels["Outliers"] = -1
+        df.Label = df.Label.map(reverse_topic_labels)
+        merged_model.topics_ = df.Label.values
 
         # Update the class internally
         has_outliers = bool(self._outliers)
