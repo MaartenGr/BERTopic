@@ -36,6 +36,10 @@ def test_check_embeddings_shape():
 
 def test_select_topic_representation():
     ctfidf_embeddings = np.array([[1, 1, 1]])
+    ctfidf_embeddings_sparse = csr_matrix(
+        (ctfidf_embeddings.reshape(-1).tolist(), ([0, 0, 0], [0, 1, 2])),
+        shape=ctfidf_embeddings.shape
+    )
     topic_embeddings = np.array([[2, 2, 2]])
 
     # Use topic embeddings
@@ -61,19 +65,13 @@ def test_select_topic_representation():
     np.testing.assert_array_equal(topic_embeddings, repr_)
     assert not ctfidf_used
 
-    # No topic representation is provided
-    with pytest.raises(ValueError):
-        select_topic_representation(None, None, use_ctfidf=False)
-
     # `scipy.sparse.csr_matrix` can be used as c-TF-IDF embeddings
     np.testing.assert_array_equal(
         ctfidf_embeddings,
-        select_topic_representation(
-            csr_matrix(
-                (ctfidf_embeddings.reshape(-1).tolist(), ([0, 0, 0], [0, 1, 2])),
-                shape=ctfidf_embeddings.shape
-            ),
-            topic_embeddings,
-            use_ctfidf=True
-        )[0]
+        select_topic_representation(ctfidf_embeddings_sparse, None, use_ctfidf=True, ctfidf_as_ndarray=True)[0]
     )
+
+    # check that `csr_matrix` is not casted to `np.ndarray` when `ctfidf_as_ndarray` is False
+    repr_ = select_topic_representation(ctfidf_embeddings_sparse, None, ctfidf_as_ndarray=False)[0]
+
+    assert isinstance(repr_, csr_matrix)

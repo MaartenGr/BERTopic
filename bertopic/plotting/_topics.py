@@ -77,7 +77,7 @@ def visualize_topics(topic_model,
     indices = np.array([all_topics.index(topic) for topic in topics])
 
     embeddings, c_tfidf_used = select_topic_representation(
-        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf=use_ctfidf
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf=use_ctfidf, ctfidf_as_ndarray=True,
     )
     embeddings = embeddings[indices]
 

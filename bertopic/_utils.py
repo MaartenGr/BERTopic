@@ -4,7 +4,8 @@ import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
+
 
 class MyLogger:
     def __init__(self, level):
@@ -152,8 +153,9 @@ def validate_distance_matrix(X, n_samples):
 def select_topic_representation(
     ctfidf_embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
     semantic_embeddings: Optional[np.ndarray] = None,
-    use_ctfidf: bool = True
-) -> tuple[np.ndarray, bool]:
+    use_ctfidf: bool = True,
+    ctfidf_as_ndarray: bool = False,
+) -> Tuple[np.ndarray, bool]:
     """Select the topic representation.
 
     Arguments:
@@ -161,6 +163,7 @@ def select_topic_representation(
         semantic_embeddings: The semantic embedding matrix
         use_ctfidf: Whether to use the c-TF-IDF representation. If False, topics embedding representation is used, if it
                     exists. Default is True.
+        ctfidf_as_ndarray: Whether to convert c-TF-IDF as ndarray, in case c-TF-IDF representation is selected
     Raises
         ValueError:
             - If no topic representation was found
@@ -173,17 +176,9 @@ def select_topic_representation(
     def to_ndarray(array: Union[np.ndarray, csr_matrix]) -> np.ndarray:
         if isinstance(array, csr_matrix):
             return array.toarray()
-        elif not isinstance(array, np.ndarray):
-            raise ValueError("The embeddings should be either a type of `numpy.ndarray` or `scipy.sparse.csr_matrix`")
         return array
 
     logger = MyLogger("WARNING")
-
-    if ctfidf_embeddings is None and semantic_embeddings is None:
-        raise ValueError("No topic representation was found.")
-
-    if ctfidf_embeddings is not None:
-        ctfidf_embeddings = to_ndarray(ctfidf_embeddings)
 
     if use_ctfidf:
         if ctfidf_embeddings is None:
@@ -192,12 +187,12 @@ def select_topic_representation(
                 "Defaulting to semantic embeddings."
             )
             return semantic_embeddings, False
-        return ctfidf_embeddings, True
+        return to_ndarray(ctfidf_embeddings) if ctfidf_as_ndarray else ctfidf_embeddings, True
     else:
         if semantic_embeddings is None:
             logger.warning(
                 "No topic embeddings were found despite they are supposed to be used (`use_ctfidf` is False). "
                 "Defaulting to c-TF-IDF representation."
             )
-            return ctfidf_embeddings, True
+            return to_ndarray(ctfidf_embeddings) if ctfidf_as_ndarray else ctfidf_embeddings, True
         return semantic_embeddings, False

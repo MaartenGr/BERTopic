@@ -4140,7 +4140,7 @@ class BERTopic:
 
         # Create topic distance matrix
         topic_embeddings = select_topic_representation(
-            self.c_tf_idf_, self.topic_embeddings_, use_ctfidf
+            self.c_tf_idf_, self.topic_embeddings_, use_ctfidf, ctfidf_as_ndarray=True
         )[0][self._outliers:]
         distance_matrix = 1-cosine_similarity(topic_embeddings)
         np.fill_diagonal(distance_matrix, 0)
@@ -4190,7 +4190,9 @@ class BERTopic:
         max_topic = unique_topics[-1]
 
         # Find similar topics
-        embeddings = select_topic_representation(self.c_tf_idf_, self.topic_embeddings_, use_ctfidf)[0]
+        embeddings = select_topic_representation(
+            self.c_tf_idf_, self.topic_embeddings_, use_ctfidf, ctfidf_as_ndarray=True
+        )[0]
         norm_data = normalize(embeddings, norm='l2')
         predictions = hdbscan.HDBSCAN(min_cluster_size=2,
                                       metric='euclidean',
