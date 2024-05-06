@@ -572,7 +572,7 @@ class BERTopic:
 
         For each subset of the data:
 
-        1. Generate embeddings with a pre-traing language model
+        1. Generate embeddings with a pre-training language model
         2. Incrementally update the dimensionality reduction algorithm with `partial_fit`
         3. Incrementally update the cluster algorithm with `partial_fit`
         4. Incrementally update the OnlineCountVectorizer and apply some form of decay
@@ -1722,7 +1722,7 @@ class BERTopic:
 
         Arguments:
             hier_topics: A dataframe containing the structure of the topic tree.
-                         This is the output of `topic_model.hierachical_topics()`
+                         This is the output of `topic_model.hierarchical_topics()`
             max_distance: The maximum distance between two topics. This value is
                           based on the Distance column in `hier_topics`.
             tight_layout: Whether to use a tight layout (narrow width) for
@@ -3815,7 +3815,7 @@ class BERTopic:
                                      ) -> Union[List[str], List[List[int]]]:
         """ Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
-        most represenative to their topic based on the cosine similarity between
+        most representative to their topic based on the cosine similarity between
         c-TF-IDF representations.
 
         Arguments:

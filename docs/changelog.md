@@ -104,7 +104,7 @@ cohere_model = CohereBackend(
 *  Fixed typos in best practices documentation by [@poomkusa](https://github.com/poomkusa) in [#1557](https://github.com/MaartenGr/BERTopic/pull/1557)
 *  Correct TopicMapper doc example by [@chrisji](https://github.com/chrisji) in [#1637](https://github.com/MaartenGr/BERTopic/pull/1637)
 * Fix typing in hierarchical_topics by [@dschwalm](https://github.com/dschwalm) in [#1364](https://github.com/MaartenGr/BERTopic/pull/1364)
-*  Fixed typing issue with treshold parameter in reduce_outliers by [@dschwalm](https://github.com/dschwalm) in [#1380](https://github.com/MaartenGr/BERTopic/pull/1380)
+*  Fixed typing issue with threshold parameter in reduce_outliers by [@dschwalm](https://github.com/dschwalm) in [#1380](https://github.com/MaartenGr/BERTopic/pull/1380)
 * Fix several typos by [@mertyyanik](https://github.com/mertyyanik) in [#1307](https://github.com/MaartenGr/BERTopic/pull/1307)
 (#1307)
 * Fix inconsistent naming by [@rolanderdei](https://github.com/rolanderdei) in [#1073](https://github.com/MaartenGr/BERTopic/pull/1073)
@@ -318,7 +318,7 @@ With v0.15, we can now perform multimodal topic modeling in BERTopic! The most b
   <figcaption></figcaption>
 </figure>
 
-In this example, we are going to use images from `flickr` that each have a caption accociated to it: 
+In this example, we are going to use images from `flickr` that each have a caption associated to it: 
 
 ```python
 # NOTE: This requires the `datasets` package which you can 

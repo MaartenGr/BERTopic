@@ -209,7 +209,7 @@ topics, probs = topic_model.fit_transform(docs)
 ```  
 
 !!! note
-    The `calculate_probabilties` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`.approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
+    The `calculate_probabilities` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`.approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
  
 ## **Numpy gives me an error when running BERTopic**
 With the release of Numpy 1.20.0, there have been significant issues with using that version (and previous ones) due to compilation issues and pypi.   

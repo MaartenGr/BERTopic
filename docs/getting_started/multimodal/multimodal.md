@@ -11,7 +11,7 @@ The most basic example of multimodal topic modeling in BERTopic is when you have
   <figcaption></figcaption>
 </figure>
 
-In this example, we are going to use images from `flickr` that each have a caption accociated to it: 
+In this example, we are going to use images from `flickr` that each have a caption associated to it: 
 
 ```python
 # NOTE: This requires the `datasets` package which you can 
@@ -87,7 +87,7 @@ HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
     # Embed documents only
     doc_embeddings = model.embed_documents(docs)
 
-    # Embeding images only
+    # Embedding images only
     image_embeddings = model.embed_images(images)
 
     # Embed both images and documents, then average them

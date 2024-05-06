@@ -75,7 +75,7 @@ class OpenAI(BaseRepresentation):
         exponential_backoff: Retry requests with a random exponential backoff.
                              A short sleep is used when a rate limit error is hit,
                              then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests.
+                             if errors are hit until 10 unsuccessful requests.
                              If True, overrides `delay_in_seconds`.
         chat: Set this to True if a GPT-3.5 model is used.
               See: https://platform.openai.com/docs/models/gpt-3-5
@@ -96,7 +96,7 @@ class OpenAI(BaseRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
@@ -218,7 +218,7 @@ class OpenAI(BaseRepresentation):
                     response = self.client.chat.completions.create(**kwargs)
 
                 # Check whether content was actually generated
-                # Adresses #1570 for potential issues with OpenAI's content filter
+                # Addresses #1570 for potential issues with OpenAI's content filter
                 if hasattr(response.choices[0].message, "content"):
                     label = response.choices[0].message.content.strip().replace("topic: ", "")
                 else:

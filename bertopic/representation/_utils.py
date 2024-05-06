@@ -14,8 +14,8 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         def encode(self, doc):
             return doc.split(",")
 
-        def decode(self, doc_chuncks):
-            return ",".join(doc_chuncks)
+        def decode(self, doc_chunks):
+            return ",".join(doc_chunks)
     ```
 
     You can use this tokenizer by passing it to the `tokenizer` parameter.
@@ -33,7 +33,7 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`. They are decoded with 
+                         and truncated depending on `doc_length`. They are decoded with 
                          whitespaces.
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
