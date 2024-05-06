@@ -8,8 +8,10 @@ from typing import Optional, Union, Tuple
 
 
 class MyLogger:
-    def __init__(self, level):
+    def __init__(self):
         self.logger = logging.getLogger('BERTopic')
+
+    def configure(self, level):
         self.set_level(level)
         self._add_handler()
         self.logger.propagate = False
@@ -178,7 +180,7 @@ def select_topic_representation(
             return array.toarray()
         return array
 
-    logger = MyLogger("WARNING")
+    logger = MyLogger()
 
     if use_ctfidf:
         if ctfidf_embeddings is None:

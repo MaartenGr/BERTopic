@@ -61,7 +61,8 @@ import bertopic._save_utils as save_utils
 # Visualization
 import plotly.graph_objects as go
 
-logger = MyLogger("WARNING")
+logger = MyLogger()
+logger.configure("WARNING")
 
 
 class BERTopic:

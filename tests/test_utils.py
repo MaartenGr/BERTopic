@@ -5,11 +5,13 @@ from bertopic._utils import check_documents_type, check_embeddings_shape, MyLogg
 from scipy.sparse import csr_matrix
 
 def test_logger():
-    logger = MyLogger("DEBUG")
+    logger = MyLogger()
+    logger.configure("DEBUG")
     assert isinstance(logger.logger, logging.Logger)
     assert logger.logger.level == 10
 
-    logger = MyLogger("WARNING")
+    logger = MyLogger()
+    logger.configure("WARNING")
     assert isinstance(logger.logger, logging.Logger)
     assert logger.logger.level == 30
 
