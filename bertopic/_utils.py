@@ -155,7 +155,7 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
     is added to one of the elements to make sure that the array does not contain duplicates.
 
     Arguments:
-        dists: distance array.
+        dists: distance array sorted in the increasing order.
         noise_max: the maximal magnitude of noise to be added.
 
     Returns:
@@ -164,30 +164,14 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
     Raises:
           ValueError: If the distance array is not sorted in the increasing order.
     """
-
-    def get_next_diff_value(array: np.array, ix: int) -> Union[float, None]:
-        """Get the next different value from `array[ix]` in the array."""
-        for j in range(ix + 1, array.shape[0]):
-            if array[j] != array[ix]:
-                return array[j]
-        return None
-
-    if not np.all(np.diff(dists) >= 0):
-        raise ValueError("The distances must be sorted in the increasing order")
     dists_cp = dists.copy()
 
     for i in range(dists.shape[0] - 1):
         if dists[i] == dists[i + 1]:
-            next_unique_dist = get_next_diff_value(dists, i)
-            # if there is no different distance further in the array, the `next_unique_dist` is set to be a lightly
-            # larger than the current (also the max) distance in the array
-            next_unique_dist = dists[i] + noise_max if next_unique_dist is None else next_unique_dist
+            # returns the next unique distance or the current distance with the added noise
+            next_unique_dist = next((d for d in dists[i + 1:] if d != dists[i]), dists[i] + noise_max)
 
-            # when the max noise is smaller than `curr_max_noise`, then we can be sure that order is preserved.
-            # `dists_cp` must be used since it contains the noise-added values.
+            # the noise can never be large then the difference between the next unique distance and the current one
             curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
-            dists_cp[i + 1] = np.random.uniform(
-                low=dists_cp[i] + curr_max_noise / 2,
-                high=dists_cp[i] + curr_max_noise
-            )
+            dists_cp[i + 1] = np.random.uniform(low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise)
     return dists_cp
