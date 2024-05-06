@@ -70,10 +70,10 @@ def test_select_topic_representation():
     # `scipy.sparse.csr_matrix` can be used as c-TF-IDF embeddings
     np.testing.assert_array_equal(
         ctfidf_embeddings,
-        select_topic_representation(ctfidf_embeddings_sparse, None, use_ctfidf=True, ctfidf_as_ndarray=True)[0]
+        select_topic_representation(ctfidf_embeddings_sparse, None, use_ctfidf=True, output_ndarray=True)[0]
     )
 
     # check that `csr_matrix` is not casted to `np.ndarray` when `ctfidf_as_ndarray` is False
-    repr_ = select_topic_representation(ctfidf_embeddings_sparse, None, ctfidf_as_ndarray=False)[0]
+    repr_ = select_topic_representation(ctfidf_embeddings_sparse, None, output_ndarray=False)[0]
 
     assert isinstance(repr_, csr_matrix)

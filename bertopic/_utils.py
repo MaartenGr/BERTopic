@@ -154,18 +154,18 @@ def validate_distance_matrix(X, n_samples):
 
 def select_topic_representation(
     ctfidf_embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
-    semantic_embeddings: Optional[np.ndarray] = None,
+    embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
     use_ctfidf: bool = True,
-    ctfidf_as_ndarray: bool = False,
+    output_ndarray: bool = False,
 ) -> Tuple[np.ndarray, bool]:
     """Select the topic representation.
 
     Arguments:
         ctfidf_embeddings: The c-TF-IDF embedding matrix
-        semantic_embeddings: The semantic embedding matrix
+        embeddings: The topic embedding matrix
         use_ctfidf: Whether to use the c-TF-IDF representation. If False, topics embedding representation is used, if it
                     exists. Default is True.
-        ctfidf_as_ndarray: Whether to convert c-TF-IDF as ndarray, in case c-TF-IDF representation is selected
+        output_ndarray: Whether to convert the selected representation into ndarray
     Raises
         ValueError:
             - If no topic representation was found
@@ -188,13 +188,17 @@ def select_topic_representation(
                 "No c-TF-IDF matrix was found despite it is supposed to be used (`use_ctfidf` is True). "
                 "Defaulting to semantic embeddings."
             )
-            return semantic_embeddings, False
-        return to_ndarray(ctfidf_embeddings) if ctfidf_as_ndarray else ctfidf_embeddings, True
+            repr_, ctfidf_used = embeddings, False
+        else:
+            repr_, ctfidf_used = ctfidf_embeddings, True
     else:
-        if semantic_embeddings is None:
+        if embeddings is None:
             logger.warning(
                 "No topic embeddings were found despite they are supposed to be used (`use_ctfidf` is False). "
                 "Defaulting to c-TF-IDF representation."
             )
-            return to_ndarray(ctfidf_embeddings) if ctfidf_as_ndarray else ctfidf_embeddings, True
-        return semantic_embeddings, False
+            repr_, ctfidf_used = ctfidf_embeddings, True
+        else:
+            repr_, ctfidf_used = embeddings, False
+
+    return to_ndarray(repr_) if output_ndarray else repr_, ctfidf_used
