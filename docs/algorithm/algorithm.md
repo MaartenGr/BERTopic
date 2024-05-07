@@ -25,7 +25,7 @@ There is extensive documentation on how to use each step in this pipeline:
 
 1. [Embeddings](../getting_started/embeddings/embeddings.html)
 2. [Dimensionality Reduction](../getting_started/dim_reduction/dim_reduction.html)
-3. [Clustering](../getting_started/dim_reduction/dim_reduction.html)
+3. [Clustering](../getting_started/clustering/clustering.html)
 4. [Tokenizer](../getting_started/vectorizers/vectorizers.html)
 5. [Weighting Scheme](../getting_started/ctfidf/ctfidf.html)
 6. [Representation Tuning](../getting_started/representation/representation.html)
