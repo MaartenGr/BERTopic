@@ -194,7 +194,7 @@ class OpenAI(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
+        repr_docs_mappings, _, _, repr_doc_ids = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
 
         # Generate using OpenAI's Language Model
         updated_topics = {}
@@ -219,13 +219,20 @@ class OpenAI(BaseRepresentation):
                     response = self.client.chat.completions.create(**kwargs)
 
                 choice = response.choices[0]
-                has_content = hasattr(response.choices[0].message, "content")
 
-                if rchoice.finish_reason == "stop" and has_content:
-                    label = rchoice.message.content.strip().replace("topic: ", "")
-                elif rchoice.finish_reason == "length" and has_content:
-                    label = rchoice.message.content.strip().replace("topic: ", "")
+                if choice.finish_reason == "stop":
+                    label = choice.message.content.strip().replace("topic: ", "")
+                elif choice.finish_reason == "length":
+                    logger.warn(f"Extracing Topics - Length limit reached for doc_ids ({repr_doc_ids})")
+                    if hasattr(response.choices[0].message, "content"):
+                        label = choice.message.content.strip().replace("topic: ", "")
+                    else:
+                        label = "Incomple output due to token limit being reached"
+                elif choice.finish_reason == "content_filter":
+                    logger.warn(f"Extracing Topics - Content filtered for doc_ids ({repr_doc_ids})")
+                    label = "Output content filtered by OpenAI"
                 else:
+                    logger.warn(f"Extracing Topics - No label due to finish_reason {choice.finish_reason} for doc_ids ({repr_doc_ids})")
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
