@@ -2,12 +2,11 @@ from ._base import BaseEmbedder
 
 # Imports for light-weight variant of BERTopic
 from bertopic.backend._sklearn import SklearnEmbedder
+from bertopic._utils import MyLogger
 from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline as ScikitPipeline
-
-from bertopic._utils import MyLogger
 
 logger = MyLogger("WARNING")
 
