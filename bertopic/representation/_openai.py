@@ -5,8 +5,9 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document
+from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document, MyLogger
 
+logger = MyLogger("WARNING")
 
 DEFAULT_PROMPT = """
 This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
@@ -37,7 +38,7 @@ Keywords: [KEYWORDS]
 Topic name:"""
 
 DEFAULT_CHAT_PROMPT = """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 [DOCUMENTS]
 The topic is described by the following keywords: [KEYWORDS]
 
