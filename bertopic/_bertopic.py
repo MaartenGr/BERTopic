@@ -383,7 +383,8 @@ class BERTopic:
         if embeddings is None:
             logger.info("Embedding - Transforming documents to embeddings.")
             self.embedding_model = select_backend(self.embedding_model,
-                                                  language=self.language)
+                                                  language=self.language,
+                                                  verbose=self.verbose)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   images=images,
                                                   method="document",
@@ -630,14 +631,16 @@ class BERTopic:
         if embeddings is None:
             if self.topic_representations_ is None:
                 self.embedding_model = select_backend(self.embedding_model,
-                                                      language=self.language)
+                                                      language=self.language,
+                                                      verbose=self.verbose)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   method="document",
                                                   verbose=self.verbose)
         else:
             if self.embedding_model is not None and self.topic_representations_ is None:
                 self.embedding_model = select_backend(self.embedding_model,
-                                                      language=self.language)
+                                                      language=self.language,
+                                                      verbose=self.verbose)
 
         # Reduce dimensionality
         if self.seed_topic_list is not None and self.embedding_model is not None:
@@ -3143,7 +3146,7 @@ class BERTopic:
             with open(file_or_dir, 'rb') as file:
                 if embedding_model:
                     topic_model = joblib.load(file)
-                    topic_model.embedding_model = select_backend(embedding_model)
+                    topic_model.embedding_model = select_backend(embedding_model, verbose=self.verbose)
                 else:
                     topic_model = joblib.load(file)
                 return topic_model
@@ -3294,7 +3297,7 @@ class BERTopic:
 
         # Replace embedding model if one is specifically chosen
         if embedding_model is not None and type(merged_model.embedding_model) == BaseEmbedder:
-            merged_model.embedding_model = select_backend(embedding_model)
+            merged_model.embedding_model = select_backend(embedding_model, verbose=self.verbose)
         return merged_model
 
     def push_to_hf_hub(
