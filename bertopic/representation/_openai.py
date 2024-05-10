@@ -218,10 +218,13 @@ class OpenAI(BaseRepresentation):
                 else:
                     response = self.client.chat.completions.create(**kwargs)
 
-                # Check whether content was actually generated
-                # Adresses #1570 for potential issues with OpenAI's content filter
-                if hasattr(response.choices[0].message, "content"):
-                    label = response.choices[0].message.content.strip().replace("topic: ", "")
+                choice = response.choices[0]
+                has_content = hasattr(response.choices[0].message, "content")
+
+                if rchoice.finish_reason == "stop" and has_content:
+                    label = rchoice.message.content.strip().replace("topic: ", "")
+                elif rchoice.finish_reason == "length" and has_content:
+                    label = rchoice.message.content.strip().replace("topic: ", "")
                 else:
                     label = "No label returned"
             else:
