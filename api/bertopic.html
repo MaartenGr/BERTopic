@@ -7933,7 +7933,11 @@ you best.</p>
 <span class="normal">4351</span>
 <span class="normal">4352</span>
 <span class="normal">4353</span>
-<span class="normal">4354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BERTopic</span><span class="p">:</span>
+<span class="normal">4354</span>
+<span class="normal">4355</span>
+<span class="normal">4356</span>
+<span class="normal">4357</span>
+<span class="normal">4358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BERTopic</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;BERTopic is a topic modeling technique that leverages BERT embeddings and</span>
 <span class="sd">    c-TF-IDF to create dense clusters allowing for easily interpretable topics</span>
 <span class="sd">    whilst keeping important words in the topic descriptions.</span>
@@ -11548,15 +11552,20 @@ you best.</p>
 
         <span class="n">cluster_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">documents</span><span class="o">.</span><span class="n">Old_ID</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="n">cluster_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">merged_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">)):]</span>
-        <span class="n">cluster_topics</span> <span class="o">=</span> <span class="p">[</span><span class="n">cluster_names</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">documents</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outliers</span><span class="p">:</span>
+            <span class="n">cluster_topics</span> <span class="o">=</span> <span class="p">[</span><span class="n">cluster_names</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">if</span> <span class="n">topic</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;Outliers&quot;</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">documents</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cluster_topics</span> <span class="o">=</span> <span class="p">[</span><span class="n">cluster_names</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">documents</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
             <span class="s2">&quot;Indices&quot;</span><span class="p">:</span> <span class="n">zeroshot_indices</span> <span class="o">+</span> <span class="n">cluster_indices</span><span class="p">,</span>
             <span class="s2">&quot;Label&quot;</span><span class="p">:</span> <span class="n">zeroshot_topics</span> <span class="o">+</span> <span class="n">cluster_topics</span><span class="p">}</span>
         <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Indices&quot;</span><span class="p">)</span>
         <span class="n">reverse_topic_labels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outliers</span><span class="p">:</span>
+            <span class="n">reverse_topic_labels</span><span class="p">[</span><span class="s2">&quot;Outliers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">df</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">reverse_topic_labels</span><span class="p">)</span>
-        <span class="n">merged_model</span><span class="o">.</span><span class="n">topics_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">merged_model</span><span class="o">.</span><span class="n">topics_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
         <span class="c1"># Update the class internally</span>
         <span class="n">has_outliers</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_outliers</span><span class="p">)</span>
@@ -11846,8 +11855,7 @@ you best.</p>
         <span class="k">if</span> <span class="n">partial_fit</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vectorizer_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span><span class="o">.</span><span class="n">update_bow</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">fit</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vectorizer_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vectorizer_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vectorizer_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vectorizer_model</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
 
@@ -12899,11 +12907,7 @@ you best.</p>
 
           <details class="quote">
             <summary>Source code in <code>bertopic\_bertopic.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4340</span>
-<span class="normal">4341</span>
-<span class="normal">4342</span>
-<span class="normal">4343</span>
-<span class="normal">4344</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">4344</span>
 <span class="normal">4345</span>
 <span class="normal">4346</span>
 <span class="normal">4347</span>
@@ -12913,7 +12917,11 @@ you best.</p>
 <span class="normal">4351</span>
 <span class="normal">4352</span>
 <span class="normal">4353</span>
-<span class="normal">4354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">4354</span>
+<span class="normal">4355</span>
+<span class="normal">4356</span>
+<span class="normal">4357</span>
+<span class="normal">4358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the current object.</span>
 
 <span class="sd">    Returns:</span>
