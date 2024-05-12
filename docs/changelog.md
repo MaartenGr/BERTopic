@@ -5,6 +5,20 @@ hide:
 
 # Changelog
 
+## **Version 0.16.2**
+*Release date: 12 May, 2024*
+
+<h3><b>Fixes:</a></b></h3>
+
+* Fix issue with zeroshot topic modeling missing outlier [#1957](https://github.com/MaartenGr/BERTopic/issues/1957)
+* Bump github actions versions by [@afuetterer](https://github.com/afuetterer) in [#1941](https://github.com/MaartenGr/BERTopic/pull/1941)
+* Drop support for python 3.7 by [@afuetterer](https://github.com/afuetterer) in [#1949](https://github.com/MaartenGr/BERTopic/pull/1949)
+* Add testing python 3.10+ in Github actions by [@afuetterer](https://github.com/afuetterer) in [#1968](https://github.com/MaartenGr/BERTopic/pull/1968)
+* Speed up fitting CountVectorizer by [@dannywhuang](https://github.com/dannywhuang) in [#1938](https://github.com/MaartenGr/BERTopic/pull/1938)
+* Fix `transform` when using cuML HDBSCAN by [@beckernick](https://github.com/beckernick) in [#1960](https://github.com/MaartenGr/BERTopic/pull/1960)
+* Fix wrong link in algorithm documentation by [@naeyn](https://github.com/naeyn) in [#1970](https://github.com/MaartenGr/BERTopic/pull/1970)
+
+
 ## **Version 0.16.1**
 *Release date: 21 April, 2024*
 
