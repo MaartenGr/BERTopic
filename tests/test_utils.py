@@ -2,6 +2,7 @@ import pytest
 import logging
 import numpy as np
 from bertopic._utils import check_documents_type, check_embeddings_shape, MyLogger, get_unique_distances
+from typing import List
 
 
 def test_logger():
@@ -35,7 +36,7 @@ def test_check_embeddings_shape():
 
 
 def test_make_unique_distances():
-    def check_dists(dists: list[float], noise_max: float):
+    def check_dists(dists: List[float], noise_max: float):
         unique_dists = get_unique_distances(np.array(dists, dtype=float), noise_max=noise_max)
         assert len(unique_dists) == len(dists), "The number of elements must be the same"
         assert len(dists) == len(np.unique(unique_dists)), "The distances must be unique"

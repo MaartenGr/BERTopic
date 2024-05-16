@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import logging
-from typing import Union
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
