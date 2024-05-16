@@ -159,9 +159,6 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
 
     Returns:
          Unique distances sorted in the preserved increasing order.
-
-    Raises:
-          ValueError: If the distance array is not sorted in the increasing order.
     """
     dists_cp = dists.copy()
 
