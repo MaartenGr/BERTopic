@@ -223,16 +223,16 @@ class OpenAI(BaseRepresentation):
                 if output.finish_reason == "stop":
                     label = output.message.content.strip().replace("topic: ", "")
                 elif output.finish_reason == "length":
-                    logger.warn(f"OpenAI Topic Representation - Length limit reached for doc_ids ({repr_doc_ids})")
+                    logger.warn(f"OpenAI Topic Representation - Length limit reached for documents IDs: ({repr_doc_ids})")
                     if hasattr(output.message, "content"):
                         label = output.message.content.strip().replace("topic: ", "")
                     else:
                         label = "OpenAI Topic Representation - Incomplete output due to token limit being reached"
                 elif output.finish_reason == "content_filter":
-                    logger.warn(f"OpenAI Topic Representation - Content filtered for doc_ids ({repr_doc_ids})")
+                    logger.warn(f"OpenAI Topic Representation - The content filter of OpenAI was trigger for the following documents IDs: ({repr_doc_ids})")
                     label = "Output content filtered by OpenAI"
                 else:
-                    logger.warn(f"OpenAI Topic Representation - No label due to finish_reason {output.finish_reason} for doc_ids ({repr_doc_ids})")
+                    logger.warn(f"OpenAI Topic Representation - Couldn't create a label due to {output.finish_reason} for the following document IDs: ({repr_doc_ids})")
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
