@@ -227,7 +227,7 @@ class OpenAI(BaseRepresentation):
                     if hasattr(output.message, "content"):
                         label = output.message.content.strip().replace("topic: ", "")
                     else:
-                        label = "Incomple output due to token limit being reached"
+                        label = "Incomplete output due to token limit being reached"
                 elif output.finish_reason == "content_filter":
                     logger.warn(f"Extracing Topics - Content filtered for doc_ids ({repr_doc_ids})")
                     label = "Output content filtered by OpenAI"
