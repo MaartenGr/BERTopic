@@ -218,28 +218,28 @@ class OpenAI(BaseRepresentation):
                 else:
                     response = self.client.chat.completions.create(**kwargs)
 
-                choice = response.choices[0]
+                output = response.choices[0]
 
-                if choice.finish_reason == "stop":
-                    label = choice.message.content.strip().replace("topic: ", "")
-                elif choice.finish_reason == "length":
+                if output.finish_reason == "stop":
+                    label = output.message.content.strip().replace("topic: ", "")
+                elif output.finish_reason == "length":
                     logger.warn(f"Extracing Topics - Length limit reached for doc_ids ({repr_doc_ids})")
-                    if hasattr(response.choices[0].message, "content"):
-                        label = choice.message.content.strip().replace("topic: ", "")
+                    if hasattr(output.message, "content"):
+                        label = output.message.content.strip().replace("topic: ", "")
                     else:
                         label = "Incomple output due to token limit being reached"
-                elif choice.finish_reason == "content_filter":
+                elif output.finish_reason == "content_filter":
                     logger.warn(f"Extracing Topics - Content filtered for doc_ids ({repr_doc_ids})")
                     label = "Output content filtered by OpenAI"
                 else:
-                    logger.warn(f"Extracing Topics - No label due to finish_reason {choice.finish_reason} for doc_ids ({repr_doc_ids})")
+                    logger.warn(f"Extracing Topics - No label due to finish_reason {output.finish_reason} for doc_ids ({repr_doc_ids})")
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
                     response = completions_with_backoff(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
                 else:
                     response = self.client.completions.create(model=self.model, prompt=prompt, **self.generator_kwargs)
-                label = response.choices[0].text.strip()
+                label = output.text.strip()
 
             updated_topics[topic] = [(label, 1)]
 
