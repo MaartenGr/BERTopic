@@ -572,7 +572,7 @@ class BERTopic:
 
         For each subset of the data:
 
-        1. Generate embeddings with a pre-training language model
+        1. Generate embeddings with a pre-trained language model
         2. Incrementally update the dimensionality reduction algorithm with `partial_fit`
         3. Incrementally update the cluster algorithm with `partial_fit`
         4. Incrementally update the OnlineCountVectorizer and apply some form of decay
