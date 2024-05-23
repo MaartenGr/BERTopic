@@ -125,7 +125,7 @@ def supervised_topic_model(documents, document_embeddings, embedding_model, targ
 
 @pytest.fixture(scope="session")
 def online_topic_model(documents, document_embeddings, embedding_model):
-    umap_model = IncrementalPCA(n_components=5)
+    umap_model = PCA(n_components=5)
     cluster_model = MiniBatchKMeans(n_clusters=50, random_state=0)
     vectorizer_model = OnlineCountVectorizer(stop_words="english", decay=.01)
     model = BERTopic(umap_model=umap_model, hdbscan_model=cluster_model, vectorizer_model=vectorizer_model, embedding_model=embedding_model)
