@@ -89,7 +89,7 @@ vision = [
 [project.urls]
 Documentation = "https://maartengr.github.io/BERTopic/"
 Homepage = "https://github.com/MaartenGr/BERTopic"
-"Issue Tracker" = "https://github.com/MaartenGr/BERTopic/issues"
+Issues = "https://github.com/MaartenGr/BERTopic/issues"
 "Source Code" = "https://github.com/MaartenGr/BERTopic/"
 
 [tool.hatch.version]
