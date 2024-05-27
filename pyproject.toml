@@ -7,7 +7,7 @@ name = "bertopic"
 dynamic = ["version"]
 description = "BERTopic performs topic Modeling with state-of-the-art transformer models."
 readme = "README.md"
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 requires-python = ">=3.8"
 authors = [
     { name = "Maarten P. Grootendorst", email = "maartengrootendorst@gmail.com" },
