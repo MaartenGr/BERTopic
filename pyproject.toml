@@ -90,7 +90,7 @@ vision = [
 Documentation = "https://maartengr.github.io/BERTopic/"
 Homepage = "https://github.com/MaartenGr/BERTopic"
 Issues = "https://github.com/MaartenGr/BERTopic/issues"
-"Source Code" = "https://github.com/MaartenGr/BERTopic/"
+Repository = "https://github.com/MaartenGr/BERTopic.git"
 
 [tool.hatch.version]
 path = "bertopic/__init__.py"
