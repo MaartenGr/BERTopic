@@ -1450,9 +1450,13 @@ class BERTopic:
                            "Note that topic embeddings will also be created through weighted"
                            "c-TF-IDF embeddings instead of centroid embeddings.")
 
-        # Extract words
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
         documents_per_topic = documents.groupby(['Topic'], as_index=False).agg({'Document': ' '.join})
+
+        # Update topic sizes and assignments
+        self._update_topic_size(documents)
+
+        # Extract words and update topic labels
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
 
@@ -1465,9 +1469,6 @@ class BERTopic:
                 self.topic_embeddings_ = self.topic_embeddings_[1:]
             else:
                 self._create_topic_vectors()
-
-        # Update topic labels
-        self._update_topic_size(documents)
 
     def get_topics(self, full: bool = False) -> Mapping[str, Tuple[str, float]]:
         """ Return topics with top n words and their c-TF-IDF score
