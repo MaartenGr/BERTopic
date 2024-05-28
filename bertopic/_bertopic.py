@@ -284,8 +284,10 @@ class BERTopic:
                               for key, values in self.topic_representations_.items()}
         if self._is_zeroshot():
             # Need to correct labels from zero-shot topics
-            topic_id_to_zeroshot_label = {topic_id: self.zeroshot_topic_list[topic_id] for topic_id in
-                                          self.topic_id_to_zeroshot_topic_idx}
+            topic_id_to_zeroshot_label = {
+                topic_id: self.zeroshot_topic_list[zeroshot_topic_idx]
+                for topic_id, zeroshot_topic_idx in self.topic_id_to_zeroshot_topic_idx.items()
+            }
             topic_labels.update(topic_id_to_zeroshot_label)
         return topic_labels
 
@@ -4058,13 +4060,31 @@ class BERTopic:
 
         # Track mappings and sizes of topics for merging topic embeddings
         mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, new_topics)}
-        mappings = defaultdict(list)
+        basic_mappings = defaultdict(list)
         for key, val in sorted(mapped_topics.items()):
-            mappings[val].append(key)
+            basic_mappings[val].append(key)
         mappings = {topic_from:
                     {"topics_to": topics_to,
                      "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to]}
-                    for topic_from, topics_to in mappings.items()}
+                    for topic_from, topics_to in basic_mappings.items()}
+
+        # Combine merged zero-shot topics with '_' and
+        # remap self.topic_id_to_zeroshot_topic_idx based on new self.zeroshot_topic_list
+        if self._is_zeroshot():
+            topic_id_to_zeroshot_topics = {
+                topic_to: [
+                    self.zeroshot_topic_list[self.topic_id_to_zeroshot_topic_idx[topic_id]]
+                    for topic_id in topics_from
+                ] for topic_to, topics_from in basic_mappings.items()
+                if any(topic_id in self.topic_id_to_zeroshot_topic_idx for topic_id in topics_from)
+            }
+            new_topic_id_to_zeroshot_topics = {topic_id: '_'.join(topics) for topic_id, topics in topic_id_to_zeroshot_topics.items()}
+            self.topic_id_to_zeroshot_topic_idx = {
+                topic_id: zeroshot_topic_idx
+                for zeroshot_topic_idx, (topic_id, _)
+                in enumerate(new_topic_id_to_zeroshot_topics.items())
+            }
+            self.zeroshot_topic_list = list(new_topic_id_to_zeroshot_topics.values())
 
         # Map topics
         documents.Topic = new_topics
