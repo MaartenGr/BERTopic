@@ -4071,7 +4071,11 @@ class BERTopic:
             topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics)
         elif isinstance(self.representation_model, dict):
             if self.representation_model.get("Main"):
-                topics = self.representation_model["Main"].extract_topics(self, documents, c_tf_idf, topics)
+                if isinstance(self.representation_model["Main"], list):
+                    for tuner in self.representation_model["Main"]:
+                        topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
+                else:
+                    topics = self.representation_model["Main"].extract_topics(self, documents, c_tf_idf, topics)            
         topics = {label: values[:self.top_n_words] for label, values in topics.items()}
 
         # Extract additional topic aspects
