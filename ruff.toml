@@ -14,5 +14,8 @@ ignore = [
   "D104"  # Missing docstring in public package
 ]
 
+[lint.per-file-ignores]
+"**/tests/*" = ["D"] # Ignore all docstring errors in tests
+
 [lint.pydocstyle]
 convention = "google"
