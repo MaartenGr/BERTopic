@@ -575,7 +575,7 @@ topic_model.visualize_topics_per_class(topics_per_class)
 <iframe src="topics_per_class.html" style="width:1400px; height: 1000px; border: 0px;""></iframe>
 
 
-## **Visualize Probablities or Distribution**
+## **Visualize Probabilities or Distribution**
 
 We can generate the topic-document probability matrix by simply setting `calculate_probabilities=True` if a HDBSCAN model is used:
 

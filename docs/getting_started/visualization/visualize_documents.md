@@ -69,7 +69,7 @@ fig = topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_em
 fig.savefig("path/to/file.png", bbox_inches="tight")
 ```
 
-## **Visualize Probablities or Distribution**
+## **Visualize Probabilities or Distribution**
 
 We can generate the topic-document probability matrix by simply setting `calculate_probabilities=True` if a HDBSCAN model is used:
 
