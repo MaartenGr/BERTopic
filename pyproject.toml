@@ -75,6 +75,7 @@ spacy = [
 test = [
     "pytest>=5.4.3",
     "pytest-cov>=2.6.1",
+    "ruff~=0.4.7",
 ]
 use = [
     "tensorflow",

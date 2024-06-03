@@ -1,0 +1,18 @@
+target-version = "py38"
+
+[lint]
+select = [  
+  "E4",  # Ruff Defaults
+  "E7",
+  "E9",
+  "F",   # End Ruff Defaults,
+  "D"
+]
+
+ignore = [
+  "D100", # Missing docstring in public module
+  "D104"  # Missing docstring in public package
+]
+
+[lint.pydocstyle]
+convention = "google"
