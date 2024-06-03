@@ -23,10 +23,6 @@ except ImportError:
     _has_hf_hub = False
 
 # Typing
-if sys.version_info >= (3, 8):
-    pass
-else:
-    pass
 from typing import Union
 
 # Pytorch check
