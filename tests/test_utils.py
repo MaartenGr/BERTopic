@@ -20,11 +20,7 @@ def test_logger():
 
 @pytest.mark.parametrize(
     "docs",
-    [
-        "A document not in an iterable",
-        [None],
-        5
-    ],
+    ["A document not in an iterable", [None], 5],
 )
 def test_check_documents_type(docs):
     with pytest.raises(TypeError):
@@ -33,8 +29,7 @@ def test_check_documents_type(docs):
 
 def test_check_embeddings_shape():
     docs = ["doc_one", "doc_two"]
-    embeddings = np.array([[1, 2, 3],
-                           [2, 3, 4]])
+    embeddings = np.array([[1, 2, 3], [2, 3, 4]])
     check_embeddings_shape(embeddings, docs)
     
 

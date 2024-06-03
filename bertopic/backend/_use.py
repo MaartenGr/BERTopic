@@ -23,6 +23,7 @@ class USEBackend(BaseEmbedder):
     use_embedder = USEBackend(embedding_model)
     ```
     """
+
     def __init__(self, embedding_model):
         super().__init__()
 
@@ -30,13 +31,13 @@ class USEBackend(BaseEmbedder):
             embedding_model(["test sentence"])
             self.embedding_model = embedding_model
         except TypeError:
-            raise ValueError("Please select a correct USE model: \n"
-                             "`import tensorflow_hub` \n"
-                             "`embedding_model = tensorflow_hub.load(path_to_model)`")
+            raise ValueError(
+                "Please select a correct USE model: \n"
+                "`import tensorflow_hub` \n"
+                "`embedding_model = tensorflow_hub.load(path_to_model)`"
+            )
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 

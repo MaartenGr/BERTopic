@@ -33,6 +33,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     sentence_model = SentenceTransformerBackend(embedding_model)
     ```
     """
+
     def __init__(self, embedding_model: Union[str, SentenceTransformer]):
         super().__init__()
 
@@ -43,13 +44,13 @@ class SentenceTransformerBackend(BaseEmbedder):
             self.embedding_model = SentenceTransformer(embedding_model)
             self._hf_model = embedding_model
         else:
-            raise ValueError("Please select a correct SentenceTransformers model: \n"
-                             "`from sentence_transformers import SentenceTransformer` \n"
-                             "`model = SentenceTransformer('all-MiniLM-L6-v2')`")
+            raise ValueError(
+                "Please select a correct SentenceTransformers model: \n"
+                "`from sentence_transformers import SentenceTransformer` \n"
+                "`model = SentenceTransformer('all-MiniLM-L6-v2')`"
+            )
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 

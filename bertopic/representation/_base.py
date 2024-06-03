@@ -6,12 +6,14 @@ from typing import Mapping, List, Tuple
 
 class BaseRepresentation(BaseEstimator):
     """The base representation model for fine-tuning topic representations"""
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
+
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, float]]]:
         """Extract topics
 
         Each representation model that inherits this class will have

@@ -4,12 +4,17 @@ import numpy as np
 import pandas as pd
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_get_topic(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     topics = [topic_model.get_topic(topic) for topic in set(topic_model.topics_)]
@@ -21,12 +26,18 @@ def test_get_topic(model, request):
     assert len(topics) == len(topic_model.get_topic_info())
     assert not unknown_topic
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_get_topics(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     topics = topic_model.get_topics()
@@ -35,12 +46,17 @@ def test_get_topics(model, request):
     assert len(topics.keys()) == len(set(topic_model.topics_))
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_get_topic_freq(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     for topic in set(topic_model.topics_):
@@ -48,7 +64,7 @@ def test_get_topic_freq(model, request):
 
     topic_freq = topic_model.get_topic_freq()
     unique_topics = set(topic_model.topics_)
-    topics_in_mapper = set(np.array(topic_model.topic_mapper_.mappings_)[: ,-1])
+    topics_in_mapper = set(np.array(topic_model.topic_mapper_.mappings_)[:, -1])
 
     assert isinstance(topic_freq, pd.DataFrame)
 
@@ -57,10 +73,15 @@ def test_get_topic_freq(model, request):
     assert len(unique_topics.difference(topics_in_mapper)) == 0
 
 
-@pytest.mark.parametrize('model', [('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+    ],
+)
 def test_get_representative_docs(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     all_docs = topic_model.get_representative_docs()
@@ -79,12 +100,17 @@ def test_get_representative_docs(model, request):
     assert len(topics.difference(topics_in_mapper)) == 0
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_get_topic_info(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     info = topic_model.get_topic_info()

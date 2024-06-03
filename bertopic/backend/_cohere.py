@@ -39,12 +39,15 @@ class CohereBackend(BaseEmbedder):
     )
     ```
     """
-    def __init__(self,
-                 client,
-                 embedding_model: str = "large",
-                 delay_in_seconds: float = None,
-                 batch_size: int = None,
-                 embed_kwargs: Mapping[str, Any] = {}):
+
+    def __init__(
+        self,
+        client,
+        embedding_model: str = "large",
+        delay_in_seconds: float = None,
+        batch_size: int = None,
+        embed_kwargs: Mapping[str, Any] = {},
+    ):
         super().__init__()
         self.client = client
         self.embedding_model = embedding_model
@@ -57,9 +60,7 @@ class CohereBackend(BaseEmbedder):
         else:
             self.embed_kwargs["model"] = self.embedding_model
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -90,4 +91,4 @@ class CohereBackend(BaseEmbedder):
 
     def _chunks(self, documents):
         for i in range(0, len(documents), self.batch_size):
-            yield documents[i:i + self.batch_size]
+            yield documents[i : i + self.batch_size]

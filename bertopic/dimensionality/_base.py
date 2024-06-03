@@ -18,6 +18,7 @@ class BaseDimensionalityReduction:
     topic_model = BERTopic(umap_model=empty_reduction_model)
     ```
     """
+
     def fit(self, X: np.ndarray = None):
         return self
 

@@ -5,19 +5,15 @@ from bertopic.backend._utils import select_backend
 
 
 class WordDocEmbedder(BaseEmbedder):
-    """Combine a document- and word-level embedder
-    """
-    def __init__(self,
-                 embedding_model,
-                 word_embedding_model):
+    """Combine a document- and word-level embedder"""
+
+    def __init__(self, embedding_model, word_embedding_model):
         super().__init__()
 
         self.embedding_model = select_backend(embedding_model)
         self.word_embedding_model = select_backend(word_embedding_model)
 
-    def embed_words(self,
-                    words: List[str],
-                    verbose: bool = False) -> np.ndarray:
+    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings
 
@@ -32,9 +28,7 @@ class WordDocEmbedder(BaseEmbedder):
         """
         return self.word_embedding_model.embed(words, verbose)
 
-    def embed_documents(self,
-                        document: List[str],
-                        verbose: bool = False) -> np.ndarray:
+    def embed_documents(self, document: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings
 

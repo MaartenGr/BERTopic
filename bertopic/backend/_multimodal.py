@@ -1,4 +1,3 @@
-
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
@@ -11,13 +10,13 @@ from bertopic.backend import BaseEmbedder
 class MultiModalBackend(BaseEmbedder):
     """Multimodal backend using Sentence-transformers
 
-    The sentence-transformers embedding model used for 
-    generating word, document, and image embeddings.  
+    The sentence-transformers embedding model used for
+    generating word, document, and image embeddings.
 
     Arguments:
-        embedding_model: A sentence-transformers embedding model that 
+        embedding_model: A sentence-transformers embedding model that
                          can either embed both images and text or only text.
-                         If it only embeds text, then `image_model` needs 
+                         If it only embeds text, then `image_model` needs
                          to be used to embed the images.
         image_model: A sentence-transformers embedding model that is used
                      to embed only images.
@@ -42,22 +41,27 @@ class MultiModalBackend(BaseEmbedder):
     sentence_model = MultiModalBackend(embedding_model)
     ```
     """
-    def __init__(self, 
-                 embedding_model: Union[str, SentenceTransformer], 
-                 image_model: Union[str, SentenceTransformer] = None,
-                 batch_size: int = 32):
+
+    def __init__(
+        self,
+        embedding_model: Union[str, SentenceTransformer],
+        image_model: Union[str, SentenceTransformer] = None,
+        batch_size: int = 32,
+    ):
         super().__init__()
         self.batch_size = batch_size
-        
+
         # Text or Text+Image model
         if isinstance(embedding_model, SentenceTransformer):
             self.embedding_model = embedding_model
         elif isinstance(embedding_model, str):
             self.embedding_model = SentenceTransformer(embedding_model)
         else:
-            raise ValueError("Please select a correct SentenceTransformers model: \n"
-                             "`from sentence_transformers import SentenceTransformer` \n"
-                             "`model = SentenceTransformer('clip-ViT-B-32')`")
+            raise ValueError(
+                "Please select a correct SentenceTransformers model: \n"
+                "`from sentence_transformers import SentenceTransformer` \n"
+                "`model = SentenceTransformer('clip-ViT-B-32')`"
+            )
 
         # Image Model
         self.image_model = None
@@ -67,10 +71,12 @@ class MultiModalBackend(BaseEmbedder):
             elif isinstance(image_model, str):
                 self.image_model = SentenceTransformer(image_model)
             else:
-                raise ValueError("Please select a correct SentenceTransformers model: \n"
-                                "`from sentence_transformers import SentenceTransformer` \n"
-                                "`model = SentenceTransformer('clip-ViT-B-32')`")
-            
+                raise ValueError(
+                    "Please select a correct SentenceTransformers model: \n"
+                    "`from sentence_transformers import SentenceTransformer` \n"
+                    "`model = SentenceTransformer('clip-ViT-B-32')`"
+                )
+
         try:
             self.tokenizer = self.embedding_model._first_module().processor.tokenizer
         except AttributeError:
@@ -78,10 +84,9 @@ class MultiModalBackend(BaseEmbedder):
         except:
             self.tokenizer = None
 
-    def embed(self,
-              documents: List[str],
-              images: List[str] = None,
-              verbose: bool = False) -> np.ndarray:
+    def embed(
+        self, documents: List[str], images: List[str] = None, verbose: bool = False
+    ) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -114,10 +119,10 @@ class MultiModalBackend(BaseEmbedder):
             return doc_embeddings
         elif image_embeddings is not None:
             return image_embeddings
-    
-    def embed_documents(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
+
+    def embed_documents(
+        self, documents: List[str], verbose: bool = False
+    ) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
@@ -130,9 +135,11 @@ class MultiModalBackend(BaseEmbedder):
             that each have an embeddings size of `m`
         """
         truncated_docs = [self._truncate_document(doc) for doc in documents]
-        embeddings = self.embedding_model.encode(truncated_docs, show_progress_bar=verbose)
+        embeddings = self.embedding_model.encode(
+            truncated_docs, show_progress_bar=verbose
+        )
         return embeddings
-    
+
     def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings
@@ -145,9 +152,9 @@ class MultiModalBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        embeddings = self.embedding_model.encode(words, show_progress_bar=verbose)    
+        embeddings = self.embedding_model.encode(words, show_progress_bar=verbose)
         return embeddings
-    
+
     def embed_images(self, images, verbose):
         if self.batch_size:
             nr_iterations = int(np.ceil(len(images) / self.batch_size))
@@ -158,11 +165,16 @@ class MultiModalBackend(BaseEmbedder):
                 start_index = i * self.batch_size
                 end_index = (i * self.batch_size) + self.batch_size
 
-                images_to_embed = [Image.open(image) if isinstance(image, str) else image for image in images[start_index:end_index]]
+                images_to_embed = [
+                    Image.open(image) if isinstance(image, str) else image
+                    for image in images[start_index:end_index]
+                ]
                 if self.image_model is not None:
                     img_emb = self.image_model.encode(images_to_embed)
                 else:
-                    img_emb = self.embedding_model.encode(images_to_embed, show_progress_bar=False)
+                    img_emb = self.embedding_model.encode(
+                        images_to_embed, show_progress_bar=False
+                    )
                 embeddings.extend(img_emb.tolist())
 
                 # Close images
@@ -175,9 +187,11 @@ class MultiModalBackend(BaseEmbedder):
             if self.image_model is not None:
                 embeddings = self.image_model.encode(images_to_embed)
             else:
-                embeddings = self.embedding_model.encode(images_to_embed, show_progress_bar=False)
+                embeddings = self.embedding_model.encode(
+                    images_to_embed, show_progress_bar=False
+                )
         return embeddings
-    
+
     def _truncate_document(self, document):
         if self.tokenizer:
             tokens = self.tokenizer.encode(document)

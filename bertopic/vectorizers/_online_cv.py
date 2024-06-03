@@ -67,10 +67,8 @@ class OnlineCountVectorizer(CountVectorizer):
     References:
         Adapted from: https://github.com/idoshlomo/online_vectorizers
     """
-    def __init__(self,
-                 decay: float = None,
-                 delete_min_df: float = None,
-                 **kwargs):
+
+    def __init__(self, decay: float = None, delete_min_df: float = None, **kwargs):
         self.decay = decay
         self.delete_min_df = delete_min_df
         super(OnlineCountVectorizer, self).__init__(**kwargs)
@@ -81,7 +79,7 @@ class OnlineCountVectorizer(CountVectorizer):
         Arguments:
             raw_documents: A list of documents
         """
-        if not hasattr(self, 'vocabulary_'):
+        if not hasattr(self, "vocabulary_"):
             return self.fit(raw_documents)
 
         analyzer = self.build_analyzer()
@@ -91,7 +89,12 @@ class OnlineCountVectorizer(CountVectorizer):
 
         if oov_tokens:
             max_index = max(self.vocabulary_.values())
-            oov_vocabulary = dict(zip(oov_tokens, list(range(max_index + 1, max_index + 1 + len(oov_tokens), 1))))
+            oov_vocabulary = dict(
+                zip(
+                    oov_tokens,
+                    list(range(max_index + 1, max_index + 1 + len(oov_tokens), 1)),
+                )
+            )
             self.vocabulary_.update(oov_vocabulary)
 
         return self
@@ -118,11 +121,15 @@ class OnlineCountVectorizer(CountVectorizer):
             X = self.transform(raw_documents)
 
             # Add empty columns if new words are found
-            columns = csr_matrix((self.X_.shape[0], X.shape[1] - self.X_.shape[1]), dtype=int)
+            columns = csr_matrix(
+                (self.X_.shape[0], X.shape[1] - self.X_.shape[1]), dtype=int
+            )
             self.X_ = sparse.hstack([self.X_, columns])
 
             # Add empty rows if new topics are found
-            rows = csr_matrix((X.shape[0] - self.X_.shape[0], self.X_.shape[1]), dtype=int)
+            rows = csr_matrix(
+                (X.shape[0] - self.X_.shape[0], self.X_.shape[1]), dtype=int
+            )
             self.X_ = sparse.vstack([self.X_, rows])
 
             # Decay of BoW matrix

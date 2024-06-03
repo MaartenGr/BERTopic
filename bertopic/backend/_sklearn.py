@@ -12,14 +12,14 @@ class SklearnEmbedder(BaseEmbedder):
         pipe: A scikit-learn pipeline that can `.transform()` text.
 
     Examples:
-    Scikit-Learn is very flexible and it allows for many representations. 
-    A relatively simple pipeline is shown below. 
+    Scikit-Learn is very flexible and it allows for many representations.
+    A relatively simple pipeline is shown below.
 
     ```python
     from sklearn.pipeline import make_pipeline
     from sklearn.decomposition import TruncatedSVD
     from sklearn.feature_extraction.text import TfidfVectorizer
-    
+
     from bertopic.backend import SklearnEmbedder
 
     pipe = make_pipeline(
@@ -32,16 +32,17 @@ class SklearnEmbedder(BaseEmbedder):
     ```
 
     This pipeline first constructs a sparse representation based on TF/idf and then
-    makes it dense by applying SVD. Alternatively, you might also construct something 
+    makes it dense by applying SVD. Alternatively, you might also construct something
     more elaborate. As long as you construct a scikit-learn compatible pipeline, you
-    should be able to pass it to Bertopic. 
+    should be able to pass it to Bertopic.
 
-    !!! Warning 
+    !!! Warning
         One caveat to be aware of is that scikit-learns base `Pipeline` class does not
         support the `.partial_fit()`-API. If you have a pipeline that theoretically should
         be able to support online learning then you might want to explore
-        the [scikit-partial](https://github.com/koaning/scikit-partial) project. 
+        the [scikit-partial](https://github.com/koaning/scikit-partial) project.
     """
+
     def __init__(self, pipe):
         super().__init__()
         self.pipe = pipe
@@ -58,10 +59,10 @@ class SklearnEmbedder(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        try: 
+        try:
             check_is_fitted(self.pipe)
             embeddings = self.pipe.transform(documents)
         except NotFittedError:
             embeddings = self.pipe.fit_transform(documents)
 
-        return embeddings 
+        return embeddings
