@@ -5,7 +5,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class SpacyBackend(BaseEmbedder):
-    """ Spacy embedding model
+    """Spacy embedding model
 
     The Spacy embedding model used for generating document and
     word embeddings.
@@ -14,7 +14,6 @@ class SpacyBackend(BaseEmbedder):
         embedding_model: A spacy embedding model
 
     Examples:
-
     To create a Spacy backend, you need to create an nlp object and
     pass it through this backend:
 
@@ -62,7 +61,7 @@ class SpacyBackend(BaseEmbedder):
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:

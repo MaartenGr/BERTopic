@@ -18,7 +18,7 @@ def visualize_documents(topic_model,
                         title: str = "<b>Documents and Topics</b>",
                         width: int = 1200,
                         height: int = 750):
-    """ Visualize documents and their topics in 2D
+    """Visualize documents and their topics in 2D
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -44,7 +44,6 @@ def visualize_documents(topic_model,
         height: The height of the figure.
 
     Examples:
-
     To visualize the topics simply run:
 
     ```python

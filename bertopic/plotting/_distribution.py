@@ -10,7 +10,7 @@ def visualize_distribution(topic_model,
                            title: str = "<b>Topic Probability Distribution</b>",
                            width: int = 800,
                            height: int = 600) -> go.Figure:
-    """ Visualize the distribution of topic probabilities
+    """Visualize the distribution of topic probabilities
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -25,7 +25,6 @@ def visualize_distribution(topic_model,
         height: The height of the figure.
 
     Examples:
-
     Make sure to fit the model before and only input the
     probabilities of a single document:
 

@@ -1,7 +1,7 @@
 import pandas as pd
 from langchain.docstore.document import Document
 from scipy.sparse import csr_matrix
-from typing import Callable, Dict, Mapping, List, Tuple, Union
+from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
@@ -10,7 +10,7 @@ DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
 
 class LangChain(BaseRepresentation):
-    """ Using chains in langchain to generate topic labels.
+    """Using chains in langchain to generate topic labels.
 
     The classic example uses `langchain.chains.question_answering.load_qa_chain`.
     This returns a chain that takes a list of documents and a question as input.
@@ -153,7 +153,7 @@ class LangChain(BaseRepresentation):
                        c_tf_idf: csr_matrix,
                        topics: Mapping[str, List[Tuple[str, float]]]
                        ) -> Mapping[str, List[Tuple[str, int]]]:
-        """ Extract topics
+        """Extract topics
 
         Arguments:
             topic_model: A BERTopic model

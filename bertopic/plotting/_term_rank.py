@@ -10,7 +10,7 @@ def visualize_term_rank(topic_model,
                         title: str = "<b>Term score decline per Topic</b>",
                         width: int = 800,
                         height: int = 500) -> go.Figure:
-    """ Visualize the ranks of all terms across all topics
+    """Visualize the ranks of all terms across all topics
 
     Each topic is represented by a set of words. These words, however,
     do not all equally represent the topic. This visualization shows
@@ -33,7 +33,6 @@ def visualize_term_rank(topic_model,
         fig: A plotly figure
 
     Examples:
-
     To visualize the ranks of all words across
     all topics simply run:
 
@@ -62,7 +61,6 @@ def visualize_term_rank(topic_model,
     Reference to that specific analysis can be found
     [here](https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html).
     """
-
     topics = [] if topics is None else topics
 
     topic_ids = topic_model.get_topic_info().Topic.unique().tolist()

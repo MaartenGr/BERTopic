@@ -10,7 +10,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class HFTransformerBackend(BaseEmbedder):
-    """ Hugging Face transformers model
+    """Hugging Face transformers model
 
     This uses the `transformers.pipelines.pipeline` to define and create 
     a feature generation pipeline from which embeddings can be extracted. 
@@ -19,7 +19,6 @@ class HFTransformerBackend(BaseEmbedder):
         embedding_model: A Hugging Face feature extraction pipeline
 
     Examples:
-
     To use a Hugging Face transformers model, load in a pipeline and point 
     to any model found on their model hub (https://huggingface.co/models):
 
@@ -43,7 +42,7 @@ class HFTransformerBackend(BaseEmbedder):
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:
@@ -66,7 +65,7 @@ class HFTransformerBackend(BaseEmbedder):
     def _embed(self,
                document: str,
                features: np.ndarray) -> np.ndarray:
-        """ Mean pooling
+        """Mean pooling
 
         Arguments:
             document: The document for which to extract the attention mask
@@ -85,7 +84,7 @@ class HFTransformerBackend(BaseEmbedder):
 
 
 class MyDataset(Dataset):
-    """ Dataset to pass to `transformers.pipelines.pipeline` """
+    """Dataset to pass to `transformers.pipelines.pipeline`"""
     def __init__(self, docs):
         self.docs = docs
 

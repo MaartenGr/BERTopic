@@ -6,10 +6,9 @@ from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans, MiniBatchKMeans
-from sklearn.decomposition import PCA, IncrementalPCA
+from sklearn.decomposition import PCA
 from bertopic.vectorizers import OnlineCountVectorizer
 from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
-from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
 

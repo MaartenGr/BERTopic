@@ -9,7 +9,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 
 class OnlineCountVectorizer(CountVectorizer):
-    """ An online variant of the CountVectorizer with updating vocabulary.
+    """An online variant of the CountVectorizer with updating vocabulary.
 
     At each `.partial_fit`, its vocabulary is updated based on any OOV words
     it might find. Then, `.update_bow` can be used to track and update
@@ -42,7 +42,6 @@ class OnlineCountVectorizer(CountVectorizer):
         X_ (scipy.sparse.csr_matrix) : The Bag-of-Words representation
 
     Examples:
-
     ```python
     from bertopic.vectorizers import OnlineCountVectorizer
     vectorizer = OnlineCountVectorizer(stop_words="english")
@@ -77,7 +76,7 @@ class OnlineCountVectorizer(CountVectorizer):
         super(OnlineCountVectorizer, self).__init__(**kwargs)
 
     def partial_fit(self, raw_documents: List[str]) -> None:
-        """ Perform a partial fit and update vocabulary with OOV tokens
+        """Perform a partial fit and update vocabulary with OOV tokens
 
         Arguments:
             raw_documents: A list of documents
@@ -98,7 +97,7 @@ class OnlineCountVectorizer(CountVectorizer):
         return self
 
     def update_bow(self, raw_documents: List[str]) -> csr_matrix:
-        """ Create or update the bag-of-words matrix
+        """Create or update the bag-of-words matrix
 
         Update the bag-of-words matrix by adding the newly transformed
         documents. This may add empty columns if new words are found and/or
@@ -140,7 +139,7 @@ class OnlineCountVectorizer(CountVectorizer):
         return self.X_
 
     def _clean_bow(self) -> None:
-        """ Remove words that do not exceed `self.delete_min_df` """
+        """Remove words that do not exceed `self.delete_min_df`"""
         # Only keep words with a minimum frequency
         indices = np.where(self.X_.sum(0) >= self.delete_min_df)[1]
         indices_dict = {index: index for index in indices}

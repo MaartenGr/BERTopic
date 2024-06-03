@@ -6,7 +6,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class CohereBackend(BaseEmbedder):
-    """ Cohere Embedding Model
+    """Cohere Embedding Model
 
     Arguments:
         client: A `cohere` client.
@@ -21,7 +21,6 @@ class CohereBackend(BaseEmbedder):
                             such as `input_type`
 
     Examples:
-
     ```python
     import cohere
     from bertopic.backend import CohereBackend
@@ -61,7 +60,7 @@ class CohereBackend(BaseEmbedder):
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:

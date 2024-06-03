@@ -7,7 +7,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class OpenAIBackend(BaseEmbedder):
-    """ OpenAI Embedding Model
+    """OpenAI Embedding Model
 
     Arguments:
         client: A `openai.OpenAI` client.
@@ -22,7 +22,6 @@ class OpenAIBackend(BaseEmbedder):
                           deployment_ids.
 
     Examples:
-
     ```python
     import openai
     from bertopic.backend import OpenAIBackend
@@ -52,7 +51,7 @@ class OpenAIBackend(BaseEmbedder):
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:

@@ -13,7 +13,7 @@ def visualize_topics_over_time(topic_model,
                                title: str = "<b>Topics over Time</b>",
                                width: int = 1250,
                                height: int = 450) -> go.Figure:
-    """ Visualize topics over time
+    """Visualize topics over time
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -33,7 +33,6 @@ def visualize_topics_over_time(topic_model,
         A plotly.graph_objects.Figure including all traces
 
     Examples:
-
     To visualize the topics over time, simply run:
 
     ```python

@@ -22,7 +22,7 @@ def visualize_hierarchical_documents(topic_model,
                                      title: str = "<b>Hierarchical Documents and Topics</b>",
                                      width: int = 1200,
                                      height: int = 750) -> go.Figure:
-    """ Visualize documents and their topics in 2D at different levels of hierarchy
+    """Visualize documents and their topics in 2D at different levels of hierarchy
 
     Arguments:
         docs: The documents you used when calling either `fit` or `fit_transform`
@@ -62,7 +62,6 @@ def visualize_hierarchical_documents(topic_model,
         height: The height of the figure.
 
     Examples:
-
     To visualize the topics simply run:
 
     ```python
@@ -104,7 +103,7 @@ def visualize_hierarchical_documents(topic_model,
     fig.write_html("path/to/file.html")
     ```
 
-    NOTE:
+    Note:
         This visualization was inspired by the scatter plot representation of Doc2Map:
         https://github.com/louisgeisler/Doc2Map
 

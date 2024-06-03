@@ -13,7 +13,7 @@ def visualize_topics_per_class(topic_model,
                                title: str = "<b>Topics per Class</b>",
                                width: int = 1250,
                                height: int = 900) -> go.Figure:
-    """ Visualize topics per class
+    """Visualize topics per class
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -33,7 +33,6 @@ def visualize_topics_per_class(topic_model,
         A plotly.graph_objects.Figure including all traces
 
     Examples:
-
     To visualize the topics per class, simply run:
 
     ```python

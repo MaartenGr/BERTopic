@@ -3,7 +3,7 @@ import time
 
 
 def truncate_document(topic_model, doc_length, tokenizer, document: str):
-    """ Truncate a document to a certain length
+    """Truncate a document to a certain length
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and
     `encode` method. An example would be the following custom tokenizer:
@@ -79,7 +79,7 @@ def retry_with_exponential_backoff(
                 return func(*args, **kwargs)
  
             # Retry on specific errors
-            except errors as e:
+            except errors:
                 # Increment retries
                 num_retries += 1
  

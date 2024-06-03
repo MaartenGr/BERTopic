@@ -23,7 +23,7 @@ def visualize_document_datamap(topic_model,
                                width: int = 1200,
                                height: int = 1200,
                                **datamap_kwds) -> Figure:
-    """ Visualize documents and their topics in 2D as a static plot for publication using
+    """Visualize documents and their topics in 2D as a static plot for publication using
     DataMapPlot.
 
     Arguments:
@@ -51,7 +51,6 @@ def visualize_document_datamap(topic_model,
         figure: A Matplotlib Figure object.
 
     Examples:
-
     To visualize the topics simply run:
 
     ```python
@@ -94,7 +93,6 @@ def visualize_document_datamap(topic_model,
     <img src="../../getting_started/visualization/datamapplot.png",
          alt="DataMapPlot of 20-Newsgroups", width=800, height=800></img>
     """
-
     topic_per_doc = topic_model.topics_
 
     df = pd.DataFrame({"topic": np.array(topic_per_doc)})

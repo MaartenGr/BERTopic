@@ -3,7 +3,7 @@ import numpy as np
 
 
 def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
-    """ Function used to select the HDBSCAN-like model for generating 
+    """Function used to select the HDBSCAN-like model for generating
     predictions and probabilities.
 
     Arguments:
@@ -15,7 +15,6 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         embeddings: Input embeddings for "approximate_predict"
                     and "membership_vector"
     """
-
     # Approximate predict
     if func == "approximate_predict":
         if isinstance(model, hdbscan.HDBSCAN):
@@ -59,7 +58,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
 
 
 def is_supported_hdbscan(model):
-    """ Check whether the input model is a supported HDBSCAN-like model """
+    """Check whether the input model is a supported HDBSCAN-like model"""
     if isinstance(model, hdbscan.HDBSCAN):
         return True
 

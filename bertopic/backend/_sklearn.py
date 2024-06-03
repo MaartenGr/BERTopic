@@ -3,7 +3,7 @@ from sklearn.utils.validation import check_is_fitted, NotFittedError
 
 
 class SklearnEmbedder(BaseEmbedder):
-    """ Scikit-Learn based embedding model
+    """Scikit-Learn based embedding model
 
     This component allows the usage of scikit-learn pipelines for generating document and
     word embeddings.
@@ -12,7 +12,6 @@ class SklearnEmbedder(BaseEmbedder):
         pipe: A scikit-learn pipeline that can `.transform()` text.
 
     Examples:
-
     Scikit-Learn is very flexible and it allows for many representations. 
     A relatively simple pipeline is shown below. 
 
@@ -48,7 +47,7 @@ class SklearnEmbedder(BaseEmbedder):
         self.pipe = pipe
 
     def embed(self, documents, verbose=False):
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:

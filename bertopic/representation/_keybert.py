@@ -16,7 +16,7 @@ class KeyBERTInspired(BaseRepresentation):
                  nr_samples: int = 500,
                  nr_candidate_words: int = 100,
                  random_state: int = 42):
-        """ Use a KeyBERT-like model to fine-tune the topic representations
+        """Use a KeyBERT-like model to fine-tune the topic representations
 
         The algorithm follows KeyBERT but does some optimization in
         order to speed up inference.
@@ -69,7 +69,7 @@ class KeyBERTInspired(BaseRepresentation):
                        c_tf_idf: csr_matrix,
                        topics: Mapping[str, List[Tuple[str, float]]]
                        ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topics
+        """Extract topics
 
         Arguments:
             topic_model: A BERTopic model
@@ -100,7 +100,7 @@ class KeyBERTInspired(BaseRepresentation):
                                  c_tf_idf: csr_matrix,
                                  topics: Mapping[str, List[Tuple[str, float]]]
                                  ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ For each topic, extract candidate words based on the c-TF-IDF
+        """For each topic, extract candidate words based on the c-TF-IDF
         representation.
 
         Arguments:
@@ -143,7 +143,7 @@ class KeyBERTInspired(BaseRepresentation):
                             representative_docs: List[str],
                             repr_doc_indices: List[List[int]]
                             ) -> Union[np.ndarray, List[str]]:
-        """ Extract the representative document embeddings and create topic embeddings.
+        """Extract the representative document embeddings and create topic embeddings.
         Then extract word embeddings and calculate the cosine similarity between topic
         embeddings and the word embeddings. Topic embeddings are the average of
         representative document embeddings.
@@ -175,7 +175,7 @@ class KeyBERTInspired(BaseRepresentation):
                            topics: Mapping[str, List[Tuple[str, float]]],
                            sim: np.ndarray
                            ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract the top n words per topic based on the
+        """Extract the top n words per topic based on the
         similarity matrix between topics and words.
 
         Arguments:

@@ -6,7 +6,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class SentenceTransformerBackend(BaseEmbedder):
-    """ Sentence-transformers embedding model
+    """Sentence-transformers embedding model
 
     The sentence-transformers embedding model used for generating document and
     word embeddings.
@@ -15,7 +15,6 @@ class SentenceTransformerBackend(BaseEmbedder):
         embedding_model: A sentence-transformers embedding model
 
     Examples:
-
     To create a model, you can load in a string pointing to a
     sentence-transformers model:
 
@@ -51,7 +50,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:

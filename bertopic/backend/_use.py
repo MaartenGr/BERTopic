@@ -6,7 +6,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class USEBackend(BaseEmbedder):
-    """ Universal Sentence Encoder
+    """Universal Sentence Encoder
 
     USE encodes text into high-dimensional vectors that
     are used for semantic similarity in BERTopic.
@@ -15,7 +15,6 @@ class USEBackend(BaseEmbedder):
         embedding_model: An USE embedding model
 
     Examples:
-
     ```python
     import tensorflow_hub
     from bertopic.backend import USEBackend
@@ -38,7 +37,7 @@ class USEBackend(BaseEmbedder):
     def embed(self,
               documents: List[str],
               verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings
 
         Arguments:

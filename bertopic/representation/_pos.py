@@ -14,7 +14,7 @@ from bertopic.representation._base import BaseRepresentation
 
 
 class PartOfSpeech(BaseRepresentation):
-    """ Extract Topic Keywords based on their Part-of-Speech
+    """Extract Topic Keywords based on their Part-of-Speech
 
     DEFAULT_PATTERNS = [
                 [{'POS': 'ADJ'}, {'POS': 'NOUN'}],
@@ -92,7 +92,7 @@ class PartOfSpeech(BaseRepresentation):
                        c_tf_idf: csr_matrix,
                        topics: Mapping[str, List[Tuple[str, float]]]
                        ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topics
+        """Extract topics
 
         Arguments:
             topic_model: A BERTopic model

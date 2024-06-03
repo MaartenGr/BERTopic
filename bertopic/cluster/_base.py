@@ -2,15 +2,14 @@ import numpy as np
 
 
 class BaseCluster:
-    """ The Base Cluster class
+    """The Base Cluster class
 
     Using this class directly in BERTopic will make it skip
     over the cluster step. As a result, topics need to be passed 
     to BERTopic in the form of its `y` parameter in order to create 
     topic representations. 
 
-    Examples:    
-
+    Examples:
     This will skip over the cluster step in BERTopic:
 
     ```python

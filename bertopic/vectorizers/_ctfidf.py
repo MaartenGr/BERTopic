@@ -7,8 +7,7 @@ import scipy.sparse as sp
 
 
 class ClassTfidfTransformer(TfidfTransformer):
-    """
-    A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.
+    """A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.
 
     ![](../algorithm/c-TF-IDF.svg)
 
@@ -34,7 +33,6 @@ class ClassTfidfTransformer(TfidfTransformer):
                          are multiplied.
 
     Examples:
-
     ```python
     transformer = ClassTfidfTransformer()
     ```

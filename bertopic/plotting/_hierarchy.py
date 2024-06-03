@@ -3,7 +3,6 @@ import pandas as pd
 from typing import Callable, List, Union
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from scipy.spatial.distance import squareform
 from sklearn.metrics.pairwise import cosine_similarity
 
 from bertopic._utils import select_topic_representation
@@ -26,7 +25,7 @@ def visualize_hierarchy(topic_model,
                         linkage_function: Callable[[csr_matrix], np.ndarray] = None,
                         distance_function: Callable[[csr_matrix], csr_matrix] = None,
                         color_threshold: int = 1) -> go.Figure:
-    """ Visualize a hierarchical structure of the topics
+    """Visualize a hierarchical structure of the topics
 
     A ward linkage function is used to perform the
     hierarchical clustering based on the cosine distance
@@ -73,7 +72,6 @@ def visualize_hierarchy(topic_model,
         fig: A plotly figure
 
     Examples:
-
     To visualize the hierarchical structure of
     topics simply run:
 
@@ -221,10 +219,9 @@ def _get_annotations(topic_model,
                      distance_function: Callable[[csr_matrix], csr_matrix],
                      orientation: str,
                      custom_labels: bool = False) -> List[List[str]]:
+    """Get annotations by replicating linkage function calculation in scipy
 
-    """ Get annotations by replicating linkage function calculation in scipy
-
-    Arguments
+    Arguments:
         topic_model: A fitted BERTopic instance.
         hierarchical_topics: A dataframe that contains a hierarchy of topics
                              represented by their parents and their children.

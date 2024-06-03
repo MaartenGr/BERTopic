@@ -16,7 +16,7 @@ def visualize_topics(topic_model,
                      title: str = "<b>Intertopic Distance Map</b>",
                      width: int = 650,
                      height: int = 650) -> go.Figure:
-    """ Visualize topics, their sizes, and their corresponding words
+    """Visualize topics, their sizes, and their corresponding words
 
     This visualization is highly inspired by LDAvis, a great visualization
     technique typically reserved for LDA.
@@ -34,7 +34,6 @@ def visualize_topics(topic_model,
         height: The height of the figure.
 
     Examples:
-
     To visualize the topics simply run:
 
     ```python
@@ -99,7 +98,7 @@ def _plotly_topic_visualization(df: pd.DataFrame,
                                 title: str,
                                 width: int,
                                 height: int):
-    """ Create plotly-based visualization of topics with a slider for topic selection """
+    """Create plotly-based visualization of topics with a slider for topic selection"""
 
     def get_color(topic_selected):
         if topic_selected == -1:

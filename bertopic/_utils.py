@@ -38,7 +38,7 @@ class MyLogger:
 
 
 def check_documents_type(documents):
-    """ Check whether the input documents are indeed a list of strings """
+    """Check whether the input documents are indeed a list of strings"""
     if isinstance(documents, pd.DataFrame):
         raise TypeError("Make sure to supply a list of strings, not a dataframe.")
     elif isinstance(documents, Iterable) and not isinstance(documents, str):
@@ -49,7 +49,7 @@ def check_documents_type(documents):
 
 
 def check_embeddings_shape(embeddings, docs):
-    """ Check if the embeddings have the correct shape """
+    """Check if the embeddings have the correct shape"""
     if embeddings is not None:
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
             raise ValueError("Make sure to input embeddings as a numpy array or scipy.sparse.csr.csr_matrix. ")
@@ -61,7 +61,7 @@ def check_embeddings_shape(embeddings, docs):
 
 
 def check_is_fitted(topic_model):
-    """ Checks if the model was fitted by verifying the presence of self.matches
+    """Checks if the model was fitted by verifying the presence of self.matches
 
     Arguments:
         model: BERTopic instance for which the check is performed.
@@ -80,8 +80,7 @@ def check_is_fitted(topic_model):
 
 
 class NotInstalled:
-    """
-    This object is used to notify the user that additional dependencies need to be
+    """This object is used to notify the user that additional dependencies need to be
     installed in order to use the string matching model.
     """
 
@@ -104,7 +103,7 @@ class NotInstalled:
 
 
 def validate_distance_matrix(X, n_samples):
-    """ Validate the distance matrix and convert it to a condensed distance matrix
+    """Validate the distance matrix and convert it to a condensed distance matrix
     if necessary.
 
     A valid distance matrix is either a square matrix of shape (n_samples, n_samples)

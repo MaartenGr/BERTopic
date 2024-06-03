@@ -5,7 +5,7 @@ from bertopic.backend._utils import select_backend
 
 
 class WordDocEmbedder(BaseEmbedder):
-    """ Combine a document- and word-level embedder
+    """Combine a document- and word-level embedder
     """
     def __init__(self,
                  embedding_model,
@@ -18,7 +18,7 @@ class WordDocEmbedder(BaseEmbedder):
     def embed_words(self,
                     words: List[str],
                     verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n words into an n-dimensional
+        """Embed a list of n words into an n-dimensional
         matrix of embeddings
 
         Arguments:
@@ -35,7 +35,7 @@ class WordDocEmbedder(BaseEmbedder):
     def embed_documents(self,
                         document: List[str],
                         verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n words into an n-dimensional
+        """Embed a list of n words into an n-dimensional
         matrix of embeddings
 
         Arguments:

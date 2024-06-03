@@ -15,7 +15,7 @@ def visualize_barchart(topic_model,
                        width: int = 250,
                        height: int = 250,
                        autoscale: bool=False) -> go.Figure:
-    """ Visualize a barchart of selected topics
+    """Visualize a barchart of selected topics
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -34,7 +34,6 @@ def visualize_barchart(topic_model,
         fig: A plotly figure
 
     Examples:
-
     To visualize the barchart of selected topics
     simply run:
 

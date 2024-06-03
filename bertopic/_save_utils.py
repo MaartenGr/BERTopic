@@ -19,10 +19,10 @@ except ImportError:
 
 # Typing
 if sys.version_info >= (3, 8):
-    from typing import Literal
+    pass
 else:
-    from typing_extensions import Literal
-from typing import Union, Mapping, Any
+    pass
+from typing import Union
 
 # Pytorch check
 try:
@@ -115,7 +115,7 @@ def push_to_hf_hub(
         save_embedding_model: Union[str, bool] = True,
         save_ctfidf: bool = False,
         ):
-    """ Push your BERTopic model to a HuggingFace Hub
+    """Push your BERTopic model to a HuggingFace Hub
 
     Arguments:
         repo_id: The name of your HuggingFace repository
@@ -161,7 +161,7 @@ def push_to_hf_hub(
 
 
 def load_local_files(path):
-    """ Load local BERTopic files """
+    """Load local BERTopic files"""
     # Load json configs
     topics = load_cfg_from_json(path / TOPICS_NAME)
     params = load_cfg_from_json(path / CONFIG_NAME)
@@ -209,7 +209,7 @@ def load_local_files(path):
 
 
 def load_files_from_hf(path):
-    """ Load files from HuggingFace. """
+    """Load files from HuggingFace."""
     path = str(path)
 
     # Configs
@@ -256,7 +256,7 @@ def load_files_from_hf(path):
 
 
 def generate_readme(model, repo_id: str):
-    """ Generate README for HuggingFace model card """
+    """Generate README for HuggingFace model card"""
     model_card = MODEL_CARD_TEMPLATE
     topic_table_head = "| Topic ID | Topic Keywords | Topic Frequency | Label | \n|----------|----------------|-----------------|-------| \n"
 
@@ -300,7 +300,7 @@ def generate_readme(model, repo_id: str):
 
 
 def save_hf(model, save_directory, serialization: str):
-    """ Save topic embeddings, either safely (using safetensors) or using legacy pytorch """
+    """Save topic embeddings, either safely (using safetensors) or using legacy pytorch"""
     tensors = torch.from_numpy(np.array(model.topic_embeddings_, dtype=np.float32))
     tensors = {"topic_embeddings": tensors}
 
@@ -314,7 +314,7 @@ def save_hf(model, save_directory, serialization: str):
 def save_ctfidf(model,
                 save_directory: str,
                 serialization: str):
-    """ Save c-TF-IDF sparse matrix """
+    """Save c-TF-IDF sparse matrix"""
     indptr = torch.from_numpy(model.c_tf_idf_.indptr)
     indices = torch.from_numpy(model.c_tf_idf_.indices)
     data = torch.from_numpy(model.c_tf_idf_.data)
@@ -336,7 +336,7 @@ def save_ctfidf(model,
 
 
 def save_ctfidf_config(model, path):
-    """ Save parameters to recreate CountVectorizer and c-TF-IDF """
+    """Save parameters to recreate CountVectorizer and c-TF-IDF"""
     config = {}
 
     # Recreate ClassTfidfTransformer
@@ -361,7 +361,7 @@ def save_ctfidf_config(model, path):
 
 
 def save_config(model, path: str, embedding_model):
-    """ Save BERTopic configuration """
+    """Save BERTopic configuration"""
     path = Path(path)
     params = model.get_params()
     config = {param: value for param, value in params.items() if "model" not in param}
@@ -384,7 +384,7 @@ def check_has_visual_aspect(model):
                 return True
 
 def save_images(model, path: str):
-    """ Save topic images """
+    """Save topic images"""
     if _has_vision:
         visual_aspects = None
         for aspect, value in model.topic_aspects_.items():
@@ -399,7 +399,7 @@ def save_images(model, path: str):
 
 
 def save_topics(model, path: str):
-    """ Save Topic-specific information """
+    """Save Topic-specific information"""
     path = Path(path)
 
     if _has_vision:
@@ -428,7 +428,7 @@ def save_topics(model, path: str):
 
 
 def load_cfg_from_json(json_file: Union[str, os.PathLike]):
-    """ Load configuration from json """
+    """Load configuration from json"""
     with open(json_file, "r", encoding="utf-8") as reader:
         text = reader.read()
     return json.loads(text)
@@ -445,7 +445,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 def get_package_versions():
-    """ Get versions of main dependencies of BERTopic """
+    """Get versions of main dependencies of BERTopic"""
     try:
         import platform
         from numpy import __version__ as np_version
@@ -473,7 +473,7 @@ def get_package_versions():
     
 
 def load_safetensors(path):
-    """ Load safetensors and check whether it is installed """
+    """Load safetensors and check whether it is installed"""
     try:
         import safetensors.torch
         import safetensors
@@ -483,7 +483,7 @@ def load_safetensors(path):
 
 
 def save_safetensors(path, tensors):
-    """ Save safetensors and check whether it is installed """
+    """Save safetensors and check whether it is installed"""
     try:
         import safetensors.torch
         import safetensors

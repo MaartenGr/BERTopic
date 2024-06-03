@@ -71,7 +71,7 @@ languages = [
 def select_backend(embedding_model,
                    language: str = None,
                    verbose: bool = False) -> BaseEmbedder:
-    """ Select an embedding model based on language or a specific provided model.
+    """Select an embedding model based on language or a specific provided model.
     When selecting a language, we choose all-MiniLM-L6-v2 for English and
     paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
     If sentence-transformers is not installed, in the case of a lightweight installation,
@@ -80,7 +80,6 @@ def select_backend(embedding_model,
     Returns:
         model: The selected model backend.
     """
-
     logger.set_level("INFO" if verbose else "WARNING")
 
     # BERTopic language backend
