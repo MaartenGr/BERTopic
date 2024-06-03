@@ -20,7 +20,7 @@ def visualize_documents(
     width: int = 1200,
     height: int = 750,
 ):
-    """Visualize documents and their topics in 2D
+    """Visualize documents and their topics in 2D.
 
     Arguments:
         topic_model: A fitted BERTopic instance.

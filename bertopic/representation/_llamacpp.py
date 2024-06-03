@@ -126,7 +126,7 @@ class LlamaCPP(BaseRepresentation):
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topic representations and return a single label
+        """Extract topic representations and return a single label.
 
         Arguments:
             topic_model: A BERTopic model

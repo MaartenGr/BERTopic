@@ -8,7 +8,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class MultiModalBackend(BaseEmbedder):
-    """Multimodal backend using Sentence-transformers
+    """Multimodal backend using Sentence-transformers.
 
     The sentence-transformers embedding model used for
     generating word, document, and image embeddings.
@@ -88,7 +88,7 @@ class MultiModalBackend(BaseEmbedder):
         self, documents: List[str], images: List[str] = None, verbose: bool = False
     ) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded
@@ -124,7 +124,7 @@ class MultiModalBackend(BaseEmbedder):
         self, documents: List[str], verbose: bool = False
     ) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded
@@ -142,7 +142,7 @@ class MultiModalBackend(BaseEmbedder):
 
     def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             words: A list of words to be embedded

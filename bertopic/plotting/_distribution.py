@@ -12,7 +12,7 @@ def visualize_distribution(
     width: int = 800,
     height: int = 600,
 ) -> go.Figure:
-    """Visualize the distribution of topic probabilities
+    """Visualize the distribution of topic probabilities.
 
     Arguments:
         topic_model: A fitted BERTopic instance.

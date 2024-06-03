@@ -15,7 +15,7 @@ def visualize_topics_per_class(
     width: int = 1250,
     height: int = 900,
 ) -> go.Figure:
-    """Visualize topics per class
+    """Visualize topics per class.
 
     Arguments:
         topic_model: A fitted BERTopic instance.

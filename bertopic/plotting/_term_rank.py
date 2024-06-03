@@ -12,7 +12,7 @@ def visualize_term_rank(
     width: int = 800,
     height: int = 500,
 ) -> go.Figure:
-    """Visualize the ranks of all terms across all topics
+    """Visualize the ranks of all terms across all topics.
 
     Each topic is represented by a set of words. These words, however,
     do not all equally represent the topic. This visualization shows

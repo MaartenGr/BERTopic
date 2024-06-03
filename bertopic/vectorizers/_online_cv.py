@@ -74,7 +74,7 @@ class OnlineCountVectorizer(CountVectorizer):
         super(OnlineCountVectorizer, self).__init__(**kwargs)
 
     def partial_fit(self, raw_documents: List[str]) -> None:
-        """Perform a partial fit and update vocabulary with OOV tokens
+        """Perform a partial fit and update vocabulary with OOV tokens.
 
         Arguments:
             raw_documents: A list of documents
@@ -100,7 +100,7 @@ class OnlineCountVectorizer(CountVectorizer):
         return self
 
     def update_bow(self, raw_documents: List[str]) -> csr_matrix:
-        """Create or update the bag-of-words matrix
+        """Create or update the bag-of-words matrix.
 
         Update the bag-of-words matrix by adding the newly transformed
         documents. This may add empty columns if new words are found and/or
@@ -146,7 +146,7 @@ class OnlineCountVectorizer(CountVectorizer):
         return self.X_
 
     def _clean_bow(self) -> None:
-        """Remove words that do not exceed `self.delete_min_df`"""
+        """Remove words that do not exceed `self.delete_min_df`."""
         # Only keep words with a minimum frequency
         indices = np.where(self.X_.sum(0) >= self.delete_min_df)[1]
         indices_dict = {index: index for index in indices}

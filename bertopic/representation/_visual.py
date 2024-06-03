@@ -82,7 +82,7 @@ class VisualRepresentation(BaseRepresentation):
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topics
+        """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
@@ -166,7 +166,7 @@ class VisualRepresentation(BaseRepresentation):
     def image_to_text(
         self, documents: pd.DataFrame, embeddings: np.ndarray
     ) -> pd.DataFrame:
-        """Convert images to text"""
+        """Convert images to text."""
         # Create image topic embeddings
         topics = documents.Topic.values.tolist()
         images = documents.Image.values.tolist()
@@ -222,7 +222,7 @@ class VisualRepresentation(BaseRepresentation):
 
 
 def get_concat_h_multi_resize(im_list):
-    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/"""
+    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
     min_height = min(im.height for im in im_list)
     min_height = max(im.height for im in im_list)
     im_list_resize = []
@@ -240,7 +240,7 @@ def get_concat_h_multi_resize(im_list):
 
 
 def get_concat_v_multi_resize(im_list):
-    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/"""
+    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
     min_width = min(im.width for im in im_list)
     min_width = max(im.width for im in im_list)
     im_list_resize = [
@@ -257,7 +257,7 @@ def get_concat_v_multi_resize(im_list):
 
 
 def get_concat_tile_resize(im_list_2d, image_height=600, image_squares=False):
-    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/"""
+    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
     images = [[image.copy() for image in images] for images in im_list_2d]
 
     # Create

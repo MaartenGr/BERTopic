@@ -7,7 +7,7 @@ from bertopic.representation._base import BaseRepresentation
 
 
 class ZeroShotClassification(BaseRepresentation):
-    """Zero-shot Classification on topic keywords with candidate labels
+    """Zero-shot Classification on topic keywords with candidate labels.
 
     Arguments:
         candidate_topics: A list of labels to assign to the topics if they
@@ -63,7 +63,7 @@ class ZeroShotClassification(BaseRepresentation):
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topics
+        """Extract topics.
 
         Arguments:
             topic_model: Not used

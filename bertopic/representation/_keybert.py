@@ -18,7 +18,7 @@ class KeyBERTInspired(BaseRepresentation):
         nr_candidate_words: int = 100,
         random_state: int = 42,
     ):
-        """Use a KeyBERT-like model to fine-tune the topic representations
+        """Use a KeyBERT-like model to fine-tune the topic representations.
 
         The algorithm follows KeyBERT but does some optimization in
         order to speed up inference.
@@ -72,7 +72,7 @@ class KeyBERTInspired(BaseRepresentation):
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topics
+        """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model

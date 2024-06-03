@@ -3,7 +3,7 @@ import time
 
 
 def truncate_document(topic_model, doc_length, tokenizer, document: str):
-    """Truncate a document to a certain length
+    """Truncate a document to a certain length.
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and
     `encode` method. An example would be the following custom tokenizer:

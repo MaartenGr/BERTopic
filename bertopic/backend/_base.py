@@ -3,7 +3,7 @@ from typing import List
 
 
 class BaseEmbedder:
-    """The Base Embedder used for creating embedding models
+    """The Base Embedder used for creating embedding models.
 
     Arguments:
         embedding_model: The main embedding model to be used for extracting
@@ -20,7 +20,7 @@ class BaseEmbedder:
 
     def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded
@@ -34,7 +34,7 @@ class BaseEmbedder:
 
     def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             words: A list of words to be embedded
@@ -49,7 +49,7 @@ class BaseEmbedder:
 
     def embed_documents(self, document: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             document: A list of documents to be embedded

@@ -15,7 +15,7 @@ The name of this topic is:
 
 
 class TextGeneration(BaseRepresentation):
-    """Text2Text or text generation with transformers
+    """Text2Text or text generation with transformers.
 
     Arguments:
         model: A transformers pipeline that should be initialized as "text-generation"
@@ -122,7 +122,7 @@ class TextGeneration(BaseRepresentation):
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topic representations and return a single label
+        """Extract topic representations and return a single label.
 
         Arguments:
             topic_model: A BERTopic model

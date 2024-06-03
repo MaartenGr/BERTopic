@@ -2,7 +2,7 @@ import numpy as np
 
 
 class BaseDimensionalityReduction:
-    """The Base Dimensionality Reduction class
+    """The Base Dimensionality Reduction class.
 
     You can use this to skip over the dimensionality reduction step in BERTopic.
 

@@ -15,7 +15,7 @@ def visualize_topics_over_time(
     width: int = 1250,
     height: int = 450,
 ) -> go.Figure:
-    """Visualize topics over time
+    """Visualize topics over time.
 
     Arguments:
         topic_model: A fitted BERTopic instance.

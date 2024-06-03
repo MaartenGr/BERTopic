@@ -2,7 +2,7 @@ import numpy as np
 
 
 class BaseCluster:
-    """The Base Cluster class
+    """The Base Cluster class.
 
     Using this class directly in BERTopic will make it skip
     over the cluster step. As a result, topics need to be passed

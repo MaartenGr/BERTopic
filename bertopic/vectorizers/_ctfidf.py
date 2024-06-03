@@ -96,7 +96,7 @@ class ClassTfidfTransformer(TfidfTransformer):
         return self
 
     def transform(self, X: sp.csr_matrix):
-        """Transform a count-based matrix to c-TF-IDF
+        """Transform a count-based matrix to c-TF-IDF.
 
         Arguments:
             X (sparse matrix): A matrix of term/token counts.

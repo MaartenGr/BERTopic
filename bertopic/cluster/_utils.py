@@ -63,7 +63,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
 
 
 def is_supported_hdbscan(model):
-    """Check whether the input model is a supported HDBSCAN-like model"""
+    """Check whether the input model is a supported HDBSCAN-like model."""
     if isinstance(model, hdbscan.HDBSCAN):
         return True
 

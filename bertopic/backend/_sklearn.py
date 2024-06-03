@@ -3,7 +3,7 @@ from sklearn.utils.validation import check_is_fitted, NotFittedError
 
 
 class SklearnEmbedder(BaseEmbedder):
-    """Scikit-Learn based embedding model
+    """Scikit-Learn based embedding model.
 
     This component allows the usage of scikit-learn pipelines for generating document and
     word embeddings.
@@ -49,7 +49,7 @@ class SklearnEmbedder(BaseEmbedder):
 
     def embed(self, documents, verbose=False):
         """Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded

@@ -8,7 +8,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class FlairBackend(BaseEmbedder):
-    """Flair Embedding Model
+    """Flair Embedding Model.
 
     The Flair embedding model used for generating document and
     word embeddings.
@@ -54,7 +54,7 @@ class FlairBackend(BaseEmbedder):
 
     def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded

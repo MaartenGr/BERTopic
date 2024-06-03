@@ -17,7 +17,7 @@ def visualize_barchart(
     height: int = 250,
     autoscale: bool = False,
 ) -> go.Figure:
-    """Visualize a barchart of selected topics
+    """Visualize a barchart of selected topics.
 
     Arguments:
         topic_model: A fitted BERTopic instance.

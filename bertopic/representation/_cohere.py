@@ -133,7 +133,7 @@ class Cohere(BaseRepresentation):
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topics
+        """Extract topics.
 
         Arguments:
             topic_model: Not used
