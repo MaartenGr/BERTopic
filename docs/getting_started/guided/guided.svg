@@ -111,7 +111,7 @@
 <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="256" y="317.176">+</tspan></text>
 <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="256" y="344.176">2</tspan></text>
 <line x1="179" y1="328.5" x2="343" y2="328.5" stroke="black"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" letter-spacing="0em"><tspan x="379" y="462.764">Mutiply the IDF values of the seeded </tspan><tspan x="379" y="476.764">keywords across all topics with 1.2.</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" letter-spacing="0em"><tspan x="379" y="462.764">Multiply the IDF values of the seeded </tspan><tspan x="379" y="476.764">keywords across all topics with 1.2.</tspan></text>
 <path d="M263.293 392.707C263.683 393.098 264.317 393.098 264.707 392.707L271.071 386.343C271.462 385.953 271.462 385.319 271.071 384.929C270.681 384.538 270.047 384.538 269.657 384.929L264 390.586L258.343 384.929C257.953 384.538 257.319 384.538 256.929 384.929C256.538 385.319 256.538 385.953 256.929 386.343L263.293 392.707ZM263 367L263 392L265 392L265 367L263 367Z" fill="black"/>
 <rect x="162.045" y="400" width="202.259" height="17.7695" fill="white"/>
 <line x1="162.045" y1="417.815" x2="364.305" y2="417.815" stroke="#BDBDBD" stroke-width="2"/>

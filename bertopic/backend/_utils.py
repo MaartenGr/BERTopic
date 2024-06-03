@@ -2,11 +2,13 @@ from ._base import BaseEmbedder
 
 # Imports for light-weight variant of BERTopic
 from bertopic.backend._sklearn import SklearnEmbedder
+from bertopic._utils import MyLogger
 from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline as ScikitPipeline
 
+logger = MyLogger("WARNING")
 
 languages = [
     "arabic",
@@ -66,14 +68,20 @@ languages = [
 
 
 def select_backend(embedding_model,
-                   language: str = None) -> BaseEmbedder:
-    """ Select an embedding model based on language or a specific sentence transformer models.
+                   language: str = None,
+                   verbose: bool = False) -> BaseEmbedder:
+    """ Select an embedding model based on language or a specific provided model.
     When selecting a language, we choose all-MiniLM-L6-v2 for English and
     paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
+    If sentence-transformers is not installed, in the case of a lightweight installation,
+    a scikit-learn backend is default.
 
     Returns:
-        model: Either a Sentence-Transformer or Flair model
+        model: The selected model backend.
     """
+
+    logger.set_level("INFO" if verbose else "WARNING")
+
     # BERTopic language backend
     if isinstance(embedding_model, BaseEmbedder):
         return embedding_model
@@ -126,8 +134,14 @@ def select_backend(embedding_model,
                                 "Else, please select a language from the following list:\n"
                                 f"{languages}")
 
-        # Only for light-weight installation
-        except ModuleNotFoundError:
+        # A ModuleNotFoundError might be a lightweight installation
+        except ModuleNotFoundError as e:
+            if e.name != "sentence_transformers":
+                # Error occurred in a downstream module, probably not a lightweight install
+                raise e
+            # Whole sentence_transformers module is missing, probably a lightweight install
+            if verbose:
+                logger.info("Automatically selecting lightweight scikit-learn embedding backend as sentence-transformers appears to not be installed.")
             pipe = make_pipeline(TfidfVectorizer(), TruncatedSVD(100))
             return SklearnEmbedder(pipe)
 

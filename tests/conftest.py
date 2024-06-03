@@ -125,7 +125,7 @@ def supervised_topic_model(documents, document_embeddings, embedding_model, targ
 
 @pytest.fixture(scope="session")
 def online_topic_model(documents, document_embeddings, embedding_model):
-    umap_model = IncrementalPCA(n_components=5)
+    umap_model = PCA(n_components=5)
     cluster_model = MiniBatchKMeans(n_clusters=50, random_state=0)
     vectorizer_model = OnlineCountVectorizer(stop_words="english", decay=.01)
     model = BERTopic(umap_model=umap_model, hdbscan_model=cluster_model, vectorizer_model=vectorizer_model, embedding_model=embedding_model)
@@ -135,4 +135,18 @@ def online_topic_model(documents, document_embeddings, embedding_model):
         model.partial_fit(documents[index: index+50], document_embeddings[index: index+50])
         topics.extend(model.topics_)
     model.topics_ = topics
+    return model
+
+@pytest.fixture(scope="session")
+def cuml_base_topic_model(documents, document_embeddings, embedding_model):
+    from cuml.cluster import HDBSCAN as cuml_hdbscan
+    from cuml.manifold import UMAP as cuml_umap
+
+    model = BERTopic(
+        embedding_model=embedding_model,
+        calculate_probabilities=True,
+        umap_model=cuml_umap(n_components=5, n_neighbors=5, random_state=42),
+        hdbscan_model=cuml_hdbscan(min_cluster_size=3, prediction_data=True),
+    )
+    model.fit(documents, document_embeddings)
     return model

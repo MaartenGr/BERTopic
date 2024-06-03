@@ -384,7 +384,8 @@ class BERTopic:
         if embeddings is None:
             logger.info("Embedding - Transforming documents to embeddings.")
             self.embedding_model = select_backend(self.embedding_model,
-                                                  language=self.language)
+                                                  language=self.language,
+                                                  verbose=self.verbose)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   images=images,
                                                   method="document",
@@ -573,7 +574,7 @@ class BERTopic:
 
         For each subset of the data:
 
-        1. Generate embeddings with a pre-traing language model
+        1. Generate embeddings with a pre-trained language model
         2. Incrementally update the dimensionality reduction algorithm with `partial_fit`
         3. Incrementally update the cluster algorithm with `partial_fit`
         4. Incrementally update the OnlineCountVectorizer and apply some form of decay
@@ -631,14 +632,16 @@ class BERTopic:
         if embeddings is None:
             if self.topic_representations_ is None:
                 self.embedding_model = select_backend(self.embedding_model,
-                                                      language=self.language)
+                                                      language=self.language,
+                                                      verbose=self.verbose)
             embeddings = self._extract_embeddings(documents.Document.values.tolist(),
                                                   method="document",
                                                   verbose=self.verbose)
         else:
             if self.embedding_model is not None and self.topic_representations_ is None:
                 self.embedding_model = select_backend(self.embedding_model,
-                                                      language=self.language)
+                                                      language=self.language,
+                                                      verbose=self.verbose)
 
         # Reduce dimensionality
         if self.seed_topic_list is not None and self.embedding_model is not None:
@@ -1726,7 +1729,7 @@ class BERTopic:
 
         Arguments:
             hier_topics: A dataframe containing the structure of the topic tree.
-                         This is the output of `topic_model.hierachical_topics()`
+                         This is the output of `topic_model.hierarchical_topics()`
             max_distance: The maximum distance between two topics. This value is
                           based on the Distance column in `hier_topics`.
             tight_layout: Whether to use a tight layout (narrow width) for
@@ -3159,7 +3162,7 @@ class BERTopic:
             with open(file_or_dir, 'rb') as file:
                 if embedding_model:
                     topic_model = joblib.load(file)
-                    topic_model.embedding_model = select_backend(embedding_model)
+                    topic_model.embedding_model = select_backend(embedding_model, verbose=self.verbose)
                 else:
                     topic_model = joblib.load(file)
                 return topic_model
@@ -3257,37 +3260,37 @@ class BERTopic:
 
             # Merge Topic Representations
             new_topics_dict = {}
-            new_topic_val = max_topic + 1
-            for index, new_topic in enumerate(new_topics):
-                new_topic_val = max_topic + index + 1
-                new_topics_dict[new_topic] = new_topic_val
-                merged_topics["topic_representations"][str(new_topic_val)] = selected_topics["topic_representations"][str(new_topic)]
-                merged_topics["topic_labels"][str(new_topic_val)] = selected_topics["topic_labels"][str(new_topic)]
+            for new_topic in new_topics:
+                if new_topic != -1:
+                    max_topic += 1
+                    new_topics_dict[new_topic] = max_topic
+                    merged_topics["topic_representations"][str(max_topic)] = selected_topics["topic_representations"][str(new_topic)]
+                    merged_topics["topic_labels"][str(max_topic)] = selected_topics["topic_labels"][str(new_topic)]
 
-                # Add new aspects
-                if selected_topics["topic_aspects"]:
-                    aspects_1 = set(merged_topics["topic_aspects"].keys())
-                    aspects_2 = set(selected_topics["topic_aspects"].keys())
-                    aspects_diff = aspects_2.difference(aspects_1)
-                    if aspects_diff:
-                        for aspect in aspects_diff:
-                            merged_topics["topic_aspects"][aspect] = {}
+                    # Add new aspects
+                    if selected_topics["topic_aspects"]:
+                        aspects_1 = set(merged_topics["topic_aspects"].keys())
+                        aspects_2 = set(selected_topics["topic_aspects"].keys())
+                        aspects_diff = aspects_2.difference(aspects_1)
+                        if aspects_diff:
+                            for aspect in aspects_diff:
+                                merged_topics["topic_aspects"][aspect] = {}
 
-                    # If the original model does not have topic aspects but the to be added model does
-                    if not merged_topics.get("topic_aspects"):
-                        merged_topics["topic_aspects"] = selected_topics["topic_aspects"]
+                        # If the original model does not have topic aspects but the to be added model does
+                        if not merged_topics.get("topic_aspects"):
+                            merged_topics["topic_aspects"] = selected_topics["topic_aspects"]
 
-                    # If they both contain topic aspects, add to the existing set of aspects
-                    else:
-                        for aspect, values in selected_topics["topic_aspects"].items():
-                            merged_topics["topic_aspects"][aspect][str(new_topic_val)] = values[str(new_topic)]
+                        # If they both contain topic aspects, add to the existing set of aspects
+                        else:
+                            for aspect, values in selected_topics["topic_aspects"].items():
+                                merged_topics["topic_aspects"][aspect][str(max_topic)] = values[str(new_topic)]
 
-                # Add new embeddings
-                new_tensors = tensors[new_topic + selected_topics["_outliers"]]
-                merged_tensors = np.vstack([merged_tensors, new_tensors])
+                    # Add new embeddings
+                    new_tensors = tensors[new_topic + selected_topics["_outliers"]]
+                    merged_tensors = np.vstack([merged_tensors, new_tensors])
 
             # Topic Mapper
-            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, new_topic_val+1, 1))).mappings_
+            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, max_topic+1, 1))).mappings_
 
             # Find similar topics and re-assign those from the new models
             sims_idx = np.argmax(sim_matrix, axis=1)
@@ -3310,7 +3313,7 @@ class BERTopic:
 
         # Replace embedding model if one is specifically chosen
         if embedding_model is not None and type(merged_model.embedding_model) == BaseEmbedder:
-            merged_model.embedding_model = select_backend(embedding_model)
+            merged_model.embedding_model = select_backend(embedding_model, verbose=self.verbose)
         return merged_model
 
     def push_to_hf_hub(
@@ -3695,15 +3698,20 @@ class BERTopic:
 
         cluster_indices = list(documents.Old_ID.values)
         cluster_names = list(merged_model.topic_labels_.values())[len(set(y)):]
-        cluster_topics = [cluster_names[topic + self._outliers] for topic in documents.Topic.values]
+        if self._outliers:
+            cluster_topics = [cluster_names[topic] if topic != -1 else "Outliers" for topic in documents.Topic.values]
+        else:
+            cluster_topics = [cluster_names[topic] for topic in documents.Topic.values]
 
         df = pd.DataFrame({
             "Indices": zeroshot_indices + cluster_indices,
             "Label": zeroshot_topics + cluster_topics}
         ).sort_values("Indices")
         reverse_topic_labels = dict((v, k) for k, v in merged_model.topic_labels_.items())
+        if self._outliers:
+            reverse_topic_labels["Outliers"] = -1
         df.Label = df.Label.map(reverse_topic_labels)
-        merged_model.topics_ = df.Label.values
+        merged_model.topics_ = df.Label.astype(int).tolist()
 
         # Update the class internally
         has_outliers = bool(self._outliers)
@@ -3831,7 +3839,7 @@ class BERTopic:
                                      ) -> Union[List[str], List[List[int]]]:
         """ Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
-        most represenative to their topic based on the cosine similarity between
+        most representative to their topic based on the cosine similarity between
         c-TF-IDF representations.
 
         Arguments:
@@ -3993,8 +4001,7 @@ class BERTopic:
         if partial_fit:
             X = self.vectorizer_model.partial_fit(documents).update_bow(documents)
         elif fit:
-            self.vectorizer_model.fit(documents)
-            X = self.vectorizer_model.transform(documents)
+            X = self.vectorizer_model.fit_transform(documents)
         else:
             X = self.vectorizer_model.transform(documents)
 
