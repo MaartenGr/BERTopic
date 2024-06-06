@@ -96,3 +96,26 @@ Repository = "https://github.com/MaartenGr/BERTopic.git"
 [tool.setuptools.packages.find]
 include = ["bertopic*"]
 exclude = ["tests"]
+
+[tool.ruff]
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [  
+  "E4",  # Ruff Defaults
+  "E7",
+  "E9",
+  "F",   # End Ruff Defaults,
+  "D"
+]
+
+ignore = [
+  "D100", # Missing docstring in public module
+  "D104"  # Missing docstring in public package
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["D"] # Ignore all docstring errors in tests
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
