@@ -54,14 +54,15 @@ from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger, check_documents_type, check_embeddings_shape,
-    check_is_fitted, validate_distance_matrix
+    check_is_fitted, validate_distance_matrix, select_topic_representation
 )
 import bertopic._save_utils as save_utils
 
 # Visualization
 import plotly.graph_objects as go
 
-logger = MyLogger("WARNING")
+logger = MyLogger()
+logger.configure("WARNING")
 
 
 class BERTopic:
@@ -916,12 +917,13 @@ class BERTopic:
 
     def hierarchical_topics(self,
                             docs: List[str],
+                            use_ctfidf: bool = True,
                             linkage_function: Callable[[csr_matrix], np.ndarray] = None,
                             distance_function: Callable[[csr_matrix], csr_matrix] = None) -> pd.DataFrame:
         """ Create a hierarchy of topics
 
         To create this hierarchy, BERTopic needs to be already fitted once.
-        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF
+        Then, a hierarchy is calculated on the distance matrix of the c-TF-IDF or topic embeddings
         representation using `scipy.cluster.hierarchy.linkage`.
 
         Based on that hierarchy, we calculate the topic representation at each
@@ -931,12 +933,14 @@ class BERTopic:
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
             linkage_function: The linkage function to use. Default is:
                               `lambda x: sch.linkage(x, 'ward', optimal_ordering=True)`
             distance_function: The distance function to use on the c-TF-IDF matrix. Default is:
                                `lambda x: 1 - cosine_similarity(x)`.
-                               You can pass any function that returns either a square matrix of 
-                               shape (n_samples, n_samples) with zeros on the diagonal and 
+                               You can pass any function that returns either a square matrix of
+                               shape (n_samples, n_samples) with zeros on the diagonal and
                                non-negative values or condensed distance matrix of shape
                                (n_samples * (n_samples - 1) / 2,) containing the upper
                                triangular of the distance matrix.
@@ -975,7 +979,7 @@ class BERTopic:
             linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
 
         # Calculate distance
-        embeddings = self.c_tf_idf_[self._outliers:]
+        embeddings = select_topic_representation(self.c_tf_idf_, self.topic_embeddings_, use_ctfidf)[0][self._outliers:]
         X = distance_function(embeddings)
         X = validate_distance_matrix(X, embeddings.shape[0])
 
@@ -2007,13 +2011,15 @@ class BERTopic:
     def reduce_topics(self,
                       docs: List[str],
                       nr_topics: Union[int, str] = 20,
-                      images: List[str] = None) -> None:
+                      images: List[str] = None,
+                      use_ctfidf: bool = False,
+                      ) -> None:
         """ Reduce the number of topics to a fixed number of topics
         or automatically.
 
         If nr_topics is an integer, then the number of topics is reduced
         to nr_topics using `AgglomerativeClustering` on the cosine distance matrix
-        of the topic embeddings.
+        of the topic c-TF-IDF or semantic embeddings.
 
         If nr_topics is `"auto"`, then HDBSCAN is used to automatically
         reduce the number of topics by running it on the topic embeddings.
@@ -2025,6 +2031,8 @@ class BERTopic:
             nr_topics: The number of topics you want reduced to
             images: A list of paths to the images used when calling either
                     `fit` or `fit_transform`
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
 
         Updates:
             topics_ : Assigns topics to their merged representations.
@@ -2053,7 +2061,7 @@ class BERTopic:
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Image": images, "ID": range(len(docs))})
 
         # Reduce number of topics
-        documents = self._reduce_topics(documents)
+        documents = self._reduce_topics(documents, use_ctfidf)
         self._merged_topics = None
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
@@ -2824,6 +2832,7 @@ class BERTopic:
                             orientation: str = "left",
                             topics: List[int] = None,
                             top_n_topics: int = None,
+                            use_ctfidf: bool = True,
                             custom_labels: bool = False,
                             title: str = "<b>Hierarchical Clustering</b>",
                             width: int = 1000,
@@ -2836,7 +2845,7 @@ class BERTopic:
 
         A ward linkage function is used to perform the
         hierarchical clustering based on the cosine distance
-        matrix between topic embeddings.
+        matrix between c-TF-IDF or semantic embeddings of the topics.
 
         Arguments:
             topic_model: A fitted BERTopic instance.
@@ -2844,6 +2853,8 @@ class BERTopic:
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
             top_n_topics: Only select the top n most frequent topics
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
                            NOTE: Custom labels are only generated for the original
@@ -2904,6 +2915,7 @@ class BERTopic:
                                             orientation=orientation,
                                             topics=topics,
                                             top_n_topics=top_n_topics,
+                                            use_ctfidf=use_ctfidf,
                                             custom_labels=custom_labels,
                                             title=title,
                                             width=width,
@@ -2918,13 +2930,14 @@ class BERTopic:
                           topics: List[int] = None,
                           top_n_topics: int = None,
                           n_clusters: int = None,
+                          use_ctfidf: bool = False,
                           custom_labels: bool = False,
                           title: str = "<b>Similarity Matrix</b>",
                           width: int = 800,
                           height: int = 800) -> go.Figure:
         """ Visualize a heatmap of the topic's similarity matrix
 
-        Based on the cosine similarity matrix between topic embeddings,
+        Based on the cosine similarity matrix between c-TF-IDFs or semantic embeddings of the topics,
         a heatmap is created showing the similarity between topics.
 
         Arguments:
@@ -2932,6 +2945,8 @@ class BERTopic:
             top_n_topics: Only select the top n most frequent topics.
             n_clusters: Create n clusters and order the similarity
                         matrix by those clusters.
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
             title: Title of the plot.
@@ -2962,6 +2977,7 @@ class BERTopic:
                                           topics=topics,
                                           top_n_topics=top_n_topics,
                                           n_clusters=n_clusters,
+                                          use_ctfidf=use_ctfidf,
                                           custom_labels=custom_labels,
                                           title=title,
                                           width=width,
@@ -4091,34 +4107,39 @@ class BERTopic:
 
         return topics
 
-    def _reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
+    def _reduce_topics(self, documents: pd.DataFrame, use_ctfidf: bool = False) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
+                        embeddings are used.
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
         """
+
         logger.info("Topic reduction - Reducing number of topics")
         initial_nr_topics = len(self.get_topics())
 
         if isinstance(self.nr_topics, int):
             if self.nr_topics < initial_nr_topics:
-                documents = self._reduce_to_n_topics(documents)
+                documents = self._reduce_to_n_topics(documents, use_ctfidf)
         elif isinstance(self.nr_topics, str):
-            documents = self._auto_reduce_topics(documents)
+            documents = self._auto_reduce_topics(documents, use_ctfidf)
         else:
             raise ValueError("nr_topics needs to be an int or 'auto'! ")
 
         logger.info(f"Topic reduction - Reduced number of topics from {initial_nr_topics} to {len(self.get_topic_freq())}")
         return documents
 
-    def _reduce_to_n_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
+    def _reduce_to_n_topics(self, documents: pd.DataFrame, use_ctfidf: bool = False) -> pd.DataFrame:
         """ Reduce topics to self.nr_topics
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, semantic
+                        embedding are used.
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
@@ -4126,10 +4147,9 @@ class BERTopic:
         topics = documents.Topic.tolist().copy()
 
         # Create topic distance matrix
-        if self.topic_embeddings_ is not None:
-            topic_embeddings = self.topic_embeddings_[self._outliers:, ]
-        else:
-            topic_embeddings = self.c_tf_idf_[self._outliers:, ].toarray()
+        topic_embeddings = select_topic_representation(
+            self.c_tf_idf_, self.topic_embeddings_, use_ctfidf, output_ndarray=True
+        )[0][self._outliers:]
         distance_matrix = 1-cosine_similarity(topic_embeddings)
         np.fill_diagonal(distance_matrix, 0)
 
@@ -4162,11 +4182,13 @@ class BERTopic:
         self._update_topic_size(documents)
         return documents
 
-    def _auto_reduce_topics(self, documents: pd.DataFrame) -> pd.DataFrame:
+    def _auto_reduce_topics(self, documents: pd.DataFrame, use_ctfidf: bool = False) -> pd.DataFrame:
         """ Reduce the number of topics automatically using HDBSCAN
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs and Topics
+            use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
+                        embeddings from the embedding model are used.
 
         Returns:
             documents: Updated dataframe with documents and the reduced number of Topics
@@ -4176,10 +4198,9 @@ class BERTopic:
         max_topic = unique_topics[-1]
 
         # Find similar topics
-        if self.topic_embeddings_ is not None:
-            embeddings = np.array(self.topic_embeddings_)
-        else:
-            embeddings = self.c_tf_idf_.toarray()
+        embeddings = select_topic_representation(
+            self.c_tf_idf_, self.topic_embeddings_, use_ctfidf, output_ndarray=True
+        )[0]
         norm_data = normalize(embeddings, norm='l2')
         predictions = hdbscan.HDBSCAN(min_cluster_size=2,
                                       metric='euclidean',
