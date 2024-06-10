@@ -227,7 +227,7 @@ model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
 # Embed documents only
 doc_embeddings = model.embed_documents(docs)
 
-# Embeding images only
+# Embedding images only
 image_embeddings = model.embed_images(images)
 
 # Embed both images and documents, then average them

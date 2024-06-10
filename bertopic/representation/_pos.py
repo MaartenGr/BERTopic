@@ -141,8 +141,8 @@ class PartOfSpeech(BaseRepresentation):
         updated_topics = {topic: [] for topic in topics.keys()}
 
         for topic, candidate_keywords in candidate_topics.items():
-            word_indices = [words_lookup.get(keyword) for keyword in candidate_keywords if words_lookup.get(keyword)]
-            vals = topic_model.c_tf_idf_[:, np.array(word_indices)][topic + topic_model._outliers]
+            word_indices = np.sort([words_lookup.get(keyword) for keyword in candidate_keywords if keyword in words_lookup])
+            vals = topic_model.c_tf_idf_[:, word_indices][topic + topic_model._outliers]
             indices = np.argsort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words:][::-1]
             vals = np.sort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words:][::-1]
             topic_words = [(words[word_indices[index]], val) for index, val in zip(indices, vals)]

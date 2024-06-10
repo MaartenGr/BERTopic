@@ -5,6 +5,20 @@ hide:
 
 # Changelog
 
+## **Version 0.16.2**
+*Release date: 12 May, 2024*
+
+<h3><b>Fixes:</a></b></h3>
+
+* Fix issue with zeroshot topic modeling missing outlier [#1957](https://github.com/MaartenGr/BERTopic/issues/1957)
+* Bump github actions versions by [@afuetterer](https://github.com/afuetterer) in [#1941](https://github.com/MaartenGr/BERTopic/pull/1941)
+* Drop support for python 3.7 by [@afuetterer](https://github.com/afuetterer) in [#1949](https://github.com/MaartenGr/BERTopic/pull/1949)
+* Add testing python 3.10+ in Github actions by [@afuetterer](https://github.com/afuetterer) in [#1968](https://github.com/MaartenGr/BERTopic/pull/1968)
+* Speed up fitting CountVectorizer by [@dannywhuang](https://github.com/dannywhuang) in [#1938](https://github.com/MaartenGr/BERTopic/pull/1938)
+* Fix `transform` when using cuML HDBSCAN by [@beckernick](https://github.com/beckernick) in [#1960](https://github.com/MaartenGr/BERTopic/pull/1960)
+* Fix wrong link in algorithm documentation by [@naeyn](https://github.com/naeyn) in [#1970](https://github.com/MaartenGr/BERTopic/pull/1970)
+
+
 ## **Version 0.16.1**
 *Release date: 21 April, 2024*
 
@@ -104,7 +118,7 @@ cohere_model = CohereBackend(
 *  Fixed typos in best practices documentation by [@poomkusa](https://github.com/poomkusa) in [#1557](https://github.com/MaartenGr/BERTopic/pull/1557)
 *  Correct TopicMapper doc example by [@chrisji](https://github.com/chrisji) in [#1637](https://github.com/MaartenGr/BERTopic/pull/1637)
 * Fix typing in hierarchical_topics by [@dschwalm](https://github.com/dschwalm) in [#1364](https://github.com/MaartenGr/BERTopic/pull/1364)
-*  Fixed typing issue with treshold parameter in reduce_outliers by [@dschwalm](https://github.com/dschwalm) in [#1380](https://github.com/MaartenGr/BERTopic/pull/1380)
+*  Fixed typing issue with threshold parameter in reduce_outliers by [@dschwalm](https://github.com/dschwalm) in [#1380](https://github.com/MaartenGr/BERTopic/pull/1380)
 * Fix several typos by [@mertyyanik](https://github.com/mertyyanik) in [#1307](https://github.com/MaartenGr/BERTopic/pull/1307)
 (#1307)
 * Fix inconsistent naming by [@rolanderdei](https://github.com/rolanderdei) in [#1073](https://github.com/MaartenGr/BERTopic/pull/1073)
@@ -318,7 +332,7 @@ With v0.15, we can now perform multimodal topic modeling in BERTopic! The most b
   <figcaption></figcaption>
 </figure>
 
-In this example, we are going to use images from `flickr` that each have a caption accociated to it: 
+In this example, we are going to use images from `flickr` that each have a caption associated to it: 
 
 ```python
 # NOTE: This requires the `datasets` package which you can 

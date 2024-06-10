@@ -3,7 +3,7 @@ import pandas as pd
 from umap import UMAP
 from typing import List, Union
 from sklearn.preprocessing import MinMaxScaler
-
+from bertopic._utils import select_topic_representation
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 def visualize_topics(topic_model,
                      topics: List[int] = None,
                      top_n_topics: int = None,
+                     use_ctfidf: bool = False,
                      custom_labels: Union[bool, str] = False,
                      title: str = "<b>Intertopic Distance Map</b>",
                      width: int = 650,
@@ -24,6 +25,7 @@ def visualize_topics(topic_model,
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
+        use_ctfidf: Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.
         custom_labels: If bool, whether to use custom topic labels that were defined using 
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
@@ -74,13 +76,17 @@ def visualize_topics(topic_model,
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
 
-    if topic_model.topic_embeddings_ is not None:
-        embeddings = topic_model.topic_embeddings_[indices]
-        embeddings = UMAP(n_neighbors=2, n_components=2, metric='cosine', random_state=42).fit_transform(embeddings)
-    else:
-        embeddings = topic_model.c_tf_idf_.toarray()[indices]
+    embeddings, c_tfidf_used = select_topic_representation(
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf=use_ctfidf, output_ndarray=True,
+    )
+    embeddings = embeddings[indices]
+
+    if c_tfidf_used:
         embeddings = MinMaxScaler().fit_transform(embeddings)
         embeddings = UMAP(n_neighbors=2, n_components=2, metric='hellinger', random_state=42).fit_transform(embeddings)
+    else:
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric='cosine', random_state=42).fit_transform(embeddings)
+
 
     # Visualize with plotly
     df = pd.DataFrame({"x": embeddings[:, 0], "y": embeddings[:, 1],

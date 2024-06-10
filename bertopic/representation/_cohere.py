@@ -70,7 +70,7 @@ class Cohere(BaseRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`

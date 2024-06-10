@@ -72,7 +72,7 @@ topic_model = BERTopic(
   hdbscan_model=hdbscan_model,              # Step 3 - Cluster reduced embeddings
   vectorizer_model=vectorizer_model,        # Step 4 - Tokenize topics
   ctfidf_model=ctfidf_model,                # Step 5 - Extract topic words
-  representation_model=representation_model # Step 6 - (Optional) Fine-tune topic represenations
+  representation_model=representation_model # Step 6 - (Optional) Fine-tune topic representations
 )
 ```
 

@@ -19,7 +19,7 @@ def visualize_approximate_distribution(topic_model,
     a single document. 
 
     NOTE:
-    This fuction will return a stylized pandas dataframe if Jinja2 is installed. If not, 
+    This function will return a stylized pandas dataframe if Jinja2 is installed. If not, 
     it will only return a pandas dataframe without color highlighting. To install jinja:
 
     `pip install jinja2`

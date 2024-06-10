@@ -107,7 +107,7 @@ class River:
         
     def partial_fit(self, umap_embeddings):
         for umap_embedding, _ in stream.iter_array(umap_embeddings):
-            self.model = self.model.learn_one(umap_embedding)
+            self.model.learn_one(umap_embedding)
 
         labels = []
         for umap_embedding, _ in stream.iter_array(umap_embeddings):

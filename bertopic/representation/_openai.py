@@ -76,7 +76,7 @@ class OpenAI(BaseRepresentation):
         exponential_backoff: Retry requests with a random exponential backoff.
                              A short sleep is used when a rate limit error is hit,
                              then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests.
+                             if errors are hit until 10 unsuccessful requests.
                              If True, overrides `delay_in_seconds`.
         chat: Set this to True if a GPT-3.5 model is used.
               See: https://platform.openai.com/docs/models/gpt-3-5
@@ -97,7 +97,7 @@ class OpenAI(BaseRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
@@ -217,7 +217,7 @@ class OpenAI(BaseRepresentation):
                     response = chat_completions_with_backoff(self.client, **kwargs)
                 else:
                     response = self.client.chat.completions.create(**kwargs)
-
+                    
                 output = response.choices[0]
 
                 if output.finish_reason == "stop":
@@ -227,7 +227,8 @@ class OpenAI(BaseRepresentation):
                     if hasattr(output.message, "content"):
                         label = output.message.content.strip().replace("topic: ", "")
                     else:
-                        label = "OpenAI Topic Representation - Incomplete output due to token limit being reached"
+                        label = "OpenAI Topic Representation - Incomplete output due to token limit being reached"                        
+                # Addresses #1570 for potential issues with OpenAI's content filter        
                 elif output.finish_reason == "content_filter":
                     logger.warn(f"OpenAI Topic Representation - The content filter of OpenAI was trigger for the following documents IDs: ({repr_doc_ids})")
                     label = "Output content filtered by OpenAI"
