@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💡 General questions
+    url: https://github.com/maartengr/bertopic/discussions
+    about: Ask a question there!
+  - name: Want to contribute?
+    url: https://github.com/maartengr/bertopic/blob/main/CONTRIBUTING.md
+    about: Head to the contributing guidelines
