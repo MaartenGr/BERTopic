@@ -27,4 +27,4 @@ body:
     attributes:
       label: Your contribution
       description: |
-        Any help on the implementation of this feature would be greatly appreciated. If you are interested in working on this, make sure to read the CONTRIBUTING.MD [readme](https://github.com/maartengr/bertopic/blob/main/CONTRIBUTING.md)
+        Any help on the implementation of this feature would be greatly appreciated. If you are interested in working on this, make sure to read the [CONTRIBUTING.MD guide](https://github.com/MaartenGr/BERTopic/blob/master/CONTRIBUTING.md)
