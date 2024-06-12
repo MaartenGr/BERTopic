@@ -14,8 +14,7 @@ docs:
 	mkdocs serve
 
 pypi:
-	python setup.py sdist
-	python setup.py bdist_wheel --universal
+	python -m build
 	twine upload dist/*
 
 clean:

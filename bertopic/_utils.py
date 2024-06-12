@@ -4,11 +4,14 @@ import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
+from typing import Optional, Union, Tuple
 
 
 class MyLogger:
-    def __init__(self, level):
+    def __init__(self):
         self.logger = logging.getLogger('BERTopic')
+
+    def configure(self, level):
         self.set_level(level)
         self._add_handler()
         self.logger.propagate = False
@@ -149,6 +152,7 @@ def validate_distance_matrix(X, n_samples):
     return X
 
 
+
 def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
     """Check if the consecutive elements in the distance array are the same. If so, a small noise
     is added to one of the elements to make sure that the array does not contain duplicates.
@@ -171,3 +175,55 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
             curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
             dists_cp[i + 1] = np.random.uniform(low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise)
     return dists_cp
+
+  
+def select_topic_representation(
+    ctfidf_embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
+    embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
+    use_ctfidf: bool = True,
+    output_ndarray: bool = False,
+) -> Tuple[np.ndarray, bool]:
+    """Select the topic representation.
+
+    Arguments:
+        ctfidf_embeddings: The c-TF-IDF embedding matrix
+        embeddings: The topic embedding matrix
+        use_ctfidf: Whether to use the c-TF-IDF representation. If False, topics embedding representation is used, if it
+                    exists. Default is True.
+        output_ndarray: Whether to convert the selected representation into ndarray
+    Raises
+        ValueError:
+            - If no topic representation was found
+            - If c-TF-IDF embeddings are not a numpy array or a scipy.sparse.csr_matrix
+
+    Returns:
+        The selected topic representation and a boolean indicating whether it is c-TF-IDF.
+    """
+
+    def to_ndarray(array: Union[np.ndarray, csr_matrix]) -> np.ndarray:
+        if isinstance(array, csr_matrix):
+            return array.toarray()
+        return array
+
+    logger = MyLogger()
+
+    if use_ctfidf:
+        if ctfidf_embeddings is None:
+            logger.warning(
+                "No c-TF-IDF matrix was found despite it is supposed to be used (`use_ctfidf` is True). "
+                "Defaulting to semantic embeddings."
+            )
+            repr_, ctfidf_used = embeddings, False
+        else:
+            repr_, ctfidf_used = ctfidf_embeddings, True
+    else:
+        if embeddings is None:
+            logger.warning(
+                "No topic embeddings were found despite they are supposed to be used (`use_ctfidf` is False). "
+                "Defaulting to c-TF-IDF representation."
+            )
+            repr_, ctfidf_used = ctfidf_embeddings, True
+        else:
+            repr_, ctfidf_used = embeddings, False
+
+    return to_ndarray(repr_) if output_ndarray else repr_, ctfidf_used

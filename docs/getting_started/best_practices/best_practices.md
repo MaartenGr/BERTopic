@@ -387,7 +387,8 @@ To show its effect, let's start by disabling the logger:
 
 ```python
 from bertopic._utils import MyLogger
-logger = MyLogger("ERROR")
+logger = MyLogger()
+logger.configure("ERROR")
 loaded_model.verbose = False
 topic_model.verbose = False
 ```

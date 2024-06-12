@@ -8,7 +8,8 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline as ScikitPipeline
 
-logger = MyLogger("WARNING")
+logger = MyLogger()
+logger.configure("WARNING")
 
 languages = [
     "arabic",
