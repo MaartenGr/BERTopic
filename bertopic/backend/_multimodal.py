@@ -81,17 +81,21 @@ class MultiModalBackend(BaseEmbedder):
             self.tokenizer = self.embedding_model._first_module().processor.tokenizer
         except AttributeError:
             self.tokenizer = self.embedding_model.tokenizer
-        except:
+        except: # noqa: E722
             self.tokenizer = None
 
     def embed(
         self, documents: List[str], images: List[str] = None, verbose: bool = False
     ) -> np.ndarray:
-        """Embed a list of n documents/words into an n-dimensional
+        """Embed a list of n documents/words or images into an n-dimensional
         matrix of embeddings.
+
+        Either documents, images, or both can be provided. If both are provided,
+        then the embeddings are averaged.
 
         Arguments:
             documents: A list of documents or words to be embedded
+            images: A list of image paths to be embedded
             verbose: Controls the verbosity of the process
 
         Returns:

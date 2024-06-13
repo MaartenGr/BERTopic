@@ -27,6 +27,7 @@ def visualize_hierarchical_documents(
     """Visualize documents and their topics in 2D at different levels of hierarchy.
 
     Arguments:
+        topic_model: A fitted BERTopic instance.
         docs: The documents you used when calling either `fit` or `fit_transform`
         hierarchical_topics: A dataframe that contains a hierarchy of topics
                              represented by their parents and their children

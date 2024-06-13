@@ -111,7 +111,9 @@ select = [
 
 ignore = [
   "D100", # Missing docstring in public module
-  "D104"  # Missing docstring in public package
+  "D104", # Missing docstring in public package
+  "D205", # 1 blank line required between summary line and description
+  "E731", # Do not assign a lambda expression, use a def
 ]
 
 [tool.ruff.lint.per-file-ignores]

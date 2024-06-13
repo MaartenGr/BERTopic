@@ -1,13 +1,12 @@
 import copy
 import pytest
 from bertopic import BERTopic
+import importlib.util
 
 
 def cuml_available():
     try:
-        import cuml
-
-        return True
+        return importlib.util.find_spec("cuml") is not None
     except ImportError:
         return False
 

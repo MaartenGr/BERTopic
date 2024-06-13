@@ -50,7 +50,7 @@ topic: <topic label>
 
 
 class OpenAI(BaseRepresentation):
-    """Using the OpenAI API to generate topic labels based
+    r"""Using the OpenAI API to generate topic labels based
     on one of their Completion of ChatCompletion models.
 
     The default method is `openai.Completion` if `chat=False`.

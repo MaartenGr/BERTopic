@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 try:
-    from pandas.io.formats.style import Styler
+    from pandas.io.formats.style import Styler # noqa: F401
 
     HAS_JINJA = True
 except (ModuleNotFoundError, ImportError):

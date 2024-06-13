@@ -37,7 +37,7 @@ try:
     from PIL import Image
 
     _has_vision = True
-except:
+except ImportError:
     _has_vision = False
 
 
@@ -119,6 +119,7 @@ def push_to_hf_hub(
     """Push your BERTopic model to a HuggingFace Hub.
 
     Arguments:
+        model: The BERTopic model to push
         repo_id: The name of your HuggingFace repository
         commit_message: A commit message
         token: Token to add if not already logged in
@@ -158,7 +159,7 @@ def push_to_hf_hub(
             get_hf_file_metadata(
                 hf_hub_url(repo_id=repo_id, filename="README.md", revision=revision)
             )
-        except:
+        except: # noqa: E722
             if model_card:
                 readme_text = generate_readme(model, repo_id)
                 readme_path = Path(tmpdir) / "README.md"
@@ -200,7 +201,7 @@ def load_local_files(path):
             if torch_path.is_file():
                 ctfidf_tensors = torch.load(torch_path, map_location="cpu")
         ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
-    except:
+    except: # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
     # Load images
@@ -209,7 +210,7 @@ def load_local_files(path):
         try:
             Image.open(path / "images/0.jpg")
             _has_images = True
-        except:
+        except: # noqa: E722
             _has_images = False
 
         if _has_images:
@@ -234,7 +235,7 @@ def load_files_from_hf(path):
     try:
         tensors = hf_hub_download(path, HF_SAFE_WEIGHTS_NAME, revision=None)
         tensors = load_safetensors(tensors)
-    except:
+    except: # noqa: E722
         tensors = hf_hub_download(path, HF_WEIGHTS_NAME, revision=None)
         tensors = torch.load(tensors, map_location="cpu")
 
@@ -248,10 +249,10 @@ def load_files_from_hf(path):
                 path, CTFIDF_SAFE_WEIGHTS_NAME, revision=None
             )
             ctfidf_tensors = load_safetensors(ctfidf_tensors)
-        except:
+        except: # noqa: E722
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
             ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu")
-    except:
+    except: # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
     # Load images if they exist
@@ -260,7 +261,7 @@ def load_files_from_hf(path):
         try:
             hf_hub_download(path, "images/0.jpg", revision=None)
             _has_images = True
-        except:
+        except: # noqa: E722
             _has_images = False
 
         if _has_images:
@@ -416,7 +417,6 @@ def check_has_visual_aspect(model):
     if _has_vision:
         for aspect, value in model.topic_aspects_.items():
             if isinstance(value[0], Image.Image):
-                visual_aspects = model.topic_aspects_[aspect]
                 return True
 
 
@@ -490,7 +490,7 @@ def get_package_versions():
             from importlib.metadata import version
 
             hdbscan_version = version("hdbscan")
-        except:
+        except: # noqa: E722
             hdbscan_version = None
 
         from umap import __version__ as umap_version

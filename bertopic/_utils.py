@@ -72,7 +72,7 @@ def check_is_fitted(topic_model):
     """Checks if the model was fitted by verifying the presence of self.matches.
 
     Arguments:
-        model: BERTopic instance for which the check is performed.
+        topic_model: BERTopic instance for which the check is performed.
 
     Returns:
         None
