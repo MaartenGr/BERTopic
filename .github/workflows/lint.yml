@@ -27,7 +27,8 @@ jobs:
           pip install -e ".[test]"
       - name: Ruff Format Check
         run: ruff format --check .
+        id: format
       - name: Ruff Lint Check
         run: ruff check --output-format=github .
         # Still run if format check fails
-        if: always()
+        if: success() || steps.format.conclusion == 'failure'
