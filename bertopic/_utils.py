@@ -152,6 +152,31 @@ def validate_distance_matrix(X, n_samples):
     return X
 
 
+
+def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
+    """Check if the consecutive elements in the distance array are the same. If so, a small noise
+    is added to one of the elements to make sure that the array does not contain duplicates.
+
+    Arguments:
+        dists: distance array sorted in the increasing order.
+        noise_max: the maximal magnitude of noise to be added.
+
+    Returns:
+         Unique distances sorted in the preserved increasing order.
+    """
+    dists_cp = dists.copy()
+
+    for i in range(dists.shape[0] - 1):
+        if dists[i] == dists[i + 1]:
+            # returns the next unique distance or the current distance with the added noise
+            next_unique_dist = next((d for d in dists[i + 1:] if d != dists[i]), dists[i] + noise_max)
+
+            # the noise can never be large then the difference between the next unique distance and the current one
+            curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
+            dists_cp[i + 1] = np.random.uniform(low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise)
+    return dists_cp
+
+  
 def select_topic_representation(
     ctfidf_embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
     embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
