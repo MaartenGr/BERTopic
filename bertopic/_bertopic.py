@@ -880,14 +880,15 @@ class BERTopic:
             # matrix at timestamp t-1
             if evolution_tuning and index != 0:
                 current_topics = sorted(list(documents_per_topic.Topic.values))
-                overlapping_topics = sorted(list(set(previous_topics).intersection(set(current_topics)))  # noqa: F821
-                    )
+                overlapping_topics = sorted(
+                    list(set(previous_topics).intersection(set(current_topics)))  # noqa: F821
+                )
 
                 current_overlap_idx = [
                     current_topics.index(topic) for topic in overlapping_topics
                 ]
                 previous_overlap_idx = [
-                    previous_topics.index(topic) # noqa: F821
+                    previous_topics.index(topic)  # noqa: F821
                     for topic in overlapping_topics
                 ]
 
