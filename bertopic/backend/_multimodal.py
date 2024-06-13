@@ -81,7 +81,7 @@ class MultiModalBackend(BaseEmbedder):
             self.tokenizer = self.embedding_model._first_module().processor.tokenizer
         except AttributeError:
             self.tokenizer = self.embedding_model.tokenizer
-        except: # noqa: E722
+        except:  # noqa: E722
             self.tokenizer = None
 
     def embed(

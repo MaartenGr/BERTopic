@@ -881,20 +881,21 @@ class BERTopic:
             if evolution_tuning and index != 0:
                 current_topics = sorted(list(documents_per_topic.Topic.values))
                 overlapping_topics = sorted(
-                    list(set(previous_topics).intersection(set(current_topics))) # noqa: F821
+                    list(set(previous_topics).intersection(set(current_topics)))  # noqa: F821
                 )
 
                 current_overlap_idx = [
                     current_topics.index(topic) for topic in overlapping_topics
                 ]
                 previous_overlap_idx = [
-                    previous_topics.index(topic) for topic in overlapping_topics # noqa: F821
+                    previous_topics.index(topic)  # noqa: F821
+                    for topic in overlapping_topics
                 ]
 
                 c_tf_idf.tolil()[current_overlap_idx] = (
                     (
                         c_tf_idf[current_overlap_idx]
-                        + previous_c_tf_idf[previous_overlap_idx] # noqa: F821
+                        + previous_c_tf_idf[previous_overlap_idx]  # noqa: F821
                     )
                     / 2.0
                 ).tolil()
@@ -929,8 +930,8 @@ class BERTopic:
             topics_over_time.extend(topics_at_timestamp)
 
             if evolution_tuning:
-                previous_topics = sorted(list(documents_per_topic.Topic.values)) # noqa: F841
-                previous_c_tf_idf = c_tf_idf.copy() # noqa: F841
+                previous_topics = sorted(list(documents_per_topic.Topic.values))  # noqa: F841
+                previous_c_tf_idf = c_tf_idf.copy()  # noqa: F841
 
         return pd.DataFrame(
             topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"]
@@ -5172,7 +5173,7 @@ def _create_model_from_files(
     # Select HF model through SentenceTransformers
     try:
         embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
-    except: # noqa: E722
+    except:  # noqa: E722
         embedding_model = BaseEmbedder()
 
         if warn_no_backend:
