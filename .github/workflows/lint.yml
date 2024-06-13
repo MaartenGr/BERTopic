@@ -13,8 +13,6 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    # Set this at job level so it's marked as failed if any of the steps fail
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.12
@@ -31,3 +29,5 @@ jobs:
         run: ruff format --check .
       - name: Ruff Lint Check
         run: ruff check --output-format=github .
+        # Still run if format check fails
+        if: always()
