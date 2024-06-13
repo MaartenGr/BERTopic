@@ -3162,7 +3162,7 @@ class BERTopic:
             with open(file_or_dir, 'rb') as file:
                 if embedding_model:
                     topic_model = joblib.load(file)
-                    topic_model.embedding_model = select_backend(embedding_model, verbose=self.verbose)
+                    topic_model.embedding_model = select_backend(embedding_model, verbose=topic_model.verbose)
                 else:
                     topic_model = joblib.load(file)
                 return topic_model
@@ -3179,7 +3179,7 @@ class BERTopic:
 
         # Replace embedding model if one is specifically chosen
         if embedding_model is not None:
-            topic_model.embedding_model = select_backend(embedding_model)
+            topic_model.embedding_model = select_backend(embedding_model, verbose=topic_model.verbose)
 
         return topic_model
 
@@ -3312,8 +3312,9 @@ class BERTopic:
         merged_model.embedding_model = models[0].embedding_model
 
         # Replace embedding model if one is specifically chosen
+        verbose = any([model.verbose for model in models])
         if embedding_model is not None and type(merged_model.embedding_model) == BaseEmbedder:
-            merged_model.embedding_model = select_backend(embedding_model, verbose=self.verbose)
+            merged_model.embedding_model = select_backend(embedding_model, verbose=verbose)
         return merged_model
 
     def push_to_hf_hub(
