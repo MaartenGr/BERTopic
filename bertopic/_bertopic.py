@@ -256,7 +256,7 @@ class BERTopic:
         self.topic_mapper_ = None
         self.topic_representations_ = None
         self.topic_embeddings_ = None
-        self.topic_id_to_zeroshot_topic_idx = None
+        self.topic_id_to_zeroshot_topic_idx = {}
         self.custom_labels_ = None
         self.c_tf_idf_ = None
         self.representative_images_ = None
