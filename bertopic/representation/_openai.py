@@ -238,7 +238,7 @@ class OpenAI(BaseRepresentation):
                     response = completions_with_backoff(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
                 else:
                     response = self.client.completions.create(model=self.model, prompt=prompt, **self.generator_kwargs)
-                label = output.text.strip()
+                label = response.choices[0].text.strip()
 
             updated_topics[topic] = [(label, 1)]
 
