@@ -4069,16 +4069,22 @@ class BERTopic:
                     for topic_from, topics_to in basic_mappings.items()}
 
         # Combine merged zero-shot topics with '_' and
-        # remap self.topic_id_to_zeroshot_topic_idx based on new self.zeroshot_topic_list
+        # remap self.topic_id_to_zeroshot_topic_idx based on new self.zeroshot_topic_list.
+        # This does not keep the ordering where zero-shot topics come before clustered topics.
         if self._is_zeroshot():
-            topic_id_to_zeroshot_topics = {
+            new_topic_id_to_zeroshot_topics = {
                 topic_to: [
                     self.zeroshot_topic_list[self.topic_id_to_zeroshot_topic_idx[topic_id]]
-                    for topic_id in topics_from
+                    # multiple original topics combined; one or more are zero-shot topics
+                    for topic_id in topics_from if topic_id in self.topic_id_to_zeroshot_topic_idx
                 ] for topic_to, topics_from in basic_mappings.items()
+                # create mapping if any of the original topics are zero-shot
                 if any(topic_id in self.topic_id_to_zeroshot_topic_idx for topic_id in topics_from)
             }
-            new_topic_id_to_zeroshot_topics = {topic_id: '_'.join(topics) for topic_id, topics in topic_id_to_zeroshot_topics.items()}
+            new_topic_id_to_zeroshot_topics = {
+                topic_id: '_'.join(topics)
+                for topic_id, topics in new_topic_id_to_zeroshot_topics.items()
+            }
             self.topic_id_to_zeroshot_topic_idx = {
                 topic_id: zeroshot_topic_idx
                 for zeroshot_topic_idx, (topic_id, _)
