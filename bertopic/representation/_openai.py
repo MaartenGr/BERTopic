@@ -5,9 +5,7 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document, MyLogger
-
-logger = MyLogger("WARNING")
+from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document
 
 DEFAULT_PROMPT = """
 This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
@@ -223,17 +221,17 @@ class OpenAI(BaseRepresentation):
                 if output.finish_reason == "stop":
                     label = output.message.content.strip().replace("topic: ", "")
                 elif output.finish_reason == "length":
-                    logger.warn(f"OpenAI Topic Representation - Length limit reached for documents IDs: ({repr_doc_ids})")
+                    topic_model.logger.warn(f"OpenAI Topic Representation - Length limit reached for documents IDs: ({repr_doc_ids})")
                     if hasattr(output.message, "content"):
                         label = output.message.content.strip().replace("topic: ", "")
                     else:
                         label = "OpenAI Topic Representation - Incomplete output due to token limit being reached"                        
                 # Addresses #1570 for potential issues with OpenAI's content filter        
                 elif output.finish_reason == "content_filter":
-                    logger.warn(f"OpenAI Topic Representation - The content filter of OpenAI was trigger for the following documents IDs: ({repr_doc_ids})")
+                    topic_model.logger.warn(f"OpenAI Topic Representation - The content filter of OpenAI was trigger for the following documents IDs: ({repr_doc_ids})")
                     label = "Output content filtered by OpenAI"
                 else:
-                    logger.warn(f"OpenAI Topic Representation - Couldn't create a label due to {output.finish_reason} for the following document IDs: ({repr_doc_ids})")
+                    topic_model.logger.warn(f"OpenAI Topic Representation - Couldn't create a label due to {output.finish_reason} for the following document IDs: ({repr_doc_ids})")
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
