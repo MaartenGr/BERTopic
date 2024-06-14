@@ -7,7 +7,6 @@ from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document
 
-
 DEFAULT_PROMPT = """
 This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
 ---
@@ -37,7 +36,7 @@ Keywords: [KEYWORDS]
 Topic name:"""
 
 DEFAULT_CHAT_PROMPT = """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 [DOCUMENTS]
 The topic is described by the following keywords: [KEYWORDS]
 
@@ -193,7 +192,7 @@ class OpenAI(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
+        repr_docs_mappings, _, _, repr_doc_ids = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
 
         # Generate using OpenAI's Language Model
         updated_topics = {}
@@ -216,12 +215,23 @@ class OpenAI(BaseRepresentation):
                     response = chat_completions_with_backoff(self.client, **kwargs)
                 else:
                     response = self.client.chat.completions.create(**kwargs)
+                    
+                output = response.choices[0]
 
-                # Check whether content was actually generated
-                # Addresses #1570 for potential issues with OpenAI's content filter
-                if hasattr(response.choices[0].message, "content"):
-                    label = response.choices[0].message.content.strip().replace("topic: ", "")
+                if output.finish_reason == "stop":
+                    label = output.message.content.strip().replace("topic: ", "")
+                elif output.finish_reason == "length":
+                    topic_model.logger.warn(f"OpenAI Topic Representation - Length limit reached for documents IDs: ({repr_doc_ids})")
+                    if hasattr(output.message, "content"):
+                        label = output.message.content.strip().replace("topic: ", "")
+                    else:
+                        label = "OpenAI Topic Representation - Incomplete output due to token limit being reached"                        
+                # Addresses #1570 for potential issues with OpenAI's content filter        
+                elif output.finish_reason == "content_filter":
+                    topic_model.logger.warn(f"OpenAI Topic Representation - The content filter of OpenAI was trigger for the following documents IDs: ({repr_doc_ids})")
+                    label = "Output content filtered by OpenAI"
                 else:
+                    topic_model.logger.warn(f"OpenAI Topic Representation - Couldn't create a label due to {output.finish_reason} for the following document IDs: ({repr_doc_ids})")
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
