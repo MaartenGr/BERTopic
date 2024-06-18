@@ -4089,7 +4089,7 @@ class BERTopic:
 
             for topic_to, topics_from in basic_mappings.items():
                 # When extracting topics, the reduced topics were reordered.
-                # Must get the updates topic_to.
+                # Must get the updated topic_to.
                 topic_to = topics_to_map[topic_to]
 
                 # which of the original topics are zero-shot
