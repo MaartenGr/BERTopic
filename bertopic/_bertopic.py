@@ -3612,11 +3612,10 @@ class BERTopic:
     def _is_zeroshot(self):
         """ Check whether zero-shot topic modeling is possible
 
-        * There should be a cluster model used
         * Embedding model is necessary to convert zero-shot topics to embeddings
         * Zero-shot topics should be defined
         """
-        if self.zeroshot_topic_list is not None and self.embedding_model is not None and type(self.hdbscan_model) != BaseCluster:
+        if self.zeroshot_topic_list is not None and self.embedding_model is not None:
             return True
         return False
 
