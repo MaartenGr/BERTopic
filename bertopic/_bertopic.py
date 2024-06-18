@@ -2017,10 +2017,10 @@ class BERTopic:
         mappings = defaultdict(list)
         for key, val in sorted(mapping.items()):
             mappings[val].append(key)
-        mappings = {topic_from:
-                    {"topics_to": topics_to,
-                     "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to]}
-                    for topic_from, topics_to in mappings.items()}
+        mappings = {topic_to:
+                    {"topics_from": topics_from,
+                     "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from]}
+                    for topic_to, topics_from in mappings.items()}
 
         # Update topics
         documents.Topic = documents.Topic.map(mapping)
@@ -3831,13 +3831,13 @@ class BERTopic:
         # Topic embeddings when merging topics
         elif self.topic_embeddings_ is not None and mappings is not None:
             topic_embeddings_dict = {}
-            for topic_from, topics_to in mappings.items():
-                topic_ids = topics_to["topics_to"]
-                topic_sizes = topics_to["topic_sizes"]
+            for topic_to, topics_from in mappings.items():
+                topic_ids = topics_from["topics_from"]
+                topic_sizes = topics_from["topic_sizes"]
                 if topic_ids:
                     embds = np.array(self.topic_embeddings_)[np.array(topic_ids) + self._outliers]
                     topic_embedding = np.average(embds, axis=0, weights=topic_sizes)
-                    topic_embeddings_dict[topic_from] = topic_embedding
+                    topic_embeddings_dict[topic_to] = topic_embedding
 
             # Re-order topic embeddings
             topics_to_map = {topic_mapping[0]: topic_mapping[1] for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]}
@@ -4062,10 +4062,13 @@ class BERTopic:
         basic_mappings = defaultdict(list)
         for key, val in sorted(mapped_topics.items()):
             basic_mappings[val].append(key)
-        mappings = {topic_from:
-                    {"topics_to": topics_to,
-                     "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to]}
-                    for topic_from, topics_to in basic_mappings.items()}
+        mappings = {
+            topic_to: {
+                "topics_from": topics_from,
+                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from]
+            }
+            for topic_to, topics_from in basic_mappings.items()
+        }
 
         # Combine merged zero-shot topics with '_' and
         # remap self.topic_id_to_zeroshot_topic_idx based on new self.zeroshot_topic_list.
