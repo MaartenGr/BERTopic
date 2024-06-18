@@ -3586,19 +3586,19 @@ class BERTopic:
         assigned_ids = [index for index, value in enumerate(assignment_vals) if value >= self.zeroshot_min_similarity]
         non_assigned_ids = [index for index, value in enumerate(assignment_vals) if value < self.zeroshot_min_similarity]
 
-        # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
-        num_zeroshot_topics = len(assignment_vals.unique())
-        if self.nr_topics and not self.nr_topics > num_zeroshot_topics:
-            raise ValueError(f'The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics '
-                             f'({num_zeroshot_topics}). Consider raising nr_topics or raising the '
-                             f'zeroshot_min_similarity ({self.zeroshot_min_similarity}).')
-
         # Assign topics
         assigned_documents = documents.iloc[assigned_ids]
         assigned_documents["Topic"] = [topic for topic in assignment[assigned_ids]]
         assigned_documents["Old_ID"] = assigned_documents["ID"].copy()
         assigned_documents["ID"] = range(len(assigned_documents))
         assigned_embeddings = embeddings[assigned_ids]
+
+        # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
+        num_zeroshot_topics = len(assigned_documents["Topic"].unique())
+        if self.nr_topics and not self.nr_topics > num_zeroshot_topics:
+            raise ValueError(f'The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics '
+                             f'({num_zeroshot_topics}). Consider raising nr_topics or raising the '
+                             f'zeroshot_min_similarity ({self.zeroshot_min_similarity}).')
 
         # Select non-assigned topics to be clustered
         documents = documents.iloc[non_assigned_ids]
