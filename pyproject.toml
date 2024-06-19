@@ -75,6 +75,7 @@ spacy = [
 test = [
     "pytest>=5.4.3",
     "pytest-cov>=2.6.1",
+    "ruff~=0.4.7",
 ]
 use = [
     "tensorflow",
@@ -95,3 +96,28 @@ Repository = "https://github.com/MaartenGr/BERTopic.git"
 [tool.setuptools.packages.find]
 include = ["bertopic*"]
 exclude = ["tests"]
+
+[tool.ruff]
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [  
+  "E4",  # Ruff Defaults
+  "E7",
+  "E9",
+  "F",   # End Ruff Defaults,
+  "D"
+]
+
+ignore = [
+  "D100", # Missing docstring in public module
+  "D104", # Missing docstring in public package
+  "D205", # 1 blank line required between summary line and description
+  "E731", # Do not assign a lambda expression, use a def
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["D"] # Ignore all docstring errors in tests
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

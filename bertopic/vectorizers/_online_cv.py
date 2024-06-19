@@ -9,7 +9,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 
 class OnlineCountVectorizer(CountVectorizer):
-    """ An online variant of the CountVectorizer with updating vocabulary.
+    """An online variant of the CountVectorizer with updating vocabulary.
 
     At each `.partial_fit`, its vocabulary is updated based on any OOV words
     it might find. Then, `.update_bow` can be used to track and update
@@ -42,7 +42,6 @@ class OnlineCountVectorizer(CountVectorizer):
         X_ (scipy.sparse.csr_matrix) : The Bag-of-Words representation
 
     Examples:
-
     ```python
     from bertopic.vectorizers import OnlineCountVectorizer
     vectorizer = OnlineCountVectorizer(stop_words="english")
@@ -68,21 +67,19 @@ class OnlineCountVectorizer(CountVectorizer):
     References:
         Adapted from: https://github.com/idoshlomo/online_vectorizers
     """
-    def __init__(self,
-                 decay: float = None,
-                 delete_min_df: float = None,
-                 **kwargs):
+
+    def __init__(self, decay: float = None, delete_min_df: float = None, **kwargs):
         self.decay = decay
         self.delete_min_df = delete_min_df
         super(OnlineCountVectorizer, self).__init__(**kwargs)
 
     def partial_fit(self, raw_documents: List[str]) -> None:
-        """ Perform a partial fit and update vocabulary with OOV tokens
+        """Perform a partial fit and update vocabulary with OOV tokens.
 
         Arguments:
             raw_documents: A list of documents
         """
-        if not hasattr(self, 'vocabulary_'):
+        if not hasattr(self, "vocabulary_"):
             return self.fit(raw_documents)
 
         analyzer = self.build_analyzer()
@@ -92,13 +89,18 @@ class OnlineCountVectorizer(CountVectorizer):
 
         if oov_tokens:
             max_index = max(self.vocabulary_.values())
-            oov_vocabulary = dict(zip(oov_tokens, list(range(max_index + 1, max_index + 1 + len(oov_tokens), 1))))
+            oov_vocabulary = dict(
+                zip(
+                    oov_tokens,
+                    list(range(max_index + 1, max_index + 1 + len(oov_tokens), 1)),
+                )
+            )
             self.vocabulary_.update(oov_vocabulary)
 
         return self
 
     def update_bow(self, raw_documents: List[str]) -> csr_matrix:
-        """ Create or update the bag-of-words matrix
+        """Create or update the bag-of-words matrix.
 
         Update the bag-of-words matrix by adding the newly transformed
         documents. This may add empty columns if new words are found and/or
@@ -119,11 +121,15 @@ class OnlineCountVectorizer(CountVectorizer):
             X = self.transform(raw_documents)
 
             # Add empty columns if new words are found
-            columns = csr_matrix((self.X_.shape[0], X.shape[1] - self.X_.shape[1]), dtype=int)
+            columns = csr_matrix(
+                (self.X_.shape[0], X.shape[1] - self.X_.shape[1]), dtype=int
+            )
             self.X_ = sparse.hstack([self.X_, columns])
 
             # Add empty rows if new topics are found
-            rows = csr_matrix((X.shape[0] - self.X_.shape[0], self.X_.shape[1]), dtype=int)
+            rows = csr_matrix(
+                (X.shape[0] - self.X_.shape[0], self.X_.shape[1]), dtype=int
+            )
             self.X_ = sparse.vstack([self.X_, rows])
 
             # Decay of BoW matrix
@@ -140,7 +146,7 @@ class OnlineCountVectorizer(CountVectorizer):
         return self.X_
 
     def _clean_bow(self) -> None:
-        """ Remove words that do not exceed `self.delete_min_df` """
+        """Remove words that do not exceed `self.delete_min_df`."""
         # Only keep words with a minimum frequency
         indices = np.where(self.X_.sum(0) >= self.delete_min_df)[1]
         indices_dict = {index: index for index in indices}

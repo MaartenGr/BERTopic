@@ -6,7 +6,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class SentenceTransformerBackend(BaseEmbedder):
-    """ Sentence-transformers embedding model
+    """Sentence-transformers embedding model.
 
     The sentence-transformers embedding model used for generating document and
     word embeddings.
@@ -15,7 +15,6 @@ class SentenceTransformerBackend(BaseEmbedder):
         embedding_model: A sentence-transformers embedding model
 
     Examples:
-
     To create a model, you can load in a string pointing to a
     sentence-transformers model:
 
@@ -34,6 +33,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     sentence_model = SentenceTransformerBackend(embedding_model)
     ```
     """
+
     def __init__(self, embedding_model: Union[str, SentenceTransformer]):
         super().__init__()
 
@@ -44,15 +44,15 @@ class SentenceTransformerBackend(BaseEmbedder):
             self.embedding_model = SentenceTransformer(embedding_model)
             self._hf_model = embedding_model
         else:
-            raise ValueError("Please select a correct SentenceTransformers model: \n"
-                             "`from sentence_transformers import SentenceTransformer` \n"
-                             "`model = SentenceTransformer('all-MiniLM-L6-v2')`")
+            raise ValueError(
+                "Please select a correct SentenceTransformers model: \n"
+                "`from sentence_transformers import SentenceTransformer` \n"
+                "`model = SentenceTransformer('all-MiniLM-L6-v2')`"
+            )
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n documents/words into an n-dimensional
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded

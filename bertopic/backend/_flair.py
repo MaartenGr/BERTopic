@@ -8,7 +8,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class FlairBackend(BaseEmbedder):
-    """ Flair Embedding Model
+    """Flair Embedding Model.
 
     The Flair embedding model used for generating document and
     word embeddings.
@@ -17,7 +17,6 @@ class FlairBackend(BaseEmbedder):
         embedding_model: A Flair embedding model
 
     Examples:
-
     ```python
     from bertopic.backend import FlairBackend
     from flair.embeddings import WordEmbeddings, DocumentPoolEmbeddings
@@ -30,6 +29,7 @@ class FlairBackend(BaseEmbedder):
     flair_embedder = FlairBackend(document_glove_embeddings)
     ```
     """
+
     def __init__(self, embedding_model: Union[TokenEmbeddings, DocumentEmbeddings]):
         super().__init__()
 
@@ -45,16 +45,16 @@ class FlairBackend(BaseEmbedder):
             self.embedding_model = embedding_model
 
         else:
-            raise ValueError("Please select a correct Flair model by either using preparing a token or document "
-                             "embedding model: \n"
-                             "`from flair.embeddings import TransformerDocumentEmbeddings` \n"
-                             "`roberta = TransformerDocumentEmbeddings('roberta-base')`")
+            raise ValueError(
+                "Please select a correct Flair model by either using preparing a token or document "
+                "embedding model: \n"
+                "`from flair.embeddings import TransformerDocumentEmbeddings` \n"
+                "`roberta = TransformerDocumentEmbeddings('roberta-base')`"
+            )
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n documents/words into an n-dimensional
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded
@@ -67,7 +67,9 @@ class FlairBackend(BaseEmbedder):
         embeddings = []
         for document in tqdm(documents, disable=not verbose):
             try:
-                sentence = Sentence(document) if document else Sentence("an empty document")
+                sentence = (
+                    Sentence(document) if document else Sentence("an empty document")
+                )
                 self.embedding_model.embed(sentence)
             except RuntimeError:
                 sentence = Sentence("an empty document")
