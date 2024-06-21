@@ -63,6 +63,13 @@ def test_full_model(model, documents, request):
 
     assert len(topics_test) == 2
 
+    # Test zero-shot topic modeling
+    if topic_model._is_zeroshot():
+        if topic_model._outliers:
+            assert set(topic_model.topic_labels_.keys()) == set(range(-1, len(topic_model.topic_labels_) - 1))
+        else:
+            assert set(topic_model.topic_labels_.keys()) == set(range(len(topic_model.topic_labels_)))
+
     # Test topics over time
     timestamps = [i % 10 for i in range(len(documents))]
     topics_over_time = topic_model.topics_over_time(documents, timestamps)
