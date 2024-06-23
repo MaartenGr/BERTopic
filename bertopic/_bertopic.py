@@ -298,8 +298,10 @@ class BERTopic:
 
     @property
     def topic_labels_(self):
-        topic_labels = {key: f"{key}_" + "_".join([word[0] for word in values[:4]])
-                              for key, values in self.topic_representations_.items()}
+        topic_labels = {
+            key: f"{key}_" + "_".join([word[0] for word in values[:4]])
+            for key, values in self.topic_representations_.items()
+        }
         if self._is_zeroshot():
             # Need to correct labels from zero-shot topics
             topic_id_to_zeroshot_label = {
@@ -446,15 +448,21 @@ class BERTopic:
 
         # Zero-shot Topic Modeling
         if self._is_zeroshot():
-            documents, embeddings, assigned_documents, assigned_embeddings = self._zeroshot_topic_modeling(documents, embeddings)
+            documents, embeddings, assigned_documents, assigned_embeddings = (
+                self._zeroshot_topic_modeling(documents, embeddings)
+            )
             # Filter UMAP embeddings to only non-assigned embeddings to be used for clustering
             umap_embeddings = self.umap_model.transform(embeddings)
 
         if len(documents) > 0:  # No zero-shot topics matched
             # Cluster reduced embeddings
-            documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, y=y)
+            documents, probabilities = self._cluster_embeddings(
+                umap_embeddings, documents, y=y
+            )
             if self._is_zeroshot() and len(assigned_documents) > 0:
-                documents, embeddings = self._combine_zeroshot_topics(documents, embeddings, assigned_documents, assigned_embeddings)
+                documents, embeddings = self._combine_zeroshot_topics(
+                    documents, embeddings, assigned_documents, assigned_embeddings
+                )
         else:
             # All documents matches zero-shot topics
             documents = assigned_documents
@@ -501,7 +509,9 @@ class BERTopic:
             else:
                 # Use `topics_before_reduction` because `self.topics_` may have already been updated from
                 # reducing topics, and the original probabilities are needed for `self._map_probabilities()`
-                probabilities = sim_matrix[np.arange(len(documents)), topics_before_reduction]
+                probabilities = sim_matrix[
+                    np.arange(len(documents)), topics_before_reduction
+                ]
 
         # Resulting output
         self.probabilities_ = self._map_probabilities(
@@ -1622,7 +1632,6 @@ class BERTopic:
                 "c-TF-IDF embeddings instead of centroid embeddings."
             )
 
-        # Extract words
         documents = pd.DataFrame(
             {"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images}
         )
@@ -1633,6 +1642,7 @@ class BERTopic:
         # Update topic sizes and assignments
         self._update_topic_size(documents)
 
+        # Extract words and update topic labels
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
 
@@ -2272,7 +2282,7 @@ class BERTopic:
         mappings = {
             topic_to: {
                 "topics_from": topics_from,
-                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from]
+                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
             }
             for topic_to, topics_from in mappings.items()
         }
@@ -4044,9 +4054,11 @@ class BERTopic:
         # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
         num_zeroshot_topics = len(assigned_documents["Topic"].unique())
         if self.nr_topics and not self.nr_topics > num_zeroshot_topics:
-            raise ValueError(f'The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics '
-                             f'({num_zeroshot_topics}). Consider raising nr_topics or raising the '
-                             f'zeroshot_min_similarity ({self.zeroshot_min_similarity}).')
+            raise ValueError(
+                f"The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics "
+                f"({num_zeroshot_topics}). Consider raising nr_topics or raising the "
+                f"zeroshot_min_similarity ({self.zeroshot_min_similarity})."
+            )
 
         # Select non-assigned topics to be clustered
         documents = documents.iloc[non_assigned_ids]
@@ -4067,23 +4079,37 @@ class BERTopic:
             return True
         return False
 
-    def _combine_zeroshot_topics(self,
-                                 documents: pd.DataFrame,
-                                 embeddings: np.ndarray,
-                                 assigned_documents: pd.DataFrame,
-                                 assigned_embeddings: np.ndarray) -> tuple[pd.DataFrame, np.ndarray]:
-
+    def _combine_zeroshot_topics(
+        self,
+        documents: pd.DataFrame,
+        embeddings: np.ndarray,
+        assigned_documents: pd.DataFrame,
+        assigned_embeddings: np.ndarray,
+    ) -> tuple[pd.DataFrame, np.ndarray]:
         # Combine Zero-shot topics with topics from clustering
-        zeroshot_topic_idx_to_topic_id = {zeroshot_topic_id: new_topic_id for new_topic_id, zeroshot_topic_id in
-                                          enumerate(set(assigned_documents.Topic))}
-        self.topic_id_to_zeroshot_topic_idx = {new_topic_id: zeroshot_topic_id for new_topic_id, zeroshot_topic_id in
-                                               enumerate(set(assigned_documents.Topic))}
-        assigned_documents.Topic = assigned_documents.Topic.map(zeroshot_topic_idx_to_topic_id)
+        zeroshot_topic_idx_to_topic_id = {
+            zeroshot_topic_id: new_topic_id
+            for new_topic_id, zeroshot_topic_id in enumerate(
+                set(assigned_documents.Topic)
+            )
+        }
+        self.topic_id_to_zeroshot_topic_idx = {
+            new_topic_id: zeroshot_topic_id
+            for new_topic_id, zeroshot_topic_id in enumerate(
+                set(assigned_documents.Topic)
+            )
+        }
+        assigned_documents.Topic = assigned_documents.Topic.map(
+            zeroshot_topic_idx_to_topic_id
+        )
         num_zeroshot_topics = len(zeroshot_topic_idx_to_topic_id)
 
         # Insert zeroshot topics between outlier cluster and other clusters
         documents.Topic = documents.Topic.apply(
-            lambda topic_id: topic_id + num_zeroshot_topics if topic_id != -1 else topic_id)
+            lambda topic_id: topic_id + num_zeroshot_topics
+            if topic_id != -1
+            else topic_id
+        )
 
         # Combine the clustered documents/embeddings with assigned documents/embeddings in the original order
         documents = pd.concat([documents, assigned_documents])
@@ -4661,7 +4687,7 @@ class BERTopic:
         mappings = {
             topic_to: {
                 "topics_from": topics_from,
-                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from]
+                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
             }
             for topic_to, topics_from in basic_mappings.items()
         }
@@ -4680,8 +4706,10 @@ class BERTopic:
         # or use a calculated representation.
         if self._is_zeroshot():
             new_topic_id_to_zeroshot_topic_idx = {}
-            topics_to_map = {topic_mapping[0]: topic_mapping[1] for topic_mapping in
-                             np.array(self.topic_mapper_.mappings_)[:, -2:]}
+            topics_to_map = {
+                topic_mapping[0]: topic_mapping[1]
+                for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]
+            }
 
             for topic_to, topics_from in basic_mappings.items():
                 # When extracting topics, the reduced topics were reordered.
@@ -4690,7 +4718,8 @@ class BERTopic:
 
                 # which of the original topics are zero-shot
                 zeroshot_topic_ids = [
-                    topic_id for topic_id in topics_from
+                    topic_id
+                    for topic_id in topics_from
                     if topic_id in self.topic_id_to_zeroshot_topic_idx
                 ]
                 if len(zeroshot_topic_ids) == 0:
@@ -4699,7 +4728,9 @@ class BERTopic:
                 # If any of the original topics are zero-shot, take the best fitting zero-shot label
                 # if the cosine similarity with the new topic exceeds the zero-shot threshold
                 zeroshot_labels = [
-                    self.zeroshot_topic_list[self.topic_id_to_zeroshot_topic_idx[topic_id]]
+                    self.zeroshot_topic_list[
+                        self.topic_id_to_zeroshot_topic_idx[topic_id]
+                    ]
                     for topic_id in zeroshot_topic_ids
                 ]
                 zeroshot_embeddings = self._extract_embeddings(zeroshot_labels)
@@ -4709,7 +4740,9 @@ class BERTopic:
                 best_zeroshot_topic_idx = np.argmax(cosine_similarities)
                 best_cosine_similarity = cosine_similarities[best_zeroshot_topic_idx]
                 if best_cosine_similarity >= self.zeroshot_min_similarity:
-                    new_topic_id_to_zeroshot_topic_idx[topic_to] = zeroshot_topic_ids[best_zeroshot_topic_idx]
+                    new_topic_id_to_zeroshot_topic_idx[topic_to] = zeroshot_topic_ids[
+                        best_zeroshot_topic_idx
+                    ]
 
             self.topic_id_to_zeroshot_topic_idx = new_topic_id_to_zeroshot_topic_idx
 
