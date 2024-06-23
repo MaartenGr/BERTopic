@@ -24,5 +24,5 @@ __all__ = [
     "visualize_topics_over_time",
     "visualize_topics_per_class",
     "visualize_hierarchical_documents",
-    "visualize_approximate_distribution"
+    "visualize_approximate_distribution",
 ]

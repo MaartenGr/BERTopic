@@ -3,7 +3,7 @@ import time
 
 
 def truncate_document(topic_model, doc_length, tokenizer, document: str):
-    """ Truncate a document to a certain length
+    """Truncate a document to a certain length.
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and
     `encode` method. An example would be the following custom tokenizer:
@@ -14,8 +14,8 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         def encode(self, doc):
             return doc.split(",")
 
-        def decode(self, doc_chuncks):
-            return ",".join(doc_chuncks)
+        def decode(self, doc_chunks):
+            return ",".join(doc_chunks)
     ```
 
     You can use this tokenizer by passing it to the `tokenizer` parameter.
@@ -25,15 +25,15 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         doc_length: The maximum length of each document. If a document is longer,
                     it will be truncated. If None, the entire document is passed.
         tokenizer: The tokenizer used to calculate to split the document into segments
-                   used to count the length of a document. 
-                       * If tokenizer is 'char', then the document is split up 
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
                        * If tokenizer is 'whitespace', the document is split up
                          into words separated by whitespaces. These words are counted
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`. They are decoded with 
+                         and truncated depending on `doc_length`. They are decoded with
                          whitespaces.
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
@@ -51,7 +51,7 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         elif tokenizer == "vectorizer":
             tokenizer = topic_model.vectorizer_model.build_tokenizer()
             truncated_document = " ".join(tokenizer(document)[:doc_length])
-        elif hasattr(tokenizer, 'encode') and hasattr(tokenizer, 'decode'):
+        elif hasattr(tokenizer, "encode") and hasattr(tokenizer, "decode"):
             encoded_document = tokenizer.encode(document)
             truncated_document = tokenizer.decode(encoded_document[:doc_length])
         return truncated_document
@@ -67,36 +67,36 @@ def retry_with_exponential_backoff(
     errors: tuple = None,
 ):
     """Retry a function with exponential backoff."""
- 
+
     def wrapper(*args, **kwargs):
         # Initialize variables
         num_retries = 0
         delay = initial_delay
- 
+
         # Loop until a successful response or max_retries is hit or an exception is raised
         while True:
             try:
                 return func(*args, **kwargs)
- 
+
             # Retry on specific errors
-            except errors as e:
+            except errors:
                 # Increment retries
                 num_retries += 1
- 
+
                 # Check if max retries has been reached
                 if num_retries > max_retries:
                     raise Exception(
                         f"Maximum number of retries ({max_retries}) exceeded."
                     )
- 
+
                 # Increment the delay
                 delay *= exponential_base * (1 + jitter * random.random())
- 
+
                 # Sleep for the delay
                 time.sleep(delay)
- 
+
             # Raise exceptions for any errors not specified
             except Exception as e:
                 raise e
- 
+
     return wrapper

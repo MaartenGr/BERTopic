@@ -5,11 +5,16 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+    ],
+)
 def test_update_topics(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     old_ctfidf = topic_model.c_tf_idf_
@@ -32,18 +37,27 @@ def test_update_topics(model, documents, request):
     assert len(set(old_topics)) - 1 == len(set(topic_model.topics_))
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_extract_topics(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     nr_topics = 5
-    documents = pd.DataFrame({"Document": documents,
-                              "ID": range(len(documents)),
-                              "Topic": np.random.randint(-1, nr_topics-1, len(documents))})
+    documents = pd.DataFrame(
+        {
+            "Document": documents,
+            "ID": range(len(documents)),
+            "Topic": np.random.randint(-1, nr_topics - 1, len(documents)),
+        }
+    )
     topic_model._update_topic_size(documents)
     topic_model._extract_topics(documents)
     freq = topic_model.get_topic_freq()
@@ -56,18 +70,27 @@ def test_extract_topics(model, documents, request):
     assert len(freq.Topic.unique()) == len(freq)
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_extract_topics_custom_cv(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     nr_topics = 5
-    documents = pd.DataFrame({"Document": documents,
-                              "ID": range(len(documents)),
-                              "Topic": np.random.randint(-1, nr_topics-1, len(documents))})
+    documents = pd.DataFrame(
+        {
+            "Document": documents,
+            "ID": range(len(documents)),
+            "Topic": np.random.randint(-1, nr_topics - 1, len(documents)),
+        }
+    )
 
     cv = CountVectorizer(ngram_range=(1, 2))
     topic_model.vectorizer_model = cv
@@ -83,12 +106,17 @@ def test_extract_topics_custom_cv(model, documents, request):
     assert len(freq.Topic.unique()) == len(freq)
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 @pytest.mark.parametrize("reduced_topics", [2, 4, 10])
 def test_topic_reduction(model, reduced_topics, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
@@ -107,20 +135,25 @@ def test_topic_reduction(model, reduced_topics, documents, request):
     assert topic_model.topics_ != old_topics
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_topic_reduction_edge_cases(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     topic_model.nr_topics = 100
     nr_topics = 5
     topics = np.random.randint(-1, nr_topics - 1, len(documents))
-    old_documents = pd.DataFrame({"Document": documents,
-                                  "ID": range(len(documents)),
-                                  "Topic": topics})
+    old_documents = pd.DataFrame(
+        {"Document": documents, "ID": range(len(documents)), "Topic": topics}
+    )
     topic_model._update_topic_size(old_documents)
     topic_model._extract_topics(old_documents)
     old_freq = topic_model.get_topic_freq()
@@ -133,12 +166,17 @@ def test_topic_reduction_edge_cases(model, documents, request):
     pd.testing.assert_frame_equal(old_freq, new_freq)
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_find_topics(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     similar_topics, similarity = topic_model.find_topics("car")

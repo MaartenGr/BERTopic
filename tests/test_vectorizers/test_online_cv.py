@@ -1,10 +1,18 @@
-
 import copy
 import pytest
 from bertopic.vectorizers import OnlineCountVectorizer
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'), ('custom_topic_model'), ('merged_topic_model'), ('reduced_topic_model'), ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_online_cv(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     vectorizer_model = OnlineCountVectorizer(stop_words="english", ngram_range=(2, 2))
@@ -18,7 +26,7 @@ def test_online_cv(model, documents, request):
             assert old_topic != new_topic
 
 
-@pytest.mark.parametrize('model', [('online_topic_model')])
+@pytest.mark.parametrize("model", [("online_topic_model")])
 def test_clean_bow(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
 

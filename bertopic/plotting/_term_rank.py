@@ -3,14 +3,16 @@ from typing import List, Union
 import plotly.graph_objects as go
 
 
-def visualize_term_rank(topic_model,
-                        topics: List[int] = None,
-                        log_scale: bool = False,
-                        custom_labels: Union[bool, str] = False,
-                        title: str = "<b>Term score decline per Topic</b>",
-                        width: int = 800,
-                        height: int = 500) -> go.Figure:
-    """ Visualize the ranks of all terms across all topics
+def visualize_term_rank(
+    topic_model,
+    topics: List[int] = None,
+    log_scale: bool = False,
+    custom_labels: Union[bool, str] = False,
+    title: str = "<b>Term score decline per Topic</b>",
+    width: int = 800,
+    height: int = 500,
+) -> go.Figure:
+    """Visualize the ranks of all terms across all topics.
 
     Each topic is represented by a set of words. These words, however,
     do not all equally represent the topic. This visualization shows
@@ -22,7 +24,7 @@ def visualize_term_rank(topic_model,
         topics: A selection of topics to visualize. These will be colored
                 red where all others will be colored black.
         log_scale: Whether to represent the ranking on a log scale
-        custom_labels: If bool, whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
@@ -33,7 +35,6 @@ def visualize_term_rank(topic_model,
         fig: A plotly figure
 
     Examples:
-
     To visualize the ranks of all words across
     all topics simply run:
 
@@ -62,42 +63,49 @@ def visualize_term_rank(topic_model,
     Reference to that specific analysis can be found
     [here](https://wzbsocialsciencecenter.github.io/tm_corona/tm_analysis.html).
     """
-
     topics = [] if topics is None else topics
 
     topic_ids = topic_model.get_topic_info().Topic.unique().tolist()
     topic_words = [topic_model.get_topic(topic) for topic in topic_ids]
 
     values = np.array([[value[1] for value in values] for values in topic_words])
-    indices = np.array([[value + 1 for value in range(len(values))] for values in topic_words])
+    indices = np.array(
+        [[value + 1 for value in range(len(values))] for values in topic_words]
+    )
 
     # Create figure
     lines = []
     for topic, x, y in zip(topic_ids, indices, values):
         if not any(y > 1.5):
-
             # labels
             if isinstance(custom_labels, str):
-                label = f"{topic}_" + "_".join(list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3])
+                label = f"{topic}_" + "_".join(
+                    list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3]
+                )
             elif topic_model.custom_labels_ is not None and custom_labels:
                 label = topic_model.custom_labels_[topic + topic_model._outliers]
             else:
-                label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
+                label = f"<b>Topic {topic}</b>:" + "_".join(
+                    [word[0] for word in topic_model.get_topic(topic)]
+                )
                 label = label[:50]
 
             # line parameters
             color = "red" if topic in topics else "black"
-            opacity = 1 if topic in topics else .1
+            opacity = 1 if topic in topics else 0.1
             if any(y == 0):
                 y[y == 0] = min(values[values > 0])
             y = np.log10(y, out=y, where=y > 0) if log_scale else y
 
-            line = go.Scatter(x=x, y=y,
-                              name="",
-                              hovertext=label,
-                              mode="lines+lines",
-                              opacity=opacity,
-                              line=dict(color=color, width=1.5))
+            line = go.Scatter(
+                x=x,
+                y=y,
+                name="",
+                hovertext=label,
+                mode="lines+lines",
+                opacity=opacity,
+                line=dict(color=color, width=1.5),
+            )
             lines.append(line)
 
     fig = go.Figure(data=lines)
@@ -108,28 +116,22 @@ def visualize_term_rank(topic_model,
         showlegend=False,
         template="plotly_white",
         title={
-            'text': f"{title}",
-            'y': .9,
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': dict(
-                size=22,
-                color="Black")
+            "text": f"{title}",
+            "y": 0.9,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+            "font": dict(size=22, color="Black"),
         },
         width=width,
         height=height,
-        hoverlabel=dict(
-            bgcolor="white",
-            font_size=16,
-            font_family="Rockwell"
-        ),
+        hoverlabel=dict(bgcolor="white", font_size=16, font_family="Rockwell"),
     )
 
-    fig.update_xaxes(title_text='Term Rank')
+    fig.update_xaxes(title_text="Term Rank")
     if log_scale:
-        fig.update_yaxes(title_text='c-TF-IDF score (log scale)')
+        fig.update_yaxes(title_text="c-TF-IDF score (log scale)")
     else:
-        fig.update_yaxes(title_text='c-TF-IDF score')
+        fig.update_yaxes(title_text="c-TF-IDF score")
 
     return fig

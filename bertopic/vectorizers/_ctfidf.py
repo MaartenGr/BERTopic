@@ -7,8 +7,7 @@ import scipy.sparse as sp
 
 
 class ClassTfidfTransformer(TfidfTransformer):
-    """
-    A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.
+    """A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.
 
     ![](../algorithm/c-TF-IDF.svg)
 
@@ -27,24 +26,25 @@ class ClassTfidfTransformer(TfidfTransformer):
                         `log(1+((avg_nr_samples - df + 0.5) / (df+0.5)))`
         reduce_frequent_words: Takes the square root of the bag-of-words after normalizing the matrix.
                                Helps to reduce the impact of words that appear too frequently.
-        seed_words: Specific words that will have their idf value increased by 
-                    the value of `seed_multiplier`. 
+        seed_words: Specific words that will have their idf value increased by
+                    the value of `seed_multiplier`.
                     NOTE: This will only increase the value of words that have an exact match.
         seed_multiplier: The value with which the idf values of the words in `seed_words`
                          are multiplied.
 
     Examples:
-
     ```python
     transformer = ClassTfidfTransformer()
     ```
     """
-    def __init__(self, 
-                 bm25_weighting: bool = False, 
-                 reduce_frequent_words: bool = False,
-                 seed_words: List[str] = None,
-                 seed_multiplier: float = 2
-                 ):
+
+    def __init__(
+        self,
+        bm25_weighting: bool = False,
+        reduce_frequent_words: bool = False,
+        seed_words: List[str] = None,
+        seed_multiplier: float = 2,
+    ):
         self.bm25_weighting = bm25_weighting
         self.reduce_frequent_words = reduce_frequent_words
         self.seed_words = seed_words
@@ -58,7 +58,7 @@ class ClassTfidfTransformer(TfidfTransformer):
             X: A matrix of term/token counts.
             multiplier: A multiplier for increasing/decreasing certain IDF scores
         """
-        X = check_array(X, accept_sparse=('csr', 'csc'))
+        X = check_array(X, accept_sparse=("csr", "csc"))
         if not sp.issparse(X):
             X = sp.csr_matrix(X)
         dtype = np.float64
@@ -74,26 +74,29 @@ class ClassTfidfTransformer(TfidfTransformer):
 
             # BM25-inspired weighting procedure
             if self.bm25_weighting:
-                idf = np.log(1+((avg_nr_samples - df + 0.5) / (df+0.5)))
+                idf = np.log(1 + ((avg_nr_samples - df + 0.5) / (df + 0.5)))
 
             # Divide the average number of samples by the word frequency
             # +1 is added to force values to be positive
             else:
-                idf = np.log((avg_nr_samples / df)+1)
+                idf = np.log((avg_nr_samples / df) + 1)
 
             # Multiplier to increase/decrease certain idf scores
             if multiplier is not None:
                 idf = idf * multiplier
 
-            self._idf_diag = sp.diags(idf, offsets=0,
-                                      shape=(n_features, n_features),
-                                      format='csr',
-                                      dtype=dtype)
+            self._idf_diag = sp.diags(
+                idf,
+                offsets=0,
+                shape=(n_features, n_features),
+                format="csr",
+                dtype=dtype,
+            )
 
         return self
 
     def transform(self, X: sp.csr_matrix):
-        """Transform a count-based matrix to c-TF-IDF
+        """Transform a count-based matrix to c-TF-IDF.
 
         Arguments:
             X (sparse matrix): A matrix of term/token counts.
@@ -102,7 +105,7 @@ class ClassTfidfTransformer(TfidfTransformer):
             X (sparse matrix): A c-TF-IDF matrix
         """
         if self.use_idf:
-            X = normalize(X, axis=1, norm='l1', copy=False)
+            X = normalize(X, axis=1, norm="l1", copy=False)
 
             if self.reduce_frequent_words:
                 X.data = np.sqrt(X.data)

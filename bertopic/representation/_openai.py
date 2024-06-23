@@ -5,7 +5,10 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import retry_with_exponential_backoff, truncate_document
+from bertopic.representation._utils import (
+    retry_with_exponential_backoff,
+    truncate_document,
+)
 
 
 DEFAULT_PROMPT = """
@@ -47,7 +50,7 @@ topic: <topic label>
 
 
 class OpenAI(BaseRepresentation):
-    """ Using the OpenAI API to generate topic labels based
+    r"""Using the OpenAI API to generate topic labels based
     on one of their Completion of ChatCompletion models.
 
     The default method is `openai.Completion` if `chat=False`.
@@ -75,7 +78,7 @@ class OpenAI(BaseRepresentation):
         exponential_backoff: Retry requests with a random exponential backoff.
                              A short sleep is used when a rate limit error is hit,
                              then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests.
+                             if errors are hit until 10 unsuccessful requests.
                              If True, overrides `delay_in_seconds`.
         chat: Set this to True if a GPT-3.5 model is used.
               See: https://platform.openai.com/docs/models/gpt-3-5
@@ -96,7 +99,7 @@ class OpenAI(BaseRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
@@ -135,19 +138,21 @@ class OpenAI(BaseRepresentation):
     representation_model = OpenAI(client, model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
     ```
     """
-    def __init__(self,
-                 client,
-                 model: str = "text-embedding-3-small",
-                 prompt: str = None,
-                 generator_kwargs: Mapping[str, Any] = {},
-                 delay_in_seconds: float = None,
-                 exponential_backoff: bool = False,
-                 chat: bool = False,
-                 nr_docs: int = 4,
-                 diversity: float = None,
-                 doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None
-                 ):
+
+    def __init__(
+        self,
+        client,
+        model: str = "text-embedding-3-small",
+        prompt: str = None,
+        generator_kwargs: Mapping[str, Any] = {},
+        delay_in_seconds: float = None,
+        exponential_backoff: bool = False,
+        chat: bool = False,
+        nr_docs: int = 4,
+        diversity: float = None,
+        doc_length: int = None,
+        tokenizer: Union[str, Callable] = None,
+    ):
         self.client = client
         self.model = model
 
@@ -175,13 +180,14 @@ class OpenAI(BaseRepresentation):
         if not self.generator_kwargs.get("stop") and not chat:
             self.generator_kwargs["stop"] = "\n"
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topics
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, float]]]:
+        """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
@@ -193,12 +199,19 @@ class OpenAI(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
+        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+        )
 
         # Generate using OpenAI's Language Model
         updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+        for topic, docs in tqdm(
+            repr_docs_mappings.items(), disable=not topic_model.verbose
+        ):
+            truncated_docs = [
+                truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
+                for doc in docs
+            ]
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
@@ -209,25 +222,40 @@ class OpenAI(BaseRepresentation):
             if self.chat:
                 messages = [
                     {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ]
-                kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
+                kwargs = {
+                    "model": self.model,
+                    "messages": messages,
+                    **self.generator_kwargs,
+                }
                 if self.exponential_backoff:
                     response = chat_completions_with_backoff(self.client, **kwargs)
                 else:
                     response = self.client.chat.completions.create(**kwargs)
 
                 # Check whether content was actually generated
-                # Adresses #1570 for potential issues with OpenAI's content filter
+                # Addresses #1570 for potential issues with OpenAI's content filter
                 if hasattr(response.choices[0].message, "content"):
-                    label = response.choices[0].message.content.strip().replace("topic: ", "")
+                    label = (
+                        response.choices[0]
+                        .message.content.strip()
+                        .replace("topic: ", "")
+                    )
                 else:
                     label = "No label returned"
             else:
                 if self.exponential_backoff:
-                    response = completions_with_backoff(self.client, model=self.model, prompt=prompt, **self.generator_kwargs)
+                    response = completions_with_backoff(
+                        self.client,
+                        model=self.model,
+                        prompt=prompt,
+                        **self.generator_kwargs,
+                    )
                 else:
-                    response = self.client.completions.create(model=self.model, prompt=prompt, **self.generator_kwargs)
+                    response = self.client.completions.create(
+                        model=self.model, prompt=prompt, **self.generator_kwargs
+                    )
                 label = response.choices[0].text.strip()
 
             updated_topics[topic] = [(label, 1)]
@@ -265,16 +293,12 @@ class OpenAI(BaseRepresentation):
 def completions_with_backoff(client, **kwargs):
     return retry_with_exponential_backoff(
         client.completions.create,
-        errors=(
-            openai.RateLimitError,
-        ),
+        errors=(openai.RateLimitError,),
     )(**kwargs)
 
 
 def chat_completions_with_backoff(client, **kwargs):
     return retry_with_exponential_backoff(
         client.chat.completions.create,
-        errors=(
-            openai.RateLimitError,
-        ),
+        errors=(openai.RateLimitError,),
     )(**kwargs)

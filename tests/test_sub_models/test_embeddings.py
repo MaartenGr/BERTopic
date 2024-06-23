@@ -5,16 +5,23 @@ from bertopic import BERTopic
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_extract_embeddings(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     single_embedding = topic_model._extract_embeddings("a document")
-    multiple_embeddings = topic_model._extract_embeddings(["something different", "another document"])
+    multiple_embeddings = topic_model._extract_embeddings(
+        ["something different", "another document"]
+    )
     sim_matrix = cosine_similarity(single_embedding, multiple_embeddings)[0]
 
     assert single_embedding.shape[0] == 1
@@ -31,12 +38,17 @@ def test_extract_embeddings(model, request):
     assert sim_matrix[1] > 0.5
 
 
-@pytest.mark.parametrize('model', [('kmeans_pca_topic_model'),
-                                   ('base_topic_model'),
-                                   ('custom_topic_model'),
-                                   ('merged_topic_model'),
-                                   ('reduced_topic_model'),
-                                   ('online_topic_model')])
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
 def test_extract_embeddings_compare(model, embedding_model, request):
     docs = ["some document"]
     topic_model = copy.deepcopy(request.getfixturevalue(model))

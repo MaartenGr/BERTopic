@@ -5,7 +5,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class SpacyBackend(BaseEmbedder):
-    """ Spacy embedding model
+    """Spacy embedding model.
 
     The Spacy embedding model used for generating document and
     word embeddings.
@@ -14,7 +14,6 @@ class SpacyBackend(BaseEmbedder):
         embedding_model: A spacy embedding model
 
     Examples:
-
     To create a Spacy backend, you need to create an nlp object and
     pass it through this backend:
 
@@ -50,20 +49,21 @@ class SpacyBackend(BaseEmbedder):
     spacy_model = SpacyBackend(nlp)
     ```
     """
+
     def __init__(self, embedding_model):
         super().__init__()
 
         if "spacy" in str(type(embedding_model)):
             self.embedding_model = embedding_model
         else:
-            raise ValueError("Please select a correct Spacy model by either using a string such as 'en_core_web_md' "
-                             "or create a nlp model using: `nlp = spacy.load('en_core_web_md')")
+            raise ValueError(
+                "Please select a correct Spacy model by either using a string such as 'en_core_web_md' "
+                "or create a nlp model using: `nlp = spacy.load('en_core_web_md')"
+            )
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n documents/words into an n-dimensional
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded
@@ -86,7 +86,7 @@ class SpacyBackend(BaseEmbedder):
             else:
                 embedding = embedding._.trf_data.tensors[-1][0]
 
-            if not isinstance(embedding, np.ndarray) and hasattr(embedding, 'get'):
+            if not isinstance(embedding, np.ndarray) and hasattr(embedding, "get"):
                 # Convert cupy array to numpy array
                 embedding = embedding.get()
             embeddings.append(embedding)

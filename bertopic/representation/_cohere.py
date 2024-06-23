@@ -37,7 +37,7 @@ Topic name:"""
 
 
 class Cohere(BaseRepresentation):
-    """ Use the Cohere API to generate topic labels based on their
+    """Use the Cohere API to generate topic labels based on their
     generative model.
 
     Find more about their models here:
@@ -51,26 +51,26 @@ class Cohere(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
-        delay_in_seconds: The delay in seconds between consecutive prompts 
-                                in order to prevent RateLimitErrors. 
+        delay_in_seconds: The delay in seconds between consecutive prompts
+                                in order to prevent RateLimitErrors.
         nr_docs: The number of documents to pass to OpenAI if a prompt
                  with the `["DOCUMENTS"]` tag is used.
         diversity: The diversity of documents to pass to OpenAI.
-                   Accepts values between 0 and 1. A higher 
+                   Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
         doc_length: The maximum length of each document. If a document is longer,
                     it will be truncated. If None, the entire document is passed.
         tokenizer: The tokenizer used to calculate to split the document into segments
-                   used to count the length of a document. 
-                       * If tokenizer is 'char', then the document is split up 
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
                        * If tokenizer is 'whitespace', the document is split up
                          into words separated by whitespaces. These words are counted
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
@@ -103,16 +103,18 @@ class Cohere(BaseRepresentation):
     representation_model = Cohere(co, prompt=prompt)
     ```
     """
-    def __init__(self,
-                 client,
-                 model: str = "xlarge",
-                 prompt: str = None,
-                 delay_in_seconds: float = None,
-                 nr_docs: int = 4,
-                 diversity: float = None,
-                 doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None
-                 ):
+
+    def __init__(
+        self,
+        client,
+        model: str = "xlarge",
+        prompt: str = None,
+        delay_in_seconds: float = None,
+        nr_docs: int = 4,
+        diversity: float = None,
+        doc_length: int = None,
+        tokenizer: Union[str, Callable] = None,
+    ):
         self.client = client
         self.model = model
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
@@ -124,13 +126,14 @@ class Cohere(BaseRepresentation):
         self.tokenizer = tokenizer
         self.prompts_ = []
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topics
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, float]]]:
+        """Extract topics.
 
         Arguments:
             topic_model: Not used
@@ -142,12 +145,19 @@ class Cohere(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Extract the top 4 representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity)
+        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+        )
 
         # Generate using Cohere's Language Model
         updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+        for topic, docs in tqdm(
+            repr_docs_mappings.items(), disable=not topic_model.verbose
+        ):
+            truncated_docs = [
+                truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
+                for doc in docs
+            ]
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
@@ -155,11 +165,13 @@ class Cohere(BaseRepresentation):
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
-            request = self.client.generate(model=self.model,
-                                           prompt=prompt,
-                                           max_tokens=50,
-                                           num_generations=1,
-                                           stop_sequences=["\n"])
+            request = self.client.generate(
+                model=self.model,
+                prompt=prompt,
+                max_tokens=50,
+                num_generations=1,
+                stop_sequences=["\n"],
+            )
             label = request.generations[0].text.strip()
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 

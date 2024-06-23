@@ -101,7 +101,7 @@ loaded_model = BERTopic.load("MaartenGr/BERTopic_ArXiv")
 ```
 
 ### **Parameters**
-There are number of parameters that may be worthwile to know:
+There are number of parameters that may be worthwhile to know:
 
 * `private`
     * Whether to create a private repository

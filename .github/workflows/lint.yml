@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+  push:
+    branches:
+    - master
+    - dev
+  pull_request:
+    branches:
+    - master
+    - dev
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip 
+          pip install -e ".[test]"
+      - name: Ruff Format Check
+        run: ruff format --check .
+        id: format
+      - name: Ruff Lint Check
+        run: ruff check --output-format=github .
+        # Still run if format check fails
+        if: success() || steps.format.conclusion == 'failure'

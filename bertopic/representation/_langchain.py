@@ -1,7 +1,7 @@
 import pandas as pd
 from langchain.docstore.document import Document
 from scipy.sparse import csr_matrix
-from typing import Callable, Dict, Mapping, List, Tuple, Union
+from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
@@ -10,7 +10,7 @@ DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
 
 class LangChain(BaseRepresentation):
-    """ Using chains in langchain to generate topic labels.
+    """Using chains in langchain to generate topic labels.
 
     The classic example uses `langchain.chains.question_answering.load_qa_chain`.
     This returns a chain that takes a list of documents and a question as input.
@@ -32,21 +32,21 @@ class LangChain(BaseRepresentation):
                  formats the representative documents within the prompt.
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
-                   Accepts values between 0 and 1. A higher 
+                   Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
         doc_length: The maximum length of each document. If a document is longer,
                     it will be truncated. If None, the entire document is passed.
         tokenizer: The tokenizer used to calculate to split the document into segments
-                   used to count the length of a document. 
-                       * If tokenizer is 'char', then the document is split up 
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
                        * If tokenizer is 'whitespace', the document is split up
                          into words separated by whitespaces. These words are counted
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`. They are decoded with 
+                         and truncated depending on `doc_length`. They are decoded with
                          whitespaces.
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
@@ -129,15 +129,17 @@ class LangChain(BaseRepresentation):
     representation_model = LangChain(chain, prompt=representation_prompt)
     ```
     """
-    def __init__(self,
-                 chain,
-                 prompt: str = None,
-                 nr_docs: int = 4,
-                 diversity: float = None,
-                 doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None,
-                 chain_config = None,
-                 ):
+
+    def __init__(
+        self,
+        chain,
+        prompt: str = None,
+        nr_docs: int = 4,
+        diversity: float = None,
+        doc_length: int = None,
+        tokenizer: Union[str, Callable] = None,
+        chain_config=None,
+    ):
         self.chain = chain
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
@@ -147,13 +149,14 @@ class LangChain(BaseRepresentation):
         self.doc_length = doc_length
         self.tokenizer = tokenizer
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, int]]]:
-        """ Extract topics
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, int]]]:
+        """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
@@ -171,7 +174,7 @@ class LangChain(BaseRepresentation):
             topics=topics,
             nr_samples=500,
             nr_repr_docs=self.nr_docs,
-            diversity=self.diversity
+            diversity=self.diversity,
         )
 
         # Generate label using langchain's batch functionality
@@ -179,10 +182,7 @@ class LangChain(BaseRepresentation):
             [
                 Document(
                     page_content=truncate_document(
-                        topic_model,
-                        self.doc_length,
-                        self.tokenizer,
-                        doc
+                        topic_model, self.doc_length, self.tokenizer, doc
                     )
                 )
                 for doc in docs
@@ -203,7 +203,7 @@ class LangChain(BaseRepresentation):
                 {"input_documents": docs, "question": prompt}
                 for docs, prompt in zip(chain_docs, prompts)
             ]
-            
+
         else:
             inputs = [
                 {"input_documents": docs, "question": self.prompt}

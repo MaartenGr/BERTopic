@@ -15,7 +15,7 @@ The name of this topic is:
 
 
 class TextGeneration(BaseRepresentation):
-    """ Text2Text or text generation with transformers
+    """Text2Text or text generation with transformers.
 
     Arguments:
         model: A transformers pipeline that should be initialized as "text-generation"
@@ -47,7 +47,7 @@ class TextGeneration(BaseRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
@@ -81,16 +81,18 @@ class TextGeneration(BaseRepresentation):
     representation_model = TextGeneration(generator)
     ```
     """
-    def __init__(self,
-                 model: Union[str, pipeline],
-                 prompt: str = None,
-                 pipeline_kwargs: Mapping[str, Any] = {},
-                 random_state: int = 42,
-                 nr_docs: int = 4,
-                 diversity: float = None,
-                 doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None
-                 ):
+
+    def __init__(
+        self,
+        model: Union[str, pipeline],
+        prompt: str = None,
+        pipeline_kwargs: Mapping[str, Any] = {},
+        random_state: int = 42,
+        nr_docs: int = 4,
+        diversity: float = None,
+        doc_length: int = None,
+        tokenizer: Union[str, Callable] = None,
+    ):
         self.random_state = random_state
         set_seed(random_state)
         if isinstance(model, str):
@@ -98,9 +100,11 @@ class TextGeneration(BaseRepresentation):
         elif isinstance(model, Pipeline):
             self.model = model
         else:
-            raise ValueError("Make sure that the HF model that you"
-                             "pass is either a string referring to a"
-                             "HF model or a `transformers.pipeline` object.")
+            raise ValueError(
+                "Make sure that the HF model that you"
+                "pass is either a string referring to a"
+                "HF model or a `transformers.pipeline` object."
+            )
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
         self.pipeline_kwargs = pipeline_kwargs
@@ -111,13 +115,14 @@ class TextGeneration(BaseRepresentation):
 
         self.prompts_ = []
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topic representations and return a single label
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, float]]]:
+        """Extract topic representations and return a single label.
 
         Arguments:
             topic_model: A BERTopic model
@@ -131,30 +136,38 @@ class TextGeneration(BaseRepresentation):
         # Extract the top 4 representative documents per topic
         if self.prompt != DEFAULT_PROMPT and "[DOCUMENTS]" in self.prompt:
             repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-                c_tf_idf,
-                documents,
-                topics,
-                500,
-                self.nr_docs,
-                self.diversity
+                c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
             )
         else:
             repr_docs_mappings = {topic: None for topic in topics.keys()}
 
         updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-
+        for topic, docs in tqdm(
+            repr_docs_mappings.items(), disable=not topic_model.verbose
+        ):
             # Prepare prompt
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs] if docs is not None else docs
+            truncated_docs = (
+                [
+                    truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
+                    for doc in docs
+                ]
+                if docs is not None
+                else docs
+            )
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
             topic_description = self.model(prompt, **self.pipeline_kwargs)
-            topic_description = [(description["generated_text"].replace(prompt, ""), 1) for description in topic_description]
+            topic_description = [
+                (description["generated_text"].replace(prompt, ""), 1)
+                for description in topic_description
+            ]
 
             if len(topic_description) < 10:
-                topic_description += [("", 0) for _ in range(10-len(topic_description))]
+                topic_description += [
+                    ("", 0) for _ in range(10 - len(topic_description))
+                ]
 
             updated_topics[topic] = topic_description
 

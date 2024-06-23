@@ -3,7 +3,7 @@ import numpy as np
 
 
 def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
-    """ Function used to select the HDBSCAN-like model for generating 
+    """Function used to select the HDBSCAN-like model for generating
     predictions and probabilities.
 
     Arguments:
@@ -15,7 +15,6 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         embeddings: Input embeddings for "approximate_predict"
                     and "membership_vector"
     """
-
     # Approximate predict
     if func == "approximate_predict":
         if isinstance(model, hdbscan.HDBSCAN):
@@ -25,7 +24,10 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         str_type_model = str(type(model)).lower()
         if "cuml" in str_type_model and "hdbscan" in str_type_model:
             from cuml.cluster import hdbscan as cuml_hdbscan
-            predictions, probabilities = cuml_hdbscan.approximate_predict(model, embeddings)
+
+            predictions, probabilities = cuml_hdbscan.approximate_predict(
+                model, embeddings
+            )
             return predictions, probabilities
 
         predictions = model.predict(embeddings)
@@ -39,10 +41,11 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         str_type_model = str(type(model)).lower()
         if "cuml" in str_type_model and "hdbscan" in str_type_model:
             from cuml.cluster import hdbscan as cuml_hdbscan
+
             return cuml_hdbscan.all_points_membership_vectors(model)
 
         return None
-    
+
     # membership_vector
     if func == "membership_vector":
         if isinstance(model, hdbscan.HDBSCAN):
@@ -52,6 +55,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         str_type_model = str(type(model)).lower()
         if "cuml" in str_type_model and "hdbscan" in str_type_model:
             from cuml.cluster import hdbscan as cuml_hdbscan
+
             probabilities = cuml_hdbscan.membership_vector(model, embeddings)
             return probabilities
 
@@ -59,7 +63,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
 
 
 def is_supported_hdbscan(model):
-    """ Check whether the input model is a supported HDBSCAN-like model """
+    """Check whether the input model is a supported HDBSCAN-like model."""
     if isinstance(model, hdbscan.HDBSCAN):
         return True
 

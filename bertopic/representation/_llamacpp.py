@@ -18,11 +18,11 @@ A: """
 
 
 class LlamaCPP(BaseRepresentation):
-    """ A llama.cpp implementation to use as a representation model.
+    """A llama.cpp implementation to use as a representation model.
 
     Arguments:
-        model: Either a string pointing towards a local LLM or a 
-                `llama_cpp.Llama` object.       
+        model: Either a string pointing towards a local LLM or a
+                `llama_cpp.Llama` object.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -47,7 +47,7 @@ class LlamaCPP(BaseRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
@@ -88,23 +88,27 @@ class LlamaCPP(BaseRepresentation):
     topic_model = BERTopic(representation_model=representation_model, verbose=True)
     ```
     """
-    def __init__(self,
-                 model: Union[str, Llama],
-                 prompt: str = None,
-                 pipeline_kwargs: Mapping[str, Any] = {},
-                 nr_docs: int = 4,
-                 diversity: float = None,
-                 doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None
-                 ):
+
+    def __init__(
+        self,
+        model: Union[str, Llama],
+        prompt: str = None,
+        pipeline_kwargs: Mapping[str, Any] = {},
+        nr_docs: int = 4,
+        diversity: float = None,
+        doc_length: int = None,
+        tokenizer: Union[str, Callable] = None,
+    ):
         if isinstance(model, str):
             self.model = Llama(model_path=model, n_gpu_layers=-1, stop="Q:")
         elif isinstance(model, Llama):
             self.model = model
         else:
-            raise ValueError("Make sure that the model that you"
-                             "pass is either a string referring to a"
-                             "local LLM or a ` llama_cpp.Llama` object.")
+            raise ValueError(
+                "Make sure that the model that you"
+                "pass is either a string referring to a"
+                "local LLM or a ` llama_cpp.Llama` object."
+            )
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
         self.pipeline_kwargs = pipeline_kwargs
@@ -115,13 +119,14 @@ class LlamaCPP(BaseRepresentation):
 
         self.prompts_ = []
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topic representations and return a single label
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, float]]]:
+        """Extract topic representations and return a single label.
 
         Arguments:
             topic_model: A BERTopic model
@@ -134,28 +139,32 @@ class LlamaCPP(BaseRepresentation):
         """
         # Extract the top 4 representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf,
-            documents,
-            topics,
-            500,
-            self.nr_docs,
-            self.diversity
+            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
         )
 
         updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-
+        for topic, docs in tqdm(
+            repr_docs_mappings.items(), disable=not topic_model.verbose
+        ):
             # Prepare prompt
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+            truncated_docs = [
+                truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
+                for doc in docs
+            ]
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
-            topic_description = self.model(prompt, **self.pipeline_kwargs)['choices']
-            topic_description = [(description["text"].replace(prompt, ""), 1) for description in topic_description]
+            topic_description = self.model(prompt, **self.pipeline_kwargs)["choices"]
+            topic_description = [
+                (description["text"].replace(prompt, ""), 1)
+                for description in topic_description
+            ]
 
             if len(topic_description) < 10:
-                topic_description += [("", 0) for _ in range(10-len(topic_description))]
+                topic_description += [
+                    ("", 0) for _ in range(10 - len(topic_description))
+                ]
 
             updated_topics[topic] = topic_description
 

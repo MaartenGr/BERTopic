@@ -31,5 +31,5 @@ __all__ = [
     "OpenAIBackend",
     "CohereBackend",
     "MultiModalBackend",
-    "languages"
+    "languages",
 ]
