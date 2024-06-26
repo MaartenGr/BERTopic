@@ -291,28 +291,24 @@ class BERTopic:
 
     @property
     def _outliers(self):
-        """
-        Some algorithms have outlier labels (-1) that can be tricky to work
+        """Some algorithms have outlier labels (-1) that can be tricky to work
         with if you are slicing data based on that labels. Therefore, we
         track if there are outlier labels and act accordingly when slicing.
 
         Returns:
             An integer indicating whether outliers are present in the topic model
         """
-
         return 1 if -1 in self.topic_sizes_ else 0
 
     @property
     def topic_labels_(self):
-        """
-        Map topic IDs to their labels.
+        """Map topic IDs to their labels.
         A label is the topic ID, along with the first four words of the topic representation, joined using '_'.
         Zeroshot topic labels come from self.zeroshot_topic_list rather than the calculated representation.
 
         Returns:
             topic_labels: a dict mapping a topic ID (int) to its label (str)
         """
-
         topic_labels = {
             key: f"{key}_" + "_".join([word[0] for word in values[:4]])
             for key, values in self.topic_representations_.items()
