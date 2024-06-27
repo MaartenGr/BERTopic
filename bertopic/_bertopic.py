@@ -4097,7 +4097,7 @@ class BERTopic:
         embeddings: np.ndarray,
         assigned_documents: pd.DataFrame,
         assigned_embeddings: np.ndarray,
-    ) -> tuple[pd.DataFrame, np.ndarray]:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         """Combine the zero-shot topics with the clustered topics.
 
         The zero-shot topics will be inserted between the outlier topic (that may or may not exist) and the rest of the
