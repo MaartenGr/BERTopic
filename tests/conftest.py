@@ -64,7 +64,7 @@ def zeroshot_topic_model(documents, document_embeddings, embedding_model):
         embedding_model=embedding_model,
         calculate_probabilities=True,
         zeroshot_topic_list=zeroshot_topic_list,
-        zeroshot_min_similarity=0.5,
+        zeroshot_min_similarity=0.3,
     )
     model.umap_model.random_state = 42
     model.hdbscan_model.min_cluster_size = 2
