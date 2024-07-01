@@ -27,17 +27,15 @@ def document_embeddings(documents, embedding_model):
 
 @pytest.fixture(scope="session")
 def reduced_embeddings(document_embeddings):
-    reduced_embeddings = UMAP(
-        n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine"
-    ).fit_transform(document_embeddings)
+    reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit_transform(
+        document_embeddings
+    )
     return reduced_embeddings
 
 
 @pytest.fixture(scope="session")
 def documents():
-    newsgroup_docs = fetch_20newsgroups(
-        subset="all", remove=("headers", "footers", "quotes")
-    )["data"][:1000]
+    newsgroup_docs = fetch_20newsgroups(subset="all", remove=("headers", "footers", "quotes"))["data"][:1000]
     return newsgroup_docs
 
 
@@ -74,9 +72,7 @@ def zeroshot_topic_model(documents, document_embeddings, embedding_model):
 
 @pytest.fixture(scope="session")
 def custom_topic_model(documents, document_embeddings, embedding_model):
-    umap_model = UMAP(
-        n_neighbors=15, n_components=6, min_dist=0.0, metric="cosine", random_state=42
-    )
+    umap_model = UMAP(n_neighbors=15, n_components=6, min_dist=0.0, metric="cosine", random_state=42)
     hdbscan_model = HDBSCAN(
         min_cluster_size=3,
         metric="euclidean",
@@ -94,9 +90,7 @@ def custom_topic_model(documents, document_embeddings, embedding_model):
 
 @pytest.fixture(scope="session")
 def representation_topic_model(documents, document_embeddings, embedding_model):
-    umap_model = UMAP(
-        n_neighbors=15, n_components=6, min_dist=0.0, metric="cosine", random_state=42
-    )
+    umap_model = UMAP(n_neighbors=15, n_components=6, min_dist=0.0, metric="cosine", random_state=42)
     hdbscan_model = HDBSCAN(
         min_cluster_size=3,
         metric="euclidean",
@@ -177,9 +171,7 @@ def online_topic_model(documents, document_embeddings, embedding_model):
 
     topics = []
     for index in range(0, len(documents), 50):
-        model.partial_fit(
-            documents[index : index + 50], document_embeddings[index : index + 50]
-        )
+        model.partial_fit(documents[index : index + 50], document_embeddings[index : index + 50])
         topics.extend(model.topics_)
     model.topics_ = topics
     return model

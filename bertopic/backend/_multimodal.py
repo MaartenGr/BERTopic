@@ -84,9 +84,7 @@ class MultiModalBackend(BaseEmbedder):
         except:  # noqa: E722
             self.tokenizer = None
 
-    def embed(
-        self, documents: List[str], images: List[str] = None, verbose: bool = False
-    ) -> np.ndarray:
+    def embed(self, documents: List[str], images: List[str] = None, verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words or images into an n-dimensional
         matrix of embeddings.
 
@@ -124,9 +122,7 @@ class MultiModalBackend(BaseEmbedder):
         elif image_embeddings is not None:
             return image_embeddings
 
-    def embed_documents(
-        self, documents: List[str], verbose: bool = False
-    ) -> np.ndarray:
+    def embed_documents(self, documents: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 
@@ -139,9 +135,7 @@ class MultiModalBackend(BaseEmbedder):
             that each have an embeddings size of `m`
         """
         truncated_docs = [self._truncate_document(doc) for doc in documents]
-        embeddings = self.embedding_model.encode(
-            truncated_docs, show_progress_bar=verbose
-        )
+        embeddings = self.embedding_model.encode(truncated_docs, show_progress_bar=verbose)
         return embeddings
 
     def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
@@ -170,15 +164,12 @@ class MultiModalBackend(BaseEmbedder):
                 end_index = (i * self.batch_size) + self.batch_size
 
                 images_to_embed = [
-                    Image.open(image) if isinstance(image, str) else image
-                    for image in images[start_index:end_index]
+                    Image.open(image) if isinstance(image, str) else image for image in images[start_index:end_index]
                 ]
                 if self.image_model is not None:
                     img_emb = self.image_model.encode(images_to_embed)
                 else:
-                    img_emb = self.embedding_model.encode(
-                        images_to_embed, show_progress_bar=False
-                    )
+                    img_emb = self.embedding_model.encode(images_to_embed, show_progress_bar=False)
                 embeddings.extend(img_emb.tolist())
 
                 # Close images
@@ -191,9 +182,7 @@ class MultiModalBackend(BaseEmbedder):
             if self.image_model is not None:
                 embeddings = self.image_model.encode(images_to_embed)
             else:
-                embeddings = self.embedding_model.encode(
-                    images_to_embed, show_progress_bar=False
-                )
+                embeddings = self.embedding_model.encode(images_to_embed, show_progress_bar=False)
         return embeddings
 
     def _truncate_document(self, document):

@@ -221,8 +221,7 @@ class BERTopic:
         # Topic-based parameters
         if top_n_words > 100:
             logger.warning(
-                "Note that extracting more than 100 words from a sparse "
-                "can slow down computation quite a bit."
+                "Note that extracting more than 100 words from a sparse can slow down computation quite a bit."
             )
 
         self.top_n_words = top_n_words
@@ -241,9 +240,7 @@ class BERTopic:
 
         # Vectorizer
         self.n_gram_range = n_gram_range
-        self.vectorizer_model = vectorizer_model or CountVectorizer(
-            ngram_range=self.n_gram_range
-        )
+        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=self.n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
 
         # Representation model
@@ -364,9 +361,7 @@ class BERTopic:
         topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
-        self.fit_transform(
-            documents=documents, embeddings=embeddings, y=y, images=images
-        )
+        self.fit_transform(documents=documents, embeddings=embeddings, y=y, images=images)
         return self
 
     def fit_transform(
@@ -427,16 +422,12 @@ class BERTopic:
             check_embeddings_shape(embeddings, documents)
 
         doc_ids = range(len(documents)) if documents is not None else range(len(images))
-        documents = pd.DataFrame(
-            {"Document": documents, "ID": doc_ids, "Topic": None, "Image": images}
-        )
+        documents = pd.DataFrame({"Document": documents, "ID": doc_ids, "Topic": None, "Image": images})
 
         # Extract embeddings
         if embeddings is None:
             logger.info("Embedding - Transforming documents to embeddings.")
-            self.embedding_model = select_backend(
-                self.embedding_model, language=self.language, verbose=self.verbose
-            )
+            self.embedding_model = select_backend(self.embedding_model, language=self.language, verbose=self.verbose)
             embeddings = self._extract_embeddings(
                 documents.Document.values.tolist(),
                 images=images,
@@ -446,9 +437,7 @@ class BERTopic:
             logger.info("Embedding - Completed \u2713")
         else:
             if self.embedding_model is not None:
-                self.embedding_model = select_backend(
-                    self.embedding_model, language=self.language
-                )
+                self.embedding_model = select_backend(self.embedding_model, language=self.language)
 
         # Guided Topic Modeling
         if self.seed_topic_list is not None and self.embedding_model is not None:
@@ -459,17 +448,15 @@ class BERTopic:
 
         # Zero-shot Topic Modeling
         if self._is_zeroshot():
-            documents, embeddings, assigned_documents, assigned_embeddings = (
-                self._zeroshot_topic_modeling(documents, embeddings)
+            documents, embeddings, assigned_documents, assigned_embeddings = self._zeroshot_topic_modeling(
+                documents, embeddings
             )
             # Filter UMAP embeddings to only non-assigned embeddings to be used for clustering
             umap_embeddings = self.umap_model.transform(embeddings)
 
         if len(documents) > 0:  # No zero-shot topics matched
             # Cluster reduced embeddings
-            documents, probabilities = self._cluster_embeddings(
-                umap_embeddings, documents, y=y
-            )
+            documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, y=y)
             if self._is_zeroshot() and len(assigned_documents) > 0:
                 documents, embeddings = self._combine_zeroshot_topics(
                     documents, embeddings, assigned_documents, assigned_embeddings
@@ -526,9 +513,7 @@ class BERTopic:
                 ]
 
         # Resulting output
-        self.probabilities_ = self._map_probabilities(
-            probabilities, original_topics=True
-        )
+        self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
         return predictions, self.probabilities_
@@ -588,9 +573,7 @@ class BERTopic:
             documents = [documents]
 
         if embeddings is None:
-            embeddings = self._extract_embeddings(
-                documents, images=images, method="document", verbose=self.verbose
-            )
+            embeddings = self._extract_embeddings(documents, images=images, method="document", verbose=self.verbose)
 
         # Check if an embedding model was found
         if embeddings is None:
@@ -602,9 +585,7 @@ class BERTopic:
 
         # Transform without hdbscan_model and umap_model using only cosine similarity
         elif type(self.hdbscan_model) == BaseCluster:
-            logger.info(
-                "Predicting topic assignments through cosine similarity of topic and document embeddings."
-            )
+            logger.info("Predicting topic assignments through cosine similarity of topic and document embeddings.")
             sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
             predictions = np.argmax(sim_matrix, axis=1) - self._outliers
 
@@ -628,12 +609,8 @@ class BERTopic:
 
                 # Calculate probabilities
                 if self.calculate_probabilities:
-                    logger.info(
-                        "Probabilities - Start calculation of probabilities with HDBSCAN"
-                    )
-                    probabilities = hdbscan_delegator(
-                        self.hdbscan_model, "membership_vector", umap_embeddings
-                    )
+                    logger.info("Probabilities - Start calculation of probabilities with HDBSCAN")
+                    probabilities = hdbscan_delegator(self.hdbscan_model, "membership_vector", umap_embeddings)
                     logger.info("Probabilities - Completed \u2713")
             else:
                 predictions = self.hdbscan_model.predict(umap_embeddings)
@@ -712,16 +689,13 @@ class BERTopic:
         check_embeddings_shape(embeddings, documents)
         if not hasattr(self.hdbscan_model, "partial_fit"):
             raise ValueError(
-                "In order to use `.partial_fit`, the cluster model should have "
-                "a `.partial_fit` function."
+                "In order to use `.partial_fit`, the cluster model should have " "a `.partial_fit` function."
             )
 
         # Prepare documents
         if isinstance(documents, str):
             documents = [documents]
-        documents = pd.DataFrame(
-            {"Document": documents, "ID": range(len(documents)), "Topic": None}
-        )
+        documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
 
         # Extract embeddings
         if embeddings is None:
@@ -746,9 +720,7 @@ class BERTopic:
         umap_embeddings = self._reduce_dimensionality(embeddings, y, partial_fit=True)
 
         # Cluster reduced embeddings
-        documents, self.probabilities_ = self._cluster_embeddings(
-            umap_embeddings, documents, partial_fit=True
-        )
+        documents, self.probabilities_ = self._cluster_embeddings(umap_embeddings, documents, partial_fit=True)
         topics = documents.Topic.to_list()
 
         # Map and find new topics
@@ -756,10 +728,7 @@ class BERTopic:
             self.topic_mapper_ = TopicMapper(topics)
         mappings = self.topic_mapper_.get_mappings()
         new_topics = set(topics).difference(set(mappings.keys()))
-        new_topic_ids = {
-            topic: max(mappings.values()) + index + 1
-            for index, topic in enumerate(new_topics)
-        }
+        new_topic_ids = {topic: max(mappings.values()) + index + 1 for index, topic in enumerate(new_topics)}
         self.topic_mapper_.add_new_topics(new_topic_ids)
         updated_mappings = self.topic_mapper_.get_mappings()
         updated_topics = [updated_mappings[topic] for topic in topics]
@@ -767,25 +736,19 @@ class BERTopic:
 
         # Add missing topics (topics that were originally created but are now missing)
         if self.topic_representations_:
-            missing_topics = set(self.topic_representations_.keys()).difference(
-                set(updated_topics)
-            )
+            missing_topics = set(self.topic_representations_.keys()).difference(set(updated_topics))
             for missing_topic in missing_topics:
                 documents.loc[len(documents), :] = [" ", len(documents), missing_topic]
         else:
             missing_topics = {}
 
         # Prepare documents
-        documents_per_topic = documents.sort_values("Topic").groupby(
-            ["Topic"], as_index=False
-        )
+        documents_per_topic = documents.sort_values("Topic").groupby(["Topic"], as_index=False)
         updated_topics = documents_per_topic.first().Topic.astype(int)
         documents_per_topic = documents_per_topic.agg({"Document": " ".join})
 
         # Update topic representations
-        self.c_tf_idf_, updated_words = self._c_tf_idf(
-            documents_per_topic, partial_fit=True
-        )
+        self.c_tf_idf_, updated_words = self._c_tf_idf(documents_per_topic, partial_fit=True)
         self.topic_representations_ = self._extract_words_per_topic(
             updated_words, documents, self.c_tf_idf_, calculate_aspects=False
         )
@@ -801,10 +764,7 @@ class BERTopic:
             sizes = documents.groupby(["Topic"], as_index=False).count()
             for _, row in sizes.iterrows():
                 topic = int(row.Topic)
-                if (
-                    self.topic_sizes_.get(topic) is not None
-                    and topic not in missing_topics
-                ):
+                if self.topic_sizes_.get(topic) is not None and topic not in missing_topics:
                     self.topic_sizes_[topic] += int(row.Document)
                 elif self.topic_sizes_.get(topic) is None:
                     self.topic_sizes_[topic] = int(row.Document)
@@ -879,9 +839,7 @@ class BERTopic:
         check_is_fitted(self)
         check_documents_type(docs)
         selected_topics = topics if topics else self.topics_
-        documents = pd.DataFrame(
-            {"Document": docs, "Topic": selected_topics, "Timestamps": timestamps}
-        )
+        documents = pd.DataFrame({"Document": docs, "Topic": selected_topics, "Timestamps": timestamps})
         global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm="l1", copy=False)
 
         all_topics = sorted(list(documents.Topic.unique()))
@@ -930,9 +888,7 @@ class BERTopic:
                     list(set(previous_topics).intersection(set(current_topics)))  # noqa: F821
                 )
 
-                current_overlap_idx = [
-                    current_topics.index(topic) for topic in overlapping_topics
-                ]
+                current_overlap_idx = [current_topics.index(topic) for topic in overlapping_topics]
                 previous_overlap_idx = [
                     previous_topics.index(topic)  # noqa: F821
                     for topic in overlapping_topics
@@ -940,8 +896,7 @@ class BERTopic:
 
                 c_tf_idf.tolil()[current_overlap_idx] = (
                     (
-                        c_tf_idf[current_overlap_idx]
-                        + previous_c_tf_idf[previous_overlap_idx]  # noqa: F821
+                        c_tf_idf[current_overlap_idx] + previous_c_tf_idf[previous_overlap_idx]  # noqa: F821
                     )
                     / 2.0
                 ).tolil()
@@ -949,16 +904,11 @@ class BERTopic:
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
             if global_tuning:
-                selected_topics = [
-                    all_topics_indices[topic]
-                    for topic in documents_per_topic.Topic.values
-                ]
+                selected_topics = [all_topics_indices[topic] for topic in documents_per_topic.Topic.values]
                 c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
             # Extract the words per topic
-            words_per_topic = self._extract_words_per_topic(
-                words, selection, c_tf_idf, calculate_aspects=False
-            )
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
             topic_frequency = pd.Series(
                 documents_per_topic.Timestamps.values, index=documents_per_topic.Topic
             ).to_dict()
@@ -979,9 +929,7 @@ class BERTopic:
                 previous_topics = sorted(list(documents_per_topic.Topic.values))  # noqa: F841
                 previous_c_tf_idf = c_tf_idf.copy()  # noqa: F841
 
-        return pd.DataFrame(
-            topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"]
-        )
+        return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
 
     def topics_per_class(
         self,
@@ -1023,9 +971,7 @@ class BERTopic:
         ```
         """
         check_documents_type(docs)
-        documents = pd.DataFrame(
-            {"Document": docs, "Topic": self.topics_, "Class": classes}
-        )
+        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Class": classes})
         global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm="l1", copy=False)
 
         # For each unique timestamp, create topic representations
@@ -1042,18 +988,11 @@ class BERTopic:
             # by simply taking the average of the two
             if global_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm="l1", copy=False)
-                c_tf_idf = (
-                    global_c_tf_idf[documents_per_topic.Topic.values + self._outliers]
-                    + c_tf_idf
-                ) / 2.0
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + self._outliers] + c_tf_idf) / 2.0
 
             # Extract the words per topic
-            words_per_topic = self._extract_words_per_topic(
-                words, selection, c_tf_idf, calculate_aspects=False
-            )
-            topic_frequency = pd.Series(
-                documents_per_topic.Class.values, index=documents_per_topic.Topic
-            ).to_dict()
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
+            topic_frequency = pd.Series(documents_per_topic.Class.values, index=documents_per_topic.Topic).to_dict()
 
             # Fill dataframe with results
             topics_at_class = [
@@ -1067,9 +1006,7 @@ class BERTopic:
             ]
             topics_per_class.extend(topics_at_class)
 
-        topics_per_class = pd.DataFrame(
-            topics_per_class, columns=["Topic", "Words", "Frequency", "Class"]
-        )
+        topics_per_class = pd.DataFrame(topics_per_class, columns=["Topic", "Words", "Frequency", "Class"])
 
         return topics_per_class
 
@@ -1138,9 +1075,9 @@ class BERTopic:
             linkage_function = lambda x: sch.linkage(x, "ward", optimal_ordering=True)
 
         # Calculate distance
-        embeddings = select_topic_representation(
-            self.c_tf_idf_, self.topic_embeddings_, use_ctfidf
-        )[0][self._outliers :]
+        embeddings = select_topic_representation(self.c_tf_idf_, self.topic_embeddings_, use_ctfidf)[0][
+            self._outliers :
+        ]
         X = distance_function(embeddings)
         X = validate_distance_matrix(X, embeddings.shape[0])
 
@@ -1153,15 +1090,9 @@ class BERTopic:
             Z[:, 2] = get_unique_distances(Z[:, 2])
 
         # Calculate basic bag-of-words to be iteratively merged later
-        documents = pd.DataFrame(
-            {"Document": docs, "ID": range(len(docs)), "Topic": self.topics_}
-        )
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(
-            {"Document": " ".join}
-        )
-        documents_per_topic = documents_per_topic.loc[
-            documents_per_topic.Topic != -1, :
-        ]
+        documents = pd.DataFrame({"Document": docs, "ID": range(len(docs)), "Topic": self.topics_})
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
         clean_documents = self._preprocess_text(documents_per_topic.Document.values)
 
         # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
@@ -1187,9 +1118,7 @@ class BERTopic:
         )
         for index in tqdm(range(len(Z))):
             # Find clustered documents
-            clusters = (
-                sch.fcluster(Z, t=Z[index][2], criterion="distance") - self._outliers
-            )
+            clusters = sch.fcluster(Z, t=Z[index][2], criterion="distance") - self._outliers
             nr_clusters = len(clusters)
 
             # Extract first topic we find to get the set of topics in a merged topic
@@ -1200,18 +1129,14 @@ class BERTopic:
                     topic = int(val)
                 else:
                     val = Z[int(val - len(clusters))][0]
-            clustered_topics = [
-                i for i, x in enumerate(clusters) if x == clusters[topic]
-            ]
+            clustered_topics = [i for i, x in enumerate(clusters) if x == clusters[topic]]
 
             # Group bow per cluster, calculate c-TF-IDF and extract words
             grouped = csr_matrix(bow[clustered_topics].sum(axis=0))
             c_tf_idf = self.ctfidf_model.transform(grouped)
             selection = documents.loc[documents.Topic.isin(clustered_topics), :]
             selection.Topic = 0
-            words_per_topic = self._extract_words_per_topic(
-                words, selection, c_tf_idf, calculate_aspects=False
-            )
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
 
             # Extract parent's name and ID
             parent_id = index + len(clusters)
@@ -1398,9 +1323,7 @@ class BERTopic:
                         t = math.ceil(window / stride) - 1
                         for i in range(math.ceil(window / stride) - 1):
                             padded.append(tokenset[: window - ((t - i) * stride)])
-                            padded_ids.append(
-                                list(range(0, window - ((t - i) * stride)))
-                            )
+                            padded_ids.append(list(range(0, window - ((t - i) * stride))))
 
                         token_sets = padded + token_sets
                         token_sets_ids = padded_ids + token_sets_ids
@@ -1413,20 +1336,14 @@ class BERTopic:
 
             # Calculate similarity between embeddings of token sets and the topics
             if use_embedding_model:
-                embeddings = self._extract_embeddings(
-                    all_sentences, method="document", verbose=True
-                )
-                similarity = cosine_similarity(
-                    embeddings, self.topic_embeddings_[self._outliers :]
-                )
+                embeddings = self._extract_embeddings(all_sentences, method="document", verbose=True)
+                similarity = cosine_similarity(embeddings, self.topic_embeddings_[self._outliers :])
 
             # Calculate similarity between c-TF-IDF of token sets and the topics
             else:
                 bow_doc = self.vectorizer_model.transform(all_sentences)
                 c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
-                similarity = cosine_similarity(
-                    c_tf_idf_doc, self.c_tf_idf_[self._outliers :]
-                )
+                similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers :])
 
             # Only keep similarities that exceed the minimum
             similarity[similarity < min_similarity] = 0
@@ -1445,9 +1362,7 @@ class BERTopic:
                     # Assign topics to individual tokens
                     token_id = [i for i in range(len(token))]
                     token_val = {index: [] for index in token_id}
-                    for sim, token_set in zip(
-                        similarity[start:end], all_token_sets_ids[start:end]
-                    ):
+                    for sim, token_set in zip(similarity[start:end], all_token_sets_ids[start:end]):
                         for token in token_set:
                             if token in token_val:
                                 token_val[token].append(sim)
@@ -1477,9 +1392,7 @@ class BERTopic:
                         end = end + 1
                     group = similarity[start:end].sum(axis=0)
                     topic_distribution.append(group)
-                topic_distribution = normalize(
-                    np.array(topic_distribution), norm="l1", axis=1
-                )
+                topic_distribution = normalize(np.array(topic_distribution), norm="l1", axis=1)
                 topic_token_distribution = None
 
             # Combine results
@@ -1493,9 +1406,7 @@ class BERTopic:
 
         return topic_distributions, topic_token_distributions
 
-    def find_topics(
-        self, search_term: str = None, image: str = None, top_n: int = 5
-    ) -> Tuple[List[int], List[float]]:
+    def find_topics(self, search_term: str = None, image: str = None, top_n: int = 5) -> Tuple[List[int], List[float]]:
         """Find topics most similar to a search_term.
 
         Creates an embedding for a search query and compares that with
@@ -1529,25 +1440,19 @@ class BERTopic:
         search_term consists of a phrase or multiple words.
         """
         if self.embedding_model is None:
-            raise Exception(
-                "This method can only be used if you did not use custom embeddings."
-            )
+            raise Exception("This method can only be used if you did not use custom embeddings.")
 
         topic_list = list(self.topic_representations_.keys())
         topic_list.sort()
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
-            search_embedding = self._extract_embeddings(
-                [search_term], method="word", verbose=False
-            ).flatten()
+            search_embedding = self._extract_embeddings([search_term], method="word", verbose=False).flatten()
         elif image is not None:
             search_embedding = self._extract_embeddings(
                 [None], images=[image], method="document", verbose=False
             ).flatten()
-        sims = cosine_similarity(
-            search_embedding.reshape(1, -1), self.topic_embeddings_
-        ).flatten()
+        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings_).flatten()
 
         # Extract topics most similar to search_term
         ids = np.argsort(sims)[-top_n:]
@@ -1623,13 +1528,10 @@ class BERTopic:
 
         if top_n_words > 100:
             logger.warning(
-                "Note that extracting more than 100 words from a sparse "
-                "can slow down computation quite a bit."
+                "Note that extracting more than 100 words from a sparse " "can slow down computation quite a bit."
             )
         self.top_n_words = top_n_words
-        self.vectorizer_model = vectorizer_model or CountVectorizer(
-            ngram_range=n_gram_range
-        )
+        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
         self.representation_model = representation_model
 
@@ -1644,12 +1546,8 @@ class BERTopic:
                 "c-TF-IDF embeddings instead of centroid embeddings."
             )
 
-        documents = pd.DataFrame(
-            {"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images}
-        )
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(
-            {"Document": " ".join}
-        )
+        documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
 
         # Update topic sizes and assignments
         self._update_topic_size(documents)
@@ -1697,9 +1595,7 @@ class BERTopic:
         else:
             return self.topic_representations_
 
-    def get_topic(
-        self, topic: int, full: bool = False
-    ) -> Union[Mapping[str, Tuple[str, float]], bool]:
+    def get_topic(self, topic: int, full: bool = False) -> Union[Mapping[str, Tuple[str, float]], bool]:
         """Return top n words for a specific topic and their c-TF-IDF scores.
 
         Arguments:
@@ -1719,10 +1615,7 @@ class BERTopic:
         if topic in self.topic_representations_:
             if full:
                 representations = {"Main": self.topic_representations_[topic]}
-                aspects = {
-                    aspect: representations[topic]
-                    for aspect, representations in self.topic_aspects_.items()
-                }
+                aspects = {aspect: representations[topic] for aspect, representations in self.topic_aspects_.items()}
                 representations.update(aspects)
                 return representations
             else:
@@ -1746,25 +1639,17 @@ class BERTopic:
         """
         check_is_fitted(self)
 
-        info = pd.DataFrame(
-            self.topic_sizes_.items(), columns=["Topic", "Count"]
-        ).sort_values("Topic")
+        info = pd.DataFrame(self.topic_sizes_.items(), columns=["Topic", "Count"]).sort_values("Topic")
         info["Name"] = info.Topic.map(self.topic_labels_)
 
         # Custom label
         if self.custom_labels_ is not None:
             if len(self.custom_labels_) == len(info):
-                labels = {
-                    topic - self._outliers: label
-                    for topic, label in enumerate(self.custom_labels_)
-                }
+                labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels_)}
                 info["CustomName"] = info["Topic"].map(labels)
 
         # Main Keywords
-        values = {
-            topic: list(list(zip(*values))[0])
-            for topic, values in self.topic_representations_.items()
-        }
+        values = {topic: list(list(zip(*values))[0]) for topic, values in self.topic_representations_.items()}
         info["Representation"] = info["Topic"].map(values)
 
         # Extract all topic aspects
@@ -1774,24 +1659,16 @@ class BERTopic:
                     if isinstance(list(values.values())[-1][0], tuple) or isinstance(
                         list(values.values())[-1][0], list
                     ):
-                        values = {
-                            topic: list(list(zip(*value))[0])
-                            for topic, value in values.items()
-                        }
+                        values = {topic: list(list(zip(*value))[0]) for topic, value in values.items()}
                     elif isinstance(list(values.values())[-1][0], str):
-                        values = {
-                            topic: " ".join(value).strip()
-                            for topic, value in values.items()
-                        }
+                        values = {topic: " ".join(value).strip() for topic, value in values.items()}
                 info[aspect] = info["Topic"].map(values)
 
         # Representative Docs / Images
         if self.representative_docs_ is not None:
             info["Representative_Docs"] = info["Topic"].map(self.representative_docs_)
         if self.representative_images_ is not None:
-            info["Representative_Images"] = info["Topic"].map(
-                self.representative_images_
-            )
+            info["Representative_Images"] = info["Topic"].map(self.representative_images_)
 
         # Select specific topic to return
         if topic is not None:
@@ -1826,9 +1703,9 @@ class BERTopic:
         if isinstance(topic, int):
             return self.topic_sizes_[topic]
         else:
-            return pd.DataFrame(
-                self.topic_sizes_.items(), columns=["Topic", "Count"]
-            ).sort_values("Count", ascending=False)
+            return pd.DataFrame(self.topic_sizes_.items(), columns=["Topic", "Count"]).sort_values(
+                "Count", ascending=False
+            )
 
     def get_document_info(
         self,
@@ -1899,10 +1776,7 @@ class BERTopic:
         document_info = pd.merge(document_info, topic_info, on="Topic", how="left")
 
         # Add top n words
-        top_n_words = {
-            topic: " - ".join(list(zip(*self.get_topic(topic)))[0])
-            for topic in set(self.topics_)
-        }
+        top_n_words = {topic: " - ".join(list(zip(*self.get_topic(topic)))[0]) for topic in set(self.topics_)}
         document_info["Top_n_words"] = document_info.Topic.map(top_n_words)
 
         # Add flat probabilities
@@ -1916,15 +1790,9 @@ class BERTopic:
                 ]
 
         # Add representative document labels
-        repr_docs = [
-            repr_doc
-            for repr_docs in self.representative_docs_.values()
-            for repr_doc in repr_docs
-        ]
+        repr_docs = [repr_doc for repr_docs in self.representative_docs_.values() for repr_doc in repr_docs]
         document_info["Representative_document"] = False
-        document_info.loc[
-            document_info.Document.isin(repr_docs), "Representative_document"
-        ] = True
+        document_info.loc[document_info.Document.isin(repr_docs), "Representative_document"] = True
 
         # Add custom meta data provided by the user
         if metadata is not None:
@@ -2028,12 +1896,8 @@ class BERTopic:
         max_original_topic = hier_topics.Parent_ID.astype(int).min() - 1
 
         # Extract mapping from ID to name
-        topic_to_name = dict(
-            zip(hier_topics.Child_Left_ID, hier_topics.Child_Left_Name)
-        )
-        topic_to_name.update(
-            dict(zip(hier_topics.Child_Right_ID, hier_topics.Child_Right_Name))
-        )
+        topic_to_name = dict(zip(hier_topics.Child_Left_ID, hier_topics.Child_Left_Name))
+        topic_to_name.update(dict(zip(hier_topics.Child_Right_ID, hier_topics.Child_Right_Name)))
         topic_to_name = {topic: name[:100] for topic, name in topic_to_name.items()}
 
         # Create tree
@@ -2051,8 +1915,7 @@ class BERTopic:
             def _tree(to_print, start, parent, tree, grandpa=None, indent=""):
                 # Get distance between merged topics
                 distance = hier_topics.loc[
-                    (hier_topics.Child_Left_ID == parent)
-                    | (hier_topics.Child_Right_ID == parent),
+                    (hier_topics.Child_Left_ID == parent) | (hier_topics.Child_Right_ID == parent),
                     "Distance",
                 ]
                 distance = distance.values[0] if len(distance) > 0 else 10
@@ -2064,12 +1927,7 @@ class BERTopic:
                         if int(parent) <= max_original_topic:
                             # Do not append topic ID if they are not merged
                             if distance < max_distance:
-                                to_print += (
-                                    "■──"
-                                    + topic_to_name[parent]
-                                    + f" ── Topic: {parent}"
-                                    + "\n"
-                                )
+                                to_print += "■──" + topic_to_name[parent] + f" ── Topic: {parent}" + "\n"
                             else:
                                 to_print += "O \n"
                         else:
@@ -2080,15 +1938,11 @@ class BERTopic:
 
                 for child in tree[parent][:-1]:
                     to_print += indent + "├" + "─"
-                    to_print = _tree(
-                        to_print, start, child, tree, parent, indent + "│" + " " * width
-                    )
+                    to_print = _tree(to_print, start, child, tree, parent, indent + "│" + " " * width)
 
                 child = tree[parent][-1]
                 to_print += indent + "└" + "─"
-                to_print = _tree(
-                    to_print, start, child, tree, parent, indent + " " * (width + 1)
-                )
+                to_print = _tree(to_print, start, child, tree, parent, indent + " " * (width + 1))
 
                 return to_print
 
@@ -2099,9 +1953,7 @@ class BERTopic:
         start = str(hier_topics.Parent_ID.astype(int).max())
         return get_tree(start, tree)
 
-    def set_topic_labels(
-        self, topic_labels: Union[List[str], Mapping[int, str]]
-    ) -> None:
+    def set_topic_labels(self, topic_labels: Union[List[str], Mapping[int, str]]) -> None:
         """Set custom topic labels in your fitted BERTopic model.
 
         Arguments:
@@ -2145,17 +1997,12 @@ class BERTopic:
 
         if isinstance(topic_labels, dict):
             if self.custom_labels_ is not None:
-                original_labels = {
-                    topic: label
-                    for topic, label in zip(unique_topics, self.custom_labels_)
-                }
+                original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels_)}
             else:
                 info = self.get_topic_info()
                 original_labels = dict(zip(info.Topic, info.Name))
             custom_labels = [
-                topic_labels.get(topic)
-                if topic_labels.get(topic)
-                else original_labels[topic]
+                topic_labels.get(topic) if topic_labels.get(topic) else original_labels[topic]
                 for topic in unique_topics
             ]
 
@@ -2164,8 +2011,7 @@ class BERTopic:
                 custom_labels = topic_labels
             else:
                 raise ValueError(
-                    "Make sure that `topic_labels` contains the same number "
-                    "of labels as there are topics."
+                    "Make sure that `topic_labels` contains the same number " "of labels as there are topics."
                 )
 
         self.custom_labels_ = custom_labels
@@ -2283,8 +2129,7 @@ class BERTopic:
                     mapping[topic] = topic_group[0]
         else:
             raise ValueError(
-                "Make sure that `topics_to_merge` is either"
-                "a list of topics or a list of list of topics."
+                "Make sure that `topics_to_merge` is either" "a list of topics or a list of list of topics."
             )
 
         # Track mappings and sizes of topics for merging topic embeddings
@@ -2472,9 +2317,7 @@ class BERTopic:
 
         # Check correct use of parameters
         if strategy.lower() == "probabilities" and probabilities is None:
-            raise ValueError(
-                "Make sure to pass in `probabilities` in order to use the probabilities strategy"
-            )
+            raise ValueError("Make sure to pass in `probabilities` in order to use the probabilities strategy")
 
         # Reduce outliers by extracting most likely topics through the topic-term probability matrix
         if strategy.lower() == "probabilities":
@@ -2490,12 +2333,8 @@ class BERTopic:
             topic_distr, _ = self.approximate_distribution(
                 outlier_docs, min_similarity=threshold, **distributions_params
             )
-            outlier_topics = iter(
-                [np.argmax(prob) if sum(prob) > 0 else -1 for prob in topic_distr]
-            )
-            new_topics = [
-                topic if topic != -1 else next(outlier_topics) for topic in topics
-            ]
+            outlier_topics = iter([np.argmax(prob) if sum(prob) > 0 else -1 for prob in topic_distr])
+            new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
 
         # Reduce outliers by finding the most similar c-TF-IDF representations
         elif strategy.lower() == "c-tf-idf":
@@ -2505,18 +2344,12 @@ class BERTopic:
             # Calculate c-TF-IDF of outlier documents with all topics
             bow_doc = self.vectorizer_model.transform(outlier_docs)
             c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
-            similarity = cosine_similarity(
-                c_tf_idf_doc, self.c_tf_idf_[self._outliers :]
-            )
+            similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers :])
 
             # Update topics
             similarity[similarity < threshold] = 0
-            outlier_topics = iter(
-                [np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity]
-            )
-            new_topics = [
-                topic if topic != -1 else next(outlier_topics) for topic in topics
-            ]
+            outlier_topics = iter([np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity])
+            new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
 
         # Reduce outliers by finding the most similar topic embeddings
         elif strategy.lower() == "embeddings":
@@ -2533,28 +2366,18 @@ class BERTopic:
 
             # Extract or calculate embeddings for outlier documents
             if embeddings is not None:
-                outlier_embeddings = np.array(
-                    [embeddings[index] for index in outlier_ids]
-                )
+                outlier_embeddings = np.array([embeddings[index] for index in outlier_ids])
             elif images is not None:
                 outlier_images = [images[index] for index in outlier_ids]
-                outlier_embeddings = self.embedding_model.embed_images(
-                    outlier_images, verbose=self.verbose
-                )
+                outlier_embeddings = self.embedding_model.embed_images(outlier_images, verbose=self.verbose)
             else:
                 outlier_embeddings = self.embedding_model.embed_documents(outlier_docs)
-            similarity = cosine_similarity(
-                outlier_embeddings, self.topic_embeddings_[self._outliers :]
-            )
+            similarity = cosine_similarity(outlier_embeddings, self.topic_embeddings_[self._outliers :])
 
             # Update topics
             similarity[similarity < threshold] = 0
-            outlier_topics = iter(
-                [np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity]
-            )
-            new_topics = [
-                topic if topic != -1 else next(outlier_topics) for topic in topics
-            ]
+            outlier_topics = iter([np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity])
+            new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
 
         return new_topics
 
@@ -3507,9 +3330,7 @@ class BERTopic:
                 )
 
             # Minimal
-            save_utils.save_hf(
-                model=self, save_directory=save_directory, serialization=serialization
-            )
+            save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
             save_utils.save_topics(model=self, path=save_directory / "topics.json")
             save_utils.save_images(model=self, path=save_directory / "images")
             save_utils.save_config(
@@ -3525,9 +3346,7 @@ class BERTopic:
                     save_directory=save_directory,
                     serialization=serialization,
                 )
-                save_utils.save_ctfidf_config(
-                    model=self, path=save_directory / "ctfidf_config.json"
-                )
+                save_utils.save_ctfidf_config(model=self, path=save_directory / "ctfidf_config.json")
 
     @classmethod
     def load(cls, path: str, embedding_model=None):
@@ -3557,22 +3376,16 @@ class BERTopic:
             with open(file_or_dir, "rb") as file:
                 if embedding_model:
                     topic_model = joblib.load(file)
-                    topic_model.embedding_model = select_backend(
-                        embedding_model, verbose=topic_model.verbose
-                    )
+                    topic_model.embedding_model = select_backend(embedding_model, verbose=topic_model.verbose)
                 else:
                     topic_model = joblib.load(file)
                 return topic_model
 
         # Load from directory or HF
         if file_or_dir.is_dir():
-            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = (
-                save_utils.load_local_files(file_or_dir)
-            )
+            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_local_files(file_or_dir)
         elif "/" in str(path):
-            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = (
-                save_utils.load_files_from_hf(path)
-            )
+            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(path)
         else:
             raise ValueError("Make sure to either pass a valid directory or HF model.")
         topic_model = _create_model_from_files(
@@ -3587,9 +3400,7 @@ class BERTopic:
 
         # Replace embedding model if one is specifically chosen
         if embedding_model is not None:
-            topic_model.embedding_model = select_backend(
-                embedding_model, verbose=topic_model.verbose
-            )
+            topic_model.embedding_model = select_backend(embedding_model, verbose=topic_model.verbose)
 
         return topic_model
 
@@ -3645,9 +3456,7 @@ class BERTopic:
             all_topics, all_params, all_tensors = [], [], []
             for index, model in enumerate(models):
                 model.save(tmpdir, serialization="pytorch")
-                topics, params, tensors, _, _, _ = save_utils.load_local_files(
-                    Path(tmpdir)
-                )
+                topics, params, tensors, _, _, _ = save_utils.load_local_files(Path(tmpdir))
                 all_topics.append(topics)
                 all_params.append(params)
                 all_tensors.append(np.array(tensors["topic_embeddings"]))
@@ -3666,11 +3475,7 @@ class BERTopic:
 
             # Extract new topics
             new_topics = sorted(
-                [
-                    index - selected_topics["_outliers"]
-                    for index, sim in enumerate(sims)
-                    if sim < min_similarity
-                ]
+                [index - selected_topics["_outliers"] for index, sim in enumerate(sims) if sim < min_similarity]
             )
             max_topic = max(set(merged_topics["topics"]))
 
@@ -3680,12 +3485,10 @@ class BERTopic:
                 if new_topic != -1:
                     max_topic += 1
                     new_topics_dict[new_topic] = max_topic
-                    merged_topics["topic_representations"][str(max_topic)] = (
-                        selected_topics["topic_representations"][str(new_topic)]
-                    )
-                    merged_topics["topic_labels"][str(max_topic)] = selected_topics[
-                        "topic_labels"
-                    ][str(new_topic)]
+                    merged_topics["topic_representations"][str(max_topic)] = selected_topics["topic_representations"][
+                        str(new_topic)
+                    ]
+                    merged_topics["topic_labels"][str(max_topic)] = selected_topics["topic_labels"][str(new_topic)]
 
                     # Add new aspects
                     if selected_topics["topic_aspects"]:
@@ -3698,27 +3501,19 @@ class BERTopic:
 
                         # If the original model does not have topic aspects but the to be added model does
                         if not merged_topics.get("topic_aspects"):
-                            merged_topics["topic_aspects"] = selected_topics[
-                                "topic_aspects"
-                            ]
+                            merged_topics["topic_aspects"] = selected_topics["topic_aspects"]
 
                         # If they both contain topic aspects, add to the existing set of aspects
                         else:
-                            for aspect, values in selected_topics[
-                                "topic_aspects"
-                            ].items():
-                                merged_topics["topic_aspects"][aspect][
-                                    str(max_topic)
-                                ] = values[str(new_topic)]
+                            for aspect, values in selected_topics["topic_aspects"].items():
+                                merged_topics["topic_aspects"][aspect][str(max_topic)] = values[str(new_topic)]
 
                     # Add new embeddings
                     new_tensors = tensors[new_topic + selected_topics["_outliers"]]
                     merged_tensors = np.vstack([merged_tensors, new_tensors])
 
             # Topic Mapper
-            merged_topics["topic_mapper"] = TopicMapper(
-                list(range(-1, max_topic + 1, 1))
-            ).mappings_
+            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, max_topic + 1, 1))).mappings_
 
             # Find similar topics and re-assign those from the new models
             sims_idx = np.argmax(sim_matrix, axis=1)
@@ -3749,13 +3544,8 @@ class BERTopic:
 
         # Replace embedding model if one is specifically chosen
         verbose = any([model.verbose for model in models])
-        if (
-            embedding_model is not None
-            and type(merged_model.embedding_model) == BaseEmbedder
-        ):
-            merged_model.embedding_model = select_backend(
-                embedding_model, verbose=verbose
-            )
+        if embedding_model is not None and type(merged_model.embedding_model) == BaseEmbedder:
+            merged_model.embedding_model = select_backend(embedding_model, verbose=verbose)
         return merged_model
 
     def push_to_hf_hub(
@@ -3874,17 +3664,11 @@ class BERTopic:
             documents = [documents]
 
         if images is not None and hasattr(self.embedding_model, "embed_images"):
-            embeddings = self.embedding_model.embed(
-                documents=documents, images=images, verbose=verbose
-            )
+            embeddings = self.embedding_model.embed(documents=documents, images=images, verbose=verbose)
         elif method == "word":
-            embeddings = self.embedding_model.embed_words(
-                words=documents, verbose=verbose
-            )
+            embeddings = self.embedding_model.embed_words(words=documents, verbose=verbose)
         elif method == "document":
-            embeddings = self.embedding_model.embed_documents(
-                documents, verbose=verbose
-            )
+            embeddings = self.embedding_model.embed_documents(documents, verbose=verbose)
         elif documents[0] is None and images is None:
             raise ValueError(
                 "Make sure to use an embedding model that can either embed documents"
@@ -3897,9 +3681,7 @@ class BERTopic:
             )
         return embeddings
 
-    def _images_to_text(
-        self, documents: pd.DataFrame, embeddings: np.ndarray
-    ) -> pd.DataFrame:
+    def _images_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
         """Convert images to text."""
         logger.info("Images - Converting images to text. This might take a while.")
         if isinstance(self.representation_model, dict):
@@ -3912,19 +3694,14 @@ class BERTopic:
                     documents = tuner.image_to_text(documents, embeddings)
         elif isinstance(self.representation_model, BaseRepresentation):
             if getattr(self.representation_model, "image_to_text_model", False):
-                documents = self.representation_model.image_to_text(
-                    documents, embeddings
-                )
+                documents = self.representation_model.image_to_text(documents, embeddings)
         logger.info("Images - Completed \u2713")
         return documents
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
         """Map predictions to the correct topics if topics were reduced."""
         mappings = self.topic_mapper_.get_mappings(original_topics=True)
-        mapped_predictions = [
-            mappings[prediction] if prediction in mappings else -1
-            for prediction in predictions
-        ]
+        mapped_predictions = [mappings[prediction] if prediction in mappings else -1 for prediction in predictions]
         return mapped_predictions
 
     def _reduce_dimensionality(
@@ -4008,12 +3785,8 @@ class BERTopic:
         if hasattr(self.hdbscan_model, "probabilities_"):
             probabilities = self.hdbscan_model.probabilities_
 
-            if self.calculate_probabilities and is_supported_hdbscan(
-                self.hdbscan_model
-            ):
-                probabilities = hdbscan_delegator(
-                    self.hdbscan_model, "all_points_membership_vectors"
-                )
+            if self.calculate_probabilities and is_supported_hdbscan(self.hdbscan_model):
+                probabilities = hdbscan_delegator(self.hdbscan_model, "all_points_membership_vectors")
 
         if not partial_fit:
             self.topic_mapper_ = TopicMapper(self.topics_)
@@ -4037,23 +3810,15 @@ class BERTopic:
             documents: The leftover documents that were not assigned to any topic
             embeddings: The leftover embeddings that were not assigned to any topic
         """
-        logger.info(
-            "Zeroshot Step 1 - Finding documents that could be assigned to either one of the zero-shot topics"
-        )
+        logger.info("Zeroshot Step 1 - Finding documents that could be assigned to either one of the zero-shot topics")
         # Similarity between document and zero-shot topic embeddings
         zeroshot_embeddings = self._extract_embeddings(self.zeroshot_topic_list)
         cosine_similarities = cosine_similarity(embeddings, zeroshot_embeddings)
         assignment = np.argmax(cosine_similarities, 1)
         assignment_vals = np.max(cosine_similarities, 1)
-        assigned_ids = [
-            index
-            for index, value in enumerate(assignment_vals)
-            if value >= self.zeroshot_min_similarity
-        ]
+        assigned_ids = [index for index, value in enumerate(assignment_vals) if value >= self.zeroshot_min_similarity]
         non_assigned_ids = [
-            index
-            for index, value in enumerate(assignment_vals)
-            if value < self.zeroshot_min_similarity
+            index for index, value in enumerate(assignment_vals) if value < self.zeroshot_min_similarity
         ]
 
         # Assign topics
@@ -4117,32 +3882,22 @@ class BERTopic:
             documents: DataFrame with all the original documents with their topic assignments
             embeddings: np.ndarray of embeddings aligned with the documents
         """
-        logger.info(
-            "Zeroshot Step 2 - Combining topics from zero-shot topic modeling with topics from clustering..."
-        )
+        logger.info("Zeroshot Step 2 - Combining topics from zero-shot topic modeling with topics from clustering...")
         # Combine Zero-shot topics with topics from clustering
         zeroshot_topic_idx_to_topic_id = {
             zeroshot_topic_id: new_topic_id
-            for new_topic_id, zeroshot_topic_id in enumerate(
-                set(assigned_documents.Topic)
-            )
+            for new_topic_id, zeroshot_topic_id in enumerate(set(assigned_documents.Topic))
         }
         self._topic_id_to_zeroshot_topic_idx = {
             new_topic_id: zeroshot_topic_id
-            for new_topic_id, zeroshot_topic_id in enumerate(
-                set(assigned_documents.Topic)
-            )
+            for new_topic_id, zeroshot_topic_id in enumerate(set(assigned_documents.Topic))
         }
-        assigned_documents.Topic = assigned_documents.Topic.map(
-            zeroshot_topic_idx_to_topic_id
-        )
+        assigned_documents.Topic = assigned_documents.Topic.map(zeroshot_topic_idx_to_topic_id)
         num_zeroshot_topics = len(zeroshot_topic_idx_to_topic_id)
 
         # Insert zeroshot topics between outlier cluster and other clusters
         documents.Topic = documents.Topic.apply(
-            lambda topic_id: topic_id + num_zeroshot_topics
-            if topic_id != -1
-            else topic_id
+            lambda topic_id: topic_id + num_zeroshot_topics if topic_id != -1 else topic_id
         )
 
         # Combine the clustered documents/embeddings with assigned documents/embeddings in the original order
@@ -4159,9 +3914,7 @@ class BERTopic:
         logger.info("Zeroshot Step 2 - Completed \u2713")
         return documents, embeddings
 
-    def _guided_topic_modeling(
-        self, embeddings: np.ndarray
-    ) -> Tuple[List[int], np.array]:
+    def _guided_topic_modeling(self, embeddings: np.ndarray) -> Tuple[List[int], np.array]:
         """Apply Guided Topic Modeling.
 
         We transform the seeded topics to embeddings using the
@@ -4185,12 +3938,8 @@ class BERTopic:
         logger.info("Guided - Find embeddings highly related to seeded topics.")
         # Create embeddings from the seeded topics
         seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
-        seed_topic_embeddings = self._extract_embeddings(
-            seed_topic_list, verbose=self.verbose
-        )
-        seed_topic_embeddings = np.vstack(
-            [seed_topic_embeddings, embeddings.mean(axis=0)]
-        )
+        seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
+        seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
 
         # Label documents that are most similar to one of the seeded topics
         sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
@@ -4201,9 +3950,7 @@ class BERTopic:
         # embedding of the seeded topic to force the documents in a cluster
         for seed_topic in range(len(seed_topic_list)):
             indices = [index for index, topic in enumerate(y) if topic == seed_topic]
-            embeddings[indices] = np.average(
-                [embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1]
-            )
+            embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
         logger.info("Guided - Completed \u2713")
         return y, embeddings
 
@@ -4226,17 +3973,11 @@ class BERTopic:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         if verbose:
-            logger.info(
-                "Representation - Extracting topics from clusters using representation models."
-            )
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(
-            {"Document": " ".join}
-        )
+            logger.info("Representation - Extracting topics from clusters using representation models.")
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
-        self._create_topic_vectors(
-            documents=documents, embeddings=embeddings, mappings=mappings
-        )
+        self._create_topic_vectors(documents=documents, embeddings=embeddings, mappings=mappings)
         if verbose:
             logger.info("Representation - Completed \u2713")
 
@@ -4310,11 +4051,7 @@ class BERTopic:
             selected_docs_ids = selection.index.tolist()
 
             # Calculate similarity
-            nr_docs = (
-                nr_repr_docs
-                if len(selected_docs) > nr_repr_docs
-                else len(selected_docs)
-            )
+            nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
             bow = self.vectorizer_model.transform(selected_docs)
             ctfidf = self.ctfidf_model.transform(bow)
             sim_matrix = cosine_similarity(ctfidf, c_tf_idf[index])
@@ -4331,28 +4068,14 @@ class BERTopic:
 
             # Extract top n most representative documents
             else:
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[
-                    -nr_docs:
-                ]
+                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
                 docs = [selected_docs[index] for index in indices]
 
-            doc_ids = [
-                selected_docs_ids[index]
-                for index, doc in enumerate(selected_docs)
-                if doc in docs
-            ]
+            doc_ids = [selected_docs_ids[index] for index, doc in enumerate(selected_docs) if doc in docs]
             repr_docs_ids.append(doc_ids)
             repr_docs.extend(docs)
-            repr_docs_indices.append(
-                [
-                    repr_docs_indices[-1][-1] + i + 1 if index != 0 else i
-                    for i in range(nr_docs)
-                ]
-            )
-        repr_docs_mappings = {
-            topic: repr_docs[i[0] : i[-1] + 1]
-            for topic, i in zip(topics.keys(), repr_docs_indices)
-        }
+            repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
+        repr_docs_mappings = {topic: repr_docs[i[0] : i[-1] + 1] for topic, i in zip(topics.keys(), repr_docs_indices)}
 
         return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
 
@@ -4393,30 +4116,22 @@ class BERTopic:
                 topic_ids = topics_from["topics_from"]
                 topic_sizes = topics_from["topic_sizes"]
                 if topic_ids:
-                    embds = np.array(self.topic_embeddings_)[
-                        np.array(topic_ids) + self._outliers
-                    ]
+                    embds = np.array(self.topic_embeddings_)[np.array(topic_ids) + self._outliers]
                     topic_embedding = np.average(embds, axis=0, weights=topic_sizes)
                     topic_embeddings_dict[topic_to] = topic_embedding
 
             # Re-order topic embeddings
             topics_to_map = {
-                topic_mapping[0]: topic_mapping[1]
-                for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]
+                topic_mapping[0]: topic_mapping[1] for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]
             }
             topic_embeddings = {}
             for topic, embds in topic_embeddings_dict.items():
                 topic_embeddings[topics_to_map[topic]] = embds
             unique_topics = sorted(list(topic_embeddings.keys()))
-            self.topic_embeddings_ = np.array(
-                [topic_embeddings[topic] for topic in unique_topics]
-            )
+            self.topic_embeddings_ = np.array([topic_embeddings[topic] for topic in unique_topics])
 
         # Topic embeddings based on keyword representations
-        elif (
-            self.embedding_model is not None
-            and type(self.embedding_model) is not BaseEmbedder
-        ):
+        elif self.embedding_model is not None and type(self.embedding_model) is not BaseEmbedder:
             topic_list = list(self.topic_representations_.keys())
             topic_list.sort()
 
@@ -4428,9 +4143,7 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            word_embeddings = self._extract_embeddings(
-                topic_words, method="word", verbose=False
-            )
+            word_embeddings = self._extract_embeddings(topic_words, method="word", verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -4488,33 +4201,16 @@ class BERTopic:
         if self.ctfidf_model.seed_words and self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
             multiplier = np.array(
-                [
-                    self.ctfidf_model.seed_multiplier
-                    if word in self.ctfidf_model.seed_words
-                    else 1
-                    for word in words
-                ]
+                [self.ctfidf_model.seed_multiplier if word in self.ctfidf_model.seed_words else 1 for word in words]
             )
-            multiplier = np.array(
-                [
-                    1.2 if word in seed_topic_list else value
-                    for value, word in zip(multiplier, words)
-                ]
-            )
+            multiplier = np.array([1.2 if word in seed_topic_list else value for value, word in zip(multiplier, words)])
         elif self.ctfidf_model.seed_words:
             multiplier = np.array(
-                [
-                    self.ctfidf_model.seed_multiplier
-                    if word in self.ctfidf_model.seed_words
-                    else 1
-                    for word in words
-                ]
+                [self.ctfidf_model.seed_multiplier if word in self.ctfidf_model.seed_words else 1 for word in words]
             )
         elif self.seed_topic_list:
             seed_topic_list = [seed for seeds in self.seed_topic_list for seed in seeds]
-            multiplier = np.array(
-                [1.2 if word in seed_topic_list else 1 for word in words]
-            )
+            multiplier = np.array([1.2 if word in seed_topic_list else 1 for word in words])
 
         if fit:
             self.ctfidf_model = self.ctfidf_model.fit(X, multiplier=multiplier)
@@ -4572,9 +4268,7 @@ class BERTopic:
         # Get top 30 words per topic based on c-TF-IDF score
         base_topics = {
             label: [
-                (words[word_index], score)
-                if word_index is not None and score > 0
-                else ("", 0.00001)
+                (words[word_index], score) if word_index is not None and score > 0 else ("", 0.00001)
                 for word_index, score in zip(indices[index][::-1], scores[index][::-1])
             ]
             for index, label in enumerate(labels)
@@ -4584,40 +4278,27 @@ class BERTopic:
         topics = base_topics.copy()
         if not self.representation_model:
             # Default representation: c_tf_idf + top_n_words
-            topics = {
-                label: values[: self.top_n_words] for label, values in topics.items()
-            }
+            topics = {label: values[: self.top_n_words] for label, values in topics.items()}
         elif isinstance(self.representation_model, list):
             for tuner in self.representation_model:
                 topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
         elif isinstance(self.representation_model, BaseRepresentation):
-            topics = self.representation_model.extract_topics(
-                self, documents, c_tf_idf, topics
-            )
+            topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics)
         elif isinstance(self.representation_model, dict):
             if self.representation_model.get("Main"):
                 main_model = self.representation_model["Main"]
                 if isinstance(main_model, BaseRepresentation):
-                    topics = main_model.extract_topics(
-                        self, documents, c_tf_idf, topics
-                    )
+                    topics = main_model.extract_topics(self, documents, c_tf_idf, topics)
                 elif isinstance(main_model, list):
                     for tuner in main_model:
                         topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
                 else:
-                    raise TypeError(
-                        f"unsupported type {type(main_model).__name__} for representation_model['Main']"
-                    )
+                    raise TypeError(f"unsupported type {type(main_model).__name__} for representation_model['Main']")
             else:
                 # Default representation: c_tf_idf + top_n_words
-                topics = {
-                    label: values[: self.top_n_words]
-                    for label, values in topics.items()
-                }
+                topics = {label: values[: self.top_n_words] for label, values in topics.items()}
         else:
-            raise TypeError(
-                f"unsupported type {type(self.representation_model).__name__} for representation_model"
-            )
+            raise TypeError(f"unsupported type {type(self.representation_model).__name__} for representation_model")
 
         # Extract additional topic aspects
         if calculate_aspects and isinstance(self.representation_model, dict):
@@ -4626,19 +4307,12 @@ class BERTopic:
                     aspects = base_topics.copy()
                     if not aspect_model:
                         # Default representation: c_tf_idf + top_n_words
-                        aspects = {
-                            label: values[: self.top_n_words]
-                            for label, values in aspects.items()
-                        }
+                        aspects = {label: values[: self.top_n_words] for label, values in aspects.items()}
                     if isinstance(aspect_model, list):
                         for tuner in aspect_model:
-                            aspects = tuner.extract_topics(
-                                self, documents, c_tf_idf, aspects
-                            )
+                            aspects = tuner.extract_topics(self, documents, c_tf_idf, aspects)
                     elif isinstance(aspect_model, BaseRepresentation):
-                        aspects = aspect_model.extract_topics(
-                            self, documents, c_tf_idf, aspects
-                        )
+                        aspects = aspect_model.extract_topics(self, documents, c_tf_idf, aspects)
                     else:
                         raise TypeError(
                             f"unsupported type {type(aspect_model).__name__} for representation_model[{repr(aspect)}]"
@@ -4647,9 +4321,7 @@ class BERTopic:
 
         return topics
 
-    def _reduce_topics(
-        self, documents: pd.DataFrame, use_ctfidf: bool = False
-    ) -> pd.DataFrame:
+    def _reduce_topics(self, documents: pd.DataFrame, use_ctfidf: bool = False) -> pd.DataFrame:
         """Reduce topics to self.nr_topics.
 
         Arguments:
@@ -4676,9 +4348,7 @@ class BERTopic:
         )
         return documents
 
-    def _reduce_to_n_topics(
-        self, documents: pd.DataFrame, use_ctfidf: bool = False
-    ) -> pd.DataFrame:
+    def _reduce_to_n_topics(self, documents: pd.DataFrame, use_ctfidf: bool = False) -> pd.DataFrame:
         """Reduce topics to self.nr_topics.
 
         Arguments:
@@ -4700,9 +4370,7 @@ class BERTopic:
 
         # Cluster the topic embeddings using AgglomerativeClustering
         if version.parse(sklearn_version) >= version.parse("1.4.0"):
-            cluster = AgglomerativeClustering(
-                self.nr_topics - self._outliers, metric="precomputed", linkage="average"
-            )
+            cluster = AgglomerativeClustering(self.nr_topics - self._outliers, metric="precomputed", linkage="average")
         else:
             cluster = AgglomerativeClustering(
                 self.nr_topics - self._outliers,
@@ -4713,9 +4381,7 @@ class BERTopic:
         new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in topics]
 
         # Track mappings and sizes of topics for merging topic embeddings
-        mapped_topics = {
-            from_topic: to_topic for from_topic, to_topic in zip(topics, new_topics)
-        }
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, new_topics)}
         basic_mappings = defaultdict(list)
         for key, val in sorted(mapped_topics.items()):
             basic_mappings[val].append(key)
@@ -4742,8 +4408,7 @@ class BERTopic:
         if self._is_zeroshot():
             new_topic_id_to_zeroshot_topic_idx = {}
             topics_to_map = {
-                topic_mapping[0]: topic_mapping[1]
-                for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]
+                topic_mapping[0]: topic_mapping[1] for topic_mapping in np.array(self.topic_mapper_.mappings_)[:, -2:]
             }
 
             for topic_to, topics_from in basic_mappings.items():
@@ -4753,9 +4418,7 @@ class BERTopic:
 
                 # which of the original topics are zero-shot
                 zeroshot_topic_ids = [
-                    topic_id
-                    for topic_id in topics_from
-                    if topic_id in self._topic_id_to_zeroshot_topic_idx
+                    topic_id for topic_id in topics_from if topic_id in self._topic_id_to_zeroshot_topic_idx
                 ]
                 if len(zeroshot_topic_ids) == 0:
                     continue
@@ -4763,9 +4426,7 @@ class BERTopic:
                 # If any of the original topics are zero-shot, take the best fitting zero-shot label
                 # if the cosine similarity with the new topic exceeds the zero-shot threshold
                 zeroshot_labels = [
-                    self.zeroshot_topic_list[
-                        self._topic_id_to_zeroshot_topic_idx[topic_id]
-                    ]
+                    self.zeroshot_topic_list[self._topic_id_to_zeroshot_topic_idx[topic_id]]
                     for topic_id in zeroshot_topic_ids
                 ]
                 zeroshot_embeddings = self._extract_embeddings(zeroshot_labels)
@@ -4775,18 +4436,14 @@ class BERTopic:
                 best_zeroshot_topic_idx = np.argmax(cosine_similarities)
                 best_cosine_similarity = cosine_similarities[best_zeroshot_topic_idx]
                 if best_cosine_similarity >= self.zeroshot_min_similarity:
-                    new_topic_id_to_zeroshot_topic_idx[topic_to] = zeroshot_topic_ids[
-                        best_zeroshot_topic_idx
-                    ]
+                    new_topic_id_to_zeroshot_topic_idx[topic_to] = zeroshot_topic_ids[best_zeroshot_topic_idx]
 
             self._topic_id_to_zeroshot_topic_idx = new_topic_id_to_zeroshot_topic_idx
 
         self._update_topic_size(documents)
         return documents
 
-    def _auto_reduce_topics(
-        self, documents: pd.DataFrame, use_ctfidf: bool = False
-    ) -> pd.DataFrame:
+    def _auto_reduce_topics(self, documents: pd.DataFrame, use_ctfidf: bool = False) -> pd.DataFrame:
         """Reduce the number of topics automatically using HDBSCAN.
 
         Arguments:
@@ -4819,13 +4476,8 @@ class BERTopic:
             for index, prediction in enumerate(predictions)
             if prediction != -1
         }
-        documents.Topic = (
-            documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
-        )
-        mapped_topics = {
-            from_topic: to_topic
-            for from_topic, to_topic in zip(topics, documents.Topic.tolist())
-        }
+        documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
+        mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
 
         # Track mappings and sizes of topics for merging topic embeddings
         mappings = defaultdict(list)
@@ -4873,17 +4525,13 @@ class BERTopic:
         self._update_topic_size(documents)
 
         # Map topics based on frequency
-        df = pd.DataFrame(
-            self.topic_sizes_.items(), columns=["Old_Topic", "Size"]
-        ).sort_values("Size", ascending=False)
+        df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
         df = df[df.Old_Topic != -1]
         sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
         self.topic_mapper_.add_mappings(sorted_topics)
 
         # Map documents
-        documents.Topic = (
-            documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
-        )
+        documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
         self._update_topic_size(documents)
         return documents
 
@@ -4918,9 +4566,7 @@ class BERTopic:
                 )
                 for from_topic, to_topic in mappings.items():
                     if to_topic != -1 and from_topic != -1:
-                        mapped_probabilities[:, to_topic] += probabilities[
-                            :, from_topic
-                        ]
+                        mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
 
                 return mapped_probabilities
 
@@ -4936,12 +4582,8 @@ class BERTopic:
         cleaned_documents = [doc.replace("\n", " ") for doc in documents]
         cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]
         if self.language == "english":
-            cleaned_documents = [
-                re.sub(r"[^A-Za-z0-9 ]+", "", doc) for doc in cleaned_documents
-            ]
-        cleaned_documents = [
-            doc if doc != "" else "emptydoc" for doc in cleaned_documents
-        ]
+            cleaned_documents = [re.sub(r"[^A-Za-z0-9 ]+", "", doc) for doc in cleaned_documents]
+        cleaned_documents = [doc if doc != "" else "emptydoc" for doc in cleaned_documents]
         return cleaned_documents
 
     @staticmethod
@@ -4961,13 +4603,8 @@ class BERTopic:
         indices = []
         for le, ri in zip(matrix.indptr[:-1], matrix.indptr[1:]):
             n_row_pick = min(n, ri - le)
-            values = matrix.indices[
-                le + np.argpartition(matrix.data[le:ri], -n_row_pick)[-n_row_pick:]
-            ]
-            values = [
-                values[index] if len(values) >= index + 1 else None
-                for index in range(n)
-            ]
+            values = matrix.indices[le + np.argpartition(matrix.data[le:ri], -n_row_pick)[-n_row_pick:]]
+            values = [values[index] if len(values) >= index + 1 else None for index in range(n)]
             indices.append(values)
         return np.array(indices)
 
@@ -4984,9 +4621,7 @@ class BERTopic:
         """
         top_values = []
         for row, values in enumerate(indices):
-            scores = np.array(
-                [matrix[row, value] if value is not None else 0 for value in values]
-            )
+            scores = np.array([matrix[row, value] if value is not None else 0 for value in values])
             top_values.append(scores)
         return np.array(top_values)
 
@@ -4999,11 +4634,7 @@ class BERTopic:
         """
         init_signature = inspect.signature(cls.__init__)
         parameters = sorted(
-            [
-                p.name
-                for p in init_signature.parameters.values()
-                if p.name != "self" and p.kind != p.VAR_KEYWORD
-            ]
+            [p.name for p in init_signature.parameters.values() if p.name != "self" and p.kind != p.VAR_KEYWORD]
         )
         return parameters
 
@@ -5173,22 +4804,16 @@ def _create_model_from_files(
         **params,
     )
     topic_model.topic_embeddings_ = tensors["topic_embeddings"].numpy()
-    topic_model.topic_representations_ = {
-        int(key): val for key, val in topics["topic_representations"].items()
-    }
+    topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
-    topic_model.topic_sizes_ = {
-        int(key): val for key, val in topics["topic_sizes"].items()
-    }
+    topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
     topic_model.custom_labels_ = topics["custom_labels"]
 
     if topics.get("topic_aspects"):
         topic_aspects = {}
         for aspect, values in topics["topic_aspects"].items():
             if aspect != "Visual_Aspect":
-                topic_aspects[aspect] = {
-                    int(topic): value for topic, value in values.items()
-                }
+                topic_aspects[aspect] = {int(topic): value for topic, value in values.items()}
         topic_model.topic_aspects_ = topic_aspects
 
         if images is not None:
@@ -5209,20 +4834,12 @@ def _create_model_from_files(
         )
 
         # CountVectorizer
-        topic_model.vectorizer_model = CountVectorizer(
-            **ctfidf_config["vectorizer_model"]["params"]
-        )
-        topic_model.vectorizer_model.vocabulary_ = ctfidf_config["vectorizer_model"][
-            "vocab"
-        ]
+        topic_model.vectorizer_model = CountVectorizer(**ctfidf_config["vectorizer_model"]["params"])
+        topic_model.vectorizer_model.vocabulary_ = ctfidf_config["vectorizer_model"]["vocab"]
 
         # ClassTfidfTransformer
-        topic_model.ctfidf_model.reduce_frequent_words = ctfidf_config["ctfidf_model"][
-            "reduce_frequent_words"
-        ]
-        topic_model.ctfidf_model.bm25_weighting = ctfidf_config["ctfidf_model"][
-            "bm25_weighting"
-        ]
+        topic_model.ctfidf_model.reduce_frequent_words = ctfidf_config["ctfidf_model"]["reduce_frequent_words"]
+        topic_model.ctfidf_model.bm25_weighting = ctfidf_config["ctfidf_model"]["bm25_weighting"]
         idf = ctfidf_tensors["diag"].numpy()
         topic_model.ctfidf_model._idf_diag = sp.diags(
             idf, offsets=0, shape=(len(idf), len(idf)), format="csr", dtype=np.float64

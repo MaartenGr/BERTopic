@@ -69,9 +69,7 @@ def visualize_term_rank(
     topic_words = [topic_model.get_topic(topic) for topic in topic_ids]
 
     values = np.array([[value[1] for value in values] for values in topic_words])
-    indices = np.array(
-        [[value + 1 for value in range(len(values))] for values in topic_words]
-    )
+    indices = np.array([[value + 1 for value in range(len(values))] for values in topic_words])
 
     # Create figure
     lines = []
@@ -79,15 +77,11 @@ def visualize_term_rank(
         if not any(y > 1.5):
             # labels
             if isinstance(custom_labels, str):
-                label = f"{topic}_" + "_".join(
-                    list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3]
-                )
+                label = f"{topic}_" + "_".join(list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3])
             elif topic_model.custom_labels_ is not None and custom_labels:
                 label = topic_model.custom_labels_[topic + topic_model._outliers]
             else:
-                label = f"<b>Topic {topic}</b>:" + "_".join(
-                    [word[0] for word in topic_model.get_topic(topic)]
-                )
+                label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
                 label = label[:50]
 
             # line parameters

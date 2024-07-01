@@ -52,9 +52,7 @@ def visualize_barchart(
     <iframe src="../../getting_started/visualization/bar_chart.html"
     style="width:1100px; height: 660px; border: 0px;""></iframe>
     """
-    colors = itertools.cycle(
-        ["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"]
-    )
+    colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
 
     # Select topics based on top_n and topics args
     freq_df = topic_model.get_topic_freq()
@@ -68,21 +66,11 @@ def visualize_barchart(
 
     # Initialize figure
     if isinstance(custom_labels, str):
-        subplot_titles = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
-            for topic in topics
-        ]
-        subplot_titles = [
-            "_".join([label[0] for label in labels[:4]]) for labels in subplot_titles
-        ]
-        subplot_titles = [
-            label if len(label) < 30 else label[:27] + "..." for label in subplot_titles
-        ]
+        subplot_titles = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        subplot_titles = ["_".join([label[0] for label in labels[:4]]) for labels in subplot_titles]
+        subplot_titles = [label if len(label) < 30 else label[:27] + "..." for label in subplot_titles]
     elif topic_model.custom_labels_ is not None and custom_labels:
-        subplot_titles = [
-            topic_model.custom_labels_[topic + topic_model._outliers]
-            for topic in topics
-        ]
+        subplot_titles = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in topics]
     else:
         subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
@@ -100,9 +88,7 @@ def visualize_barchart(
     row = 1
     column = 1
     for topic in topics:
-        words = [word + "  " for word, _ in topic_model.get_topic(topic)][:n_words][
-            ::-1
-        ]
+        words = [word + "  " for word, _ in topic_model.get_topic(topic)][:n_words][::-1]
         scores = [score for _, score in topic_model.get_topic(topic)][:n_words][::-1]
 
         fig.add_trace(

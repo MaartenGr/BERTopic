@@ -60,17 +60,11 @@ def visualize_distribution(
 
     # Create labels
     if isinstance(custom_labels, str):
-        labels = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
-            for topic in labels_idx
-        ]
+        labels = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in labels_idx]
         labels = ["_".join([label[0] for label in l[:4]]) for l in labels]  # noqa: E741
         labels = [label if len(label) < 30 else label[:27] + "..." for label in labels]
     elif topic_model.custom_labels_ is not None and custom_labels:
-        labels = [
-            topic_model.custom_labels_[idx + topic_model._outliers]
-            for idx in labels_idx
-        ]
+        labels = [topic_model.custom_labels_[idx + topic_model._outliers] for idx in labels_idx]
     else:
         labels = []
         for idx in labels_idx:

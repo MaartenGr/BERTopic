@@ -68,12 +68,10 @@ class MaximalMarginalRelevance(BaseRepresentation):
         updated_topics = {}
         for topic, topic_words in topics.items():
             words = [word[0] for word in topic_words]
-            word_embeddings = topic_model._extract_embeddings(
-                words, method="word", verbose=False
+            word_embeddings = topic_model._extract_embeddings(words, method="word", verbose=False)
+            topic_embedding = topic_model._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(
+                1, -1
             )
-            topic_embedding = topic_model._extract_embeddings(
-                " ".join(words), method="word", verbose=False
-            ).reshape(1, -1)
             topic_words = mmr(
                 topic_embedding,
                 word_embeddings,
@@ -81,9 +79,7 @@ class MaximalMarginalRelevance(BaseRepresentation):
                 self.diversity,
                 self.top_n_words,
             )
-            updated_topics[topic] = [
-                (word, value) for word, value in topics[topic] if word in topic_words
-            ]
+            updated_topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
         return updated_topics
 
 
@@ -119,14 +115,10 @@ def mmr(
         # Extract similarities within candidates and
         # between candidates and selected keywords/phrases
         candidate_similarities = word_doc_similarity[candidates_idx, :]
-        target_similarities = np.max(
-            word_similarity[candidates_idx][:, keywords_idx], axis=1
-        )
+        target_similarities = np.max(word_similarity[candidates_idx][:, keywords_idx], axis=1)
 
         # Calculate MMR
-        mmr = (
-            1 - diversity
-        ) * candidate_similarities - diversity * target_similarities.reshape(-1, 1)
+        mmr = (1 - diversity) * candidate_similarities - diversity * target_similarities.reshape(-1, 1)
         mmr_idx = candidates_idx[np.argmax(mmr)]
 
         # Update keywords & candidates

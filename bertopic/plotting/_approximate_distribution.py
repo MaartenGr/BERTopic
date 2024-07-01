@@ -86,9 +86,7 @@ def visualize_approximate_distribution(
 
     def highligh_color(data, color="white"):
         attr = "background-color: {}".format(color)
-        return pd.DataFrame(
-            np.where(data == 0, attr, ""), index=data.index, columns=data.columns
-        )
+        return pd.DataFrame(np.where(data == 0, attr, ""), index=data.index, columns=data.columns)
 
     if len(df) == 0:
         return df

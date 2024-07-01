@@ -18,12 +18,8 @@ classes = [data["target_names"][i] for i in data["target"]][:1000]
 )
 def test_class(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
-    topics_per_class_global = topic_model.topics_per_class(
-        documents, classes=classes, global_tuning=True
-    )
-    topics_per_class_local = topic_model.topics_per_class(
-        documents, classes=classes, global_tuning=False
-    )
+    topics_per_class_global = topic_model.topics_per_class(documents, classes=classes, global_tuning=True)
+    topics_per_class_local = topic_model.topics_per_class(documents, classes=classes, global_tuning=False)
 
     assert topics_per_class_global.Frequency.sum() == len(documents)
     assert topics_per_class_local.Frequency.sum() == len(documents)

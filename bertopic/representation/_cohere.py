@@ -151,13 +151,8 @@ class Cohere(BaseRepresentation):
 
         # Generate using Cohere's Language Model
         updated_topics = {}
-        for topic, docs in tqdm(
-            repr_docs_mappings.items(), disable=not topic_model.verbose
-        ):
-            truncated_docs = [
-                truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
-                for doc in docs
-            ]
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 

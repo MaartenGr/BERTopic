@@ -36,9 +36,7 @@ def test_hierarchy(model, documents, request):
 def test_linkage(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     linkage_function = lambda x: sch.linkage(x, "single", optimal_ordering=True)
-    hierarchical_topics = topic_model.hierarchical_topics(
-        documents, linkage_function=linkage_function
-    )
+    hierarchical_topics = topic_model.hierarchical_topics(documents, linkage_function=linkage_function)
     merged_topics = set([v for vals in hierarchical_topics.Topics.values for v in vals])
     tree = topic_model.get_topic_tree(hierarchical_topics)
 
@@ -61,9 +59,7 @@ def test_linkage(model, documents, request):
 def test_tree(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     linkage_function = lambda x: sch.linkage(x, "single", optimal_ordering=True)
-    hierarchical_topics = topic_model.hierarchical_topics(
-        documents, linkage_function=linkage_function
-    )
+    hierarchical_topics = topic_model.hierarchical_topics(documents, linkage_function=linkage_function)
     merged_topics = set([v for vals in hierarchical_topics.Topics.values for v in vals])
     tree = topic_model.get_topic_tree(hierarchical_topics)
 

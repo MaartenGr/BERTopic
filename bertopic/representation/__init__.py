@@ -24,9 +24,7 @@ try:
     from bertopic.representation._zeroshot import ZeroShotClassification
 except ModuleNotFoundError:
     msg = "`pip install bertopic` without `--no-deps` \n\n"
-    ZeroShotClassification = NotInstalled(
-        "ZeroShotClassification", "transformers", custom_msg=msg
-    )
+    ZeroShotClassification = NotInstalled("ZeroShotClassification", "transformers", custom_msg=msg)
 
 # OpenAI Generator
 try:

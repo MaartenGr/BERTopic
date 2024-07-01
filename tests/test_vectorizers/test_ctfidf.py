@@ -23,12 +23,8 @@ from bertopic.vectorizers import ClassTfidfTransformer
 def test_ctfidf(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     topics = topic_model.topics_
-    documents = pd.DataFrame(
-        {"Document": documents, "ID": range(len(documents)), "Topic": topics}
-    )
-    documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(
-        {"Document": " ".join}
-    )
+    documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": topics})
+    documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
     documents = topic_model._preprocess_text(documents_per_topic.Document.values)
     count = topic_model.vectorizer_model.fit(documents)
 
@@ -74,12 +70,8 @@ def test_ctfidf_custom_cv(model, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     topic_model.vectorizer_model = cv
     topics = topic_model.topics_
-    documents = pd.DataFrame(
-        {"Document": documents, "ID": range(len(documents)), "Topic": topics}
-    )
-    documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(
-        {"Document": " ".join}
-    )
+    documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": topics})
+    documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
     documents = topic_model._preprocess_text(documents_per_topic.Document.values)
     count = topic_model.vectorizer_model.fit(documents)
 

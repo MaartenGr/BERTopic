@@ -19,7 +19,4 @@ def test_dynamic(model, documents, request):
     topics_over_time = topic_model.topics_over_time(documents, timestamps)
     fig = topic_model.visualize_topics_over_time(topics_over_time)
 
-    assert (
-        len(fig.to_dict()["data"])
-        == len(set(topic_model.topics_)) - topic_model._outliers
-    )
+    assert len(fig.to_dict()["data"]) == len(set(topic_model.topics_)) - topic_model._outliers

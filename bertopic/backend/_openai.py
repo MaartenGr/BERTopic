@@ -70,9 +70,7 @@ class OpenAIBackend(BaseEmbedder):
         if self.batch_size is not None:
             embeddings = []
             for batch in tqdm(self._chunks(prepared_documents), disable=not verbose):
-                response = self.client.embeddings.create(
-                    input=batch, **self.generator_kwargs
-                )
+                response = self.client.embeddings.create(input=batch, **self.generator_kwargs)
                 embeddings.extend([r.embedding for r in response.data])
 
                 # Delay subsequent calls
@@ -81,9 +79,7 @@ class OpenAIBackend(BaseEmbedder):
 
         # Extract embeddings all at once
         else:
-            response = self.client.embeddings.create(
-                input=prepared_documents, **self.generator_kwargs
-            )
+            response = self.client.embeddings.create(input=prepared_documents, **self.generator_kwargs)
             embeddings = [r.embedding for r in response.data]
         return np.array(embeddings)
 

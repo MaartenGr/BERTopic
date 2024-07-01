@@ -109,24 +109,18 @@ def visualize_documents(
     # Extract embeddings if not already done
     if sample is None:
         if embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(
-                df.doc.to_list(), method="document"
-            )
+            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
         else:
             embeddings_to_reduce = embeddings
     else:
         if embeddings is not None:
             embeddings_to_reduce = embeddings[indices]
         elif embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(
-                df.doc.to_list(), method="document"
-            )
+            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
 
     # Reduce input embeddings
     if reduced_embeddings is None:
-        umap_model = UMAP(
-            n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine"
-        ).fit(embeddings_to_reduce)
+        umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
         embeddings_2d = umap_model.embedding_
     elif sample is not None and reduced_embeddings is not None:
         embeddings_2d = reduced_embeddings[indices]
@@ -143,21 +137,14 @@ def visualize_documents(
 
     # Prepare text and names
     if isinstance(custom_labels, str):
-        names = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
-            for topic in unique_topics
-        ]
+        names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in unique_topics]
         names = ["_".join([label[0] for label in labels[:4]]) for labels in names]
         names = [label if len(label) < 30 else label[:27] + "..." for label in names]
     elif topic_model.custom_labels_ is not None and custom_labels:
-        names = [
-            topic_model.custom_labels_[topic + topic_model._outliers]
-            for topic in unique_topics
-        ]
+        names = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in unique_topics]
     else:
         names = [
-            f"{topic}_"
-            + "_".join([word for word, value in topic_model.get_topic(topic)][:3])
+            f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3])
             for topic in unique_topics
         ]
 
@@ -248,12 +235,8 @@ def visualize_documents(
         y1=sum(y_range) / 2,
         line=dict(color="#9E9E9E", width=2),
     )
-    fig.add_annotation(
-        x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10
-    )
-    fig.add_annotation(
-        y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10
-    )
+    fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
+    fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
 
     # Stylize layout
     fig.update_layout(

@@ -120,9 +120,7 @@ class PartOfSpeech(BaseRepresentation):
             candidate_documents = []
             for keyword in keywords:
                 selection = documents.loc[documents.Topic == topic, :]
-                selection = selection.loc[
-                    selection.Document.str.contains(keyword), "Document"
-                ]
+                selection = selection.loc[selection.Document.str.contains(keyword), "Document"]
                 if len(selection) > 0:
                     for document in selection[:2]:
                         candidate_documents.append(document)
@@ -150,27 +148,14 @@ class PartOfSpeech(BaseRepresentation):
 
         for topic, candidate_keywords in candidate_topics.items():
             word_indices = np.sort(
-                [
-                    words_lookup.get(keyword)
-                    for keyword in candidate_keywords
-                    if keyword in words_lookup
-                ]
+                [words_lookup.get(keyword) for keyword in candidate_keywords if keyword in words_lookup]
             )
             vals = topic_model.c_tf_idf_[:, word_indices][topic + topic_model._outliers]
-            indices = np.argsort(np.array(vals.todense().reshape(1, -1))[0])[
-                -self.top_n_words :
-            ][::-1]
-            vals = np.sort(np.array(vals.todense().reshape(1, -1))[0])[
-                -self.top_n_words :
-            ][::-1]
-            topic_words = [
-                (words[word_indices[index]], val) for index, val in zip(indices, vals)
-            ]
+            indices = np.argsort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words :][::-1]
+            vals = np.sort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words :][::-1]
+            topic_words = [(words[word_indices[index]], val) for index, val in zip(indices, vals)]
             updated_topics[topic] = topic_words
             if len(updated_topics[topic]) < self.top_n_words:
-                updated_topics[topic] += [
-                    ("", 0)
-                    for _ in range(self.top_n_words - len(updated_topics[topic]))
-                ]
+                updated_topics[topic] += [("", 0) for _ in range(self.top_n_words - len(updated_topics[topic]))]
 
         return updated_topics

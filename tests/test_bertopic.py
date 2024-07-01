@@ -75,13 +75,9 @@ def test_full_model(model, documents, request):
     # Test zero-shot topic modeling
     if topic_model._is_zeroshot():
         if topic_model._outliers:
-            assert set(topic_model.topic_labels_.keys()) == set(
-                range(-1, len(topic_model.topic_labels_) - 1)
-            )
+            assert set(topic_model.topic_labels_.keys()) == set(range(-1, len(topic_model.topic_labels_) - 1))
         else:
-            assert set(topic_model.topic_labels_.keys()) == set(
-                range(len(topic_model.topic_labels_))
-            )
+            assert set(topic_model.topic_labels_.keys()) == set(range(len(topic_model.topic_labels_)))
 
     # Test topics over time
     timestamps = [i % 10 for i in range(len(documents))]
@@ -130,9 +126,7 @@ def test_full_model(model, documents, request):
         assert topic != original_topic
 
     # Test updating topic labels
-    topic_labels = topic_model.generate_topic_labels(
-        nr_words=3, topic_prefix=False, word_length=10, separator=", "
-    )
+    topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
     assert len(topic_labels) == len(set(topic_model.topics_))
 
     # Test setting topic labels
@@ -148,9 +142,7 @@ def test_full_model(model, documents, request):
     # Test reduction of outliers
     if -1 in topics:
         new_topics = topic_model.reduce_outliers(documents, topics, threshold=0.0)
-        nr_outliers_topic_model = sum(
-            [1 for topic in topic_model.topics_ if topic == -1]
-        )
+        nr_outliers_topic_model = sum([1 for topic in topic_model.topics_ if topic == -1])
         nr_outliers_new_topics = sum([1 for topic in new_topics if topic == -1])
 
         if topic_model._outliers == 1:

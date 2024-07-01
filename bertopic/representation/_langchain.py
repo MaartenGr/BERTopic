@@ -180,11 +180,7 @@ class LangChain(BaseRepresentation):
         # Generate label using langchain's batch functionality
         chain_docs: List[List[Document]] = [
             [
-                Document(
-                    page_content=truncate_document(
-                        topic_model, self.doc_length, self.tokenizer, doc
-                    )
-                )
+                Document(page_content=truncate_document(topic_model, self.doc_length, self.tokenizer, doc))
                 for doc in docs
             ]
             for docs in repr_docs_mappings.values()
@@ -199,16 +195,10 @@ class LangChain(BaseRepresentation):
                 prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
                 prompts.append(prompt)
 
-            inputs = [
-                {"input_documents": docs, "question": prompt}
-                for docs, prompt in zip(chain_docs, prompts)
-            ]
+            inputs = [{"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)]
 
         else:
-            inputs = [
-                {"input_documents": docs, "question": self.prompt}
-                for docs in chain_docs
-            ]
+            inputs = [{"input_documents": docs, "question": self.prompt} for docs in chain_docs]
 
         # `self.chain` must return a dict with an `output_text` key
         # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
@@ -216,8 +206,7 @@ class LangChain(BaseRepresentation):
         labels = [output["output_text"].strip() for output in outputs]
 
         updated_topics = {
-            topic: [(label, 1)] + [("", 0) for _ in range(9)]
-            for topic, label in zip(repr_docs_mappings.keys(), labels)
+            topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
         }
 
         return updated_topics

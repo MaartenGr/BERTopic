@@ -45,20 +45,14 @@ def check_documents_type(documents):
         if not any([isinstance(doc, str) for doc in documents]):
             raise TypeError("Make sure that the iterable only contains strings.")
     else:
-        raise TypeError(
-            "Make sure that the documents variable is an iterable containing strings only."
-        )
+        raise TypeError("Make sure that the documents variable is an iterable containing strings only.")
 
 
 def check_embeddings_shape(embeddings, docs):
     """Check if the embeddings have the correct shape."""
     if embeddings is not None:
-        if not any(
-            [isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]
-        ):
-            raise ValueError(
-                "Make sure to input embeddings as a numpy array or scipy.sparse.csr.csr_matrix. "
-            )
+        if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
+            raise ValueError("Make sure to input embeddings as a numpy array or scipy.sparse.csr.csr_matrix. ")
         else:
             if embeddings.shape[0] != len(docs):
                 raise ValueError(
@@ -137,16 +131,11 @@ def validate_distance_matrix(X, n_samples):
         # check it has correct size
         n = s[0]
         if n != (n_samples * (n_samples - 1) / 2):
-            raise ValueError(
-                "The condensed distance matrix must have " "shape (n*(n-1)/2,)."
-            )
+            raise ValueError("The condensed distance matrix must have " "shape (n*(n-1)/2,).")
     elif len(s) == 2:
         # check it has correct size
         if (s[0] != n_samples) or (s[1] != n_samples):
-            raise ValueError(
-                "The distance matrix must be of shape "
-                "(n, n) where n is the number of samples."
-            )
+            raise ValueError("The distance matrix must be of shape " "(n, n) where n is the number of samples.")
         # force zero diagonal and convert to condensed
         np.fill_diagonal(X, 0)
         X = squareform(X)
@@ -182,15 +171,11 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
     for i in range(dists.shape[0] - 1):
         if dists[i] == dists[i + 1]:
             # returns the next unique distance or the current distance with the added noise
-            next_unique_dist = next(
-                (d for d in dists[i + 1 :] if d != dists[i]), dists[i] + noise_max
-            )
+            next_unique_dist = next((d for d in dists[i + 1 :] if d != dists[i]), dists[i] + noise_max)
 
             # the noise can never be large then the difference between the next unique distance and the current one
             curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
-            dists_cp[i + 1] = np.random.uniform(
-                low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise
-            )
+            dists_cp[i + 1] = np.random.uniform(low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise)
     return dists_cp
 
 
