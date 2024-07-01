@@ -19,9 +19,7 @@ def test_merge(model, documents, request):
 
     topics_to_merge = [1, 2]
     topic_model.merge_topics(documents, topics_to_merge)
-    mappings = topic_model.topic_mapper_.get_mappings(
-        list(topic_model.hdbscan_model.labels_)
-    )
+    mappings = topic_model.topic_mapper_.get_mappings(list(topic_model.hdbscan_model.labels_))
     mapped_labels = [mappings[label] for label in topic_model.hdbscan_model.labels_]
 
     assert nr_topics == len(set(topic_model.topics_)) + 1
@@ -33,9 +31,7 @@ def test_merge(model, documents, request):
 
     topics_to_merge = [1, 2]
     topic_model.merge_topics(documents, topics_to_merge)
-    mappings = topic_model.topic_mapper_.get_mappings(
-        list(topic_model.hdbscan_model.labels_)
-    )
+    mappings = topic_model.topic_mapper_.get_mappings(list(topic_model.hdbscan_model.labels_))
     mapped_labels = [mappings[label] for label in topic_model.hdbscan_model.labels_]
 
     assert nr_topics == len(set(topic_model.topics_)) + 2

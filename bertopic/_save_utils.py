@@ -135,9 +135,7 @@ def push_to_hf_hub(
         save_ctfidf: Whether to save c-TF-IDF information
     """
     if not _has_hf_hub:
-        raise ValueError(
-            "Make sure you have the huggingface hub installed via `pip install --upgrade huggingface_hub`"
-        )
+        raise ValueError("Make sure you have the huggingface hub installed via `pip install --upgrade huggingface_hub`")
 
     # Create repo if it doesn't exist yet and infer complete repo_id
     repo_url = create_repo(repo_id, token=token, private=private, exist_ok=True)
@@ -156,9 +154,7 @@ def push_to_hf_hub(
 
         # Add README if it does not exist
         try:
-            get_hf_file_metadata(
-                hf_hub_url(repo_id=repo_id, filename="README.md", revision=revision)
-            )
+            get_hf_file_metadata(hf_hub_url(repo_id=repo_id, filename="README.md", revision=revision))
         except:  # noqa: E722
             if model_card:
                 readme_text = generate_readme(model, repo_id)
@@ -241,13 +237,9 @@ def load_files_from_hf(path):
 
     # c-TF-IDF
     try:
-        ctfidf_config = load_cfg_from_json(
-            hf_hub_download(path, CTFIDF_CFG_NAME, revision=None)
-        )
+        ctfidf_config = load_cfg_from_json(hf_hub_download(path, CTFIDF_CFG_NAME, revision=None))
         try:
-            ctfidf_tensors = hf_hub_download(
-                path, CTFIDF_SAFE_WEIGHTS_NAME, revision=None
-            )
+            ctfidf_tensors = hf_hub_download(path, CTFIDF_SAFE_WEIGHTS_NAME, revision=None)
             ctfidf_tensors = load_safetensors(ctfidf_tensors)
         except:  # noqa: E722
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
@@ -268,9 +260,7 @@ def load_files_from_hf(path):
             topic_list = list(topics["topic_representations"].keys())
             images = {}
             for topic in topic_list:
-                image = Image.open(
-                    hf_hub_download(path, f"images/{topic}.jpg", revision=None)
-                )
+                image = Image.open(hf_hub_download(path, f"images/{topic}.jpg", revision=None))
                 images[int(topic)] = image
 
     return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
@@ -283,11 +273,7 @@ def generate_readme(model, repo_id: str):
 
     # Get Statistics
     model_name = repo_id.split("/")[-1]
-    params = {
-        param: value
-        for param, value in model.get_params().items()
-        if "model" not in param
-    }
+    params = {param: value for param, value in model.get_params().items() if "model" not in param}
     params = "\n".join([f"* {param}: {value}" for param, value in params.items()])
     topics = sorted(list(set(model.topics_)))
     nr_topics = str(len(set(model.topics_)))
@@ -298,23 +284,15 @@ def generate_readme(model, repo_id: str):
         nr_documents = ""
 
     # Topic information
-    topic_keywords = [
-        " - ".join(list(zip(*model.get_topic(topic)))[0][:5]) for topic in topics
-    ]
+    topic_keywords = [" - ".join(list(zip(*model.get_topic(topic)))[0][:5]) for topic in topics]
     topic_freq = [model.get_topic_freq(topic) for topic in topics]
-    topic_labels = (
-        model.custom_labels_
-        if model.custom_labels_
-        else [model.topic_labels_[topic] for topic in topics]
-    )
+    topic_labels = model.custom_labels_ if model.custom_labels_ else [model.topic_labels_[topic] for topic in topics]
     topics = [
         f"| {topic} | {topic_keywords[index]} | {topic_freq[topic]} | {topic_labels[index]} | \n"
         for index, topic in enumerate(topics)
     ]
     topics = topic_table_head + "".join(topics)
-    frameworks = "\n".join(
-        [f"* {param}: {value}" for param, value in get_package_versions().items()]
-    )
+    frameworks = "\n".join([f"* {param}: {value}" for param, value in get_package_versions().items()])
 
     # Fill Statistics into model card
     model_card = model_card.replace("{MODEL_NAME}", model_name)
@@ -330,9 +308,7 @@ def generate_readme(model, repo_id: str):
     if not has_visual_aspect:
         model_card = model_card.replace("{PIPELINE_TAG}", "text-classification")
     else:
-        model_card = model_card.replace(
-            "pipeline_tag: {PIPELINE_TAG}\n", ""
-        )  # TODO add proper tag for this instance
+        model_card = model_card.replace("pipeline_tag: {PIPELINE_TAG}\n", "")  # TODO add proper tag for this instance
 
     return model_card
 

@@ -21,13 +21,9 @@ from bertopic import BERTopic
     ],
 )
 def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
-    embeddings, _ = make_blobs(
-        n_samples=samples, centers=centers, n_features=features, random_state=42
-    )
+    embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
     documents = [str(i + 1) for i in range(embeddings.shape[0])]
-    old_df = pd.DataFrame(
-        {"Document": documents, "ID": range(len(documents)), "Topic": None}
-    )
+    old_df = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
 
     if cluster_model == "kmeans":
         cluster_model = KMeans(n_clusters=centers)
@@ -44,9 +40,7 @@ def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
-    pd.testing.assert_frame_equal(
-        old_df.drop("Topic", axis=1), new_df.drop("Topic", axis=1)
-    )
+    pd.testing.assert_frame_equal(old_df.drop("Topic", axis=1), new_df.drop("Topic", axis=1))
 
 
 @pytest.mark.parametrize("cluster_model", ["hdbscan", "kmeans"])
@@ -62,13 +56,9 @@ def test_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
     ],
 )
 def test_custom_hdbscan_cluster_embeddings(cluster_model, samples, features, centers):
-    embeddings, _ = make_blobs(
-        n_samples=samples, centers=centers, n_features=features, random_state=42
-    )
+    embeddings, _ = make_blobs(n_samples=samples, centers=centers, n_features=features, random_state=42)
     documents = [str(i + 1) for i in range(embeddings.shape[0])]
-    old_df = pd.DataFrame(
-        {"Document": documents, "ID": range(len(documents)), "Topic": None}
-    )
+    old_df = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
     if cluster_model == "kmeans":
         cluster_model = KMeans(n_clusters=centers)
     else:
@@ -84,6 +74,4 @@ def test_custom_hdbscan_cluster_embeddings(cluster_model, samples, features, cen
 
     assert len(new_df.Topic.unique()) == centers
     assert "Topic" in new_df.columns
-    pd.testing.assert_frame_equal(
-        old_df.drop("Topic", axis=1), new_df.drop("Topic", axis=1)
-    )
+    pd.testing.assert_frame_equal(old_df.drop("Topic", axis=1), new_df.drop("Topic", axis=1))

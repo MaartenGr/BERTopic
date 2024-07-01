@@ -143,28 +143,18 @@ class LlamaCPP(BaseRepresentation):
         )
 
         updated_topics = {}
-        for topic, docs in tqdm(
-            repr_docs_mappings.items(), disable=not topic_model.verbose
-        ):
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             # Prepare prompt
-            truncated_docs = [
-                truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
-                for doc in docs
-            ]
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
             topic_description = self.model(prompt, **self.pipeline_kwargs)["choices"]
-            topic_description = [
-                (description["text"].replace(prompt, ""), 1)
-                for description in topic_description
-            ]
+            topic_description = [(description["text"].replace(prompt, ""), 1) for description in topic_description]
 
             if len(topic_description) < 10:
-                topic_description += [
-                    ("", 0) for _ in range(10 - len(topic_description))
-                ]
+                topic_description += [("", 0) for _ in range(10 - len(topic_description))]
 
             updated_topics[topic] = topic_description
 

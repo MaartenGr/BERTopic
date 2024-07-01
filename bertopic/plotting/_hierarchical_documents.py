@@ -133,24 +133,18 @@ def visualize_hierarchical_documents(
     # Extract embeddings if not already done
     if sample is None:
         if embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(
-                df.doc.to_list(), method="document"
-            )
+            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
         else:
             embeddings_to_reduce = embeddings
     else:
         if embeddings is not None:
             embeddings_to_reduce = embeddings[indices]
         elif embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(
-                df.doc.to_list(), method="document"
-            )
+            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
 
     # Reduce input embeddings
     if reduced_embeddings is None:
-        umap_model = UMAP(
-            n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine"
-        ).fit(embeddings_to_reduce)
+        umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
         embeddings_2d = umap_model.embedding_
     elif sample is not None and reduced_embeddings is not None:
         embeddings_2d = reduced_embeddings[indices]
@@ -179,8 +173,7 @@ def visualize_hierarchical_documents(
         max_distances = [distances[i] for i in log_indices]
     elif level_scale == "lin" or level_scale == "linear":
         max_distances = [
-            distances[indices[-1]]
-            for indices in np.array_split(range(len(hierarchical_topics)), nr_levels)
+            distances[indices[-1]] for indices in np.array_split(range(len(hierarchical_topics)), nr_levels)
         ][::-1]
     else:
         raise ValueError("level_scale needs to be one of 'log' or 'linear'")
@@ -188,9 +181,7 @@ def visualize_hierarchical_documents(
     for index, max_distance in enumerate(max_distances):
         # Get topics below `max_distance`
         mapping = {topic: topic for topic in df.topic.unique()}
-        selection = hierarchical_topics.loc[
-            hierarchical_topics.Distance <= max_distance, :
-        ]
+        selection = hierarchical_topics.loc[hierarchical_topics.Distance <= max_distance, :]
         selection.Parent_ID = selection.Parent_ID.astype(int)
         selection = selection.sort_values("Parent_ID")
 
@@ -219,18 +210,12 @@ def visualize_hierarchical_documents(
             if topic_model.get_topic(topic):
                 if isinstance(custom_labels, str):
                     trace_name = f"{topic}_" + "_".join(
-                        list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][
-                            :3
-                        ]
+                        list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3]
                     )
                 elif topic_model.custom_labels_ is not None and custom_labels:
-                    trace_name = topic_model.custom_labels_[
-                        topic + topic_model._outliers
-                    ]
+                    trace_name = topic_model.custom_labels_[topic + topic_model._outliers]
                 else:
-                    trace_name = f"{topic}_" + "_".join(
-                        [word[:20] for word, _ in topic_model.get_topic(topic)][:3]
-                    )
+                    trace_name = f"{topic}_" + "_".join([word[:20] for word, _ in topic_model.get_topic(topic)][:3])
                 topic_names[topic] = {
                     "trace_name": trace_name[:40],
                     "plot_text": trace_name[:40],
@@ -239,9 +224,7 @@ def visualize_hierarchical_documents(
         else:
             trace_name = (
                 f"{topic}_"
-                + hierarchical_topics.loc[
-                    hierarchical_topics.Parent_ID == str(topic), "Parent_Name"
-                ].values[0]
+                + hierarchical_topics.loc[hierarchical_topics.Parent_ID == str(topic), "Parent_Name"].values[0]
             )
             plot_text = "_".join([name[:20] for name in trace_name.split("_")[:3]])
             topic_names[topic] = {
@@ -264,9 +247,7 @@ def visualize_hierarchical_documents(
                     mode="markers+text",
                     name="other",
                     hoverinfo="text",
-                    hovertext=df.loc[(df[f"level_{level+1}"] == -1), "doc"]
-                    if not hide_document_hover
-                    else None,
+                    hovertext=df.loc[(df[f"level_{level+1}"] == -1), "doc"] if not hide_document_hover else None,
                     showlegend=False,
                     marker=dict(color="#CFD8DC", size=5, opacity=0.5),
                 )
@@ -275,20 +256,14 @@ def visualize_hierarchical_documents(
         # Selected topics
         if topics:
             selection = df.loc[(df.topic.isin(topics)), :]
-            unique_topics = sorted(
-                [int(topic) for topic in selection[f"level_{level+1}"].unique()]
-            )
+            unique_topics = sorted([int(topic) for topic in selection[f"level_{level+1}"].unique()])
         else:
-            unique_topics = sorted(
-                [int(topic) for topic in df[f"level_{level+1}"].unique()]
-            )
+            unique_topics = sorted([int(topic) for topic in df[f"level_{level+1}"].unique()])
 
         for topic in unique_topics:
             if topic != -1:
                 if topics:
-                    selection = df.loc[
-                        (df[f"level_{level+1}"] == topic) & (df.topic.isin(topics)), :
-                    ]
+                    selection = df.loc[(df[f"level_{level+1}"] == topic) & (df.topic.isin(topics)), :]
                 else:
                     selection = df.loc[df[f"level_{level+1}"] == topic, :]
 
@@ -297,9 +272,7 @@ def visualize_hierarchical_documents(
                     selection["text"] = ""
                     selection.loc[len(selection) - 1, "x"] = selection.x.mean()
                     selection.loc[len(selection) - 1, "y"] = selection.y.mean()
-                    selection.loc[len(selection) - 1, "text"] = topic_names[int(topic)][
-                        "plot_text"
-                    ]
+                    selection.loc[len(selection) - 1, "text"] = topic_names[int(topic)]["plot_text"]
 
                 traces.append(
                     go.Scattergl(
@@ -373,12 +346,8 @@ def visualize_hierarchical_documents(
         y1=sum(y_range) / 2,
         line=dict(color="#9E9E9E", width=2),
     )
-    fig.add_annotation(
-        x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10
-    )
-    fig.add_annotation(
-        y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10
-    )
+    fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
+    fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
 
     # Stylize layout
     fig.update_layout(

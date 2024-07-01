@@ -205,13 +205,8 @@ class OpenAI(BaseRepresentation):
 
         # Generate using OpenAI's Language Model
         updated_topics = {}
-        for topic, docs in tqdm(
-            repr_docs_mappings.items(), disable=not topic_model.verbose
-        ):
-            truncated_docs = [
-                truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
-                for doc in docs
-            ]
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
             prompt = self._create_prompt(truncated_docs, topic, topics)
             self.prompts_.append(prompt)
 
@@ -237,11 +232,7 @@ class OpenAI(BaseRepresentation):
                 # Check whether content was actually generated
                 # Addresses #1570 for potential issues with OpenAI's content filter
                 if hasattr(response.choices[0].message, "content"):
-                    label = (
-                        response.choices[0]
-                        .message.content.strip()
-                        .replace("topic: ", "")
-                    )
+                    label = response.choices[0].message.content.strip().replace("topic: ", "")
                 else:
                     label = "No label returned"
             else:
@@ -253,9 +244,7 @@ class OpenAI(BaseRepresentation):
                         **self.generator_kwargs,
                     )
                 else:
-                    response = self.client.completions.create(
-                        model=self.model, prompt=prompt, **self.generator_kwargs
-                    )
+                    response = self.client.completions.create(model=self.model, prompt=prompt, **self.generator_kwargs)
                 label = response.choices[0].text.strip()
 
             updated_topics[topic] = [(label, 1)]

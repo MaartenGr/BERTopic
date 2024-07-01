@@ -73,29 +73,17 @@ def visualize_topics_per_class(
 
     # Prepare data
     if isinstance(custom_labels, str):
-        topic_names = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
-            for topic in topics
-        ]
-        topic_names = [
-            "_".join([label[0] for label in labels[:4]]) for labels in topic_names
-        ]
-        topic_names = [
-            label if len(label) < 30 else label[:27] + "..." for label in topic_names
-        ]
-        topic_names = {
-            key: topic_names[index]
-            for index, key in enumerate(topic_model.topic_labels_.keys())
-        }
+        topic_names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        topic_names = ["_".join([label[0] for label in labels[:4]]) for labels in topic_names]
+        topic_names = [label if len(label) < 30 else label[:27] + "..." for label in topic_names]
+        topic_names = {key: topic_names[index] for index, key in enumerate(topic_model.topic_labels_.keys())}
     elif topic_model.custom_labels_ is not None and custom_labels:
         topic_names = {
-            key: topic_model.custom_labels_[key + topic_model._outliers]
-            for key, _ in topic_model.topic_labels_.items()
+            key: topic_model.custom_labels_[key + topic_model._outliers] for key, _ in topic_model.topic_labels_.items()
         }
     else:
         topic_names = {
-            key: value[:40] + "..." if len(value) > 40 else value
-            for key, value in topic_model.topic_labels_.items()
+            key: value[:40] + "..." if len(value) > 40 else value for key, value in topic_model.topic_labels_.items()
         }
     topics_per_class["Name"] = topics_per_class.Topic.map(topic_names)
     data = topics_per_class.loc[topics_per_class.Topic.isin(selected_topics), :]

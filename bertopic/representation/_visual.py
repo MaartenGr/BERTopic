@@ -63,9 +63,7 @@ class VisualRepresentation(BaseRepresentation):
         if isinstance(image_to_text_model, Pipeline):
             self.image_to_text_model = image_to_text_model
         elif isinstance(image_to_text_model, str):
-            self.image_to_text_model = pipeline(
-                "image-to-text", model=image_to_text_model
-            )
+            self.image_to_text_model = pipeline("image-to-text", model=image_to_text_model)
         elif image_to_text_model is None:
             self.image_to_text_model = None
         else:
@@ -109,23 +107,17 @@ class VisualRepresentation(BaseRepresentation):
         for topic in tqdm(unique_topics):
             # Get and order represetnative images
             sliced_examplars = repr_docs_ids[topic + topic_model._outliers]
-            sliced_examplars = [
-                sliced_examplars[i : i + 3] for i in range(0, len(sliced_examplars), 3)
-            ]
+            sliced_examplars = [sliced_examplars[i : i + 3] for i in range(0, len(sliced_examplars), 3)]
             images_to_combine = [
                 [
-                    Image.open(images[index])
-                    if isinstance(images[index], str)
-                    else images[index]
+                    Image.open(images[index]) if isinstance(images[index], str) else images[index]
                     for index in sub_indices
                 ]
                 for sub_indices in sliced_examplars
             ]
 
             # Concatenate representative images
-            representative_image = get_concat_tile_resize(
-                images_to_combine, self.image_height, self.image_squares
-            )
+            representative_image = get_concat_tile_resize(images_to_combine, self.image_height, self.image_squares)
             representative_images[topic] = representative_image
 
             # Make sure to properly close images
@@ -136,9 +128,7 @@ class VisualRepresentation(BaseRepresentation):
 
         return representative_images
 
-    def _convert_image_to_text(
-        self, images: List[str], verbose: bool = False
-    ) -> List[str]:
+    def _convert_image_to_text(self, images: List[str], verbose: bool = False) -> List[str]:
         """Convert a list of images to captions.
 
         Arguments:
@@ -163,9 +153,7 @@ class VisualRepresentation(BaseRepresentation):
 
         return documents
 
-    def image_to_text(
-        self, documents: pd.DataFrame, embeddings: np.ndarray
-    ) -> pd.DataFrame:
+    def image_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
         """Convert images to text."""
         # Create image topic embeddings
         topics = documents.Topic.values.tolist()
@@ -193,10 +181,7 @@ class VisualRepresentation(BaseRepresentation):
         current_id = 0
         for topic, image_ids in tqdm(image_centroids.items()):
             selected_images = [
-                Image.open(images[index])
-                if isinstance(images[index], str)
-                else images[index]
-                for index in image_ids
+                Image.open(images[index]) if isinstance(images[index], str) else images[index] for index in image_ids
             ]
             text = self._convert_image_to_text(selected_images)
 
@@ -243,10 +228,7 @@ def get_concat_v_multi_resize(im_list):
     """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
     min_width = min(im.width for im in im_list)
     min_width = max(im.width for im in im_list)
-    im_list_resize = [
-        im.resize((min_width, int(im.height * min_width / im.width)), resample=0)
-        for im in im_list
-    ]
+    im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=0) for im in im_list]
     total_height = sum(im.height for im in im_list_resize)
     dst = Image.new("RGB", (min_width, total_height), (255, 255, 255))
     pos_y = 0
@@ -264,9 +246,7 @@ def get_concat_tile_resize(im_list_2d, image_height=600, image_squares=False):
     if image_squares:
         width = int(image_height / 3)
         height = int(image_height / 3)
-        images = [
-            [image.resize((width, height)) for image in images] for images in im_list_2d
-        ]
+        images = [[image.resize((width, height)) for image in images] for images in im_list_2d]
 
     # Resize images based on minimum size
     else:
@@ -280,9 +260,7 @@ def get_concat_tile_resize(im_list_2d, image_height=600, image_squares=False):
                         resample=0,
                     )
                 elif img.width > img.height:
-                    images[i][j] = img.resize(
-                        (min_width, int(img.height * min_width / img.width)), resample=0
-                    )
+                    images[i][j] = img.resize((min_width, int(img.height * min_width / img.width)), resample=0)
                 else:
                     images[i][j] = img.resize((min_width, min_width))
 

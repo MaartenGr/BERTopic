@@ -123,9 +123,9 @@ def visualize_hierarchy(
     indices = np.array([all_topics.index(topic) for topic in topics])
 
     # Select topic embeddings
-    embeddings = select_topic_representation(
-        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
-    )[0][indices]
+    embeddings = select_topic_representation(topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf)[0][
+        indices
+    ]
 
     # Annotations
     if hierarchical_topics is not None and len(topics) == len(freq_df.Topic.to_list()):
@@ -142,9 +142,7 @@ def visualize_hierarchy(
         annotations = None
 
     # wrap distance function to validate input and return a condensed distance matrix
-    distance_function_viz = lambda x: validate_distance_matrix(
-        distance_function(x), embeddings.shape[0]
-    )
+    distance_function_viz = lambda x: validate_distance_matrix(distance_function(x), embeddings.shape[0])
     # Create dendogram
     fig = ff.create_dendrogram(
         embeddings,
@@ -159,31 +157,20 @@ def visualize_hierarchy(
     axis = "yaxis" if orientation == "left" else "xaxis"
     if isinstance(custom_labels, str):
         new_labels = [
-            [[str(x), None]] + topic_model.topic_aspects_[custom_labels][x]
-            for x in fig.layout[axis]["ticktext"]
+            [[str(x), None]] + topic_model.topic_aspects_[custom_labels][x] for x in fig.layout[axis]["ticktext"]
         ]
-        new_labels = [
-            "_".join([label[0] for label in labels[:4]]) for labels in new_labels
-        ]
-        new_labels = [
-            label if len(label) < 30 else label[:27] + "..." for label in new_labels
-        ]
+        new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+        new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
     elif topic_model.custom_labels_ is not None and custom_labels:
         new_labels = [
-            topic_model.custom_labels_[topics[int(x)] + topic_model._outliers]
-            for x in fig.layout[axis]["ticktext"]
+            topic_model.custom_labels_[topics[int(x)] + topic_model._outliers] for x in fig.layout[axis]["ticktext"]
         ]
     else:
         new_labels = [
-            [[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)])
-            for x in fig.layout[axis]["ticktext"]
+            [[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)]) for x in fig.layout[axis]["ticktext"]
         ]
-        new_labels = [
-            "_".join([label[0] for label in labels[:4]]) for labels in new_labels
-        ]
-        new_labels = [
-            label if len(label) < 30 else label[:27] + "..." for label in new_labels
-        ]
+        new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+        new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 
     # Stylize layout
     fig.update_layout(
@@ -222,21 +209,9 @@ def visualize_hierarchy(
     if hierarchical_topics is not None:
         for index in [0, 3]:
             axis = "x" if orientation == "left" else "y"
-            xs = [
-                data["x"][index]
-                for data in fig.data
-                if (data["text"] and data[axis][index] > 0)
-            ]
-            ys = [
-                data["y"][index]
-                for data in fig.data
-                if (data["text"] and data[axis][index] > 0)
-            ]
-            hovertext = [
-                data["text"][index]
-                for data in fig.data
-                if (data["text"] and data[axis][index] > 0)
-            ]
+            xs = [data["x"][index] for data in fig.data if (data["text"] and data[axis][index] > 0)]
+            ys = [data["y"][index] for data in fig.data if (data["text"] and data[axis][index] > 0)]
+            hovertext = [data["text"][index] for data in fig.data if (data["text"] and data[axis][index] > 0)]
 
             fig.add_trace(
                 go.Scatter(
@@ -322,18 +297,12 @@ def _get_annotations(
         if len(fst_topic) == 1:
             if isinstance(custom_labels, str):
                 fst_name = f"{fst_topic[0]}_" + "_".join(
-                    list(zip(*topic_model.topic_aspects_[custom_labels][fst_topic[0]]))[
-                        0
-                    ][:3]
+                    list(zip(*topic_model.topic_aspects_[custom_labels][fst_topic[0]]))[0][:3]
                 )
             elif topic_model.custom_labels_ is not None and custom_labels:
-                fst_name = topic_model.custom_labels_[
-                    fst_topic[0] + topic_model._outliers
-                ]
+                fst_name = topic_model.custom_labels_[fst_topic[0] + topic_model._outliers]
             else:
-                fst_name = "_".join(
-                    [word for word, _ in topic_model.get_topic(fst_topic[0])][:5]
-                )
+                fst_name = "_".join([word for word, _ in topic_model.get_topic(fst_topic[0])][:5])
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(fst_topic):
@@ -342,18 +311,12 @@ def _get_annotations(
         if len(scnd_topic) == 1:
             if isinstance(custom_labels, str):
                 scnd_name = f"{scnd_topic[0]}_" + "_".join(
-                    list(
-                        zip(*topic_model.topic_aspects_[custom_labels][scnd_topic[0]])
-                    )[0][:3]
+                    list(zip(*topic_model.topic_aspects_[custom_labels][scnd_topic[0]]))[0][:3]
                 )
             elif topic_model.custom_labels_ is not None and custom_labels:
-                scnd_name = topic_model.custom_labels_[
-                    scnd_topic[0] + topic_model._outliers
-                ]
+                scnd_name = topic_model.custom_labels_[scnd_topic[0] + topic_model._outliers]
             else:
-                scnd_name = "_".join(
-                    [word for word, _ in topic_model.get_topic(scnd_topic[0])][:5]
-                )
+                scnd_name = "_".join([word for word, _ in topic_model.get_topic(scnd_topic[0])][:5])
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(scnd_topic):

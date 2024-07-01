@@ -19,9 +19,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 def test_extract_embeddings(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     single_embedding = topic_model._extract_embeddings("a document")
-    multiple_embeddings = topic_model._extract_embeddings(
-        ["something different", "another document"]
-    )
+    multiple_embeddings = topic_model._extract_embeddings(["something different", "another document"])
     sim_matrix = cosine_similarity(single_embedding, multiple_embeddings)[0]
 
     assert single_embedding.shape[0] == 1

@@ -59,9 +59,9 @@ def visualize_heatmap(
     <iframe src="../../getting_started/visualization/heatmap.html"
     style="width:1000px; height: 720px; border: 0px;""></iframe>
     """
-    embeddings = select_topic_representation(
-        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
-    )[0][topic_model._outliers :]
+    embeddings = select_topic_representation(topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf)[0][
+        topic_model._outliers :
+    ]
 
     # Select topics based on top_n and topics args
     freq_df = topic_model.get_topic_freq()
@@ -77,10 +77,7 @@ def visualize_heatmap(
     sorted_topics = topics
     if n_clusters:
         if n_clusters >= len(set(topics)):
-            raise ValueError(
-                "Make sure to set `n_clusters` lower than "
-                "the total number of unique topics."
-            )
+            raise ValueError("Make sure to set `n_clusters` lower than " "the total number of unique topics.")
 
         distance_matrix = cosine_similarity(embeddings[topics])
         Z = linkage(distance_matrix, "ward")
@@ -101,31 +98,16 @@ def visualize_heatmap(
     # Create labels
     if isinstance(custom_labels, str):
         new_labels = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
-            for topic in sorted_topics
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in sorted_topics
         ]
-        new_labels = [
-            "_".join([label[0] for label in labels[:4]]) for labels in new_labels
-        ]
-        new_labels = [
-            label if len(label) < 30 else label[:27] + "..." for label in new_labels
-        ]
+        new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+        new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
     elif topic_model.custom_labels_ is not None and custom_labels:
-        new_labels = [
-            topic_model.custom_labels_[topic + topic_model._outliers]
-            for topic in sorted_topics
-        ]
+        new_labels = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in sorted_topics]
     else:
-        new_labels = [
-            [[str(topic), None]] + topic_model.get_topic(topic)
-            for topic in sorted_topics
-        ]
-        new_labels = [
-            "_".join([label[0] for label in labels[:4]]) for labels in new_labels
-        ]
-        new_labels = [
-            label if len(label) < 30 else label[:27] + "..." for label in new_labels
-        ]
+        new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]
+        new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
+        new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 
     fig = px.imshow(
         distance_matrix,

@@ -58,9 +58,7 @@ class HFTransformerBackend(BaseEmbedder):
 
         embeddings = []
         for document, features in tqdm(
-            zip(
-                documents, self.embedding_model(dataset, truncation=True, padding=True)
-            ),
+            zip(documents, self.embedding_model(dataset, truncation=True, padding=True)),
             total=len(dataset),
             disable=not verbose,
         ):
@@ -79,12 +77,10 @@ class HFTransformerBackend(BaseEmbedder):
         https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2#usage-huggingface-transformers
         """
         token_embeddings = np.array(features)
-        attention_mask = self.embedding_model.tokenizer(
-            document, truncation=True, padding=True, return_tensors="np"
-        )["attention_mask"]
-        input_mask_expanded = np.broadcast_to(
-            np.expand_dims(attention_mask, -1), token_embeddings.shape
-        )
+        attention_mask = self.embedding_model.tokenizer(document, truncation=True, padding=True, return_tensors="np")[
+            "attention_mask"
+        ]
+        input_mask_expanded = np.broadcast_to(np.expand_dims(attention_mask, -1), token_embeddings.shape)
         sum_embeddings = np.sum(token_embeddings * input_mask_expanded, 1)
         sum_mask = np.clip(
             input_mask_expanded.sum(1),

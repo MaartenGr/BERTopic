@@ -67,9 +67,7 @@ class FlairBackend(BaseEmbedder):
         embeddings = []
         for document in tqdm(documents, disable=not verbose):
             try:
-                sentence = (
-                    Sentence(document) if document else Sentence("an empty document")
-                )
+                sentence = Sentence(document) if document else Sentence("an empty document")
                 self.embedding_model.embed(sentence)
             except RuntimeError:
                 sentence = Sentence("an empty document")

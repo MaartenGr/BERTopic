@@ -142,15 +142,10 @@ class TextGeneration(BaseRepresentation):
             repr_docs_mappings = {topic: None for topic in topics.keys()}
 
         updated_topics = {}
-        for topic, docs in tqdm(
-            repr_docs_mappings.items(), disable=not topic_model.verbose
-        ):
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             # Prepare prompt
             truncated_docs = (
-                [
-                    truncate_document(topic_model, self.doc_length, self.tokenizer, doc)
-                    for doc in docs
-                ]
+                [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
                 if docs is not None
                 else docs
             )
@@ -160,14 +155,11 @@ class TextGeneration(BaseRepresentation):
             # Extract result from generator and use that as label
             topic_description = self.model(prompt, **self.pipeline_kwargs)
             topic_description = [
-                (description["generated_text"].replace(prompt, ""), 1)
-                for description in topic_description
+                (description["generated_text"].replace(prompt, ""), 1) for description in topic_description
             ]
 
             if len(topic_description) < 10:
-                topic_description += [
-                    ("", 0) for _ in range(10 - len(topic_description))
-                ]
+                topic_description += [("", 0) for _ in range(10 - len(topic_description))]
 
             updated_topics[topic] = topic_description
 

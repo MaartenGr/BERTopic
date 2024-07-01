@@ -17,8 +17,6 @@ def test_documents(model, reduced_embeddings, documents, request):
     topics = set(topic_model.topics_)
     if -1 in topics:
         topics.remove(-1)
-    fig = topic_model.visualize_documents(
-        documents, embeddings=reduced_embeddings, hide_document_hover=True
-    )
+    fig = topic_model.visualize_documents(documents, embeddings=reduced_embeddings, hide_document_hover=True)
     fig_topics = [int(data["name"].split("_")[0]) for data in fig.to_dict()["data"][1:]]
     assert set(fig_topics) == topics

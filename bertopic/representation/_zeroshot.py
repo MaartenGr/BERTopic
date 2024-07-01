@@ -75,12 +75,8 @@ class ZeroShotClassification(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Classify topics
-        topic_descriptions = [
-            " ".join(list(zip(*topics[topic]))[0]) for topic in topics.keys()
-        ]
-        classifications = self.model(
-            topic_descriptions, self.candidate_topics, **self.pipeline_kwargs
-        )
+        topic_descriptions = [" ".join(list(zip(*topics[topic]))[0]) for topic in topics.keys()]
+        classifications = self.model(topic_descriptions, self.candidate_topics, **self.pipeline_kwargs)
 
         # Extract labels
         updated_topics = {}
@@ -90,25 +86,19 @@ class ZeroShotClassification(BaseRepresentation):
             # Multi-label assignment
             if self.pipeline_kwargs.get("multi_label"):
                 topic_description = []
-                for label, score in zip(
-                    classification["labels"], classification["scores"]
-                ):
+                for label, score in zip(classification["labels"], classification["scores"]):
                     if score > self.min_prob:
                         topic_description.append((label, score))
 
             # Single label assignment
             elif classification["scores"][0] > self.min_prob:
-                topic_description = [
-                    (classification["labels"][0], classification["scores"][0])
-                ]
+                topic_description = [(classification["labels"][0], classification["scores"][0])]
 
             # Make sure that 10 items are returned
             if len(topic_description) == 0:
                 topic_description = topics[topic]
             elif len(topic_description) < 10:
-                topic_description += [
-                    ("", 0) for _ in range(10 - len(topic_description))
-                ]
+                topic_description += [("", 0) for _ in range(10 - len(topic_description))]
             updated_topics[topic] = topic_description
 
         return updated_topics

@@ -65,22 +65,13 @@ def visualize_topics(
     topic_list = sorted(topics)
     frequencies = [topic_model.topic_sizes_[topic] for topic in topic_list]
     if isinstance(custom_labels, str):
-        words = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
-            for topic in topic_list
-        ]
+        words = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topic_list]
         words = ["_".join([label[0] for label in labels[:4]]) for labels in words]
         words = [label if len(label) < 30 else label[:27] + "..." for label in words]
     elif custom_labels and topic_model.custom_labels_ is not None:
-        words = [
-            topic_model.custom_labels_[topic + topic_model._outliers]
-            for topic in topic_list
-        ]
+        words = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in topic_list]
     else:
-        words = [
-            " | ".join([word[0] for word in topic_model.get_topic(topic)[:5]])
-            for topic in topic_list
-        ]
+        words = [" | ".join([word[0] for word in topic_model.get_topic(topic)[:5]]) for topic in topic_list]
 
     # Embed c-TF-IDF into 2D
     all_topics = sorted(list(topic_model.get_topics().keys()))
@@ -96,13 +87,9 @@ def visualize_topics(
 
     if c_tfidf_used:
         embeddings = MinMaxScaler().fit_transform(embeddings)
-        embeddings = UMAP(
-            n_neighbors=2, n_components=2, metric="hellinger", random_state=42
-        ).fit_transform(embeddings)
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric="hellinger", random_state=42).fit_transform(embeddings)
     else:
-        embeddings = UMAP(
-            n_neighbors=2, n_components=2, metric="cosine", random_state=42
-        ).fit_transform(embeddings)
+        embeddings = UMAP(n_neighbors=2, n_components=2, metric="cosine", random_state=42).fit_transform(embeddings)
 
     # Visualize with plotly
     df = pd.DataFrame(
@@ -117,18 +104,14 @@ def visualize_topics(
     return _plotly_topic_visualization(df, topic_list, title, width, height)
 
 
-def _plotly_topic_visualization(
-    df: pd.DataFrame, topic_list: List[str], title: str, width: int, height: int
-):
+def _plotly_topic_visualization(df: pd.DataFrame, topic_list: List[str], title: str, width: int, height: int):
     """Create plotly-based visualization of topics with a slider for topic selection."""
 
     def get_color(topic_selected):
         if topic_selected == -1:
             marker_color = ["#B0BEC5" for _ in topic_list]
         else:
-            marker_color = [
-                "red" if topic == topic_selected else "#B0BEC5" for topic in topic_list
-            ]
+            marker_color = ["red" if topic == topic_selected else "#B0BEC5" for topic in topic_list]
         return [{"marker.color": [marker_color]}]
 
     # Prepare figure range
@@ -152,9 +135,7 @@ def _plotly_topic_visualization(
         labels={"x": "", "y": ""},
         hover_data={"Topic": True, "Words": True, "Size": True, "x": False, "y": False},
     )
-    fig.update_traces(
-        marker=dict(color="#B0BEC5", line=dict(width=2, color="DarkSlateGrey"))
-    )
+    fig.update_traces(marker=dict(color="#B0BEC5", line=dict(width=2, color="DarkSlateGrey")))
 
     # Update hover order
     fig.update_traces(
@@ -168,10 +149,7 @@ def _plotly_topic_visualization(
     )
 
     # Create a slider for topic selection
-    steps = [
-        dict(label=f"Topic {topic}", method="update", args=get_color(topic))
-        for topic in topic_list
-    ]
+    steps = [dict(label=f"Topic {topic}", method="update", args=get_color(topic)) for topic in topic_list]
     sliders = [dict(active=0, pad={"t": 50}, steps=steps)]
 
     # Stylize layout
@@ -213,12 +191,8 @@ def _plotly_topic_visualization(
         y1=sum(y_range) / 2,
         line=dict(color="#9E9E9E", width=2),
     )
-    fig.add_annotation(
-        x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10
-    )
-    fig.add_annotation(
-        y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10
-    )
+    fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
+    fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
     fig.data = fig.data[::-1]
 
     return fig

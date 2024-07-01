@@ -48,9 +48,7 @@ class GensimBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        vector_shape = self.embedding_model.get_vector(
-            list(self.embedding_model.index_to_key)[0]
-        ).shape[0]
+        vector_shape = self.embedding_model.get_vector(list(self.embedding_model.index_to_key)[0]).shape[0]
         empty_vector = np.zeros(vector_shape)
 
         # Extract word embeddings and pool to document-level

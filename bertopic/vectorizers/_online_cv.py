@@ -121,15 +121,11 @@ class OnlineCountVectorizer(CountVectorizer):
             X = self.transform(raw_documents)
 
             # Add empty columns if new words are found
-            columns = csr_matrix(
-                (self.X_.shape[0], X.shape[1] - self.X_.shape[1]), dtype=int
-            )
+            columns = csr_matrix((self.X_.shape[0], X.shape[1] - self.X_.shape[1]), dtype=int)
             self.X_ = sparse.hstack([self.X_, columns])
 
             # Add empty rows if new topics are found
-            rows = csr_matrix(
-                (X.shape[0] - self.X_.shape[0], self.X_.shape[1]), dtype=int
-            )
+            rows = csr_matrix((X.shape[0] - self.X_.shape[0], self.X_.shape[1]), dtype=int)
             self.X_ = sparse.vstack([self.X_, rows])
 
             # Decay of BoW matrix
