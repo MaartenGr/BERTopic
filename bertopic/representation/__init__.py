@@ -1,6 +1,7 @@
 from bertopic._utils import NotInstalled
 from bertopic.representation._cohere import Cohere
 from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._bm42 import BM42Inspired
 from bertopic.representation._keybert import KeyBERTInspired
 from bertopic.representation._mmr import MaximalMarginalRelevance
 
@@ -55,6 +56,7 @@ except ModuleNotFoundError:
 
 __all__ = [
     "BaseRepresentation",
+    "BM42Inspired",
     "TextGeneration",
     "ZeroShotClassification",
     "KeyBERTInspired",

@@ -47,6 +47,40 @@ topic_model = BERTopic(representation_model=representation_model)
 </div>
 <br>
 
+
+## **BM42Inspired**
+
+The hybrid nature of BERTopic (Bag-of-Words and semantic representations) can be generalized even to the topic representations it creates using a modified version of [BM42](https://qdrant.tech/articles/bm42/). It works as follows:
+
+First, we extract the top n representative documents per topic. To extract the representative documents, we randomly sample a number of candidate documents per cluster which is controlled by the `nr_samples` parameter.
+
+Then, the top n representative documents are extracted by calculating the c-TF-IDF representation for the candidate documents.
+
+For all representative documents per topic, their attention matrix is calculated and all weights are summed. The weights are then multiplied by the **IDF** values of BERTopic's **c-TF-IDF** algorithm to get the final BM42 representation. These IDF values are either extracted from creating a new c-TF-IDF on the representativate documents (`recalculate_idf=True`) or by taking the IDF values of the c-TF-IDF model that was trained on the entire corpus (`recalculate_idf=False`).
+
+Thus, the algorithm follows some principles of [BM42](https://qdrant.tech/articles/bm42/) but does some optimization in
+order to speed up inference and it uses the **IDF** values of **c-TF-IDF**. Usage is straightforward:
+
+```python
+from bertopic.representation import BM42Inspired
+from bertopic import BERTopic
+
+# Create your representation model
+representation_model = BM42Inspired(
+    "sentence-transformers/all-MiniLM-L6-v2",
+    recalculate_idf=True
+)
+
+# Use the representation model in BERTopic on top of the default pipeline
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+!!! Tip
+    You will have to define an (new) embedding model as shown above in order to use this representation model.
+    You can use the same embedding model as you used when generating the embeddings but note that 
+    you can only pass a string pointing to that model.
+    
+
 ## **PartOfSpeech**
 Our candidate topics, as extracted with c-TF-IDF, do not take into account a keyword's part of speech as extracting noun-phrases from 
 all documents can be computationally quite expensive. Instead, we can leverage c-TF-IDF to perform part of speech on a subset of 

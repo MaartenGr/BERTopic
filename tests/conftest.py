@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.decomposition import PCA
 from bertopic.vectorizers import OnlineCountVectorizer
-from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
+from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance, BM42Inspired
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
 
@@ -99,6 +99,7 @@ def representation_topic_model(documents, document_embeddings, embedding_model):
     )
     representation_model = {
         "Main": KeyBERTInspired(),
+        "BM42": BM42Inspired("all-MiniLM-L6-v2"),
         "MMR": [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance()],
     }
     model = BERTopic(
