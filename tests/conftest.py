@@ -99,7 +99,7 @@ def representation_topic_model(documents, document_embeddings, embedding_model):
     )
     representation_model = {
         "Main": KeyBERTInspired(),
-        "BM42": BM42Inspired("all-MiniLM-L6-v2"),
+        "BM42": BM42Inspired("sentence-transformers/all-MiniLM-L6-v2"),
         "MMR": [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance()],
     }
     model = BERTopic(
