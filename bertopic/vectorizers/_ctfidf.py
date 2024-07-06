@@ -85,6 +85,8 @@ class ClassTfidfTransformer(TfidfTransformer):
             if multiplier is not None:
                 idf = idf * multiplier
 
+            self.idf_ = idf
+
             self._idf_diag = sp.diags(
                 idf,
                 offsets=0,
