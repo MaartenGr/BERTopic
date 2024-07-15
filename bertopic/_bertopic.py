@@ -437,7 +437,9 @@ class BERTopic:
             logger.info("Embedding - Completed \u2713")
         else:
             if self.embedding_model is not None:
-                self.embedding_model = select_backend(self.embedding_model, language=self.language)
+                self.embedding_model = select_backend(
+                    self.embedding_model, language=self.language, verbose=self.verbose
+                )
 
         # Guided Topic Modeling
         if self.seed_topic_list is not None and self.embedding_model is not None:
