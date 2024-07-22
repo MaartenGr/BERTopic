@@ -2650,13 +2650,15 @@
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_keybert.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">KeyBERTInspired</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                 <span class="n">nr_repr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-                 <span class="n">nr_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
-                 <span class="n">nr_candidate_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-                 <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Use a KeyBERT-like model to fine-tune the topic representations</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">nr_repr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">nr_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+        <span class="n">nr_candidate_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Use a KeyBERT-like model to fine-tune the topic representations.</span>
 
 <span class="sd">        The algorithm follows KeyBERT but does some optimization in</span>
 <span class="sd">        order to speed up inference.</span>
@@ -2703,13 +2705,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nr_candidate_words</span> <span class="o">=</span> <span class="n">nr_candidate_words</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -2721,7 +2724,9 @@
 <span class="sd">            updated_topics: Updated topic representations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># We extract the top n representative documents per class</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">representative_docs</span><span class="p">,</span> <span class="n">repr_doc_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_repr_docs</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">representative_docs</span><span class="p">,</span> <span class="n">repr_doc_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
+            <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_repr_docs</span>
+        <span class="p">)</span>
 
         <span class="c1"># We extract the top n words per class</span>
         <span class="n">topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_candidate_words</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
@@ -2735,12 +2740,13 @@
 
         <span class="k">return</span> <span class="n">updated_topics</span>
 
-    <span class="k">def</span> <span class="nf">_extract_candidate_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                 <span class="n">topic_model</span><span class="p">,</span>
-                                 <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                                 <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; For each topic, extract candidate words based on the c-TF-IDF</span>
+    <span class="k">def</span> <span class="nf">_extract_candidate_words</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For each topic, extract candidate words based on the c-TF-IDF</span>
 <span class="sd">        representation.</span>
 
 <span class="sd">        Arguments:</span>
@@ -2767,23 +2773,25 @@
         <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">take_along_axis</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">sorted_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Get top 30 words per topic based on c-TF-IDF score</span>
-        <span class="n">topics</span> <span class="o">=</span> <span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="p">[(</span><span class="n">words</span><span class="p">[</span><span class="n">word_index</span><span class="p">],</span> <span class="n">score</span><span class="p">)</span>
-                          <span class="k">if</span> <span class="n">word_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                          <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">)</span>
-                          <span class="k">for</span> <span class="n">word_index</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">scores</span><span class="p">[</span><span class="n">index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                          <span class="p">]</span>
-                  <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)}</span>
-        <span class="n">topics</span> <span class="o">=</span> <span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_candidate_words</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">topics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">label</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="n">word_index</span><span class="p">],</span> <span class="n">score</span><span class="p">)</span> <span class="k">if</span> <span class="n">word_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">word_index</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">scores</span><span class="p">[</span><span class="n">index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">topics</span> <span class="o">=</span> <span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_candidate_words</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="k">return</span> <span class="n">topics</span>
 
-    <span class="k">def</span> <span class="nf">_extract_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                            <span class="n">topic_model</span><span class="p">,</span>
-                            <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
-                            <span class="n">representative_docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                            <span class="n">repr_doc_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
-                            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract the representative document embeddings and create topic embeddings.</span>
+    <span class="k">def</span> <span class="nf">_extract_embeddings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+        <span class="n">representative_docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">repr_doc_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract the representative document embeddings and create topic embeddings.</span>
 <span class="sd">        Then extract word embeddings and calculate the cosine similarity between topic</span>
 <span class="sd">        embeddings and the word embeddings. Topic embeddings are the average of</span>
 <span class="sd">        representative document embeddings.</span>
@@ -2801,7 +2809,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate representative docs embeddings and create topic embeddings</span>
         <span class="n">repr_embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">representative_docs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;document&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">topic_embeddings</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">repr_embeddings</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">repr_doc_indices</span><span class="p">]</span>
+        <span class="n">topic_embeddings</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">repr_embeddings</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">repr_doc_indices</span><span class="p">]</span>
 
         <span class="c1"># Calculate word embeddings and extract best matching with updated topic_embeddings</span>
         <span class="n">vocab</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">word</span> <span class="k">for</span> <span class="n">words</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">]))</span>
@@ -2810,12 +2818,13 @@
 
         <span class="k">return</span> <span class="n">sim</span><span class="p">,</span> <span class="n">vocab</span>
 
-    <span class="k">def</span> <span class="nf">_extract_top_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                           <span class="n">vocab</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                           <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
-                           <span class="n">sim</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
-                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract the top n words per topic based on the</span>
+    <span class="k">def</span> <span class="nf">_extract_top_words</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vocab</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+        <span class="n">sim</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract the top n words per topic based on the</span>
 <span class="sd">        similarity matrix between topics and words.</span>
 
 <span class="sd">        Arguments:</span>
@@ -2832,8 +2841,10 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">topic</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">vocab</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]]</span>
             <span class="n">values</span> <span class="o">=</span> <span class="n">sim</span><span class="p">[:,</span> <span class="n">indices</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">word_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:]]</span>
-            <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vocab</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:],</span> <span class="n">word_indices</span><span class="p">)][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">word_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="p">:]]</span>
+            <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">values</span><span class="p">)[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="p">:],</span> <span class="n">word_indices</span><span class="p">)</span>
+            <span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">updated_topics</span>
 </code></pre></div>
@@ -2866,7 +2877,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Use a KeyBERT-like model to fine-tune the topic representations</p>
+      <p>Use a KeyBERT-like model to fine-tune the topic representations.</p>
 <p>The algorithm follows KeyBERT but does some optimization in
 order to speed up inference.</p>
 <p>The steps are as follows. First, we extract the top n representative
@@ -2939,13 +2950,15 @@ calculating the cosine similarity between word and topic embeddings.</p>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_keybert.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-             <span class="n">nr_repr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-             <span class="n">nr_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
-             <span class="n">nr_candidate_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
-             <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Use a KeyBERT-like model to fine-tune the topic representations</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">nr_repr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">nr_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="n">nr_candidate_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use a KeyBERT-like model to fine-tune the topic representations.</span>
 
 <span class="sd">    The algorithm follows KeyBERT but does some optimization in</span>
 <span class="sd">    order to speed up inference.</span>
@@ -3011,7 +3024,7 @@ calculating the cosine similarity between word and topic embeddings.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Extract topics</p>
+      <p>Extract topics.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -3067,13 +3080,14 @@ calculating the cosine similarity between word and topic embeddings.</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_keybert.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>
@@ -3085,7 +3099,9 @@ calculating the cosine similarity between word and topic embeddings.</p>
 <span class="sd">        updated_topics: Updated topic representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># We extract the top n representative documents per class</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">representative_docs</span><span class="p">,</span> <span class="n">repr_doc_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_repr_docs</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">representative_docs</span><span class="p">,</span> <span class="n">repr_doc_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
+        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_repr_docs</span>
+    <span class="p">)</span>
 
     <span class="c1"># We extract the top n words per class</span>
     <span class="n">topics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_candidate_words</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>

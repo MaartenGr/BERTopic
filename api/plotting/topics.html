@@ -2616,7 +2616,7 @@
 <a id="bertopic.plotting._topics.visualize_topics"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize topics, their sizes, and their corresponding words</p>
+      <p>Visualize topics, their sizes, and their corresponding words.</p>
 <p>This visualization is highly inspired by LDAvis, a great visualization
 technique typically reserved for LDA.</p>
 
@@ -2650,9 +2650,15 @@ technique typically reserved for LDA.</p>
         <td><code>None</code></td>
       </tr>
       <tr>
+        <td><code>use_ctfidf</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".</p></td>
         <td><code>False</code></td>
@@ -2691,14 +2697,17 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_topics.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                     <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Intertopic Distance Map&lt;/b&gt;&quot;</span><span class="p">,</span>
-                     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
-                     <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize topics, their sizes, and their corresponding words</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_ctfidf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Intertopic Distance Map&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">650</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize topics, their sizes, and their corresponding words.</span>
 
 <span class="sd">    This visualization is highly inspired by LDAvis, a great visualization</span>
 <span class="sd">    technique typically reserved for LDA.</span>
@@ -2707,7 +2716,8 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
 <span class="sd">        topics: A selection of topics to visualize</span>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics</span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        use_ctfidf: Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.</span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
 <span class="sd">        title: Title of the plot.</span>
@@ -2715,7 +2725,6 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 <span class="sd">        height: The height of the figure.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the topics simply run:</span>
 
 <span class="sd">    ```python</span>
@@ -2757,17 +2766,30 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
     <span class="n">all_topics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">get_topics</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">all_topics</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="o">.</span><span class="n">toarray</span><span class="p">()[</span><span class="n">indices</span><span class="p">]</span>
+    <span class="n">embeddings</span><span class="p">,</span> <span class="n">c_tfidf_used</span> <span class="o">=</span> <span class="n">select_topic_representation</span><span class="p">(</span>
+        <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">,</span>
+        <span class="n">use_ctfidf</span><span class="o">=</span><span class="n">use_ctfidf</span><span class="p">,</span>
+        <span class="n">output_ndarray</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">c_tfidf_used</span><span class="p">:</span>
         <span class="n">embeddings</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;hellinger&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;hellinger&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
 
     <span class="c1"># Visualize with plotly</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
-                       <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">,</span> <span class="s2">&quot;Words&quot;</span><span class="p">:</span> <span class="n">words</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">})</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">embeddings</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;Topic&quot;</span><span class="p">:</span> <span class="n">topic_list</span><span class="p">,</span>
+            <span class="s2">&quot;Words&quot;</span><span class="p">:</span> <span class="n">words</span><span class="p">,</span>
+            <span class="s2">&quot;Size&quot;</span><span class="p">:</span> <span class="n">frequencies</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">_plotly_topic_visualization</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">topic_list</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
 </code></pre></div>
         </details>

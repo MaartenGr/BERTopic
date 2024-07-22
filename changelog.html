@@ -2539,6 +2539,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-0163" class="md-nav__link">
+    Version 0.16.3
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-0162" class="md-nav__link">
     Version 0.16.2
   </a>
@@ -2799,6 +2806,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-0163" class="md-nav__link">
+    Version 0.16.3
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-0162" class="md-nav__link">
     Version 0.16.2
   </a>
@@ -3041,6 +3055,36 @@
 
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="version-0163"><strong>Version 0.16.3</strong><a class="headerlink" href="#version-0163" title="Permanent link">&para;</a></h2>
+<p><em>Release date: 22 July, 2024</em></p>
+<h3><b>Highlights:</a></b></h3>
+
+<ul>
+<li>Simplify zero-shot topic modeling by <a href="https://github.com/ianrandman">@ianrandman</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2060">#2060</a></li>
+<li>Option to choose between c-TF-IDF and Topic Embeddings in many functions by <a href="https://github.com/azikoss">@azikoss</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1894">#1894</a><ul>
+<li>Use the <code>use_ctfidf</code> parameter in the following function to choose between c-TF-IDF and topic embeddings:<ul>
+<li><code>hierarchical_topics</code>, <code>reduce_topics</code>, <code>visualize_hierarchy</code>, <code>visualize_heatmap</code>, <code>visualize_topics</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Linting with Ruff by <a href="https://github.com/afuetterer">@afuetterer</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2033">#2033</a></li>
+<li>Switch from setup.py to pyproject.toml by <a href="https://github.com/afuetterer">@afuetterer</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1978">#1978</a></li>
+<li>In multi-aspect context, allow Main model to be chained by <a href="https://github.com/ddicato">@ddicato</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2002">#2002</a></li>
+</ul>
+<h3><b>Fixes:</a></b></h3>
+
+<ul>
+<li>Added templates for <a href="https://github.com/MaartenGr/BERTopic/tree/master/.github/ISSUE_TEMPLATE">issues</a> and <a href="https://github.com/MaartenGr/BERTopic/blob/master/.github/PULL_REQUEST_TEMPLATE.md">pull requests</a></li>
+<li>Update River documentation example by <a href="https://github.com/Proteusiq">@Proteusiq</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2004">#2004</a></li>
+<li>Fix PartOfSpeech reproducibility by <a href="https://github.com/Greenpp">@Greenpp</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1996">#1996</a></li>
+<li>Fix PartOfSpeech ignoring first word by <a href="https://github.com/Greenpp">@Greenpp</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2024">#2024</a></li>
+<li>Make sklearn embedding backend auto-select more cautious by <a href="https://github.com/freddyheppell">@freddyheppell</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1984">#1984</a></li>
+<li>Fix typos by <a href="https://github.com/afuetterer">@afuetterer</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1974">#1974</a></li>
+<li>Fix hierarchical_topics(...) when the distances between three clusters are the same by <a href="https://github.com/azikoss">@azikoss</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1929">#1929</a></li>
+<li>Fixes to chain strategy example in outlier_reduction.md by <a href="https://github.com/reuning">@reuning</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2065">#2065</a></li>
+<li>Remove obsolete flake8 config and update line length by <a href="https://github.com/afuetterer">@afuetterer</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/2066">#22066</a></li>
+</ul>
 <h2 id="version-0162"><strong>Version 0.16.2</strong><a class="headerlink" href="#version-0162" title="Permanent link">&para;</a></h2>
 <p><em>Release date: 12 May, 2024</em></p>
 <h3><b>Fixes:</a></b></h3>
@@ -3163,7 +3207,7 @@
 <li>Fixed typos in best practices documentation by <a href="https://github.com/poomkusa">@poomkusa</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1557">#1557</a></li>
 <li>Correct TopicMapper doc example by <a href="https://github.com/chrisji">@chrisji</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1637">#1637</a></li>
 <li>Fix typing in hierarchical_topics by <a href="https://github.com/dschwalm">@dschwalm</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1364">#1364</a></li>
-<li>Fixed typing issue with treshold parameter in reduce_outliers by <a href="https://github.com/dschwalm">@dschwalm</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1380">#1380</a></li>
+<li>Fixed typing issue with threshold parameter in reduce_outliers by <a href="https://github.com/dschwalm">@dschwalm</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1380">#1380</a></li>
 <li>Fix several typos by <a href="https://github.com/mertyyanik">@mertyyanik</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1307">#1307</a>
 (#1307)</li>
 <li>Fix inconsistent naming by <a href="https://github.com/rolanderdei">@rolanderdei</a> in <a href="https://github.com/MaartenGr/BERTopic/pull/1073">#1073</a></li>
@@ -3363,7 +3407,7 @@ However, we are not sure whether other topics exist and want to explore those.</
   </p>
 <figcaption></figcaption>
 </figure>
-<p>In this example, we are going to use images from <code>flickr</code> that each have a caption accociated to it: </p>
+<p>In this example, we are going to use images from <code>flickr</code> that each have a caption associated to it: </p>
 <div class="highlight"><pre><span></span><code><span class="c1"># NOTE: This requires the `datasets` package which you can </span>
 <span class="c1"># install with `pip install datasets`</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>

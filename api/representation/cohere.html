@@ -2675,8 +2675,8 @@ https://docs.cohere.ai/docs</p>
       <tr>
         <td><code>delay_in_seconds</code></td>
         <td><code>float</code></td>
-        <td><p>The delay in seconds between consecutive prompts 
-                    in order to prevent RateLimitErrors. </p></td>
+        <td><p>The delay in seconds between consecutive prompts
+                    in order to prevent RateLimitErrors.</p></td>
         <td><code>None</code></td>
       </tr>
       <tr>
@@ -2690,7 +2690,7 @@ https://docs.cohere.ai/docs</p>
         <td><code>diversity</code></td>
         <td><code>float</code></td>
         <td><p>The diversity of documents to pass to OpenAI.
-       Accepts values between 0 and 1. A higher 
+       Accepts values between 0 and 1. A higher
        values results in passing more diverse documents
        whereas lower values passes more similar documents.</p></td>
         <td><code>None</code></td>
@@ -2706,15 +2706,15 @@ https://docs.cohere.ai/docs</p>
         <td><code>tokenizer</code></td>
         <td><code>Union[str, Callable]</code></td>
         <td><p>The tokenizer used to calculate to split the document into segments
-       used to count the length of a document. 
-           * If tokenizer is 'char', then the document is split up 
+       used to count the length of a document.
+           * If tokenizer is 'char', then the document is split up
              into characters which are counted to adhere to <code>doc_length</code>
            * If tokenizer is 'whitespace', the document is split up
              into words separated by whitespaces. These words are counted
              and truncated depending on <code>doc_length</code>
            * If tokenizer is 'vectorizer', then the internal CountVectorizer
              is used to tokenize the document. These tokens are counted
-             and trunctated depending on <code>doc_length</code>
+             and truncated depending on <code>doc_length</code>
            * If tokenizer is a callable, then that callable is used to tokenize
              the document. These tokens are counted and truncated depending
              on <code>doc_length</code></p></td>
@@ -2744,7 +2744,7 @@ https://docs.cohere.ai/docs</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_cohere.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Cohere</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Use the Cohere API to generate topic labels based on their</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use the Cohere API to generate topic labels based on their</span>
 <span class="sd">    generative model.</span>
 
 <span class="sd">    Find more about their models here:</span>
@@ -2758,26 +2758,26 @@ https://docs.cohere.ai/docs</p>
 <span class="sd">                NOTE: Use `&quot;[KEYWORDS]&quot;` and `&quot;[DOCUMENTS]&quot;` in the prompt</span>
 <span class="sd">                to decide where the keywords and documents need to be</span>
 <span class="sd">                inserted.</span>
-<span class="sd">        delay_in_seconds: The delay in seconds between consecutive prompts </span>
-<span class="sd">                                in order to prevent RateLimitErrors. </span>
+<span class="sd">        delay_in_seconds: The delay in seconds between consecutive prompts</span>
+<span class="sd">                                in order to prevent RateLimitErrors.</span>
 <span class="sd">        nr_docs: The number of documents to pass to OpenAI if a prompt</span>
 <span class="sd">                 with the `[&quot;DOCUMENTS&quot;]` tag is used.</span>
 <span class="sd">        diversity: The diversity of documents to pass to OpenAI.</span>
-<span class="sd">                   Accepts values between 0 and 1. A higher </span>
+<span class="sd">                   Accepts values between 0 and 1. A higher</span>
 <span class="sd">                   values results in passing more diverse documents</span>
 <span class="sd">                   whereas lower values passes more similar documents.</span>
 <span class="sd">        doc_length: The maximum length of each document. If a document is longer,</span>
 <span class="sd">                    it will be truncated. If None, the entire document is passed.</span>
 <span class="sd">        tokenizer: The tokenizer used to calculate to split the document into segments</span>
-<span class="sd">                   used to count the length of a document. </span>
-<span class="sd">                       * If tokenizer is &#39;char&#39;, then the document is split up </span>
+<span class="sd">                   used to count the length of a document.</span>
+<span class="sd">                       * If tokenizer is &#39;char&#39;, then the document is split up</span>
 <span class="sd">                         into characters which are counted to adhere to `doc_length`</span>
 <span class="sd">                       * If tokenizer is &#39;whitespace&#39;, the document is split up</span>
 <span class="sd">                         into words separated by whitespaces. These words are counted</span>
 <span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is &#39;vectorizer&#39;, then the internal CountVectorizer</span>
 <span class="sd">                         is used to tokenize the document. These tokens are counted</span>
-<span class="sd">                         and trunctated depending on `doc_length`</span>
+<span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is a callable, then that callable is used to tokenize</span>
 <span class="sd">                         the document. These tokens are counted and truncated depending</span>
 <span class="sd">                         on `doc_length`</span>
@@ -2810,16 +2810,18 @@ https://docs.cohere.ai/docs</p>
 <span class="sd">    representation_model = Cohere(co, prompt=prompt)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">client</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xlarge&quot;</span><span class="p">,</span>
-                 <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-                 <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                 <span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xlarge&quot;</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span> <span class="k">if</span> <span class="n">prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DEFAULT_PROMPT</span>
@@ -2831,13 +2833,14 @@ https://docs.cohere.ai/docs</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompts_</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: Not used</span>
@@ -2849,7 +2852,9 @@ https://docs.cohere.ai/docs</p>
 <span class="sd">            updated_topics: Updated topic representations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract the top 4 representative documents per topic</span>
-        <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">)</span>
+        <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
+            <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+        <span class="p">)</span>
 
         <span class="c1"># Generate using Cohere&#39;s Language Model</span>
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2862,11 +2867,13 @@ https://docs.cohere.ai/docs</p>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">:</span>
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">)</span>
 
-            <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
-                                           <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-                                           <span class="n">max_tokens</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                                           <span class="n">num_generations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                           <span class="n">stop_sequences</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">])</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+                <span class="n">max_tokens</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">num_generations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">stop_sequences</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
             <span class="n">label</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">generations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)]</span>
 
@@ -2926,7 +2933,7 @@ https://docs.cohere.ai/docs</p>
 
     <div class="doc doc-contents ">
 
-      <p>Extract topics</p>
+      <p>Extract topics.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2982,13 +2989,14 @@ https://docs.cohere.ai/docs</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_cohere.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: Not used</span>
@@ -3000,7 +3008,9 @@ https://docs.cohere.ai/docs</p>
 <span class="sd">        updated_topics: Updated topic representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Extract the top 4 representative documents per topic</span>
-    <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">)</span>
+    <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
+        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+    <span class="p">)</span>
 
     <span class="c1"># Generate using Cohere&#39;s Language Model</span>
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3013,11 +3023,13 @@ https://docs.cohere.ai/docs</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">:</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay_in_seconds</span><span class="p">)</span>
 
-        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
-                                       <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-                                       <span class="n">max_tokens</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-                                       <span class="n">num_generations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                       <span class="n">stop_sequences</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">])</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">max_tokens</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+            <span class="n">num_generations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">stop_sequences</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
         <span class="n">label</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">generations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)]</span>
 

@@ -2632,7 +2632,7 @@
 <a id="bertopic.representation._pos.PartOfSpeech"></a>
     <div class="doc doc-contents first">
 
-      <p>Extract Topic Keywords based on their Part-of-Speech</p>
+      <p>Extract Topic Keywords based on their Part-of-Speech.</p>
 <p>DEFAULT_PATTERNS = [
             [{'POS': 'ADJ'}, {'POS': 'NOUN'}],
             [{'POS': 'NOUN'}],
@@ -2701,7 +2701,7 @@ their respective c-TF-IDF values.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_pos.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">PartOfSpeech</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract Topic Keywords based on their Part-of-Speech</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract Topic Keywords based on their Part-of-Speech.</span>
 
 <span class="sd">    DEFAULT_PATTERNS = [</span>
 <span class="sd">                [{&#39;POS&#39;: &#39;ADJ&#39;}, {&#39;POS&#39;: &#39;NOUN&#39;}],</span>
@@ -2750,36 +2750,43 @@ their respective c-TF-IDF values.</p>
 <span class="sd">    representation_model = PartOfSpeech(&quot;en_core_web_sm&quot;, pos_patterns=pos_patterns)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Language</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;en_core_web_sm&quot;</span><span class="p">,</span>
-                 <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                 <span class="n">pos_patterns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Language</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;en_core_web_sm&quot;</span><span class="p">,</span>
+        <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">pos_patterns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Language</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure that the Spacy model that you&quot;</span>
-                             <span class="s2">&quot;pass is either a string referring to a&quot;</span>
-                             <span class="s2">&quot;Spacy model or a Spacy nlp object.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Make sure that the Spacy model that you&quot;</span>
+                <span class="s2">&quot;pass is either a string referring to a&quot;</span>
+                <span class="s2">&quot;Spacy model or a Spacy nlp object.&quot;</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="o">=</span> <span class="n">top_n_words</span>
 
         <span class="k">if</span> <span class="n">pos_patterns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pos_patterns</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">[{</span><span class="s1">&#39;POS&#39;</span><span class="p">:</span> <span class="s1">&#39;ADJ&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;POS&#39;</span><span class="p">:</span> <span class="s1">&#39;NOUN&#39;</span><span class="p">}],</span>
-                <span class="p">[{</span><span class="s1">&#39;POS&#39;</span><span class="p">:</span> <span class="s1">&#39;NOUN&#39;</span><span class="p">}],</span> <span class="p">[{</span><span class="s1">&#39;POS&#39;</span><span class="p">:</span> <span class="s1">&#39;ADJ&#39;</span><span class="p">}]</span>
+                <span class="p">[{</span><span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="s2">&quot;ADJ&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="s2">&quot;NOUN&quot;</span><span class="p">}],</span>
+                <span class="p">[{</span><span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="s2">&quot;NOUN&quot;</span><span class="p">}],</span>
+                <span class="p">[{</span><span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="s2">&quot;ADJ&quot;</span><span class="p">}],</span>
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pos_patterns</span> <span class="o">=</span> <span class="n">pos_patterns</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -2828,14 +2835,16 @@ their respective c-TF-IDF values.</p>
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
 
         <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">candidate_keywords</span> <span class="ow">in</span> <span class="n">candidate_topics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">word_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">words_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">candidate_keywords</span> <span class="k">if</span> <span class="n">words_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keyword</span><span class="p">)])</span>
+            <span class="n">word_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">words_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">candidate_keywords</span> <span class="k">if</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">words_lookup</span><span class="p">]</span>
+            <span class="p">)</span>
             <span class="n">vals</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">[:,</span> <span class="n">word_indices</span><span class="p">][</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span>
-            <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">topic_words</span> <span class="o">=</span> <span class="p">[(</span><span class="n">words</span><span class="p">[</span><span class="n">word_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]],</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">vals</span><span class="p">)]</span>
             <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">topic_words</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">])</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:</span>
-                <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]))]</span>
+                <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]))]</span>
 
         <span class="k">return</span> <span class="n">updated_topics</span>
 </code></pre></div>
@@ -2866,7 +2875,7 @@ their respective c-TF-IDF values.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Extract topics</p>
+      <p>Extract topics.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2922,13 +2931,14 @@ their respective c-TF-IDF values.</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_pos.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>
@@ -2977,14 +2987,16 @@ their respective c-TF-IDF values.</p>
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
 
     <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">candidate_keywords</span> <span class="ow">in</span> <span class="n">candidate_topics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">word_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">words_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">candidate_keywords</span> <span class="k">if</span> <span class="n">words_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keyword</span><span class="p">)])</span>
+        <span class="n">word_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">words_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span> <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">candidate_keywords</span> <span class="k">if</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">words_lookup</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="n">vals</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">[:,</span> <span class="n">word_indices</span><span class="p">][</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">todense</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">topic_words</span> <span class="o">=</span> <span class="p">[(</span><span class="n">words</span><span class="p">[</span><span class="n">word_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]],</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">vals</span><span class="p">)]</span>
         <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">topic_words</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">])</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">:</span>
-            <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]))]</span>
+            <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]))]</span>
 
     <span class="k">return</span> <span class="n">updated_topics</span>
 </code></pre></div>

@@ -2616,7 +2616,7 @@
 <a id="bertopic.plotting._documents.visualize_documents"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize documents and their topics in 2D</p>
+      <p>Visualize documents and their topics in 2D.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2687,7 +2687,7 @@
       <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".</p></td>
         <td><code>False</code></td>
@@ -2750,19 +2750,21 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_documents.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_documents</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                        <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                        <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">reduced_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">sample</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">hide_annotations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">hide_document_hover</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
-                        <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
-                        <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_documents</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduced_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sample</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">hide_annotations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">hide_document_hover</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize documents and their topics in 2D.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
@@ -2780,7 +2782,7 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
 <span class="sd">        hide_annotations: Hide the names of the traces on top of each cluster.</span>
 <span class="sd">        hide_document_hover: Hide the content of the documents when hovering over</span>
 <span class="sd">                             specific points. Helps to speed up generation of visualization.</span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
 <span class="sd">        title: Title of the plot.</span>
@@ -2788,7 +2790,6 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
 <span class="sd">        height: The height of the figure.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the topics simply run:</span>
 
 <span class="sd">    ```python</span>
@@ -2863,7 +2864,7 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
 
     <span class="c1"># Reduce input embeddings</span>
     <span class="k">if</span> <span class="n">reduced_embeddings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">embeddings_to_reduce</span><span class="p">)</span>
+        <span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">embeddings_to_reduce</span><span class="p">)</span>
         <span class="n">embeddings_2d</span> <span class="o">=</span> <span class="n">umap_model</span><span class="o">.</span><span class="n">embedding_</span>
     <span class="k">elif</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">reduced_embeddings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">embeddings_2d</span> <span class="o">=</span> <span class="n">reduced_embeddings</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
@@ -2886,7 +2887,10 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
     <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)][:</span><span class="mi">3</span><span class="p">])</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)][:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span>
+        <span class="p">]</span>
 
     <span class="c1"># Visualize</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
@@ -2898,7 +2902,13 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
 
     <span class="n">selection</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">topic</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">non_selected_topics</span><span class="p">),</span> <span class="p">:]</span>
     <span class="n">selection</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">selection</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">selection</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">selection</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">&quot;Other documents&quot;</span><span class="p">]</span>
+    <span class="n">selection</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="n">selection</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+        <span class="n">selection</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+        <span class="s2">&quot;Other documents&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
 
     <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
         <span class="n">go</span><span class="o">.</span><span class="n">Scattergl</span><span class="p">(</span>
@@ -2906,10 +2916,10 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
             <span class="n">y</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
             <span class="n">hovertext</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">doc</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_document_hover</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
-            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers+text&quot;</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;other&quot;</span><span class="p">,</span>
             <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#CFD8DC&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#CFD8DC&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
@@ -2920,7 +2930,13 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
             <span class="n">selection</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_annotations</span><span class="p">:</span>
-                <span class="n">selection</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">selection</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">selection</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">name</span><span class="p">]</span>
+                <span class="n">selection</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">selection</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">selection</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                    <span class="n">selection</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                    <span class="n">name</span><span class="p">,</span>
+                <span class="p">]</span>
 
             <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
                 <span class="n">go</span><span class="o">.</span><span class="n">Scattergl</span><span class="p">(</span>
@@ -2929,24 +2945,40 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
                     <span class="n">hovertext</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">doc</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_document_hover</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
                     <span class="n">text</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
-                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers+text&quot;</span><span class="p">,</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                     <span class="n">textfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
                         <span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
                     <span class="p">),</span>
-                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
     <span class="c1"># Add grid in a &#39;plus&#39; shape</span>
-    <span class="n">x_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">))</span>
-    <span class="n">y_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">))</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
-                  <span class="n">x0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                  <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#CFD8DC&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
-                  <span class="n">x0</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                  <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#9E9E9E&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">x_range</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">y_range</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">y0</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">x1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">y1</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#CFD8DC&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">y0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">x1</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">y1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#9E9E9E&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;D1&quot;</span><span class="p">,</span> <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">yshift</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;D2&quot;</span><span class="p">,</span> <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">xshift</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
@@ -2954,16 +2986,14 @@ style="width:1000px; height: 800px; border: 0px;""></iframe>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">),</span>
         <span class="p">},</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-        <span class="n">height</span><span class="o">=</span><span class="n">height</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">visible</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

@@ -2618,7 +2618,7 @@
 <a id="bertopic.dimensionality._base.BaseDimensionalityReduction"></a>
     <div class="doc doc-contents first">
 
-      <p>The Base Dimensionality Reduction class</p>
+      <p>The Base Dimensionality Reduction class.</p>
 <p>You can use this to skip over the dimensionality reduction step in BERTopic.</p>
 
 <p><strong>Examples:</strong></p>
@@ -2635,12 +2635,11 @@
         <details class="quote">
           <summary>Source code in <code>bertopic\dimensionality\_base.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BaseDimensionalityReduction</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; The Base Dimensionality Reduction class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Base Dimensionality Reduction class.</span>
 
 <span class="sd">    You can use this to skip over the dimensionality reduction step in BERTopic.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    This will skip over the reduction step in BERTopic:</span>
 
 <span class="sd">    ```python</span>
@@ -2652,6 +2651,7 @@
 <span class="sd">    topic_model = BERTopic(umap_model=empty_reduction_model)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 

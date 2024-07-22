@@ -2679,7 +2679,7 @@ that maximize their within diversity with respect to the document.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_mmr.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MaximalMarginalRelevance</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate Maximal Marginal Relevance (MMR)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate Maximal Marginal Relevance (MMR)</span>
 <span class="sd">    between candidate keywords and the document.</span>
 
 <span class="sd">    MMR considers the similarity of keywords/keyphrases with the</span>
@@ -2706,17 +2706,19 @@ that maximize their within diversity with respect to the document.</p>
 <span class="sd">    topic_model = BERTopic(representation_model=representation_model)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">top_n_words</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span> <span class="o">=</span> <span class="n">diversity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span> <span class="o">=</span> <span class="n">top_n_words</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topic representations</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topic representations.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: The BERTopic model</span>
@@ -2727,18 +2729,27 @@ that maximize their within diversity with respect to the document.</p>
 <span class="sd">        Returns:</span>
 <span class="sd">            updated_topics: Updated topic representations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">embedding_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;MaximalMarginalRelevance can only be used BERTopic was instantiated&quot;</span>
-                          <span class="s2">&quot;with the `embedding_model` parameter.&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;MaximalMarginalRelevance can only be used BERTopic was instantiated&quot;</span>
+                <span class="s2">&quot;with the `embedding_model` parameter.&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span> <span class="n">topics</span>
 
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topic_words</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topic_words</span><span class="p">]</span>
             <span class="n">word_embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">topic_embedding</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">topic_words</span> <span class="o">=</span> <span class="n">mmr</span><span class="p">(</span><span class="n">topic_embedding</span><span class="p">,</span> <span class="n">word_embeddings</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">)</span>
+            <span class="n">topic_embedding</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">topic_words</span> <span class="o">=</span> <span class="n">mmr</span><span class="p">(</span>
+                <span class="n">topic_embedding</span><span class="p">,</span>
+                <span class="n">word_embeddings</span><span class="p">,</span>
+                <span class="n">words</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">word</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topic_words</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">updated_topics</span>
 </code></pre></div>
@@ -2769,7 +2780,7 @@ that maximize their within diversity with respect to the document.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Extract topic representations</p>
+      <p>Extract topic representations.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2825,13 +2836,14 @@ that maximize their within diversity with respect to the document.</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_mmr.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topic representations</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topic representations.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: The BERTopic model</span>
@@ -2842,18 +2854,27 @@ that maximize their within diversity with respect to the document.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        updated_topics: Updated topic representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">embedding_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;MaximalMarginalRelevance can only be used BERTopic was instantiated&quot;</span>
-                      <span class="s2">&quot;with the `embedding_model` parameter.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;MaximalMarginalRelevance can only be used BERTopic was instantiated&quot;</span>
+            <span class="s2">&quot;with the `embedding_model` parameter.&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">topics</span>
 
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topic_words</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topic_words</span><span class="p">]</span>
         <span class="n">word_embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">topic_embedding</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">topic_words</span> <span class="o">=</span> <span class="n">mmr</span><span class="p">(</span><span class="n">topic_embedding</span><span class="p">,</span> <span class="n">word_embeddings</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">)</span>
+        <span class="n">topic_embedding</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_embeddings</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">topic_words</span> <span class="o">=</span> <span class="n">mmr</span><span class="p">(</span>
+            <span class="n">topic_embedding</span><span class="p">,</span>
+            <span class="n">word_embeddings</span><span class="p">,</span>
+            <span class="n">words</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">top_n_words</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">word</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">topic_words</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">updated_topics</span>
 </code></pre></div>

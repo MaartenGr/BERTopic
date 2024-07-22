@@ -2616,10 +2616,10 @@
 <a id="bertopic.plotting._hierarchy.visualize_hierarchy"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize a hierarchical structure of the topics</p>
+      <p>Visualize a hierarchical structure of the topics.</p>
 <p>A ward linkage function is used to perform the
 hierarchical clustering based on the cosine distance
-matrix between topic embeddings.</p>
+matrix between topic embeddings (either c-TF-IDF or the embeddings from the embedding model).</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2658,12 +2658,19 @@ matrix between topic embeddings.</p>
         <td><code>None</code></td>
       </tr>
       <tr>
+        <td><code>use_ctfidf</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the embeddings
+        from the embedding model are used.</p></td>
+        <td><code>True</code></td>
+      </tr>
+      <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".
-           NOTE: Custom labels are only generated for the original 
+           NOTE: Custom labels are only generated for the original
            un-merged topics.</p></td>
         <td><code>False</code></td>
       </tr>
@@ -2708,10 +2715,10 @@ matrix between topic embeddings.</p>
         <td><code>Callable[[scipy.sparse._csr.csr_matrix], scipy.sparse._csr.csr_matrix]</code></td>
         <td><p>The distance function to use on the c-TF-IDF matrix. Default is:
                <code>lambda x: 1 - cosine_similarity(x)</code>.
-                You can pass any function that returns either a square matrix of 
-                shape (n_samples, n_samples) with zeros on the diagonal and 
-                non-negative values or condensed distance matrix of shape 
-                (n_samples * (n_samples - 1) / 2,) containing the upper 
+                You can pass any function that returns either a square matrix of
+                shape (n_samples, n_samples) with zeros on the diagonal and
+                non-negative values or condensed distance matrix of shape
+                (n_samples * (n_samples - 1) / 2,) containing the upper
                 triangular of the distance matrix.
                NOTE: Make sure to use the same <code>distance_function</code> as used
                in <code>topic_model.hierarchical_topics</code>.</p></td>
@@ -2765,23 +2772,26 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_hierarchy.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_hierarchy</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                        <span class="n">orientation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span>
-                        <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Hierarchical Clustering&lt;/b&gt;&quot;</span><span class="p">,</span>
-                        <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-                        <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
-                        <span class="n">hierarchical_topics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">linkage_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">distance_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">csr_matrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">color_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize a hierarchical structure of the topics</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_hierarchy</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">orientation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_ctfidf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Hierarchical Clustering&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
+    <span class="n">hierarchical_topics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">linkage_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">csr_matrix</span><span class="p">],</span> <span class="n">csr_matrix</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">color_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize a hierarchical structure of the topics.</span>
 
 <span class="sd">    A ward linkage function is used to perform the</span>
 <span class="sd">    hierarchical clustering based on the cosine distance</span>
-<span class="sd">    matrix between topic embeddings.</span>
+<span class="sd">    matrix between topic embeddings (either c-TF-IDF or the embeddings from the embedding model).</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
@@ -2789,10 +2799,12 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 <span class="sd">                     Either &#39;left&#39; or &#39;bottom&#39;</span>
 <span class="sd">        topics: A selection of topics to visualize</span>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics</span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the embeddings</span>
+<span class="sd">                    from the embedding model are used.</span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
-<span class="sd">                       NOTE: Custom labels are only generated for the original </span>
+<span class="sd">                       NOTE: Custom labels are only generated for the original</span>
 <span class="sd">                       un-merged topics.</span>
 <span class="sd">        title: Title of the plot.</span>
 <span class="sd">        width: The width of the figure. Only works if orientation is set to &#39;left&#39;</span>
@@ -2807,10 +2819,10 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 <span class="sd">                          in `topic_model.hierarchical_topics`.</span>
 <span class="sd">        distance_function: The distance function to use on the c-TF-IDF matrix. Default is:</span>
 <span class="sd">                           `lambda x: 1 - cosine_similarity(x)`.</span>
-<span class="sd">                            You can pass any function that returns either a square matrix of </span>
-<span class="sd">                            shape (n_samples, n_samples) with zeros on the diagonal and </span>
-<span class="sd">                            non-negative values or condensed distance matrix of shape </span>
-<span class="sd">                            (n_samples * (n_samples - 1) / 2,) containing the upper </span>
+<span class="sd">                            You can pass any function that returns either a square matrix of</span>
+<span class="sd">                            shape (n_samples, n_samples) with zeros on the diagonal and</span>
+<span class="sd">                            non-negative values or condensed distance matrix of shape</span>
+<span class="sd">                            (n_samples * (n_samples - 1) / 2,) containing the upper</span>
 <span class="sd">                            triangular of the distance matrix.</span>
 <span class="sd">                           NOTE: Make sure to use the same `distance_function` as used</span>
 <span class="sd">                           in `topic_model.hierarchical_topics`.</span>
@@ -2822,7 +2834,6 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
 <span class="sd">        fig: A plotly figure</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the hierarchical structure of</span>
 <span class="sd">    topics simply run:</span>
 
@@ -2854,7 +2865,7 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
         <span class="n">distance_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">linkage_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">linkage_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sch</span><span class="o">.</span><span class="n">linkage</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;ward&#39;</span><span class="p">,</span> <span class="n">optimal_ordering</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">linkage_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sch</span><span class="o">.</span><span class="n">linkage</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;ward&quot;</span><span class="p">,</span> <span class="n">optimal_ordering</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Select topics based on top_n and topics args</span>
     <span class="n">freq_df</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span>
@@ -2871,85 +2882,88 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">all_topics</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="p">])</span>
 
     <span class="c1"># Select topic embeddings</span>
-    <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">)[</span><span class="n">indices</span><span class="p">]</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">select_topic_representation</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">,</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">,</span> <span class="n">use_ctfidf</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span>
+        <span class="n">indices</span>
+    <span class="p">]</span>
 
     <span class="c1"># Annotations</span>
     <span class="k">if</span> <span class="n">hierarchical_topics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">topics</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">freq_df</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">to_list</span><span class="p">()):</span>
-        <span class="n">annotations</span> <span class="o">=</span> <span class="n">_get_annotations</span><span class="p">(</span><span class="n">topic_model</span><span class="o">=</span><span class="n">topic_model</span><span class="p">,</span>
-                                       <span class="n">hierarchical_topics</span><span class="o">=</span><span class="n">hierarchical_topics</span><span class="p">,</span>
-                                       <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">,</span>
-                                       <span class="n">distance_function</span><span class="o">=</span><span class="n">distance_function</span><span class="p">,</span>
-                                       <span class="n">linkage_function</span><span class="o">=</span><span class="n">linkage_function</span><span class="p">,</span>
-                                       <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
-                                       <span class="n">custom_labels</span><span class="o">=</span><span class="n">custom_labels</span><span class="p">)</span>
+        <span class="n">annotations</span> <span class="o">=</span> <span class="n">_get_annotations</span><span class="p">(</span>
+            <span class="n">topic_model</span><span class="o">=</span><span class="n">topic_model</span><span class="p">,</span>
+            <span class="n">hierarchical_topics</span><span class="o">=</span><span class="n">hierarchical_topics</span><span class="p">,</span>
+            <span class="n">embeddings</span><span class="o">=</span><span class="n">embeddings</span><span class="p">,</span>
+            <span class="n">distance_function</span><span class="o">=</span><span class="n">distance_function</span><span class="p">,</span>
+            <span class="n">linkage_function</span><span class="o">=</span><span class="n">linkage_function</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+            <span class="n">custom_labels</span><span class="o">=</span><span class="n">custom_labels</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">annotations</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># wrap distance function to validate input and return a condensed distance matrix</span>
-    <span class="n">distance_function_viz</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">validate_distance_matrix</span><span class="p">(</span>
-        <span class="n">distance_function</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">distance_function_viz</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">validate_distance_matrix</span><span class="p">(</span><span class="n">distance_function</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="c1"># Create dendogram</span>
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_dendrogram</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span>
-                               <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
-                               <span class="n">distfun</span><span class="o">=</span><span class="n">distance_function_viz</span><span class="p">,</span>
-                               <span class="n">linkagefun</span><span class="o">=</span><span class="n">linkage_function</span><span class="p">,</span>
-                               <span class="n">hovertext</span><span class="o">=</span><span class="n">annotations</span><span class="p">,</span>
-                               <span class="n">color_threshold</span><span class="o">=</span><span class="n">color_threshold</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_dendrogram</span><span class="p">(</span>
+        <span class="n">embeddings</span><span class="p">,</span>
+        <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+        <span class="n">distfun</span><span class="o">=</span><span class="n">distance_function_viz</span><span class="p">,</span>
+        <span class="n">linkagefun</span><span class="o">=</span><span class="n">linkage_function</span><span class="p">,</span>
+        <span class="n">hovertext</span><span class="o">=</span><span class="n">annotations</span><span class="p">,</span>
+        <span class="n">color_threshold</span><span class="o">=</span><span class="n">color_threshold</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># Create nicer labels</span>
     <span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;yaxis&quot;</span> <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span> <span class="k">else</span> <span class="s2">&quot;xaxis&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[[[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="s2">&quot;ticktext&quot;</span><span class="p">]]</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="s2">&quot;ticktext&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
-        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">topics</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="s2">&quot;ticktext&quot;</span><span class="p">]]</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">topics</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="s2">&quot;ticktext&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topics</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)]),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topics</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
-                      <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="s2">&quot;ticktext&quot;</span><span class="p">]]</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topics</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)]),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topics</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">layout</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="s2">&quot;ticktext&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
 
     <span class="c1"># Stylize layout</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
-        <span class="n">plot_bgcolor</span><span class="o">=</span><span class="s1">&#39;#ECEFF1&#39;</span><span class="p">,</span>
+        <span class="n">plot_bgcolor</span><span class="o">=</span><span class="s2">&quot;#ECEFF1&quot;</span><span class="p">,</span>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">),</span>
         <span class="p">},</span>
-        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
-            <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-            <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span>
-        <span class="p">),</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="c1"># Stylize orientation</span>
     <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">200</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">topics</span><span class="p">)),</span>
-                          <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
-                          <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">tickmode</span><span class="o">=</span><span class="s2">&quot;array&quot;</span><span class="p">,</span>
-                                     <span class="n">ticktext</span><span class="o">=</span><span class="n">new_labels</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">height</span><span class="o">=</span><span class="mi">200</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">topics</span><span class="p">)),</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">tickmode</span><span class="o">=</span><span class="s2">&quot;array&quot;</span><span class="p">,</span> <span class="n">ticktext</span><span class="o">=</span><span class="n">new_labels</span><span class="p">),</span>
+        <span class="p">)</span>
 
         <span class="c1"># Fix empty space on the bottom of the graph</span>
-        <span class="n">y_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">trace</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">5</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">fig</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]])</span>
-        <span class="n">y_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">trace</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">5</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">fig</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]])</span>
+        <span class="n">y_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">5</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">fig</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]])</span>
+        <span class="n">y_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">5</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">fig</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]])</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">]))</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">200</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">topics</span><span class="p">)),</span>
-                          <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-                          <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">tickmode</span><span class="o">=</span><span class="s2">&quot;array&quot;</span><span class="p">,</span>
-                                     <span class="n">ticktext</span><span class="o">=</span><span class="n">new_labels</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+            <span class="n">width</span><span class="o">=</span><span class="mi">200</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">topics</span><span class="p">)),</span>
+            <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+            <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">tickmode</span><span class="o">=</span><span class="s2">&quot;array&quot;</span><span class="p">,</span> <span class="n">ticktext</span><span class="o">=</span><span class="n">new_labels</span><span class="p">),</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">hierarchical_topics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
@@ -2958,9 +2972,17 @@ style="width:1000px; height: 680px; border: 0px;""></iframe>
             <span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
             <span class="n">hovertext</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">fig</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
 
-            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">ys</span><span class="p">,</span> <span class="n">marker_color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
-                                     <span class="n">hovertext</span><span class="o">=</span><span class="n">hovertext</span><span class="p">,</span> <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
-                                     <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+                <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">xs</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">ys</span><span class="p">,</span>
+                    <span class="n">marker_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                    <span class="n">hovertext</span><span class="o">=</span><span class="n">hovertext</span><span class="p">,</span>
+                    <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+                    <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
     <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div>
         </details>

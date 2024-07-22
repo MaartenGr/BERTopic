@@ -2627,7 +2627,7 @@
   </p>
 <figcaption></figcaption>
 </figure>
-<p>In this example, we are going to use images from <code>flickr</code> that each have a caption accociated to it: </p>
+<p>In this example, we are going to use images from <code>flickr</code> that each have a caption associated to it: </p>
 <div class="highlight"><pre><span></span><code><span class="c1"># NOTE: This requires the `datasets` package which you can </span>
 <span class="c1"># install with `pip install datasets`</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
@@ -2692,7 +2692,7 @@ to generate embeddings: </p>
 <span class="c1"># Embed documents only</span>
 <span class="n">doc_embeddings</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">embed_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 
-<span class="c1"># Embeding images only</span>
+<span class="c1"># Embedding images only</span>
 <span class="n">image_embeddings</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">embed_images</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
 
 <span class="c1"># Embed both images and documents, then average them</span>

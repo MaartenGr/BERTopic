@@ -2634,7 +2634,7 @@
 <a id="bertopic.representation._textgeneration.TextGeneration"></a>
     <div class="doc doc-contents first">
 
-      <p>Text2Text or text generation with transformers</p>
+      <p>Text2Text or text generation with transformers.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2714,7 +2714,7 @@
              and truncated depending on <code>doc_length</code>
            * If tokenizer is 'vectorizer', then the internal CountVectorizer
              is used to tokenize the document. These tokens are counted
-             and trunctated depending on <code>doc_length</code>
+             and truncated depending on <code>doc_length</code>
            * If tokenizer is a callable, then that callable is used to tokenize
              the document. These tokens are counted and truncated depending
              on <code>doc_length</code></p></td>
@@ -2747,7 +2747,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_textgeneration.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">TextGeneration</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Text2Text or text generation with transformers</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Text2Text or text generation with transformers.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        model: A transformers pipeline that should be initialized as &quot;text-generation&quot;</span>
@@ -2779,7 +2779,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 <span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is &#39;vectorizer&#39;, then the internal CountVectorizer</span>
 <span class="sd">                         is used to tokenize the document. These tokens are counted</span>
-<span class="sd">                         and trunctated depending on `doc_length`</span>
+<span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is a callable, then that callable is used to tokenize</span>
 <span class="sd">                         the document. These tokens are counted and truncated depending</span>
 <span class="sd">                         on `doc_length`</span>
@@ -2813,16 +2813,18 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 <span class="sd">    representation_model = TextGeneration(generator)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">],</span>
-                 <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">pipeline_kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-                 <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
-                 <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-                 <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                 <span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">],</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pipeline_kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+        <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
         <span class="n">set_seed</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -2830,9 +2832,11 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Pipeline</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure that the HF model that you&quot;</span>
-                             <span class="s2">&quot;pass is either a string referring to a&quot;</span>
-                             <span class="s2">&quot;HF model or a `transformers.pipeline` object.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Make sure that the HF model that you&quot;</span>
+                <span class="s2">&quot;pass is either a string referring to a&quot;</span>
+                <span class="s2">&quot;HF model or a `transformers.pipeline` object.&quot;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span> <span class="k">if</span> <span class="n">prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DEFAULT_PROMPT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_prompt_</span> <span class="o">=</span> <span class="n">DEFAULT_PROMPT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pipeline_kwargs</span> <span class="o">=</span> <span class="n">pipeline_kwargs</span>
@@ -2843,13 +2847,14 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 
         <span class="bp">self</span><span class="o">.</span><span class="n">prompts_</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topic representations and return a single label</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topic representations and return a single label.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -2863,30 +2868,30 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
         <span class="c1"># Extract the top 4 representative documents per topic</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">!=</span> <span class="n">DEFAULT_PROMPT</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
             <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
-                <span class="n">c_tf_idf</span><span class="p">,</span>
-                <span class="n">documents</span><span class="p">,</span>
-                <span class="n">topics</span><span class="p">,</span>
-                <span class="mi">500</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+                <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">repr_docs_mappings</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
 
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">verbose</span><span class="p">):</span>
-
             <span class="c1"># Prepare prompt</span>
-            <span class="n">truncated_docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">truncate_document</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">]</span> <span class="k">if</span> <span class="n">docs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">docs</span>
+            <span class="n">truncated_docs</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">[</span><span class="n">truncate_document</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">docs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">docs</span>
+            <span class="p">)</span>
             <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_prompt</span><span class="p">(</span><span class="n">truncated_docs</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prompts_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
 
             <span class="c1"># Extract result from generator and use that as label</span>
             <span class="n">topic_description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_kwargs</span><span class="p">)</span>
-            <span class="n">topic_description</span> <span class="o">=</span> <span class="p">[(</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;generated_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">description</span> <span class="ow">in</span> <span class="n">topic_description</span><span class="p">]</span>
+            <span class="n">topic_description</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;generated_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">description</span> <span class="ow">in</span> <span class="n">topic_description</span>
+            <span class="p">]</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">topic_description</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
-                <span class="n">topic_description</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">topic_description</span><span class="p">))]</span>
+                <span class="n">topic_description</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">topic_description</span><span class="p">))]</span>
 
             <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">topic_description</span>
 
@@ -2940,7 +2945,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 
     <div class="doc doc-contents ">
 
-      <p>Extract topic representations and return a single label</p>
+      <p>Extract topic representations and return a single label.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2996,13 +3001,14 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_textgeneration.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topic representations and return a single label</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topic representations and return a single label.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>
@@ -3016,30 +3022,30 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with thte <code>[D
     <span class="c1"># Extract the top 4 representative documents per topic</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">!=</span> <span class="n">DEFAULT_PROMPT</span> <span class="ow">and</span> <span class="s2">&quot;[DOCUMENTS]&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">:</span>
         <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
-            <span class="n">c_tf_idf</span><span class="p">,</span>
-            <span class="n">documents</span><span class="p">,</span>
-            <span class="n">topics</span><span class="p">,</span>
-            <span class="mi">500</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+            <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">repr_docs_mappings</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">topics</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
 
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">verbose</span><span class="p">):</span>
-
         <span class="c1"># Prepare prompt</span>
-        <span class="n">truncated_docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">truncate_document</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">]</span> <span class="k">if</span> <span class="n">docs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">docs</span>
+        <span class="n">truncated_docs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span><span class="n">truncate_document</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">docs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">docs</span>
+        <span class="p">)</span>
         <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_prompt</span><span class="p">(</span><span class="n">truncated_docs</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">topics</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompts_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
 
         <span class="c1"># Extract result from generator and use that as label</span>
         <span class="n">topic_description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline_kwargs</span><span class="p">)</span>
-        <span class="n">topic_description</span> <span class="o">=</span> <span class="p">[(</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;generated_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">description</span> <span class="ow">in</span> <span class="n">topic_description</span><span class="p">]</span>
+        <span class="n">topic_description</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;generated_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">description</span> <span class="ow">in</span> <span class="n">topic_description</span>
+        <span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">topic_description</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
-            <span class="n">topic_description</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">topic_description</span><span class="p">))]</span>
+            <span class="n">topic_description</span> <span class="o">+=</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">topic_description</span><span class="p">))]</span>
 
         <span class="n">updated_topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="n">topic_description</span>
 

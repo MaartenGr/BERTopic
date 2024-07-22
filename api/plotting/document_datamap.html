@@ -2759,18 +2759,20 @@ The advised and preferred pipeline for using this function is as follows:</p>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_datamap.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_document_datamap</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                               <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                               <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                               <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                               <span class="n">reduced_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                               <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                               <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Documents and Topics&quot;</span><span class="p">,</span>
-                               <span class="n">sub_title</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                               <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
-                               <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
-                               <span class="o">**</span><span class="n">datamap_kwds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D as a static plot for publication using</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_document_datamap</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduced_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Documents and Topics&quot;</span><span class="p">,</span>
+    <span class="n">sub_title</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">datamap_kwds</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize documents and their topics in 2D as a static plot for publication using</span>
 <span class="sd">    DataMapPlot.</span>
 
 <span class="sd">    Arguments:</span>
@@ -2798,7 +2800,6 @@ The advised and preferred pipeline for using this function is as follows:</p>
 <span class="sd">        figure: A Matplotlib Figure object.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the topics simply run:</span>
 
 <span class="sd">    ```python</span>
@@ -2841,7 +2842,6 @@ The advised and preferred pipeline for using this function is as follows:</p>
 <span class="sd">    &lt;img src=&quot;../../getting_started/visualization/datamapplot.png&quot;,</span>
 <span class="sd">         alt=&quot;DataMapPlot of 20-Newsgroups&quot;, width=800, height=800&gt;&lt;/img&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">topic_per_doc</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;topic&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_per_doc</span><span class="p">)})</span>
@@ -2856,7 +2856,7 @@ The advised and preferred pipeline for using this function is as follows:</p>
 
     <span class="c1"># Reduce input embeddings</span>
     <span class="k">if</span> <span class="n">reduced_embeddings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">embeddings_to_reduce</span><span class="p">)</span>
+        <span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">embeddings_to_reduce</span><span class="p">)</span>
         <span class="n">embeddings_2d</span> <span class="o">=</span> <span class="n">umap_model</span><span class="o">.</span><span class="n">embedding_</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">embeddings_2d</span> <span class="o">=</span> <span class="n">reduced_embeddings</span>
@@ -2871,7 +2871,10 @@ The advised and preferred pipeline for using this function is as follows:</p>
     <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Topic-</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">: &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)][:</span><span class="mi">3</span><span class="p">])</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;Topic-</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">: &quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)][:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span>
+        <span class="p">]</span>
 
     <span class="n">topic_name_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic_num</span><span class="p">:</span> <span class="n">topic_name</span> <span class="k">for</span> <span class="n">topic_num</span><span class="p">,</span> <span class="n">topic_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">unique_topics</span><span class="p">,</span> <span class="n">names</span><span class="p">)}</span>
     <span class="n">topic_name_mapping</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Unlabelled&quot;</span>
@@ -2889,7 +2892,7 @@ The advised and preferred pipeline for using this function is as follows:</p>
     <span class="n">figure</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">datamapplot</span><span class="o">.</span><span class="n">create_plot</span><span class="p">(</span>
         <span class="n">embeddings_2d</span><span class="p">,</span>
         <span class="n">named_topic_per_doc</span><span class="p">,</span>
-        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="mi">100</span><span class="p">),</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">100</span><span class="p">),</span>
         <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
         <span class="n">sub_title</span><span class="o">=</span><span class="n">sub_title</span><span class="p">,</span>

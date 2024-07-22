@@ -2618,13 +2618,15 @@
 <a id="bertopic.cluster._base.BaseCluster"></a>
     <div class="doc doc-contents first">
 
-      <p>The Base Cluster class</p>
+      <p>The Base Cluster class.</p>
 <p>Using this class directly in BERTopic will make it skip
-over the cluster step. As a result, topics need to be passed 
-to BERTopic in the form of its <code>y</code> parameter in order to create 
-topic representations. </p>
-<p>Examples:    </p>
-<p>This will skip over the cluster step in BERTopic:</p>
+over the cluster step. As a result, topics need to be passed
+to BERTopic in the form of its <code>y</code> parameter in order to create
+topic representations.</p>
+
+<p><strong>Examples:</strong></p>
+    
+      <p>This will skip over the cluster step in BERTopic:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 <span class="kn">from</span> <span class="nn">bertopic.dimensionality</span> <span class="kn">import</span> <span class="n">BaseCluster</span>
 
@@ -2632,8 +2634,8 @@ topic representations. </p>
 
 <span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">hdbscan_model</span><span class="o">=</span><span class="n">empty_cluster_model</span><span class="p">)</span>
 </code></pre></div>
-<p>Then, this class can be used to perform manual topic modeling. 
-That is, topic modeling on a topics that were already generated before 
+<p>Then, this class can be used to perform manual topic modeling.
+That is, topic modeling on a topics that were already generated before
 without the need to learn them:</p>
 <div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 </code></pre></div>
@@ -2641,15 +2643,14 @@ without the need to learn them:</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\cluster\_base.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BaseCluster</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; The Base Cluster class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Base Cluster class.</span>
 
 <span class="sd">    Using this class directly in BERTopic will make it skip</span>
-<span class="sd">    over the cluster step. As a result, topics need to be passed </span>
-<span class="sd">    to BERTopic in the form of its `y` parameter in order to create </span>
-<span class="sd">    topic representations. </span>
+<span class="sd">    over the cluster step. As a result, topics need to be passed</span>
+<span class="sd">    to BERTopic in the form of its `y` parameter in order to create</span>
+<span class="sd">    topic representations.</span>
 
-<span class="sd">    Examples:    </span>
-
+<span class="sd">    Examples:</span>
 <span class="sd">    This will skip over the cluster step in BERTopic:</span>
 
 <span class="sd">    ```python</span>
@@ -2661,14 +2662,15 @@ without the need to learn them:</p>
 <span class="sd">    topic_model = BERTopic(hdbscan_model=empty_cluster_model)</span>
 <span class="sd">    ```</span>
 
-<span class="sd">    Then, this class can be used to perform manual topic modeling. </span>
-<span class="sd">    That is, topic modeling on a topics that were already generated before </span>
+<span class="sd">    Then, this class can be used to perform manual topic modeling.</span>
+<span class="sd">    That is, topic modeling on a topics that were already generated before</span>
 <span class="sd">    without the need to learn them:</span>
 
 <span class="sd">    ```python</span>
 <span class="sd">    topic_model.fit(docs, y=y)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="n">y</span>

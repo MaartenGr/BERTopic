@@ -2635,94 +2635,149 @@
     <div class="doc doc-contents first">
 
       <p>Using the OpenAI API to generate topic labels based
-    on one of their Completion of ChatCompletion models.</p>
-<div class="highlight"><pre><span></span><code>The default method is `openai.Completion` if `chat=False`.
+on one of their Completion of ChatCompletion models.</p>
+<p>The default method is <code>openai.Completion</code> if <code>chat=False</code>.
 The prompts will also need to follow a completion task. If you
-are looking for a more interactive chats, use `chat=True`
-with `model=gpt-3.5-turbo`.
+are looking for a more interactive chats, use <code>chat=True</code>
+with <code>model=gpt-3.5-turbo</code>.</p>
+<p>For an overview see:
+https://platform.openai.com/docs/models</p>
 
-For an overview see:
-https://platform.openai.com/docs/models
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>client</code></td>
+        <td></td>
+        <td><p>A <code>openai.OpenAI</code> client</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>model</code></td>
+        <td><code>str</code></td>
+        <td><p>Model to use within OpenAI, defaults to <code>"text-ada-001"</code>.
+   NOTE: If a <code>gpt-3.5-turbo</code> model is used, make sure to set
+   <code>chat</code> to True.</p></td>
+        <td><code>&#39;text-embedding-3-small&#39;</code></td>
+      </tr>
+      <tr>
+        <td><code>generator_kwargs</code></td>
+        <td><code>Mapping[str, Any]</code></td>
+        <td><p>Kwargs passed to <code>openai.Completion.create</code>
+              for fine-tuning the output.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+      <tr>
+        <td><code>prompt</code></td>
+        <td><code>str</code></td>
+        <td><p>The prompt to be used in the model. If no prompt is given,
+    <code>self.default_prompt_</code> is used instead.
+    NOTE: Use <code>"[KEYWORDS]"</code> and <code>"[DOCUMENTS]"</code> in the prompt
+    to decide where the keywords and documents need to be
+    inserted.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>delay_in_seconds</code></td>
+        <td><code>float</code></td>
+        <td><p>The delay in seconds between consecutive prompts
+              in order to prevent RateLimitErrors.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>exponential_backoff</code></td>
+        <td><code>bool</code></td>
+        <td><p>Retry requests with a random exponential backoff.
+                 A short sleep is used when a rate limit error is hit,
+                 then the requests is retried. Increase the sleep length
+                 if errors are hit until 10 unsuccessful requests.
+                 If True, overrides <code>delay_in_seconds</code>.</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
+        <td><code>chat</code></td>
+        <td><code>bool</code></td>
+        <td><p>Set this to True if a GPT-3.5 model is used.
+  See: https://platform.openai.com/docs/models/gpt-3-5</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
+        <td><code>nr_docs</code></td>
+        <td><code>int</code></td>
+        <td><p>The number of documents to pass to OpenAI if a prompt
+     with the <code>["DOCUMENTS"]</code> tag is used.</p></td>
+        <td><code>4</code></td>
+      </tr>
+      <tr>
+        <td><code>diversity</code></td>
+        <td><code>float</code></td>
+        <td><p>The diversity of documents to pass to OpenAI.
+       Accepts values between 0 and 1. A higher
+       values results in passing more diverse documents
+       whereas lower values passes more similar documents.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>doc_length</code></td>
+        <td><code>int</code></td>
+        <td><p>The maximum length of each document. If a document is longer,
+        it will be truncated. If None, the entire document is passed.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>tokenizer</code></td>
+        <td><code>Union[str, Callable]</code></td>
+        <td><p>The tokenizer used to calculate to split the document into segments
+       used to count the length of a document.
+           * If tokenizer is 'char', then the document is split up
+             into characters which are counted to adhere to <code>doc_length</code>
+           * If tokenizer is 'whitespace', the document is split up
+             into words separated by whitespaces. These words are counted
+             and truncated depending on <code>doc_length</code>
+           * If tokenizer is 'vectorizer', then the internal CountVectorizer
+             is used to tokenize the document. These tokens are counted
+             and truncated depending on <code>doc_length</code>
+           * If tokenizer is a callable, then that callable is used to tokenize
+             the document. These tokens are counted and truncated depending
+             on <code>doc_length</code></p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>      <p>Usage:</p>
+<p>To use this, you will need to install the openai package first:</p>
+<p><code>pip install openai</code></p>
+<p>Then, get yourself an API key and use OpenAI's API as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">openai</span>
+<span class="kn">from</span> <span class="nn">bertopic.representation</span> <span class="kn">import</span> <span class="n">OpenAI</span>
+<span class="kn">from</span> <span class="nn">bertopic</span> <span class="kn">import</span> <span class="n">BERTopic</span>
 
-!!! arguments
-    client: A `openai.OpenAI` client
-    !!! model &quot;Model to use within OpenAI, defaults to `&quot;text-ada-001&quot;`.&quot;
-           NOTE: If a `gpt-3.5-turbo` model is used, make sure to set
-           `chat` to True.
-    !!! generator_kwargs &quot;Kwargs passed to `openai.Completion.create`&quot;
-                      for fine-tuning the output.
-    !!! prompt &quot;The prompt to be used in the model. If no prompt is given,&quot;
-            `self.default_prompt_` is used instead.
-            NOTE: Use `&quot;[KEYWORDS]&quot;` and `&quot;[DOCUMENTS]&quot;` in the prompt
-            to decide where the keywords and documents need to be
-            inserted.
-    !!! delay_in_seconds &quot;The delay in seconds between consecutive prompts&quot;
-                      in order to prevent RateLimitErrors.
-    !!! exponential_backoff &quot;Retry requests with a random exponential backoff.&quot;
-                         A short sleep is used when a rate limit error is hit,
-                         then the requests is retried. Increase the sleep length
-                         if errors are hit until 10 unsuccesfull requests.
-                         If True, overrides `delay_in_seconds`.
-    !!! chat &quot;Set this to True if a GPT-3.5 model is used.&quot;
-          See: https://platform.openai.com/docs/models/gpt-3-5
-    !!! nr_docs &quot;The number of documents to pass to OpenAI if a prompt&quot;
-             with the `[&quot;DOCUMENTS&quot;]` tag is used.
-    !!! diversity &quot;The diversity of documents to pass to OpenAI.&quot;
-               Accepts values between 0 and 1. A higher
-               values results in passing more diverse documents
-               whereas lower values passes more similar documents.
-    !!! doc_length &quot;The maximum length of each document. If a document is longer,&quot;
-                it will be truncated. If None, the entire document is passed.
-    !!! tokenizer &quot;The tokenizer used to calculate to split the document into segments&quot;
-               used to count the length of a document.
-                   * If tokenizer is &#39;char&#39;, then the document is split up
-                     into characters which are counted to adhere to `doc_length`
-                   * If tokenizer is &#39;whitespace&#39;, the document is split up
-                     into words separated by whitespaces. These words are counted
-                     and truncated depending on `doc_length`
-                   * If tokenizer is &#39;vectorizer&#39;, then the internal CountVectorizer
-                     is used to tokenize the document. These tokens are counted
-                     and trunctated depending on `doc_length`
-                   * If tokenizer is a callable, then that callable is used to tokenize
-                     the document. These tokens are counted and truncated depending
-                     on `doc_length`
+<span class="c1"># Create your representation model</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">MY_API_KEY</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 
-Usage:
-
-To use this, you will need to install the openai package first:
-
-`pip install openai`
-
-Then, get yourself an API key and use OpenAI&#39;s API as follows:
-
-```python
-import openai
-from bertopic.representation import OpenAI
-from bertopic import BERTopic
-
-# Create your representation model
-client = openai.OpenAI(api_key=MY_API_KEY)
-representation_model = OpenAI(client, delay_in_seconds=5)
-
-# Use the representation model in BERTopic on top of the default pipeline
-topic_model = BERTopic(representation_model=representation_model)
-```
-
-You can also use a custom prompt:
-
-```python
-prompt = &quot;I have the following documents: [DOCUMENTS]
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
 </code></pre></div>
-<p>These documents are about the following topic: '"
-    representation_model = OpenAI(client, prompt=prompt, delay_in_seconds=5)
-    <code>If you want to use OpenAI's ChatGPT model:</code>python
-    representation_model = OpenAI(client, model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
-    ```</p>
+<p>You can also use a custom prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;I have the following documents: [DOCUMENTS] </span><span class="se">\n</span><span class="s2">These documents are about the following topic: &#39;&quot;</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>If you want to use OpenAI's ChatGPT model:</p>
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">chat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_openai.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">OpenAI</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Using the OpenAI API to generate topic labels based</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Using the OpenAI API to generate topic labels based</span>
 <span class="sd">    on one of their Completion of ChatCompletion models.</span>
 
 <span class="sd">    The default method is `openai.Completion` if `chat=False`.</span>
@@ -2750,7 +2805,7 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 <span class="sd">        exponential_backoff: Retry requests with a random exponential backoff.</span>
 <span class="sd">                             A short sleep is used when a rate limit error is hit,</span>
 <span class="sd">                             then the requests is retried. Increase the sleep length</span>
-<span class="sd">                             if errors are hit until 10 unsuccesfull requests.</span>
+<span class="sd">                             if errors are hit until 10 unsuccessful requests.</span>
 <span class="sd">                             If True, overrides `delay_in_seconds`.</span>
 <span class="sd">        chat: Set this to True if a GPT-3.5 model is used.</span>
 <span class="sd">              See: https://platform.openai.com/docs/models/gpt-3-5</span>
@@ -2771,7 +2826,7 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 <span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is &#39;vectorizer&#39;, then the internal CountVectorizer</span>
 <span class="sd">                         is used to tokenize the document. These tokens are counted</span>
-<span class="sd">                         and trunctated depending on `doc_length`</span>
+<span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is a callable, then that callable is used to tokenize</span>
 <span class="sd">                         the document. These tokens are counted and truncated depending</span>
 <span class="sd">                         on `doc_length`</span>
@@ -2810,19 +2865,21 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 <span class="sd">    representation_model = OpenAI(client, model=&quot;gpt-3.5-turbo&quot;, delay_in_seconds=10, chat=True)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">client</span><span class="p">,</span>
-                 <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text-embedding-3-small&quot;</span><span class="p">,</span>
-                 <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">generator_kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-                 <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">exponential_backoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">chat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-                 <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                 <span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text-embedding-3-small&quot;</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">generator_kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exponential_backoff</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">chat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
 
@@ -2850,13 +2907,14 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stop&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">chat</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -2868,7 +2926,9 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 <span class="sd">            updated_topics: Updated topic representations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract the top n representative documents per topic</span>
-        <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">)</span>
+        <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
+            <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+        <span class="p">)</span>
 
         <span class="c1"># Generate using OpenAI&#39;s Language Model</span>
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2884,23 +2944,32 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat</span><span class="p">:</span>
                 <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">},</span>
-                    <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span>
+                    <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">},</span>
                 <span class="p">]</span>
-                <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">messages</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">}</span>
+                <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">messages</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">,</span>
+                <span class="p">}</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponential_backoff</span><span class="p">:</span>
                     <span class="n">response</span> <span class="o">=</span> <span class="n">chat_completions_with_backoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
                 <span class="c1"># Check whether content was actually generated</span>
-                <span class="c1"># Adresses #1570 for potential issues with OpenAI&#39;s content filter</span>
+                <span class="c1"># Addresses #1570 for potential issues with OpenAI&#39;s content filter</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">):</span>
                     <span class="n">label</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;topic: &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;No label returned&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponential_backoff</span><span class="p">:</span>
-                    <span class="n">response</span> <span class="o">=</span> <span class="n">completions_with_backoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">)</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">completions_with_backoff</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
+                        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                        <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">)</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -2963,7 +3032,7 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 
     <div class="doc doc-contents ">
 
-      <p>Extract topics</p>
+      <p>Extract topics.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -3019,13 +3088,14 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_openai.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>
@@ -3037,7 +3107,9 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
 <span class="sd">        updated_topics: Updated topic representations</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Extract the top n representative documents per topic</span>
-    <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span><span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">)</span>
+    <span class="n">repr_docs_mappings</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_extract_representative_docs</span><span class="p">(</span>
+        <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topics</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+    <span class="p">)</span>
 
     <span class="c1"># Generate using OpenAI&#39;s Language Model</span>
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3053,23 +3125,32 @@ prompt = &quot;I have the following documents: [DOCUMENTS]
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat</span><span class="p">:</span>
             <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">},</span>
-                <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span>
+                <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">},</span>
             <span class="p">]</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">messages</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">}</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">messages</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">,</span>
+            <span class="p">}</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponential_backoff</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="n">chat_completions_with_backoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="c1"># Check whether content was actually generated</span>
-            <span class="c1"># Adresses #1570 for potential issues with OpenAI&#39;s content filter</span>
+            <span class="c1"># Addresses #1570 for potential issues with OpenAI&#39;s content filter</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">):</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;topic: &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;No label returned&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exponential_backoff</span><span class="p">:</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">completions_with_backoff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">)</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">completions_with_backoff</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">,</span>
+                    <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">)</span>
             <span class="n">label</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>

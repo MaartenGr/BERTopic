@@ -3083,7 +3083,8 @@
 <p>Instead, the assignment of topics is done through cosine similarity of document embeddings and topic embeddings. This speeds up inferences significantly. </p>
 <p>To show its effect, let's start by disabling the logger:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">bertopic._utils</span> <span class="kn">import</span> <span class="n">MyLogger</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">MyLogger</span><span class="p">(</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">MyLogger</span><span class="p">()</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
 <span class="n">loaded_model</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">topic_model</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
 </code></pre></div>

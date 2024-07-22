@@ -2616,7 +2616,7 @@
 <a id="bertopic.plotting._distribution.visualize_distribution"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize the distribution of topic probabilities</p>
+      <p>Visualize the distribution of topic probabilities.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2651,7 +2651,7 @@
       <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".</p></td>
         <td><code>False</code></td>
@@ -2691,21 +2691,23 @@ style="width:1000px; height: 500px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_distribution.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                           <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                           <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">,</span>
-                           <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                           <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topic Probability Distribution&lt;/b&gt;&quot;</span><span class="p">,</span>
-                           <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
-                           <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize the distribution of topic probabilities</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_distribution</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">probabilities</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">min_probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topic Probability Distribution&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize the distribution of topic probabilities.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
 <span class="sd">        probabilities: An array of probability scores</span>
 <span class="sd">        min_probability: The minimum probability score to visualize.</span>
 <span class="sd">                         All others are ignored.</span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
 <span class="sd">        title: Title of the plot.</span>
@@ -2713,7 +2715,6 @@ style="width:1000px; height: 500px; border: 0px;""></iframe>
 <span class="sd">        height: The height of the figure.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    Make sure to fit the model before and only input the</span>
 <span class="sd">    probabilities of a single document:</span>
 
@@ -2731,11 +2732,15 @@ style="width:1000px; height: 500px; border: 0px;""></iframe>
 <span class="sd">    style=&quot;width:1000px; height: 500px; border: 0px;&quot;&quot;&gt;&lt;/iframe&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This visualization cannot be used if you have set `calculate_probabilities` to False &quot;</span>
-                         <span class="s2">&quot;as it uses the topic probabilities of all topics. &quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;This visualization cannot be used if you have set `calculate_probabilities` to False &quot;</span>
+            <span class="s2">&quot;as it uses the topic probabilities of all topics. &quot;</span>
+        <span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">probabilities</span> <span class="o">&gt;</span> <span class="n">min_probability</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;There are no values where `min_probability` is higher than the &quot;</span>
-                         <span class="s2">&quot;probabilities that were supplied. Lower `min_probability` to prevent this error.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;There are no values where `min_probability` is higher than the &quot;</span>
+            <span class="s2">&quot;probabilities that were supplied. Lower `min_probability` to prevent this error.&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Get values and indices equal or exceed the minimum probability</span>
     <span class="n">labels_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&gt;=</span> <span class="n">min_probability</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -2744,7 +2749,7 @@ style="width:1000px; height: 500px; border: 0px;""></iframe>
     <span class="c1"># Create labels</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">labels_idx</span><span class="p">]</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">l</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>  <span class="c1"># noqa: E741</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">labels_idx</span><span class="p">]</span>
@@ -2761,38 +2766,32 @@ style="width:1000px; height: 500px; border: 0px;""></iframe>
                 <span class="n">vals</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
 
     <span class="c1"># Create Figure</span>
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span>
-        <span class="n">x</span><span class="o">=</span><span class="n">vals</span><span class="p">,</span>
-        <span class="n">y</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
-        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#C8D2D7&#39;</span><span class="p">,</span>
-            <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6E8484&#39;</span><span class="p">,</span>
-                <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-        <span class="p">),</span>
-        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">vals</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#C8D2D7&quot;</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#6E8484&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="p">)</span>
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Probability&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mf">.95</span><span class="p">,</span>
-            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">),</span>
         <span class="p">},</span>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
-            <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-            <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span>
-        <span class="p">),</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span><span class="p">),</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span>

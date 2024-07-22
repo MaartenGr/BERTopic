@@ -2685,8 +2685,8 @@ across all classes.</p>
       <tr>
         <td><code>seed_words</code></td>
         <td><code>List[str]</code></td>
-        <td><p>Specific words that will have their idf value increased by 
-        the value of <code>seed_multiplier</code>. 
+        <td><p>Specific words that will have their idf value increased by
+        the value of <code>seed_multiplier</code>.
         NOTE: This will only increase the value of words that have an exact match.</p></td>
         <td><code>None</code></td>
       </tr>
@@ -2707,8 +2707,7 @@ across all classes.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ClassTfidfTransformer</span><span class="p">(</span><span class="n">TfidfTransformer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Class-based TF-IDF procedure using scikit-learns TfidfTransformer as a base.</span>
 
 <span class="sd">    ![](../algorithm/c-TF-IDF.svg)</span>
 
@@ -2727,24 +2726,25 @@ across all classes.</p>
 <span class="sd">                        `log(1+((avg_nr_samples - df + 0.5) / (df+0.5)))`</span>
 <span class="sd">        reduce_frequent_words: Takes the square root of the bag-of-words after normalizing the matrix.</span>
 <span class="sd">                               Helps to reduce the impact of words that appear too frequently.</span>
-<span class="sd">        seed_words: Specific words that will have their idf value increased by </span>
-<span class="sd">                    the value of `seed_multiplier`. </span>
+<span class="sd">        seed_words: Specific words that will have their idf value increased by</span>
+<span class="sd">                    the value of `seed_multiplier`.</span>
 <span class="sd">                    NOTE: This will only increase the value of words that have an exact match.</span>
 <span class="sd">        seed_multiplier: The value with which the idf values of the words in `seed_words`</span>
 <span class="sd">                         are multiplied.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    ```python</span>
 <span class="sd">    transformer = ClassTfidfTransformer()</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                 <span class="n">bm25_weighting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
-                 <span class="n">reduce_frequent_words</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">seed_words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">seed_multiplier</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span>
-                 <span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bm25_weighting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">reduce_frequent_words</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">seed_words</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed_multiplier</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bm25_weighting</span> <span class="o">=</span> <span class="n">bm25_weighting</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reduce_frequent_words</span> <span class="o">=</span> <span class="n">reduce_frequent_words</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed_words</span> <span class="o">=</span> <span class="n">seed_words</span>
@@ -2758,7 +2758,7 @@ across all classes.</p>
 <span class="sd">            X: A matrix of term/token counts.</span>
 <span class="sd">            multiplier: A multiplier for increasing/decreasing certain IDF scores</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">accept_sparse</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;csr&#39;</span><span class="p">,</span> <span class="s1">&#39;csc&#39;</span><span class="p">))</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">accept_sparse</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;csr&quot;</span><span class="p">,</span> <span class="s2">&quot;csc&quot;</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">sp</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
@@ -2774,26 +2774,29 @@ across all classes.</p>
 
             <span class="c1"># BM25-inspired weighting procedure</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bm25_weighting</span><span class="p">:</span>
-                <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">-</span> <span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)))</span>
+                <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">-</span> <span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)))</span>
 
             <span class="c1"># Divide the average number of samples by the word frequency</span>
             <span class="c1"># +1 is added to force values to be positive</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Multiplier to increase/decrease certain idf scores</span>
             <span class="k">if</span> <span class="n">multiplier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">idf</span> <span class="o">=</span> <span class="n">idf</span> <span class="o">*</span> <span class="n">multiplier</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_idf_diag</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">idf</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                      <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_features</span><span class="p">),</span>
-                                      <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csr&#39;</span><span class="p">,</span>
-                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_idf_diag</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span>
+                <span class="n">idf</span><span class="p">,</span>
+                <span class="n">offsets</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_features</span><span class="p">),</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;csr&quot;</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            X (sparse matrix): A matrix of term/token counts.</span>
@@ -2802,7 +2805,7 @@ across all classes.</p>
 <span class="sd">            X (sparse matrix): A c-TF-IDF matrix</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_idf</span><span class="p">:</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_frequent_words</span><span class="p">:</span>
                 <span class="n">X</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
@@ -2874,7 +2877,7 @@ across all classes.</p>
 <span class="sd">        X: A matrix of term/token counts.</span>
 <span class="sd">        multiplier: A multiplier for increasing/decreasing certain IDF scores</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">accept_sparse</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;csr&#39;</span><span class="p">,</span> <span class="s1">&#39;csc&#39;</span><span class="p">))</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">check_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">accept_sparse</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;csr&quot;</span><span class="p">,</span> <span class="s2">&quot;csc&quot;</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sp</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
@@ -2890,21 +2893,24 @@ across all classes.</p>
 
         <span class="c1"># BM25-inspired weighting procedure</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bm25_weighting</span><span class="p">:</span>
-            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">-</span> <span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)))</span>
+            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">-</span> <span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)))</span>
 
         <span class="c1"># Divide the average number of samples by the word frequency</span>
         <span class="c1"># +1 is added to force values to be positive</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">idf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">avg_nr_samples</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Multiplier to increase/decrease certain idf scores</span>
         <span class="k">if</span> <span class="n">multiplier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">idf</span> <span class="o">=</span> <span class="n">idf</span> <span class="o">*</span> <span class="n">multiplier</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_idf_diag</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="n">idf</span><span class="p">,</span> <span class="n">offsets</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                  <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_features</span><span class="p">),</span>
-                                  <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;csr&#39;</span><span class="p">,</span>
-                                  <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_idf_diag</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span>
+            <span class="n">idf</span><span class="p">,</span>
+            <span class="n">offsets</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_features</span><span class="p">),</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;csr&quot;</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div>
@@ -2927,7 +2933,7 @@ across all classes.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Transform a count-based matrix to c-TF-IDF</p>
+      <p>Transform a count-based matrix to c-TF-IDF.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2966,7 +2972,7 @@ across all classes.</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\vectorizers\_ctfidf.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform a count-based matrix to c-TF-IDF.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        X (sparse matrix): A matrix of term/token counts.</span>
@@ -2975,7 +2981,7 @@ across all classes.</p>
 <span class="sd">        X (sparse matrix): A c-TF-IDF matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_idf</span><span class="p">:</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;l1&#39;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_frequent_words</span><span class="p">:</span>
             <span class="n">X</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>

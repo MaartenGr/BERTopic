@@ -2616,7 +2616,7 @@
 <a id="bertopic.plotting._hierarchical_documents.visualize_hierarchical_documents"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize documents and their topics in 2D at different levels of hierarchy</p>
+      <p>Visualize documents and their topics in 2D at different levels of hierarchy.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2629,6 +2629,12 @@
     </tr>
   </thead>
   <tbody>
+      <tr>
+        <td><code>topic_model</code></td>
+        <td></td>
+        <td><p>A fitted BERTopic instance.</p></td>
+        <td><em>required</em></td>
+      </tr>
       <tr>
         <td><code>docs</code></td>
         <td><code>List[str]</code></td>
@@ -2689,8 +2695,8 @@
         <td><code>nr_levels</code></td>
         <td><code>int</code></td>
         <td><p>The number of levels to be visualized in the hierarchy. First, the distances
-       in <code>hierarchical_topics.Distance</code> are split in <code>nr_levels</code> lists of distances. 
-       Then, for each list of distances, the merged topics are selected that have a 
+       in <code>hierarchical_topics.Distance</code> are split in <code>nr_levels</code> lists of distances.
+       Then, for each list of distances, the merged topics are selected that have a
        distance less or equal to the maximum distance of the selected list of distances.
        NOTE: To get all possible merged steps, make sure that <code>nr_levels</code> is equal to
        the length of <code>hierarchical_topics</code>.</p></td>
@@ -2699,20 +2705,20 @@
       <tr>
         <td><code>level_scale</code></td>
         <td><code>str</code></td>
-        <td><p>Whether to apply a linear or logarithmic (log) scale levels of the distance 
-         vector. Linear scaling will perform an equal number of merges at each level 
-         while logarithmic scaling will perform more mergers in earlier levels to 
-         provide more resolution at higher levels (this can be used for when the number 
-         of topics is large). </p></td>
+        <td><p>Whether to apply a linear or logarithmic (log) scale levels of the distance
+         vector. Linear scaling will perform an equal number of merges at each level
+         while logarithmic scaling will perform more mergers in earlier levels to
+         provide more resolution at higher levels (this can be used for when the number
+         of topics is large).</p></td>
         <td><code>&#39;linear&#39;</code></td>
       </tr>
       <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".
-           NOTE: Custom labels are only generated for the original 
+           NOTE: Custom labels are only generated for the original
            un-merged topics.</p></td>
         <td><code>False</code></td>
       </tr>
@@ -2780,24 +2786,27 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_hierarchical_documents.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_hierarchical_documents</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                                     <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                                     <span class="n">hierarchical_topics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                                     <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">reduced_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">sample</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                     <span class="n">hide_annotations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                     <span class="n">hide_document_hover</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                     <span class="n">nr_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                                     <span class="n">level_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> 
-                                     <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Hierarchical Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
-                                     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
-                                     <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize documents and their topics in 2D at different levels of hierarchy</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_hierarchical_documents</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">hierarchical_topics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduced_embeddings</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sample</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">hide_annotations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">hide_document_hover</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">nr_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">level_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Hierarchical Documents and Topics&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">750</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize documents and their topics in 2D at different levels of hierarchy.</span>
 
 <span class="sd">    Arguments:</span>
+<span class="sd">        topic_model: A fitted BERTopic instance.</span>
 <span class="sd">        docs: The documents you used when calling either `fit` or `fit_transform`</span>
 <span class="sd">        hierarchical_topics: A dataframe that contains a hierarchy of topics</span>
 <span class="sd">                             represented by their parents and their children</span>
@@ -2815,27 +2824,26 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
 <span class="sd">        hide_document_hover: Hide the content of the documents when hovering over</span>
 <span class="sd">                             specific points. Helps to speed up generation of visualizations.</span>
 <span class="sd">        nr_levels: The number of levels to be visualized in the hierarchy. First, the distances</span>
-<span class="sd">                   in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances. </span>
-<span class="sd">                   Then, for each list of distances, the merged topics are selected that have a </span>
+<span class="sd">                   in `hierarchical_topics.Distance` are split in `nr_levels` lists of distances.</span>
+<span class="sd">                   Then, for each list of distances, the merged topics are selected that have a</span>
 <span class="sd">                   distance less or equal to the maximum distance of the selected list of distances.</span>
 <span class="sd">                   NOTE: To get all possible merged steps, make sure that `nr_levels` is equal to</span>
 <span class="sd">                   the length of `hierarchical_topics`.</span>
-<span class="sd">        level_scale: Whether to apply a linear or logarithmic (log) scale levels of the distance </span>
-<span class="sd">                     vector. Linear scaling will perform an equal number of merges at each level </span>
-<span class="sd">                     while logarithmic scaling will perform more mergers in earlier levels to </span>
-<span class="sd">                     provide more resolution at higher levels (this can be used for when the number </span>
-<span class="sd">                     of topics is large). </span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        level_scale: Whether to apply a linear or logarithmic (log) scale levels of the distance</span>
+<span class="sd">                     vector. Linear scaling will perform an equal number of merges at each level</span>
+<span class="sd">                     while logarithmic scaling will perform more mergers in earlier levels to</span>
+<span class="sd">                     provide more resolution at higher levels (this can be used for when the number</span>
+<span class="sd">                     of topics is large).</span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
-<span class="sd">                       NOTE: Custom labels are only generated for the original </span>
+<span class="sd">                       NOTE: Custom labels are only generated for the original</span>
 <span class="sd">                       un-merged topics.</span>
 <span class="sd">        title: Title of the plot.</span>
 <span class="sd">        width: The width of the figure.</span>
 <span class="sd">        height: The height of the figure.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the topics simply run:</span>
 
 <span class="sd">    ```python</span>
@@ -2877,7 +2885,7 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
 <span class="sd">    fig.write_html(&quot;path/to/file.html&quot;)</span>
 <span class="sd">    ```</span>
 
-<span class="sd">    NOTE:</span>
+<span class="sd">    Note:</span>
 <span class="sd">        This visualization was inspired by the scatter plot representation of Doc2Map:</span>
 <span class="sd">        https://github.com/louisgeisler/Doc2Map</span>
 
@@ -2893,7 +2901,7 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">topic_per_doc</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_per_doc</span><span class="p">)</span> <span class="o">==</span> <span class="n">topic</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="n">sample</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">sample</span><span class="p">)</span>
         <span class="n">indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
 
@@ -2915,7 +2923,7 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
 
     <span class="c1"># Reduce input embeddings</span>
     <span class="k">if</span> <span class="n">reduced_embeddings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">embeddings_to_reduce</span><span class="p">)</span>
+        <span class="n">umap_model</span> <span class="o">=</span> <span class="n">UMAP</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cosine&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">embeddings_to_reduce</span><span class="p">)</span>
         <span class="n">embeddings_2d</span> <span class="o">=</span> <span class="n">umap_model</span><span class="o">.</span><span class="n">embedding_</span>
     <span class="k">elif</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">reduced_embeddings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">embeddings_2d</span> <span class="o">=</span> <span class="n">reduced_embeddings</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
@@ -2928,17 +2936,28 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
 
     <span class="c1"># Create topic list for each level, levels are created by calculating the distance</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">Distance</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span> <span class="ow">or</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s1">&#39;logarithmic&#39;</span><span class="p">:</span>
-        <span class="n">log_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="n">stop</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="n">nr_levels</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s2">&quot;log&quot;</span> <span class="ow">or</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s2">&quot;logarithmic&quot;</span><span class="p">:</span>
+        <span class="n">log_indices</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span>
+                    <span class="n">start</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                    <span class="n">stop</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                    <span class="n">num</span><span class="o">=</span><span class="n">nr_levels</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
         <span class="n">log_indices</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
         <span class="n">max_distances</span> <span class="o">=</span> <span class="p">[</span><span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">log_indices</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s1">&#39;lin&#39;</span> <span class="ow">or</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
-        <span class="n">max_distances</span> <span class="o">=</span> <span class="p">[</span><span class="n">distances</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hierarchical_topics</span><span class="p">)),</span> <span class="n">nr_levels</span><span class="p">)][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s2">&quot;lin&quot;</span> <span class="ow">or</span> <span class="n">level_scale</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+        <span class="n">max_distances</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">distances</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hierarchical_topics</span><span class="p">)),</span> <span class="n">nr_levels</span><span class="p">)</span>
+        <span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;level_scale needs to be one of &#39;log&#39; or &#39;linear&#39;&quot;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">max_distance</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">max_distances</span><span class="p">):</span>
-
         <span class="c1"># Get topics below `max_distance`</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">:</span> <span class="n">topic</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">topic</span><span class="o">.</span><span class="n">unique</span><span class="p">()}</span>
         <span class="n">selection</span> <span class="o">=</span> <span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">Distance</span> <span class="o">&lt;=</span> <span class="n">max_distance</span><span class="p">,</span> <span class="p">:]</span>
@@ -2969,17 +2988,28 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
         <span class="k">if</span> <span class="n">topic</span> <span class="o">&lt;</span> <span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">Parent_ID</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="n">trace_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">topic</span><span class="p">]))[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="n">trace_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">topic</span><span class="p">]))[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="p">)</span>
                 <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
                     <span class="n">trace_name</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">topic</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">trace_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">word</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic</span><span class="p">(</span><span class="n">topic</span><span class="p">)][:</span><span class="mi">3</span><span class="p">])</span>
-                <span class="n">topic_names</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;trace_name&quot;</span><span class="p">:</span> <span class="n">trace_name</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span> <span class="s2">&quot;plot_text&quot;</span><span class="p">:</span> <span class="n">trace_name</span><span class="p">[:</span><span class="mi">40</span><span class="p">]}</span>
+                <span class="n">topic_names</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;trace_name&quot;</span><span class="p">:</span> <span class="n">trace_name</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span>
+                    <span class="s2">&quot;plot_text&quot;</span><span class="p">:</span> <span class="n">trace_name</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span>
+                <span class="p">}</span>
                 <span class="n">trace_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">trace_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span> <span class="o">+</span> <span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">Parent_ID</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="s2">&quot;Parent_Name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">trace_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">_&quot;</span>
+                <span class="o">+</span> <span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hierarchical_topics</span><span class="o">.</span><span class="n">Parent_ID</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="s2">&quot;Parent_Name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
             <span class="n">plot_text</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">name</span><span class="p">[:</span><span class="mi">20</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">trace_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]])</span>
-            <span class="n">topic_names</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;trace_name&quot;</span><span class="p">:</span> <span class="n">trace_name</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span> <span class="s2">&quot;plot_text&quot;</span><span class="p">:</span> <span class="n">plot_text</span><span class="p">[:</span><span class="mi">40</span><span class="p">]}</span>
+            <span class="n">topic_names</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;trace_name&quot;</span><span class="p">:</span> <span class="n">trace_name</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span>
+                <span class="s2">&quot;plot_text&quot;</span><span class="p">:</span> <span class="n">plot_text</span><span class="p">[:</span><span class="mi">40</span><span class="p">],</span>
+            <span class="p">}</span>
             <span class="n">trace_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace_name</span><span class="p">)</span>
 
     <span class="c1"># Prepare traces</span>
@@ -2990,17 +3020,17 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
         <span class="c1"># Outliers</span>
         <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">:</span>
             <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">go</span><span class="o">.</span><span class="n">Scattergl</span><span class="p">(</span>
-                        <span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;x&quot;</span><span class="p">],</span>
-                        <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
-                        <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
-                        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;other&quot;</span><span class="p">,</span>
-                        <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
-                        <span class="n">hovertext</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;doc&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_document_hover</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#CFD8DC&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-                    <span class="p">)</span>
+                <span class="n">go</span><span class="o">.</span><span class="n">Scattergl</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;x&quot;</span><span class="p">],</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers+text&quot;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;other&quot;</span><span class="p">,</span>
+                    <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+                    <span class="n">hovertext</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;doc&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_document_hover</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#CFD8DC&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
                 <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="c1"># Selected topics</span>
         <span class="k">if</span> <span class="n">topics</span><span class="p">:</span>
@@ -3012,8 +3042,7 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
         <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">unique_topics</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">topic</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">topics</span><span class="p">:</span>
-                    <span class="n">selection</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">topic</span><span class="p">)</span> <span class="o">&amp;</span>
-                                       <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">topic</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">topics</span><span class="p">)),</span> <span class="p">:]</span>
+                    <span class="n">selection</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">topic</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">topic</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">topics</span><span class="p">)),</span> <span class="p">:]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">selection</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;level_</span><span class="si">{</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">topic</span><span class="p">,</span> <span class="p">:]</span>
 
@@ -3032,8 +3061,8 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
                         <span class="n">hovertext</span><span class="o">=</span><span class="n">selection</span><span class="o">.</span><span class="n">doc</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hide_document_hover</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
                         <span class="n">name</span><span class="o">=</span><span class="n">topic_names</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">topic</span><span class="p">)][</span><span class="s2">&quot;trace_name&quot;</span><span class="p">],</span>
-                        <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
-                        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers+text&quot;</span><span class="p">,</span>
+                        <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
 
@@ -3063,27 +3092,39 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
         <span class="n">step</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
-            <span class="n">args</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">)}]</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">data</span><span class="p">)}],</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="n">step</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;visible&quot;</span><span class="p">][</span><span class="n">index</span><span class="o">+</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">step</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;visible&quot;</span><span class="p">][</span><span class="n">index</span> <span class="o">+</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
 
-    <span class="n">sliders</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">currentvalue</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;Level: &quot;</span><span class="p">},</span>
-        <span class="n">pad</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span>
-        <span class="n">steps</span><span class="o">=</span><span class="n">steps</span>
-    <span class="p">)]</span>
+    <span class="n">sliders</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">currentvalue</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;Level: &quot;</span><span class="p">},</span> <span class="n">pad</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">)]</span>
 
     <span class="c1"># Add grid in a &#39;plus&#39; shape</span>
-    <span class="n">x_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">))</span>
-    <span class="n">y_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">.15</span><span class="p">))</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
-                  <span class="n">x0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                  <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#CFD8DC&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
-                  <span class="n">x0</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                  <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#9E9E9E&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">x_range</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">y_range</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">*</span> <span class="mf">0.15</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">y0</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">x1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">y1</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#CFD8DC&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_shape</span><span class="p">(</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">y0</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">x1</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">y1</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#9E9E9E&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">y_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;D1&quot;</span><span class="p">,</span> <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">yshift</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">x_range</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;D2&quot;</span><span class="p">,</span> <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">xshift</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
@@ -3092,13 +3133,11 @@ style="width:1000px; height: 770px; border: 0px;""></iframe>
         <span class="n">sliders</span><span class="o">=</span><span class="n">sliders</span><span class="p">,</span>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">),</span>
         <span class="p">},</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>

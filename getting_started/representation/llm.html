@@ -2842,7 +2842,7 @@ For example, if we have the following prompt:</p>
 <li>The tokenizer used to calculate to split the document into segments used to count the length of a document. <ul>
 <li>If tokenizer is  <code>'char'</code>, then the document is split up into characters which are counted to adhere to <code>doc_length</code></li>
 <li>If tokenizer is <code>'whitespace'</code>, the document is split up into words separated by whitespaces. These words are counted       and truncated depending on <code>doc_length</code></li>
-<li>If tokenizer is <code>'vectorizer'</code>, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and trunctated depending on <code>doc_length</code></li>
+<li>If tokenizer is <code>'vectorizer'</code>, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and truncated depending on <code>doc_length</code></li>
 <li>If tokenizer is a callable, then that callable is used to tokenized the document. These tokens are counted and truncated depending on <code>doc_length</code></li>
 </ul>
 </li>
@@ -3048,7 +3048,7 @@ be inserted by using the <code>[KEYWORDS]</code> or documents with the <code>[DO
 </code></pre></div>
 <p>Three pieces of the prompt were created:  </p>
 <ul>
-<li><code>system_prompt</code> helps us guide the model during a conversation. For example, we can say that it is a helpful assisant that is specialized in labeling topics.</li>
+<li><code>system_prompt</code> helps us guide the model during a conversation. For example, we can say that it is a helpful assistant that is specialized in labeling topics.</li>
 <li><code>example_prompt</code> gives an example of a correctly labeled topic to guide Llama 2</li>
 <li><code>main_prompt</code> contains the main question we are going to ask it, namely to label a topic. Note that it uses the <code>[DOCUMENTS]</code>  and <code>[KEYWORDS]</code> to provide the most relevant documents and keywords as additional context</li>
 </ul>

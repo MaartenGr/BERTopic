@@ -2682,7 +2682,7 @@ This returns a chain that takes a list of documents and a question as input.</p>
         <td><code>diversity</code></td>
         <td><code>float</code></td>
         <td><p>The diversity of documents to pass to LangChain.
-       Accepts values between 0 and 1. A higher 
+       Accepts values between 0 and 1. A higher
        values results in passing more diverse documents
        whereas lower values passes more similar documents.</p></td>
         <td><code>None</code></td>
@@ -2698,15 +2698,15 @@ This returns a chain that takes a list of documents and a question as input.</p>
         <td><code>tokenizer</code></td>
         <td><code>Union[str, Callable]</code></td>
         <td><p>The tokenizer used to calculate to split the document into segments
-       used to count the length of a document. 
-           * If tokenizer is 'char', then the document is split up 
+       used to count the length of a document.
+           * If tokenizer is 'char', then the document is split up
              into characters which are counted to adhere to <code>doc_length</code>
            * If tokenizer is 'whitespace', the document is split up
              into words separated by whitespaces. These words are counted
              and truncated depending on <code>doc_length</code>
            * If tokenizer is 'vectorizer', then the internal CountVectorizer
              is used to tokenize the document. These tokens are counted
-             and trunctated depending on <code>doc_length</code>. They are decoded with 
+             and truncated depending on <code>doc_length</code>. They are decoded with
              whitespaces.
            * If tokenizer is a callable, then that callable is used to tokenize
              the document. These tokens are counted and truncated depending
@@ -2786,7 +2786,7 @@ The example below uses the LangChain Expression Language:</p>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_langchain.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">LangChain</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Using chains in langchain to generate topic labels.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Using chains in langchain to generate topic labels.</span>
 
 <span class="sd">    The classic example uses `langchain.chains.question_answering.load_qa_chain`.</span>
 <span class="sd">    This returns a chain that takes a list of documents and a question as input.</span>
@@ -2808,21 +2808,21 @@ The example below uses the LangChain Expression Language:</p>
 <span class="sd">                 formats the representative documents within the prompt.</span>
 <span class="sd">        nr_docs: The number of documents to pass to LangChain</span>
 <span class="sd">        diversity: The diversity of documents to pass to LangChain.</span>
-<span class="sd">                   Accepts values between 0 and 1. A higher </span>
+<span class="sd">                   Accepts values between 0 and 1. A higher</span>
 <span class="sd">                   values results in passing more diverse documents</span>
 <span class="sd">                   whereas lower values passes more similar documents.</span>
 <span class="sd">        doc_length: The maximum length of each document. If a document is longer,</span>
 <span class="sd">                    it will be truncated. If None, the entire document is passed.</span>
 <span class="sd">        tokenizer: The tokenizer used to calculate to split the document into segments</span>
-<span class="sd">                   used to count the length of a document. </span>
-<span class="sd">                       * If tokenizer is &#39;char&#39;, then the document is split up </span>
+<span class="sd">                   used to count the length of a document.</span>
+<span class="sd">                       * If tokenizer is &#39;char&#39;, then the document is split up</span>
 <span class="sd">                         into characters which are counted to adhere to `doc_length`</span>
 <span class="sd">                       * If tokenizer is &#39;whitespace&#39;, the document is split up</span>
 <span class="sd">                         into words separated by whitespaces. These words are counted</span>
 <span class="sd">                         and truncated depending on `doc_length`</span>
 <span class="sd">                       * If tokenizer is &#39;vectorizer&#39;, then the internal CountVectorizer</span>
 <span class="sd">                         is used to tokenize the document. These tokens are counted</span>
-<span class="sd">                         and trunctated depending on `doc_length`. They are decoded with </span>
+<span class="sd">                         and truncated depending on `doc_length`. They are decoded with</span>
 <span class="sd">                         whitespaces.</span>
 <span class="sd">                       * If tokenizer is a callable, then that callable is used to tokenize</span>
 <span class="sd">                         the document. These tokens are counted and truncated depending</span>
@@ -2905,15 +2905,17 @@ The example below uses the LangChain Expression Language:</p>
 <span class="sd">    representation_model = LangChain(chain, prompt=representation_prompt)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">chain</span><span class="p">,</span>
-                 <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-                 <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">chain_config</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">chain</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">nr_docs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">diversity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">doc_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chain_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chain</span> <span class="o">=</span> <span class="n">chain</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">prompt</span> <span class="k">if</span> <span class="n">prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DEFAULT_PROMPT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_prompt_</span> <span class="o">=</span> <span class="n">DEFAULT_PROMPT</span>
@@ -2923,13 +2925,14 @@ The example below uses the LangChain Expression Language:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span> <span class="o">=</span> <span class="n">doc_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
 
-    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">topic_model</span><span class="p">,</span>
-                       <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                       <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                       <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+    <span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">topic_model</span><span class="p">,</span>
+        <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+        <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            topic_model: A BERTopic model</span>
@@ -2947,20 +2950,13 @@ The example below uses the LangChain Expression Language:</p>
             <span class="n">topics</span><span class="o">=</span><span class="n">topics</span><span class="p">,</span>
             <span class="n">nr_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
             <span class="n">nr_repr_docs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span>
-            <span class="n">diversity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+            <span class="n">diversity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Generate label using langchain&#39;s batch functionality</span>
         <span class="n">chain_docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">[</span>
-                <span class="n">Document</span><span class="p">(</span>
-                    <span class="n">page_content</span><span class="o">=</span><span class="n">truncate_document</span><span class="p">(</span>
-                        <span class="n">topic_model</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span>
-                        <span class="n">doc</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
+                <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="n">truncate_document</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span>
             <span class="p">]</span>
             <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
@@ -2975,16 +2971,10 @@ The example below uses the LangChain Expression Language:</p>
                 <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[KEYWORDS]&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
                 <span class="n">prompts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
 
-            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span>
-                <span class="k">for</span> <span class="n">docs</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">chain_docs</span><span class="p">,</span> <span class="n">prompts</span><span class="p">)</span>
-            <span class="p">]</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span> <span class="k">for</span> <span class="n">docs</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">chain_docs</span><span class="p">,</span> <span class="n">prompts</span><span class="p">)]</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">}</span>
-                <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">chain_docs</span>
-            <span class="p">]</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">}</span> <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">chain_docs</span><span class="p">]</span>
 
         <span class="c1"># `self.chain` must return a dict with an `output_text` key</span>
         <span class="c1"># same output key as the `StuffDocumentsChain` returned by `load_qa_chain`</span>
@@ -2992,8 +2982,7 @@ The example below uses the LangChain Expression Language:</p>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
 
         <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">topic</span><span class="p">:</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)]</span>
-            <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="n">topic</span><span class="p">:</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)]</span> <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">labels</span><span class="p">)</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">updated_topics</span>
@@ -3025,7 +3014,7 @@ The example below uses the LangChain Expression Language:</p>
 
     <div class="doc doc-contents ">
 
-      <p>Extract topics</p>
+      <p>Extract topics.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -3081,13 +3070,14 @@ The example below uses the LangChain Expression Language:</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\representation\_langchain.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                   <span class="n">topic_model</span><span class="p">,</span>
-                   <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                   <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
-                   <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span>
-                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Extract topics</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">extract_topics</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">c_tf_idf</span><span class="p">:</span> <span class="n">csr_matrix</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract topics.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A BERTopic model</span>
@@ -3105,20 +3095,13 @@ The example below uses the LangChain Expression Language:</p>
         <span class="n">topics</span><span class="o">=</span><span class="n">topics</span><span class="p">,</span>
         <span class="n">nr_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
         <span class="n">nr_repr_docs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nr_docs</span><span class="p">,</span>
-        <span class="n">diversity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diversity</span>
+        <span class="n">diversity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diversity</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Generate label using langchain&#39;s batch functionality</span>
     <span class="n">chain_docs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">[</span>
-            <span class="n">Document</span><span class="p">(</span>
-                <span class="n">page_content</span><span class="o">=</span><span class="n">truncate_document</span><span class="p">(</span>
-                    <span class="n">topic_model</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span>
-                    <span class="n">doc</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="n">truncate_document</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">doc</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
@@ -3133,16 +3116,10 @@ The example below uses the LangChain Expression Language:</p>
             <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[KEYWORDS]&quot;</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
             <span class="n">prompts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
 
-        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span>
-            <span class="k">for</span> <span class="n">docs</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">chain_docs</span><span class="p">,</span> <span class="n">prompts</span><span class="p">)</span>
-        <span class="p">]</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}</span> <span class="k">for</span> <span class="n">docs</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">chain_docs</span><span class="p">,</span> <span class="n">prompts</span><span class="p">)]</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">}</span>
-            <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">chain_docs</span>
-        <span class="p">]</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;input_documents&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">}</span> <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">chain_docs</span><span class="p">]</span>
 
     <span class="c1"># `self.chain` must return a dict with an `output_text` key</span>
     <span class="c1"># same output key as the `StuffDocumentsChain` returned by `load_qa_chain`</span>
@@ -3150,8 +3127,7 @@ The example below uses the LangChain Expression Language:</p>
     <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="s2">&quot;output_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
 
     <span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">topic</span><span class="p">:</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)]</span>
-        <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">topic</span><span class="p">:</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)]</span> <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">repr_docs_mappings</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">labels</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">updated_topics</span>

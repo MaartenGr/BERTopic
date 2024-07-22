@@ -2616,9 +2616,9 @@
 <a id="bertopic.plotting._heatmap.visualize_heatmap"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize a heatmap of the topic's similarity matrix</p>
-<p>Based on the cosine similarity matrix between topic embeddings,
-a heatmap is created showing the similarity between topics.</p>
+      <p>Visualize a heatmap of the topic's similarity matrix.</p>
+<p>Based on the cosine similarity matrix between topic embeddings (either c-TF-IDF or the embeddings from the embedding
+model), a heatmap is created showing the similarity between topics.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2657,9 +2657,16 @@ a heatmap is created showing the similarity between topics.</p>
         <td><code>None</code></td>
       </tr>
       <tr>
+        <td><code>use_ctfidf</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the embeddings
+        from the embedding model are used.</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".</p></td>
         <td><code>False</code></td>
@@ -2714,18 +2721,21 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_heatmap.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_heatmap</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                      <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                      <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Similarity Matrix&lt;/b&gt;&quot;</span><span class="p">,</span>
-                      <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
-                      <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize a heatmap of the topic&#39;s similarity matrix</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_heatmap</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_ctfidf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Similarity Matrix&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">800</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize a heatmap of the topic&#39;s similarity matrix.</span>
 
-<span class="sd">    Based on the cosine similarity matrix between topic embeddings,</span>
-<span class="sd">    a heatmap is created showing the similarity between topics.</span>
+<span class="sd">    Based on the cosine similarity matrix between topic embeddings (either c-TF-IDF or the embeddings from the embedding</span>
+<span class="sd">    model), a heatmap is created showing the similarity between topics.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
@@ -2733,7 +2743,9 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
 <span class="sd">        top_n_topics: Only select the top n most frequent topics.</span>
 <span class="sd">        n_clusters: Create n clusters and order the similarity</span>
 <span class="sd">                    matrix by those clusters.</span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the embeddings</span>
+<span class="sd">                    from the embedding model are used.</span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
 <span class="sd">        title: Title of the plot.</span>
@@ -2744,7 +2756,6 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
 <span class="sd">        fig: A plotly figure</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the similarity matrix of</span>
 <span class="sd">    topics simply run:</span>
 
@@ -2761,12 +2772,9 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
 <span class="sd">    &lt;iframe src=&quot;../../getting_started/visualization/heatmap.html&quot;</span>
 <span class="sd">    style=&quot;width:1000px; height: 720px; border: 0px;&quot;&quot;&gt;&lt;/iframe&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Select topic embeddings</span>
-    <span class="k">if</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">)[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">:]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">[</span><span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">:]</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">select_topic_representation</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">c_tf_idf_</span><span class="p">,</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_embeddings_</span><span class="p">,</span> <span class="n">use_ctfidf</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span>
+        <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span> <span class="p">:</span>
+    <span class="p">]</span>
 
     <span class="c1"># Select topics based on top_n and topics args</span>
     <span class="n">freq_df</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span>
@@ -2782,12 +2790,11 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
     <span class="n">sorted_topics</span> <span class="o">=</span> <span class="n">topics</span>
     <span class="k">if</span> <span class="n">n_clusters</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">n_clusters</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">topics</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure to set `n_clusters` lower than &quot;</span>
-                             <span class="s2">&quot;the total number of unique topics.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure to set `n_clusters` lower than &quot;</span> <span class="s2">&quot;the total number of unique topics.&quot;</span><span class="p">)</span>
 
         <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">embeddings</span><span class="p">[</span><span class="n">topics</span><span class="p">])</span>
-        <span class="n">Z</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">,</span> <span class="s1">&#39;ward&#39;</span><span class="p">)</span>
-        <span class="n">clusters</span> <span class="o">=</span> <span class="n">fcluster</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;maxclust&#39;</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">,</span> <span class="s2">&quot;ward&quot;</span><span class="p">)</span>
+        <span class="n">clusters</span> <span class="o">=</span> <span class="n">fcluster</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s2">&quot;maxclust&quot;</span><span class="p">)</span>
 
         <span class="c1"># Extract new order of topics</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">cluster</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">}</span>
@@ -2803,7 +2810,9 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
 
     <span class="c1"># Create labels</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">sorted_topics</span><span class="p">]</span>
+        <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[[</span><span class="nb">str</span><span class="p">(</span><span class="n">topic</span><span class="p">),</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_aspects_</span><span class="p">[</span><span class="n">custom_labels</span><span class="p">][</span><span class="n">topic</span><span class="p">]</span> <span class="k">for</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">sorted_topics</span>
+        <span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
@@ -2813,34 +2822,29 @@ style="width:1000px; height: 720px; border: 0px;""></iframe>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">[:</span><span class="mi">4</span><span class="p">]])</span> <span class="k">for</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
         <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">]</span>
 
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">,</span>
-                    <span class="n">labels</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;Similarity Score&quot;</span><span class="p">),</span>
-                    <span class="n">x</span><span class="o">=</span><span class="n">new_labels</span><span class="p">,</span>
-                    <span class="n">y</span><span class="o">=</span><span class="n">new_labels</span><span class="p">,</span>
-                    <span class="n">color_continuous_scale</span><span class="o">=</span><span class="s1">&#39;GnBu&#39;</span>
-                    <span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">distance_matrix</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;Similarity Score&quot;</span><span class="p">),</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">new_labels</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">new_labels</span><span class="p">,</span>
+        <span class="n">color_continuous_scale</span><span class="o">=</span><span class="s2">&quot;GnBu&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mf">.95</span><span class="p">,</span>
-            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.55</span><span class="p">,</span>
-            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.55</span><span class="p">,</span>
+            <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">),</span>
         <span class="p">},</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
-            <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-            <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span>
-        <span class="p">),</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend_title_text</span><span class="o">=</span><span class="s1">&#39;Trend&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend_title_text</span><span class="o">=</span><span class="s2">&quot;Trend&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div>

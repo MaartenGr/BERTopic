@@ -2616,7 +2616,7 @@
 <a id="bertopic.plotting._topics_per_class.visualize_topics_per_class"></a>
     <div class="doc doc-contents first">
 
-      <p>Visualize topics per class</p>
+      <p>Visualize topics per class.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2663,7 +2663,7 @@
       <tr>
         <td><code>custom_labels</code></td>
         <td><code>Union[bool, str]</code></td>
-        <td><p>If bool, whether to use custom topic labels that were defined using 
+        <td><p>If bool, whether to use custom topic labels that were defined using
            <code>topic_model.set_topic_labels</code>.
            If <code>str</code>, it uses labels from other aspects, e.g., "Aspect1".</p></td>
         <td><code>False</code></td>
@@ -2718,16 +2718,18 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
 
         <details class="quote">
           <summary>Source code in <code>bertopic\plotting\_topics_per_class.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics_per_class</span><span class="p">(</span><span class="n">topic_model</span><span class="p">,</span>
-                               <span class="n">topics_per_class</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-                               <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                               <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                               <span class="n">normalize_frequency</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                               <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                               <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topics per Class&lt;/b&gt;&quot;</span><span class="p">,</span>
-                               <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
-                               <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Visualize topics per class</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">visualize_topics_per_class</span><span class="p">(</span>
+    <span class="n">topic_model</span><span class="p">,</span>
+    <span class="n">topics_per_class</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">top_n_topics</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">topics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">normalize_frequency</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">custom_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&lt;b&gt;Topics per Class&lt;/b&gt;&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1250</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Visualize topics per class.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        topic_model: A fitted BERTopic instance.</span>
@@ -2736,7 +2738,7 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
 <span class="sd">        top_n_topics: To visualize the most frequent topics instead of all</span>
 <span class="sd">        topics: Select which topics you would like to be visualized</span>
 <span class="sd">        normalize_frequency: Whether to normalize each topic&#39;s frequency individually</span>
-<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using </span>
+<span class="sd">        custom_labels: If bool, whether to use custom topic labels that were defined using</span>
 <span class="sd">                       `topic_model.set_topic_labels`.</span>
 <span class="sd">                       If `str`, it uses labels from other aspects, e.g., &quot;Aspect1&quot;.</span>
 <span class="sd">        title: Title of the plot.</span>
@@ -2747,7 +2749,6 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
 <span class="sd">        A plotly.graph_objects.Figure including all traces</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    To visualize the topics per class, simply run:</span>
 
 <span class="sd">    ```python</span>
@@ -2764,7 +2765,15 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
 <span class="sd">    &lt;iframe src=&quot;../../getting_started/visualization/topics_per_class.html&quot;</span>
 <span class="sd">    style=&quot;width:1400px; height: 1000px; border: 0px;&quot;&quot;&gt;&lt;/iframe&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;#E69F00&quot;</span><span class="p">,</span> <span class="s2">&quot;#56B4E9&quot;</span><span class="p">,</span> <span class="s2">&quot;#009E73&quot;</span><span class="p">,</span> <span class="s2">&quot;#F0E442&quot;</span><span class="p">,</span> <span class="s2">&quot;#D55E00&quot;</span><span class="p">,</span> <span class="s2">&quot;#0072B2&quot;</span><span class="p">,</span> <span class="s2">&quot;#CC79A7&quot;</span><span class="p">]</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;#E69F00&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;#56B4E9&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;#009E73&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;#F0E442&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;#D55E00&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;#0072B2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;#CC79A7&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
 
     <span class="c1"># Select topics based on top_n and topics args</span>
     <span class="n">freq_df</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">get_topic_freq</span><span class="p">()</span>
@@ -2783,10 +2792,13 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
         <span class="n">topic_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span> <span class="k">else</span> <span class="n">label</span><span class="p">[:</span><span class="mi">27</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">topic_names</span><span class="p">]</span>
         <span class="n">topic_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">topic_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
     <span class="k">elif</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">custom_labels</span><span class="p">:</span>
-        <span class="n">topic_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">topic_names</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">custom_labels_</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">_outliers</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">topic_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">[:</span><span class="mi">40</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">40</span> <span class="k">else</span> <span class="n">value</span>
-                       <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">topic_names</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">[:</span><span class="mi">40</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">40</span> <span class="k">else</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_labels_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
     <span class="n">topics_per_class</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topics_per_class</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">topic_names</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">topics_per_class</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">topics_per_class</span><span class="o">.</span><span class="n">Topic</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">selected_topics</span><span class="p">),</span> <span class="p">:]</span>
 
@@ -2804,14 +2816,18 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
             <span class="n">x</span> <span class="o">=</span> <span class="n">normalize</span><span class="p">(</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Frequency</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">trace_data</span><span class="o">.</span><span class="n">Frequency</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Class</span><span class="p">,</span>
-                             <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
-                             <span class="n">visible</span><span class="o">=</span><span class="n">visible</span><span class="p">,</span>
-                             <span class="n">marker_color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="mi">7</span><span class="p">],</span>
-                             <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
-                             <span class="n">name</span><span class="o">=</span><span class="n">topic_name</span><span class="p">,</span>
-                             <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span>
-                             <span class="n">hovertext</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;&lt;b&gt;Topic </span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s1">&lt;/b&gt;&lt;br&gt;Words: </span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">]))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">trace_data</span><span class="o">.</span><span class="n">Class</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+                <span class="n">visible</span><span class="o">=</span><span class="n">visible</span><span class="p">,</span>
+                <span class="n">marker_color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="mi">7</span><span class="p">],</span>
+                <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">topic_name</span><span class="p">,</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span>
+                <span class="n">hovertext</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;&lt;b&gt;Topic </span><span class="si">{</span><span class="n">topic</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;br&gt;Words: </span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="c1"># Styling of the visualization</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2820,26 +2836,20 @@ style="width:1400px; height: 1000px; border: 0px;""></iframe>
         <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Normalized Frequency&quot;</span> <span class="k">if</span> <span class="n">normalize_frequency</span> <span class="k">else</span> <span class="s2">&quot;Frequency&quot;</span><span class="p">,</span>
         <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Class&quot;</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mf">.95</span><span class="p">,</span>
-            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">,</span>
-            <span class="s1">&#39;xanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;yanchor&#39;</span><span class="p">:</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;font&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
-                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">)</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.40</span><span class="p">,</span>
+            <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;font&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">),</span>
         <span class="p">},</span>
         <span class="n">template</span><span class="o">=</span><span class="s2">&quot;simple_white&quot;</span><span class="p">,</span>
         <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
-            <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-            <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span>
-        <span class="p">),</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Rockwell&quot;</span><span class="p">),</span>
         <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
             <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&lt;b&gt;Global Topic Representation&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">),</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div>

@@ -2632,7 +2632,7 @@
 <a id="bertopic.backend._openai.OpenAIBackend"></a>
     <div class="doc doc-contents first">
 
-      <p>OpenAI Embedding Model</p>
+      <p>OpenAI Embedding Model.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2694,7 +2694,7 @@
         <details class="quote">
           <summary>Source code in <code>bertopic\backend\_openai.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">OpenAIBackend</span><span class="p">(</span><span class="n">BaseEmbedder</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; OpenAI Embedding Model</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;OpenAI Embedding Model.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        client: A `openai.OpenAI` client.</span>
@@ -2709,7 +2709,6 @@
 <span class="sd">                          deployment_ids.</span>
 
 <span class="sd">    Examples:</span>
-
 <span class="sd">    ```python</span>
 <span class="sd">    import openai</span>
 <span class="sd">    from bertopic.backend import OpenAIBackend</span>
@@ -2718,12 +2717,15 @@
 <span class="sd">    openai_embedder = OpenAIBackend(client, &quot;text-embedding-ada-002&quot;)</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">,</span>
-                 <span class="n">embedding_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text-embedding-ada-002&quot;</span><span class="p">,</span>
-                 <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">generator_kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">,</span>
+        <span class="n">embedding_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text-embedding-ada-002&quot;</span><span class="p">,</span>
+        <span class="n">delay_in_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">generator_kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">embedding_model</span> <span class="o">=</span> <span class="n">embedding_model</span>
@@ -2736,11 +2738,9 @@
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;engine&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">generator_kwargs</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_model</span>
 
-    <span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-              <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Embed a list of n documents/words into an n-dimensional</span>
-<span class="sd">        matrix of embeddings</span>
+    <span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Embed a list of n documents/words into an n-dimensional</span>
+<span class="sd">        matrix of embeddings.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            documents: A list of documents or words to be embedded</span>
@@ -2772,7 +2772,7 @@
 
     <span class="k">def</span> <span class="nf">_chunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">documents</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">):</span>
-            <span class="k">yield</span> <span class="n">documents</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
+            <span class="k">yield</span> <span class="n">documents</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">]</span>
 </code></pre></div>
         </details>
 
@@ -2802,7 +2802,7 @@
     <div class="doc doc-contents ">
 
       <p>Embed a list of n documents/words into an n-dimensional
-matrix of embeddings</p>
+matrix of embeddings.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -2847,11 +2847,9 @@ that each have an embeddings size of <code>m</code></p></td>
 </table>
         <details class="quote">
           <summary>Source code in <code>bertopic\backend\_openai.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-          <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-          <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Embed a list of n documents/words into an n-dimensional</span>
-<span class="sd">    matrix of embeddings</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Embed a list of n documents/words into an n-dimensional</span>
+<span class="sd">    matrix of embeddings.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        documents: A list of documents or words to be embedded</span>
