@@ -5,6 +5,33 @@ hide:
 
 # Changelog
 
+
+## **Version 0.16.3**
+*Release date: 22 July, 2024*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Simplify zero-shot topic modeling by [@ianrandman](https://github.com/ianrandman) in [#2060](https://github.com/MaartenGr/BERTopic/pull/2060)
+* Option to choose between c-TF-IDF and Topic Embeddings in many functions by [@azikoss](https://github.com/azikoss) in [#1894](https://github.com/MaartenGr/BERTopic/pull/1894)
+    * Use the `use_ctfidf` parameter in the following function to choose between c-TF-IDF and topic embeddings:
+        * `hierarchical_topics`, `reduce_topics`, `visualize_hierarchy`, `visualize_heatmap`, `visualize_topics`
+* Linting with Ruff by [@afuetterer](https://github.com/afuetterer) in [#2033](https://github.com/MaartenGr/BERTopic/pull/2033)
+* Switch from setup.py to pyproject.toml by [@afuetterer](https://github.com/afuetterer) in [#1978](https://github.com/MaartenGr/BERTopic/pull/1978)
+* In multi-aspect context, allow Main model to be chained by [@ddicato](https://github.com/ddicato) in [#2002](https://github.com/MaartenGr/BERTopic/pull/2002)
+
+<h3><b>Fixes:</a></b></h3>
+
+* Added templates for [issues](https://github.com/MaartenGr/BERTopic/tree/master/.github/ISSUE_TEMPLATE) and [pull requests](https://github.com/MaartenGr/BERTopic/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+* Update River documentation example by [@Proteusiq](https://github.com/Proteusiq) in [#2004](https://github.com/MaartenGr/BERTopic/pull/2004)
+* Fix PartOfSpeech reproducibility by [@Greenpp](https://github.com/Greenpp) in [#1996](https://github.com/MaartenGr/BERTopic/pull/1996)
+* Fix PartOfSpeech ignoring first word by [@Greenpp](https://github.com/Greenpp) in [#2024](https://github.com/MaartenGr/BERTopic/pull/2024)
+* Make sklearn embedding backend auto-select more cautious by [@freddyheppell](https://github.com/freddyheppell) in [#1984](https://github.com/MaartenGr/BERTopic/pull/1984)
+* Fix typos by [@afuetterer](https://github.com/afuetterer) in [#1974](https://github.com/MaartenGr/BERTopic/pull/1974)
+* Fix hierarchical_topics(...) when the distances between three clusters are the same by [@azikoss](https://github.com/azikoss) in [#1929](https://github.com/MaartenGr/BERTopic/pull/1929)
+* Fixes to chain strategy example in outlier_reduction.md by [@reuning](https://github.com/reuning) in [#2065](https://github.com/MaartenGr/BERTopic/pull/2065)
+* Remove obsolete flake8 config and update line length by [@afuetterer](https://github.com/afuetterer) in [#22066](https://github.com/MaartenGr/BERTopic/pull/2066)
+
+
 ## **Version 0.16.2**
 *Release date: 12 May, 2024*
 

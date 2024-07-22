@@ -2387,6 +2387,7 @@ class BERTopic:
         self,
         topics: List[int] = None,
         top_n_topics: int = None,
+        use_ctfidf: bool = False,
         custom_labels: bool = False,
         title: str = "<b>Intertopic Distance Map</b>",
         width: int = 650,
@@ -2403,6 +2404,7 @@ class BERTopic:
                     For example, if you want to visualize only topics 1 through 5:
                     `topics = [1, 2, 3, 4, 5]`.
             top_n_topics: Only select the top n most frequent topics
+            use_ctfidf: Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
             title: Title of the plot.
@@ -2428,6 +2430,7 @@ class BERTopic:
             self,
             topics=topics,
             top_n_topics=top_n_topics,
+            use_ctfidf=use_ctfidf,
             custom_labels=custom_labels,
             title=title,
             width=width,
