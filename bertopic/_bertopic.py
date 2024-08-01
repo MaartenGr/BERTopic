@@ -313,7 +313,7 @@ class BERTopic:
         if self._is_zeroshot():
             # Need to correct labels from zero-shot topics
             topic_id_to_zeroshot_label = {
-                topic_id: self.zeroshot_topic_list[zeroshot_topic_idx]
+                self.topic_mapper_.get_mappings()[topic_id]: self.zeroshot_topic_list[zeroshot_topic_idx]
                 for topic_id, zeroshot_topic_idx in self._topic_id_to_zeroshot_topic_idx.items()
             }
             topic_labels.update(topic_id_to_zeroshot_label)
@@ -453,10 +453,12 @@ class BERTopic:
             documents, embeddings, assigned_documents, assigned_embeddings = self._zeroshot_topic_modeling(
                 documents, embeddings
             )
+            
             # Filter UMAP embeddings to only non-assigned embeddings to be used for clustering
-            umap_embeddings = self.umap_model.transform(embeddings)
+            if len(documents) > 0:
+                umap_embeddings = self.umap_model.transform(embeddings)
 
-        if len(documents) > 0:  # No zero-shot topics matched
+        if len(documents) > 0:
             # Cluster reduced embeddings
             documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, y=y)
             if self._is_zeroshot() and len(assigned_documents) > 0:
@@ -467,7 +469,6 @@ class BERTopic:
             # All documents matches zero-shot topics
             documents = assigned_documents
             embeddings = assigned_embeddings
-        topics_before_reduction = self.topics_
 
         # Sort and Map Topic IDs by their frequency
         if not self.nr_topics:
@@ -505,17 +506,11 @@ class BERTopic:
             sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
 
             if self.calculate_probabilities:
-                probabilities = sim_matrix
+                self.probabilities_ = sim_matrix
             else:
-                # Use `topics_before_reduction` because `self.topics_` may have already been updated from
-                # reducing topics, and the original probabilities are needed for `self._map_probabilities()`
-                probabilities = sim_matrix[
-                    np.arange(len(documents)),
-                    np.array(topics_before_reduction) + self._outliers,
-                ]
-
-        # Resulting output
-        self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
+                self.probabilities_ = np.max(sim_matrix, axis=1)
+        else:
+            self.probabilities_ = self._map_probabilities(probabilities, original_topics=True)
         predictions = documents.Topic.to_list()
 
         return predictions, self.probabilities_
@@ -3835,18 +3830,23 @@ class BERTopic:
 
         # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
         num_zeroshot_topics = len(assigned_documents["Topic"].unique())
-        if self.nr_topics and not self.nr_topics > num_zeroshot_topics:
-            raise ValueError(
-                f"The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics "
-                f"({num_zeroshot_topics}). Consider raising nr_topics or raising the "
-                f"zeroshot_min_similarity ({self.zeroshot_min_similarity})."
-            )
+        if self.nr_topics != "auto":
+            if self.nr_topics and not self.nr_topics > num_zeroshot_topics:
+                raise ValueError(
+                    f"The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics "
+                    f"({num_zeroshot_topics}). Consider raising nr_topics or raising the "
+                    f"zeroshot_min_similarity ({self.zeroshot_min_similarity})."
+                )
 
         # Select non-assigned topics to be clustered
         documents = documents.iloc[non_assigned_ids]
         documents["Old_ID"] = documents["ID"].copy()
         documents["ID"] = range(len(documents))
         embeddings = embeddings[non_assigned_ids]
+
+        if len(documents) == 0:
+            self.topics_ = assigned_documents["Topic"].values.tolist()
+            self.topic_mapper_ = TopicMapper(self.topics_)
 
         logger.info("Zeroshot Step 1 - Completed \u2713")
         return documents, embeddings, assigned_documents, assigned_embeddings
@@ -4108,7 +4108,10 @@ class BERTopic:
             topic_embeddings = []
             topics = documents.sort_values("Topic").Topic.unique()
             for topic in topics:
-                indices = documents.loc[documents.Topic == topic, "ID"].values
+                if self._is_zeroshot():
+                    indices = documents.loc[documents.Topic == topic, "Old_ID"].values
+                else:
+                    indices = documents.loc[documents.Topic == topic, "ID"].values
                 indices = [int(index) for index in indices]
                 topic_embedding = np.mean(embeddings[indices], axis=0)
                 topic_embeddings.append(topic_embedding)
@@ -4490,10 +4493,10 @@ class BERTopic:
             mappings[val].append(key)
         mappings = {
             topic_from: {
-                "topics_to": topics_to,
+                "topics_from": topic_from,
                 "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to],
             }
-            for topic_from, topics_to in mappings.items()
+            for topics_to, topic_from in mappings.items()
         }
 
         # Update documents and topics
@@ -4532,8 +4535,23 @@ class BERTopic:
         # Map topics based on frequency
         df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
         df = df[df.Old_Topic != -1]
-        sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
-        self.topic_mapper_.add_mappings(sorted_topics)
+
+        # Zero-shot topics should be after the -1 topic and before clustered topics
+        nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
+        if self._is_zeroshot and not self.nr_topics and nr_zeroshot > 0:
+            df = df.loc[df.Old_Topic.isin([list(range(len(self._topic_id_to_zeroshot_topic_idx)))])]
+            nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
+            sorted_topics = {
+                **{-1: -1},
+                **dict(zip(df.Old_Topic, range(nr_zeroshot, len(df)+nr_zeroshot)))
+            }
+            for k, v in self._topic_id_to_zeroshot_topic_idx.items():
+                sorted_topics[k] = v
+            self.topic_mapper_.add_mappings(sorted_topics)
+
+        else:
+            sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
+            self.topic_mapper_.add_mappings(sorted_topics)
 
         # Map documents
         documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
