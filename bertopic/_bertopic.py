@@ -4539,20 +4539,8 @@ class BERTopic:
         self._update_topic_size(documents)
         df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
         df = df[df.Old_Topic != -1]
-
-        # Zero-shot topics should be after the -1 topic and before clustered topics
-        nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
-        if self._is_zeroshot and not self.nr_topics and nr_zeroshot > 0:
-            df = df.loc[df.Old_Topic.isin([list(range(len(self._topic_id_to_zeroshot_topic_idx)))])]
-            nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
-            sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(nr_zeroshot, len(df) + nr_zeroshot)))}
-            for k, v in self._topic_id_to_zeroshot_topic_idx.items():
-                sorted_topics[k] = v
-            self.topic_mapper_.add_mappings(sorted_topics)
-
-        else:
-            sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
-            self.topic_mapper_.add_mappings(sorted_topics)
+        sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
+        self.topic_mapper_.add_mappings(sorted_topics)
 
         # Map documents
         documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
