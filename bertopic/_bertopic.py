@@ -453,7 +453,7 @@ class BERTopic:
             documents, embeddings, assigned_documents, assigned_embeddings = self._zeroshot_topic_modeling(
                 documents, embeddings
             )
-            
+
             # Filter UMAP embeddings to only non-assigned embeddings to be used for clustering
             if len(documents) > 0:
                 umap_embeddings = self.umap_model.transform(embeddings)
@@ -4530,9 +4530,13 @@ class BERTopic:
             documents: Updated dataframe with documents and the mapped
                        and re-ordered topic ids
         """
-        self._update_topic_size(documents)
+        # No need to sort if it's the first pass of zero-shot topic modeling
+        nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
+        if self._is_zeroshot and not self.nr_topics and nr_zeroshot > 0:
+            return documents
 
         # Map topics based on frequency
+        self._update_topic_size(documents)
         df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
         df = df[df.Old_Topic != -1]
 
@@ -4541,10 +4545,7 @@ class BERTopic:
         if self._is_zeroshot and not self.nr_topics and nr_zeroshot > 0:
             df = df.loc[df.Old_Topic.isin([list(range(len(self._topic_id_to_zeroshot_topic_idx)))])]
             nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
-            sorted_topics = {
-                **{-1: -1},
-                **dict(zip(df.Old_Topic, range(nr_zeroshot, len(df)+nr_zeroshot)))
-            }
+            sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(nr_zeroshot, len(df) + nr_zeroshot)))}
             for k, v in self._topic_id_to_zeroshot_topic_idx.items():
                 sorted_topics[k] = v
             self.topic_mapper_.add_mappings(sorted_topics)
