@@ -3908,6 +3908,7 @@ class BERTopic:
         # Combine the clustered documents/embeddings with assigned documents/embeddings in the original order
         documents = pd.concat([documents, assigned_documents])
         embeddings = np.vstack([embeddings, assigned_embeddings])
+        documents.ID = documents.Old_ID
         sorted_indices = documents.Old_ID.argsort()
         documents = documents.iloc[sorted_indices]
         embeddings = embeddings[sorted_indices]
@@ -4108,10 +4109,7 @@ class BERTopic:
             topic_embeddings = []
             topics = documents.sort_values("Topic").Topic.unique()
             for topic in topics:
-                if self._is_zeroshot():
-                    indices = documents.loc[documents.Topic == topic, "Old_ID"].values
-                else:
-                    indices = documents.loc[documents.Topic == topic, "ID"].values
+                indices = documents.loc[documents.Topic == topic, "ID"].values
                 indices = [int(index) for index in indices]
                 topic_embedding = np.mean(embeddings[indices], axis=0)
                 topic_embeddings.append(topic_embedding)
@@ -4492,11 +4490,11 @@ class BERTopic:
         for key, val in sorted(mapped_topics.items()):
             mappings[val].append(key)
         mappings = {
-            topic_from: {
-                "topics_from": topic_from,
-                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to],
+            topic_to: {
+                "topics_from": topics_from,
+                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
             }
-            for topics_to, topic_from in mappings.items()
+            for topic_to, topics_from in mappings.items()
         }
 
         # Update documents and topics
