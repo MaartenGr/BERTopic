@@ -3346,6 +3346,12 @@ class BERTopic:
 
             # Additional
             if save_ctfidf:
+                if self.c_tf_idf_ is None:
+                    logger.warning(
+                        "The c-TF-IDF matrix could not be saved as it was not found. "
+                        "This typically occurs when merging BERTopic models with `BERTopic.merge_models`."
+                    )
+                    return
                 save_utils.save_ctfidf(
                     model=self,
                     save_directory=save_directory,
