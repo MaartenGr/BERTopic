@@ -3955,7 +3955,7 @@ class BERTopic:
         # embedding of the seeded topic to force the documents in a cluster
         for seed_topic in range(len(seed_topic_list)):
             indices = [index for index, topic in enumerate(y) if topic == seed_topic]
-            embeddings[indices] = np.average([embeddings[indices], seed_topic_embeddings[seed_topic]], weights=[3, 1])
+            embeddings[indices] = embeddings[indices] * 0.75 + seed_topic_embeddings[seed_topic] * 0.25
         logger.info("Guided - Completed \u2713")
         return y, embeddings
 
