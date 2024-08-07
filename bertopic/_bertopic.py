@@ -3351,13 +3351,13 @@ class BERTopic:
                         "The c-TF-IDF matrix could not be saved as it was not found. "
                         "This typically occurs when merging BERTopic models with `BERTopic.merge_models`."
                     )
-                    return
-                save_utils.save_ctfidf(
-                    model=self,
-                    save_directory=save_directory,
-                    serialization=serialization,
-                )
-                save_utils.save_ctfidf_config(model=self, path=save_directory / "ctfidf_config.json")
+                else:
+                    save_utils.save_ctfidf(
+                        model=self,
+                        save_directory=save_directory,
+                        serialization=serialization,
+                    )
+                    save_utils.save_ctfidf_config(model=self, path=save_directory / "ctfidf_config.json")
 
     @classmethod
     def load(cls, path: str, embedding_model=None):
