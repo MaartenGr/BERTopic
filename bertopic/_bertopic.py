@@ -313,7 +313,7 @@ class BERTopic:
         if self._is_zeroshot():
             # Need to correct labels from zero-shot topics
             topic_id_to_zeroshot_label = {
-                self.topic_mapper_.get_mappings()[topic_id]: self.zeroshot_topic_list[zeroshot_topic_idx]
+                topic_id: self.zeroshot_topic_list[zeroshot_topic_idx]
                 for topic_id, zeroshot_topic_idx in self._topic_id_to_zeroshot_topic_idx.items()
             }
             topic_labels.update(topic_id_to_zeroshot_label)
