@@ -1852,7 +1852,7 @@ class BERTopic:
         hier_topics: pd.DataFrame,
         max_distance: float = None,
         tight_layout: bool = False,
-        custom_labels: Union[bool, str] = False
+        custom_labels: Union[bool, str] = False,
     ) -> str:
         """Extract the topic tree such that it can be printed.
 
@@ -1908,14 +1908,14 @@ class BERTopic:
         child_right_ids = hier_topics.Child_Right_ID.astype(int)
 
         # Get the new parent labels generated from `hierarchical_topics`
-        new_left_labels = {int(row['Child_Left_ID']): row['Child_Left_Name'] for idx, row in hier_topics.iterrows()}
-        new_right_labels = {int(row['Child_Right_ID']): row['Child_Right_Name'] for idx, row in hier_topics.iterrows()}
+        new_left_labels = {int(row["Child_Left_ID"]): row["Child_Left_Name"] for idx, row in hier_topics.iterrows()}
+        new_right_labels = {int(row["Child_Right_ID"]): row["Child_Right_Name"] for idx, row in hier_topics.iterrows()}
 
         if custom_labels:
             left_labels = {}
             if isinstance(custom_labels, str):
                 for topic, kws_info in self.topic_aspects_[custom_labels].items():
-                    label = '_'.join([kw[0] for kw in kws_info[:5]]) # displaying top 5 kws
+                    label = "_".join([kw[0] for kw in kws_info[:5]])  # displaying top 5 kws
                     left_labels[topic] = label
             elif self.custom_labels_ is not None and custom_labels:
                 left_labels = {topic_id: label for topic_id, label in enumerate(self.custom_labels_, -self._outliers)}
@@ -1927,12 +1927,8 @@ class BERTopic:
             new_left_labels.update(left_labels)
             new_right_labels.update(right_labels)
 
-            child_left_names = [
-                new_left_labels[topic] for topic in child_left_ids
-            ]
-            child_right_names = [
-                new_right_labels[topic] for topic in child_right_ids
-            ]
+            child_left_names = [new_left_labels[topic] for topic in child_left_ids]
+            child_right_names = [new_right_labels[topic] for topic in child_right_ids]
 
         else:
             child_left_names = hier_topics.Child_Left_Name
