@@ -4495,11 +4495,11 @@ class BERTopic:
         for key, val in sorted(mapped_topics.items()):
             mappings[val].append(key)
         mappings = {
-            topic_from: {
-                "topics_to": topics_to,
-                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_to],
+            topic_to: {
+                "topics_from": topics_from,
+                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
             }
-            for topic_from, topics_to in mappings.items()
+            for topic_to, topics_from in mappings.items()
         }
 
         # Update documents and topics
