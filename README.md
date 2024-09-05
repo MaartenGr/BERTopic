@@ -1,4 +1,4 @@
-[![PyPI - Python](https://img.shields.io/badge/python-v3.7+-blue.svg)](https://pypi.org/project/bertopic/)
+[![PyPI - Python](https://img.shields.io/badge/python-v3.8+-blue.svg)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/actions/workflow/status/MaartenGr/BERTopic/testing.yml?branch=master)](https://github.com/MaartenGr/BERTopic/actions)
 [![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
@@ -56,7 +56,7 @@ If you want to install BERTopic with other embedding models, you can choose one 
 
 ```bash
 # Choose an embedding backend
-pip install bertopic[flair, gensim, spacy, use]
+pip install bertopic[flair,gensim,spacy,use]
 
 # Topic modeling with images
 pip install bertopic[vision]

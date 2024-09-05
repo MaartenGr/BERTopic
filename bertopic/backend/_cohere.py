@@ -6,7 +6,7 @@ from bertopic.backend import BaseEmbedder
 
 
 class CohereBackend(BaseEmbedder):
-    """ Cohere Embedding Model
+    """Cohere Embedding Model.
 
     Arguments:
         client: A `cohere` client.
@@ -21,7 +21,6 @@ class CohereBackend(BaseEmbedder):
                             such as `input_type`
 
     Examples:
-
     ```python
     import cohere
     from bertopic.backend import CohereBackend
@@ -40,12 +39,15 @@ class CohereBackend(BaseEmbedder):
     )
     ```
     """
-    def __init__(self,
-                 client,
-                 embedding_model: str = "large",
-                 delay_in_seconds: float = None,
-                 batch_size: int = None,
-                 embed_kwargs: Mapping[str, Any] = {}):
+
+    def __init__(
+        self,
+        client,
+        embedding_model: str = "large",
+        delay_in_seconds: float = None,
+        batch_size: int = None,
+        embed_kwargs: Mapping[str, Any] = {},
+    ):
         super().__init__()
         self.client = client
         self.embedding_model = embedding_model
@@ -58,11 +60,9 @@ class CohereBackend(BaseEmbedder):
         else:
             self.embed_kwargs["model"] = self.embedding_model
 
-    def embed(self,
-              documents: List[str],
-              verbose: bool = False) -> np.ndarray:
-        """ Embed a list of n documents/words into an n-dimensional
-        matrix of embeddings
+    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n documents/words into an n-dimensional
+        matrix of embeddings.
 
         Arguments:
             documents: A list of documents or words to be embedded
@@ -76,7 +76,7 @@ class CohereBackend(BaseEmbedder):
         if self.batch_size is not None:
             embeddings = []
             for batch in tqdm(self._chunks(documents), disable=not verbose):
-                response = self.client.embed(batch, **self.embed_kwargs)
+                response = self.client.embed(texts=batch, **self.embed_kwargs)
                 embeddings.extend(response.embeddings)
 
                 # Delay subsequent calls
@@ -85,10 +85,10 @@ class CohereBackend(BaseEmbedder):
 
         # Extract embeddings all at once
         else:
-            response = self.client.embed(documents, **self.embed_kwargs)
+            response = self.client.embed(texts=documents, **self.embed_kwargs)
             embeddings = response.embeddings
         return np.array(embeddings)
 
     def _chunks(self, documents):
         for i in range(0, len(documents), self.batch_size):
-            yield documents[i:i + self.batch_size]
+            yield documents[i : i + self.batch_size]

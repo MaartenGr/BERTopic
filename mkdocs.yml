@@ -83,6 +83,7 @@ nav:
       - Plotting:
         - Barchart: api/plotting/barchart.md
         - Documents: api/plotting/documents.md
+        - Documents with DataMapPlot: api/plotting/document_datamap.md
         - DTM: api/plotting/dtm.md
         - Hierarchical documents: api/plotting/hierarchical_documents.md
         - Hierarchical topics: api/plotting/hierarchy.md
@@ -98,8 +99,7 @@ plugins:
       watch:
         - bertopic
   - search
-  - social
-copyright: Copyright &copy; 2023 Maintained by <a href="https://github.com/MaartenGr">Maarten</a>.
+copyright: Copyright &copy; 2024 Maintained by <a href="https://github.com/MaartenGr">Maarten Grootendorst</a>.
 
 theme:
   custom_dir: images/

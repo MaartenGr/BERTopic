@@ -1,7 +1,7 @@
 import pandas as pd
 from langchain.docstore.document import Document
 from scipy.sparse import csr_matrix
-from typing import Callable, Dict, Mapping, List, Tuple, Union
+from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
@@ -10,7 +10,7 @@ DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
 
 class LangChain(BaseRepresentation):
-    """ Using chains in langchain to generate topic labels.
+    """Using chains in langchain to generate topic labels.
 
     The classic example uses `langchain.chains.question_answering.load_qa_chain`.
     This returns a chain that takes a list of documents and a question as input.
@@ -23,24 +23,30 @@ class LangChain(BaseRepresentation):
                Output key must be `output_text`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `self.default_prompt_` is used instead.
-        nr_docs: The number of documents to pass to LangChain if a prompt
-                 with the `["DOCUMENTS"]` tag is used.
+                 NOTE: Use `"[KEYWORDS]"` in the prompt
+                 to decide where the keywords need to be
+                 inserted. Keywords won't be included unless
+                 indicated. Unlike other representation models,
+                 Langchain does not use the `"[DOCUMENTS]"` tag
+                 to insert documents into the prompt. The load_qa_chain function
+                 formats the representative documents within the prompt.
+        nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
-                   Accepts values between 0 and 1. A higher 
+                   Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
         doc_length: The maximum length of each document. If a document is longer,
                     it will be truncated. If None, the entire document is passed.
         tokenizer: The tokenizer used to calculate to split the document into segments
-                   used to count the length of a document. 
-                       * If tokenizer is 'char', then the document is split up 
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
                        * If tokenizer is 'whitespace', the document is split up
                          into words separated by whitespaces. These words are counted
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and trunctated depending on `doc_length`. They are decoded with 
+                         and truncated depending on `doc_length`. They are decoded with
                          whitespaces.
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
@@ -123,15 +129,17 @@ class LangChain(BaseRepresentation):
     representation_model = LangChain(chain, prompt=representation_prompt)
     ```
     """
-    def __init__(self,
-                 chain,
-                 prompt: str = None,
-                 nr_docs: int = 4,
-                 diversity: float = None,
-                 doc_length: int = None,
-                 tokenizer: Union[str, Callable] = None,
-                 chain_config = None,
-                 ):
+
+    def __init__(
+        self,
+        chain,
+        prompt: str = None,
+        nr_docs: int = 4,
+        diversity: float = None,
+        doc_length: int = None,
+        tokenizer: Union[str, Callable] = None,
+        chain_config=None,
+    ):
         self.chain = chain
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
@@ -141,13 +149,14 @@ class LangChain(BaseRepresentation):
         self.doc_length = doc_length
         self.tokenizer = tokenizer
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, int]]]:
-        """ Extract topics
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, int]]]:
+        """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
@@ -165,30 +174,31 @@ class LangChain(BaseRepresentation):
             topics=topics,
             nr_samples=500,
             nr_repr_docs=self.nr_docs,
-            diversity=self.diversity
+            diversity=self.diversity,
         )
 
         # Generate label using langchain's batch functionality
         chain_docs: List[List[Document]] = [
             [
-                Document(
-                    page_content=truncate_document(
-                        topic_model,
-                        self.doc_length,
-                        self.tokenizer,
-                        doc
-                    )
-                )
+                Document(page_content=truncate_document(topic_model, self.doc_length, self.tokenizer, doc))
                 for doc in docs
             ]
             for docs in repr_docs_mappings.values()
         ]
 
         # `self.chain` must take `input_documents` and `question` as input keys
-        inputs = [
-            {"input_documents": docs, "question": self.prompt}
-            for docs in chain_docs
-        ]
+        # Use a custom prompt that leverages keywords, using the tag: [KEYWORDS]
+        if "[KEYWORDS]" in self.prompt:
+            prompts = []
+            for topic in topics:
+                keywords = list(zip(*topics[topic]))[0]
+                prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
+                prompts.append(prompt)
+
+            inputs = [{"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)]
+
+        else:
+            inputs = [{"input_documents": docs, "question": self.prompt} for docs in chain_docs]
 
         # `self.chain` must return a dict with an `output_text` key
         # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
@@ -196,8 +206,7 @@ class LangChain(BaseRepresentation):
         labels = [output["output_text"].strip() for output in outputs]
 
         updated_topics = {
-            topic: [(label, 1)] + [("", 0) for _ in range(9)]
-            for topic, label in zip(repr_docs_mappings.keys(), labels)
+            topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
         }
 
         return updated_topics

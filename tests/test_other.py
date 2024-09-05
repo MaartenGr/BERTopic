@@ -19,4 +19,4 @@ def test_get_params():
     assert not params["nr_topics"]
     assert params["n_gram_range"] == (1, 1)
     assert params["min_topic_size"] == 10
-    assert params["language"] == 'english'
+    assert params["language"] == "english"

@@ -6,33 +6,36 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def visualize_barchart(topic_model,
-                       topics: List[int] = None,
-                       top_n_topics: int = 8,
-                       n_words: int = 5,
-                       custom_labels: Union[bool, str] = False,
-                       title: str = "<b>Topic Word Scores</b>",
-                       width: int = 250,
-                       height: int = 250) -> go.Figure:
-    """ Visualize a barchart of selected topics
+def visualize_barchart(
+    topic_model,
+    topics: List[int] = None,
+    top_n_topics: int = 8,
+    n_words: int = 5,
+    custom_labels: Union[bool, str] = False,
+    title: str = "<b>Topic Word Scores</b>",
+    width: int = 250,
+    height: int = 250,
+    autoscale: bool = False,
+) -> go.Figure:
+    """Visualize a barchart of selected topics.
 
     Arguments:
         topic_model: A fitted BERTopic instance.
         topics: A selection of topics to visualize.
         top_n_topics: Only select the top n most frequent topics.
         n_words: Number of words to show in a topic
-        custom_labels: If bool, whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
         width: The width of each figure.
         height: The height of each figure.
+        autoscale: Whether to automatically calculate the height of the figures to fit the whole bar text
 
     Returns:
         fig: A plotly figure
 
     Examples:
-
     To visualize the barchart of selected topics
     simply run:
 
@@ -72,12 +75,14 @@ def visualize_barchart(topic_model,
         subplot_titles = [f"Topic {topic}" for topic in topics]
     columns = 4
     rows = int(np.ceil(len(topics) / columns))
-    fig = make_subplots(rows=rows,
-                        cols=columns,
-                        shared_xaxes=False,
-                        horizontal_spacing=.1,
-                        vertical_spacing=.4 / rows if rows > 1 else 0,
-                        subplot_titles=subplot_titles)
+    fig = make_subplots(
+        rows=rows,
+        cols=columns,
+        shared_xaxes=False,
+        horizontal_spacing=0.1,
+        vertical_spacing=0.4 / rows if rows > 1 else 0,
+        subplot_titles=subplot_titles,
+    )
 
     # Add barchart for each topic
     row = 1
@@ -87,11 +92,17 @@ def visualize_barchart(topic_model,
         scores = [score for _, score in topic_model.get_topic(topic)][:n_words][::-1]
 
         fig.add_trace(
-            go.Bar(x=scores,
-                   y=words,
-                   orientation='h',
-                   marker_color=next(colors)),
-            row=row, col=column)
+            go.Bar(x=scores, y=words, orientation="h", marker_color=next(colors)),
+            row=row,
+            col=column,
+        )
+
+        if autoscale:
+            if len(words) > 12:
+                height = 250 + (len(words) - 12) * 11
+
+            if len(words) > 9:
+                fig.update_yaxes(tickfont=dict(size=(height - 140) // len(words)))
 
         if column == columns:
             column = 1
@@ -104,21 +115,15 @@ def visualize_barchart(topic_model,
         template="plotly_white",
         showlegend=False,
         title={
-            'text': f"{title}",
-            'x': .5,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': dict(
-                size=22,
-                color="Black")
+            "text": f"{title}",
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+            "font": dict(size=22, color="Black"),
         },
-        width=width*4,
-        height=height*rows if rows > 1 else height * 1.3,
-        hoverlabel=dict(
-            bgcolor="white",
-            font_size=16,
-            font_family="Rockwell"
-        ),
+        width=width * 4,
+        height=height * rows if rows > 1 else height * 1.3,
+        hoverlabel=dict(bgcolor="white", font_size=16, font_family="Rockwell"),
     )
 
     fig.update_xaxes(showgrid=True)

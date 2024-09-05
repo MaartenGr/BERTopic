@@ -7,7 +7,7 @@ from bertopic.representation._base import BaseRepresentation
 
 
 class ZeroShotClassification(BaseRepresentation):
-    """ Zero-shot Classification on topic keywords with candidate labels
+    """Zero-shot Classification on topic keywords with candidate labels.
 
     Arguments:
         candidate_topics: A list of labels to assign to the topics if they
@@ -34,31 +34,36 @@ class ZeroShotClassification(BaseRepresentation):
     topic_model = BERTopic(representation_model=representation_model)
     ```
     """
-    def __init__(self,
-                 candidate_topics: List[str],
-                 model: str = "facebook/bart-large-mnli",
-                 pipeline_kwargs: Mapping[str, Any] = {},
-                 min_prob: float = 0.8
-                 ):
+
+    def __init__(
+        self,
+        candidate_topics: List[str],
+        model: str = "facebook/bart-large-mnli",
+        pipeline_kwargs: Mapping[str, Any] = {},
+        min_prob: float = 0.8,
+    ):
         self.candidate_topics = candidate_topics
         if isinstance(model, str):
             self.model = pipeline("zero-shot-classification", model=model)
         elif isinstance(model, Pipeline):
             self.model = model
         else:
-            raise ValueError("Make sure that the HF model that you"
-                             "pass is either a string referring to a"
-                             "HF model or a `transformers.pipeline` object.")
+            raise ValueError(
+                "Make sure that the HF model that you"
+                "pass is either a string referring to a"
+                "HF model or a `transformers.pipeline` object."
+            )
         self.pipeline_kwargs = pipeline_kwargs
         self.min_prob = min_prob
 
-    def extract_topics(self,
-                       topic_model,
-                       documents: pd.DataFrame,
-                       c_tf_idf: csr_matrix,
-                       topics: Mapping[str, List[Tuple[str, float]]]
-                       ) -> Mapping[str, List[Tuple[str, float]]]:
-        """ Extract topics
+    def extract_topics(
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
+    ) -> Mapping[str, List[Tuple[str, float]]]:
+        """Extract topics.
 
         Arguments:
             topic_model: Not used
@@ -93,7 +98,7 @@ class ZeroShotClassification(BaseRepresentation):
             if len(topic_description) == 0:
                 topic_description = topics[topic]
             elif len(topic_description) < 10:
-                topic_description += [("", 0) for _ in range(10-len(topic_description))]
+                topic_description += [("", 0) for _ in range(10 - len(topic_description))]
             updated_topics[topic] = topic_description
 
         return updated_topics

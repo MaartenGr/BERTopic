@@ -40,6 +40,17 @@ If you are using conda, you can approach it as follows:
 
 ❗Note: Unit testing the package can take quite some time since it needs to run several variants of the BERTopic pipeline.
 
+## 🧹 Linting and Formatting
+
+We use [Ruff](https://docs.astral.sh/ruff/) to ensure code is uniformly formatted and to avoid common mistakes and bad practices.
+
+* To automatically re-format code, run `make format`
+* To check for linting issues, run `make lint` - some issues may be automatically fixed, some will not be
+
+When a pull request is made, the CI will automatically check for linting and formatting issues. However, it will not automatically apply any fixes, so it is easiest to run locally.
+
+If you believe an error is incorrectly flagged, use a [`# noqa:` comment to suppress](https://docs.astral.sh/ruff/linter/#error-suppression), but this is discouraged unless strictly necessary.
+
 ## 🤓 Collaborative Efforts
 
 When you run into any issue with the above or need help to start with a pull request, feel free to reach out in the issues! As with all repositories, this one has its particularities as a result of the maintainer's view. Each repository is quite different and so will their processes. 

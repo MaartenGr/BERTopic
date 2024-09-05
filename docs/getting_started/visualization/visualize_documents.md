@@ -1,3 +1,5 @@
+## **Visualize documents with Plotly**
+
 Using the `.visualize_topics`, we can visualize the topics and get insight into their relationships. However, 
 you might want a more fine-grained approach where we can visualize the documents inside the topics to see 
 if they were assigned correctly or whether they make sense. To do so, we can use the `topic_model.visualize_documents()` 
@@ -43,7 +45,31 @@ When you visualize the documents, you might not always want to see the complete 
 topic_model.visualize_documents(titles, reduced_embeddings=reduced_embeddings)
 ```
 
-## **Visualize Probablities or Distribution**
+## **Visualize documents with DataMapPlot**
+
+`.visualize_document_datamap` provides an alternative way to visualize the documents inside the topics as a static [DataMapPlot](https://datamapplot.readthedocs.io/en/latest/intro_splash.html). Using the same pipeline as above, you can generate a DataMapPlot by running:
+
+```python
+
+# with the original embeddings
+topic_model.visualize_document_datamap(docs, embeddings=embeddings)
+
+# with the reduced embeddings
+topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_embeddings)
+```
+
+<br><br>
+<img src="./datamapplot.png">
+<br><br>
+
+Or if you want to save the resulting figure:
+
+```python
+fig = topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_embeddings)
+fig.savefig("path/to/file.png", bbox_inches="tight")
+```
+
+## **Visualize Probabilities or Distribution**
 
 We can generate the topic-document probability matrix by simply setting `calculate_probabilities=True` if a HDBSCAN model is used:
 
@@ -99,4 +125,5 @@ df
     The distribution of the probabilities does not give an indication to 
     the distribution of the frequencies of topics across a document. It merely shows
     how confident BERTopic is that certain topics can be found in a document.
+
 

@@ -1,31 +1,54 @@
 import copy
 import pytest
 from bertopic import BERTopic
+import importlib.util
+
+
+def cuml_available():
+    try:
+        return importlib.util.find_spec("cuml") is not None
+    except ImportError:
+        return False
 
 
 @pytest.mark.parametrize(
-    'model',
+    "model",
     [
         ("base_topic_model"),
-        ('kmeans_pca_topic_model'),
-        ('custom_topic_model'),
-        ('merged_topic_model'),
-        ('reduced_topic_model'),
-        ('online_topic_model'),
-        ('supervised_topic_model'),
-        ('representation_topic_model'),
-        ('zeroshot_topic_model')
-    ])
+        ("kmeans_pca_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+        ("supervised_topic_model"),
+        ("representation_topic_model"),
+        ("zeroshot_topic_model"),
+        pytest.param(
+            "cuml_base_topic_model",
+            marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available"),
+        ),
+    ],
+)
 def test_full_model(model, documents, request):
-    """ Tests the entire pipeline in one go. This serves as a sanity check to see if the default
+    """Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
 
     NOTE: This does not cover all cases but merely combines it all together
     """
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     if model == "base_topic_model":
-        topic_model.save("model_dir", serialization="pytorch", save_ctfidf=True, save_embedding_model="sentence-transformers/all-MiniLM-L6-v2")
+        topic_model.save(
+            "model_dir",
+            serialization="pytorch",
+            save_ctfidf=True,
+            save_embedding_model="sentence-transformers/all-MiniLM-L6-v2",
+        )
         topic_model = BERTopic.load("model_dir")
+
+    if model == "cuml_base_topic_model":
+        assert "cuml" in str(type(topic_model.umap_model)).lower()
+        assert "cuml" in str(type(topic_model.hdbscan_model)).lower()
+
     topics = topic_model.topics_
 
     for topic in set(topics):
@@ -48,6 +71,13 @@ def test_full_model(model, documents, request):
     topics_test, probs_test = topic_model.transform([doc, doc])
 
     assert len(topics_test) == 2
+
+    # Test zero-shot topic modeling
+    if topic_model._is_zeroshot():
+        if topic_model._outliers:
+            assert set(topic_model.topic_labels_.keys()) == set(range(-1, len(topic_model.topic_labels_) - 1))
+        else:
+            assert set(topic_model.topic_labels_.keys()) == set(range(len(topic_model.topic_labels_)))
 
     # Test topics over time
     timestamps = [i % 10 for i in range(len(documents))]

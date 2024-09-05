@@ -112,10 +112,10 @@ outliers that are left since this method is typically much slower:
 
 ```python
 # Use the "c-TF-IDF" strategy with a threshold
-new_topics = topic_model.reduce_outliers(docs, new_topics , strategy="c-tf-idf", threshold=0.1)
+new_topics = topic_model.reduce_outliers(docs, topics , strategy="c-tf-idf", threshold=0.1)
 
 # Reduce all outliers that are left with the "distributions" strategy
-new_topics = topic_model.reduce_outliers(docs, topics, strategy="distributions")
+new_topics = topic_model.reduce_outliers(docs, new_topics, strategy="distributions")
 ```
 
 

@@ -209,7 +209,7 @@ topics, probs = topic_model.fit_transform(docs)
 ```  
 
 !!! note
-    The `calculate_probabilties` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`.approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
+    The `calculate_probabilities` parameter is only used when using HDBSCAN or cuML's HDBSCAN model. In other words, this will not work when using a model other than HDBSCAN. Instead, we can approximate the topic distributions across all documents with [`.approximate_distribution`](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html).
  
 ## **Numpy gives me an error when running BERTopic**
 With the release of Numpy 1.20.0, there have been significant issues with using that version (and previous ones) due to compilation issues and pypi.   
@@ -311,3 +311,40 @@ are important in understanding the general topic of the document. Although this 
 have data that contains a lot of noise, for example, HTML-tags, then it would be best to remove them. HTML-tags 
 typically do not contribute to the meaning of a document and should therefore be removed. However, if you apply 
 topic modeling to HTML-code to extract topics of code, then it becomes important.
+
+## **I run into issues running on Apple Silicon. What should I do?**
+Apple Silicon chips (M1 & M2) are based on `arm64` (aka [`AArch64`](https://apple.stackexchange.com/questions/451238/is-m1-chip-aarch64-or-amd64), not to be confused with `amd64`/`x86_64`). There are known issues with upstream dependencies for this architecture, for example [numba](https://github.com/numba/numba/issues/5520). You may not always run into this issue, depending on the extras that you need.
+
+One possible solution is to use [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers), which allow you to setup a Linux-based environment. To run BERTopic effectively you need to be aware of two things:
+
+1. Make sure to use a Docker image specifically built for arm64
+2. Make sure to use a *volume* instead of a *bind-mount*  
+   ℹ️ the latter significantly reduces disk I/O
+
+Using the pre-configured [Data Science Dev Containers](https://github.com/b-data/data-science-devcontainers) makes sure these setting are optimized. To start using them, do the following:
+
+* Install and run Docker
+* Clone repository [data-science-devcontainers](https://github.com/b-data/data-science-devcontainers)
+* Open VS Code, build the `Python base` or `Python scipy` container and start working  
+  ℹ️ Change `PYTHON_VERSION` to `3.11` in the respective `devcontainer.json` to work with the latest patch release of Python 3.11
+* Note that data is persisted in the container
+  * When using an unmodified `devcontainer.json`: Work in `/home/vscode`  
+    👉 This is the *home directory* of user `vscode`
+  * Python packages are installed to the home directory by default  
+    👉 This is due to env variable `PIP_USER=1`
+  * Note that the directory `/workspaces` is also persisted
+
+### **Do these Data Science Dev Containers support GPU acceleration?**
+
+Yes, but only on Linux and Windows.
+
+The CUDA-enabled variants require the following in addition to Docker:
+
+* NVIDIA GPU
+* NVIDIA driver
+* Linux: [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+* Windows: [GPU support in Docker Desktop](https://docs.docker.com/desktop/gpu/)
+
+ℹ️ The host running the GPU accelerated Dev Containers only requires the NVIDIA driver, the CUDA toolkit does not have to be installed.
+
+See the [CUDA Version Matrix](https://github.com/b-data/jupyterlab-python-docker-stack/blob/main/CUDA_VERSION_MATRIX.md) regarding Ubuntu/CUDA/Python versions and recommended NVIDIA drivers.

@@ -1,21 +1,17 @@
 Zero-shot Topic Modeling is a technique that allows you to find topics in large amounts of documents that were predefined. When faced with many documents, you often have an idea of which topics will definitely be in there. Whether that is a result of simply knowing your data or if a domain expert is involved in defining those topics.
 
 This method allows you to not only find those specific topics but also create new topics for documents that would not fit with your predefined topics. 
-This allows for extensive flexibility as there are three scenario's to explore.
+This allows for extensive flexibility as there are three scenario's to explore:
 
-First, both zero-shot topics and clustered topics were detected. This means that some documents would fit with the predefined topics where others would not. For the latter, new topics were found.
-
-Second, only zero-shot topics were detected. Here, we would not need to find additional topics since all original documents were assigned to one of the predefined topics.
-
-Third, no zero-shot topics were detected. This means that none of the documents would fit with the predefined topics and a regular BERTopic would be run. 
+* First, both zero-shot topics and clustered topics were detected. This means that some documents would fit with the predefined topics where others would not. For the latter, new topics were found.
+* Second, only zero-shot topics were detected. Here, we would not need to find additional topics since all original documents were assigned to one of the predefined topics.
+* Third, no zero-shot topics were detected. This means that none of the documents would fit with the predefined topics and a regular BERTopic would be run. 
 
 <div class="svg_image">
 --8<-- "docs/getting_started/zeroshot/zeroshot.svg"
 </div>
 
-This method works as follows. First, we create a number of labels for our predefined topics and embed them using any embedding model. Then, we compare the embeddings of the documents with the predefined labels using cosine similarity. If they pass a user-defined threshold, the zero-shot topic is assigned to a document. If it does not, then that document, along with others, will be put through a regular BERTopic model.
-
-This creates two models. One for the zero-shot topics and one for the non-zero-shot topics. We combine these two BERTopic models to create a single model that contains both zero-shot and non-zero-shot topics.
+This method works as follows. First, we create a number of labels for our predefined topics and embed them using any embedding model. Then, we compare the embeddings of the documents with the predefined labels using cosine similarity. If they pass a user-defined threshold, the zero-shot topic is assigned to a document. If it does not, then that document, along with others, will follow the regular BERTopic pipeline and attempt to find clusters that do not fit with the zero-shot topics.
    
 ### **Example**
 In order to use zero-shot BERTopic, we create a list of topics that we want to assign to our documents. However, 

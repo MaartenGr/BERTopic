@@ -5,6 +5,91 @@ hide:
 
 # Changelog
 
+
+## **Version 0.16.3**
+*Release date: 22 July, 2024*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Simplify zero-shot topic modeling by [@ianrandman](https://github.com/ianrandman) in [#2060](https://github.com/MaartenGr/BERTopic/pull/2060)
+* Option to choose between c-TF-IDF and Topic Embeddings in many functions by [@azikoss](https://github.com/azikoss) in [#1894](https://github.com/MaartenGr/BERTopic/pull/1894)
+    * Use the `use_ctfidf` parameter in the following function to choose between c-TF-IDF and topic embeddings:
+        * `hierarchical_topics`, `reduce_topics`, `visualize_hierarchy`, `visualize_heatmap`, `visualize_topics`
+* Linting with Ruff by [@afuetterer](https://github.com/afuetterer) in [#2033](https://github.com/MaartenGr/BERTopic/pull/2033)
+* Switch from setup.py to pyproject.toml by [@afuetterer](https://github.com/afuetterer) in [#1978](https://github.com/MaartenGr/BERTopic/pull/1978)
+* In multi-aspect context, allow Main model to be chained by [@ddicato](https://github.com/ddicato) in [#2002](https://github.com/MaartenGr/BERTopic/pull/2002)
+
+<h3><b>Fixes:</a></b></h3>
+
+* Added templates for [issues](https://github.com/MaartenGr/BERTopic/tree/master/.github/ISSUE_TEMPLATE) and [pull requests](https://github.com/MaartenGr/BERTopic/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+* Update River documentation example by [@Proteusiq](https://github.com/Proteusiq) in [#2004](https://github.com/MaartenGr/BERTopic/pull/2004)
+* Fix PartOfSpeech reproducibility by [@Greenpp](https://github.com/Greenpp) in [#1996](https://github.com/MaartenGr/BERTopic/pull/1996)
+* Fix PartOfSpeech ignoring first word by [@Greenpp](https://github.com/Greenpp) in [#2024](https://github.com/MaartenGr/BERTopic/pull/2024)
+* Make sklearn embedding backend auto-select more cautious by [@freddyheppell](https://github.com/freddyheppell) in [#1984](https://github.com/MaartenGr/BERTopic/pull/1984)
+* Fix typos by [@afuetterer](https://github.com/afuetterer) in [#1974](https://github.com/MaartenGr/BERTopic/pull/1974)
+* Fix hierarchical_topics(...) when the distances between three clusters are the same by [@azikoss](https://github.com/azikoss) in [#1929](https://github.com/MaartenGr/BERTopic/pull/1929)
+* Fixes to chain strategy example in outlier_reduction.md by [@reuning](https://github.com/reuning) in [#2065](https://github.com/MaartenGr/BERTopic/pull/2065)
+* Remove obsolete flake8 config and update line length by [@afuetterer](https://github.com/afuetterer) in [#22066](https://github.com/MaartenGr/BERTopic/pull/2066)
+
+
+## **Version 0.16.2**
+*Release date: 12 May, 2024*
+
+<h3><b>Fixes:</a></b></h3>
+
+* Fix issue with zeroshot topic modeling missing outlier [#1957](https://github.com/MaartenGr/BERTopic/issues/1957)
+* Bump github actions versions by [@afuetterer](https://github.com/afuetterer) in [#1941](https://github.com/MaartenGr/BERTopic/pull/1941)
+* Drop support for python 3.7 by [@afuetterer](https://github.com/afuetterer) in [#1949](https://github.com/MaartenGr/BERTopic/pull/1949)
+* Add testing python 3.10+ in Github actions by [@afuetterer](https://github.com/afuetterer) in [#1968](https://github.com/MaartenGr/BERTopic/pull/1968)
+* Speed up fitting CountVectorizer by [@dannywhuang](https://github.com/dannywhuang) in [#1938](https://github.com/MaartenGr/BERTopic/pull/1938)
+* Fix `transform` when using cuML HDBSCAN by [@beckernick](https://github.com/beckernick) in [#1960](https://github.com/MaartenGr/BERTopic/pull/1960)
+* Fix wrong link in algorithm documentation by [@naeyn](https://github.com/naeyn) in [#1970](https://github.com/MaartenGr/BERTopic/pull/1970)
+
+
+## **Version 0.16.1**
+*Release date: 21 April, 2024*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Add Quantized [LLM Tutorial](https://colab.research.google.com/drive/1DdSHvVPJA3rmNfBWjCo2P1E9686xfxFx?usp=sharing)
+* Add optional [datamapplot](https://github.com/TutteInstitute/datamapplot) visualization using `topic_model.visualize_document_datamap` by [@lmcinnes](https://github.com/lmcinnes) in [#1750](https://github.com/MaartenGr/BERTopic/pull/1750)
+* Migrated OpenAIBackend to openai>=1 by [@peguerosdc](https://github.com/peguerosdc) in [#1724](https://github.com/MaartenGr/BERTopic/pull/1724)
+* Add automatic height scaling and font resize by [@ir2718](https://github.com/ir2718) in [#1863](https://github.com/MaartenGr/BERTopic/pull/1863)
+* Use `[KEYWORDS]` tags with the LangChain representation model by [@mcantimmy](https://github.com/mcantimmy) in [#1871](https://github.com/MaartenGr/BERTopic/pull/1871)
+
+
+<h3><b>Fixes:</a></b></h3>
+
+* Fixed issue with `.merge_models` seemingly skipping topic [#1898](https://github.com/MaartenGr/BERTopic/issues/1898)
+* Fixed Cohere client.embed TypeError [#1904](https://github.com/MaartenGr/BERTopic/issues/1904)
+* Fixed `AttributeError: 'TextGeneration' object has no attribute 'random_state'` [#1870](https://github.com/MaartenGr/BERTopic/issues/1870)
+* Fixed topic embeddings not properly updated if all outliers were removed [#1838](https://github.com/MaartenGr/BERTopic/issues/1838)
+* Fixed issue with representation models not properly merging [#1762](https://github.com/MaartenGr/BERTopic/issues/1762)
+* Fixed Embeddings not ordered correctly when using `.merge_models` [#1804](https://github.com/MaartenGr/BERTopic/issues/1804)
+* Fixed Outlier topic not in the 0th position when using zero-shot topic modeling causing prediction issues (amongst others) [#1804](https://github.com/MaartenGr/BERTopic/issues/1804)
+* Fixed Incorrect label in ZeroShot doc SVG [#1732](https://github.com/MaartenGr/BERTopic/issues/1732)
+* Fixed MultiModalBackend throws error with clip-ViT-B-32-multilingual-v1 [#1670](https://github.com/MaartenGr/BERTopic/issues/1670)
+* Fixed AuthenticationError while using OpenAI() [#1678](https://github.com/MaartenGr/BERTopic/issues/1678)
+
+* Update FAQ on Apple Silicon by [@benz0li](https://github.com/benz0li) in [#1901](https://github.com/MaartenGr/BERTopic/pull/1901)
+* Add documentation DataMapPlot + FAQ for running on Apple Silicon by [@dkapitan](https://github.com/dkapitan) in [#1854](https://github.com/MaartenGr/BERTopic/pull/1854)
+* Remove commas from pip install reference in readme by [@luisoala](https://github.com/luisoala) in [#1850](https://github.com/MaartenGr/BERTopic/pull/1850)
+* Spelling corrections by [@joouha](https://github.com/joouha) in [#1801](https://github.com/MaartenGr/BERTopic/pull/1801)
+* Replacing the deprecated `text-ada-001` model with the latest `text-embedding-3-small` from OpenAI by [@atmb4u](https://github.com/atmb4u) in [#1800](https://github.com/MaartenGr/BERTopic/pull/1800)
+* Prevent invalid empty input error when retrieving embeddings with openai backend by [@liaoelton](https://github.com/liaoelton) in [#1827](https://github.com/MaartenGr/BERTopic/pull/1827)
+* Remove spurious warning about missing embedding model by [@sliedes](https://github.com/sliedes) in [#1774](https://github.com/MaartenGr/BERTopic/pull/1774)
+* Fix type hint in ClassTfidfTransformer constructor [@snape](https://github.com/snape) in [#1803](https://github.com/MaartenGr/BERTopic/pull/1803)
+* Fix typo and simplify wording in OnlineCountVectorizer docstring by [@chrisji](https://github.com/chrisji) in [#1802](https://github.com/MaartenGr/BERTopic/pull/1802)
+* Fixed warning when saving a topic model without an embedding model by [@zilch42](https://github.com/zilch42) in [#1740](https://github.com/MaartenGr/BERTopic/pull/1740)
+* Fix bug in `TextGeneration` by [@manveersadhal](https://github.com/manveersadhal) in [#1726](https://github.com/MaartenGr/BERTopic/pull/1726)
+* Fix an incorrect link to usecases.md by [@nicholsonjf](https://github.com/nicholsonjf) in [#1731](https://github.com/MaartenGr/BERTopic/pull/1731)
+* Prevent `model` argument being passed twice when using `generator_kwargs` in OpenAI by [@ninavandiermen](https://github.com/ninavandiermen) in [#1733](https://github.com/MaartenGr/BERTopic/pull/1733)
+* Several fixes to the docstrings by [@arpadikuma](https://github.com/arpadikuma) in [#1719](https://github.com/MaartenGr/BERTopic/pull/1719)
+* Remove unused `cluster_df` variable in `hierarchical_topics` by [@shadiakiki1986](https://github.com/shadiakiki1986) in [#1701](https://github.com/MaartenGr/BERTopic/pull/1701)
+* Removed redundant quotation mark by [@LawrenceFulton](https://github.com/LawrenceFulton) in [#1695](https://github.com/MaartenGr/BERTopic/pull/1695)
+* Fix typo in merge models docs by [@zilch42](https://github.com/zilch42) in [#1660](https://github.com/MaartenGr/BERTopic/pull/1660)
+
+
 ## **Version 0.16.0**
 *Release date: 26 November, 2023*
 
@@ -42,7 +127,7 @@ cohere_model = CohereBackend(
 
 * Fixed n-gram Keywords need delimiting in OpenAI() [#1546](https://github.com/MaartenGr/BERTopic/issues/1546)
 * Fixed OpenAI v1.0 issues [#1629](https://github.com/MaartenGr/BERTopic/issues/1629)
-* Improved documentation/logging to adress [#1589](https://github.com/MaartenGr/BERTopic/issues/1589), [#1591](https://github.com/MaartenGr/BERTopic/issues/1591)
+* Improved documentation/logging to address [#1589](https://github.com/MaartenGr/BERTopic/issues/1589), [#1591](https://github.com/MaartenGr/BERTopic/issues/1591)
 * Fixed engine support for Azure OpenAI embeddings [#1577](https://github.com/MaartenGr/BERTopic/issues/1487)
 * Fixed OpenAI Representation: KeyError: 'content' [#1570](https://github.com/MaartenGr/BERTopic/issues/1570)
 * Fixed Loading topic model with multiple topic aspects changes their format [#1487](https://github.com/MaartenGr/BERTopic/issues/1487)
@@ -60,7 +145,7 @@ cohere_model = CohereBackend(
 *  Fixed typos in best practices documentation by [@poomkusa](https://github.com/poomkusa) in [#1557](https://github.com/MaartenGr/BERTopic/pull/1557)
 *  Correct TopicMapper doc example by [@chrisji](https://github.com/chrisji) in [#1637](https://github.com/MaartenGr/BERTopic/pull/1637)
 * Fix typing in hierarchical_topics by [@dschwalm](https://github.com/dschwalm) in [#1364](https://github.com/MaartenGr/BERTopic/pull/1364)
-*  Fixed typing issue with treshold parameter in reduce_outliers by [@dschwalm](https://github.com/dschwalm) in [#1380](https://github.com/MaartenGr/BERTopic/pull/1380)
+*  Fixed typing issue with threshold parameter in reduce_outliers by [@dschwalm](https://github.com/dschwalm) in [#1380](https://github.com/MaartenGr/BERTopic/pull/1380)
 * Fix several typos by [@mertyyanik](https://github.com/mertyyanik) in [#1307](https://github.com/MaartenGr/BERTopic/pull/1307)
 (#1307)
 * Fix inconsistent naming by [@rolanderdei](https://github.com/rolanderdei) in [#1073](https://github.com/MaartenGr/BERTopic/pull/1073)
@@ -72,7 +157,7 @@ The new `.merge_models` feature allows for any number of fitted BERTopic models 
 * **Incremental topic modeling** -- Continuously merge models together to detect whether new topics have appeared
 * **Federated Learning** - Train BERTopic models on different clients and combine them on a central server
 * **Minimal compute** - We can essentially batch the training process into multiple instances to reduce compute
-* **Different datasets** - When you have different datasets that you want to train seperately on, for example with different languages, you can train each model separately and join them after training
+* **Different datasets** - When you have different datasets that you want to train separately on, for example with different languages, you can train each model separately and join them after training
 
 To demonstrate merging different topic models with BERTopic, we use the ArXiv paper abstracts to see which topics they generally contain.
 
@@ -274,7 +359,7 @@ With v0.15, we can now perform multimodal topic modeling in BERTopic! The most b
   <figcaption></figcaption>
 </figure>
 
-In this example, we are going to use images from `flickr` that each have a caption accociated to it: 
+In this example, we are going to use images from `flickr` that each have a caption associated to it: 
 
 ```python
 # NOTE: This requires the `datasets` package which you can 

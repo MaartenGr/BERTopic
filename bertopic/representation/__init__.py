@@ -64,5 +64,5 @@ __all__ = [
     "OpenAI",
     "LangChain",
     "LlamaCPP",
-    "VisualRepresentation"
+    "VisualRepresentation",
 ]

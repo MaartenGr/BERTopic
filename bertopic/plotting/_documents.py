@@ -6,19 +6,21 @@ from umap import UMAP
 from typing import List, Union
 
 
-def visualize_documents(topic_model,
-                        docs: List[str],
-                        topics: List[int] = None,
-                        embeddings: np.ndarray = None,
-                        reduced_embeddings: np.ndarray = None,
-                        sample: float = None,
-                        hide_annotations: bool = False,
-                        hide_document_hover: bool = False,
-                        custom_labels: Union[bool, str] = False,
-                        title: str = "<b>Documents and Topics</b>",
-                        width: int = 1200,
-                        height: int = 750):
-    """ Visualize documents and their topics in 2D
+def visualize_documents(
+    topic_model,
+    docs: List[str],
+    topics: List[int] = None,
+    embeddings: np.ndarray = None,
+    reduced_embeddings: np.ndarray = None,
+    sample: float = None,
+    hide_annotations: bool = False,
+    hide_document_hover: bool = False,
+    custom_labels: Union[bool, str] = False,
+    title: str = "<b>Documents and Topics</b>",
+    width: int = 1200,
+    height: int = 750,
+):
+    """Visualize documents and their topics in 2D.
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -36,7 +38,7 @@ def visualize_documents(topic_model,
         hide_annotations: Hide the names of the traces on top of each cluster.
         hide_document_hover: Hide the content of the documents when hovering over
                              specific points. Helps to speed up generation of visualization.
-        custom_labels: If bool, whether to use custom topic labels that were defined using 
+        custom_labels: If bool, whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
         title: Title of the plot.
@@ -44,7 +46,6 @@ def visualize_documents(topic_model,
         height: The height of the figure.
 
     Examples:
-
     To visualize the topics simply run:
 
     ```python
@@ -52,7 +53,7 @@ def visualize_documents(topic_model,
     ```
 
     Do note that this re-calculates the embeddings and reduces them to 2D.
-    The advised and prefered pipeline for using this function is as follows:
+    The advised and preferred pipeline for using this function is as follows:
 
     ```python
     from sklearn.datasets import fetch_20newsgroups
@@ -119,7 +120,7 @@ def visualize_documents(topic_model,
 
     # Reduce input embeddings
     if reduced_embeddings is None:
-        umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='cosine').fit(embeddings_to_reduce)
+        umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
         embeddings_2d = umap_model.embedding_
     elif sample is not None and reduced_embeddings is not None:
         embeddings_2d = reduced_embeddings[indices]
@@ -142,7 +143,10 @@ def visualize_documents(topic_model,
     elif topic_model.custom_labels_ is not None and custom_labels:
         names = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in unique_topics]
     else:
-        names = [f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]
+        names = [
+            f"{topic}_" + "_".join([word for word, value in topic_model.get_topic(topic)][:3])
+            for topic in unique_topics
+        ]
 
     # Visualize
     fig = go.Figure()
@@ -154,7 +158,13 @@ def visualize_documents(topic_model,
 
     selection = df.loc[df.topic.isin(non_selected_topics), :]
     selection["text"] = ""
-    selection.loc[len(selection), :] = [None, None, selection.x.mean(), selection.y.mean(), "Other documents"]
+    selection.loc[len(selection), :] = [
+        None,
+        None,
+        selection.x.mean(),
+        selection.y.mean(),
+        "Other documents",
+    ]
 
     fig.add_trace(
         go.Scattergl(
@@ -162,10 +172,10 @@ def visualize_documents(topic_model,
             y=selection.y,
             hovertext=selection.doc if not hide_document_hover else None,
             hoverinfo="text",
-            mode='markers+text',
+            mode="markers+text",
             name="other",
             showlegend=False,
-            marker=dict(color='#CFD8DC', size=5, opacity=0.5)
+            marker=dict(color="#CFD8DC", size=5, opacity=0.5),
         )
     )
 
@@ -176,7 +186,13 @@ def visualize_documents(topic_model,
             selection["text"] = ""
 
             if not hide_annotations:
-                selection.loc[len(selection), :] = [None, None, selection.x.mean(), selection.y.mean(), name]
+                selection.loc[len(selection), :] = [
+                    None,
+                    None,
+                    selection.x.mean(),
+                    selection.y.mean(),
+                    name,
+                ]
 
             fig.add_trace(
                 go.Scattergl(
@@ -185,24 +201,40 @@ def visualize_documents(topic_model,
                     hovertext=selection.doc if not hide_document_hover else None,
                     hoverinfo="text",
                     text=selection.text,
-                    mode='markers+text',
+                    mode="markers+text",
                     name=name,
                     textfont=dict(
                         size=12,
                     ),
-                    marker=dict(size=5, opacity=0.5)
+                    marker=dict(size=5, opacity=0.5),
                 )
             )
 
     # Add grid in a 'plus' shape
-    x_range = (df.x.min() - abs((df.x.min()) * .15), df.x.max() + abs((df.x.max()) * .15))
-    y_range = (df.y.min() - abs((df.y.min()) * .15), df.y.max() + abs((df.y.max()) * .15))
-    fig.add_shape(type="line",
-                  x0=sum(x_range) / 2, y0=y_range[0], x1=sum(x_range) / 2, y1=y_range[1],
-                  line=dict(color="#CFD8DC", width=2))
-    fig.add_shape(type="line",
-                  x0=x_range[0], y0=sum(y_range) / 2, x1=x_range[1], y1=sum(y_range) / 2,
-                  line=dict(color="#9E9E9E", width=2))
+    x_range = (
+        df.x.min() - abs((df.x.min()) * 0.15),
+        df.x.max() + abs((df.x.max()) * 0.15),
+    )
+    y_range = (
+        df.y.min() - abs((df.y.min()) * 0.15),
+        df.y.max() + abs((df.y.max()) * 0.15),
+    )
+    fig.add_shape(
+        type="line",
+        x0=sum(x_range) / 2,
+        y0=y_range[0],
+        x1=sum(x_range) / 2,
+        y1=y_range[1],
+        line=dict(color="#CFD8DC", width=2),
+    )
+    fig.add_shape(
+        type="line",
+        x0=x_range[0],
+        y0=sum(y_range) / 2,
+        x1=x_range[1],
+        y1=sum(y_range) / 2,
+        line=dict(color="#9E9E9E", width=2),
+    )
     fig.add_annotation(x=x_range[0], y=sum(y_range) / 2, text="D1", showarrow=False, yshift=10)
     fig.add_annotation(y=y_range[1], x=sum(x_range) / 2, text="D2", showarrow=False, xshift=10)
 
@@ -210,16 +242,14 @@ def visualize_documents(topic_model,
     fig.update_layout(
         template="simple_white",
         title={
-            'text': f"{title}",
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'font': dict(
-                size=22,
-                color="Black")
+            "text": f"{title}",
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+            "font": dict(size=22, color="Black"),
         },
         width=width,
-        height=height
+        height=height,
     )
 
     fig.update_xaxes(visible=False)

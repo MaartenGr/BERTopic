@@ -57,7 +57,7 @@ We can truncate the input documents in `[DOCUMENTS]` in order to reduce the numb
     * The tokenizer used to calculate to split the document into segments used to count the length of a document. 
         * If tokenizer is  `'char'`, then the document is split up into characters which are counted to adhere to `doc_length`
         * If tokenizer is `'whitespace'`, the document is split up into words separated by whitespaces. These words are counted       and truncated depending on `doc_length`
-        * If tokenizer is `'vectorizer'`, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and trunctated depending on `doc_length`
+        * If tokenizer is `'vectorizer'`, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and truncated depending on `doc_length`
         * If tokenizer is a callable, then that callable is used to tokenized the document. These tokens are counted and truncated depending on `doc_length`
 
 This means that the definition of `doc_length` changes depending on what constitutes a token in the `tokenizer` parameter. If a token is a character, then `doc_length` refers to max length in characters. If a token is a word, then `doc_length` refers to the max length in words.
@@ -291,7 +291,7 @@ prompt = system_prompt + example_prompt + main_prompt
 
 Three pieces of the prompt were created:  
   
-* `system_prompt` helps us guide the model during a conversation. For example, we can say that it is a helpful assisant that is specialized in labeling topics.
+* `system_prompt` helps us guide the model during a conversation. For example, we can say that it is a helpful assistant that is specialized in labeling topics.
 * `example_prompt` gives an example of a correctly labeled topic to guide Llama 2
 * `main_prompt` contains the main question we are going to ask it, namely to label a topic. Note that it uses the `[DOCUMENTS]`  and `[KEYWORDS]` to provide the most relevant documents and keywords as additional context
 
