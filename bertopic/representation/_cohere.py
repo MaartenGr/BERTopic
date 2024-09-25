@@ -33,7 +33,9 @@ Topic:
 Sample texts from this topic:
 [DOCUMENTS]
 Keywords: [KEYWORDS]
-Topic name:"""
+Provide the topic name directly without any explanation."""
+
+DEFAULT_SYSTEM_PROMPT = "You are designated as an assistant that identify and extract high-level topics from texts."
 
 
 class Cohere(BaseRepresentation):
@@ -51,6 +53,8 @@ class Cohere(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `self.default_system_prompt_` is used instead.
         delay_in_seconds: The delay in seconds between consecutive prompts
                                 in order to prevent RateLimitErrors.
         nr_docs: The number of documents to pass to OpenAI if a prompt
@@ -107,8 +111,9 @@ class Cohere(BaseRepresentation):
     def __init__(
         self,
         client,
-        model: str = "xlarge",
+        model: str = "command-r",
         prompt: str = None,
+        system_prompt: str = None,
         delay_in_seconds: float = None,
         nr_docs: int = 4,
         diversity: float = None,
@@ -118,7 +123,9 @@ class Cohere(BaseRepresentation):
         self.client = client
         self.model = model
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
+        self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
         self.delay_in_seconds = delay_in_seconds
         self.nr_docs = nr_docs
         self.diversity = diversity
@@ -160,14 +167,14 @@ class Cohere(BaseRepresentation):
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
-            request = self.client.generate(
+            request = self.client.chat(
                 model=self.model,
-                prompt=prompt,
+                preamble=self.system_prompt,
+                message=prompt,
                 max_tokens=50,
-                num_generations=1,
                 stop_sequences=["\n"],
             )
-            label = request.generations[0].text.strip()
+            label = request.text.strip().replace("Topic name: ", "")
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics

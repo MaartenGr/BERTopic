@@ -48,7 +48,7 @@ Based on the information above, extract a short topic label in the following for
 topic: <topic label>
 """
 
-DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant."
+DEFAULT_SYSTEM_PROMPT = "You are designated as an assistant that identify and extract high-level topics from texts."
 
 
 class OpenAI(BaseRepresentation):
@@ -75,6 +75,8 @@ class OpenAI(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `self.default_system_prompt_` is used instead.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
         exponential_backoff: Retry requests with a random exponential backoff.
@@ -170,6 +172,7 @@ class OpenAI(BaseRepresentation):
             self.system_prompt = system_prompt
 
         self.default_prompt_ = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
+        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
         self.chat = chat
