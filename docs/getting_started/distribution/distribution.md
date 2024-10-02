@@ -41,7 +41,7 @@ After doing so, we can approximate the topic distributions for your documents:
 topic_distr, _ = topic_model.approximate_distribution(docs)
 ```
 
-The resulting `topic_distr` is a *n* x *m* matrix where *n* are the topics and *m* the documents. We can then visualize the distribution 
+The resulting `topic_distr` is a *n* x *m* matrix where *n* are the documents and *m* the topics. We can then visualize the distribution 
 of topics in a document:
 
 ```python
