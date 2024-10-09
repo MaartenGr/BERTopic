@@ -6,6 +6,19 @@ hide:
 # Changelog
 
 
+## **Version 0.16.4**
+*Release date: 9 October, 2024*
+
+<h3><b>Fixes:</a></b></h3>
+
+* Fix ValueError in Guided Topic Modeling by [@RTChou](https://github.com/RTChou) in [#2115](https://github.com/MaartenGr/BERTopic/pull/2115)
+* Fix saving BERTopic when c-TF-IDF is None by [@sete39](https://github.com/sete39) in [#2112](https://github.com/MaartenGr/BERTopic/pull/2112)
+* Fix `KeyError: 'topics_from'` in [#2101](https://github.com/MaartenGr/BERTopic/pull/2101)
+* Fix issues related Zero-shot Topic Modeling by [@ianrandman](https://github.com/ianrandman) in [#2105](https://github.com/MaartenGr/BERTopic/pull/2105)
+* Fix regex matching being used in PartOfSpeech representation model by [@woranov](https://github.com/woranov) in [#2138](https://github.com/MaartenGr/BERTopic/pull/2138)
+* Update typo by [@saikumaru](https://github.com/saikumaru) in [#2162](https://github.com/MaartenGr/BERTopic/pull/2162)
+
+
 ## **Version 0.16.3**
 *Release date: 22 July, 2024*
 
