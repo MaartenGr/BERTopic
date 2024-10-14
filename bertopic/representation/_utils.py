@@ -1,8 +1,9 @@
 import random
 import time
+from typing import Union
 
 
-def truncate_document(topic_model, doc_length, tokenizer, document: str):
+def truncate_document(topic_model, doc_length: Union[int, None], tokenizer: Union[str, callable], document: str) -> str:
     """Truncate a document to a certain length.
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and
@@ -54,6 +55,12 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         elif hasattr(tokenizer, "encode") and hasattr(tokenizer, "decode"):
             encoded_document = tokenizer.encode(document)
             truncated_document = tokenizer.decode(encoded_document[:doc_length])
+        else:
+            raise ValueError(
+                "Please select from one of the valid options for the `tokenizer` parameter: \n"
+                "{'char', 'whitespace', 'vectorizer'} \n"
+                "Alternatively if `tokenizer` is a callable ensure it has methods to encode and decode a document "
+            )
         return truncated_document
     return document
 
