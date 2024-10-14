@@ -1,8 +1,9 @@
 import random
 import time
+from typing import Union
 
 
-def truncate_document(topic_model, doc_length, tokenizer, document: str):
+def truncate_document(topic_model, doc_length: Union[int, None], tokenizer: Union[str, callable], document: str) -> str:
     """Truncate a document to a certain length.
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and

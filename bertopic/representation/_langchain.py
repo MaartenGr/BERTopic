@@ -148,6 +148,12 @@ class LangChain(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
+        if self.tokenizer is None and self.doc_length is not None:
+            raise ValueError(
+                "Please select from one of the valid options for the `tokenizer` parameter: \n"
+                "{'char', 'whitespace', 'vectorizer'} \n"
+                "If `tokenizer` is of type callable ensure it has methods to encode and decode a document \n"
+            )
 
     def extract_topics(
         self,

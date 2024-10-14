@@ -180,6 +180,13 @@ class OpenAI(BaseRepresentation):
         if not self.generator_kwargs.get("stop") and not chat:
             self.generator_kwargs["stop"] = "\n"
 
+        if self.tokenizer is None and self.doc_length is not None:
+            raise ValueError(
+                "Please select from one of the valid options for the `tokenizer` parameter: \n"
+                "{'char', 'whitespace', 'vectorizer'} \n"
+                "If `tokenizer` is of type callable ensure it has methods to encode and decode a document \n"
+            )
+
     def extract_topics(
         self,
         topic_model,
