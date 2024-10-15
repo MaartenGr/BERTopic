@@ -153,6 +153,7 @@ def test_topic_reduction_edge_cases(model, documents, request):
     topics = np.random.randint(-1, nr_topics - 1, len(documents))
     old_documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": topics})
     topic_model._update_topic_size(old_documents)
+    old_documents = topic_model._sort_mappings_by_frequency(old_documents)
     topic_model._extract_topics(old_documents)
     old_freq = topic_model.get_topic_freq()
 
