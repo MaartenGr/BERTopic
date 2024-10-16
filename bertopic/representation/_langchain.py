@@ -1,35 +1,22 @@
 import pandas as pd
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
 
-DEFAULT_PROMPT = "What are these documents about? Please give a single label."
-
 
 class LangChain(BaseRepresentation):
     """Using chains in langchain to generate topic labels.
 
-    The classic example uses `langchain.chains.question_answering.load_qa_chain`.
-    This returns a chain that takes a list of documents and a question as input.
-
-    You can also use Runnables such as those composed using the LangChain Expression Language.
+    You can use chains or Runnables such as those composed using the LangChain Expression Language
+    as long as their schema respects the conditions defined below.
 
     Arguments:
         chain: The langchain chain or Runnable with a `batch` method.
-               Input keys must be `input_documents` and `question`.
-               Output key must be `output_text`.
-        prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
-                 NOTE: Use `"[KEYWORDS]"` in the prompt
-                 to decide where the keywords need to be
-                 inserted. Keywords won't be included unless
-                 indicated. Unlike other representation models,
-                 Langchain does not use the `"[DOCUMENTS]"` tag
-                 to insert documents into the prompt. The load_qa_chain function
-                 formats the representative documents within the prompt.
+               Input keys must be `documents` (mandatory) and `keywords` (optional).
+               Output key must be `representation`.
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher
@@ -60,14 +47,30 @@ class LangChain(BaseRepresentation):
     like openai:
 
     `pip install langchain`
-    `pip install openai`
+    `pip install langchain_openai`
 
     Then, you can create your chain as follows:
 
     ```python
-    from langchain.chains.question_answering import load_qa_chain
-    from langchain.llms import OpenAI
-    chain = load_qa_chain(OpenAI(temperature=0, openai_api_key=my_openai_api_key), chain_type="stuff")
+    from langchain_openai import ChatOpenAI
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.runnables import RunnablePassthrough
+    from langchain.chains.combine_documents import create_stuff_documents_chain
+
+    chat_model = ChatOpenAI(model=..., api_key=...)
+
+    # For simple prompts
+    prompt = ChatPromptTemplate.from_template("What are these documents about? {documents}. Here are some keywords about them {keywords} Please give a single label.")
+
+    # For multi-message prompts
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", "You are provided with a list of documents and are asked to provide a single label for the topic."),
+            ("human", "Here is the list of documents: {documents}"),
+        ]
+    )
+
+    chain = RunnablePassthrough.assign(representation=create_stuff_documents_chain(chat_model, prompt, document_variable_name="documents"))
     ```
 
     Finally, you can pass the chain to BERTopic as follows:
@@ -82,26 +85,21 @@ class LangChain(BaseRepresentation):
     topic_model = BERTopic(representation_model=representation_model)
     ```
 
-    You can also use a custom prompt:
-
-    ```python
-    prompt = "What are these documents about? Please give a single label."
-    representation_model = LangChain(chain, prompt=prompt)
-    ```
-
     You can also use a Runnable instead of a chain.
     The example below uses the LangChain Expression Language:
 
     ```python
     from bertopic.representation import LangChain
-    from langchain.chains.question_answering import load_qa_chain
     from langchain.chat_models import ChatAnthropic
-    from langchain.schema.document import Document
-    from langchain.schema.runnable import RunnablePassthrough
+    from langchain_core.documents import Document
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.runnables import RunnablePassthrough
+    from langchain.chains.combine_documents import create_stuff_documents_chain
     from langchain_experimental.data_anonymizer.presidio import PresidioReversibleAnonymizer
 
     prompt = ...
-    llm = ...
+
+    chat_model = ...
 
     # We will construct a special privacy-preserving chain using Microsoft Presidio
 
@@ -109,7 +107,7 @@ class LangChain(BaseRepresentation):
 
     chain = (
         {
-            "input_documents": (
+            "documents": (
                 lambda inp: [
                     Document(
                         page_content=pii_handler.anonymize(
@@ -117,23 +115,22 @@ class LangChain(BaseRepresentation):
                             language="en",
                         ),
                     )
-                    for d in inp["input_documents"]
+                    for d in inp["documents"]
                 ]
             ),
-            "question": RunnablePassthrough(),
+            "keywords": RunnablePassthrough(),
         }
-        | load_qa_chain(representation_llm, chain_type="stuff")
-        | (lambda output: {"output_text": pii_handler.deanonymize(output["output_text"])})
+        | create_stuff_documents_chain(chat_model, prompt, document_variable_name="documents")
+        | (lambda output: {"representation": pii_handler.deanonymize(output["representation"])})
     )
 
-    representation_model = LangChain(chain, prompt=representation_prompt)
+    representation_model = LangChain(chain)
     ```
     """
 
     def __init__(
         self,
         chain,
-        prompt: str = None,
         nr_docs: int = 4,
         diversity: float = None,
         doc_length: int = None,
@@ -141,8 +138,6 @@ class LangChain(BaseRepresentation):
         chain_config=None,
     ):
         self.chain = chain
-        self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
         self.chain_config = chain_config
         self.nr_docs = nr_docs
         self.diversity = diversity
@@ -186,24 +181,21 @@ class LangChain(BaseRepresentation):
             for docs in repr_docs_mappings.values()
         ]
 
-        # `self.chain` must take `input_documents` and `question` as input keys
-        # Use a custom prompt that leverages keywords, using the tag: [KEYWORDS]
-        if "[KEYWORDS]" in self.prompt:
-            prompts = []
-            for topic in topics:
-                keywords = list(zip(*topics[topic]))[0]
-                prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
-                prompts.append(prompt)
+        # `self.chain` must take `documents` as a mandatory input key and `keywords` as an optional input key
+        formatted_keywords_list = []
+        for topic in topics:
+            keywords = list(zip(*topics[topic]))[0]
+            formatted_keywords_list.append(", ".join(keywords))
 
-            inputs = [{"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)]
+        # Documents are passed as a list of langchain Document objects, it is up to the chain to format them into a str
+        inputs = [
+            {"documents": docs, "keywords": formatted_keywords}
+            for docs, formatted_keywords in zip(chain_docs, formatted_keywords_list)
+        ]
 
-        else:
-            inputs = [{"input_documents": docs, "question": self.prompt} for docs in chain_docs]
-
-        # `self.chain` must return a dict with an `output_text` key
-        # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
+        # `self.chain` must return a dict with an `representation` key
         outputs = self.chain.batch(inputs=inputs, config=self.chain_config)
-        labels = [output["output_text"].strip() for output in outputs]
+        labels = [output["representation"].strip() for output in outputs]
 
         updated_topics = {
             topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
