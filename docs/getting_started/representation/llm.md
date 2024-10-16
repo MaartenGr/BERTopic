@@ -479,15 +479,23 @@ To use langchain, you will need to install the langchain package first. Addition
 like openai:
 
 ```bash
-pip install langchain, openai
+pip install langchain
+pip langchain_openai
 ```
 
 Then, you can create your chain as follows:
 
 ```python
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import OpenAI
-chain = load_qa_chain(OpenAI(temperature=0, openai_api_key=my_openai_api_key), chain_type="stuff")
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain.chains.combine_documents import create_stuff_documents_chain
+
+chat_model = ChatOpenAI(model=..., api_key=...)
+
+prompt = ChatPromptTemplate.from_template("What are these documents about? {documents}. Please give a single label.")
+
+chain = RunnablePassthrough.assign(representation=create_stuff_documents_chain(chat_model, prompt, document_variable_name="documents"))
 ```
 
 Finally, you can pass the chain to BERTopic as follows:
@@ -502,16 +510,16 @@ representation_model = LangChain(chain)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-You can also use a custom prompt:
+You can also customize the prompt, and include the optional `keywords` placeholder to add the keywords to the prompt.
 
 ```python
-prompt = "What are these documents about? Please give a single label."
-representation_model = LangChain(chain, prompt=prompt)
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are provided with a list of documents and are asked to provide a single label for the topic."),
+        ("human", "Here is the list of documents: {documents} and related keywords: {keywords}"),
+    ]
+)
 ```
-
-!!! note Note
-    The prompt does not make use of `[KEYWORDS]` and `[DOCUMENTS]` tags as 
-    the documents are already used within langchain's `load_qa_chain`. 
 
 ## **Cohere**
 
