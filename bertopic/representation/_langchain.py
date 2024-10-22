@@ -1,10 +1,17 @@
 import pandas as pd
 from langchain_core.documents import Document
+from langchain_core.prompts import ChatPromptTemplate
+
 from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
+
+
+DEFAULT_PROMPT = ChatPromptTemplate.from_template(
+    "What are these documents about? {DOCUMENTS} Here are keywords related to them {KEYWORDS}. Your output is a single label without any formatting."
+)
 
 
 class LangChain(BaseRepresentation):
@@ -15,8 +22,7 @@ class LangChain(BaseRepresentation):
 
     Arguments:
         chain: The langchain chain or Runnable with a `batch` method.
-               Input keys must be `documents` (mandatory) and `keywords` (optional).
-               Output key must be `representation`.
+               Input keys must be `DOCUMENTS` (mandatory) and `KEYWORDS` (optional).
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher
@@ -189,13 +195,13 @@ class LangChain(BaseRepresentation):
 
         # Documents are passed as a list of langchain Document objects, it is up to the chain to format them into a str
         inputs = [
-            {"documents": docs, "keywords": formatted_keywords}
+            {"DOCUMENTS": docs, "KEYWORDS": formatted_keywords}
             for docs, formatted_keywords in zip(chain_docs, formatted_keywords_list)
         ]
 
         # `self.chain` must return a dict with an `representation` key
         outputs = self.chain.batch(inputs=inputs, config=self.chain_config)
-        labels = [output["representation"].strip() for output in outputs]
+        labels = [output.strip() for output in outputs]
 
         updated_topics = {
             topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
