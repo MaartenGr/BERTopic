@@ -334,7 +334,7 @@ After installation, you need to download your LLM locally before we use it in BE
 wget https://huggingface.co/TheBloke/zephyr-7B-alpha-GGUF/resolve/main/zephyr-7b-alpha.Q4_K_M.gguf
 ```
 
-Finally, we can now use the model the model with BERTopic in just a couple of lines:
+Finally, we can now use the model with BERTopic in just a couple of lines:
 
 ```python
 from bertopic import BERTopic
