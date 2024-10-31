@@ -103,7 +103,7 @@ class LangChain(BaseRepresentation):
             representation_model = LangChain(llm=chat_model)
 
             # Create your representation model with a custom prompt
-            prompt = "Output a single label that describes the following documents: [DOCUMENTS]"
+            prompt = "What are these documents about? [DOCUMENTS] Here are keywords related to them [KEYWORDS]."
             representation_model = LangChain(llm=chat_model, prompt=prompt)
 
             # Use the representation model in BERTopic on top of the default pipeline
@@ -164,9 +164,15 @@ class LangChain(BaseRepresentation):
         tokenizer: Union[str, Callable] = None,
         chain_config: dict = None,
     ):
+        self.prompt = prompt
+
         if chain is not None:
             self.chain = chain
         elif llm is not None:
+            # Check that the prompt contains the necessary placeholder
+            if "[DOCUMENTS]" not in prompt:
+                raise ValueError("The prompt must contain the placeholder [DOCUMENTS]")
+
             # Convert prompt placeholders to the LangChain format
             langchain_prompt = prompt.replace("[DOCUMENTS]", "{DOCUMENTS}").replace("[KEYWORDS]", "{KEYWORDS}")
 
@@ -221,24 +227,24 @@ class LangChain(BaseRepresentation):
             for docs in repr_docs_mappings.values()
         ]
 
-        # `self.chain` must take `input_documents` and `question` as input keys
-        # Use a custom prompt that leverages keywords, using the tag: [KEYWORDS]
-        if "[KEYWORDS]" in self.prompt:
-            prompts = []
-            for topic in topics:
-                keywords = list(zip(*topics[topic]))[0]
-                prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
-                prompts.append(prompt)
+        # Extract keywords from the topics and format them as a string
+        formatted_keywords_list = []
+        for topic in topics:
+            keywords = list(zip(*topics[topic]))[0]
+            formatted_keywords_list.append(", ".join(keywords))
 
-            inputs = [{"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)]
+        # self.chain must accept DOCUMENTS as a mandatory input key and KEYWORDS as an optional input key
+        # We always pass both keys to the chain, and the chain can choose to use them or not
+        # Documents are passed as a list of LangChain Document objects, it is up to the chain to format them into a string
+        inputs = [
+            {"DOCUMENTS": docs, "KEYWORDS": formatted_keywords}
+            for docs, formatted_keywords in zip(chain_docs, formatted_keywords_list)
+        ]
 
-        else:
-            inputs = [{"input_documents": docs, "question": self.prompt} for docs in chain_docs]
-
-        # `self.chain` must return a dict with an `output_text` key
-        # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
+        # self.chain must return a string label or a list of string labels for each input
         outputs = self.chain.batch(inputs=inputs, config=self.chain_config)
-        labels = [output["output_text"].strip() for output in outputs]
+
+        labels = [output.strip() for output in outputs]
 
         updated_topics = {
             topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
