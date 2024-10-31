@@ -48,9 +48,9 @@ class LangChain(BaseRepresentation):
         chain: The langchain chain or Runnable with a `batch` method.
                Input keys must be `input_documents` and `question`.
                Output key must be `output_text`.
-        prompt: A string containing placeholders `[DOCUMENTS]` and `[KEYWORDS]` that will be 
-                replaced with the actual documents and keywords during processing. If not provided, 
-                the default prompt defined in DEFAULT_PROMPT will be used. Note that the prompt is 
+        prompt: A string containing placeholders `[DOCUMENTS]` and `[KEYWORDS]` that will be
+                replaced with the actual documents and keywords during processing. If not provided,
+                the default prompt defined in DEFAULT_PROMPT will be used. Note that the prompt is
                 only used in the basic LangChain stuff documents chain (used when `llm` is provided).
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
@@ -160,16 +160,15 @@ class LangChain(BaseRepresentation):
         diversity: float = None,
         doc_length: int = None,
         tokenizer: Union[str, Callable] = None,
-        chain_config=None,
+        chain_config: dict = None,
     ):
         self.chain = chain
         self.prompt = prompt
-        self.default_prompt_ = DEFAULT_PROMPT
-        self.chain_config = chain_config
         self.nr_docs = nr_docs
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
+        self.chain_config = chain_config
 
     def extract_topics(
         self,
