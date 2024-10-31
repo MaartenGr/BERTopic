@@ -48,15 +48,10 @@ class LangChain(BaseRepresentation):
         chain: The langchain chain or Runnable with a `batch` method.
                Input keys must be `input_documents` and `question`.
                Output key must be `output_text`.
-        prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
-                 NOTE: Use `"[KEYWORDS]"` in the prompt
-                 to decide where the keywords need to be
-                 inserted. Keywords won't be included unless
-                 indicated. Unlike other representation models,
-                 Langchain does not use the `"[DOCUMENTS]"` tag
-                 to insert documents into the prompt. The load_qa_chain function
-                 formats the representative documents within the prompt.
+        prompt: A string containing placeholders `[DOCUMENTS]` and `[KEYWORDS]` that will be 
+                replaced with the actual documents and keywords during processing. If not provided, 
+                the default prompt defined in DEFAULT_PROMPT will be used. Note that the prompt is 
+                only used in the basic LangChain stuff documents chain (used when `llm` is provided).
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher
