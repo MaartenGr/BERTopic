@@ -262,14 +262,14 @@ class LangChain(BaseRepresentation):
                 # 4. Pad with empty strings if needed to always have 10 elements
                 clean_outputs = [str(label).strip() for label in output]
                 top_labels = clean_outputs[:10]
-                
+
                 # Create (label, weight) pairs with decreasing weights
                 labels = [(label, 1.0 - (i * 0.1)) for i, label in enumerate(top_labels)]
-                
+
                 # Pad with empty strings if we have less than 10 labels
                 if len(labels) < 10:
                     labels.extend([("", 0.0) for _ in range(10 - len(labels))])
-            
+
             updated_topics[topic] = labels
 
         return updated_topics
