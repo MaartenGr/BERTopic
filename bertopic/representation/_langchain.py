@@ -4,7 +4,8 @@ from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 from langchain_core.language_models import LanguageModelLike
 from langchain_core.runnables import Runnable
-
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
 
@@ -55,9 +56,10 @@ class LangChain(BaseRepresentation):
                 replaced with the actual documents and keywords during processing. If not provided,
                 the default prompt defined in DEFAULT_PROMPT will be used. Note that the prompt is
                 only used in the basic LangChain stuff documents chain (used when `llm` is provided).
-        chain: The langchain chain or Runnable with a `batch` method.
-               Input keys must be `input_documents` and `question`.
-               Output key must be `output_text`.
+        chain: A custom LangChain chain to be used instead of the basic LangChain stuff documents chain that
+                is created using `llm` and `prompt`. The chain must accept the input key `DOCUMENTS` and optionally
+                the input key `KEYWORDS`. It should output either a string or a list directly (not as a dict).
+                If provided, `llm` and `prompt` are ignored.
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher
@@ -169,9 +171,20 @@ class LangChain(BaseRepresentation):
         tokenizer: Union[str, Callable] = None,
         chain_config: dict = None,
     ):
-        self.llm = llm
-        self.prompt = prompt
-        self.chain = chain
+        if chain is not None:
+            self.chain = chain
+        elif llm is not None:
+            # Convert prompt placeholders to the LangChain format
+            langchain_prompt = prompt.replace("[DOCUMENTS]", "{DOCUMENTS}").replace("[KEYWORDS]", "{KEYWORDS}")
+
+            # Create ChatPromptTemplate
+            chat_prompt = ChatPromptTemplate.from_template(langchain_prompt)
+
+            # Create a basic LangChain chain using create_stuff_documents_chain
+            self.chain = create_stuff_documents_chain(llm, chat_prompt, document_variable_name="DOCUMENTS")
+        else:
+            raise ValueError("Either `llm` or `chain` must be provided")
+
         self.nr_docs = nr_docs
         self.diversity = diversity
         self.doc_length = doc_length
