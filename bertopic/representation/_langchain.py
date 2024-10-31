@@ -2,6 +2,8 @@ import pandas as pd
 from langchain.docstore.document import Document
 from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
+from langchain_core.language_models import LanguageModelLike
+from langchain_core.runnables import Runnable
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
@@ -45,13 +47,17 @@ class LangChain(BaseRepresentation):
     You can also use Runnables such as those composed using the LangChain Expression Language.
 
     Arguments:
-        chain: The langchain chain or Runnable with a `batch` method.
-               Input keys must be `input_documents` and `question`.
-               Output key must be `output_text`.
+        llm: The language model to use for creating a basic langchain chain.
+             This parameter is used to create a default chain if no custom chain
+             is provided. If a custom chain is provided via the `chain` parameter,
+             this parameter is ignored.
         prompt: A string containing placeholders `[DOCUMENTS]` and `[KEYWORDS]` that will be
                 replaced with the actual documents and keywords during processing. If not provided,
                 the default prompt defined in DEFAULT_PROMPT will be used. Note that the prompt is
                 only used in the basic LangChain stuff documents chain (used when `llm` is provided).
+        chain: The langchain chain or Runnable with a `batch` method.
+               Input keys must be `input_documents` and `question`.
+               Output key must be `output_text`.
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher
@@ -154,16 +160,18 @@ class LangChain(BaseRepresentation):
 
     def __init__(
         self,
-        chain,
+        llm: LanguageModelLike = None,
         prompt: str = DEFAULT_PROMPT,
+        chain: Runnable = None,
         nr_docs: int = 4,
         diversity: float = None,
         doc_length: int = None,
         tokenizer: Union[str, Callable] = None,
         chain_config: dict = None,
     ):
-        self.chain = chain
+        self.llm = llm
         self.prompt = prompt
+        self.chain = chain
         self.nr_docs = nr_docs
         self.diversity = diversity
         self.doc_length = doc_length
