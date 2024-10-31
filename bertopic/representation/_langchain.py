@@ -244,10 +244,32 @@ class LangChain(BaseRepresentation):
         # self.chain must return a string label or a list of string labels for each input
         outputs = self.chain.batch(inputs=inputs, config=self.chain_config)
 
-        labels = [output.strip() for output in outputs]
-
-        updated_topics = {
-            topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
-        }
+        # Process outputs from the chain - can be either strings or lists of strings
+        updated_topics = {}
+        for topic, output in zip(repr_docs_mappings.keys(), outputs):
+            # Each output can be either:
+            # - A single string representing the main topic label
+            # - A list of strings representing multiple related labels
+            if isinstance(output, str):
+                # For string output: use it as the main label (weight=1)
+                # and pad with 9 empty strings (weight=0)
+                labels = [(output.strip(), 1)] + [("", 0) for _ in range(9)]
+            else:
+                # For list output:
+                # 1. Convert all elements to stripped strings
+                # 2. Take up to 10 elements
+                # 3. Assign decreasing weights from 1.0 to 0.1
+                # 4. Pad with empty strings if needed to always have 10 elements
+                clean_outputs = [str(label).strip() for label in output]
+                top_labels = clean_outputs[:10]
+                
+                # Create (label, weight) pairs with decreasing weights
+                labels = [(label, 1.0 - (i * 0.1)) for i, label in enumerate(top_labels)]
+                
+                # Pad with empty strings if we have less than 10 labels
+                if len(labels) < 10:
+                    labels.extend([("", 0.0) for _ in range(10 - len(labels))])
+            
+            updated_topics[topic] = labels
 
         return updated_topics
