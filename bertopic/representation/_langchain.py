@@ -10,12 +10,12 @@ from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
 
 DEFAULT_PROMPT = """
-This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
+This is a list of texts where each collection of texts describes a topic. After each collection of texts, the name of the topic they represent is mentioned as a short, highly descriptive title.
 ---
 Topic:
 Sample texts from this topic:
-- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
-- Meat, but especially beef, is the word food in terms of emissions.
+- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial-style meat production and factory farming, meat has become a staple food.
+- Meat, but especially beef, is the worst food in terms of emissions.
 - Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
 
 Keywords: meat beef eat eating emissions steak food health processed chicken
