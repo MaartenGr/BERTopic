@@ -1,5 +1,5 @@
 import pandas as pd
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 from langchain_core.language_models import LanguageModelLike
@@ -8,7 +8,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
-
 
 DEFAULT_PROMPT = """
 This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
@@ -40,26 +39,21 @@ Topic name:"""
 
 
 class LangChain(BaseRepresentation):
-    """Using chains in langchain to generate topic labels.
-
-    The classic example uses `langchain.chains.question_answering.load_qa_chain`.
-    This returns a chain that takes a list of documents and a question as input.
-
-    You can also use Runnables such as those composed using the LangChain Expression Language.
+    """This representation model uses LangChain to generate descriptive topic labels. It supports two main usage patterns.
+    1. Basic usage with a language model and optional custom prompt
+    2. Advanced usage with a custom LangChain chain for full control over the generation process
 
     Arguments:
-        llm: The language model to use for creating a basic langchain chain.
-             This parameter is used to create a default chain if no custom chain
-             is provided. If a custom chain is provided via the `chain` parameter,
-             this parameter is ignored.
-        prompt: A string containing placeholders `[DOCUMENTS]` and `[KEYWORDS]` that will be
-                replaced with the actual documents and keywords during processing. If not provided,
-                the default prompt defined in DEFAULT_PROMPT will be used. Note that the prompt is
-                only used in the basic LangChain stuff documents chain (used when `llm` is provided).
-        chain: A custom LangChain chain to be used instead of the basic LangChain stuff documents chain that
-                is created using `llm` and `prompt`. The chain must accept the input key `DOCUMENTS` and optionally
-                the input key `KEYWORDS`. It should output either a string or a list directly (not as a dict).
-                If provided, `llm` and `prompt` are ignored.
+        llm: A LangChain text model or chat model used to generate representations, only needed for basic usage.
+             Examples include ChatOpenAI or ChatAnthropic. Ignored if a custom chain is provided.
+        prompt: A string template containing the placeholder [DOCUMENTS] and optionally [KEYWORDS], only needed for basic usage.
+                Defaults to a pre-defined prompt defined in DEFAULT_PROMPT. Ignored if a custom chain is provided.
+        chain: A custom LangChain chain to generate representations, only needed for advanced usage.
+               The chain must be a LangChain Runnable that implements the batch method and accepts these input keys:
+               - DOCUMENTS: (required) A list of LangChain Document objects
+               - KEYWORDS: (optional) A list of topic keywords
+               The chain must directly output either a string label or a list of strings.
+               If provided, llm and prompt are ignored.
         nr_docs: The number of documents to pass to LangChain
         diversity: The diversity of documents to pass to LangChain.
                    Accepts values between 0 and 1. A higher
@@ -81,83 +75,77 @@ class LangChain(BaseRepresentation):
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
-        chain_config: The configuration for the langchain chain. Can be used to set options
-                      like max_concurrency to avoid rate limiting errors.
+        chain_config: The configuration for the LangChain chain. Can be used to set options like max_concurrency to avoid rate limiting errors.
+
     Usage:
 
-    To use this, you will need to install the langchain package first.
-    Additionally, you will need an underlying LLM to support langchain,
-    like openai:
+        To use this representation, you will need to install the LangChain package first.
 
-    `pip install langchain`
-    `pip install openai`
+        `pip install langchain`
 
-    Then, you can create your chain as follows:
+        There are two ways to use the LangChain representation:
 
-    ```python
-    from langchain.chains.question_answering import load_qa_chain
-    from langchain.llms import OpenAI
-    chain = load_qa_chain(OpenAI(temperature=0, openai_api_key=my_openai_api_key), chain_type="stuff")
-    ```
+        1. Use a default LangChain chain that is created using an underlying language model and a prompt.
 
-    Finally, you can pass the chain to BERTopic as follows:
+        You will first need to install the package for the underlying model. For example, if you want to use OpenAI:
 
-    ```python
-    from bertopic.representation import LangChain
+            `pip install langchain_openai`
 
-    # Create your representation model
-    representation_model = LangChain(chain)
+            ```python
+            from bertopic.representation import LangChain
+            from langchain_openai import ChatOpenAI
 
-    # Use the representation model in BERTopic on top of the default pipeline
-    topic_model = BERTopic(representation_model=representation_model)
-    ```
+            chat_model = ChatOpenAI(temperature=0, openai_api_key=my_openai_api_key)
 
-    You can also use a custom prompt:
+            # Create your representation model with the pre-defined prompt
+            representation_model = LangChain(llm=chat_model)
 
-    ```python
-    prompt = "What are these documents about? Please give a single label."
-    representation_model = LangChain(chain, prompt=prompt)
-    ```
+            # Create your representation model with a custom prompt
+            prompt = "Output a single label that describes the following documents: [DOCUMENTS]"
+            representation_model = LangChain(llm=chat_model, prompt=prompt)
 
-    You can also use a Runnable instead of a chain.
-    The example below uses the LangChain Expression Language:
+            # Use the representation model in BERTopic on top of the default pipeline
+            topic_model = BERTopic(representation_model=representation_model)
+            ```
 
-    ```python
-    from bertopic.representation import LangChain
-    from langchain.chains.question_answering import load_qa_chain
-    from langchain.chat_models import ChatAnthropic
-    from langchain.schema.document import Document
-    from langchain.schema.runnable import RunnablePassthrough
-    from langchain_experimental.data_anonymizer.presidio import PresidioReversibleAnonymizer
+        2. Use a custom LangChain chain for full control over the generation process:
 
-    prompt = ...
-    llm = ...
+            ```python
+            from bertopic.representation import LangChain
+            from langchain_anthropic import ChatAnthropic
+            from langchain_core.documents import Document
+            from langchain_core.prompts import ChatPromptTemplate
+            from langchain.chains.combine_documents import create_stuff_documents_chain
+            from langchain_experimental.data_anonymizer.presidio import PresidioReversibleAnonymizer
 
-    # We will construct a special privacy-preserving chain using Microsoft Presidio
+            prompt = ...
 
-    pii_handler = PresidioReversibleAnonymizer(analyzed_fields=["PERSON"])
+            chat_model = ...
 
-    chain = (
-        {
-            "input_documents": (
-                lambda inp: [
-                    Document(
-                        page_content=pii_handler.anonymize(
-                            d.page_content,
-                            language="en",
-                        ),
-                    )
-                    for d in inp["input_documents"]
-                ]
-            ),
-            "question": RunnablePassthrough(),
-        }
-        | load_qa_chain(representation_llm, chain_type="stuff")
-        | (lambda output: {"output_text": pii_handler.deanonymize(output["output_text"])})
-    )
+            # We will construct a special privacy-preserving chain using Microsoft Presidio
 
-    representation_model = LangChain(chain, prompt=representation_prompt)
-    ```
+            pii_handler = PresidioReversibleAnonymizer(analyzed_fields=["PERSON"])
+
+            chain = (
+                {
+                    "DOCUMENTS": (
+                        lambda inp: [
+                            Document(
+                                page_content=pii_handler.anonymize(
+                                    d.page_content,
+                                    language="en",
+                                ),
+                            )
+                            for d in inp["DOCUMENTS"]
+                        ]
+                    ),
+                    "KEYWORDS": lambda keywords: keywords["KEYWORDS"],
+                }
+                | create_stuff_documents_chain(chat_model, prompt, document_variable_name="DOCUMENTS")
+            )
+
+            representation_model = LangChain(chain=chain)
+            ```
     """
 
     def __init__(
