@@ -39,7 +39,9 @@ Topic name:"""
 
 
 class LangChain(BaseRepresentation):
-    """This representation model uses LangChain to generate descriptive topic labels. It supports two main usage patterns.
+    """This representation model uses LangChain to generate descriptive topic labels.
+
+    It supports two main usage patterns:
     1. Basic usage with a language model and optional custom prompt
     2. Advanced usage with a custom LangChain chain for full control over the generation process
 
@@ -87,7 +89,7 @@ class LangChain(BaseRepresentation):
 
         1. Use a default LangChain chain that is created using an underlying language model and a prompt.
 
-        You will first need to install the package for the underlying model. For example, if you want to use OpenAI:
+            You will first need to install the package for the underlying model. For example, if you want to use OpenAI:
 
             `pip install langchain_openai`
 
@@ -109,6 +111,9 @@ class LangChain(BaseRepresentation):
             ```
 
         2. Use a custom LangChain chain for full control over the generation process:
+
+            Remember that the chain will receive two inputs: `DOCUMENTS` and `KEYWORDS` and that it must return directly a string label
+            or a list of strings.
 
             ```python
             from bertopic.representation import LangChain
