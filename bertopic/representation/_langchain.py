@@ -14,26 +14,27 @@ This is a list of texts where each collection of texts describes a topic. After 
 ---
 Topic:
 Sample texts from this topic:
-- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial-style meat production and factory farming, meat has become a staple food.
-- Meat, but especially beef, is the worst food in terms of emissions.
-- Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
+Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial-style meat production and factory farming, meat has become a staple food.
+Meat, but especially beef, is the worst food in terms of emissions.
+Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
 
-Keywords: meat beef eat eating emissions steak food health processed chicken
+Keywords: meat, beef, eat, eating, emissions, steak, food, health, processed, chicken
 Topic name: Environmental impacts of eating meat
 ---
 Topic:
 Sample texts from this topic:
-- I have ordered the product weeks ago but it still has not arrived!
-- The website mentions that it only takes a couple of days to deliver but I still have not received mine.
-- I got a message stating that I received the monitor but that is not true!
-- It took a month longer to deliver than was advised...
+I have ordered the product weeks ago but it still has not arrived!
+The website mentions that it only takes a couple of days to deliver but I still have not received mine.
+I got a message stating that I received the monitor but that is not true!
+It took a month longer to deliver than was advised...
 
-Keywords: deliver weeks product shipping long delivery received arrived arrive week
+Keywords: deliver, weeks, product, shipping, long, delivery, received, arrived, arrive, week
 Topic name: Shipping and delivery issues
 ---
 Topic:
 Sample texts from this topic:
 [DOCUMENTS]
+
 Keywords: [KEYWORDS]
 Topic name:"""
 
@@ -180,7 +181,12 @@ class LangChain(BaseRepresentation):
             chat_prompt = ChatPromptTemplate.from_template(langchain_prompt)
 
             # Create a basic LangChain chain using create_stuff_documents_chain
-            self.chain = create_stuff_documents_chain(llm, chat_prompt, document_variable_name="DOCUMENTS")
+            self.chain = create_stuff_documents_chain(
+                llm,
+                chat_prompt,
+                document_variable_name="DOCUMENTS",
+                document_separator="\n",
+            )
         else:
             raise ValueError("Either `llm` or `chain` must be provided")
 
