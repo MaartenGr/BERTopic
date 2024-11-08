@@ -468,56 +468,84 @@ representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True, prompt=s
 The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!
 If you want to have multiple representations of a single topic, it might be worthwhile to also check out [**multi-aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling with BERTopic.
 
-
 ## **LangChain**
 
-[Langchain](https://github.com/hwchase17/langchain) is a package that helps users with chaining large language models.
-In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this 
-external knowledge are the most representative documents in each topic. 
+[LangChain](https://github.com/hwchase17/langchain) can be used to generate descriptive topic labels in BERTopic. It supports both basic usage with language models and advanced usage with custom chains for full control over the generation process.
 
-To use langchain, you will need to install the langchain package first. Additionally, you will need an underlying LLM to support langchain,
-like openai:
+To use LangChain, you will need to install it first, along with the specific integration for your chosen language model. For example, to use OpenAI models:
 
 ```bash
 pip install langchain
-pip langchain_openai
+pip install langchain-openai
 ```
 
-Then, you can create your chain as follows:
+See the [LangChain integrations page](https://python.langchain.com/docs/integrations/chat/) for the full list of supported chat models and their required packages.
 
-```python
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain.chains.combine_documents import create_stuff_documents_chain
+There are two main ways to use LangChain with BERTopic:
 
-chat_model = ChatOpenAI(model=..., api_key=...)
+### **Basic Usage**
 
-prompt = ChatPromptTemplate.from_template("What are these documents about? {documents}. Please give a single label.")
-
-chain = RunnablePassthrough.assign(representation=create_stuff_documents_chain(chat_model, prompt, document_variable_name="documents"))
-```
-
-Finally, you can pass the chain to BERTopic as follows:
+The simplest way is to use a language model with an optional custom prompt:
 
 ```python
 from bertopic.representation import LangChain
+from langchain_openai import ChatOpenAI
 
-# Create your representation model
-representation_model = LangChain(chain)
+# Create a chat model
+chat_model = ChatOpenAI(temperature=0, openai_api_key="...")
 
-# Use the representation model in BERTopic on top of the default pipeline
+# Create your representation model with the pre-defined prompt
+representation_model = LangChain(llm=chat_model)
+
+# Use the representation model in BERTopic
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-You can also customize the prompt, and include the optional `keywords` placeholder to add the keywords to the prompt.
+You can also customize the prompt:
 
 ```python
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "You are provided with a list of documents and are asked to provide a single label for the topic."),
-        ("human", "Here is the list of documents: {documents} and related keywords: {keywords}"),
-    ]
+prompt = "Here is a list of documents: [DOCUMENTS]. These documents are described by these keywords: [KEYWORDS]. Please give a short label."
+representation_model = LangChain(llm=chat_model, prompt=prompt)
+```
+
+### **Advanced Usage**
+
+For more control, you can create a custom LangChain chain to generate the representations. The representation of a topic can in that case be a single label or a list of labels, and must be directly returned by the chain.
+
+Here's an example using multiple labels output:
+
+```python
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain 
+from langchain_core.output_parsers import CommaSeparatedListOutputParser
+
+# Multiple Labels Output
+list_prompt = ChatPromptTemplate.from_template(
+    "Here is a list of documents: {DOCUMENTS}. These documents are described by these keywords: {KEYWORDS}. Output a comma-separated list of labels that represents these documents."
+)
+list_chain = create_stuff_documents_chain(
+    llm=chat_model,
+    prompt=list_prompt,
+    document_variable_name="DOCUMENTS",
+    output_parser=CommaSeparatedListOutputParser()
+)
+
+# Use in BERTopic
+representation_model = LangChain(chain=list_chain)
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+!!! note
+    When creating custom chains, the prompt uses LangChain's syntax with curly braces: `{DOCUMENTS}` and `{KEYWORDS}` instead of BERTopic's `[DOCUMENTS]` and `[KEYWORDS]`.
+
+### **Chain Configuration**
+
+You can configure the chain with different parameters or add callbacks. For example, to handle rate limits when using external APIs, you can control the number of concurrent requests:
+
+```python
+representation_model = LangChain(
+    chain=chain,
+    chain_config={"max_concurrency": 5}
 )
 ```
 
