@@ -263,17 +263,17 @@ class LangChain(BaseRepresentation):
                 # For list output:
                 # 1. Convert all elements to stripped strings
                 # 2. Take up to 10 elements
-                # 3. Assign decreasing weights from 1.0 to 0.1
+                # 3. Assign weight of 1 to all elements
                 # 4. Pad with empty strings if needed to always have 10 elements
                 clean_outputs = [str(label).strip() for label in output]
                 top_labels = clean_outputs[:10]
 
-                # Create (label, weight) pairs with decreasing weights
-                labels = [(label, 1.0 - (i * 0.1)) for i, label in enumerate(top_labels)]
+                # Create (label, weight) pairs with weight=1
+                labels = [(label, 1) for label in top_labels]
 
                 # Pad with empty strings if we have less than 10 labels
                 if len(labels) < 10:
-                    labels.extend([("", 0.0) for _ in range(10 - len(labels))])
+                    labels.extend([("", 0) for _ in range(10 - len(labels))])
 
             updated_topics[topic] = labels
 
