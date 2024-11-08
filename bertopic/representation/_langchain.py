@@ -115,6 +115,7 @@ class LangChain(BaseRepresentation):
             Remember that the chain will receive two inputs: `DOCUMENTS` and `KEYWORDS` and that it must return directly a string label
             or a list of strings.
 
+            Example of a custom chain that uses Microsoft Presidio to anonymize the documents and returns a single label:
             ```python
             from bertopic.representation import LangChain
             from langchain_anthropic import ChatAnthropic
@@ -151,6 +152,30 @@ class LangChain(BaseRepresentation):
 
             representation_model = LangChain(chain=chain)
             ```
+
+            Example of a custom chain that returns a list of labels:
+            ```python
+            from bertopic.representation import LangChain
+            from langchain_openai import ChatOpenAI
+            from langchain_core.prompts import ChatPromptTemplate
+            from langchain.chains.combine_documents import create_stuff_documents_chain
+            from langchain_core.output_parsers import CommaSeparatedListOutputParser
+
+            chat_model = ...
+
+            list_prompt = ChatPromptTemplate.from_template(
+                "Here is a list of documents: {DOCUMENTS}. Output a comma-separated list of keywords that represents these documents."
+            )
+            list_chain = create_stuff_documents_chain(
+                llm=chat_model,
+                prompt=list_prompt,
+                document_variable_name="DOCUMENTS",
+                output_parser=CommaSeparatedListOutputParser()
+            )
+
+            representation_model = LangChain(chain=list_chain)
+            ```
+
     """
 
     def __init__(
