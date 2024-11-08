@@ -9,8 +9,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document
 
-DEFAULT_PROMPT = """
-This is a list of texts where each collection of texts describes a topic. After each collection of texts, the name of the topic they represent is mentioned as a short, highly descriptive title.
+DEFAULT_PROMPT = """This is a list of texts where each collection of texts describes a topic. After each collection of texts, the name of the topic they represent is mentioned as a short, highly descriptive title.
 ---
 Topic:
 Sample texts from this topic:
