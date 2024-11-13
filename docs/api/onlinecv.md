@@ -1,3 +1,0 @@
-# `OnlineCountVectorizer`
-
-::: bertopic.vectorizers.OnlineCountVectorizer

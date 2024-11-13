@@ -33,6 +33,13 @@ except ModuleNotFoundError:
     msg = "`pip install openai` \n\n"
     OpenAI = NotInstalled("OpenAI", "openai", custom_msg=msg)
 
+# LiteLLM Generator
+try:
+    from bertopic.representation._litellm import LiteLLM
+except ModuleNotFoundError:
+    msg = "`pip install litellm` \n\n"
+    OpenAI = NotInstalled("LiteLLM", "litellm", custom_msg=msg)
+
 # LangChain Generator
 try:
     from bertopic.representation._langchain import LangChain
@@ -63,6 +70,7 @@ __all__ = [
     "Cohere",
     "OpenAI",
     "LangChain",
+    "LiteLLM",
     "LlamaCPP",
     "VisualRepresentation",
 ]

@@ -377,6 +377,7 @@ topic_model = BERTopic(representation_model=representation_model,  verbose=True)
     """
     ```
 
+
 ## **OpenAI**
 
 Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
@@ -468,6 +469,34 @@ representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True, prompt=s
 The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!
 If you want to have multiple representations of a single topic, it might be worthwhile to also check out [**multi-aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling with BERTopic.
 
+
+## **LiteLLM**
+
+An amazing framework to simplify connecting to external LLMs, is [LiteLLM](https://docs.litellm.ai). This package allows you to connect to OpenAI, Cohere, Anthropic, etc. all within one package. This makes iteration and testing out different models a breeze!
+
+o start with, we first need to install `litellm`:
+
+```bash
+pip install litellm
+```
+
+After installation, usage is straightforward and you can select any model found in their [docs](https://docs.litellm.ai/docs/providers).
+Let's show an example with OpenAI:
+
+```python
+import os
+from bertopic import BERTopic
+from bertopic.representation import LiteLLM
+
+# set ENV variables
+os.environ["OPENAI_API_KEY"] = "MY_KEY"
+
+# Create your representation model
+representation_model = LiteLLM(model="gpt-4o-mini")
+
+# Create our BERTopic model
+topic_model = BERTopic(representation_model=representation_model,  verbose=True)
+```
 
 ## **LangChain**
 
