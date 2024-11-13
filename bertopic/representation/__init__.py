@@ -38,7 +38,7 @@ try:
     from bertopic.representation._litellm import LiteLLM
 except ModuleNotFoundError:
     msg = "`pip install litellm` \n\n"
-    OpenAI = NotInstalled("LiteLLM", "litellm", custom_msg=msg)
+    LiteLLM = NotInstalled("LiteLLM", "litellm", custom_msg=msg)
 
 # LangChain Generator
 try:
