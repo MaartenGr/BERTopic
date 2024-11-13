@@ -73,7 +73,7 @@ class LiteLLM(BaseRepresentation):
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
     representation_model = LiteLLM(model="gpt", prompt=prompt)
     ```
-    """
+    """  # noqa: D301
 
     def __init__(
         self,
