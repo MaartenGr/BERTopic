@@ -46,7 +46,7 @@ class LiteLLM(BaseRepresentation):
 
     Usage:
 
-    To use this, you will need to install the openai package first:
+    To use this, you will need to install the litellm package first:
 
     `pip install litellm`
 
