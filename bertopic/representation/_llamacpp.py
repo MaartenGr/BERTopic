@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from llama_cpp import Llama
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import truncate_document
+from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 
 
 DEFAULT_PROMPT = """
@@ -118,12 +118,7 @@ class LlamaCPP(BaseRepresentation):
         self.tokenizer = tokenizer
 
         self.prompts_ = []
-        if self.tokenizer is None and self.doc_length is not None:
-            raise ValueError(
-                "Please select from one of the valid options for the `tokenizer` parameter: \n"
-                "{'char', 'whitespace', 'vectorizer'} \n"
-                "If `tokenizer` is of type callable ensure it has methods to encode and decode a document \n"
-            )
+        _ = validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
     def extract_topics(
         self,

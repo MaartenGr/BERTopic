@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import truncate_document
+from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 
 DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
@@ -148,12 +148,8 @@ class LangChain(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
-        if self.tokenizer is None and self.doc_length is not None:
-            raise ValueError(
-                "Please select from one of the valid options for the `tokenizer` parameter: \n"
-                "{'char', 'whitespace', 'vectorizer'} \n"
-                "If `tokenizer` is of type callable ensure it has methods to encode and decode a document \n"
-            )
+        _ = validate_truncate_document_parameters(self.tokenizer, self.doc_length)
+
 
     def extract_topics(
         self,

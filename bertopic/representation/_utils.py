@@ -58,6 +58,15 @@ def truncate_document(topic_model, doc_length: Union[int, None], tokenizer: Unio
         return truncated_document
     return document
 
+def validate_truncate_document_parameters(tokenizer, doc_length) -> Union[None, ValueError]:
+    """validates parameters that are used in the function `truncate_document`"""
+    if tokenizer is None and doc_length is not None:
+        raise ValueError(
+            "Please select from one of the valid options for the `tokenizer` parameter: \n"
+            "{'char', 'whitespace', 'vectorizer'} \n"
+            "If `tokenizer` is of type callable ensure it has methods to encode and decode a document \n"
+        )
+
 
 def retry_with_exponential_backoff(
     func,
