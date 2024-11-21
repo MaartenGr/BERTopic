@@ -148,7 +148,7 @@ class LangChain(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
-        _ = validate_truncate_document_parameters(self.tokenizer, self.doc_length)
+        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
 
     def extract_topics(

@@ -66,6 +66,12 @@ def validate_truncate_document_parameters(tokenizer, doc_length) -> Union[None, 
             "{'char', 'whitespace', 'vectorizer'} \n"
             "If `tokenizer` is of type callable ensure it has methods to encode and decode a document \n"
         )
+    elif tokenizer is not None and doc_length is None:
+        raise ValueError(
+            "If `tokenizer` is provided, `doc_length` of type int must be provided as well."
+        )
+    else:
+        pass
 
 
 def retry_with_exponential_backoff(

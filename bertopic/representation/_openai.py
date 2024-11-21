@@ -170,6 +170,8 @@ class OpenAI(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
+        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
+
         self.prompts_ = []
 
         self.generator_kwargs = generator_kwargs
@@ -181,7 +183,6 @@ class OpenAI(BaseRepresentation):
         if not self.generator_kwargs.get("stop") and not chat:
             self.generator_kwargs["stop"] = "\n"
 
-        _ = validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
     def extract_topics(
         self,
