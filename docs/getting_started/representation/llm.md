@@ -140,7 +140,7 @@ As can be seen from the example above, if you would like to use a `text2text-gen
 pass a `transformers.pipeline` with the `"text2text-generation"` parameter. Moreover, you can use a custom prompt and decide where the keywords should
 be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag.
 
-### **Zephyr** (Mistral 7B)
+### **Mistral (GGUF)**
 
 We can go a step further with open-source Large Language Models (LLMs) that have shown to match the performance of closed-source LLMs like ChatGPT.
 
@@ -206,13 +206,17 @@ representation_model = {"Zephyr": zephyr}
 topic_model = BERTopic(representation_model=representation_model, verbose=True)
 ```
 
-### **Llama 2**
+### **Llama (Manual Quantization)**
 
-Full Llama 2 Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QCERSMUjqGetGGujdrvv_6_EeoIcd_9M?usp=sharing)
+Full Llama Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QCERSMUjqGetGGujdrvv_6_EeoIcd_9M?usp=sharing)
 
 Open-source LLMs are starting to become more and more popular. Here, we will go through a minimal example of using [Llama 2](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) together with BERTopic. 
 
-First, we need to load in our Llama 2 model:
+!!! Note
+    Although this is an example of the older Llama 2 model, you can use the code below for any Llama variant.
+
+
+First, we need to load in our Llama model:
 
 ```python
 from torch import bfloat16
@@ -227,10 +231,10 @@ bnb_config = transformers.BitsAndBytesConfig(
     bnb_4bit_compute_dtype=bfloat16  # Computation type
 )
 
-# Llama 2 Tokenizer
+# Llama Tokenizer
 tokenizer = transformers.AutoTokenizer.from_pretrained(model_id)
 
-# Llama 2 Model
+# Llama Model
 model = transformers.AutoModelForCausalLM.from_pretrained(
     model_id,
     trust_remote_code=True,
@@ -249,7 +253,7 @@ generator = transformers.pipeline(
 )
 ```
 
-After doing so, we will need to define a prompt that works with both Llama 2 as well as BERTopic:
+After doing so, we will need to define a prompt that works with both Llama as well as BERTopic:
 
 
 ```python
@@ -292,7 +296,7 @@ prompt = system_prompt + example_prompt + main_prompt
 Three pieces of the prompt were created:  
   
 * `system_prompt` helps us guide the model during a conversation. For example, we can say that it is a helpful assistant that is specialized in labeling topics.
-* `example_prompt` gives an example of a correctly labeled topic to guide Llama 2
+* `example_prompt` gives an example of a correctly labeled topic to guide Llama
 * `main_prompt` contains the main question we are going to ask it, namely to label a topic. Note that it uses the `[DOCUMENTS]`  and `[KEYWORDS]` to provide the most relevant documents and keywords as additional context
 
 After having generated our prompt template, we can start running our topic model:
@@ -301,7 +305,7 @@ After having generated our prompt template, we can start running our topic model
 from bertopic.representation import TextGeneration
 from bertopic import BERTopic
 
-# Text generation with Llama 2
+# Text generation with Llama
 llama2 = TextGeneration(generator, prompt=prompt)
 representation_model = {
     "Llama2": llama2,
@@ -469,6 +473,37 @@ representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True, prompt=s
 The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!
 If you want to have multiple representations of a single topic, it might be worthwhile to also check out [**multi-aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) topic modeling with BERTopic.
 
+## **Ollama**
+
+To use [Ollama](https://github.com/ollama/ollama) within BERTopic, it is advised to use the `openai` package as it allows to pass through a model using the url on which the model is running. 
+
+You will first need to install `openai`:
+
+```bash
+pip install openai
+```
+
+After installation, usage is straightforward and you can select any model that you have prepared in your `ollama` model list. You can see all models by running `ollama list`.
+
+Select one from the list and you can use it in BERTopic as follows:
+
+```python
+import openai
+from bertopic.representation import OpenAI
+from bertopic import BERTopic
+
+client = openai.OpenAI(
+    base_url = 'http://localhost:11434/v1', #wherever ollama is running
+    api_key='ollama', # required, but unused
+)
+
+
+# Create your representation model
+representation_model = OpenAI(client, model='phi3:14b-medium-128k-instruct-q4_K_M')
+
+# Create your BERTopic model
+topic_model = BERTopic(representation_model=representation_model,  verbose=True)
+```
 
 ## **LiteLLM**
 
