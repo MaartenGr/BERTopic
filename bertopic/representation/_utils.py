@@ -70,8 +70,6 @@ def validate_truncate_document_parameters(tokenizer, doc_length) -> Union[None, 
         raise ValueError(
             "If `tokenizer` is provided, `doc_length` of type int must be provided as well."
         )
-    else:
-        pass
 
 
 def retry_with_exponential_backoff(
