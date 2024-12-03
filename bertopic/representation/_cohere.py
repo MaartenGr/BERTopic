@@ -128,7 +128,6 @@ class Cohere(BaseRepresentation):
 
         self.prompts_ = []
 
-
     def extract_topics(
         self,
         topic_model,

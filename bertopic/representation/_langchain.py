@@ -150,7 +150,6 @@ class LangChain(BaseRepresentation):
         self.tokenizer = tokenizer
         validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
-
     def extract_topics(
         self,
         topic_model,

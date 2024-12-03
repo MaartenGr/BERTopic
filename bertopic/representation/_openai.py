@@ -8,7 +8,7 @@ from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
     truncate_document,
-    validate_truncate_document_parameters
+    validate_truncate_document_parameters,
 )
 
 
@@ -182,7 +182,6 @@ class OpenAI(BaseRepresentation):
             del self.generator_kwargs["prompt"]
         if not self.generator_kwargs.get("stop") and not chat:
             self.generator_kwargs["stop"] = "\n"
-
 
     def extract_topics(
         self,
