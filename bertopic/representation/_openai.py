@@ -8,6 +8,7 @@ from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
     truncate_document,
+    validate_truncate_document_parameters,
 )
 
 
@@ -169,6 +170,8 @@ class OpenAI(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
+        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
+
         self.prompts_ = []
 
         self.generator_kwargs = generator_kwargs
