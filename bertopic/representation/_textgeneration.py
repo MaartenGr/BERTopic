@@ -5,7 +5,7 @@ from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import truncate_document
+from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 
 
 DEFAULT_PROMPT = """
@@ -112,6 +112,7 @@ class TextGeneration(BaseRepresentation):
         self.diversity = diversity
         self.doc_length = doc_length
         self.tokenizer = tokenizer
+        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
         self.prompts_ = []
 
