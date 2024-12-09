@@ -14,7 +14,7 @@ class BaseCluster:
 
     ```python
     from bertopic import BERTopic
-    from bertopic.dimensionality import BaseCluster
+    from bertopic.cluster import BaseCluster
 
     empty_cluster_model = BaseCluster()
 

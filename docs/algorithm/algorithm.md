@@ -164,7 +164,12 @@ The following models are implemented in `bertopic.representation`:
 * `PartOfSpeech`
 * `KeyBERTInspired`
 * `ZeroShotClassification`
-* `TextGeneration`
+* `TextGeneration` (HuggingFace)
 * `Cohere`
 * `OpenAI`
 * `LangChain`
+* `LiteLLM`
+* `LlamaCPP`
+
+!!! tip Models
+    There are roughly two sets of models. **First** are the non-generative set of models that you can find [here](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html). These include models that focus on enhancing the keywords in the topic representations. **Second** are the generative models that attempt to label or summarize the topics instead. You can find an overview of [implemented LLMs here](https://maartengr.github.io/BERTopic/getting_started/representation/llm).
