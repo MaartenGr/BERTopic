@@ -57,29 +57,12 @@ nav:
   - API:
       - BERTopic: api/bertopic.md
       - Sub-models:
-        - Backends:
-          - Base: api/backends/base.md
-          - Word Doc: api/backends/word_doc.md
-          - OpenAI: api/backends/openai.md
-          - Cohere: api/backends/cohere.md
-        - Dimensionality Reduction:
-          - Base: api/dimensionality/base.md
-        - Clustering:
-          - Base: api/cluster/base.md
-        - Vectorizers:
-          - cTFIDF: api/ctfidf.md
-          - OnlineCountVectorizer: api/onlinecv.md
-        - Topic Representation:
-          - Base: api/representation/base.md
-          - MaximalMarginalRelevance: api/representation/mmr.md
-          - KeyBERT: api/representation/keybert.md
-          - PartOfSpeech: api/representation/pos.md
-          - Text Generation:
-            - 🤗 Transformers: api/representation/generation.md
-            - LangChain: api/representation/langchain.md
-            - Cohere: api/representation/cohere.md
-            - OpenAI: api/representation/openai.md
-          - Zero-shot Classification: api/representation/zeroshot.md
+        - 1. Backends: api/backends.md
+        - 2. Dimensionality Reduction: api/dimensionality.md
+        - 3. Clustering: api/cluster.md
+        - 4. Vectorizers: api/vectorizers.md
+        - 5. c-TF-IDF: api/ctfidf.md
+        - 6. Fine-Tune Topic Representation: api/representations.md
       - Plotting:
         - Barchart: api/plotting/barchart.md
         - Documents: api/plotting/documents.md
