@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Union
 from sentence_transformers import SentenceTransformer
+from sentence_transformers.models import StaticEmbedding
 
 from bertopic.backend import BaseEmbedder
 
@@ -13,6 +14,9 @@ class SentenceTransformerBackend(BaseEmbedder):
 
     Arguments:
         embedding_model: A sentence-transformers embedding model
+        model2vec: Indicates whether `embedding_model` is a model2vec model.
+                   NOTE: Only works if `embedding_model` is a string.
+                   Otherwise, you can pass the model2vec model directly to `embedding_model`.
 
     Examples:
     To create a model, you can load in a string pointing to a
@@ -25,6 +29,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     ```
 
     or  you can instantiate a model yourself:
+
     ```python
     from bertopic.backend import SentenceTransformerBackend
     from sentence_transformers import SentenceTransformer
@@ -32,13 +37,27 @@ class SentenceTransformerBackend(BaseEmbedder):
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     sentence_model = SentenceTransformerBackend(embedding_model)
     ```
+
+    If you want to use a model2vec model without having to install model2vec,
+    you can pass the model2vec model as a string:
+
+    ```python
+    from bertopic.backend import SentenceTransformerBackend
+    from sentence_transformers import SentenceTransformer
+
+    embedding_model = SentenceTransformer("minishlab/potion-base-8M", model2vec=True)
+    sentence_model = SentenceTransformerBackend(embedding_model)
+    ```
     """
 
-    def __init__(self, embedding_model: Union[str, SentenceTransformer]):
+    def __init__(self, embedding_model: Union[str, SentenceTransformer], model2vec: bool = False):
         super().__init__()
 
         self._hf_model = None
-        if isinstance(embedding_model, SentenceTransformer):
+        if model2vec and isinstance(embedding_model, str):
+            static_embedding = StaticEmbedding.from_model2vec(embedding_model)
+            self.embedding_model = SentenceTransformer(modules=[static_embedding])
+        elif isinstance(embedding_model, SentenceTransformer):
             self.embedding_model = embedding_model
         elif isinstance(embedding_model, str):
             self.embedding_model = SentenceTransformer(embedding_model)
