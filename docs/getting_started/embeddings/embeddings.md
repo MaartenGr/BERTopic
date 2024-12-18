@@ -14,7 +14,7 @@ This modularity allows us not only to choose any embedding model to convert our 
 When new state-of-the-art pre-trained embedding models are released, BERTopic will be able to use them. As a result, BERTopic grows with any new models being released.
 Out of the box, BERTopic supports several embedding techniques. In this section, we will go through several of them and how they can be implemented. 
 
-### **Sentence Transformers**
+## **Sentence Transformers**
 You can select any model from sentence-transformers [here](https://www.sbert.net/docs/pretrained_models.html) 
 and pass it through BERTopic with `embedding_model`:
 
@@ -47,7 +47,70 @@ topic_model = BERTopic(embedding_model=sentence_model)
     topic_model = BERTopic(embedding_model=embedding_model)
     ```
 
-### 🤗 Hugging Face Transformers
+## **Model2Vec**
+To use a blazingly fast [Model2Vec](https://github.com/MinishLab/model2vec) model, you first need to install model2vec:
+
+```
+pip install model2vec
+```
+
+Then, you can load in any of their models and pass it to BERTopic like so:
+
+```python
+from model2vec import StaticModel
+embedding_model = StaticModel.from_pretrained("minishlab/potion-base-8M")
+
+topic_model = BERTopic(embedding_model=embedding_model)
+```
+
+### **Distillation**
+
+These models are extremely versatile and can be distilled from existing embedding model (like those compatible with `sentence-transformers`).
+This distillation process doesn't require a vocabulary (as it uses the tokenizer's vocabulary) but can benefit from having one. Fortunately, this allows you to 
+use the vocabulary from your input documents to distill a model yourself. 
+
+Doing so requires you to install some additional dependencies of model2vec like so:
+
+```
+pip install model2vec[distill]
+```
+
+To then distill common embedding models, you need to import the `Model2VecBackend` from BERTopic:
+
+```python
+from bertopic.backend import Model2VecBackend
+
+# Choose a model to distill (a non-Model2Vec model)
+embedding_model = Model2VecBackend(
+    "sentence-transformers/all-MiniLM-L6-v2", 
+    distill=True
+)
+
+topic_model = BERTopic(embedding_model=embedding_model)
+```
+
+You can also choose a custom vectorizer for creating the vocabulary and define custom arguments for the distillatio process:
+
+```python
+from bertopic.backend import Model2VecBackend
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Choose a model to distill (a non-Model2Vec model)
+embedding_model = Model2VecBackend(
+    "sentence-transformers/all-MiniLM-L6-v2", 
+    distill=True,
+    distill_kwargs={"pca_dims": 256, "apply_zipf": True, "use_subword": True},
+    distill_vectorizer=CountVectorizer(ngram_range=(1, 3))
+)
+
+topic_model = BERTopic(embedding_model=embedding_model)
+```
+
+!!! tip "Tip!"
+    You can save the resulting model with `topic_model.embedding_model.embedding_model.save_pretrained("m2v_model")`. 
+
+
+## **🤗 Hugging Face Transformers**
 To use a Hugging Face transformers model, load in a pipeline and point 
 to any model found on their model hub (https://huggingface.co/models):
 
@@ -61,7 +124,7 @@ topic_model = BERTopic(embedding_model=embedding_model)
 !!! tip "Tip!"
     These transformers also work quite well using `sentence-transformers` which has great optimizations tricks that make using it a bit faster. 
 
-### **Flair**
+## **Flair**
 [Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that 
 is publicly available. Flair can be used as follows:
 
@@ -87,7 +150,7 @@ document_glove_embeddings = DocumentPoolEmbeddings([glove_embedding])
 topic_model = BERTopic(embedding_model=document_glove_embeddings)
 ```
 
-### **Spacy**
+## **Spacy**
 [Spacy](https://github.com/explosion/spaCy) is an amazing framework for processing text. There are 
 many models available across many languages for modeling text. 
  
@@ -128,7 +191,7 @@ require_gpu(0)
 topic_model = BERTopic(embedding_model=nlp)
 ```
 
-### **Universal Sentence Encoder (USE)**
+## **Universal Sentence Encoder (USE)**
 The Universal Sentence Encoder encodes text into high-dimensional vectors that are used here 
 for embedding the documents. The model is trained and optimized for greater-than-word length text, 
 such as sentences, phrases, or short paragraphs.
@@ -141,7 +204,7 @@ embedding_model = tensorflow_hub.load("https://tfhub.dev/google/universal-senten
 topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
-### **Gensim**
+## **Gensim**
 BERTopic supports the `gensim.downloader` module, which allows it to download any word embedding model supported by Gensim. 
 Typically, these are Glove, Word2Vec, or FastText embeddings:
 
@@ -155,7 +218,7 @@ topic_model = BERTopic(embedding_model=ft)
     Gensim is primarily used for Word Embedding models. This works typically best for short documents since the word embeddings are pooled.
 
 
-### **Scikit-Learn Embeddings**
+## **Scikit-Learn Embeddings**
 Scikit-Learn is a framework for more than just machine learning. 
 It offers many preprocessing tools, some of which can be used to create representations 
 for text. Many of these tools are relatively lightweight and do not require a GPU. 
@@ -187,7 +250,7 @@ topic_model = BERTopic(embedding_model=pipe)
     it does not support the `bertopic.representation` models.
 
 
-### OpenAI
+## **OpenAI**
 To use OpenAI's external API, we need to define our key and explicitly call `bertopic.backend.OpenAIBackend`
 to be used in our topic model:
 
@@ -202,7 +265,7 @@ topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
 
-### Cohere
+## **Cohere**
 To use Cohere's external API, we need to define our key and explicitly call `bertopic.backend.CohereBackend`
 to be used in our topic model:
 
@@ -216,7 +279,7 @@ embedding_model = CohereBackend(client)
 topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
-### Multimodal
+## **Multimodal**
 To create embeddings for both text and images in the same vector space, we can use the `MultiModalBackend`. 
 This model uses a clip-vit based model that is capable of embedding text, images, or both:
 
@@ -235,7 +298,7 @@ doc_image_embeddings = model.embed(docs, images)
 ```
 
 
-### **Custom Backend**
+## **Custom Backend**
 If your backend or model cannot be found in the ones currently available, you can use the `bertopic.backend.BaseEmbedder` class to 
 create your backend. Below, you will find an example of creating a SentenceTransformer backend for BERTopic:
 
@@ -260,7 +323,7 @@ custom_embedder = CustomEmbedder(embedding_model=embedding_model)
 topic_model = BERTopic(embedding_model=custom_embedder)
 ```
 
-### **Custom Embeddings**
+## **Custom Embeddings**
 The base models in BERTopic are BERT-based models that work well with document similarity tasks. Your documents, 
 however, might be too specific for a general pre-trained model to be used. Fortunately, you can use the embedding 
 model in BERTopic to create document features.   
@@ -283,7 +346,7 @@ topics, probs = topic_model.fit_transform(docs, embeddings)
 As you can see above, we used a SentenceTransformer model to create the embedding. You could also have used 
 `🤗 transformers`, `Doc2Vec`, or any other embedding method. 
 
-#### **TF-IDF**
+### **TF-IDF**
 As mentioned above, any embedding technique can be used. However, when running UMAP, the typical distance metric is 
 `cosine` which does not work quite well for a TF-IDF matrix. Instead, BERTopic will recognize that a sparse matrix 
 is passed and use `hellinger` instead which works quite well for the similarity between probability distributions. 
