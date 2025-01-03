@@ -44,8 +44,8 @@ def truncate_document(topic_model, doc_length, tokenizer, document: str):
         truncated_document: A truncated document
     """
     if doc_length is not None:
-        if tokenizer == "char" or tokenizer is None:
-            truncated_document = document[:doc_length] + " (...)"
+        if tokenizer == "char":
+            truncated_document = document[:doc_length]
         elif tokenizer == "whitespace":
             truncated_document = " ".join(document.split()[:doc_length])
         elif tokenizer == "vectorizer":

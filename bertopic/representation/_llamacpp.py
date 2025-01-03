@@ -9,8 +9,8 @@ from bertopic.representation._utils import truncate_document
 
 DEFAULT_PROMPT = """
 This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
-
-Example 1:
+---
+Topic:
 Sample texts from this topic:
 - Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
 - Meat, but especially beef, is the word food in terms of emissions.
@@ -18,8 +18,8 @@ Sample texts from this topic:
 
 Keywords: meat beef eat eating emissions steak food health processed chicken
 Topic name: Environmental impacts of eating meat
-
-Example 2:
+---
+Topic:
 Sample texts from this topic:
 - I have ordered the product weeks ago but it still has not arrived!
 - The website mentions that it only takes a couple of days to deliver but I still have not received mine.
@@ -29,13 +29,13 @@ Sample texts from this topic:
 Keywords: deliver weeks product shipping long delivery received arrived arrive week
 Topic name: Shipping and delivery issues
 ---
-Extract the topic name from the following documents:
+Topic:
 Sample texts from this topic:
 [DOCUMENTS]
 Keywords: [KEYWORDS]
-Provide the extracted topic name directly without any explanation."""
+Topic name:"""
 
-DEFAULT_SYSTEM_PROMPT = "You are designated as an assistant that identify and extract high-level topics from texts."
+DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
 
 
 class LlamaCPP(BaseRepresentation):
@@ -49,6 +49,8 @@ class LlamaCPP(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `self.default_system_prompt_` is used instead.
         pipeline_kwargs: Kwargs that you can pass to the `llama_cpp.Llama`
                          when it is called such as `max_tokens` to be generated.
         nr_docs: The number of documents to pass to OpenAI if a prompt
@@ -118,11 +120,11 @@ class LlamaCPP(BaseRepresentation):
         pipeline_kwargs: Mapping[str, Any] = {},
         nr_docs: int = 4,
         diversity: float = None,
-        doc_length: int = 100,
+        doc_length: int = None,
         tokenizer: Union[str, Callable] = None,
     ):
         if isinstance(model, str):
-            self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="llama-2")
+            self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="ChatML")
         elif isinstance(model, Llama):
             self.model = model
         else:
@@ -134,6 +136,7 @@ class LlamaCPP(BaseRepresentation):
         self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
         self.default_prompt_ = DEFAULT_PROMPT
+        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
         self.pipeline_kwargs = pipeline_kwargs
         self.nr_docs = nr_docs
         self.diversity = diversity
@@ -183,21 +186,34 @@ class LlamaCPP(BaseRepresentation):
                       }
                   ], ** self.pipeline_kwargs
             )
-            label = topic_description["choices"][0]["message"]["content"].strip().replace("Topic name: ", "")
+            label = topic_description["choices"][0]["message"]["content"].strip()
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics
 
     def _create_prompt(self, docs, topic, topics):
-        keywords = ", ".join(list(zip(*topics[topic]))[0])
+        keywords = list(zip(*topics[topic]))[0]
 
-        prompt = self.prompt
-        if "[KEYWORDS]" in prompt:
-            prompt = prompt.replace("[KEYWORDS]", keywords)
-        if "[DOCUMENTS]" in prompt:
-            to_replace = ""
-            for doc in docs:
-                to_replace += f"- {doc}\n"
-            prompt = prompt.replace("[DOCUMENTS]", to_replace)
+        # Use the Default Chat Prompt
+        if self.prompt == DEFAULT_PROMPT:
+            prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
+            prompt = self._replace_documents(prompt, docs)
 
+        # Use a custom prompt that leverages keywords, documents or both using
+        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
+        else:
+            prompt = self.prompt
+            if "[KEYWORDS]" in prompt:
+                prompt = prompt.replace("[KEYWORDS]", ", ".join(keywords))
+            if "[DOCUMENTS]" in prompt:
+                prompt = self._replace_documents(prompt, docs)
+
+        return prompt
+
+    @staticmethod
+    def _replace_documents(prompt, docs):
+        to_replace = ""
+        for doc in docs:
+            to_replace += f"- {doc}\n"
+        prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt

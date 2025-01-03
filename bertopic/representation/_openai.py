@@ -48,7 +48,7 @@ Based on the information above, extract a short topic label in the following for
 topic: <topic label>
 """
 
-DEFAULT_SYSTEM_PROMPT = "You are designated as an assistant that identify and extract high-level topics from texts."
+DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
 
 
 class OpenAI(BaseRepresentation):

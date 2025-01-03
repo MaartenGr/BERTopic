@@ -33,9 +33,9 @@ Topic:
 Sample texts from this topic:
 [DOCUMENTS]
 Keywords: [KEYWORDS]
-Provide the topic name directly without any explanation."""
+Topic name:"""
 
-DEFAULT_SYSTEM_PROMPT = "You are designated as an assistant that identify and extract high-level topics from texts."
+DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
 
 
 class Cohere(BaseRepresentation):
@@ -174,7 +174,7 @@ class Cohere(BaseRepresentation):
                 max_tokens=50,
                 stop_sequences=["\n"],
             )
-            label = request.text.strip().replace("Topic name: ", "")
+            label = request.text.strip()
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics
