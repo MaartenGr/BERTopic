@@ -2,10 +2,16 @@ BERTopic uses HDBSCAN for clustering the data and it cannot specify the number o
 this is an advantage, as we can trust HDBSCAN to be better in finding the number of clusters than we are.
 Instead, we can try to reduce the number of topics that have been created. Below, you will find three methods of doing 
 so. 
+
+!!! Warning
+    For all cases of topic reduction it is generally advised to create the number of topics you would first through the clustering algorithm. That tends to be the most stable technique and often gives you the best results. This also applies with algorithms that do not allow you to select the number of topics beforehands, like HDBSCAN where you can make sure of the `min_cluster_size` parameter to control the number of topics.
+    Therefore, it is **highly** advised to not use `nr_topics` before you have attempted to control the number of topics through the clustering algorithm!
   
 ### **Manual Topic Reduction**
 Each resulting topic has its feature vector constructed from c-TF-IDF. Using those feature vectors, we can find the most similar 
-topics and merge them. If we do this iteratively, starting from the least frequent topic, we can reduce the number of topics quite easily. We do this until we reach the value of `nr_topics`:  
+topics and merge them. Using `sklearn.cluster.AgglomerativeClustering`, the resulting feature vectors are clustered to get to the set value of `nr_topics` by finding out which topics are most similar to one another through cosine similarity. 
+
+To do so, you can make sure of the `nr_topics` parameter:
 
 ```python
 from bertopic import BERTopic
