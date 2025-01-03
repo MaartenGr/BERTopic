@@ -24,12 +24,20 @@ except ModuleNotFoundError:
     msg = "`pip install bertopic[vision]` \n\n"
     MultiModalBackend = NotInstalled("Vision", "Vision", custom_msg=msg)
 
+# Model2Vec Embeddings
+try:
+    from bertopic.backend._model2vec import Model2VecBackend
+except ModuleNotFoundError:
+    msg = "`pip install model2vec` \n\n"
+    Model2VecBackend = NotInstalled("Model2Vec", "Model2Vec", custom_msg=msg)
+
 
 __all__ = [
     "BaseEmbedder",
     "WordDocEmbedder",
     "OpenAIBackend",
     "CohereBackend",
+    "Model2VecBackend",
     "MultiModalBackend",
     "languages",
 ]

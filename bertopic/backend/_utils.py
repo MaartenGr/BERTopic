@@ -124,6 +124,12 @@ def select_backend(embedding_model, language: str = None, verbose: bool = False)
 
         return HFTransformerBackend(embedding_model)
 
+    # Model2Vec embeddings
+    if "model2vec" in str(type(embedding_model)):
+        from ._model2vec import Model2VecBackend
+
+        return Model2VecBackend(embedding_model)
+
     # Select embedding model based on language
     if language:
         try:
