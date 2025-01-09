@@ -178,13 +178,8 @@ class LlamaCPP(BaseRepresentation):
             # Extract result from generator and use that as label
             # topic_description = self.model(prompt, **self.pipeline_kwargs)["choices"]
             topic_description = self.model.create_chat_completion(
-                  messages=[
-                      {"role": "system", "content": self.system_prompt},
-                      {
-                          "role": "user",
-                          "content": prompt
-                      }
-                  ], ** self.pipeline_kwargs
+                messages=[{"role": "system", "content": self.system_prompt}, {"role": "user", "content": prompt}],
+                **self.pipeline_kwargs,
             )
             label = topic_description["choices"][0]["message"]["content"].strip()
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
