@@ -49,6 +49,8 @@ Based on the information above, extract a short topic label in the following for
 topic: <topic label>
 """
 
+DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
+
 
 class OpenAI(BaseRepresentation):
     r"""Using the OpenAI API to generate topic labels based
@@ -74,6 +76,8 @@ class OpenAI(BaseRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `self.default_system_prompt_` is used instead.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
         exponential_backoff: Retry requests with a random exponential backoff.
@@ -145,6 +149,7 @@ class OpenAI(BaseRepresentation):
         client,
         model: str = "text-embedding-3-small",
         prompt: str = None,
+        system_prompt: str = None,
         generator_kwargs: Mapping[str, Any] = {},
         delay_in_seconds: float = None,
         exponential_backoff: bool = False,
@@ -162,7 +167,13 @@ class OpenAI(BaseRepresentation):
         else:
             self.prompt = prompt
 
+        if chat and system_prompt is None:
+            self.system_prompt = DEFAULT_SYSTEM_PROMPT
+        else:
+            self.system_prompt = system_prompt
+
         self.default_prompt_ = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
+        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
         self.chat = chat
@@ -219,7 +230,7 @@ class OpenAI(BaseRepresentation):
 
             if self.chat:
                 messages = [
-                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": prompt},
                 ]
                 kwargs = {
