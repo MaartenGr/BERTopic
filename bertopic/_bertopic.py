@@ -4450,7 +4450,6 @@ class BERTopic:
         """
         topics = documents.Topic.tolist().copy()
         unique_topics = sorted(list(documents.Topic.unique()))[self._outliers :]
-        max_topic = unique_topics[-1]
 
         # Find similar topics
         embeddings = select_topic_representation(
@@ -4464,12 +4463,23 @@ class BERTopic:
             prediction_data=True,
         ).fit_predict(norm_data[self._outliers :])
 
-        # Map similar topics
-        mapped_topics = {
-            unique_topics[index]: prediction + max_topic
-            for index, prediction in enumerate(predictions)
-            if prediction != -1
-        }
+        # Map clusters to their lowest topic_id
+        cluster_to_lowest = {}
+        for cluster, topic_id in zip(predictions, unique_topics):
+            if cluster != -1:  # Ignore unclustered items
+                if cluster not in cluster_to_lowest:
+                    cluster_to_lowest[cluster] = topic_id
+                else:
+                    cluster_to_lowest[cluster] = min(cluster_to_lowest[cluster], topic_id)
+
+        # Map each topic_id to the lowest topic_id in its cluster
+        mapped_topics = {}
+        for cluster, topic_id in zip(predictions, unique_topics):
+            if cluster == -1:
+                mapped_topics[topic_id] = topic_id  # No clustering, stays the same
+            else:
+                mapped_topics[topic_id] = cluster_to_lowest[cluster]
+
         documents.Topic = documents.Topic.map(mapped_topics).fillna(documents.Topic).astype(int)
         mapped_topics = {from_topic: to_topic for from_topic, to_topic in zip(topics, documents.Topic.tolist())}
 
