@@ -245,7 +245,8 @@ class OpenAI(BaseRepresentation):
 
                 # Check whether content was actually generated
                 # Addresses #1570 for potential issues with OpenAI's content filter
-                if hasattr(response.choices[0].message, "content"):
+                # Addresses #2176 for potential issues when openAI returns a None type object
+                if response and hasattr(response.choices[0].message, "content"):
                     label = response.choices[0].message.content.strip().replace("topic: ", "")
                 else:
                     label = "No label returned"
