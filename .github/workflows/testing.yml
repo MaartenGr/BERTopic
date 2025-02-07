@@ -11,6 +11,14 @@ on:
     - dev
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    # Ref: https://github.com/pre-commit/action
+    - uses: pre-commit/action@v3.0.1
+
   build:
     runs-on: ubuntu-latest
     strategy:
