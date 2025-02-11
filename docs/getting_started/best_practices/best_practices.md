@@ -5,7 +5,7 @@ Through the nature of BERTopic, its modularity, many variations of the topic mod
 The following are a number of steps, parameters, and settings that you can use that will generally improve the quality of the resulting topics. In other words, after going through the quick start and getting a feeling for the API these steps should get you to the next level of performance.
 
 !!! Note
-    Although these are called *best practices*, it does not necessarily mean that they work across all use cases perfectly. The underlying modular nature of BERTopic is meant to take different use cases into account. After going through these practices it is advised to fine-tune wherever necessary. 
+    Although these are called *best practices*, it does not necessarily mean that they work across all use cases perfectly. The underlying modular nature of BERTopic is meant to take different use cases into account. After going through these practices it is advised to fine-tune wherever necessary.
 
 
 To showcase how these "best practices" work, we will go through an example dataset and apply all practices to it.
@@ -49,7 +49,7 @@ embeddings = embedding_model.encode(abstracts, show_progress_bar=True)
 ```
 
 !!! Tip
-    New embedding models are released frequently and their performance keeps getting better. To keep track of the best embedding models out there, you can visit the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard). It is an excellent place for selecting the embedding that works best for you. For example, if you want the best of the best, then the top 5 models might the place to look. 
+    New embedding models are released frequently and their performance keeps getting better. To keep track of the best embedding models out there, you can visit the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard). It is an excellent place for selecting the embedding that works best for you. For example, if you want the best of the best, then the top 5 models might the place to look.
 
 
 ## **Preventing Stochastic Behavior**
@@ -129,7 +129,7 @@ mmr_model = MaximalMarginalRelevance(diversity=0.3)
 # GPT-3.5
 client = openai.OpenAI(api_key="sk-...")
 prompt = """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 [DOCUMENTS]
 The topic is described by the following keywords: [KEYWORDS]
 
@@ -379,9 +379,9 @@ topic_model.save("my_model_dir", serialization="safetensors", save_ctfidf=True, 
 
 ## **Inference**
 
-To speed up the inference, we can leverage a "best practice" that we used before, namely serialization. When you save a model as `safetensors` and then load it in, we are removing the dimensionality reduction and clustering steps from the pipeline. 
+To speed up the inference, we can leverage a "best practice" that we used before, namely serialization. When you save a model as `safetensors` and then load it in, we are removing the dimensionality reduction and clustering steps from the pipeline.
 
-Instead, the assignment of topics is done through cosine similarity of document embeddings and topic embeddings. This speeds up inferences significantly. 
+Instead, the assignment of topics is done through cosine similarity of document embeddings and topic embeddings. This speeds up inferences significantly.
 
 To show its effect, let's start by disabling the logger:
 

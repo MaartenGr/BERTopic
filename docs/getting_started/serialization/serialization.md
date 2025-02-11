@@ -10,8 +10,8 @@ There are three methods for saving BERTopic:
 
 
 !!! Tip "Tip"
-    It is advised to use methods 1 or 2 for saving as they generated very small models. Especially method 1 (`safetensors`) 
-    allows for a relatively safe format compared to the other methods. 
+    It is advised to use methods 1 or 2 for saving as they generated very small models. Especially method 1 (`safetensors`)
+    allows for a relatively safe format compared to the other methods.
 
 The methods are used as follows:
 
@@ -31,9 +31,9 @@ topic_model.save("my_model", serialization="pickle")
 ```
 
 !!! Warning "Warning"
-    When saving the model, make sure to also keep track of the versions of dependencies and Python used. 
-    Loading and saving the model should be done using the same dependencies and Python. Moreover, models 
-    saved in one version of BERTopic are not guaranteed to load in other versions. 
+    When saving the model, make sure to also keep track of the versions of dependencies and Python used.
+    Loading and saving the model should be done using the same dependencies and Python. Moreover, models
+    saved in one version of BERTopic are not guaranteed to load in other versions.
 
 
 ### **Pickle Drawbacks**
@@ -42,7 +42,7 @@ Saving the model with `pickle` allows for saving the entire topic model, includi
 * Arbitrary code can be run from `.pickle` files
 * The resulting model is rather large (often > 500MB) since all sub-models need to be saved
 * Explicit and specific version control is needed as they typically only run if the environment is exactly the same
- 
+
 
 ### **Safetensors and Pytorch Advantages**
 Saving the topic modeling with `.safetensors` or `pytorch` has a number of advantages:
@@ -57,7 +57,7 @@ Saving the topic modeling with `.safetensors` or `pytorch` has a number of advan
 <img src="serialization.png">
 <br><br>
 
-The above image, a model trained on 100,000 documents, demonstrates the differences in sizes comparing `safetensors`, `pytorch`, and `pickle`. The difference in sizes can mostly be explained due to the efficient saving procedure and that the clustering and dimensionality reductions are not saved in safetensors/pytorch since inference can be done based on the topic embeddings. 
+The above image, a model trained on 100,000 documents, demonstrates the differences in sizes comparing `safetensors`, `pytorch`, and `pickle`. The difference in sizes can mostly be explained due to the efficient saving procedure and that the clustering and dimensionality reductions are not saved in safetensors/pytorch since inference can be done based on the topic embeddings.
 
 
 ## **HuggingFace Hub**

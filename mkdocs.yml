@@ -12,7 +12,7 @@ nav:
   - The Algorithm: algorithm/algorithm.md
   - Getting Started:
       - Quick Start: getting_started/quickstart/quickstart.md
-      - Serialization: getting_started/serialization/serialization.md       
+      - Serialization: getting_started/serialization/serialization.md
       - Search Topics: getting_started/search/search.md
       - Best Practices: getting_started/best_practices/best_practices.md
       - In-depth:
@@ -24,9 +24,9 @@ nav:
         - Update Topics:
           - Topic Reduction: getting_started/topicreduction/topicreduction.md
           - Update Topic Representations: getting_started/topicrepresentation/topicrepresentation.md
-          - Outlier reduction: getting_started/outlier_reduction/outlier_reduction.md       
-        - Parameter tuning: getting_started/parameter tuning/parametertuning.md       
-        - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md       
+          - Outlier reduction: getting_started/outlier_reduction/outlier_reduction.md
+        - Parameter tuning: getting_started/parameter tuning/parametertuning.md
+        - Tips & Tricks: getting_started/tips_and_tricks/tips_and_tricks.md
       - Sub-models:
         - 1. Embeddings: getting_started/embeddings/embeddings.md
         - 2. Dimensionality Reduction: getting_started/dim_reduction/dim_reduction.md
@@ -95,7 +95,7 @@ theme:
   favicon: icon.png
   logo: img/icon.png
   feature:
-    tabs: true  
+    tabs: true
   features:
     - navigation.tabs
     - navigation.sections
