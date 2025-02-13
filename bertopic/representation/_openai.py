@@ -143,6 +143,7 @@ class OpenAI(BaseRepresentation):
         diversity: float = None,
         doc_length: int = None,
         tokenizer: Union[str, Callable] = None,
+        **kwargs,
     ):
         self.client = client
         self.model = model
