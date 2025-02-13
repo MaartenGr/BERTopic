@@ -12,19 +12,19 @@ from bertopic.representation._utils import (
 )
 
 
-DEFAULT_PROMPT = """
-This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
----
-Topic:
+DEFAULT_CHAT_PROMPT = """You will extract a short topic label from given documents and keywords.
+Here are two examples of topics you created before:
+
+# Example 1
 Sample texts from this topic:
 - Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
 - Meat, but especially beef, is the worst food in terms of emissions.
 - Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
 
 Keywords: meat beef eat eating emissions steak food health processed chicken
-Topic name: Environmental impacts of eating meat
----
-Topic:
+topic: Environmental impacts of eating meat
+
+# Example 2
 Sample texts from this topic:
 - I have ordered the product weeks ago but it still has not arrived!
 - The website mentions that it only takes a couple of days to deliver but I still have not received mine.
@@ -32,21 +32,16 @@ Sample texts from this topic:
 - It took a month longer to deliver than was advised...
 
 Keywords: deliver weeks product shipping long delivery received arrived arrive week
-Topic name: Shipping and delivery issues
----
-Topic:
+topic: Shipping and delivery issues
+
+# Your task
 Sample texts from this topic:
 [DOCUMENTS]
+
 Keywords: [KEYWORDS]
-Topic name:"""
 
-DEFAULT_CHAT_PROMPT = """
-I have a topic that contains the following documents: 
-[DOCUMENTS]
-The topic is described by the following keywords: [KEYWORDS]
-
-Based on the information above, extract a short topic label in the following format:
-topic: <topic label>
+Based on the information above, extract a short topic label (three words at most) in the following format:
+topic: <topic_label>
 """
 
 DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
@@ -56,19 +51,12 @@ class OpenAI(BaseRepresentation):
     r"""Using the OpenAI API to generate topic labels based
     on one of their Completion of ChatCompletion models.
 
-    The default method is `openai.Completion` if `chat=False`.
-    The prompts will also need to follow a completion task. If you
-    are looking for a more interactive chats, use `chat=True`
-    with `model=gpt-3.5-turbo`.
-
     For an overview see:
     https://platform.openai.com/docs/models
 
     Arguments:
         client: A `openai.OpenAI` client
-        model: Model to use within OpenAI, defaults to `"text-ada-001"`.
-               NOTE: If a `gpt-3.5-turbo` model is used, make sure to set
-               `chat` to True.
+        model: Model to use within OpenAI, defaults to `"gpt-4o-mini"`.
         generator_kwargs: Kwargs passed to `openai.Completion.create`
                           for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
@@ -85,8 +73,6 @@ class OpenAI(BaseRepresentation):
                              then the requests is retried. Increase the sleep length
                              if errors are hit until 10 unsuccessful requests.
                              If True, overrides `delay_in_seconds`.
-        chat: Set this to True if a GPT-3.5 model is used.
-              See: https://platform.openai.com/docs/models/gpt-3-5
         nr_docs: The number of documents to pass to OpenAI if a prompt
                  with the `["DOCUMENTS"]` tag is used.
         diversity: The diversity of documents to pass to OpenAI.
@@ -137,23 +123,22 @@ class OpenAI(BaseRepresentation):
     representation_model = OpenAI(client, prompt=prompt, delay_in_seconds=5)
     ```
 
-    If you want to use OpenAI's ChatGPT model:
+    To choose a model:
 
     ```python
-    representation_model = OpenAI(client, model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
+    representation_model = OpenAI(client, model="gpt-4o-mini", delay_in_seconds=10)
     ```
     """
 
     def __init__(
         self,
         client,
-        model: str = "text-embedding-3-small",
+        model: str = "gpt-4o-mini",
         prompt: str = None,
         system_prompt: str = None,
         generator_kwargs: Mapping[str, Any] = {},
         delay_in_seconds: float = None,
         exponential_backoff: bool = False,
-        chat: bool = False,
         nr_docs: int = 4,
         diversity: float = None,
         doc_length: int = None,
@@ -163,20 +148,19 @@ class OpenAI(BaseRepresentation):
         self.model = model
 
         if prompt is None:
-            self.prompt = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
+            self.prompt = DEFAULT_CHAT_PROMPT
         else:
             self.prompt = prompt
 
-        if chat and system_prompt is None:
+        if system_prompt is None:
             self.system_prompt = DEFAULT_SYSTEM_PROMPT
         else:
             self.system_prompt = system_prompt
 
-        self.default_prompt_ = DEFAULT_CHAT_PROMPT if chat else DEFAULT_PROMPT
+        self.default_prompt_ = DEFAULT_CHAT_PROMPT
         self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-        self.chat = chat
         self.nr_docs = nr_docs
         self.diversity = diversity
         self.doc_length = doc_length
@@ -191,7 +175,7 @@ class OpenAI(BaseRepresentation):
             del self.generator_kwargs["model"]
         if self.generator_kwargs.get("prompt"):
             del self.generator_kwargs["prompt"]
-        if not self.generator_kwargs.get("stop") and not chat:
+        if not self.generator_kwargs.get("stop"):
             self.generator_kwargs["stop"] = "\n"
 
     def extract_topics(
@@ -228,39 +212,27 @@ class OpenAI(BaseRepresentation):
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
-            if self.chat:
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": prompt},
-                ]
-                kwargs = {
-                    "model": self.model,
-                    "messages": messages,
-                    **self.generator_kwargs,
-                }
-                if self.exponential_backoff:
-                    response = chat_completions_with_backoff(self.client, **kwargs)
-                else:
-                    response = self.client.chat.completions.create(**kwargs)
-
-                # Check whether content was actually generated
-                # Addresses #1570 for potential issues with OpenAI's content filter
-                # Addresses #2176 for potential issues when openAI returns a None type object
-                if response and hasattr(response.choices[0].message, "content"):
-                    label = response.choices[0].message.content.strip().replace("topic: ", "")
-                else:
-                    label = "No label returned"
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+            kwargs = {
+                "model": self.model,
+                "messages": messages,
+                **self.generator_kwargs,
+            }
+            if self.exponential_backoff:
+                response = chat_completions_with_backoff(self.client, **kwargs)
             else:
-                if self.exponential_backoff:
-                    response = completions_with_backoff(
-                        self.client,
-                        model=self.model,
-                        prompt=prompt,
-                        **self.generator_kwargs,
-                    )
-                else:
-                    response = self.client.completions.create(model=self.model, prompt=prompt, **self.generator_kwargs)
-                label = response.choices[0].text.strip()
+                response = self.client.chat.completions.create(**kwargs)
+
+            # Check whether content was actually generated
+            # Addresses #1570 for potential issues with OpenAI's content filter
+            # Addresses #2176 for potential issues when openAI returns a None type object
+            if response and hasattr(response.choices[0].message, "content"):
+                label = response.choices[0].message.content.strip().replace("topic: ", "")
+            else:
+                label = "No label returned"
 
             updated_topics[topic] = [(label, 1)]
 
@@ -270,7 +242,7 @@ class OpenAI(BaseRepresentation):
         keywords = list(zip(*topics[topic]))[0]
 
         # Use the Default Chat Prompt
-        if self.prompt == DEFAULT_CHAT_PROMPT or self.prompt == DEFAULT_PROMPT:
+        if self.prompt == DEFAULT_CHAT_PROMPT:
             prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
             prompt = self._replace_documents(prompt, docs)
 
@@ -292,13 +264,6 @@ class OpenAI(BaseRepresentation):
             to_replace += f"- {doc}\n"
         prompt = prompt.replace("[DOCUMENTS]", to_replace)
         return prompt
-
-
-def completions_with_backoff(client, **kwargs):
-    return retry_with_exponential_backoff(
-        client.completions.create,
-        errors=(openai.RateLimitError,),
-    )(**kwargs)
 
 
 def chat_completions_with_backoff(client, **kwargs):
