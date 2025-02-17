@@ -2532,7 +2532,7 @@ class BERTopic:
 
     def visualize_document_datamap(
         self,
-        docs: List[str],
+        docs: List[str] = None,
         topics: List[int] = None,
         embeddings: np.ndarray = None,
         reduced_embeddings: np.ndarray = None,
@@ -2540,8 +2540,12 @@ class BERTopic:
         title: str = "Documents and Topics",
         sub_title: Union[str, None] = None,
         width: int = 1200,
-        height: int = 1200,
-        **datamap_kwds,
+        height: int = 750,
+        interactive: bool = False,
+        enable_search: bool = False,
+        topic_prefix: bool = False,
+        datamap_kwds: dict = {},
+        int_datamap_kwds: dict = {},
     ):
         """Visualize documents and their topics in 2D as a static plot for publication using
         DataMapPlot. This works best if there are between 5 and 60 topics. It is therefore best
@@ -2549,21 +2553,30 @@ class BERTopic:
 
         Arguments:
             topic_model:  A fitted BERTopic instance.
-            docs: The documents you used when calling either `fit` or `fit_transform`
+            docs: The documents you used when calling either `fit` or `fit_transform`.
             topics: A selection of topics to visualize.
-            Not to be confused with the topics that you get from .fit_transform. For example, if you want to visualize only topics 1 through 5: topics = [1, 2, 3, 4, 5]. Documents not in these topics will be shown as noise points.
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`. Documents not in these topics will be shown
+                    as noise points.
             embeddings:  The embeddings of all documents in `docs`.
             reduced_embeddings:  The 2D reduced embeddings of all documents in `docs`.
             custom_labels:  If bool, whether to use custom topic labels that were defined using
-                           `topic_model.set_topic_labels`.
-                           If `str`, it uses labels from other aspects, e.g., "Aspect1".
+                        `topic_model.set_topic_labels`.
+                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
             title: Title of the plot.
             sub_title: Sub-title of the plot.
             width: The width of the figure.
             height: The height of the figure.
-            **datamap_kwds:  All further keyword args will be passed on to DataMapPlot's
-                             `create_plot` function. See the DataMapPlot documentation
-                             for more details.
+            interactive: Whether to create an interactive plot using DataMapPlot's `create_interactive_plot`.
+            enable_search: Whether to enable search in the interactive plot. Only works if `interactive=True`.
+            topic_prefix: Prefix to add to the topic number when displaying the topic name.
+            datamap_kwds:  Keyword args be passed on to DataMapPlot's `create_plot` function
+                        if you are not using the interactive version.
+                        See the DataMapPlot documentation for more details.
+            int_datamap_kwds:  Keyword args be passed on to DataMapPlot's `create_interactive_plot` function
+                            if you are using the interactive version.
+                            See the DataMapPlot documentation for more details.
 
         Returns:
             figure: A Matplotlib Figure object.
@@ -2610,7 +2623,6 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        check_documents_type(docs)
         return plotting.visualize_document_datamap(
             self,
             docs,
@@ -2622,7 +2634,11 @@ class BERTopic:
             sub_title,
             width,
             height,
-            **datamap_kwds,
+            interactive,
+            enable_search,
+            topic_prefix,
+            datamap_kwds,
+            int_datamap_kwds,
         )
 
     def visualize_hierarchical_documents(

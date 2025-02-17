@@ -420,16 +420,15 @@ prompt = "I have the following documents: [DOCUMENTS] \nThese documents are abou
 representation_model = OpenAI(client, prompt=prompt)
 ```
 
-### **ChatGPT**
+### **GPT-4o**
 
-Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models. 
-In order to use ChatGPT with BERTopic, we need to define the model and make sure to enable `chat`:
+To choose a specific model from OpenAI's offering:
 
 ```python
-representation_model = OpenAI(client, model="gpt-3.5-turbo", delay_in_seconds=10, chat=True)
+representation_model = OpenAI(client, model="gpt-4o-mini", delay_in_seconds=10)
 ```
 
-Prompting with ChatGPT is very satisfying and is customizable as follows:
+Prompting with their models is very satisfying and is customizable as follows:
 
 ```python
 prompt = """
@@ -467,7 +466,7 @@ Based on the information above, please give a description of this topic in the f
 topic: <description>
 """
 
-representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True, prompt=summarization_prompt, nr_docs=5, delay_in_seconds=3)
+representation_model = OpenAI(client, model="gpt-4o-mini", prompt=summarization_prompt, nr_docs=5, delay_in_seconds=3)
 ```
 
 The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!

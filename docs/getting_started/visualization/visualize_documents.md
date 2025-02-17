@@ -69,6 +69,18 @@ fig = topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_em
 fig.savefig("path/to/file.png", bbox_inches="tight")
 ```
 
+### Interactive DataMapPlot
+
+DataMapPlot has the amazing ability to also generate interactive plots. These plots generate HTML files that allow you zoom in on the generated topics and explore the data. 
+
+Usage is straightforward, simply set `interactive=True`:
+
+```python
+fig = topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_embeddings, interactive=True)
+```
+
+<iframe src="datamapplot.html" style="width:1000px; height: 500px; border: 0px;""></iframe>
+
 ## **Visualize Probabilities or Distribution**
 
 We can generate the topic-document probability matrix by simply setting `calculate_probabilities=True` if a HDBSCAN model is used:

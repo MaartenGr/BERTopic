@@ -136,7 +136,7 @@ The topic is described by the following keywords: [KEYWORDS]
 Based on the information above, extract a short but highly descriptive topic label of at most 5 words. Make sure it is in the following format:
 topic: <topic label>
 """
-openai_model = OpenAI(client, model="gpt-3.5-turbo", exponential_backoff=True, chat=True, prompt=prompt)
+openai_model = OpenAI(client, model="gpt-4o-mini", exponential_backoff=True, prompt=prompt)
 
 # All representation models
 representation_model = {
