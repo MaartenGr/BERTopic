@@ -196,29 +196,34 @@ embeddings = normalize(embeddings)
 
 The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely `"all-MiniLM-L6-v2"`. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires `pytorch` which often results in a rather large environment, memory-wise. 
 
-Fortunately, it is possible to install BERTopic without `sentence-transformers` and use it as a lightweight solution instead. The installation can be done as follows:
+Fortunately, it is possible to install BERTopic without `sentence-transformers`, `UMAP`, and/or `HDBSCAN`. This can be to reduce your docker images for inference or when you do not use `pytorch` but for instance [Model2Vec](https://github.com/MinishLab/model2vec) instead. The installation can be done as follows:
 
 ```bash
 pip install --no-deps bertopic
-pip install --upgrade numpy hdbscan umap-learn pandas scikit-learn tqdm plotly pyyaml
+pip install --upgrade numpy pandas scikit-learn tqdm plotly pyyaml
 ```
 
-Then, we can use BERTopic without `sentence-transformers` as follows using a CPU-based embedding technique:
+This installs a bare-bones version of BERTopic. If you want to use UMAP and Model2Vec for instance, you'll need to first install them:
+
+`pip install model2vec umap-learn`
+
+Then, you can BERTopic without needing to have a CPU:
 
 ```python
-from sklearn.pipeline import make_pipeline
-from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import TfidfVectorizer
+from bertopic import BERTopic
+from model2vec import StaticModel
 
-pipe = make_pipeline(
-    TfidfVectorizer(),
-    TruncatedSVD(100)
-)
+# Model2Vec
+embedding_model = StaticModel.from_pretrained("minishlab/potion-base-8M")
 
-topic_model = BERTopic(embedding_model=pipe)
+# BERTopic
+topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
 As a result, the entire package and resulting model can be run quickly on the CPU and no GPU is necessary!
+
+!!! Note
+    If you have an alternative embedding model, you can use that instead of Model2Vec. Likewise, if you have a different method for dimensionality reduction that you want to use, you can use that instead of UMAP.
 
 
 ## **WordCloud**

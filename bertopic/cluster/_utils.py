@@ -1,4 +1,3 @@
-import hdbscan
 import numpy as np
 
 
@@ -15,6 +14,11 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
         embeddings: Input embeddings for "approximate_predict"
                     and "membership_vector"
     """
+    try:
+        import hdbscan
+    except (ImportError, ModuleNotFoundError):
+        hdbscan = type('hdbscan', (), {'HDBSCAN': None})()
+
     # Approximate predict
     if func == "approximate_predict":
         if isinstance(model, hdbscan.HDBSCAN):
@@ -62,6 +66,11 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
 
 def is_supported_hdbscan(model):
     """Check whether the input model is a supported HDBSCAN-like model."""
+    try:
+        import hdbscan
+    except (ImportError, ModuleNotFoundError):
+        hdbscan = type('hdbscan', (), {'HDBSCAN': None})()
+
     if isinstance(model, hdbscan.HDBSCAN):
         return True
 

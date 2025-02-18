@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.graph_objects as go
 import math
 
-from umap import UMAP
 from typing import List, Union
 
 
@@ -144,8 +143,14 @@ def visualize_hierarchical_documents(
 
     # Reduce input embeddings
     if reduced_embeddings is None:
-        umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
-        embeddings_2d = umap_model.embedding_
+        try:
+            from umap import UMAP
+            umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
+            embeddings_2d = umap_model.embedding_
+        except (ImportError, ModuleNotFoundError):
+            raise ModuleNotFoundError(
+                "UMAP is required if the embeddings are not yet reduced in dimensionality. Please install it using `pip install umap-learn`."
+            )
     elif sample is not None and reduced_embeddings is not None:
         embeddings_2d = reduced_embeddings[indices]
     elif sample is None and reduced_embeddings is not None:

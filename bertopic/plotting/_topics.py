@@ -1,6 +1,11 @@
 import numpy as np
 import pandas as pd
-from umap import UMAP
+try:
+    from umap import UMAP
+    HAS_UMAP = True
+except (ImportError, ModuleNotFoundError):
+    HAS_UMAP = False
+
 from typing import List, Union
 from sklearn.preprocessing import MinMaxScaler
 from bertopic._utils import select_topic_representation
@@ -85,11 +90,16 @@ def visualize_topics(
     )
     embeddings = embeddings[indices]
 
-    if c_tfidf_used:
-        embeddings = MinMaxScaler().fit_transform(embeddings)
-        embeddings = UMAP(n_neighbors=2, n_components=2, metric="hellinger", random_state=42).fit_transform(embeddings)
+    if HAS_UMAP:
+        if c_tfidf_used:
+            embeddings = MinMaxScaler().fit_transform(embeddings)
+            embeddings = UMAP(n_neighbors=2, n_components=2, metric="hellinger", random_state=42).fit_transform(embeddings)
+        else:
+            embeddings = UMAP(n_neighbors=2, n_components=2, metric="cosine", random_state=42).fit_transform(embeddings)
     else:
-        embeddings = UMAP(n_neighbors=2, n_components=2, metric="cosine", random_state=42).fit_transform(embeddings)
+        raise ModuleNotFoundError(
+            "UMAP is required to reduce the embeddings.. Please install it using `pip install umap-learn`."
+        )
 
     # Visualize with plotly
     df = pd.DataFrame(

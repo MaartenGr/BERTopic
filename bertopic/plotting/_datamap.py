@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from typing import List, Union
-from umap import UMAP
 from warnings import warn
 
 try:
@@ -122,8 +121,14 @@ def visualize_document_datamap(
 
     # Reduce input embeddings
     if reduced_embeddings is None:
-        umap_model = UMAP(n_neighbors=15, n_components=2, min_dist=0.15, metric="cosine").fit(embeddings_to_reduce)
-        embeddings_2d = umap_model.embedding_
+        try:
+            from umap import UMAP
+            umap_model = UMAP(n_neighbors=15, n_components=2, min_dist=0.15, metric="cosine").fit(embeddings_to_reduce)
+            embeddings_2d = umap_model.embedding_
+        except (ImportError, ModuleNotFoundError):
+            raise ModuleNotFoundError(
+                "UMAP is required if the embeddings are not yet reduced in dimensionality. Please install it using `pip install umap-learn`."
+            )
     else:
         embeddings_2d = reduced_embeddings
 

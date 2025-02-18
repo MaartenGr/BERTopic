@@ -37,11 +37,17 @@ else:
 from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
-import hdbscan
-from umap import UMAP
+try:
+    from hdbscan import HDBSCAN
+    HAS_HDBSCAN = True
+except (ImportError, ModuleNotFoundError):
+    HAS_HDBSCAN = False
+    from sklearn.cluster import HDBSCAN as SK_HDBSCAN
+
 from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
@@ -143,8 +149,8 @@ class BERTopic:
         zeroshot_topic_list: List[str] = None,
         zeroshot_min_similarity: float = 0.7,
         embedding_model=None,
-        umap_model: UMAP = None,
-        hdbscan_model: hdbscan.HDBSCAN = None,
+        umap_model=None,
+        hdbscan_model = None,
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: TfidfTransformer = None,
         representation_model: BaseRepresentation = None,
@@ -247,23 +253,41 @@ class BERTopic:
         self.representation_model = representation_model
 
         # UMAP or another algorithm that has .fit and .transform functions
-        self.umap_model = umap_model or UMAP(
-            n_neighbors=15,
-            n_components=5,
-            min_dist=0.0,
-            metric="cosine",
-            low_memory=self.low_memory,
-        )
+        if umap_model is not None:
+            self.umap_model = umap_model
+        else:
+            try:
+                from umap import UMAP
+                self.umap_model = UMAP(
+                    n_neighbors=15,
+                    n_components=5,
+                    min_dist=0.0,
+                    metric="cosine",
+                    low_memory=self.low_memory,
+                )
+            except (ImportError, ModuleNotFoundError):
+                self.umap_model = PCA(n_components=5)
 
         # HDBSCAN or another clustering algorithm that has .fit and .predict functions and
         # the .labels_ variable to extract the labels
-        self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(
-            min_cluster_size=self.min_topic_size,
-            metric="euclidean",
-            cluster_selection_method="eom",
-            prediction_data=True,
-        )
 
+        if hdbscan_model is not None:
+            self.hdbscan_model = hdbscan_model
+        elif HAS_HDBSCAN:
+            self.hdbscan_model = HDBSCAN(
+                min_cluster_size=self.min_topic_size,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                prediction_data=True,
+            )
+        else:
+            self.hdbscan_model = SK_HDBSCAN(
+                min_cluster_size=self.min_topic_size,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                n_jobs=-1
+            )
+            
         # Public attributes
         self.topics_ = None
         self.probabilities_ = None
@@ -326,7 +350,7 @@ class BERTopic:
         images: List[str] = None,
         y: Union[List[int], np.ndarray] = None,
     ):
-        """Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics.
+        """Fit the models on a collection of documents and generate topics.
 
         Arguments:
             documents: A list of documents to fit on
@@ -3769,7 +3793,7 @@ class BERTopic:
         partial_fit: bool = False,
         y: np.ndarray = None,
     ) -> Tuple[pd.DataFrame, np.ndarray]:
-        """Cluster UMAP embeddings with HDBSCAN.
+        """Cluster UMAP reduced embeddings with HDBSCAN.
 
         Arguments:
             umap_embeddings: The reduced sentence embeddings with UMAP
@@ -4473,12 +4497,21 @@ class BERTopic:
             self.c_tf_idf_, self.topic_embeddings_, use_ctfidf, output_ndarray=True
         )[0]
         norm_data = normalize(embeddings, norm="l2")
-        predictions = hdbscan.HDBSCAN(
-            min_cluster_size=2,
-            metric="euclidean",
-            cluster_selection_method="eom",
-            prediction_data=True,
-        ).fit_predict(norm_data[self._outliers :])
+
+        if HAS_HDBSCAN:
+            predictions = HDBSCAN(
+                min_cluster_size=2,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                prediction_data=True,
+            ).fit_predict(norm_data[self._outliers :])
+        else:
+            predictions = SK_HDBSCAN(
+                min_cluster_size=2,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                n_jobs=-1
+            ).fit_predict(norm_data[self._outliers :])
 
         # Map similar topics
         mapped_topics = {
