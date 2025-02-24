@@ -471,12 +471,12 @@ def get_package_versions():
             hdbscan_version = version("hdbscan")
         except (ImportError, ModuleNotFoundError):
             hdbscan_version = None
-            
+
         try:
             from umap import __version__ as umap_version
         except (ImportError, ModuleNotFoundError):
             umap_version = None
-        
+
         try:
             from sentence_transformers import __version__ as sbert_version
         except (ImportError, ModuleNotFoundError):
@@ -486,7 +486,7 @@ def get_package_versions():
             from numba import __version__ as numba_version
         except (ImportError, ModuleNotFoundError):
             numba_version = None
-        
+
         try:
             from transformers import __version__ as transformers_version
         except (ImportError, ModuleNotFoundError):

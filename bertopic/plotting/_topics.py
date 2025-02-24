@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
+
 try:
     from umap import UMAP
+
     HAS_UMAP = True
 except (ImportError, ModuleNotFoundError):
     HAS_UMAP = False
@@ -93,7 +95,9 @@ def visualize_topics(
     if HAS_UMAP:
         if c_tfidf_used:
             embeddings = MinMaxScaler().fit_transform(embeddings)
-            embeddings = UMAP(n_neighbors=2, n_components=2, metric="hellinger", random_state=42).fit_transform(embeddings)
+            embeddings = UMAP(n_neighbors=2, n_components=2, metric="hellinger", random_state=42).fit_transform(
+                embeddings
+            )
         else:
             embeddings = UMAP(n_neighbors=2, n_components=2, metric="cosine", random_state=42).fit_transform(embeddings)
     else:

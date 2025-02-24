@@ -39,6 +39,7 @@ from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 # Models
 try:
     from hdbscan import HDBSCAN
+
     HAS_HDBSCAN = True
 except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
@@ -150,7 +151,7 @@ class BERTopic:
         zeroshot_min_similarity: float = 0.7,
         embedding_model=None,
         umap_model=None,
-        hdbscan_model = None,
+        hdbscan_model=None,
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: TfidfTransformer = None,
         representation_model: BaseRepresentation = None,
@@ -258,6 +259,7 @@ class BERTopic:
         else:
             try:
                 from umap import UMAP
+
                 self.umap_model = UMAP(
                     n_neighbors=15,
                     n_components=5,
@@ -282,12 +284,9 @@ class BERTopic:
             )
         else:
             self.hdbscan_model = SK_HDBSCAN(
-                min_cluster_size=self.min_topic_size,
-                metric="euclidean",
-                cluster_selection_method="eom",
-                n_jobs=-1
+                min_cluster_size=self.min_topic_size, metric="euclidean", cluster_selection_method="eom", n_jobs=-1
             )
-            
+
         # Public attributes
         self.topics_ = None
         self.probabilities_ = None
@@ -708,9 +707,7 @@ class BERTopic:
         # Checks
         check_embeddings_shape(embeddings, documents)
         if not hasattr(self.hdbscan_model, "partial_fit"):
-            raise ValueError(
-                "In order to use `.partial_fit`, the cluster model should have " "a `.partial_fit` function."
-            )
+            raise ValueError("In order to use `.partial_fit`, the cluster model should have a `.partial_fit` function.")
 
         # Prepare documents
         if isinstance(documents, str):
@@ -1548,7 +1545,7 @@ class BERTopic:
 
         if top_n_words > 100:
             logger.warning(
-                "Note that extracting more than 100 words from a sparse " "can slow down computation quite a bit."
+                "Note that extracting more than 100 words from a sparse can slow down computation quite a bit."
             )
         self.top_n_words = top_n_words
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
@@ -2031,7 +2028,7 @@ class BERTopic:
                 custom_labels = topic_labels
             else:
                 raise ValueError(
-                    "Make sure that `topic_labels` contains the same number " "of labels as there are topics."
+                    "Make sure that `topic_labels` contains the same number of labels as there are topics."
                 )
 
         self.custom_labels_ = custom_labels
@@ -2148,9 +2145,7 @@ class BERTopic:
                 for topic in topic_group:
                     mapping[topic] = topic_group[0]
         else:
-            raise ValueError(
-                "Make sure that `topics_to_merge` is either" "a list of topics or a list of list of topics."
-            )
+            raise ValueError("Make sure that `topics_to_merge` is eithera list of topics or a list of list of topics.")
 
         # Track mappings and sizes of topics for merging topic embeddings
         mappings = defaultdict(list)
@@ -4507,10 +4502,7 @@ class BERTopic:
             ).fit_predict(norm_data[self._outliers :])
         else:
             predictions = SK_HDBSCAN(
-                min_cluster_size=2,
-                metric="euclidean",
-                cluster_selection_method="eom",
-                n_jobs=-1
+                min_cluster_size=2, metric="euclidean", cluster_selection_method="eom", n_jobs=-1
             ).fit_predict(norm_data[self._outliers :])
 
         # Map similar topics

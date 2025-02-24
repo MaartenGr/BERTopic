@@ -145,6 +145,7 @@ def visualize_hierarchical_documents(
     if reduced_embeddings is None:
         try:
             from umap import UMAP
+
             umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
             embeddings_2d = umap_model.embedding_
         except (ImportError, ModuleNotFoundError):
@@ -204,8 +205,8 @@ def visualize_hierarchical_documents(
                     mappings[i] = False
 
         # Create new column
-        df[f"level_{index+1}"] = df.topic.map(mapping)
-        df[f"level_{index+1}"] = df[f"level_{index+1}"].astype(int)
+        df[f"level_{index + 1}"] = df.topic.map(mapping)
+        df[f"level_{index + 1}"] = df[f"level_{index + 1}"].astype(int)
 
     # Prepare topic names of original and merged topics
     trace_names = []
@@ -247,12 +248,12 @@ def visualize_hierarchical_documents(
         if topic_model._outliers:
             traces.append(
                 go.Scattergl(
-                    x=df.loc[(df[f"level_{level+1}"] == -1), "x"],
-                    y=df.loc[df[f"level_{level+1}"] == -1, "y"],
+                    x=df.loc[(df[f"level_{level + 1}"] == -1), "x"],
+                    y=df.loc[df[f"level_{level + 1}"] == -1, "y"],
                     mode="markers+text",
                     name="other",
                     hoverinfo="text",
-                    hovertext=df.loc[(df[f"level_{level+1}"] == -1), "doc"] if not hide_document_hover else None,
+                    hovertext=df.loc[(df[f"level_{level + 1}"] == -1), "doc"] if not hide_document_hover else None,
                     showlegend=False,
                     marker=dict(color="#CFD8DC", size=5, opacity=0.5),
                 )
@@ -261,16 +262,16 @@ def visualize_hierarchical_documents(
         # Selected topics
         if topics:
             selection = df.loc[(df.topic.isin(topics)), :]
-            unique_topics = sorted([int(topic) for topic in selection[f"level_{level+1}"].unique()])
+            unique_topics = sorted([int(topic) for topic in selection[f"level_{level + 1}"].unique()])
         else:
-            unique_topics = sorted([int(topic) for topic in df[f"level_{level+1}"].unique()])
+            unique_topics = sorted([int(topic) for topic in df[f"level_{level + 1}"].unique()])
 
         for topic in unique_topics:
             if topic != -1:
                 if topics:
-                    selection = df.loc[(df[f"level_{level+1}"] == topic) & (df.topic.isin(topics)), :]
+                    selection = df.loc[(df[f"level_{level + 1}"] == topic) & (df.topic.isin(topics)), :]
                 else:
-                    selection = df.loc[df[f"level_{level+1}"] == topic, :]
+                    selection = df.loc[df[f"level_{level + 1}"] == topic, :]
 
                 if not hide_annotations:
                     selection.loc[len(selection), :] = None

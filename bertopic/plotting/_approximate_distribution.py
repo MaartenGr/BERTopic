@@ -75,7 +75,7 @@ def visualize_approximate_distribution(
         df = pd.DataFrame(topic_token_distribution).T
 
     df.columns = [f"{token}_{i}" for i, token in enumerate(tokens)]
-    df.columns = [f"{token}{' '*i}" for i, token in enumerate(tokens)]
+    df.columns = [f"{token}{' ' * i}" for i, token in enumerate(tokens)]
     df.index = list(topic_model.topic_labels_.values())[topic_model._outliers :]
     df = df.loc[(df.sum(axis=1) != 0), :]
 

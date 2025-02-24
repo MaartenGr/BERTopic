@@ -17,7 +17,7 @@ def hdbscan_delegator(model, func: str, embeddings: np.ndarray = None):
     try:
         import hdbscan
     except (ImportError, ModuleNotFoundError):
-        hdbscan = type('hdbscan', (), {'HDBSCAN': None})()
+        hdbscan = type("hdbscan", (), {"HDBSCAN": None})()
 
     # Approximate predict
     if func == "approximate_predict":
@@ -69,7 +69,7 @@ def is_supported_hdbscan(model):
     try:
         import hdbscan
     except (ImportError, ModuleNotFoundError):
-        hdbscan = type('hdbscan', (), {'HDBSCAN': None})()
+        hdbscan = type("hdbscan", (), {"HDBSCAN": None})()
 
     if isinstance(model, hdbscan.HDBSCAN):
         return True

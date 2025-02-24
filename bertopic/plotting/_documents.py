@@ -121,6 +121,7 @@ def visualize_documents(
     if reduced_embeddings is None:
         try:
             from umap import UMAP
+
             umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
             embeddings_2d = umap_model.embedding_
         except (ImportError, ModuleNotFoundError):

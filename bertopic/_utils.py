@@ -74,10 +74,7 @@ def check_is_fitted(topic_model):
     Raises:
         ValueError: If the matches were not found.
     """
-    msg = (
-        "This %(name)s instance is not fitted yet. Call 'fit' with "
-        "appropriate arguments before using this estimator."
-    )
+    msg = "This %(name)s instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."
 
     if topic_model.topics_ is None:
         raise ValueError(msg % {"name": type(topic_model).__name__})
@@ -131,11 +128,11 @@ def validate_distance_matrix(X, n_samples):
         # check it has correct size
         n = s[0]
         if n != (n_samples * (n_samples - 1) / 2):
-            raise ValueError("The condensed distance matrix must have " "shape (n*(n-1)/2,).")
+            raise ValueError("The condensed distance matrix must have shape (n*(n-1)/2,).")
     elif len(s) == 2:
         # check it has correct size
         if (s[0] != n_samples) or (s[1] != n_samples):
-            raise ValueError("The distance matrix must be of shape " "(n, n) where n is the number of samples.")
+            raise ValueError("The distance matrix must be of shape (n, n) where n is the number of samples.")
         # force zero diagonal and convert to condensed
         np.fill_diagonal(X, 0)
         X = squareform(X)
