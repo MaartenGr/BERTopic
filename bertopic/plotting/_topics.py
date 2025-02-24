@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import warnings
 from umap import UMAP
 from typing import List, Union
 from sklearn.preprocessing import MinMaxScaler
@@ -56,6 +57,9 @@ def visualize_topics(
     freq_df = freq_df.loc[freq_df.Topic != -1, :]
     if topics is not None:
         topics = list(topics)
+    elif len(topics) < 5:
+        warnings.warn("Too few topics to display.")
+        return
     elif top_n_topics is not None:
         topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
     else:
