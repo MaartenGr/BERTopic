@@ -461,22 +461,36 @@ def get_package_versions():
     try:
         import platform
         from numpy import __version__ as np_version
+        from pandas import __version__ as pandas_version
+        from sklearn import __version__ as sklearn_version
+        from plotly import __version__ as plotly_version
 
         try:
             from importlib.metadata import version
 
             hdbscan_version = version("hdbscan")
-        except:  # noqa: E722
+        except (ImportError, ModuleNotFoundError):
             hdbscan_version = None
 
-        from umap import __version__ as umap_version
-        from pandas import __version__ as pandas_version
-        from sklearn import __version__ as sklearn_version
-        from sentence_transformers import __version__ as sbert_version
-        from numba import __version__ as numba_version
-        from transformers import __version__ as transformers_version
+        try:
+            from umap import __version__ as umap_version
+        except (ImportError, ModuleNotFoundError):
+            umap_version = None
 
-        from plotly import __version__ as plotly_version
+        try:
+            from sentence_transformers import __version__ as sbert_version
+        except (ImportError, ModuleNotFoundError):
+            sbert_version = None
+
+        try:
+            from numba import __version__ as numba_version
+        except (ImportError, ModuleNotFoundError):
+            numba_version = None
+
+        try:
+            from transformers import __version__ as transformers_version
+        except (ImportError, ModuleNotFoundError):
+            transformers_version = None
 
         return {
             "Numpy": np_version,

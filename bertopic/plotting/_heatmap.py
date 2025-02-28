@@ -77,7 +77,7 @@ def visualize_heatmap(
     sorted_topics = topics
     if n_clusters:
         if n_clusters >= len(set(topics)):
-            raise ValueError("Make sure to set `n_clusters` lower than " "the total number of unique topics.")
+            raise ValueError("Make sure to set `n_clusters` lower than the total number of unique topics.")
 
         distance_matrix = cosine_similarity(embeddings[topics])
         Z = linkage(distance_matrix, "ward")

@@ -63,6 +63,8 @@ pip install bertopic[flair,gensim,spacy,use]
 pip install bertopic[vision]
 ```
 
+For a *light-weight installation* without transformers, UMAP and/or HDBSCAN (for training with Model2Vec or perhaps for inference), see [this tutorial](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation).
+
 ## Getting Started
 For an in-depth overview of the features of BERTopic 
 you can check the [**full documentation**](https://maartengr.github.io/BERTopic/) or you can follow along 
