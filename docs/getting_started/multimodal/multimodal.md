@@ -1,20 +1,20 @@
 Documents or text are often accompanied by imagery or the other way around. For example, social media images with captions and products with descriptions. Topic modeling has traditionally focused on creating topics from textual representations. However, as more multimodal representations are created, the need for multimodal topics increases.
 
-BERTopic can perform **multimodal topic modeling** in a number of ways during `.fit` and `.fit_transform` stages. 
+BERTopic can perform **multimodal topic modeling** in a number of ways during `.fit` and `.fit_transform` stages.
 
 ## **Text + Images**
 
-The most basic example of multimodal topic modeling in BERTopic is when you have images that accompany your documents. This means that it is expected that each document has an image and vice versa. Instagram pictures, for example, almost always have some descriptions to them. 
+The most basic example of multimodal topic modeling in BERTopic is when you have images that accompany your documents. This means that it is expected that each document has an image and vice versa. Instagram pictures, for example, almost always have some descriptions to them.
 
 <figure markdown>
   ![Image title](images_and_text.svg)
   <figcaption></figcaption>
 </figure>
 
-In this example, we are going to use images from `flickr` that each have a caption associated to it: 
+In this example, we are going to use images from `flickr` that each have a caption associated to it:
 
 ```python
-# NOTE: This requires the `datasets` package which you can 
+# NOTE: This requires the `datasets` package which you can
 # install with `pip install datasets`
 from datasets import load_dataset
 
@@ -42,7 +42,7 @@ representation_model = {
 topic_model = BERTopic(representation_model=representation_model, verbose=True)
 ```
 
-In this example, we are clustering the documents and are then looking for the best matching images to the resulting clusters. 
+In this example, we are clustering the documents and are then looking for the best matching images to the resulting clusters.
 
 We can now access our image representations for each topic with `topic_model.topic_aspects_["Visual_Aspect"]`.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
@@ -75,10 +75,10 @@ HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
 <br><br>
 
 !!! Tip
-    In the example above, we are clustering the documents but since you have 
-    images, you might want to cluster those or cluster an aggregation of both 
-    images and documents. For that, you can use the new `MultiModalBackend` 
-    to generate embeddings: 
+    In the example above, we are clustering the documents but since you have
+    images, you might want to cluster those or cluster an aggregation of both
+    images and documents. For that, you can use the new `MultiModalBackend`
+    to generate embeddings:
 
     ```python
     from bertopic.backend import MultiModalBackend

@@ -1,6 +1,6 @@
-When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. Some topics could be merged and having an understanding of the effect will help you understand which topics should and which should not be merged. 
+When tweaking your topic model, the number of topics that are generated has a large effect on the quality of the topic representations. Some topics could be merged and having an understanding of the effect will help you understand which topics should and which should not be merged.
 
-That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might exist in your data. 
+That is where hierarchical topic modeling comes in. It tries to model the possible hierarchical nature of the topics you have created to understand which topics are similar to each other. Moreover, you will have more insight into sub-topics that might exist in your data.
 
 <br>
 <div class="svg_image">
@@ -8,12 +8,12 @@ That is where hierarchical topic modeling comes in. It tries to model the possib
 </div>
 <br>
 
-In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are available. 
+In BERTopic, we can approximate this potential hierarchy by making use of our topic-term matrix (c-TF-IDF matrix). This matrix contains information about the importance of every word in every topic and makes for a nice numerical representation of our topics. The smaller the distance between two c-TF-IDF representations, the more similar we assume they are. In practice, this process of merging topics is done through the hierarchical clustering capabilities of `scipy` (see [here](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html)). It allows for several linkage methods through which we can approximate our topic hierarchy. As a default, we are using the [ward](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.ward.html#scipy.cluster.hierarchy.ward) but many others are available.
 
-Whenever we merge two topics, we can calculate the c-TF-IDF representation of these two merged by summing their bag-of-words representation. We assume that two sets of topics are merged and that all others are kept the same, regardless of their location in the hierarchy. This helps us isolate the potential effect of merging sets of topics. As a result, we can see the topic representation at each level in the tree. 
+Whenever we merge two topics, we can calculate the c-TF-IDF representation of these two merged by summing their bag-of-words representation. We assume that two sets of topics are merged and that all others are kept the same, regardless of their location in the hierarchy. This helps us isolate the potential effect of merging sets of topics. As a result, we can see the topic representation at each level in the tree.
 
 ## **Example**
-To demonstrate hierarchical topic modeling with BERTopic, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of documents. 
+To demonstrate hierarchical topic modeling with BERTopic, we use the 20 Newsgroups dataset to see how the topics that we uncover are represented in the 20 categories of documents.
 
 First, we train a basic BERTopic model:
 
@@ -24,7 +24,7 @@ from sklearn.datasets import fetch_20newsgroups
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))["data"]
 topic_model = BERTopic(verbose=True)
 topics, probs = topic_model.fit_transform(docs)
-``` 
+```
 
 Next, we can use our fitted BERTopic model to extract possible hierarchies from our c-TF-IDF matrix:
 
@@ -32,14 +32,14 @@ Next, we can use our fitted BERTopic model to extract possible hierarchies from 
 hierarchical_topics = topic_model.hierarchical_topics(docs)
 ```
 
-The resulting `hierarchical_topics` is a dataframe in which merged topics are described. For example, if you would 
-merge two topics, what would the topic representation of the new topic be? 
+The resulting `hierarchical_topics` is a dataframe in which merged topics are described. For example, if you would
+merge two topics, what would the topic representation of the new topic be?
 
 ## **Linkage functions**
 
-When creating the potential hierarchical nature of topics, we use Scipy's ward `linkage` function as a default 
-to generate the hierarchy. However, you might want to use a [different linkage function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html) 
-for your use case, such as `single`, `complete`, `average`, `centroid`, or `median`. In BERTopic, you can define the 
+When creating the potential hierarchical nature of topics, we use Scipy's ward `linkage` function as a default
+to generate the hierarchy. However, you might want to use a [different linkage function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html)
+for your use case, such as `single`, `complete`, `average`, `centroid`, or `median`. In BERTopic, you can define the
 linkage function yourself, including the distance function that you would like to use:
 
 
@@ -63,12 +63,12 @@ topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
 ```
 <iframe src="hierarchical_topics.html" style="width:1000px; height: 2150px; border: 0px;""></iframe>
 
-If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations 
-help you understand the effect of merging certain topics. Some might be logical to merge whilst others might not. Moreover, 
-we can now see which sub-topics can be found within certain larger themes. 
+If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations
+help you understand the effect of merging certain topics. Some might be logical to merge whilst others might not. Moreover,
+we can now see which sub-topics can be found within certain larger themes.
 
-Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can 
-use `topic_model.get_topic_tree` to create a text-based representation of this hierarchy. Although the general structure is more difficult 
+Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can
+use `topic_model.get_topic_tree` to create a text-based representation of this hierarchy. Although the general structure is more difficult
 to view, we can see better which topics could be logically merged:
 
 ```python
@@ -84,7 +84,7 @@ to view, we can see better which topics could be logically merged:
 
 <details>
   <summary>Click here to view the full tree.</summary>
-  
+
   ```bash
     .
     ├─people_armenian_said_god_armenians
@@ -343,11 +343,11 @@ to view, we can see better which topics could be logically merged:
 
 ## **Merge topics**
 
-After seeing the potential hierarchy of your topic, you might want to merge specific 
-topics. For example, if topic 1 is 
-`1_space_launch_moon_nasa` and topic 2 is `2_spacecraft_solar_space_orbit` it might 
-make sense to merge those two topics as they are quite similar in meaning. In BERTopic, 
-you can use `.merge_topics` to manually select and merge those topics. Doing so will 
+After seeing the potential hierarchy of your topic, you might want to merge specific
+topics. For example, if topic 1 is
+`1_space_launch_moon_nasa` and topic 2 is `2_spacecraft_solar_space_orbit` it might
+make sense to merge those two topics as they are quite similar in meaning. In BERTopic,
+you can use `.merge_topics` to manually select and merge those topics. Doing so will
 update their topic representation which in turn updates the entire model:
 
 ```python

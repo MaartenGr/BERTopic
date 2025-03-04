@@ -1,6 +1,6 @@
-The topics that you create can be hierarchically reduced. In order to understand the potential hierarchical 
-structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how 
-they relate to one another. This might help to select an appropriate `nr_topics` when reducing the number 
+The topics that you create can be hierarchically reduced. In order to understand the potential hierarchical
+structure of the topics, we can use `scipy.cluster.hierarchy` to create clusters and visualize how
+they relate to one another. This might help to select an appropriate `nr_topics` when reducing the number
 of topics that you have created. To visualize this hierarchy, run the following:
 
 ```python
@@ -10,14 +10,14 @@ topic_model.visualize_hierarchy()
 <iframe src="hierarchy.html" style="width:1000px; height: 680px; border: 0px;""></iframe>
 
 !!! note
-    Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to 
-    auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles 
-    the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected. 
+    Do note that this is not the actual procedure of `.reduce_topics()` when `nr_topics` is set to
+    auto since HDBSCAN is used to automatically extract topics. The visualization above closely resembles
+    the actual procedure of `.reduce_topics()` when any number of `nr_topics` is selected.
 
 ### **Hierarchical labels**
 
-Although visualizing this hierarchy gives us information about the structure, it would be helpful to see what happens 
-to the topic representations when merging topics. To do so, we first need to calculate the representations of the 
+Although visualizing this hierarchy gives us information about the structure, it would be helpful to see what happens
+to the topic representations when merging topics. To do so, we first need to calculate the representations of the
 hierarchical topics:
 
 
@@ -41,14 +41,14 @@ topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
 <iframe src="hierarchical_topics.html" style="width:1000px; height: 2150px; border: 0px;""></iframe>
 
 
-If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations 
-help you understand the effect of merging certain topics. Some might be logical to merge whilst others might not. Moreover, 
-we can now see which sub-topics can be found within certain larger themes. 
+If you **hover** over the black circles, you will see the topic representation at that level of the hierarchy. These representations
+help you understand the effect of merging certain topics. Some might be logical to merge whilst others might not. Moreover,
+we can now see which sub-topics can be found within certain larger themes.
 
 ### **Text-based topic tree**
 
-Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can 
-use `topic_model.get_topic_tree` to create a text-based representation of this hierarchy. Although the general structure is more difficult 
+Although this gives a nice overview of the potential hierarchy, hovering over all black circles can be tiresome. Instead, we can
+use `topic_model.get_topic_tree` to create a text-based representation of this hierarchy. Although the general structure is more difficult
 to view, we can see better which topics could be logically merged:
 
 ```python
@@ -64,7 +64,7 @@ to view, we can see better which topics could be logically merged:
 
 <details>
   <summary>Click here to view the full tree.</summary>
-  
+
   ```bash
     .
     ├─people_armenian_said_god_armenians
@@ -321,7 +321,7 @@ to view, we can see better which topics could be logically merged:
 </details>
 
 ## **Visualize Hierarchical Documents**
-We can extend the previous method by calculating the topic representation at different levels of the hierarchy and 
+We can extend the previous method by calculating the topic representation at different levels of the hierarchy and
 plotting them on a 2D plane. To do so, we first need to calculate the hierarchical topics:
 
 ```python
@@ -339,7 +339,7 @@ embeddings = sentence_model.encode(docs, show_progress_bar=False)
 topic_model = BERTopic().fit(docs, embeddings)
 hierarchical_topics = topic_model.hierarchical_topics(docs)
 ```
-Then, we can visualize the hierarchical documents by either supplying it with our embeddings or by 
+Then, we can visualize the hierarchical documents by either supplying it with our embeddings or by
 reducing their dimensionality ourselves:
 
 ```python
@@ -354,7 +354,7 @@ topic_model.visualize_hierarchical_documents(docs, hierarchical_topics, reduced_
 <iframe src="hierarchical_documents.html" style="width:1200px; height: 800px; border: 0px;""></iframe>
 
 !!! note
-    The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the 
-    option to hover over the individual points and see the content of the documents. This makes the resulting visualization 
-    smaller and fit into your RAM. However, it might be interesting to set `hide_document_hover=False` to hover 
-    over the points and see the content of the documents. 
+    The visualization above was generated with the additional parameter `hide_document_hover=True` which disables the
+    option to hover over the individual points and see the content of the documents. This makes the resulting visualization
+    smaller and fit into your RAM. However, it might be interesting to set `hide_document_hover=False` to hover
+    over the points and see the content of the documents.

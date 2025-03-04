@@ -1,13 +1,13 @@
-Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic. 
+Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic.
 
 !!! Tip
     Another method for online topic modeling can be found with the [**.merge_models**](https://maartengr.github.io/BERTopic/getting_started/merge/merge.html) functionality of BERTopic. It allows for merging multiple BERTopic models to create a single new one. This method can be used to discover new topics by training a new model and exploring whether that new model added new topics to the original model when merging. A major benefit, compared to `.partial_fit` is that you can keep using the original UMAP and HDBSCAN models which tends result in improved performance and gives you significant more flexibility.
 
 In BERTopic, there are three main goals for using this technique.
 
-* To reduce the memory necessary for training a topic model. 
-* To continuously update the topic model as new data comes in. 
-* To continuously find new topics as new data comes in. 
+* To reduce the memory necessary for training a topic model.
+* To continuously update the topic model as new data comes in.
+* To continuously find new topics as new data comes in.
 
 In BERTopic, online topic modeling can be a bit tricky as there are several steps involved in which online learning needs to be made available. To recap, BERTopic consists of the following 6 steps:
 
@@ -18,7 +18,7 @@ In BERTopic, online topic modeling can be a bit tricky as there are several step
 5. Extract topic words
 6. (Optional) Fine-tune topic words
 
-For some steps, an online variant is more important than others. Typically, in step 1 we use pre-trained language models that are in less need of continuous updates. This means that we can use an embedding model like Sentence-Transformers for extracting the embeddings and still use it in an online setting. Similarly, steps 5 and 6 do not necessarily need online variants since they are built upon step 4, tokenization. If that tokenization is by itself incremental, then so will steps 5 and 6. 
+For some steps, an online variant is more important than others. Typically, in step 1 we use pre-trained language models that are in less need of continuous updates. This means that we can use an embedding model like Sentence-Transformers for extracting the embeddings and still use it in an online setting. Similarly, steps 5 and 6 do not necessarily need online variants since they are built upon step 4, tokenization. If that tokenization is by itself incremental, then so will steps 5 and 6.
 
 <br>
 <div class="svg_image">
@@ -34,7 +34,7 @@ Lastly, we need to develop an online variant for step 5, tokenization. In this s
 
 ## **Example**
 
-Online topic modeling in BERTopic is rather straightforward. We first need to have our documents split into chunks such that we can train and update our topic model incrementally. 
+Online topic modeling in BERTopic is rather straightforward. We first need to have our documents split into chunks such that we can train and update our topic model incrementally.
 
 ```python
 from sklearn.datasets import fetch_20newsgroups
@@ -71,16 +71,16 @@ for docs in doc_chunks:
     topic_model.partial_fit(docs)
 ```
 
-And that is it! During each iteration, you can access the predicted topics through the `.topics_` attribute. 
+And that is it! During each iteration, you can access the predicted topics through the `.topics_` attribute.
 
 !!! note
-    Do note that in BERTopic it is not possible to use `.partial_fit` after the `.fit` as they work quite differently concerning internally updating topics, frequencies, representations, etc. 
+    Do note that in BERTopic it is not possible to use `.partial_fit` after the `.fit` as they work quite differently concerning internally updating topics, frequencies, representations, etc.
 
 !!! tip Tip
     You can use any other dimensionality reduction and clustering algorithm as long as they have a `.partial_fit` function. Moreover, you can use dimensionality reduction algorithms that do not support `.partial_fit` functions but do have a `.fit` function to first train it on a large amount of data and then continuously  add documents. The dimensionality reduction will not be updated but may be trained sufficiently to properly reduce the embeddings without the need to continuously add documents.
 
 !!! warning
-    Only the most recent batch of documents is tracked. If you want to be using online topic modeling for low-memory use cases, then it is advised to also update the `.topics_` attribute. Otherwise, variations such as **hierarchical topic modeling** will not work. 
+    Only the most recent batch of documents is tracked. If you want to be using online topic modeling for low-memory use cases, then it is advised to also update the `.topics_` attribute. Otherwise, variations such as **hierarchical topic modeling** will not work.
 
     ```python
     # Incrementally fit the topic model by training on 1000 documents at a time and track the topics in each iteration
@@ -104,7 +104,7 @@ from river import cluster
 class River:
     def __init__(self, model):
         self.model = model
-        
+
     def partial_fit(self, umap_embeddings):
         for umap_embedding, _ in stream.iter_array(umap_embeddings):
             self.model.learn_one(umap_embedding)
@@ -113,7 +113,7 @@ class River:
         for umap_embedding, _ in stream.iter_array(umap_embeddings):
             label = self.model.predict_one(umap_embedding)
             labels.append(label)
-            
+
         self.labels_ = labels
         return self
 ```
@@ -128,8 +128,8 @@ ctfidf_model = ClassTfidfTransformer(reduce_frequent_words=True, bm25_weighting=
 
 # Prepare model
 topic_model = BERTopic(
-    hdbscan_model=cluster_model, 
-    vectorizer_model=vectorizer_model, 
+    hdbscan_model=cluster_model,
+    vectorizer_model=vectorizer_model,
     ctfidf_model=ctfidf_model,
 )
 

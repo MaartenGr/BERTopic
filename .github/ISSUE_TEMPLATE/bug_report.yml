@@ -33,7 +33,7 @@ body:
       value: |
         ```python
         from bertopic import BERTopic
-        
+
         ```
 
   - type: input

@@ -1,8 +1,8 @@
-An important aspect of BERTopic is the dimensionality reduction of the input embeddings. As embeddings are often high in dimensionality, clustering becomes difficult due to the curse of dimensionality. 
+An important aspect of BERTopic is the dimensionality reduction of the input embeddings. As embeddings are often high in dimensionality, clustering becomes difficult due to the curse of dimensionality.
 
-A solution is to reduce the dimensionality of the embeddings to a workable dimensional space (e.g., 5) for clustering algorithms to work with. 
-UMAP is used as a default in BERTopic since it can capture both the local and global high-dimensional space in lower dimensions. 
-However, there are other solutions out there, such as PCA that users might be interested in trying out. Since BERTopic allows assumes some independency between steps, we can 
+A solution is to reduce the dimensionality of the embeddings to a workable dimensional space (e.g., 5) for clustering algorithms to work with.
+UMAP is used as a default in BERTopic since it can capture both the local and global high-dimensional space in lower dimensions.
+However, there are other solutions out there, such as PCA that users might be interested in trying out. Since BERTopic allows assumes some independency between steps, we can
 use any other dimensionality reduction algorithm. The image below illustrates this modularity:
 
 
@@ -13,12 +13,12 @@ use any other dimensionality reduction algorithm. The image below illustrates th
 
 
 
-As a result, the `umap_model` parameter in BERTopic now allows for a variety of dimensionality reduction models. To do so, the class should have 
+As a result, the `umap_model` parameter in BERTopic now allows for a variety of dimensionality reduction models. To do so, the class should have
 the following attributes:
-  
-* `.fit(X)` 
+
+* `.fit(X)`
     * A function that can be used to fit the model
-* `.transform(X)` 
+* `.transform(X)`
     * A transform function that transforms the input to a lower dimensional size
 
 In other words, it should have the following structure:
@@ -27,16 +27,16 @@ In other words, it should have the following structure:
 class DimensionalityReduction:
     def fit(self, X):
         return self
-    
+
     def transform(self, X):
         return X
 ```
 
-In this section, we will go through several examples of dimensionality reduction techniques and how they can be implemented.  
+In this section, we will go through several examples of dimensionality reduction techniques and how they can be implemented.
 
 
 ## **UMAP**
-As a default, BERTopic uses UMAP to perform its dimensionality reduction. To use a UMAP model with custom parameters, 
+As a default, BERTopic uses UMAP to perform its dimensionality reduction. To use a UMAP model with custom parameters,
 we simply define it and pass it to BERTopic:
 
 ```python
@@ -47,7 +47,7 @@ umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine')
 topic_model = BERTopic(umap_model=umap_model)
 ```
 
-Here, we can define any parameters in UMAP to optimize for the best performance based on whatever validation metrics you are using. 
+Here, we can define any parameters in UMAP to optimize for the best performance based on whatever validation metrics you are using.
 
 ## **PCA**
 Although UMAP works quite well in BERTopic and is typically advised, you might want to be using PCA instead. It can be faster to train and perform
@@ -62,16 +62,16 @@ dim_model = PCA(n_components=5)
 topic_model = BERTopic(umap_model=dim_model)
 ```
 
-As a small note, PCA and k-Means have worked quite well in my experiments and might be interesting to use instead of PCA and HDBSCAN. 
+As a small note, PCA and k-Means have worked quite well in my experiments and might be interesting to use instead of PCA and HDBSCAN.
 
 
 !!! note
-    As you might have noticed, the `dim_model` is passed to `umap_model` which might be a bit confusing considering 
-    you are not passing a UMAP model. For now, the name of the parameter is kept the same to adhere to the current 
-    state of the API. Changing the name could lead to deprecation issues, which I want to prevent as much as possible. 
+    As you might have noticed, the `dim_model` is passed to `umap_model` which might be a bit confusing considering
+    you are not passing a UMAP model. For now, the name of the parameter is kept the same to adhere to the current
+    state of the API. Changing the name could lead to deprecation issues, which I want to prevent as much as possible.
 
 ## **Truncated SVD**
-Like PCA, there are a bunch more dimensionality reduction techniques in `sklearn` that you can be using. Here, we will demonstrate Truncated SVD 
+Like PCA, there are a bunch more dimensionality reduction techniques in `sklearn` that you can be using. Here, we will demonstrate Truncated SVD
 but any model can be used as long as it has both a `.fit()` and `.transform()` method:
 
 
@@ -85,7 +85,7 @@ topic_model = BERTopic(umap_model=dim_model)
 
 ## **cuML UMAP**
 
-Although the original UMAP implementation is an amazing technique, it may have difficulty handling large amounts of data. Instead, 
+Although the original UMAP implementation is an amazing technique, it may have difficulty handling large amounts of data. Instead,
 we can use [cuML](https://rapids.ai/start.html#rapids-release-selector) to speed up UMAP through GPU acceleration:
 
 ```python
@@ -109,7 +109,7 @@ topic_model = BERTopic(umap_model=umap_model)
 
 
 ## **Skip dimensionality reduction**
-Although BERTopic applies dimensionality reduction as a default in its pipeline, this is a step that you might want to skip. We generate an "empty" model that simply returns the data pass it to: 
+Although BERTopic applies dimensionality reduction as a default in its pipeline, this is a step that you might want to skip. We generate an "empty" model that simply returns the data pass it to:
 
 ```python
 from bertopic import BERTopic

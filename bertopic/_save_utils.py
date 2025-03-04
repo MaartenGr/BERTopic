@@ -61,10 +61,10 @@ pipeline_tag: {PIPELINE_TAG}
 
 # {MODEL_NAME}
 
-This is a [BERTopic](https://github.com/MaartenGr/BERTopic) model. 
-BERTopic is a flexible and modular topic modeling framework that allows for the generation of easily interpretable topics from large datasets. 
+This is a [BERTopic](https://github.com/MaartenGr/BERTopic) model.
+BERTopic is a flexible and modular topic modeling framework that allows for the generation of easily interpretable topics from large datasets.
 
-## Usage 
+## Usage
 
 To use this model, please install BERTopic:
 
@@ -88,9 +88,9 @@ topic_model.get_topic_info()
 
 <details>
   <summary>Click here for an overview of all topics.</summary>
-  
+
   {TOPICS}
-  
+
 </details>
 
 ## Training hyperparameters

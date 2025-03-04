@@ -1,5 +1,5 @@
-After having created a BERTopic model, you might end up with over a hundred topics. Searching through those 
-can be quite cumbersome especially if you are searching for a specific topic. Fortunately, BERTopic allows you 
+After having created a BERTopic model, you might end up with over a hundred topics. Searching through those
+can be quite cumbersome especially if you are searching for a specific topic. Fortunately, BERTopic allows you
 to search for topics using search terms. First, let's create and train a BERTopic model:
 
 
@@ -13,9 +13,9 @@ topic_model = BERTopic()
 topics, probs = topic_model.fit_transform(docs)
 ```
 
-After having trained our model, we can use `find_topics` to search for topics that are similar 
-to an input search_term. Here, we are going to be searching for topics that closely relate the 
-search term "motor". Then, we extract the most similar topic and check the results: 
+After having trained our model, we can use `find_topics` to search for topics that are similar
+to an input search_term. Here, we are going to be searching for topics that closely relate the
+search term "motor". Then, we extract the most similar topic and check the results:
 
 ```python
 >>> similar_topics, similarity = topic_model.find_topics("motor", top_n=5)
@@ -32,9 +32,9 @@ search term "motor". Then, we extract the most similar topic and check the resul
  ('advice', 0.005534544418830091)]
 ```
 
-It definitely seems that a topic was found that closely matches "motor". The topic seems to be motorcycle 
-related and therefore matches our "motor" input. You can use the `similarity` variable to see how similar 
-the extracted topics are to the search term. 
- 
+It definitely seems that a topic was found that closely matches "motor". The topic seems to be motorcycle
+related and therefore matches our "motor" input. You can use the `similarity` variable to see how similar
+the extracted topics are to the search term.
+
 !!! note
-    You can only use this method if an embedding model was supplied to BERTopic using `embedding_model`. 
+    You can only use this method if an embedding model was supplied to BERTopic using `embedding_model`.

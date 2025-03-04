@@ -29,13 +29,13 @@ aspect_model2 = [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance(diver
 representation_model = {
    "Main": main_representation,
    "Aspect1":  aspect_model1,
-   "Aspect2":  aspect_model2 
+   "Aspect2":  aspect_model2
 }
 topic_model = BERTopic(representation_model=representation_model).fit(docs)
 ```
 
-As show above, to perform multi-aspect topic modeling, we make sure that `representation_model` is a dictionary where each representation model pipeline is defined. 
-The main pipeline, that is used in most visualization options, is defined with the `"Main"` key. All other aspects can be defined however you want. In the example above, the two additional aspects that we are interested in are defined as `"Aspect1"` and `"Aspect2"`. 
+As show above, to perform multi-aspect topic modeling, we make sure that `representation_model` is a dictionary where each representation model pipeline is defined.
+The main pipeline, that is used in most visualization options, is defined with the `"Main"` key. All other aspects can be defined however you want. In the example above, the two additional aspects that we are interested in are defined as `"Aspect1"` and `"Aspect2"`.
 
 After we have fitted our model, we can access all representations with `topic_model.get_topic_info()`:
 
@@ -43,4 +43,4 @@ After we have fitted our model, we can access all representations with `topic_mo
 <img src="table.PNG">
 <br><br>
 
-As you can see, there are a number of different representations for our topics that we can inspect. All aspects are found in `topic_model.topic_aspects_`. 
+As you can see, there are a number of different representations for our topics that we can inspect. All aspects are found in `topic_model.topic_aspects_`.
