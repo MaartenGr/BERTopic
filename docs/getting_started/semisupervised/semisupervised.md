@@ -1,6 +1,6 @@
-In BERTopic, you have several options to nudge the creation of topics toward certain pre-specified topics. Here, we will be looking at semi-supervised topic modeling with BERTopic. 
+In BERTopic, you have several options to nudge the creation of topics toward certain pre-specified topics. Here, we will be looking at semi-supervised topic modeling with BERTopic.
 
-Semi-supervised modeling allows us to steer the dimensionality reduction of the embeddings into a space that closely follows any labels you might already have. 
+Semi-supervised modeling allows us to steer the dimensionality reduction of the embeddings into a space that closely follows any labels you might already have.
 
 <br>
 <div class="svg_image">
@@ -8,8 +8,8 @@ Semi-supervised modeling allows us to steer the dimensionality reduction of the 
 </div>
 <br>
 
-In other words, we use a semi-supervised UMAP instance to reduce the dimensionality of embeddings before clustering the documents 
-with HDBSCAN. 
+In other words, we use a semi-supervised UMAP instance to reduce the dimensionality of embeddings before clustering the documents
+with HDBSCAN.
 
 First, let us prepare the data needed for our topic model:
 
@@ -23,8 +23,8 @@ categories = data["target"]
 category_names = data["target_names"]
 ```
 
-We are using the popular 20 Newsgroups dataset which contains roughly 18000 newsgroups posts that each is 
-assigned to one of 20 categories. Using this dataset we can try to extract its corresponding topic model whilst 
+We are using the popular 20 Newsgroups dataset which contains roughly 18000 newsgroups posts that each is
+assigned to one of 20 categories. Using this dataset we can try to extract its corresponding topic model whilst
 taking its underlying categories into account. These categories are here the variable `targets`.
 
 Each document can be put into one of the following categories:
@@ -51,11 +51,11 @@ Each document can be put into one of the following categories:
  'talk.politics.guns',
  'talk.politics.mideast',
  'talk.politics.misc',
- 'talk.religion.misc'] 
+ 'talk.religion.misc']
 ```
 
-To perform this semi-supervised approach, we can take in some pre-defined topics and simply pass those to the `y` parameter when fitting BERTopic. These labels can be pre-defined topics or simply documents that you feel belong together regardless of their content. BERTopic will nudge the creation of topics toward these categories 
-using the pre-defined labels. 
+To perform this semi-supervised approach, we can take in some pre-defined topics and simply pass those to the `y` parameter when fitting BERTopic. These labels can be pre-defined topics or simply documents that you feel belong together regardless of their content. BERTopic will nudge the creation of topics toward these categories
+using the pre-defined labels.
 
 To perform supervised topic modeling, we simply use all categories:
 
@@ -75,9 +75,9 @@ labels_to_add = ['comp.graphics', 'comp.os.ms-windows.misc',
               'comp.windows.x',]
 indices = [category_names.index(label) for label in labels_to_add]
 y = [label if label in indices else -1 for label in categories]
-``` 
+```
 
-The `y` variable contains many -1 values since we do not know all the categories. 
+The `y` variable contains many -1 values since we do not know all the categories.
 
 Next, we use those newly constructed labels to again BERTopic semi-supervised:
 
@@ -85,4 +85,4 @@ Next, we use those newly constructed labels to again BERTopic semi-supervised:
 topic_model = BERTopic(verbose=True).fit(docs, y=y)
 ```
 
-And that is it! By defining certain classes for our documents, we can steer the topic modeling towards modeling the pre-defined categories. 
+And that is it! By defining certain classes for our documents, we can steer the topic modeling towards modeling the pre-defined categories.

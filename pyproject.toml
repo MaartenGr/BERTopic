@@ -101,7 +101,7 @@ exclude = ["tests"]
 line-length = 120
 
 [tool.ruff.lint]
-select = [  
+select = [
   "E4",  # Ruff Defaults
   "E7",
   "E9",

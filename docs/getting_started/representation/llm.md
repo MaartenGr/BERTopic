@@ -1,14 +1,14 @@
-As we have seen in the [previous section](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html), the topics that you get from BERTopic can be fine-tuned using a number of approaches. Here, we are going to focus on text generation Large Language Models such as ChatGPT, GPT-4, and open-source solutions. 
+As we have seen in the [previous section](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html), the topics that you get from BERTopic can be fine-tuned using a number of approaches. Here, we are going to focus on text generation Large Language Models such as ChatGPT, GPT-4, and open-source solutions.
 
-Using these techniques, we can further fine-tune topics to generate labels, summaries, poems of topics, and more. To do so, we first generate a set of keywords and documents that describe a topic best using BERTopic's c-TF-IDF calculate. Then, these candidate keywords and documents are passed to the text generation model and asked to generate output that fits the topic best. 
+Using these techniques, we can further fine-tune topics to generate labels, summaries, poems of topics, and more. To do so, we first generate a set of keywords and documents that describe a topic best using BERTopic's c-TF-IDF calculate. Then, these candidate keywords and documents are passed to the text generation model and asked to generate output that fits the topic best.
 
 A huge benefit of this is that we can describe a topic with only a few documents and we therefore do not need to pass all documents to the text generation model. Not only speeds this the generation of topic labels up significantly, you also do not need a massive amount of credits when using an external API, such as Cohere or OpenAI.
 
 
 ## **Prompt Engineering**
 
-In most of the examples below, we use certain tags to customize our prompts. There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`. 
-These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
+In most of the examples below, we use certain tags to customize our prompts. There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`.
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively.
 For example, if we have the following prompt:
 
 ```python
@@ -24,13 +24,13 @@ then that will be rendered as follows:
 
 ```python
 """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 - Our videos are also made possible by your support on patreon.co.
 - If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.
 - If you want to help us make more videos, you can do so there.
 - And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.
 
-The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch 
+The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch
 
 Based on the above information, can you give a short label of the topic?
 """
@@ -41,7 +41,7 @@ Based on the above information, can you give a short label of the topic?
 
 ### **Selecting Documents**
 
-By default, four of the most representative documents will be passed to `[DOCUMENTS]`. These documents are selected by calculating their similarity (through c-TF-IDF representations) with the main c-TF-IDF representation of the topics. The four best matching documents per topic are selected. 
+By default, four of the most representative documents will be passed to `[DOCUMENTS]`. These documents are selected by calculating their similarity (through c-TF-IDF representations) with the main c-TF-IDF representation of the topics. The four best matching documents per topic are selected.
 
 To increase the number of documents passed to `[DOCUMENTS]`, we can use the `nr_docs` parameter which is accessible in all LLMs on this page. Using this value allows you to select the top *n* most representative documents instead. If you have a long enough context length, then you could even give the LLM dozens of documents.
 
@@ -54,7 +54,7 @@ We can truncate the input documents in `[DOCUMENTS]` in order to reduce the numb
 * `doc_length`
     * The maximum length of each document. If a document is longer, it will be truncated. If None, the entire document is passed.
 * `tokenizer`
-    * The tokenizer used to calculate to split the document into segments used to count the length of a document. 
+    * The tokenizer used to calculate to split the document into segments used to count the length of a document.
         * If tokenizer is  `'char'`, then the document is split up into characters which are counted to adhere to `doc_length`
         * If tokenizer is `'whitespace'`, the document is split up into words separated by whitespaces. These words are counted       and truncated depending on `doc_length`
         * If tokenizer is `'vectorizer'`, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and truncated depending on `doc_length`
@@ -85,8 +85,8 @@ tokenizer= tiktoken.encoding_for_model("gpt-3.5-turbo")
 client = openai.OpenAI(api_key="sk-...")
 representation_model = OpenAI(
     client,
-    model="gpt-3.5-turbo", 
-    delay_in_seconds=2, 
+    model="gpt-3.5-turbo",
+    delay_in_seconds=2,
     chat=True,
     nr_docs=4,
     doc_length=100,
@@ -99,9 +99,9 @@ topic_model = BERTopic(representation_model=representation_model)
 
 ## **🤗 Transformers**
 
-Nearly every week, there are new and improved models released on the 🤗 [Model Hub](https://huggingface.co/models) that, with some creativity, allow for 
-further fine-tuning of our c-TF-IDF based topics. These models range from text generation to zero-classification. In BERTopic, wrappers around these 
-methods are created as a way to support whatever might be released in the future. 
+Nearly every week, there are new and improved models released on the 🤗 [Model Hub](https://huggingface.co/models) that, with some creativity, allow for
+further fine-tuning of our c-TF-IDF based topics. These models range from text generation to zero-classification. In BERTopic, wrappers around these
+methods are created as a way to support whatever might be released in the future.
 
 Using a GPT-like model from the huggingface hub is rather straightforward:
 
@@ -116,7 +116,7 @@ representation_model = TextGeneration('gpt2')
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-GPT2, however, is not the most accurate model out there on HuggingFace models. You can get 
+GPT2, however, is not the most accurate model out there on HuggingFace models. You can get
 much better results with a `flan-T5` like model:
 
 ```python
@@ -136,7 +136,7 @@ representation_model = TextGeneration(generator)
 </div>
 <br>
 
-As can be seen from the example above, if you would like to use a `text2text-generation` model, you will to 
+As can be seen from the example above, if you would like to use a `text2text-generation` model, you will to
 pass a `transformers.pipeline` with the `"text2text-generation"` parameter. Moreover, you can use a custom prompt and decide where the keywords should
 be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag.
 
@@ -210,7 +210,7 @@ topic_model = BERTopic(representation_model=representation_model, verbose=True)
 
 Full Llama Tutorial: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QCERSMUjqGetGGujdrvv_6_EeoIcd_9M?usp=sharing)
 
-Open-source LLMs are starting to become more and more popular. Here, we will go through a minimal example of using [Llama 2](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) together with BERTopic. 
+Open-source LLMs are starting to become more and more popular. Here, we will go through a minimal example of using [Llama 2](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) together with BERTopic.
 
 !!! Note
     Although this is an example of the older Llama 2 model, you can use the code below for any Llama variant.
@@ -293,8 +293,8 @@ Based on the information about the topic above, please create a short label of t
 prompt = system_prompt + example_prompt + main_prompt
 ```
 
-Three pieces of the prompt were created:  
-  
+Three pieces of the prompt were created:
+
 * `system_prompt` helps us guide the model during a conversation. For example, we can say that it is a helpful assistant that is specialized in labeling topics.
 * `example_prompt` gives an example of a correctly labeled topic to guide Llama
 * `main_prompt` contains the main question we are going to ask it, namely to label a topic. Note that it uses the `[DOCUMENTS]`  and `[KEYWORDS]` to provide the most relevant documents and keywords as additional context
@@ -367,24 +367,24 @@ topic_model = BERTopic(representation_model=representation_model,  verbose=True)
 ```
 
 !!! Note
-    The default template that is being used uses a "Q: ... A: ... " type of structure which is why the `stop` is set at `"Q:"`. 
+    The default template that is being used uses a "Q: ... A: ... " type of structure which is why the `stop` is set at `"Q:"`.
     The default template is:
     ```python
     """
-    Q: I have a topic that contains the following documents: 
+    Q: I have a topic that contains the following documents:
     [DOCUMENTS]
 
     The topic is described by the following keywords: '[KEYWORDS]'.
 
     Based on the above information, can you give a short label of the topic?
-    A: 
+    A:
     """
     ```
 
 
 ## **OpenAI**
 
-Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
+Instead of using a language model from 🤗 transformers, we can use external APIs instead that
 do the work for you. Here, we can use [OpenAI](https://openai.com/api/) to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install openai first:
 
@@ -432,7 +432,7 @@ Prompting with their models is very satisfying and is customizable as follows:
 
 ```python
 prompt = """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 [DOCUMENTS]
 The topic is described by the following keywords: [KEYWORDS]
 
@@ -441,19 +441,19 @@ topic: <topic label>
 """
 ```
 
-!!! note 
-    Whenever you create a custom prompt, it is important to add 
+!!! note
+    Whenever you create a custom prompt, it is important to add
     ```
     Based on the information above, extract a short topic label in the following format:
     topic: <topic label>
     ```
-    at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having 
-    said that, if `topic: ` is not in the output, then it will simply extract the entire response, so 
-    feel free to experiment with the prompts. 
+    at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having
+    said that, if `topic: ` is not in the output, then it will simply extract the entire response, so
+    feel free to experiment with the prompts.
 
 ### **Summarization**
 
-Due to the structure of the prompts in OpenAI's chat models, we can extract different types of topic representations from their GPT models. 
+Due to the structure of the prompts in OpenAI's chat models, we can extract different types of topic representations from their GPT models.
 Instead of extracting a topic label, we can instead ask it to extract a short description of the topic instead:
 
 ```python
@@ -474,7 +474,7 @@ If you want to have multiple representations of a single topic, it might be wort
 
 ## **Ollama**
 
-To use [Ollama](https://github.com/ollama/ollama) within BERTopic, it is advised to use the `openai` package as it allows to pass through a model using the url on which the model is running. 
+To use [Ollama](https://github.com/ollama/ollama) within BERTopic, it is advised to use the `openai` package as it allows to pass through a model using the url on which the model is running.
 
 You will first need to install `openai`:
 
@@ -535,8 +535,8 @@ topic_model = BERTopic(representation_model=representation_model,  verbose=True)
 ## **LangChain**
 
 [Langchain](https://github.com/hwchase17/langchain) is a package that helps users with chaining large language models.
-In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this 
-external knowledge are the most representative documents in each topic. 
+In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this
+external knowledge are the most representative documents in each topic.
 
 To use langchain, you will need to install the langchain package first. Additionally, you will need an underlying LLM to support langchain,
 like openai:
@@ -573,12 +573,12 @@ representation_model = LangChain(chain, prompt=prompt)
 ```
 
 !!! note Note
-    The prompt does not make use of `[KEYWORDS]` and `[DOCUMENTS]` tags as 
-    the documents are already used within langchain's `load_qa_chain`. 
+    The prompt does not make use of `[KEYWORDS]` and `[DOCUMENTS]` tags as
+    the documents are already used within langchain's `load_qa_chain`.
 
 ## **Cohere**
 
-Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
+Instead of using a language model from 🤗 transformers, we can use external APIs instead that
 do the work for you. Here, we can use [Cohere](https://docs.cohere.ai/) to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install cohere first:
 
