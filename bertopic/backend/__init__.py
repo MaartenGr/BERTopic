@@ -33,10 +33,10 @@ except ModuleNotFoundError:
 
 # Langchain Embedddings
 try:
-    from bertopic.backend._langchain import LangchainBackend
+    from bertopic.backend._langchain import LangChainBackend
 except ModuleNotFoundError:
     msg = "`pip install langchain` \n\n"
-    Model2VecBackend = NotInstalled("Langchain", "Langchain", custom_msg=msg)
+    LangChainBackend = NotInstalled("LangChain", "LangChain", custom_msg=msg)
 
 
 __all__ = [
@@ -47,4 +47,5 @@ __all__ = [
     "Model2VecBackend",
     "MultiModalBackend",
     "languages",
+    "LangChainBackend",
 ]
