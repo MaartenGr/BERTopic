@@ -38,6 +38,15 @@ except ModuleNotFoundError:
     msg = "`pip install fastembed` \n\n"
     FastEmbedBackend = NotInstalled("FastEmbed", "FastEmbed", custom_msg=msg)
 
+
+# Langchain Embedddings
+try:
+    from bertopic.backend._langchain import LangChainBackend
+except ModuleNotFoundError:
+    msg = "`pip install langchain` \n\n"
+    LangChainBackend = NotInstalled("LangChain", "LangChain", custom_msg=msg)
+
+
 __all__ = [
     "BaseEmbedder",
     "WordDocEmbedder",
@@ -46,5 +55,6 @@ __all__ = [
     "Model2VecBackend",
     "MultiModalBackend",
     "FastEmbedBackend",
+    "LangChainBackend",
     "languages",
 ]
