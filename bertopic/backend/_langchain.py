@@ -5,20 +5,20 @@ from bertopic.backend import BaseEmbedder
 from langchain_core.embeddings import Embeddings
 
 
-class LangchainBackend(BaseEmbedder):
-    """Langchain Embedding Model.
+class LangChainBackend(BaseEmbedder):
+    """LangChain Embedding Model.
 
-    This class uses the Langchain Embedding class to embed the documents.
+    This class uses the LangChain Embedding class to embed the documents.
     Argument:
-        embedding_model: A Langchain Embedding Instance.
+        embedding_model: A LangChain Embedding Instance.
 
     Examples:
     ```python
     from langchain_community.embeddings import HuggingFaceInstructEmbeddings
-    from bertopic.backend import LangchainBackend
+    from bertopic.backend import LangChainBackend
 
     hf_embedding = HuggingFaceInstructEmbeddings()
-    langchain_embedder = LangchainBackend(hf_embedding)
+    langchain_embedder = LangChainBackend(hf_embedding)
     """
 
     def __init__(self, embedding_model: Embeddings):
