@@ -19,6 +19,7 @@ class LangChainBackend(BaseEmbedder):
 
     hf_embedding = HuggingFaceInstructEmbeddings()
     langchain_embedder = LangChainBackend(hf_embedding)
+    ```
     """
 
     def __init__(self, embedding_model: Embeddings):
