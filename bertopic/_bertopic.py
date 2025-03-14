@@ -4856,7 +4856,6 @@ def _create_model_from_files(
         ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
 
     params["n_gram_range"] = tuple(params["n_gram_range"])
-    ctfidf_config
 
     # Select HF model through SentenceTransformers
     try:
@@ -4888,10 +4887,7 @@ def _create_model_from_files(
         **params,
     )
     # converting torch.Tensors to numpy without referencing torch
-    if isinstance(tensors["topic_embeddings"], np.ndarray):
-        topic_model.topic_embeddings_ = tensors["topic_embeddings"]
-    else:
-        topic_model.topic_embeddings_ = tensors["topic_embeddings"].numpy()
+    topic_model.topic_embeddings_ = tensors["topic_embeddings"]
     topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
     topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}

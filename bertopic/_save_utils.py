@@ -185,6 +185,7 @@ def load_local_files(path):
         torch_path = path / HF_WEIGHTS_NAME
         if torch_path.is_file():
             tensors = torch.load(torch_path, map_location="cpu")
+            tensors = {k: v.numpy() for k, v in tensors.items()}
 
     # c-TF-IDF
     try:
@@ -196,6 +197,7 @@ def load_local_files(path):
             torch_path = path / CTFIDF_WEIGHTS_NAME
             if torch_path.is_file():
                 ctfidf_tensors = torch.load(torch_path, map_location="cpu")
+                ctfidf_tensors = {k: v.numpy() for k, v in ctfidf_tensors.items()}
         ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
