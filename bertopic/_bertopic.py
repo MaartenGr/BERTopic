@@ -4886,7 +4886,6 @@ def _create_model_from_files(
         hdbscan_model=empty_cluster_model,
         **params,
     )
-    # converting torch.Tensors to numpy without referencing torch
     topic_model.topic_embeddings_ = tensors["topic_embeddings"]
     topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
