@@ -328,11 +328,11 @@ def save_hf(model, save_directory, serialization: str):
 
 def save_ctfidf(model, save_directory: str, serialization: str):
     """Save c-TF-IDF sparse matrix."""
-    indptr = torch.from_numpy(model.c_tf_idf_.indptr)
-    indices = torch.from_numpy(model.c_tf_idf_.indices)
-    data = torch.from_numpy(model.c_tf_idf_.data)
-    shape = torch.from_numpy(np.array(model.c_tf_idf_.shape))
-    diag = torch.from_numpy(np.array(model.ctfidf_model._idf_diag.data))
+    indptr = model.c_tf_idf_.indptr
+    indices = model.c_tf_idf_.indices
+    data = model.c_tf_idf_.data
+    shape = np.array(model.c_tf_idf_.shape)
+    diag = np.array(model.ctfidf_model._idf_diag.data)
 
     if serialization == "safetensors":
         tensors = {
