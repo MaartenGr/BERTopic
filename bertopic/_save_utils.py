@@ -184,7 +184,7 @@ def load_local_files(path):
     else:
         torch_path = path / HF_WEIGHTS_NAME
         if torch_path.is_file():
-            tensors = torch.load(torch_path, map_location="cpu").numpy()
+            tensors = torch.load(torch_path, map_location="cpu")
 
     # c-TF-IDF
     try:
@@ -195,7 +195,7 @@ def load_local_files(path):
         else:
             torch_path = path / CTFIDF_WEIGHTS_NAME
             if torch_path.is_file():
-                ctfidf_tensors = torch.load(torch_path, map_location="cpu").numpy()
+                ctfidf_tensors = torch.load(torch_path, map_location="cpu")
         ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
@@ -233,7 +233,7 @@ def load_files_from_hf(path):
         tensors = load_safetensors(tensors)
     except:  # noqa: E722
         tensors = hf_hub_download(path, HF_WEIGHTS_NAME, revision=None)
-        tensors = torch.load(tensors, map_location="cpu").numpy()
+        tensors = torch.load(tensors, map_location="cpu")
 
     # c-TF-IDF
     try:
@@ -243,7 +243,7 @@ def load_files_from_hf(path):
             ctfidf_tensors = load_safetensors(ctfidf_tensors)
         except:  # noqa: E722
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
-            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu").numpy()
+            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu")
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
@@ -315,13 +315,14 @@ def generate_readme(model, repo_id: str):
 
 def save_hf(model, save_directory, serialization: str):
     """Save topic embeddings, either safely (using safetensors) or using legacy pytorch."""
-    tensors = torch.from_numpy(np.array(model.topic_embeddings_, dtype=np.float32))
-    tensors = {"topic_embeddings": tensors}
+    tensors = np.array(model.topic_embeddings_, dtype=np.float32)
 
     if serialization == "safetensors":
+        tensors = {"topic_embeddings": tensors}
         save_safetensors(save_directory / HF_SAFE_WEIGHTS_NAME, tensors)
     if serialization == "pytorch":
         assert _has_torch, "`pip install pytorch` to save as bin"
+        tensors = {"topic_embeddings": torch.from_numpy(tensors)}
         torch.save(tensors, save_directory / HF_WEIGHTS_NAME)
 
 
@@ -332,18 +333,25 @@ def save_ctfidf(model, save_directory: str, serialization: str):
     data = torch.from_numpy(model.c_tf_idf_.data)
     shape = torch.from_numpy(np.array(model.c_tf_idf_.shape))
     diag = torch.from_numpy(np.array(model.ctfidf_model._idf_diag.data))
-    tensors = {
-        "indptr": indptr,
-        "indices": indices,
-        "data": data,
-        "shape": shape,
-        "diag": diag,
-    }
 
     if serialization == "safetensors":
+        tensors = {
+            "indptr": indptr,
+            "indices": indices,
+            "data": data,
+            "shape": shape,
+            "diag": diag,
+        }
         save_safetensors(save_directory / CTFIDF_SAFE_WEIGHTS_NAME, tensors)
     if serialization == "pytorch":
         assert _has_torch, "`pip install pytorch` to save as .bin"
+        tensors = {
+            "indptr": torch.from_numpy(indptr),
+            "indices": torch.from_numpy(indices),
+            "data": torch.from_numpy(data),
+            "shape": torch.from_numpy(shape),
+            "diag": torch.from_numpy(diag),
+        }
         torch.save(tensors, save_directory / CTFIDF_WEIGHTS_NAME)
 
 
@@ -521,9 +529,8 @@ def load_safetensors(path):
 def save_safetensors(path, tensors):
     """Save safetensors and check whether it is installed."""
     try:
-        import safetensors.torch
-        import safetensors
+        import safetensors.numpy
 
-        safetensors.torch.save_file(tensors, path)
+        safetensors.numpy.save_file(tensors, path)
     except ImportError:
         raise ValueError("`pip install safetensors` to save as .safetensors")

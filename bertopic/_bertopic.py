@@ -4887,7 +4887,9 @@ def _create_model_from_files(
         hdbscan_model=empty_cluster_model,
         **params,
     )
-    topic_model.topic_embeddings_ = tensors["topic_embeddings"]
+    # converting torch.Tensors to numpy without referencing torch
+    topic_model.topic_embeddings_ = tensors["topic_embeddings"] \
+        if isinstance(tensors["topic_embeddings"], np.ndarray) else tensors["topic_embeddings"].numpy()
     topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
     topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
