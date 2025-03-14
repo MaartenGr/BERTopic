@@ -4849,7 +4849,6 @@ def _create_model_from_files(
         images: The images per topic
         warn_no_backend: Whether to warn the user if no backend is given
     """
-
     params["n_gram_range"] = tuple(params["n_gram_range"])
 
     if ctfidf_config is not None:
@@ -4862,6 +4861,7 @@ def _create_model_from_files(
     # Select HF model through SentenceTransformers
     try:
         from sentence_transformers import SentenceTransformer
+
         embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
     except:  # noqa: E722
         embedding_model = BaseEmbedder()
@@ -4888,8 +4888,10 @@ def _create_model_from_files(
         **params,
     )
     # converting torch.Tensors to numpy without referencing torch
-    topic_model.topic_embeddings_ = tensors["topic_embeddings"] \
-        if isinstance(tensors["topic_embeddings"], np.ndarray) else tensors["topic_embeddings"].numpy()
+    if isinstance(tensors["topic_embeddings"], np.ndarray):
+        topic_model.topic_embeddings_ = tensors["topic_embeddings"]
+    else:
+        topic_model.topic_embeddings_ = tensors["topic_embeddings"].numpy()
     topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
     topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
