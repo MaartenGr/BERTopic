@@ -90,9 +90,6 @@ vision = [
     "Pillow>=9.2.0",
 ]
 
-langchain = [
-   "langchain>=0.3.0"
-]
 
 [project.urls]
 Documentation = "https://maartengr.github.io/BERTopic/"
