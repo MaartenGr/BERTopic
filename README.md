@@ -48,11 +48,6 @@ Corresponding medium posts can be found [here](https://medium.com/data-science/t
 ) and [here](https://medium.com/data-science/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4
 ). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
-
-
-
-
-
 ## Installation
 
 Installation, with sentence-transformers, can be done using [pypi](https://pypi.org/project/bertopic/):
