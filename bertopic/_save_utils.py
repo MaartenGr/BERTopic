@@ -184,7 +184,7 @@ def load_local_files(path):
     else:
         torch_path = path / HF_WEIGHTS_NAME
         if torch_path.is_file():
-            tensors = torch.load(torch_path, map_location="cpu")
+            tensors = torch.load(torch_path, map_location="cpu").numpy()
 
     # c-TF-IDF
     try:
@@ -195,7 +195,7 @@ def load_local_files(path):
         else:
             torch_path = path / CTFIDF_WEIGHTS_NAME
             if torch_path.is_file():
-                ctfidf_tensors = torch.load(torch_path, map_location="cpu")
+                ctfidf_tensors = torch.load(torch_path, map_location="cpu").numpy()
         ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
@@ -233,7 +233,7 @@ def load_files_from_hf(path):
         tensors = load_safetensors(tensors)
     except:  # noqa: E722
         tensors = hf_hub_download(path, HF_WEIGHTS_NAME, revision=None)
-        tensors = torch.load(tensors, map_location="cpu")
+        tensors = torch.load(tensors, map_location="cpu").numpy()
 
     # c-TF-IDF
     try:
@@ -243,7 +243,7 @@ def load_files_from_hf(path):
             ctfidf_tensors = load_safetensors(ctfidf_tensors)
         except:  # noqa: E722
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
-            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu")
+            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu").numpy()
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
@@ -511,10 +511,9 @@ def get_package_versions():
 def load_safetensors(path):
     """Load safetensors and check whether it is installed."""
     try:
-        import safetensors.torch
-        import safetensors
+        import safetensors.numpy
 
-        return safetensors.torch.load_file(path, device="cpu")
+        return safetensors.numpy.load_file(path)
     except ImportError:
         raise ValueError("`pip install safetensors` to load .safetensors")
 
