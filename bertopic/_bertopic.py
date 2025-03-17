@@ -4849,8 +4849,6 @@ def _create_model_from_files(
         images: The images per topic
         warn_no_backend: Whether to warn the user if no backend is given
     """
-    from sentence_transformers import SentenceTransformer
-
     params["n_gram_range"] = tuple(params["n_gram_range"])
 
     if ctfidf_config is not None:
@@ -4858,10 +4856,11 @@ def _create_model_from_files(
         ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
 
     params["n_gram_range"] = tuple(params["n_gram_range"])
-    ctfidf_config
 
     # Select HF model through SentenceTransformers
     try:
+        from sentence_transformers import SentenceTransformer
+
         embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
     except:  # noqa: E722
         embedding_model = BaseEmbedder()
@@ -4887,7 +4886,7 @@ def _create_model_from_files(
         hdbscan_model=empty_cluster_model,
         **params,
     )
-    topic_model.topic_embeddings_ = tensors["topic_embeddings"].numpy()
+    topic_model.topic_embeddings_ = tensors["topic_embeddings"]
     topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
     topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
@@ -4924,7 +4923,7 @@ def _create_model_from_files(
         # ClassTfidfTransformer
         topic_model.ctfidf_model.reduce_frequent_words = ctfidf_config["ctfidf_model"]["reduce_frequent_words"]
         topic_model.ctfidf_model.bm25_weighting = ctfidf_config["ctfidf_model"]["bm25_weighting"]
-        idf = ctfidf_tensors["diag"].numpy()
+        idf = ctfidf_tensors["diag"]
         topic_model.ctfidf_model._idf_diag = sp.diags(
             idf, offsets=0, shape=(len(idf), len(idf)), format="csr", dtype=np.float64
         )
