@@ -6,6 +6,29 @@ hide:
 # Changelog
 
 
+## **Version 0.17.0**
+*Release date: 19 March, 2025*
+
+<h3><b>Highlights:</a></b></h3>
+* Light-weight installation without UMAP and HDBSCAN by [@MaartenGr](https://github.com/MaartenGr) in [#2289](https://github.com/MaartenGr/BERTopic/pull/2289)
+* Add Model2Vec as an embedding backend by [@MaartenGr](https://github.com/MaartenGr) in [#2245](https://github.com/MaartenGr/BERTopic/pull/2245)
+* Add LiteLLM as a representation model by [@MaartenGr](https://github.com/MaartenGr) in [#2213](https://github.com/MaartenGr/BERTopic/pull/2213)
+* Interactive DataMapPlot and deprecate non-chat OpenAI models by [@MaartenGr](https://github.com/MaartenGr) in [#2287](https://github.com/MaartenGr/BERTopic/pull/2287)
+
+<h3><b>Fixes:</a></b></h3>
+
+* Lightweight installation: use safetensors without torch by [@hedgeho](https://github.com/hedgeho) in [#2306](https://github.com/MaartenGr/BERTopic/pull/2306)
+* Fix missing links by [@MaartenGr](https://github.com/MaartenGr) in [#2305](https://github.com/MaartenGr/BERTopic/pull/2305)
+* Set up pre-commit hooks by [@afuetterer](https://github.com/afuetterer) in [#2283](https://github.com/MaartenGr/BERTopic/pull/2283)
+* Fix handling OpenAI returning None objects by [@jeaninejuliettes](https://github.com/jeaninejuliettes) in [#2280](https://github.com/MaartenGr/BERTopic/pull/2280)
+* Add support for python 3.13 by [@afuetterer](https://github.com/afuetterer) in [#2173](https://github.com/MaartenGr/BERTopic/pull/2173)
+* Added system prompts by [@Leo-LiHao](https://github.com/Leo-LiHao) in [#2145](https://github.com/MaartenGr/BERTopic/pull/2145)
+* More documentation for topic reduction by [@MaartenGr](https://github.com/MaartenGr) in [#2260](https://github.com/MaartenGr/BERTopic/pull/2260)
+* Drop support for python 3.8 by [@afuetterer](https://github.com/afuetterer) in [#2243](https://github.com/MaartenGr/BERTopic/pull/2243)
+* Fixed online topic modeling on GPU by [@SSivakumar12](https://github.com/SSivakumar12) in [#2181](https://github.com/MaartenGr/BERTopic/pull/2181)
+* Fixed hierarchical cluster visualization by [@PipaFlores](https://github.com/PipaFlores) in [#2191](https://github.com/MaartenGr/BERTopic/pull/2191)
+* Remove duplicated phrase by [@AndreaFrancis](https://github.com/AndreaFrancis) in [#2197](https://github.com/MaartenGr/BERTopic/pull/2197)
+
 ## **Version 0.16.4**
 *Release date: 9 October, 2024*
 
