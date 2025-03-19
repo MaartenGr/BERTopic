@@ -6,8 +6,8 @@ hide:
 # Changelog
 
 
-## **Version 0.17.0  **
-*Release date: 19 March, 2025
+## **Version 0.17.0**
+*Release date: 19 March, 2025*
 
 <h3><b>Highlights:</a></b></h3>
 * Light-weight installation without UMAP and HDBSCAN by [@MaartenGr](https://github.com/MaartenGr) in [#2289](https://github.com/MaartenGr/BERTopic/pull/2289)
