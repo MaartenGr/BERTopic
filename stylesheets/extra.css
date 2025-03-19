@@ -1,14 +1,14 @@
 :root {
     --md-primary-fg-color:        #234E70;
-    
+
   }
 
 :root>* {
 --md-typeset-a-color: #016198;
---md-text-link-color: #000000; 
+--md-text-link-color: #000000;
 }
 
-body[data-md-color-primary="black"] .svg_image  svg  {  
+body[data-md-color-primary="black"] .svg_image  svg  {
   filter: invert(100%) hue-rotate(180deg);
 }
 
