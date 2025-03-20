@@ -51,5 +51,5 @@ class FastEmbedBackend(BaseEmbedder):
             Document/words embeddings with shape (n, m) with `n` documents/words
             that each have an embeddings size of `m`
         """
-        embeddings = list(self.embedding_model.embed(documents, show_progress_bar=verbose))
+        embeddings = np.array(list(self.embedding_model.embed(documents, show_progress_bar=verbose)))
         return embeddings
