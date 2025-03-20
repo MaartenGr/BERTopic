@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Union
+from typing import List
 from fastembed import TextEmbedding
 
 from bertopic.backend import BaseEmbedder
@@ -28,7 +28,7 @@ class FastEmbedBackend(BaseEmbedder):
     def __init__(self, embedding_model: str = "BAAI/bge-small-en-v1.5"):
         super().__init__()
 
-        supported_models = [m['model'] for m in TextEmbedding.list_supported_models()]
+        supported_models = [m["model"] for m in TextEmbedding.list_supported_models()]
 
         if isinstance(embedding_model, str) and embedding_model in supported_models:
             self.embedding_model = TextEmbedding(model_name=embedding_model)
