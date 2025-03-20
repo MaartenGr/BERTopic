@@ -53,5 +53,5 @@ class FastEmbedBackend(BaseEmbedder):
         """
         embeddings_generator = self.embedding_model.embed(documents, parallel=0, show_progress_bar=verbose)
         embeddings_list = list(embeddings_generator)
-        embeddings_array = np.stack(embeddings_list)
+        embeddings_array = np.array(embeddings_list)
         return embeddings_array
