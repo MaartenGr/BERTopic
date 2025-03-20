@@ -31,6 +31,13 @@ except ModuleNotFoundError:
     msg = "`pip install model2vec` \n\n"
     Model2VecBackend = NotInstalled("Model2Vec", "Model2Vec", custom_msg=msg)
 
+# Langchain Embedddings
+try:
+    from bertopic.backend._langchain import LangChainBackend
+except ModuleNotFoundError:
+    msg = "`pip install langchain` \n\n"
+    LangChainBackend = NotInstalled("LangChain", "LangChain", custom_msg=msg)
+
 
 __all__ = [
     "BaseEmbedder",
@@ -40,4 +47,5 @@ __all__ = [
     "Model2VecBackend",
     "MultiModalBackend",
     "languages",
+    "LangChainBackend",
 ]
