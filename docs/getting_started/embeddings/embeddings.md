@@ -280,7 +280,7 @@ topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
 ## **FastEmbed**
-FastEmbed[https://qdrant.tech/documentation/fastembed/] is a lightweight python library for embedding generation 
+FastEmbed[https://qdrant.tech/documentation/fastembed/] is a lightweight python library for embedding generation
 and it supports popular embedding models.
 You can easily use it as in the example below:
 
