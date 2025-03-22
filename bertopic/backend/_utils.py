@@ -130,6 +130,12 @@ def select_backend(embedding_model, language: str = None, verbose: bool = False)
 
         return Model2VecBackend(embedding_model)
 
+    # FastEmbed word embeddings
+    if "fastembed" in str(type(embedding_model)):
+        from bertopic.backend._fastembed import FastEmbedBackend
+
+        return FastEmbedBackend(embedding_model)
+
     # Select embedding model based on language
     if language:
         try:
