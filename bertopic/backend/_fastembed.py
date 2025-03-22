@@ -6,17 +6,16 @@ from bertopic.backend import BaseEmbedder
 
 
 class FastEmbedBackend(BaseEmbedder):
-    """Sentence-transformers embedding model.
+    """FastEmbed embedding model.
 
-    The sentence-transformers embedding model used for generating document and
-    word embeddings.
+    The FastEmbed embedding model used for generating sentence embeddings.
 
     Arguments:
-        embedding_model: A sentence-transformers embedding model
+        embedding_model: A FastEmbed embedding model
 
     Examples:
-    To create a model, you can load in a string pointing to a
-    sentence-transformers model:
+    To create a model, you can load in a string pointing to a supported
+    FastEmbed model:
 
     ```python
     from bertopic.backend import FastEmbedBackend

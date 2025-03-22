@@ -279,6 +279,22 @@ embedding_model = CohereBackend(client)
 topic_model = BERTopic(embedding_model=embedding_model)
 ```
 
+## **FastEmbed**
+FastEmbed[https://qdrant.tech/documentation/fastembed/] is a lightweight python library for embedding generation 
+and it supports popular embedding models.
+You can easily use it as in the example below:
+
+```python
+from bertopic.backend import FastEmbedBackend
+
+embedding_model = FastEmbedBackend("BAAI/bge-small-en-v1.5")
+topic_model = BERTopic(embedding_model=embedding_model)
+```
+
+!!! tip "Tip!"
+    Before to start check the supported FastEmbed text embedding models [here](https://qdrant.github.io/fastembed/examples/Supported_Models/).
+
+
 ## **Multimodal**
 To create embeddings for both text and images in the same vector space, we can use the `MultiModalBackend`.
 This model uses a clip-vit based model that is capable of embedding text, images, or both:
