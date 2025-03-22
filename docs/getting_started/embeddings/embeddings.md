@@ -124,6 +124,17 @@ topic_model = BERTopic(embedding_model=embedding_model)
 !!! tip "Tip!"
     These transformers also work quite well using `sentence-transformers` which has great optimizations tricks that make using it a bit faster.
 
+**Langchain**
+[Langchain](https://python.langchain.com/docs/introduction) allows you to use different embedding models supported by various cloud providers. On top of that, it supports various integrations to open source models. To get started:
+
+```python
+from langchain_community.embeddings import HuggingFaceInstructEmbeddings
+from bertopic.backend import LangChainBackend
+
+hf_embedding = HuggingFaceInstructEmbeddings()
+langchain_embedder = LangChainBackend(hf_embedding)
+```
+
 ## **Flair**
 [Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that
 is publicly available. Flair can be used as follows:
