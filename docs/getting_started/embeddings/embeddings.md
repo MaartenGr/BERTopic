@@ -135,6 +135,9 @@ hf_embedding = HuggingFaceInstructEmbeddings()
 langchain_embedder = LangChainBackend(hf_embedding)
 ```
 
+To see what providers are being supported by Langchain, you can check the list [here](https://python.langchain.com/docs/integrations/providers/).
+For more information, you can have a look on [Langchain's Embedding Models](https://python.langchain.com/docs/integrations/text_embedding/).
+
 ## **Flair**
 [Flair](https://github.com/flairNLP/flair) allows you to choose almost any embedding model that
 is publicly available. Flair can be used as follows:
