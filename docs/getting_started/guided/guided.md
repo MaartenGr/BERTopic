@@ -1,7 +1,7 @@
 !!! Note
     Difference between Zero-shot and Guided BERTopic: 
     Guided BERTopic is similar - yet not equivalent - to [Zeros-shot Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html). 
-    Use Guided BERTopic to boost certain keyword's importance. Use [Zeros-shot Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html) to try to categorize documents into predefined topics ("zero-shot topics") before the clustering the remaining, unclassified documents, using the default unsupervised BERTopic topic exploration algorithm.
+    Use Guided BERTopic to boost the importance of certain keywords. Use [Zeros-shot Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html) to try to categorize documents into predefined topics ("zero-shot topics") before clustering the remaining unclassified documents using the main algorithm of BERTopic.
 
 
 Guided Topic Modeling or Seeded Topic Modeling is a collection of techniques that guides the topic modeling approach by setting several seed topics to which the model will converge to. These techniques allow the user to set a predefined number of topic representations that are sure to be in documents. For example, take an IT business that has a ticket system for the software their clients use. Those tickets may typically contain information about a specific bug regarding login issues that the IT business is aware of.  
