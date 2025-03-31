@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bertopic"
-version = "0.16.4"
+version = "0.17.0"
 description = "BERTopic performs topic Modeling with state-of-the-art transformer models."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
     { name = "Maarten P. Grootendorst", email = "maartengrootendorst@gmail.com" },
 ]
@@ -28,11 +28,11 @@ classifiers = [
     "Operating System :: POSIX",
     "Operating System :: Unix",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
@@ -41,7 +41,7 @@ dependencies = [
     "numpy>=1.20.0",
     "pandas>=1.1.5",
     "plotly>=4.7.0",
-    "scikit-learn>=0.22.2.post1",
+    "scikit-learn>=1.0",
     "sentence-transformers>=0.4.1",
     "tqdm>=4.41.1",
     "umap-learn>=0.5.0",
@@ -60,6 +60,9 @@ docs = [
     "mkdocs-material==9.5.18",
     "mkdocstrings-python==1.10.0",
     "mkdocstrings==0.24.3",
+]
+fastembed = [
+    "fastembed>=0.6.0",
 ]
 flair = [
     "flair>=0.7",
@@ -101,7 +104,7 @@ exclude = ["tests"]
 line-length = 120
 
 [tool.ruff.lint]
-select = [  
+select = [
   "E4",  # Ruff Defaults
   "E7",
   "E9",

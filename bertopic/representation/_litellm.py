@@ -8,7 +8,7 @@ from bertopic.representation._utils import retry_with_exponential_backoff
 
 
 DEFAULT_PROMPT = """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 [DOCUMENTS]
 The topic is described by the following keywords: [KEYWORDS]
 Based on the information above, extract a short topic label in the following format:

@@ -6,6 +6,29 @@ hide:
 # Changelog
 
 
+## **Version 0.17.0**
+*Release date: 19 March, 2025*
+
+<h3><b>Highlights:</a></b></h3>
+* Light-weight installation without UMAP and HDBSCAN by [@MaartenGr](https://github.com/MaartenGr) in [#2289](https://github.com/MaartenGr/BERTopic/pull/2289)
+* Add Model2Vec as an embedding backend by [@MaartenGr](https://github.com/MaartenGr) in [#2245](https://github.com/MaartenGr/BERTopic/pull/2245)
+* Add LiteLLM as a representation model by [@MaartenGr](https://github.com/MaartenGr) in [#2213](https://github.com/MaartenGr/BERTopic/pull/2213)
+* Interactive DataMapPlot and deprecate non-chat OpenAI models by [@MaartenGr](https://github.com/MaartenGr) in [#2287](https://github.com/MaartenGr/BERTopic/pull/2287)
+
+<h3><b>Fixes:</a></b></h3>
+
+* Lightweight installation: use safetensors without torch by [@hedgeho](https://github.com/hedgeho) in [#2306](https://github.com/MaartenGr/BERTopic/pull/2306)
+* Fix missing links by [@MaartenGr](https://github.com/MaartenGr) in [#2305](https://github.com/MaartenGr/BERTopic/pull/2305)
+* Set up pre-commit hooks by [@afuetterer](https://github.com/afuetterer) in [#2283](https://github.com/MaartenGr/BERTopic/pull/2283)
+* Fix handling OpenAI returning None objects by [@jeaninejuliettes](https://github.com/jeaninejuliettes) in [#2280](https://github.com/MaartenGr/BERTopic/pull/2280)
+* Add support for python 3.13 by [@afuetterer](https://github.com/afuetterer) in [#2173](https://github.com/MaartenGr/BERTopic/pull/2173)
+* Added system prompts by [@Leo-LiHao](https://github.com/Leo-LiHao) in [#2145](https://github.com/MaartenGr/BERTopic/pull/2145)
+* More documentation for topic reduction by [@MaartenGr](https://github.com/MaartenGr) in [#2260](https://github.com/MaartenGr/BERTopic/pull/2260)
+* Drop support for python 3.8 by [@afuetterer](https://github.com/afuetterer) in [#2243](https://github.com/MaartenGr/BERTopic/pull/2243)
+* Fixed online topic modeling on GPU by [@SSivakumar12](https://github.com/SSivakumar12) in [#2181](https://github.com/MaartenGr/BERTopic/pull/2181)
+* Fixed hierarchical cluster visualization by [@PipaFlores](https://github.com/PipaFlores) in [#2191](https://github.com/MaartenGr/BERTopic/pull/2191)
+* Remove duplicated phrase by [@AndreaFrancis](https://github.com/AndreaFrancis) in [#2197](https://github.com/MaartenGr/BERTopic/pull/2197)
+
 ## **Version 0.16.4**
 *Release date: 9 October, 2024*
 
@@ -203,18 +226,18 @@ merged_model = BERTopic.merge_models([topic_model_1, topic_model_2, topic_model_
 ```
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html">Zero-shot Topic Modeling</a></b></h3>
-Zeroshot Topic Modeling is a technique that allows you to find pre-defined topics in large amounts of documents. This method allows you to not only find those specific topics but also create new topics for documents that would not fit with your predefined topics. 
+Zeroshot Topic Modeling is a technique that allows you to find pre-defined topics in large amounts of documents. This method allows you to not only find those specific topics but also create new topics for documents that would not fit with your predefined topics.
 This allows for extensive flexibility as there are three scenario's to explore.
 
-* No zeroshot topics were detected. This means that none of the documents would fit with the predefined topics and a regular BERTopic would be run. 
+* No zeroshot topics were detected. This means that none of the documents would fit with the predefined topics and a regular BERTopic would be run.
 * Only zeroshot topics were detected. Here, we would not need to find additional topics since all original documents were assigned to one of the predefined topics.
 * Both zeroshot topics and clustered topics were detected. This means that some documents would fit with the predefined topics where others would not. For the latter, new topics were found.
 
 ![zeroshot](https://github.com/MaartenGr/BERTopic/assets/25746895/9cce6ee3-445f-440a-b93b-f8008578c839)
 
-In order to use zero-shot BERTopic, we create a list of topics that we want to assign to our documents. However, 
+In order to use zero-shot BERTopic, we create a list of topics that we want to assign to our documents. However,
 there may be several other topics that we know should be in the documents. The dataset that we use is small subset of ArXiv papers.
-We know the data and believe there to be at least the following topics: *clustering*, *topic modeling*, and *large language models*. 
+We know the data and believe there to be at least the following topics: *clustering*, *topic modeling*, and *large language models*.
 However, we are not sure whether other topics exist and want to explore those.
 
 Using this feature is straightforward:
@@ -237,7 +260,7 @@ zeroshot_topic_list = ["Clustering", "Topic Modeling", "Large Language Models"]
 # if the similarity does not exceed that value, it will be used
 # for clustering instead.
 topic_model = BERTopic(
-    embedding_model="thenlper/gte-small", 
+    embedding_model="thenlper/gte-small",
     min_topic_size=15,
     zeroshot_topic_list=zeroshot_topic_list,
     zeroshot_min_similarity=.85,
@@ -253,9 +276,9 @@ When we run `topic_model.get_topic_info()` you will see something like this:
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/seed_words/seed_words.html">Seed (Domain-specific) Words</a></b></h3>
 
 
-When performing Topic Modeling, you are often faced with data that you are familiar with to a certain extend or that speaks a very specific language. In those cases, topic modeling techniques might have difficulties capturing and representing the semantic nature of domain specific abbreviations, slang, short form, acronyms, etc. For example, the *"TNM"* classification is a method for identifying the stage of most cancers. The word *"TNM"* is an abbreviation and might not be correctly captured in generic embedding models. 
+When performing Topic Modeling, you are often faced with data that you are familiar with to a certain extend or that speaks a very specific language. In those cases, topic modeling techniques might have difficulties capturing and representing the semantic nature of domain specific abbreviations, slang, short form, acronyms, etc. For example, the *"TNM"* classification is a method for identifying the stage of most cancers. The word *"TNM"* is an abbreviation and might not be correctly captured in generic embedding models.
 
-To make sure that certain domain specific words are weighted higher and are more often used in topic representations, you can set any number of `seed_words` in the `bertopic.vectorizer.ClassTfidfTransformer`. To do so, let's take a look at an example. We have a dataset of article abstracts and want to perform some topic modeling. Since we might be familiar with the data, there are certain words that we know should be generally important. Let's assume that we have in-depth knowledge about reinforcement learning and know that words like "agent" and "robot" should be important in such a topic were it to be found. Using the `ClassTfidfTransformer`, we can define those `seed_words` and also choose by how much their values are multiplied. 
+To make sure that certain domain specific words are weighted higher and are more often used in topic representations, you can set any number of `seed_words` in the `bertopic.vectorizer.ClassTfidfTransformer`. To do so, let's take a look at an example. We have a dataset of article abstracts and want to perform some topic modeling. Since we might be familiar with the data, there are certain words that we know should be generally important. Let's assume that we have in-depth knowledge about reinforcement learning and know that words like "agent" and "robot" should be important in such a topic were it to be found. Using the `ClassTfidfTransformer`, we can define those `seed_words` and also choose by how much their values are multiplied.
 
 The full example is then as follows:
 
@@ -276,7 +299,7 @@ umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine',
 # to be strengthen. We increase the importance of these words as we want them to be more
 # likely to end up in the topic representations.
 ctfidf_model = ClassTfidfTransformer(
-    seed_words=["agent", "robot", "behavior", "policies", "environment"], 
+    seed_words=["agent", "robot", "behavior", "policies", "environment"],
     seed_multiplier=2
 )
 
@@ -293,7 +316,7 @@ topic_model = BERTopic(
 When using LLMs with BERTopic, we can truncate the input documents in `[DOCUMENTS]` in order to reduce the number of tokens that we have in our input prompt. To do so, all text generation modules have two parameters that we can tweak:
 
 * `doc_length` - The maximum length of each document. If a document is longer, it will be truncated. If None, the entire document is passed.
-* `tokenizer` - The tokenizer used to calculate to split the document into segments used to count the length of a document. 
+* `tokenizer` - The tokenizer used to calculate to split the document into segments used to count the length of a document.
     * Options include `'char'`, `'whitespace'`, `'vectorizer'`, and a callable
 
 This means that the definition of `doc_length` changes depending on what constitutes a token in the `tokenizer` parameter. If a token is a character, then `doc_length` refers to max length in characters. If a token is a word, then `doc_length` refers to the max length in words.
@@ -316,7 +339,7 @@ client = openai.OpenAI(api_key="sk-...")
 representation_model = OpenAI(
     client,
     model="gpt-3.5-turbo",
-    delay_in_seconds=2, 
+    delay_in_seconds=2,
     chat=True,
     nr_docs=4,
     doc_length=100,
@@ -337,7 +360,7 @@ topic_model = BERTopic(representation_model=representation_model)
     * Train your topic modeling on text, images, or images and text!
     * Use the `bertopic.backend.MultiModalBackend` to embed images, text, both or even caption images!
 * [**Multi-Aspect**](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) Topic Modeling
-    * Create multiple topic representations simultaneously 
+    * Create multiple topic representations simultaneously
 * Improved [**Serialization**](https://maartengr.github.io/BERTopic/getting_started/serialization/serialization.html) options
     * Push your model to the HuggingFace Hub with `.push_to_hf_hub`
     * Safer, smaller and more flexible serialization options with `safetensors`
@@ -355,7 +378,7 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b>Fixes:</a></b></h3>
 
-* Fixed custom prompt not working in `TextGeneration` 
+* Fixed custom prompt not working in `TextGeneration`
 * Fixed [#1142](https://github.com/MaartenGr/BERTopic/pull/1142)
 * Add additional logic to handle cupy arrays by [@metasyn](https://github.com/metasyn) in [#1179](https://github.com/MaartenGr/BERTopic/pull/1179)
 * Fix hierarchy viz and handle any form of distance matrix by [@elashrry](https://github.com/elashrry) in [#1173](https://github.com/MaartenGr/BERTopic/pull/1173)
@@ -365,17 +388,17 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html">Multimodal Topic Modeling</a></b></h3>
 
-With v0.15, we can now perform multimodal topic modeling in BERTopic! The most basic example of multimodal topic modeling in BERTopic is when you have images that accompany your documents. This means that it is expected that each document has an image and vice versa. Instagram pictures, for example, almost always have some descriptions to them. 
+With v0.15, we can now perform multimodal topic modeling in BERTopic! The most basic example of multimodal topic modeling in BERTopic is when you have images that accompany your documents. This means that it is expected that each document has an image and vice versa. Instagram pictures, for example, almost always have some descriptions to them.
 
 <figure markdown>
   ![Image title](getting_started/multimodal/images_and_text.svg)
   <figcaption></figcaption>
 </figure>
 
-In this example, we are going to use images from `flickr` that each have a caption associated to it: 
+In this example, we are going to use images from `flickr` that each have a caption associated to it:
 
 ```python
-# NOTE: This requires the `datasets` package which you can 
+# NOTE: This requires the `datasets` package which you can
 # install with `pip install datasets`
 from datasets import load_dataset
 
@@ -460,20 +483,20 @@ aspect_model2 = [KeyBERTInspired(top_n_words=30), MaximalMarginalRelevance(diver
 representation_model = {
    "Main": main_representation,
    "Aspect1":  aspect_model1,
-   "Aspect2":  aspect_model2 
+   "Aspect2":  aspect_model2
 }
 topic_model = BERTopic(representation_model=representation_model).fit(docs)
 ```
 
-As show above, to perform multi-aspect topic modeling, we make sure that `representation_model` is a dictionary where each representation model pipeline is defined. 
-The main pipeline, that is used in most visualization options, is defined with the `"Main"` key. All other aspects can be defined however you want. In the example above, the two additional aspects that we are interested in are defined as `"Aspect1"` and `"Aspect2"`. 
+As show above, to perform multi-aspect topic modeling, we make sure that `representation_model` is a dictionary where each representation model pipeline is defined.
+The main pipeline, that is used in most visualization options, is defined with the `"Main"` key. All other aspects can be defined however you want. In the example above, the two additional aspects that we are interested in are defined as `"Aspect1"` and `"Aspect2"`.
 
 After we have fitted our model, we can access all representations with `topic_model.get_topic_info()`:
 
 <img src="getting_started/multiaspect/table.PNG">
 <br>
 
-As you can see, there are a number of different representations for our topics that we can inspect. All aspects are found in `topic_model.topic_aspects_`. 
+As you can see, there are a number of different representations for our topics that we can inspect. All aspects are found in `topic_model.topic_aspects_`.
 
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/serialization/serialization.html">Serialization</a></b></h3>
@@ -509,7 +532,7 @@ Saving the topic modeling with `.safetensors` or `pytorch` has a number of advan
 <img src="getting_started/serialization/serialization.png">
 <br><br>
 
-The above image, a model trained on 100,000 documents, demonstrates the differences in sizes comparing `safetensors`, `pytorch`, and `pickle`. The difference in sizes can mostly be explained due to the efficient saving procedure and that the clustering and dimensionality reductions are not saved in safetensors/pytorch since inference can be done based on the topic embeddings. 
+The above image, a model trained on 100,000 documents, demonstrates the differences in sizes comparing `safetensors`, `pytorch`, and `pickle`. The difference in sizes can mostly be explained due to the efficient saving procedure and that the clustering and dimensionality reductions are not saved in safetensors/pytorch since inference can be done based on the topic embeddings.
 
 
 
@@ -555,7 +578,7 @@ loaded_model = BERTopic.load("MaartenGr/BERTopic_ArXiv")
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#chatgpt">ChatGPT</a></b></h3>
 
-Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models. 
+Within OpenAI's API, the ChatGPT models use a different API structure compared to the GPT-3 models.
 In order to use ChatGPT with BERTopic, we need to define the model and make sure to set `chat=True`:
 
 ```python
@@ -571,9 +594,9 @@ representation_model = OpenAI(model="gpt-3.5-turbo", delay_in_seconds=10, chat=T
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
-Prompting with ChatGPT is very satisfying and can be customized in BERTopic by using certain tags. 
-There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`. 
-These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively. 
+Prompting with ChatGPT is very satisfying and can be customized in BERTopic by using certain tags.
+There are currently two tags, namely `"[KEYWORDS]"` and `"[DOCUMENTS]"`.
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively.
 For example, if we have the following prompt:
 
 ```python
@@ -590,28 +613,28 @@ then that will be rendered as follows and passed to OpenAI's API:
 
 ```python
 """
-I have a topic that contains the following documents: 
+I have a topic that contains the following documents:
 - Our videos are also made possible by your support on patreon.co.
 - If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.
 - If you want to help us make more videos, you can do so there.
 - And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.
 
-The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch 
+The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch
 
 Based on the information above, extract a short topic label in the following format:
 topic: <topic label>
 """
 ```
 
-!!! note 
-    Whenever you create a custom prompt, it is important to add 
+!!! note
+    Whenever you create a custom prompt, it is important to add
     ```
     Based on the information above, extract a short topic label in the following format:
     topic: <topic label>
     ```
-    at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having 
-    said that, if `topic: ` is not in the output, then it will simply extract the entire response, so 
-    feel free to experiment with the prompts. 
+    at the end of your prompt as BERTopic extracts everything that comes after `topic: `. Having
+    said that, if `topic: ` is not in the output, then it will simply extract the entire response, so
+    feel free to experiment with the prompts.
 
 
 ## **Version 0.14.0**
@@ -642,16 +665,16 @@ topic: <topic label>
 * The `diversity` parameter was removed in favor of `bertopic.representation.MaximalMarginalRelevance`
 * The `representation_model` parameter was added to `bertopic.BERTopic`
 
-<br>  
+<br>
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired">Representation Models</a></b></h3>
 
-Fine-tune the c-TF-IDF representation with a variety of models. Whether that is through a KeyBERT-Inspired model or GPT-3, the choice is up to you! 
+Fine-tune the c-TF-IDF representation with a variety of models. Whether that is through a KeyBERT-Inspired model or GPT-3, the choice is up to you!
 
 <iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/218417067-a81cc179-9055-49ba-a2b0-f2c1db535159.mp4
 " title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-<br>  
+<br>
 
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#keybertinspired">KeyBERTInspired</a></b></h3>
@@ -675,7 +698,7 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#partofspeech">PartOfSpeech</a></b></h3>
 
-Our candidate topics, as extracted with c-TF-IDF, do not take into account a keyword's part of speech as extracting noun-phrases from all documents can be computationally quite expensive. Instead, we can leverage c-TF-IDF to perform part of speech on a subset of keywords and documents that best represent a topic. 
+Our candidate topics, as extracted with c-TF-IDF, do not take into account a keyword's part of speech as extracting noun-phrases from all documents can be computationally quite expensive. Instead, we can leverage c-TF-IDF to perform part of speech on a subset of keywords and documents that best represent a topic.
 
 ![partofspeech](https://user-images.githubusercontent.com/25746895/216336534-48ff400e-72e1-4c50-9030-414576bac01e.svg)
 
@@ -696,7 +719,7 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#maximalmarginalrelevance">MaximalMarginalRelevance</a></b></h3>
 
-When we calculate the weights of keywords, we typically do not consider whether we already have similar keywords in our topic. Words like "car" and "cars" 
+When we calculate the weights of keywords, we typically do not consider whether we already have similar keywords in our topic. Words like "car" and "cars"
 essentially represent the same information and often redundant. We can use `MaximalMarginalRelevance` to improve diversity of our candidate topics:
 
 ![mmr](https://user-images.githubusercontent.com/25746895/216336697-558f1409-8da3-4076-a21b-d87eec583ac7.svg)
@@ -717,7 +740,7 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#zero-shot-classification">Zero-Shot Classification</a></b></h3>
 
-To perform zero-shot classification, we feed the model with the keywords as generated through c-TF-IDF and a set of candidate labels. If, for a certain topic, we find a similar enough label, then it is assigned. If not, then we keep the original c-TF-IDF keywords. 
+To perform zero-shot classification, we feed the model with the keywords as generated through c-TF-IDF and a set of candidate labels. If, for a certain topic, we find a similar enough label, then it is assigned. If not, then we keep the original c-TF-IDF keywords.
 
 We use it in BERTopic as follows:
 
@@ -737,9 +760,9 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#transformers">Text Generation: 🤗 Transformers</a></b></h3>
 
-Nearly every week, there are new and improved models released on the 🤗 [Model Hub](https://huggingface.co/models) that, with some creativity, allow for 
-further fine-tuning of our c-TF-IDF based topics. These models range from text generation to zero-classification. In BERTopic, wrappers around these 
-methods are created as a way to support whatever might be released in the future. 
+Nearly every week, there are new and improved models released on the 🤗 [Model Hub](https://huggingface.co/models) that, with some creativity, allow for
+further fine-tuning of our c-TF-IDF based topics. These models range from text generation to zero-classification. In BERTopic, wrappers around these
+methods are created as a way to support whatever might be released in the future.
 
 Using a GPT-like model from the huggingface hub is rather straightforward:
 
@@ -759,7 +782,7 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#cohere">Text Generation: Cohere</a></b></h3>
 
-Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
+Instead of using a language model from 🤗 transformers, we can use external APIs instead that
 do the work for you. Here, we can use [Cohere](https://docs.cohere.ai/) to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install cohere first:
 
@@ -787,7 +810,7 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#openai">Text Generation: OpenAI</a></b></h3>
 
-Instead of using a language model from 🤗 transformers, we can use external APIs instead that 
+Instead of using a language model from 🤗 transformers, we can use external APIs instead that
 do the work for you. Here, we can use [OpenAI](https://openai.com/api/) to extract our topic labels from the candidate documents and keywords.
 To use this, you will need to install openai first:
 
@@ -816,8 +839,8 @@ topic_model = BERTopic(representation_model=representation_model)
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html#langchain">Text Generation: LangChain</a></b></h3>
 
 [Langchain](https://github.com/hwchase17/langchain) is a package that helps users with chaining large language models.
-In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this 
-external knowledge are the most representative documents in each topic. 
+In BERTopic, we can leverage this package in order to more efficiently combine external knowledge. Here, this
+external knowledge are the most representative documents in each topic.
 
 To use langchain, you will need to install the langchain package first. Additionally, you will need an underlying LLM to support langchain,
 like openai:
@@ -869,7 +892,7 @@ topic_model = BERTopic(representation_model=representation_model)
     * Calculate and predict probabilities during `fit_transform`  and `transform` respectively
     * This should give a major speed-up when setting `calculate_probabilities=True`
 * More images to the documentation and a lot of changes/updates/clarifications
-* Get representative documents for non-HDBSCAN models by comparing document and topic c-TF-IDF representations 
+* Get representative documents for non-HDBSCAN models by comparing document and topic c-TF-IDF representations
 * Sklearn Pipeline [Embedder](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html#scikit-learn-embeddings) by [@koaning](https://github.com/koaning) in [#791](https://github.com/MaartenGr/BERTopic/pull/791)
 
 <h3><b>Fixes:</a></b></h3>
@@ -887,14 +910,14 @@ topic_model = BERTopic(representation_model=representation_model)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/algorithm/algorithm.html">Documentation</a></b></h3>
 
-Personally, I believe that documentation can be seen as a feature and is an often underestimated aspect of open-source. So I went a bit overboard😅... and created an animation about the three pillars of BERTopic using Manim. There are many other visualizations added, one of each variation of BERTopic, and many smaller changes. 
+Personally, I believe that documentation can be seen as a feature and is an often underestimated aspect of open-source. So I went a bit overboard😅... and created an animation about the three pillars of BERTopic using Manim. There are many other visualizations added, one of each variation of BERTopic, and many smaller changes.
 
 <iframe width="1200" height="500" src="https://user-images.githubusercontent.com/25746895/205490350-cd9833e7-9cd5-44fa-8752-407d748de633.mp4
 " title="BERTopic Overview" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html">Topic Distributions</a></b></h3>
 
-The difficulty with a cluster-based topic modeling technique is that it does not directly consider that documents may contain multiple topics. With the new release, we can now model the distributions of topics! We even consider that a single word might be related to multiple topics. If a document is a mixture of topics, what is preventing a single word to be the same? 
+The difficulty with a cluster-based topic modeling technique is that it does not directly consider that documents may contain multiple topics. With the new release, we can now model the distributions of topics! We even consider that a single word might be related to multiple topics. If a document is a mixture of topics, what is preventing a single word to be the same?
 
 To do so, we approximate the distribution of topics in a document by calculating and summing the similarities of tokensets (achieved by applying a sliding window) with the topics:
 
@@ -978,7 +1001,7 @@ new_topics = topic_model.reduce_outliers(docs, topics)
 
 <h3><b><a href="https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation">Lightweight BERTopic</a></b></h3>
 
-The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely `"all-MiniLM-L6-v2"`. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires `pytorch` which often results in a rather large environment, memory-wise. 
+The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely `"all-MiniLM-L6-v2"`. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires `pytorch` which often results in a rather large environment, memory-wise.
 
 Fortunately, it is possible to install BERTopic without `sentence-transformers` and use it as a lightweight solution instead. The installation can be done as follows:
 
@@ -1040,7 +1063,7 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 * Added an [example](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#keybert-bertopic) of combining BERTopic with KeyBERT
 * Added many tests with the intention of making development a bit more stable
 
-**Fixes**: 
+**Fixes**:
 
 * Fixed iteratively merging topics ([#632](https://github.com/MaartenGr/BERTopic/issues/632) and ([#648](https://github.com/MaartenGr/BERTopic/issues/648))
 * Fixed 0th topic not showing up in visualizations ([#667](https://github.com/MaartenGr/BERTopic/issues/667))
@@ -1052,9 +1075,9 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 
 **Online/incremental topic modeling**:
 
-Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained on before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic. 
+Online topic modeling (sometimes called "incremental topic modeling") is the ability to learn incrementally from a mini-batch of instances. Essentially, it is a way to update your topic model with data on which it was not trained on before. In Scikit-Learn, this technique is often modeled through a `.partial_fit` function, which is also used in BERTopic.
 
-At a minimum, the cluster model needs to support a `.partial_fit` function in order to use this feature. The default HDBSCAN model will not work as it does not support online updating. 
+At a minimum, the cluster model needs to support a `.partial_fit` function in order to use this feature. The default HDBSCAN model will not work as it does not support online updating.
 
 ```python
 from sklearn.datasets import fetch_20newsgroups
@@ -1095,7 +1118,7 @@ topic_model.topics_ = topics
 
 **c-TF-IDF**:
 
-Explicitly define, use, and adjust the `ClassTfidfTransformer` with new parameters, `bm25_weighting` and `reduce_frequent_words`, to potentially improve the topic representation: 
+Explicitly define, use, and adjust the `ClassTfidfTransformer` with new parameters, `bm25_weighting` and `reduce_frequent_words`, to potentially improve the topic representation:
 
 ```python
 from bertopic import BERTopic
@@ -1107,7 +1130,7 @@ topic_model = BERTopic(ctfidf_model=ctfidf_model)
 
 **Attributes**:
 
-After having fitted your BERTopic instance, you can use the following attributes to have quick access to certain information, such as the topic assignment for each document in `topic_model.topics_`. 
+After having fitted your BERTopic instance, you can use the following attributes to have quick access to certain information, such as the topic assignment for each document in `topic_model.topics_`.
 
 | Attribute | Type | Description |
 |--------------------|----|---------------------------------------------------------------------------------------------|
@@ -1130,8 +1153,8 @@ After having fitted your BERTopic instance, you can use the following attributes
 
 * Perform [hierarchical topic modeling](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html) with `.hierarchical_topics`
 
-```python 
-hierarchical_topics = topic_model.hierarchical_topics(docs, topics) 
+```python
+hierarchical_topics = topic_model.hierarchical_topics(docs, topics)
 ```
 
 * Visualize [hierarchical topic representations](https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html#visualizations) with `.visualize_hierarchy`
@@ -1157,7 +1180,7 @@ reduced_embeddings = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric='
 topic_model.visualize_documents(docs, reduced_embeddings=reduced_embeddings)
 ```
 
-* Visualize [2D hierarchical documents](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html#visualize-hierarchical-documents) with `.visualize_hierarchical_documents()` 
+* Visualize [2D hierarchical documents](https://maartengr.github.io/BERTopic/getting_started/visualization/visualization.html#visualize-hierarchical-documents) with `.visualize_hierarchical_documents()`
 
 ```python
 # Run the visualization with the original embeddings
@@ -1192,9 +1215,9 @@ topic_model.merge_topics(docs, topics, topics_to_merge)
 
 * Added example for finding similar topics between two models in the [tips & tricks](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html) page
 * Add multi-modal example in the [tips & tricks](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html) page
-* Added native [Hugging Face transformers](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html#hugging-face-transformers) support 
+* Added native [Hugging Face transformers](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html#hugging-face-transformers) support
 
-**Fixes**: 
+**Fixes**:
 
 * Fix support for k-Means in `.visualize_heatmap` ([#532](https://github.com/MaartenGr/BERTopic/issues/532))
 * Fix missing topic 0 in `.visualize_topics` ([#533](https://github.com/MaartenGr/BERTopic/issues/533))
@@ -1211,7 +1234,7 @@ topic_model.merge_topics(docs, topics, topics_to_merge)
 *Release date: 30 April, 2022*
 
 
-**Highlights**: 
+**Highlights**:
 
 * Use any dimensionality reduction technique instead of UMAP:
 
@@ -1233,19 +1256,19 @@ cluster_model = KMeans(n_clusters=50)
 topic_model = BERTopic(hdbscan_model=cluster_model)
 ```
 
-**Documentation**: 
+**Documentation**:
 
 * Add a CountVectorizer page with tips and tricks on how to create topic representations that fit your use case
 * Added pages on how to use other dimensionality reduction and clustering algorithms
  * Additional instructions on how to reduce outliers in the FAQ:
 
-```python 
+```python
 import numpy as np
 probability_threshold = 0.01
-new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for prob in probs] 
+new_topics = [np.argmax(prob) if max(prob) >= probability_threshold else -1 for prob in probs]
 ```
 
-**Fixes**: 
+**Fixes**:
 
 * Fixed `None` being returned for probabilities when transforming unseen documents
 * Replaced all instances of `arg:` with `Arguments:` for consistency
@@ -1290,20 +1313,20 @@ A number of fixes, documentation updates, and small features:
 
 A release focused on algorithmic optimization and fixing several issues:
 
-**Highlights**:  
-  
+**Highlights**:
+
 * Update the non-multilingual paraphrase-* models to the all-* models due to improved [performance](https://www.sbert.net/docs/pretrained_models.html)
 * Reduce necessary RAM in c-TF-IDF top 30 word [extraction](https://stackoverflow.com/questions/49207275/finding-the-top-n-values-in-a-row-of-a-scipy-sparse-matrix)
 
-**Fixes**:  
+**Fixes**:
 
 * Fix topic mapping
     * When reducing the number of topics, these need to be mapped to the correct input/output which had some issues in the previous version
     * A new class was created as a way to track these mappings regardless of how many times they were executed
     * In other words, you can iteratively reduce the number of topics after training the model without the need to continuously train the model
-* Fix typo in embeddings page ([#200](https://github.com/MaartenGr/BERTopic/issues/200)) 
+* Fix typo in embeddings page ([#200](https://github.com/MaartenGr/BERTopic/issues/200))
 * Fix link in README ([#233](https://github.com/MaartenGr/BERTopic/issues/233))
-* Fix documentation `.visualize_term_rank()` ([#253](https://github.com/MaartenGr/BERTopic/issues/253)) 
+* Fix documentation `.visualize_term_rank()` ([#253](https://github.com/MaartenGr/BERTopic/issues/253))
 * Fix getting correct representative docs ([#258](https://github.com/MaartenGr/BERTopic/issues/258))
 * Update [memory FAQ](https://maartengr.github.io/BERTopic/faq.html#i-am-facing-memory-issues-help) with [HDBSCAN pr](https://github.com/MaartenGr/BERTopic/issues/151)
 
@@ -1312,18 +1335,18 @@ A release focused on algorithmic optimization and fixing several issues:
 
 A release focused on fixing several issues:
 
-**Fixes**:  
+**Fixes**:
 
-* Fix TypeError when auto-reducing topics ([#210](https://github.com/MaartenGr/BERTopic/issues/210)) 
+* Fix TypeError when auto-reducing topics ([#210](https://github.com/MaartenGr/BERTopic/issues/210))
 * Fix mapping representative docs when reducing topics ([#208](https://github.com/MaartenGr/BERTopic/issues/208))
 * Fix visualization issues with probabilities ([#205](https://github.com/MaartenGr/BERTopic/issues/205))
 * Fix missing `normalize_frequency` param in plots ([#213](https://github.com/MaartenGr/BERTopic/issues/208))
-  
+
 
 ## **Version 0.9.0**
 *Release date:  9 August, 2021*
 
-**Highlights**:  
+**Highlights**:
 
 * Implemented a [**Guided BERTopic**](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) -> Use seeds to steer the Topic Modeling
 * Get the most representative documents per topic: `topic_model.get_representative_docs(topic=1)`
@@ -1332,29 +1355,29 @@ A release focused on fixing several issues:
 * Return flat probabilities as default, only calculate the probabilities of all topics per document if `calculate_probabilities` is True
 * Added several FAQs
 
-**Fixes**:  
+**Fixes**:
 
 * Fix loading pre-trained BERTopic model
 * Fix mapping of probabilities
 * Fix [#190](https://github.com/MaartenGr/BERTopic/issues/190)
 
 
-**Guided BERTopic**:    
+**Guided BERTopic**:
 
-Guided BERTopic works in two ways: 
+Guided BERTopic works in two ways:
 
-First, we create embeddings for each seeded topics by joining them and passing them through the document embedder. 
-These embeddings will be compared with the existing document embeddings through cosine similarity and assigned a label. 
-If the document is most similar to a seeded topic, then it will get that topic's label. 
-If it is most similar to the average document embedding, it will get the -1 label. 
-These labels are then passed through UMAP to create a semi-supervised approach that should nudge the topic creation to the seeded topics. 
+First, we create embeddings for each seeded topics by joining them and passing them through the document embedder.
+These embeddings will be compared with the existing document embeddings through cosine similarity and assigned a label.
+If the document is most similar to a seeded topic, then it will get that topic's label.
+If it is most similar to the average document embedding, it will get the -1 label.
+These labels are then passed through UMAP to create a semi-supervised approach that should nudge the topic creation to the seeded topics.
 
-Second, we take all words in `seed_topic_list` and assign them a multiplier larger than 1. 
-Those multipliers will be used to increase the IDF values of the words across all topics thereby increasing 
-the likelihood that a seeded topic word will appear in a topic. This does, however, also increase the chance of an 
-irrelevant topic having unrelated words. In practice, this should not be an issue since the IDF value is likely to 
-remain low regardless of the multiplier. The multiplier is now a fixed value but may change to something more elegant, 
-like taking the distribution of IDF values and its position into account when defining the multiplier. 
+Second, we take all words in `seed_topic_list` and assign them a multiplier larger than 1.
+Those multipliers will be used to increase the IDF values of the words across all topics thereby increasing
+the likelihood that a seeded topic word will appear in a topic. This does, however, also increase the chance of an
+irrelevant topic having unrelated words. In practice, this should not be an issue since the IDF value is likely to
+remain low regardless of the multiplier. The multiplier is now a fixed value but may change to something more elegant,
+like taking the distribution of IDF values and its position into account when defining the multiplier.
 
 ```python
 seed_topic_list = [["company", "billion", "quarter", "shrs", "earnings"],
@@ -1372,20 +1395,20 @@ topics, probs = topic_model.fit_transform(docs)
 ## **Version 0.8.1**
 *Release date:  8 June, 2021*
 
-**Highlights**:  
+**Highlights**:
 
 * Improved models:
-    * For English documents the default is now: `"paraphrase-MiniLM-L6-v2"` 
-    * For Non-English or multi-lingual documents the default is now: `"paraphrase-multilingual-MiniLM-L12-v2"` 
-    * Both models show not only great performance but are much faster!  
+    * For English documents the default is now: `"paraphrase-MiniLM-L6-v2"`
+    * For Non-English or multi-lingual documents the default is now: `"paraphrase-multilingual-MiniLM-L12-v2"`
+    * Both models show not only great performance but are much faster!
 * Add interactive visualizations to the `plotting` API documentation
-  
-For better performance, please use the following models:  
+
+For better performance, please use the following models:
 
 * English: `"paraphrase-mpnet-base-v2"`
 * Non-English or multi-lingual: `"paraphrase-multilingual-mpnet-base-v2"`
 
-**Fixes**:   
+**Fixes**:
 
 * Improved unit testing for more stability
 * Set transformers version for Flair
@@ -1393,27 +1416,27 @@ For better performance, please use the following models:
 ## **Version 0.8.0**
 *Release date:  31 May, 2021*
 
-**Highlights**:  
+**Highlights**:
 
 * Additional visualizations:
-    * Topic Hierarchy: `topic_model.visualize_hierarchy()` 
-    * Topic Similarity Heatmap: `topic_model.visualize_heatmap()` 
-    * Topic Representation Barchart: `topic_model.visualize_barchart()` 
-    * Term Score Decline: `topic_model.visualize_term_rank()` 
+    * Topic Hierarchy: `topic_model.visualize_hierarchy()`
+    * Topic Similarity Heatmap: `topic_model.visualize_heatmap()`
+    * Topic Representation Barchart: `topic_model.visualize_barchart()`
+    * Term Score Decline: `topic_model.visualize_term_rank()`
 * Created `bertopic.plotting` library to easily extend visualizations
 * Improved automatic topic reduction by using HDBSCAN to detect similar topics
-* Sort topic ids by their frequency. -1 is the outlier class and contains typically the most documents. After that 0 is the largest  topic, 1 the second largest, etc. 
-     
-**Fixes**:   
+* Sort topic ids by their frequency. -1 is the outlier class and contains typically the most documents. After that 0 is the largest  topic, 1 the second largest, etc.
+
+**Fixes**:
 
 * Fix typo [#113](https://github.com/MaartenGr/BERTopic/pull/113), [#117](https://github.com/MaartenGr/BERTopic/pull/117)
 * Fix [#121](https://github.com/MaartenGr/BERTopic/issues/121) by removing [these](https://github.com/MaartenGr/BERTopic/blob/5c6cf22776fafaaff728370781a5d33727d3dc8f/bertopic/_bertopic.py#L359-L360) two lines
 * Fix mapping of topics after reduction (it now excludes 0) ([#103](https://github.com/MaartenGr/BERTopic/issues/103))
-  
-## **Version 0.7.0**
-*Release date:  26 April, 2021*  
 
-The two main features are **(semi-)supervised topic modeling** 
+## **Version 0.7.0**
+*Release date:  26 April, 2021*
+
+The two main features are **(semi-)supervised topic modeling**
 and several **backends** to use instead of Flair and SentenceTransformers!
 
 **Highlights**:
@@ -1438,7 +1461,7 @@ and several **backends** to use instead of Flair and SentenceTransformers!
 | (semi-)Supervised Topic Modeling with BERTopic  |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1bxizKzv5vfxJEB29sntU__ZC7PBSIPaQ?usp=sharing)  |
 | Dynamic Topic Modeling with Trump's Tweets  | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1un8ooI-7ZNlRoK0maVkYhmNRl0XGK88f?usp=sharing)  |
 
-**Fixes**:  
+**Fixes**:
 
 * Fixed issues with Torch req
 * Prevent saving term frequency matrix in CTFIDF class
@@ -1446,7 +1469,7 @@ and several **backends** to use instead of Flair and SentenceTransformers!
 * Moved visualization dependencies to base BERTopic
     * `pip install bertopic[visualization]` becomes `pip install bertopic`
 * Allow precomputed embeddings in bertopic.find_topics() ([#79](https://github.com/MaartenGr/BERTopic/issues/79)):
- 
+
 ```python
 model = BERTopic(embedding_model=my_embedding_model)
 model.fit(docs, my_precomputed_embeddings)
@@ -1458,16 +1481,16 @@ model.find_topics(search_term)
 
 **Highlights**:
 
-* DTM: Added a basic dynamic topic modeling technique based on the global c-TF-IDF representation 
+* DTM: Added a basic dynamic topic modeling technique based on the global c-TF-IDF representation
     * `model.topics_over_time(docs, timestamps, global_tuning=True)`
 * DTM: Option to evolve topics based on t-1 c-TF-IDF representation which results in evolving topics over time
     * Only uses topics at t-1 and skips evolution if there is a gap
     * `model.topics_over_time(docs, timestamps, evolution_tuning=True)`
-* DTM: Function to visualize topics over time 
+* DTM: Function to visualize topics over time
     * `model.visualize_topics_over_time(topics_over_time)`
-* DTM: Add binning of timestamps  
+* DTM: Add binning of timestamps
     * `model.topics_over_time(docs, timestamps, nr_bins=10)`
-* Add function get general information about topics (id, frequency, name, etc.) 
+* Add function get general information about topics (id, frequency, name, etc.)
     *  `get_topic_info()`
 * Improved stability of c-TF-IDF by taking the average number of words across all topics instead of the number of documents
 
@@ -1479,8 +1502,8 @@ model.find_topics(search_term)
 *Release date:  8 Februari, 2021*
 
 **Highlights**:
-  
-* Add `Flair` to allow for more (custom) token/document embeddings, including 🤗 transformers 
+
+* Add `Flair` to allow for more (custom) token/document embeddings, including 🤗 transformers
 * Option to use custom UMAP, HDBSCAN, and CountVectorizer
 * Added `low_memory` parameter to reduce memory during computation
 * Improved verbosity (shows progress bar)
@@ -1488,7 +1511,7 @@ model.find_topics(search_term)
 * Expose all parameters with a single function: `get_params()`
 
 **Fixes**:
-    
+
 * To simplify the API, the parameters stop_words and n_neighbors were removed. These can still be used when a custom UMAP or CountVectorizer is used.
 * Set `calculate_probabilities` to False as a default. Calculating probabilities with HDBSCAN significantly increases computation time and memory usage. Better to remove calculating probabilities or only allow it by manually turning this on.
 * Use the newest version of `sentence-transformers` as it speeds ups encoding significantly
@@ -1496,43 +1519,43 @@ model.find_topics(search_term)
 ## **Version 0.4.2**
 *Release date:  10 Januari, 2021*
 
-**Fixes**:  
+**Fixes**:
 
-* Selecting `embedding_model` did not work when `language` was also used. This led to the user needing 
-to set `language` to None before being able to use `embedding_model`. Fixed by using `embedding_model` when 
+* Selecting `embedding_model` did not work when `language` was also used. This led to the user needing
+to set `language` to None before being able to use `embedding_model`. Fixed by using `embedding_model` when
 `language` is used (as a default parameter).
 
 ## **Version 0.4.1**
 *Release date:  07 Januari, 2021*
 
-**Fixes**:  
+**Fixes**:
 
 * Simple fix by lowering the languages variable to match the lowered input language.
 
 ## **Version 0.4.0**
 *Release date:  21 December, 2020*
 
-**Highlights**:  
+**Highlights**:
 
 * Visualize Topics similar to [LDAvis](https://github.com/cpsievert/LDAvis)
 * Added option to reduce topics after training
 * Added option to update topic representation after training
 * Added option to search topics using a search term
 * Significantly improved the stability of generating clusters
-* Finetune the topic words by selecting the most coherent words with the highest c-TF-IDF values 
+* Finetune the topic words by selecting the most coherent words with the highest c-TF-IDF values
 * More extensive tutorials in the documentation
 
-**Notable Changes**:  
+**Notable Changes**:
 
 * Option to select language instead of sentence-transformers models to minimize the complexity of using BERTopic
-* Improved logging (remove duplicates) 
-* Check if BERTopic is fitted 
+* Improved logging (remove duplicates)
+* Check if BERTopic is fitted
 * Added TF-IDF as an embedder instead of transformer models (see tutorial)
 * Numpy for Python 3.6 will be dropped and was therefore removed from the workflow.
 * Preprocess text before passing it through c-TF-IDF
-* Merged `get_topics_freq()` with `get_topic_freq()` 
+* Merged `get_topics_freq()` with `get_topic_freq()`
 
-**Fixes**:  
+**Fixes**:
 
 * Fix error handling topic probabilities
 
@@ -1573,13 +1596,13 @@ to set `language` to None before being able to use `embedding_model`. Fixed by u
 
 * Improved the calculation of the class-based TF-IDF procedure by limiting the calculation to sparse matrices. This prevents out-of-memory problems when faced with large datasets.
 
-## **Version 0.2.0**  
+## **Version 0.2.0**
 *Release date:  11 October, 2020*
 
 **Highlights**:
 
 - Changed c-TF-IDF procedure such that it implements a version of scikit-learns procedure. This should also speed up the calculation of the sparse matrix and prevent memory errors.
-- Added automated unit tests  
+- Added automated unit tests
 
 ## **Version 0.1.2**
 *Release date:  1 October, 2020*
@@ -1596,10 +1619,10 @@ to set `language` to None before being able to use `embedding_model`. Fixed by u
 * Fixed requirements --> Issue with pytorch
 * Update documentation
 
-## **Version 0.1.0**  
+## **Version 0.1.0**
 *Release date:  24 September, 2020*
 
-**Highlights**:  
+**Highlights**:
 
 - First release of `BERTopic`
 - Added parameters for UMAP and HDBSCAN
@@ -1608,10 +1631,8 @@ to set `language` to None before being able to use `embedding_model`. Fixed by u
 - Save and load trained models (UMAP and HDBSCAN)
 - Extract topics and their sizes
 
-**Notable Changes**:  
+**Notable Changes**:
 
 - Optimized c-TF-IDF
 - Improved documentation
 - Improved topic reduction
- 
-

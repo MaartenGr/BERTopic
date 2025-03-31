@@ -1,10 +1,10 @@
-Although topic modeling is typically done by discovering topics in an unsupervised manner, there might be times when you already have a bunch of clusters or classes from which you want to model the topics. For example, the often used [20 NewsGroups dataset](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) is already split up into 20 classes. Similarly, you might already have created some labels yourself through packages like [human-learn](https://github.com/koaning/human-learn), [bulk](https://github.com/koaning/bulk), [thisnotthat](https://github.com/TutteInstitute/thisnotthat) or something entirely different. 
+Although topic modeling is typically done by discovering topics in an unsupervised manner, there might be times when you already have a bunch of clusters or classes from which you want to model the topics. For example, the often used [20 NewsGroups dataset](https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html) is already split up into 20 classes. Similarly, you might already have created some labels yourself through packages like [human-learn](https://github.com/koaning/human-learn), [bulk](https://github.com/koaning/bulk), [thisnotthat](https://github.com/TutteInstitute/thisnotthat) or something entirely different.
 
-Instead of using BERTopic to discover previously unknown topics, we are now going to manually pass them to BERTopic and try to learn the relationship between those topics and the input documents. 
+Instead of using BERTopic to discover previously unknown topics, we are now going to manually pass them to BERTopic and try to learn the relationship between those topics and the input documents.
 
-> In other words, we are going to be performing classification instead! 
+> In other words, we are going to be performing classification instead!
 
-We can view this as a supervised topic modeling approach. Instead of using a clustering algorithm, we are going to be using a classification algorithm instead. 
+We can view this as a supervised topic modeling approach. Instead of using a clustering algorithm, we are going to be using a classification algorithm instead.
 
 Generally, we have the following pipeline:
 
@@ -22,7 +22,7 @@ Instead, we are now going to skip over the dimensionality reduction step and rep
 </div>
 <br>
 
-In other words, we can pass our labels to BERTopic and it will not only learn how to predict labels for new instances, but it also transforms those labels into topics by running the c-TF-IDF representations on the set of documents within each label. This process allows us to model the topics themselves and similarly gives us the option to use everything BERTopic has to offer. 
+In other words, we can pass our labels to BERTopic and it will not only learn how to predict labels for new instances, but it also transforms those labels into topics by running the c-TF-IDF representations on the set of documents within each label. This process allows us to model the topics themselves and similarly gives us the option to use everything BERTopic has to offer.
 
 To do so, we need to skip over the dimensionality reduction step and replace the clustering step with a classification algorithm. We can use the documents and labels from the 20 NewsGroups dataset to create topics from those 20 labels:
 

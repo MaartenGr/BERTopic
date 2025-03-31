@@ -75,6 +75,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+*.lock
 
 # Artifacts
 .idea

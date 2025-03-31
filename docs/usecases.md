@@ -3,7 +3,7 @@ hide:
   - navigation
 ---
 
-Over the last few years, BERTopic has been used on a wide variety of use cases and domains, from cancer research and voice perception, to employee surveys and social media. This diversity allows for interesting use cases but it might quickly become overwhelming. This page is meant to demonstrate how, when, and why BERTopic is used in practice. 
+Over the last few years, BERTopic has been used on a wide variety of use cases and domains, from cancer research and voice perception, to employee surveys and social media. This diversity allows for interesting use cases but it might quickly become overwhelming. This page is meant to demonstrate how, when, and why BERTopic is used in practice.
 
 <br>
 <img src="img/logos.svg" width="80%">
@@ -14,7 +14,7 @@ Over the last few years, BERTopic has been used on a wide variety of use cases a
 Below are a number of use cases that have been applied in practice. These use cases are collected from and written by data-professionals.
 
 !!! note
-    If you would like to add your use case, feel free open up a PR! You only need to update [this file](https://github.com/MaartenGr/BERTopic/blob/master/docs/usecases.md) and add your example. 
+    If you would like to add your use case, feel free open up a PR! You only need to update [this file](https://github.com/MaartenGr/BERTopic/blob/master/docs/usecases.md) and add your example.
     You can just copy-paste one of the existing examples and adjust it contain a description of your use case.
 
 
@@ -29,7 +29,7 @@ Below are a number of use cases that have been applied in practice. These use ca
         </i><br>
         •••<br>First Name Last Name<br><b>My Profession</b><br>My Organization<br>
     </p> -->
-    
+
 #### App User Feedback
 
 !!! quote ""
@@ -163,4 +163,4 @@ BERTopic has also been adopted more and more in the academic field. Here are a f
 * *Alhaj, F., Al-Haj, A., Sharieh, A., & Jabri, R.* (2022). [Improving Arabic cognitive distortion classification in Twitter using BERTopic.](https://oars.uos.ac.uk/2327/1/Paper_99-Improving_Arabic_Cognitive_Distortion_Classification_in_Twitter.pdf) International Journal of Advanced Computer Science and Applications, 13(1), 854-860.
 
 
-Click [here](https://scholar.google.nl/scholar?oi=bibs&hl=nl&cites=17397195143750028634,8180869421575866889,8997387995186833349,18341994629392979746,1103958012065447153,735156116265912963,513933600215578884) for a full overview of papers citing BERTopic. 
+Click [here](https://scholar.google.nl/scholar?oi=bibs&hl=nl&cites=17397195143750028634,8180869421575866889,8997387995186833349,18341994629392979746,1103958012065447153,735156116265912963,513933600215578884) for a full overview of papers citing BERTopic.

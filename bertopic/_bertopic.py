@@ -37,11 +37,18 @@ else:
 from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
 
 # Models
-import hdbscan
-from umap import UMAP
+try:
+    from hdbscan import HDBSCAN
+
+    HAS_HDBSCAN = True
+except (ImportError, ModuleNotFoundError):
+    HAS_HDBSCAN = False
+    from sklearn.cluster import HDBSCAN as SK_HDBSCAN
+
 from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
@@ -143,8 +150,8 @@ class BERTopic:
         zeroshot_topic_list: List[str] = None,
         zeroshot_min_similarity: float = 0.7,
         embedding_model=None,
-        umap_model: UMAP = None,
-        hdbscan_model: hdbscan.HDBSCAN = None,
+        umap_model=None,
+        hdbscan_model=None,
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: TfidfTransformer = None,
         representation_model: BaseRepresentation = None,
@@ -247,22 +254,38 @@ class BERTopic:
         self.representation_model = representation_model
 
         # UMAP or another algorithm that has .fit and .transform functions
-        self.umap_model = umap_model or UMAP(
-            n_neighbors=15,
-            n_components=5,
-            min_dist=0.0,
-            metric="cosine",
-            low_memory=self.low_memory,
-        )
+        if umap_model is not None:
+            self.umap_model = umap_model
+        else:
+            try:
+                from umap import UMAP
+
+                self.umap_model = UMAP(
+                    n_neighbors=15,
+                    n_components=5,
+                    min_dist=0.0,
+                    metric="cosine",
+                    low_memory=self.low_memory,
+                )
+            except (ImportError, ModuleNotFoundError):
+                self.umap_model = PCA(n_components=5)
 
         # HDBSCAN or another clustering algorithm that has .fit and .predict functions and
         # the .labels_ variable to extract the labels
-        self.hdbscan_model = hdbscan_model or hdbscan.HDBSCAN(
-            min_cluster_size=self.min_topic_size,
-            metric="euclidean",
-            cluster_selection_method="eom",
-            prediction_data=True,
-        )
+
+        if hdbscan_model is not None:
+            self.hdbscan_model = hdbscan_model
+        elif HAS_HDBSCAN:
+            self.hdbscan_model = HDBSCAN(
+                min_cluster_size=self.min_topic_size,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                prediction_data=True,
+            )
+        else:
+            self.hdbscan_model = SK_HDBSCAN(
+                min_cluster_size=self.min_topic_size, metric="euclidean", cluster_selection_method="eom", n_jobs=-1
+            )
 
         # Public attributes
         self.topics_ = None
@@ -326,7 +349,7 @@ class BERTopic:
         images: List[str] = None,
         y: Union[List[int], np.ndarray] = None,
     ):
-        """Fit the models (Bert, UMAP, and, HDBSCAN) on a collection of documents and generate topics.
+        """Fit the models on a collection of documents and generate topics.
 
         Arguments:
             documents: A list of documents to fit on
@@ -580,7 +603,7 @@ class BERTopic:
             )
 
         # Transform without hdbscan_model and umap_model using only cosine similarity
-        elif type(self.hdbscan_model) == BaseCluster:
+        elif type(self.hdbscan_model) is BaseCluster:
             logger.info("Predicting topic assignments through cosine similarity of topic and document embeddings.")
             sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
             predictions = np.argmax(sim_matrix, axis=1) - self._outliers
@@ -684,9 +707,7 @@ class BERTopic:
         # Checks
         check_embeddings_shape(embeddings, documents)
         if not hasattr(self.hdbscan_model, "partial_fit"):
-            raise ValueError(
-                "In order to use `.partial_fit`, the cluster model should have " "a `.partial_fit` function."
-            )
+            raise ValueError("In order to use `.partial_fit`, the cluster model should have a `.partial_fit` function.")
 
         # Prepare documents
         if isinstance(documents, str):
@@ -1524,7 +1545,7 @@ class BERTopic:
 
         if top_n_words > 100:
             logger.warning(
-                "Note that extracting more than 100 words from a sparse " "can slow down computation quite a bit."
+                "Note that extracting more than 100 words from a sparse can slow down computation quite a bit."
             )
         self.top_n_words = top_n_words
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
@@ -2007,7 +2028,7 @@ class BERTopic:
                 custom_labels = topic_labels
             else:
                 raise ValueError(
-                    "Make sure that `topic_labels` contains the same number " "of labels as there are topics."
+                    "Make sure that `topic_labels` contains the same number of labels as there are topics."
                 )
 
         self.custom_labels_ = custom_labels
@@ -2124,9 +2145,7 @@ class BERTopic:
                 for topic in topic_group:
                     mapping[topic] = topic_group[0]
         else:
-            raise ValueError(
-                "Make sure that `topics_to_merge` is either" "a list of topics or a list of list of topics."
-            )
+            raise ValueError("Make sure that `topics_to_merge` is eithera list of topics or a list of list of topics.")
 
         # Track mappings and sizes of topics for merging topic embeddings
         mappings = defaultdict(list)
@@ -2532,7 +2551,7 @@ class BERTopic:
 
     def visualize_document_datamap(
         self,
-        docs: List[str],
+        docs: List[str] = None,
         topics: List[int] = None,
         embeddings: np.ndarray = None,
         reduced_embeddings: np.ndarray = None,
@@ -2540,8 +2559,12 @@ class BERTopic:
         title: str = "Documents and Topics",
         sub_title: Union[str, None] = None,
         width: int = 1200,
-        height: int = 1200,
-        **datamap_kwds,
+        height: int = 750,
+        interactive: bool = False,
+        enable_search: bool = False,
+        topic_prefix: bool = False,
+        datamap_kwds: dict = {},
+        int_datamap_kwds: dict = {},
     ):
         """Visualize documents and their topics in 2D as a static plot for publication using
         DataMapPlot. This works best if there are between 5 and 60 topics. It is therefore best
@@ -2549,21 +2572,30 @@ class BERTopic:
 
         Arguments:
             topic_model:  A fitted BERTopic instance.
-            docs: The documents you used when calling either `fit` or `fit_transform`
+            docs: The documents you used when calling either `fit` or `fit_transform`.
             topics: A selection of topics to visualize.
-            Not to be confused with the topics that you get from .fit_transform. For example, if you want to visualize only topics 1 through 5: topics = [1, 2, 3, 4, 5]. Documents not in these topics will be shown as noise points.
+                    Not to be confused with the topics that you get from `.fit_transform`.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`. Documents not in these topics will be shown
+                    as noise points.
             embeddings:  The embeddings of all documents in `docs`.
             reduced_embeddings:  The 2D reduced embeddings of all documents in `docs`.
             custom_labels:  If bool, whether to use custom topic labels that were defined using
-                           `topic_model.set_topic_labels`.
-                           If `str`, it uses labels from other aspects, e.g., "Aspect1".
+                        `topic_model.set_topic_labels`.
+                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
             title: Title of the plot.
             sub_title: Sub-title of the plot.
             width: The width of the figure.
             height: The height of the figure.
-            **datamap_kwds:  All further keyword args will be passed on to DataMapPlot's
-                             `create_plot` function. See the DataMapPlot documentation
-                             for more details.
+            interactive: Whether to create an interactive plot using DataMapPlot's `create_interactive_plot`.
+            enable_search: Whether to enable search in the interactive plot. Only works if `interactive=True`.
+            topic_prefix: Prefix to add to the topic number when displaying the topic name.
+            datamap_kwds:  Keyword args be passed on to DataMapPlot's `create_plot` function
+                        if you are not using the interactive version.
+                        See the DataMapPlot documentation for more details.
+            int_datamap_kwds:  Keyword args be passed on to DataMapPlot's `create_interactive_plot` function
+                            if you are using the interactive version.
+                            See the DataMapPlot documentation for more details.
 
         Returns:
             figure: A Matplotlib Figure object.
@@ -2610,7 +2642,6 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        check_documents_type(docs)
         return plotting.visualize_document_datamap(
             self,
             docs,
@@ -2622,7 +2653,11 @@ class BERTopic:
             sub_title,
             width,
             height,
-            **datamap_kwds,
+            interactive,
+            enable_search,
+            topic_prefix,
+            datamap_kwds,
+            int_datamap_kwds,
         )
 
     def visualize_hierarchical_documents(
@@ -3549,7 +3584,7 @@ class BERTopic:
 
         # Replace embedding model if one is specifically chosen
         verbose = any([model.verbose for model in models])
-        if embedding_model is not None and type(merged_model.embedding_model) == BaseEmbedder:
+        if embedding_model is not None and type(merged_model.embedding_model) is BaseEmbedder:
             merged_model.embedding_model = select_backend(embedding_model, verbose=verbose)
         return merged_model
 
@@ -3753,7 +3788,7 @@ class BERTopic:
         partial_fit: bool = False,
         y: np.ndarray = None,
     ) -> Tuple[pd.DataFrame, np.ndarray]:
-        """Cluster UMAP embeddings with HDBSCAN.
+        """Cluster UMAP reduced embeddings with HDBSCAN.
 
         Arguments:
             umap_embeddings: The reduced sentence embeddings with UMAP
@@ -4457,12 +4492,18 @@ class BERTopic:
             self.c_tf_idf_, self.topic_embeddings_, use_ctfidf, output_ndarray=True
         )[0]
         norm_data = normalize(embeddings, norm="l2")
-        predictions = hdbscan.HDBSCAN(
-            min_cluster_size=2,
-            metric="euclidean",
-            cluster_selection_method="eom",
-            prediction_data=True,
-        ).fit_predict(norm_data[self._outliers :])
+
+        if HAS_HDBSCAN:
+            predictions = HDBSCAN(
+                min_cluster_size=2,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                prediction_data=True,
+            ).fit_predict(norm_data[self._outliers :])
+        else:
+            predictions = SK_HDBSCAN(
+                min_cluster_size=2, metric="euclidean", cluster_selection_method="eom", n_jobs=-1
+            ).fit_predict(norm_data[self._outliers :])
 
         # Map similar topics
         mapped_topics = {
@@ -4808,8 +4849,6 @@ def _create_model_from_files(
         images: The images per topic
         warn_no_backend: Whether to warn the user if no backend is given
     """
-    from sentence_transformers import SentenceTransformer
-
     params["n_gram_range"] = tuple(params["n_gram_range"])
 
     if ctfidf_config is not None:
@@ -4817,10 +4856,11 @@ def _create_model_from_files(
         ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
 
     params["n_gram_range"] = tuple(params["n_gram_range"])
-    ctfidf_config
 
     # Select HF model through SentenceTransformers
     try:
+        from sentence_transformers import SentenceTransformer
+
         embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
     except:  # noqa: E722
         embedding_model = BaseEmbedder()
@@ -4846,7 +4886,7 @@ def _create_model_from_files(
         hdbscan_model=empty_cluster_model,
         **params,
     )
-    topic_model.topic_embeddings_ = tensors["topic_embeddings"].numpy()
+    topic_model.topic_embeddings_ = tensors["topic_embeddings"]
     topic_model.topic_representations_ = {int(key): val for key, val in topics["topic_representations"].items()}
     topic_model.topics_ = topics["topics"]
     topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
@@ -4883,7 +4923,7 @@ def _create_model_from_files(
         # ClassTfidfTransformer
         topic_model.ctfidf_model.reduce_frequent_words = ctfidf_config["ctfidf_model"]["reduce_frequent_words"]
         topic_model.ctfidf_model.bm25_weighting = ctfidf_config["ctfidf_model"]["bm25_weighting"]
-        idf = ctfidf_tensors["diag"].numpy()
+        idf = ctfidf_tensors["diag"]
         topic_model.ctfidf_model._idf_diag = sp.diags(
             idf, offsets=0, shape=(len(idf), len(idf)), format="csr", dtype=np.float64
         )

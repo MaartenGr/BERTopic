@@ -10,7 +10,7 @@ hide:
 BERTopic is a topic modeling technique that leverages 🤗 transformers and c-TF-IDF to create dense clusters
 allowing for easily interpretable topics whilst keeping important words in the topic descriptions.
 
-BERTopic supports all kinds of topic modeling techniques:  
+BERTopic supports all kinds of topic modeling techniques:
 <table>
   <tr>
     <td><a href="https://maartengr.github.io/BERTopic/getting_started/guided/guided.html">Guided</a></td>
@@ -39,7 +39,10 @@ BERTopic supports all kinds of topic modeling techniques:
  </tr>
 </table>
 
-Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99), [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4) and [here](https://towardsdatascience.com/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
+Corresponding medium posts can be found [here](https://medium.com/data-science/topic-modeling-with-bert-779f7db187e6?sk=0b5a470c006d1842ad4c8a3057063a99
+), [here](https://medium.com/data-science/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d
+) and [here](https://medium.com/data-science/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4
+). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html).
 
 ## **Installation**
 
@@ -49,8 +52,8 @@ Installation, with sentence-transformers, can be done using [pypi](https://pypi.
 pip install bertopic
 ```
 
-You may want to install more depending on the transformers and language backends that you will be using. 
-The possible installations are: 
+You may want to install more depending on the transformers and language backends that you will be using.
+The possible installations are:
 
 ```bash
 # Choose an embedding backend
@@ -66,7 +69,7 @@ We start by extracting topics from the well-known 20 newsgroups dataset containi
 ```python
 from bertopic import BERTopic
 from sklearn.datasets import fetch_20newsgroups
- 
+
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 
 topic_model = BERTopic()
@@ -86,7 +89,7 @@ Topic	Count	Name
 3	    381	    22_key_encryption_keys_encrypted
 ```
 
--1 refers to all outliers and should typically be ignored. Next, let's take a look at the most 
+-1 refers to all outliers and should typically be ignored. Next, let's take a look at the most
 frequent topic that was generated, topic 0:
 
 ```python
@@ -119,7 +122,7 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 
 !!! tip "Multilingual"
 
-    Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
+    Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages.
 
 
 ## **Fine-tune Topic Representations**
@@ -142,12 +145,12 @@ from bertopic.representation import OpenAI
 
 # Fine-tune topic representations with GPT
 client = openai.OpenAI(api_key="sk-...")
-representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True)
+representation_model = OpenAI(client, model="gpt-4o-mini", chat=True)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
 !!! tip "Multi-aspect Topic Modeling"
-    Instead of iterating over all of these different topic representations, you can model them simultaneously with [multi-aspect topic representations](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) in BERTopic. 
+    Instead of iterating over all of these different topic representations, you can model them simultaneously with [multi-aspect topic representations](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) in BERTopic.
 
 
 ## **Modularity**
@@ -166,22 +169,22 @@ You can swap out any of these models or even remove them entirely. The following
 5. [Weight](https://maartengr.github.io/BERTopic/getting_started/ctfidf/ctfidf.html) tokens
 6. [Represent topics](https://maartengr.github.io/BERTopic/getting_started/representation/representation.html) with one or [multiple](https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html) representations
 
-To find more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
+To find more about the underlying algorithm and assumptions [here](https://maartengr.github.io/BERTopic/algorithm/algorithm.html).
 
 
 ## **Overview**
-BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview 
-of all methods and a short description of its purpose. 
+BERTopic has many functions that quickly can become overwhelming. To alleviate this issue, you will find an overview
+of all methods and a short description of its purpose.
 
 ### Common
-Below, you will find an overview of common functions in BERTopic. 
+Below, you will find an overview of common functions in BERTopic.
 
-| Method | Code  | 
+| Method | Code  |
 |-----------------------|---|
 | Fit the model    |  `.fit(docs)` |
 | Fit the model and predict documents  |  `.fit_transform(docs)` |
 | Predict new documents    |  `.transform([new_doc])` |
-| Access single topic   | `.get_topic(topic=12)`  |   
+| Access single topic   | `.get_topic(topic=12)`  |
 | Access all topics     |  `.get_topics()` |
 | Get topic freq    |  `.get_topic_freq()` |
 | Get all topic information|  `.get_topic_info()` |
@@ -200,9 +203,9 @@ Below, you will find an overview of common functions in BERTopic.
 
 
 ### Attributes
-After having trained your BERTopic model, several are saved within your model. These attributes, in part, 
-refer to how model information is stored on an estimator during fitting. The attributes that you see below all end in `_` and are 
-public attributes that can be used to access model information. 
+After having trained your BERTopic model, several are saved within your model. These attributes, in part,
+refer to how model information is stored on an estimator during fitting. The attributes that you see below all end in `_` and are
+public attributes that can be used to access model information.
 
 | Attribute | Description |
 |------------------------|---------------------------------------------------------------------------------------------|
@@ -221,7 +224,7 @@ public attributes that can be used to access model information.
 ### Variations
 There are many different use cases in which topic modeling can be used. As such, several variations of BERTopic have been developed such that one package can be used across many use cases.
 
-| Method | Code  | 
+| Method | Code  |
 |-----------------------|---|
 | [Topic Distribution Approximation](https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html) | `.approximate_distribution(docs)` |
 | [Online Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/online/online.html) | `.partial_fit(doc)` |
@@ -238,11 +241,11 @@ There are many different use cases in which topic modeling can be used. As such,
 
 
 ### Visualizations
-Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation. 
-Visualizing different aspects of the topic model helps in understanding the model and makes it easier 
-to tweak the model to your liking. 
+Evaluating topic models can be rather difficult due to the somewhat subjective nature of evaluation.
+Visualizing different aspects of the topic model helps in understanding the model and makes it easier
+to tweak the model to your liking.
 
-| Method | Code  | 
+| Method | Code  |
 |-----------------------|---|
 | Visualize Topics    |  `.visualize_topics()` |
 | Visualize Documents    |  `.visualize_documents()` |
@@ -258,7 +261,7 @@ to tweak the model to your liking.
 | Visualize Topics per Class | `.visualize_topics_per_class(topics_per_class)` |
 
 
-  
+
 ## **Citation**
 To cite the [BERTopic paper](https://arxiv.org/abs/2203.05794), please use the following bibtex reference:
 

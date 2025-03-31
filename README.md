@@ -1,4 +1,5 @@
-[![PyPI - Python](https://img.shields.io/badge/python-v3.8+-blue.svg)](https://pypi.org/project/bertopic/)
+[![PyPI Downloads](https://static.pepy.tech/badge/bertopic)](https://pepy.tech/projects/bertopic)
+[![PyPI - Python](https://img.shields.io/badge/python-v3.9+-blue.svg)](https://pypi.org/project/bertopic/)
 [![Build](https://img.shields.io/github/actions/workflow/status/MaartenGr/BERTopic/testing.yml?branch=master)](https://github.com/MaartenGr/BERTopic/actions)
 [![docs](https://img.shields.io/badge/docs-Passing-green.svg)](https://maartengr.github.io/BERTopic/)
 [![PyPI - PyPi](https://img.shields.io/pypi/v/BERTopic)](https://pypi.org/project/bertopic/)
@@ -42,7 +43,10 @@ BERTopic supports all kinds of topic modeling techniques:
  </tr>
 </table>
 
-Corresponding medium posts can be found [here](https://towardsdatascience.com/topic-modeling-with-bert-779f7db187e6?source=friends_link&sk=0b5a470c006d1842ad4c8a3057063a99), [here](https://towardsdatascience.com/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4) and [here](https://towardsdatascience.com/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
+Corresponding medium posts can be found [here](https://medium.com/data-science/topic-modeling-with-bert-779f7db187e6?sk=0b5a470c006d1842ad4c8a3057063a99
+), [here](https://medium.com/data-science/using-whisper-and-bertopic-to-model-kurzgesagts-videos-7d8a63139bdf?sk=b1e0fd46f70cb15e8422b4794a81161d
+) and [here](https://medium.com/data-science/interactive-topic-modeling-with-bertopic-1ea55e7d73d8?sk=03c2168e9e74b6bda2a1f3ed953427e4
+). For a more detailed overview, you can read the [paper](https://arxiv.org/abs/2203.05794) or see a [brief overview](https://maartengr.github.io/BERTopic/algorithm/algorithm.html). 
 
 ## Installation
 
@@ -61,6 +65,8 @@ pip install bertopic[flair,gensim,spacy,use]
 # Topic modeling with images
 pip install bertopic[vision]
 ```
+
+For a *light-weight installation* without transformers, UMAP and/or HDBSCAN (for training with Model2Vec or perhaps for inference), see [this tutorial](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation).
 
 ## Getting Started
 For an in-depth overview of the features of BERTopic 
@@ -161,7 +167,7 @@ from bertopic.representation import OpenAI
 
 # Fine-tune topic representations with GPT
 client = openai.OpenAI(api_key="sk-...")
-representation_model = OpenAI(client, model="gpt-3.5-turbo", chat=True)
+representation_model = OpenAI(client, model="gpt-4o-mini", chat=True)
 topic_model = BERTopic(representation_model=representation_model)
 ```
 
