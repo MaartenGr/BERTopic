@@ -2168,6 +2168,85 @@ class BERTopic:
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
+    def delete_topics(
+        self,
+        topics_to_delete: List[int],
+    ) -> None:
+        """Delete specified topics from the topic model.
+
+        This method allows you to remove topics from the model by mapping them to a special
+        label (-1) and updating the internal topic representation accordingly. It also
+        updates the topic sizes and any relevant attributes to reflect the changes.
+
+        Arguments:
+            topics_to_delete: A list of topic IDs to be deleted from the model.
+
+        Examples:
+        To delete topics 1 and 2 from the model:
+
+        ```python
+        topic_model.delete_topics([1, 2])
+        ```
+        """
+        check_is_fitted(self)
+
+        # First map deleted topics to -1
+        initial_mapping = {topic: -1 if topic in topics_to_delete else topic for topic in set(self.topics_)}
+        initial_mapping[-1] = -1
+
+        # Update topics to mark deletions
+        self.topics_ = [initial_mapping[topic] for topic in self.topics_]
+        self._update_topic_size(pd.DataFrame({"Topic": self.topics_}))
+
+        # Create size-based mapping for remaining topics
+        df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values("Size", ascending=False)
+        df = df[df.Old_Topic != -1]  # Exclude outliers
+        final_mapping = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
+
+        # Update topics with final mapping
+        self.topics_ = [final_mapping[topic] for topic in self.topics_]
+        self.topic_mapper_.add_mappings(final_mapping, topic_model=self)
+        self._update_topic_size(pd.DataFrame({"Topic": self.topics_}))
+
+        # Update probabilities if they exist
+        if self.probabilities_ is not None:
+            self.probabilities_ = self._map_probabilities(self.probabilities_)
+
+        # Update dictionary-based attributes
+        for attr in ["topic_representations_", "topic_aspects_"]:
+            if hasattr(self, attr) and getattr(self, attr) is not None:
+                old_dict = getattr(self, attr)
+                if attr == "topic_aspects_":
+                    # Handle nested dictionary for aspects
+                    new_dict = {
+                        aspect: {
+                            final_mapping[old_topic]: content
+                            for old_topic, content in topics.items()
+                            if old_topic not in topics_to_delete
+                        }
+                        for aspect, topics in old_dict.items()
+                    }
+                else:
+                    # Handle flat dictionary
+                    new_dict = {
+                        final_mapping[old_topic]: content
+                        for old_topic, content in old_dict.items()
+                        if old_topic not in topics_to_delete
+                    }
+                setattr(self, attr, new_dict)
+
+        # Update array-based attributes using masks
+        for attr in ["topic_embeddings_", "c_tf_idf_"]:
+            if hasattr(self, attr) and getattr(self, attr) is not None:
+                matrix = getattr(self, attr)
+                mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
+                setattr(self, attr, matrix[mask])
+
+        # Update ctfidf model
+        if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
+            mask = np.array([topic not in topics_to_delete for topic in range(self.ctfidf_model._idf_diag.shape[0])])
+            self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
+
     def reduce_topics(
         self,
         docs: List[str],
