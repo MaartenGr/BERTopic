@@ -1,5 +1,5 @@
 !!! Note
-    Difference between Zero-shot and Guided BERTopic: 
+    Difference between Zero-shot and Guided BERTopic:
     Zeros-shot Topic Modeling is similar - yet not equivalent - to [Guided BERTopic](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html). Use [Guided BERTopic](https://maartengr.github.io/BERTopic/getting_started/guided/guided.html) to boost certain keyword's importance. Use [Zeros-shot Topic Modeling](https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html) to try to categorize documents into predefined topics ("zero-shot topics") before the clustering the remaining, unclassified documents, using the default unsupervised BERTopic topic exploration algorithm.
 
 Zero-shot Topic Modeling is a technique that allows you to find topics in large amounts of documents that were predefined. When faced with many documents, you often have an idea of which topics will definitely be in there. Whether that is a result of simply knowing your data or if a domain expert is involved in defining those topics.
