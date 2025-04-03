@@ -1778,7 +1778,7 @@ class BERTopic:
         # the topic distributions
         document_info = topic_model.get_document_info(docs, df=df,
                                                       metadata={"Topic_distribution": distributions})
-                """
+        """
         check_documents_type(docs)
         if df is not None:
             document_info = df.copy()
@@ -2173,14 +2173,47 @@ class BERTopic:
     ) -> None:
         check_is_fitted(self)
 
-        topics_df = pd.DataFrame(
-                {
-                    "Topic": self.topics_
-                }
-            )
+        topics_df = pd.DataFrame({"Topic": self.topics_})
 
         # Check if -1 exists in the current topics
         had_outliers = -1 in set(self.topics_)
+
+        # If adding -1 for the first time, initialize its attributes
+        if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
+            # Initialize c_tf_idf for -1 topic (zeros)
+            if hasattr(self, "c_tf_idf_") and self.c_tf_idf_ is not None:
+                outlier_row = np.zeros((1, self.c_tf_idf_.shape[1]))
+                if isinstance(self.c_tf_idf_, sp.csr_matrix):
+                    outlier_row = sp.csr_matrix(outlier_row)
+                self.c_tf_idf_ = sp.vstack([outlier_row, self.c_tf_idf_])
+
+            # Initialize topic embeddings for -1 topic (zeros)
+            if hasattr(self, "topic_embeddings_") and self.topic_embeddings_ is not None:
+                outlier_embedding = np.zeros((1, self.topic_embeddings_.shape[1]))
+                self.topic_embeddings_ = np.vstack([outlier_embedding, self.topic_embeddings_])
+
+            # Initialize topic representations for -1 topic: ("N/A - OUTLIER TOPIC", 1e-05)
+            if hasattr(self, "topic_representations_") and self.topic_representations_ is not None:
+                self.topic_representations_[-1] = [("N/A - OUTLIER TOPIC", 1e-05)]
+
+            # Initialize ctfidf model diagonal for -1 topic (ones)
+            if (
+                hasattr(self, "ctfidf_model")
+                and self.ctfidf_model is not None
+                and hasattr(self.ctfidf_model, "_idf_diag")
+            ):
+                if isinstance(self.ctfidf_model._idf_diag, sp.csr_matrix):
+                    n_features = self.ctfidf_model._idf_diag.shape[1]
+                    outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
+                    self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
+                else:
+                    outlier_diag = np.ones(1)
+                    self.ctfidf_model._idf_diag = np.concatenate([outlier_diag, self.ctfidf_model._idf_diag])
+
+            # Initialize topic aspects for -1 topic (empty dict for each aspect)
+            if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
+                for aspect in self.topic_aspects_:
+                    self.topic_aspects_[aspect][-1] = {}
 
         # First map deleted topics to -1
         mapping = {topic: -1 if topic in topics_to_delete else topic for topic in set(self.topics_)}
@@ -2198,42 +2231,7 @@ class BERTopic:
             for topic_to, topics_from in mappings.items()
         }
 
-        # If adding -1 for the first time, initialize its attributes
-        if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
-            # Initialize c_tf_idf for -1 topic (zeros)
-            if hasattr(self, "c_tf_idf_") and self.c_tf_idf_ is not None:
-                outlier_row = np.zeros((1, self.c_tf_idf_.shape[1]))
-                if isinstance(self.c_tf_idf_, sp.csr_matrix):
-                    outlier_row = sp.csr_matrix(outlier_row)
-                    self.c_tf_idf_ = sp.vstack([outlier_row, self.c_tf_idf_])
-                else:
-                    self.c_tf_idf_ = np.vstack([outlier_row, self.c_tf_idf_])
-
-            # Initialize topic embeddings for -1 topic (zeros)
-            if hasattr(self, "topic_embeddings_") and self.topic_embeddings_ is not None:
-                outlier_embedding = np.zeros((1, self.topic_embeddings_.shape[1]))
-                self.topic_embeddings_ = np.vstack([outlier_embedding, self.topic_embeddings_])
-
-            # Initialize topic representations for -1 topic: ('N/A', 1e-05)]
-            if hasattr(self, "topic_representations_") and self.topic_representations_ is not None:
-                self.topic_representations_[-1] = [('N/A', 1e-05)]
-
-            # Initialize ctfidf model diagonal for -1 topic (ones)
-            if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None and hasattr(self.ctfidf_model, "_idf_diag"):
-                if isinstance(self.ctfidf_model._idf_diag, sp.csr_matrix):
-                    n_features = self.ctfidf_model._idf_diag.shape[1]
-                    outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
-                    self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
-                else:
-                    outlier_diag = np.ones(1)
-                    self.ctfidf_model._idf_diag = np.concatenate([outlier_diag, self.ctfidf_model._idf_diag])
-
-            # Initialize topic aspects for -1 topic (empty dict for each aspect)
-            if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
-                for aspect in self.topic_aspects_:
-                    self.topic_aspects_[aspect][-1] = {}
-
-        # Continue with the rest of the delete_topics logic
+        # remove deleted topics and update attributes
         topics_df.Topic = topics_df.Topic.map(mapping)
         self.topic_mapper_.add_mappings(mapping, topic_model=self)
         topics_df = self._sort_mappings_by_frequency(topics_df)

@@ -23,7 +23,7 @@ def test_delete(model, request):
     topic_model.delete_topics(topics_to_delete)
     mappings = topic_model.topic_mapper_.get_mappings(list(topic_model.hdbscan_model.labels_))
     mapped_labels = [mappings[label] for label in topic_model.hdbscan_model.labels_]
-    
+
     if model == "online_topic_model" or model == "kmeans_pca_topic_model":
         assert nr_topics == len(set(topic_model.topics_)) + 1
         assert topic_model.get_topic_info().Count.sum() == length_documents
