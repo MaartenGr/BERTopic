@@ -3488,14 +3488,29 @@ class BERTopic:
         merged_model = BERTopic.merge_models([topic_model_1, topic_model_2, topic_model_3])
         ```
         """
-        import torch
+        def choose_backend():
+            """Choose the backend to use for saving the model."""
+            try:
+                import torch  # noqa: F401
+                return "pytorch"
+            except (ModuleNotFoundError, ImportError):
+                try:
+                    import safetensors  # noqa: F401
+                    return "safetensors"
+                except (ModuleNotFoundError, ImportError):
+                    raise ImportError(
+                        "Neither pytorch nor safetensors is installed. "
+                        "Please install at least one of these packages:\n"
+                        "  pip install torch\n"
+                        "  pip install safetensors"
+                    )
 
         # Temporarily save model and push to HF
         with TemporaryDirectory() as tmpdir:
             # Save model weights and config.
             all_topics, all_params, all_tensors = [], [], []
             for index, model in enumerate(models):
-                model.save(tmpdir, serialization="pytorch")
+                model.save(tmpdir, serialization=choose_backend())
                 topics, params, tensors, _, _, _ = save_utils.load_local_files(Path(tmpdir))
                 all_topics.append(topics)
                 all_params.append(params)
@@ -3570,7 +3585,7 @@ class BERTopic:
             merged_topics["topic_sizes"] = dict(Counter(merged_topics["topics"]))
 
         # Create a new model from the merged parameters
-        merged_tensors = {"topic_embeddings": torch.from_numpy(merged_tensors)}
+        merged_tensors = {"topic_embeddings": merged_tensors}
         merged_model = _create_model_from_files(
             merged_topics,
             merged_params,
