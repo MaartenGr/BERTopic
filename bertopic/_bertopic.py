@@ -3488,14 +3488,17 @@ class BERTopic:
         merged_model = BERTopic.merge_models([topic_model_1, topic_model_2, topic_model_3])
         ```
         """
+
         def choose_backend():
             """Choose the backend to use for saving the model."""
             try:
                 import torch  # noqa: F401
+
                 return "pytorch"
             except (ModuleNotFoundError, ImportError):
                 try:
                     import safetensors  # noqa: F401
+
                     return "safetensors"
                 except (ModuleNotFoundError, ImportError):
                     raise ImportError(
