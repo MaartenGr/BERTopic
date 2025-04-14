@@ -54,7 +54,15 @@ class SentenceTransformerBackend(BaseEmbedder):
 
         self._hf_model = None
         if model2vec and isinstance(embedding_model, str):
-            from sentence_transformers.models import StaticEmbedding
+            try:
+                from sentence_transformers.models import StaticEmbedding
+            except ImportError:
+                raise ValueError(
+                    "Cannot import StaticEmbedding from "
+                    "sentence_transformers. Please upgrade "
+                    "sentence_transformers to version 3.2.0 or don't use a "
+                    "model2vec embedding model."
+                )
             static_embedding = StaticEmbedding.from_model2vec(embedding_model)
             self.embedding_model = SentenceTransformer(modules=[static_embedding])
         elif isinstance(embedding_model, SentenceTransformer):
