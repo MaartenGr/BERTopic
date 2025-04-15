@@ -1574,7 +1574,7 @@ class BERTopic:
         self.topic_representations_ = self._extract_words_per_topic(words, documents)
 
         # Update topic vectors
-        if set(topics) != self.topics_:
+        if set(topics) != set(self.topics_):
             # Remove outlier topic embedding if all that has changed is the outlier class
             same_position = all(
                 [
