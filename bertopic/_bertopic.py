@@ -2171,6 +2171,14 @@ class BERTopic:
         self,
         topics_to_delete: List[int],
     ) -> None:
+        """Delete topics from the topic model.
+
+        The deleted topics will be mapped to -1 (outlier topic). Core topic attributes
+        like topic embeddings and c-TF-IDF will be automatically updated.
+
+        Arguments:
+            topics_to_delete: List of topics to delete
+        """
         check_is_fitted(self)
 
         topics_df = pd.DataFrame({"Topic": self.topics_})
@@ -2180,37 +2188,25 @@ class BERTopic:
 
         # If adding -1 for the first time, initialize its attributes
         if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
-            # Initialize c_tf_idf for -1 topic (zeros)
-            if hasattr(self, "c_tf_idf_") and self.c_tf_idf_ is not None:
-                outlier_row = np.zeros((1, self.c_tf_idf_.shape[1]))
-                if isinstance(self.c_tf_idf_, sp.csr_matrix):
-                    outlier_row = sp.csr_matrix(outlier_row)
-                self.c_tf_idf_ = sp.vstack([outlier_row, self.c_tf_idf_])
+            # Initialize c-TF-IDF for -1 topic (zeros)
+            outlier_row = np.zeros((1, self.c_tf_idf_.shape[1]))
+            outlier_row = sp.csr_matrix(outlier_row)
+            self.c_tf_idf_ = sp.vstack([outlier_row, self.c_tf_idf_])
 
             # Initialize topic embeddings for -1 topic (zeros)
-            if hasattr(self, "topic_embeddings_") and self.topic_embeddings_ is not None:
-                outlier_embedding = np.zeros((1, self.topic_embeddings_.shape[1]))
-                self.topic_embeddings_ = np.vstack([outlier_embedding, self.topic_embeddings_])
+            outlier_embedding = np.zeros((1, self.topic_embeddings_.shape[1]))
+            self.topic_embeddings_ = np.vstack([outlier_embedding, self.topic_embeddings_])
 
-            # Initialize topic representations for -1 topic: ("N/A - OUTLIER TOPIC", 1e-05)
-            if hasattr(self, "topic_representations_") and self.topic_representations_ is not None:
-                self.topic_representations_[-1] = [("N/A - OUTLIER TOPIC", 1e-05)]
+            # Initialize topic representations for -1 topic: ("", 1e-05)
+            self.topic_representations_[-1] = [("", 1e-05)]
 
-            # Initialize ctfidf model diagonal for -1 topic (ones)
-            if (
-                hasattr(self, "ctfidf_model")
-                and self.ctfidf_model is not None
-                and hasattr(self.ctfidf_model, "_idf_diag")
-            ):
-                if isinstance(self.ctfidf_model._idf_diag, sp.csr_matrix):
-                    n_features = self.ctfidf_model._idf_diag.shape[1]
-                    outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
-                    self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
-                else:
-                    outlier_diag = np.ones(1)
-                    self.ctfidf_model._idf_diag = np.concatenate([outlier_diag, self.ctfidf_model._idf_diag])
+            # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
+            if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
+                n_features = self.ctfidf_model._idf_diag.shape[1]
+                outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
+                self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
 
-            # Initialize topic aspects for -1 topic (empty dict for each aspect)
+            # Initialize topic aspects for -1 topic (empty dict for each aspect) if they exist
             if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
                 for aspect in self.topic_aspects_:
                     self.topic_aspects_[aspect][-1] = {}
@@ -2241,36 +2237,42 @@ class BERTopic:
         final_mapping = self.topic_mapper_.get_mappings()
 
         # Update dictionary-based attributes to remove deleted topics
-        for attr in ["topic_representations_", "topic_aspects_"]:
-            if hasattr(self, attr) and getattr(self, attr) is not None:
-                old_dict = getattr(self, attr)
-                if attr == "topic_aspects_":
-                    # Handle nested dictionary for aspects
-                    new_dict = {
-                        aspect: {
-                            (final_mapping[old_topic] if old_topic != -1 else -1): content
-                            for old_topic, content in topics.items()
-                            if old_topic not in topics_to_delete
-                        }
-                        for aspect, topics in old_dict.items()
-                    }
-                else:
-                    # Handle flat dictionary
-                    new_dict = {
-                        (final_mapping[old_topic] if old_topic != -1 else -1): content
-                        for old_topic, content in old_dict.items()
-                        if old_topic not in topics_to_delete
-                    }
-                setattr(self, attr, new_dict)
+        # Handle topic_aspects_ if it exists
+        if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
+            new_aspects = {
+                aspect: {
+                    (final_mapping[old_topic] if old_topic != -1 else -1): content
+                    for old_topic, content in topics.items()
+                    if old_topic not in topics_to_delete
+                }
+                for aspect, topics in self.topic_aspects_.items()
+            }
+            self.topic_aspects_ = new_aspects
+
+        # Update custom labels if they exist
+        if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
+            new_labels = {
+                (final_mapping[old_topic] if old_topic != -1 else -1): label
+                for old_topic, label in self.custom_labels_.items()
+                if old_topic not in topics_to_delete
+            }
+            self.custom_labels_ = new_labels
+
+        # Update topic representations
+        new_representations = {
+            (final_mapping[old_topic] if old_topic != -1 else -1): content
+            for old_topic, content in self.topic_representations_.items()
+            if old_topic not in topics_to_delete
+        }
+        self.topic_representations_ = new_representations
 
         # Update array-based attributes using masks to remove deleted topics
         for attr in ["topic_embeddings_", "c_tf_idf_"]:
-            if hasattr(self, attr) and getattr(self, attr) is not None:
-                matrix = getattr(self, attr)
-                mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
-                setattr(self, attr, matrix[mask])
+            matrix = getattr(self, attr)
+            mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
+            setattr(self, attr, matrix[mask])
 
-        # Update ctfidf model to remove deleted topics
+        # Update ctfidf model to remove deleted topics if it exists
         if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
             mask = np.array([topic not in topics_to_delete for topic in range(self.ctfidf_model._idf_diag.shape[0])])
             self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
