@@ -2200,6 +2200,18 @@ class BERTopic:
             # Initialize topic representations for -1 topic: ("", 1e-05)
             self.topic_representations_[-1] = [("", 1e-05)]
 
+            # Initialize representative docs for -1 topic (empty list)
+            self.representative_docs_[-1] = []
+
+            # Initialize representative images for -1 topic if images are being used
+            if self.representative_images_ is not None:
+                outlier_image = np.zeros((1, self.representative_images_.shape[1]))
+                self.representative_images_ = np.vstack([outlier_image, self.representative_images_])
+
+            # Initialize custom labels for -1 topic if they exist
+            if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
+                self.custom_labels_[-1] = ""
+
             # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
             if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
                 n_features = self.ctfidf_model._idf_diag.shape[1]
@@ -2234,7 +2246,7 @@ class BERTopic:
         self._update_topic_size(topics_df)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
-        final_mapping = self.topic_mapper_.get_mappings()
+        final_mapping = self.topic_mapper_.get_mappings(original_topics=False)
 
         # Update dictionary-based attributes to remove deleted topics
         # Handle topic_aspects_ if it exists
@@ -2265,6 +2277,20 @@ class BERTopic:
             if old_topic not in topics_to_delete
         }
         self.topic_representations_ = new_representations
+
+        # Update representative docs if they exist
+        new_representative_docs = {
+            (final_mapping[old_topic] if old_topic != -1 else -1): docs
+            for old_topic, docs in self.representative_docs_.items()
+            if old_topic not in topics_to_delete
+        }
+        self.representative_docs_ = new_representative_docs
+
+        # Update representative images if they exist
+        if self.representative_images_ is not None:
+            # Create a mask for non-deleted topics
+            mask = np.array([topic not in topics_to_delete for topic in range(len(self.representative_images_))])
+            self.representative_images_ = self.representative_images_[mask] if mask.any() else None
 
         # Update array-based attributes using masks to remove deleted topics
         for attr in ["topic_embeddings_", "c_tf_idf_"]:
