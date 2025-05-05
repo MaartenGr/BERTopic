@@ -90,9 +90,8 @@ class SpacyBackend(BaseEmbedder):
                     embedding = embedding._.trf_data.tensors[-1][0]
                 except AttributeError as e:
                     # For spaCy v3.7+, trf pipelines use spacy-curated-transformers and doc._.trf_data is a DocTransformerOutput object.
-                    embedding = (
-                        embedding._.trf_data.last_hidden_layer_state.data
-                    )    # or embedding._.trf_data.all_outputs[-1].data
+                    embedding = embedding._.trf_data.last_hidden_layer_state.data
+                    # embedding = embedding._.trf_data.all_outputs[-1].data
 
             if not isinstance(embedding, np.ndarray) and hasattr(embedding, "get"):
                 # Convert cupy array to numpy array
