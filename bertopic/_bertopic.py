@@ -3807,7 +3807,7 @@ class BERTopic:
                 else:
                     self.umap_model.fit(embeddings)
                     umap_embeddings = self.umap_model.transform(embeddings)
-        
+
         logger.info("Dimensionality - Completed \u2713")
         return np.nan_to_num(umap_embeddings)
 
