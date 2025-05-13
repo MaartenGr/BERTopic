@@ -3784,14 +3784,18 @@ class BERTopic:
             if hasattr(self.umap_model, "partial_fit"):
                 self.umap_model = self.umap_model.partial_fit(embeddings)
                 umap_embeddings = self.umap_model.transform(embeddings)
-            elif self.topic_representations_ is None:
+            else:
                 umap_embeddings = self.umap_model.fit_transform(embeddings)
 
         # Regular fit
         else:
-            # cuml umap needs y to be an numpy array
-            y = np.array(y) if y is not None else None
-            umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
+            try:
+                # cuml umap needs y to be an numpy array
+                y = np.array(y) if y is not None else None
+                umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
+            except TypeError:
+                self.umap_model.fit(embeddings)
+                umap_embeddings = self.umap_model.fit_transform(embeddings)
         
         logger.info("Dimensionality - Completed \u2713")
         return np.nan_to_num(umap_embeddings)
