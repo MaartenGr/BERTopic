@@ -3789,15 +3789,9 @@ class BERTopic:
 
         # Regular fit
         else:
-            try:
-                # cuml umap needs y to be an numpy array
-                y = np.array(y) if y is not None else None
-                umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
-            except TypeError:
-                umap_embeddings = self.umap_model.fit_transform(embeddings)
-
-        if not umap_embeddings:
-            umap_embeddings = self.umap_model.transform(embeddings)
+            # cuml umap needs y to be an numpy array
+            y = np.array(y) if y is not None else None
+            umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
         
         logger.info("Dimensionality - Completed \u2713")
         return np.nan_to_num(umap_embeddings)
