@@ -34,7 +34,7 @@ if sys.version_info >= (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, Optional, Dict
 
 # Models
 try:
@@ -4082,8 +4082,8 @@ class BERTopic:
         topics: Mapping[str, List[Tuple[str, float]]],
         nr_samples: int = 500,
         nr_repr_docs: int = 5,
-        diversity: float = None,
-    ) -> Union[List[str], List[List[int]]]:
+        diversity: Optional[float] = None,
+    ) -> Tuple[Dict[str, List[str]], List[str], List[List[int]], List[List[int]]]:
         """Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
         most representative to their topic based on the cosine similarity between
