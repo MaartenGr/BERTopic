@@ -3784,9 +3784,12 @@ class BERTopic:
             if hasattr(self.umap_model, "partial_fit"):
                 self.umap_model = self.umap_model.partial_fit(embeddings)
                 umap_embeddings = self.umap_model.transform(embeddings)
+            elif self.topic_representations_ is None:
+                self.umap_model.fit(embeddings)
+                umap_embeddings = self.umap_model.transform(embeddings)
             else:
                 if hasattr(self.umap_model, "fit_transform"):
-                    umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
+                    umap_embeddings = self.umap_model.fit_transform(embeddings)
                 else:
                     self.umap_model.fit(embeddings)
                     umap_embeddings = self.umap_model.transform(embeddings)
@@ -3800,7 +3803,7 @@ class BERTopic:
                     umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
                 else:
                     self.umap_model.fit(embeddings)
-                    umap_embeddings = self.umap_model.transform(embeddings)
+                    umap_embeddings = self.umap_model.transform(embeddings, y=y)
             except TypeError:
                 if hasattr(self.umap_model, "fit_transform"):
                     umap_embeddings = self.umap_model.fit_transform(embeddings)
