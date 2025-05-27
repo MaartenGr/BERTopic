@@ -71,6 +71,7 @@ class KeyBERTInspired(BaseRepresentation):
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
+        embeddings: np.ndarray = None,
     ) -> Mapping[str, List[Tuple[str, float]]]:
         """Extract topics.
 
@@ -79,6 +80,8 @@ class KeyBERTInspired(BaseRepresentation):
             documents: All input documents
             c_tf_idf: The topic c-TF-IDF representation
             topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
 
         Returns:
             updated_topics: Updated topic representations
@@ -88,12 +91,17 @@ class KeyBERTInspired(BaseRepresentation):
             c_tf_idf, documents, topics, self.nr_samples, self.nr_repr_docs
         )
 
+        # If document embeddings are precomputed extract the embeddings of the represenantative documents based on repr_doc_indices
+        repr_embeddings = None
+        if embeddings is not None:
+            repr_embeddings = [embeddings[index] for index in np.concatenate(repr_doc_indices)]
+
         # We extract the top n words per class
         topics = self._extract_candidate_words(topic_model, c_tf_idf, topics)
 
         # We calculate the similarity between word and document embeddings and create
         # topic embeddings from the representative document embeddings
-        sim_matrix, words = self._extract_embeddings(topic_model, topics, representative_docs, repr_doc_indices)
+        sim_matrix, words = self._extract_embeddings(topic_model, topics, representative_docs, repr_doc_indices,repr_embeddings)
 
         # Find the best matching words based on the similarity matrix for each topic
         updated_topics = self._extract_top_words(words, topics, sim_matrix)
@@ -150,6 +158,7 @@ class KeyBERTInspired(BaseRepresentation):
         topics: Mapping[str, List[Tuple[str, float]]],
         representative_docs: List[str],
         repr_doc_indices: List[List[int]],
+        repr_embeddings: np.ndarray = None,
     ) -> Union[np.ndarray, List[str]]:
         """Extract the representative document embeddings and create topic embeddings.
         Then extract word embeddings and calculate the cosine similarity between topic
@@ -162,13 +171,18 @@ class KeyBERTInspired(BaseRepresentation):
             representative_docs: A flat list of representative documents
             repr_doc_indices: The indices of representative documents
                               that belong to each topic
+            repr_embeddings: Embeddings of respective representative_docs
 
         Returns:
             sim: The similarity matrix between word and topic embeddings
             vocab: The complete vocabulary of input documents
         """
         # Calculate representative docs embeddings and create topic embeddings
-        repr_embeddings = topic_model._extract_embeddings(representative_docs, method="document", verbose=False)
+        # If there are no precomputed embeddings, only then create embeddings
+        if repr_embeddings is None:
+            logger.info("Embedding - Transforming representative documents to embeddings.")
+            repr_embeddings = topic_model._extract_embeddings(representative_docs, method="document", verbose=False)
+        
         topic_embeddings = [np.mean(repr_embeddings[i[0] : i[-1] + 1], axis=0) for i in repr_doc_indices]
 
         # Calculate word embeddings and extract best matching with updated topic_embeddings
