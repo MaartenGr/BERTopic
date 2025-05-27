@@ -4051,6 +4051,7 @@ class BERTopic:
             documents,
             fine_tune_representation=fine_tune_representation,
             calculate_aspects=fine_tune_representation,
+            embeddings=embeddings,
         )
         self._create_topic_vectors(documents=documents, embeddings=embeddings, mappings=mappings)
 
@@ -4311,6 +4312,7 @@ class BERTopic:
         c_tf_idf: csr_matrix = None,
         fine_tune_representation: bool = True,
         calculate_aspects: bool = True,
+        embeddings: np.ndarray = None,
     ) -> Mapping[str, List[Tuple[str, float]]]:
         """Based on tf_idf scores per topic, extract the top n words per topic.
 
@@ -4362,7 +4364,7 @@ class BERTopic:
             for tuner in self.representation_model:
                 topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
         elif fine_tune_representation and isinstance(self.representation_model, BaseRepresentation):
-            topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics)
+            topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics, embeddings)
         elif fine_tune_representation and isinstance(self.representation_model, dict):
             if self.representation_model.get("Main"):
                 main_model = self.representation_model["Main"]
