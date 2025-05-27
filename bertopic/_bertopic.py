@@ -4328,6 +4328,8 @@ class BERTopic:
             fine_tune_representation: If True, the topic representation will be fine-tuned using representation models.
                                       If False, the topic representation will remain as the base c-TF-IDF representation.
             calculate_aspects: Whether to calculate additional topic aspects
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of the sentence-transformer model
 
         Returns:
             topics: The top words per topic
