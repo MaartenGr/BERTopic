@@ -101,8 +101,9 @@ class KeyBERTInspired(BaseRepresentation):
 
         # We calculate the similarity between word and document embeddings and create
         # topic embeddings from the representative document embeddings
-        sim_matrix, words = self._extract_embeddings(topic_model, topics, representative_docs, repr_doc_indices,repr_embeddings)
-
+        sim_matrix, words = self._extract_embeddings(
+             topic_model, topics, representative_docs, repr_doc_indices, repr_embeddings
+         )
         # Find the best matching words based on the similarity matrix for each topic
         updated_topics = self._extract_top_words(words, topics, sim_matrix)
 
