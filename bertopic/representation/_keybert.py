@@ -184,7 +184,7 @@ class KeyBERTInspired(BaseRepresentation):
             repr_embeddings = topic_model._extract_embeddings(representative_docs, method="document", verbose=False)
 
         topic_embeddings = [np.mean(repr_embeddings[i[0] : i[-1] + 1], axis=0) for i in repr_doc_indices]
-        
+
         # Calculate word embeddings and extract best matching with updated topic_embeddings
         vocab = list(set([word for words in topics.values() for word in words]))
         word_embeddings = topic_model._extract_embeddings(vocab, method="document", verbose=False)
