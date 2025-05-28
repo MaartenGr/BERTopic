@@ -180,7 +180,6 @@ class KeyBERTInspired(BaseRepresentation):
         # Calculate representative docs embeddings and create topic embeddings
         # If there are no precomputed embeddings, only then create embeddings
         if repr_embeddings is None:
-            logger.info("Embedding - Transforming representative documents to embeddings.")
             repr_embeddings = topic_model._extract_embeddings(representative_docs, method="document", verbose=False)
         
         topic_embeddings = [np.mean(repr_embeddings[i[0] : i[-1] + 1], axis=0) for i in repr_doc_indices]
