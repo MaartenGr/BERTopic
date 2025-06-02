@@ -81,7 +81,7 @@ class KeyBERTInspired(BaseRepresentation):
             c_tf_idf: The topic c-TF-IDF representation
             topics: The candidate topics as calculated with c-TF-IDF
             embeddings: Pre-trained document embeddings. These can be used
-                        instead of the sentence-transformer model
+                        instead of an embedding model
 
         Returns:
             updated_topics: Updated topic representations
@@ -91,7 +91,7 @@ class KeyBERTInspired(BaseRepresentation):
             c_tf_idf, documents, topics, self.nr_samples, self.nr_repr_docs
         )
 
-        # If document embeddings are precomputed extract the embeddings of the represenantative documents based on repr_doc_indices
+        # If document embeddings are precomputed, extract the embeddings of the representative documents based on repr_doc_indices
         repr_embeddings = None
         if embeddings is not None:
             repr_embeddings = [embeddings[index] for index in np.concatenate(repr_doc_indices)]
@@ -178,8 +178,7 @@ class KeyBERTInspired(BaseRepresentation):
             sim: The similarity matrix between word and topic embeddings
             vocab: The complete vocabulary of input documents
         """
-        # Calculate representative docs embeddings and create topic embeddings
-        # If there are no precomputed embeddings, only then create embeddings
+        # Calculate representative document embeddings if there are no precomputed embeddings.
         if repr_embeddings is None:
             repr_embeddings = topic_model._extract_embeddings(representative_docs, method="document", verbose=False)
 
