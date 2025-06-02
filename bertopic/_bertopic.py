@@ -59,7 +59,7 @@ from bertopic.backend import BaseEmbedder
 from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
-from bertopic.representation import BaseRepresentation, KeyBERTInspired, MaximalMarginalRelevance
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
 from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
@@ -4365,7 +4365,7 @@ class BERTopic:
         elif fine_tune_representation and isinstance(self.representation_model, list):
             for tuner in self.representation_model:
                 topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
-        elif fine_tune_representation and isinstance(self.representation_model, (KeyBERTInspired, MaximalMarginalRelevance)):
+        elif fine_tune_representation and isinstance(self.representation_model, KeyBERTInspired):
             topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics, embeddings)
         elif fine_tune_representation and isinstance(self.representation_model, BaseRepresentation):
             topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics)
