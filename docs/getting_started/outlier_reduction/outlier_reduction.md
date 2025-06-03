@@ -164,7 +164,7 @@ reduced_embeddings = UMAP(n_neighbors=10, n_components=2,
 
 # Train our topic model
 topic_model = BERTopic(embedding_model=sentence_model, umap_model=umap_model,
-                       vectorizer_model=vectorizer_model calculate_probabilities=True, nr_topics=40)
+                       vectorizer_model=vectorizer_model, calculate_probabilities=True, nr_topics=40)
 topics, probs = topic_model.fit_transform(docs, embeddings)
 ```
 
