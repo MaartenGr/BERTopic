@@ -59,7 +59,7 @@ from bertopic.backend import BaseEmbedder
 from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
-from bertopic.representation import BaseRepresentation
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
 from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
@@ -4051,6 +4051,7 @@ class BERTopic:
             documents,
             fine_tune_representation=fine_tune_representation,
             calculate_aspects=fine_tune_representation,
+            embeddings=embeddings,
         )
         self._create_topic_vectors(documents=documents, embeddings=embeddings, mappings=mappings)
 
@@ -4311,6 +4312,7 @@ class BERTopic:
         c_tf_idf: csr_matrix = None,
         fine_tune_representation: bool = True,
         calculate_aspects: bool = True,
+        embeddings: np.ndarray = None,
     ) -> Mapping[str, List[Tuple[str, float]]]:
         """Based on tf_idf scores per topic, extract the top n words per topic.
 
@@ -4326,6 +4328,8 @@ class BERTopic:
             fine_tune_representation: If True, the topic representation will be fine-tuned using representation models.
                                       If False, the topic representation will remain as the base c-TF-IDF representation.
             calculate_aspects: Whether to calculate additional topic aspects
+            embeddings: Pre-trained document embeddings. These can be used
+                        instead of an embedding model
 
         Returns:
             topics: The top words per topic
@@ -4361,6 +4365,8 @@ class BERTopic:
         elif fine_tune_representation and isinstance(self.representation_model, list):
             for tuner in self.representation_model:
                 topics = tuner.extract_topics(self, documents, c_tf_idf, topics)
+        elif fine_tune_representation and isinstance(self.representation_model, KeyBERTInspired):
+            topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics, embeddings)
         elif fine_tune_representation and isinstance(self.representation_model, BaseRepresentation):
             topics = self.representation_model.extract_topics(self, documents, c_tf_idf, topics)
         elif fine_tune_representation and isinstance(self.representation_model, dict):
