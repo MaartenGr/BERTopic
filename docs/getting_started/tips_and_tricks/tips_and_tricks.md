@@ -207,7 +207,7 @@ This installs a bare-bones version of BERTopic. If you want to use UMAP and Mode
 
 `pip install model2vec umap-learn`
 
-Then, you can BERTopic without needing to have a CPU:
+Then, you can BERTopic without needing to have a GPU:
 
 ```python
 from bertopic import BERTopic
