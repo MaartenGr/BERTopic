@@ -177,7 +177,7 @@ class BERTopic:
             min_topic_size: The minimum size of the topic. Increasing this value will lead
                             to a lower number of clusters/topics and vice versa.
                             It is the same parameter as `min_cluster_size` in HDBSCAN.
-                            NOTE: This param will not be used if you are using `hdbscan_model`.
+                            NOTE: This param will not be used if you provide a custom `hdbscan_model`.
             nr_topics: Specifying the number of topics will reduce the initial
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
