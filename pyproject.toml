@@ -38,13 +38,13 @@ classifiers = [
 ]
 dependencies = [
     "hdbscan>=0.8.29",
+    "umap-learn>=0.5.0",
     "numpy>=1.20.0",
     "pandas>=1.1.5",
     "plotly>=4.7.0",
     "scikit-learn>=1.0",
     "sentence-transformers>=0.4.1",
     "tqdm>=4.41.1",
-    "umap-learn>=0.5.0",
 ]
 
 [project.optional-dependencies]
@@ -102,6 +102,7 @@ exclude = ["tests"]
 
 [tool.uv]
 constraint-dependencies = ["llvm>0.43.0"]
+build-constraint-dependencies = ["llvm>0.43.0"]
 
 [tool.ruff]
 line-length = 120
