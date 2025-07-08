@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bertopic"
-version = "0.17.2"
+version = "0.17.2.post1"
 description = "BERTopic performs topic Modeling with state-of-the-art transformer models."
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -101,8 +101,8 @@ include = ["bertopic*"]
 exclude = ["tests"]
 
 [tool.uv]
-constraint-dependencies = ["llvm>0.43.0"]
-build-constraint-dependencies = ["llvm>0.43.0"]
+constraint-dependencies = ["llvmlite>0.43.0"]
+build-constraint-dependencies = ["llvmlite>0.43.0"]
 
 [tool.ruff]
 line-length = 120
