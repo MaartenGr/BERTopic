@@ -7,6 +7,22 @@ hide:
 
 
 ## **Version 0.17.0**
+*Release date: 8 July, 2025*
+
+<h3><b>Highlights:</a></b></h3>
+* Added FastEmbed backend by [@nickprock](https://github.com/nickprock) in [#2213](https://github.com/MaartenGr/BERTopic/pull/2312)
+* Added LangChain backend by [@regaltsui](https://github.com/regaltsui) in [#2303](https://github.com/MaartenGr/BERTopic/pull/2303)
+* Pass precomputed embeddings to KeyBERTInspired.extract_topics [@saikumaru](https://github.com/saikumaru) in [#2368](https://github.com/MaartenGr/BERTopic/pull/2368)
+
+<h3><b>Fixes:</a></b></h3>
+* Merge models without pytorch (using safetensors) by [@MaartenGr](https://github.com/MaartenGr) in [#2329](https://github.com/MaartenGr/BERTopic/pull/2329)
+* Fix installation issue with uv by [@MaartenGr](https://github.com/MaartenGr) in [#2328](https://github.com/MaartenGr/BERTopic/pull/2328)
+* Fix incorrect comparison in update_topics by [@uply23333](https://github.com/uply23333) in [#2336](https://github.com/MaartenGr/BERTopic/pull/2336)
+* Add missing comma under Exploration subsection by [@angelonazzaro](https://github.com/angelonazzaro) in [#2374](https://github.com/MaartenGr/BERTopic/pull/2374)
+* Fix typo in Lightweight installation under tips_and_tricks by [@angelonazzaro](https://github.com/angelonazzaro) in [#2375](https://github.com/MaartenGr/BERTopic/pull/2375)
+* Fix IndexError in zero-shot topic modeling by [@MaartenGr](https://github.com/MaartenGr) in [#2267](https://github.com/MaartenGr/BERTopic/pull/2267)
+
+## **Version 0.17.0**
 *Release date: 19 March, 2025*
 
 <h3><b>Highlights:</a></b></h3>
