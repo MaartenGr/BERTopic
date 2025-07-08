@@ -5,8 +5,13 @@ hide:
 
 # Changelog
 
+## **Version 0.17.3**
+*Release date: 8 July, 2025*
 
-## **Version 0.17.0**
+* Fixed issues with `uv add bertopic` by adding `llvmlite` as an explicit dependency. Although the fixes in `v0.17.2` and `v0.17.2.post1` actually worked locally, this wasn't the case after pushing the package to pypi.org unfortunately.
+
+
+## **Version 0.17.1**
 *Release date: 8 July, 2025*
 
 <h3><b>Highlights:</a></b></h3>
