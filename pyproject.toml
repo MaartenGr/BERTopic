@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bertopic"
-version = "0.17.2.post1"
+version = "0.17.3"
 description = "BERTopic performs topic Modeling with state-of-the-art transformer models."
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -45,6 +45,7 @@ dependencies = [
     "scikit-learn>=1.0",
     "sentence-transformers>=0.4.1",
     "tqdm>=4.41.1",
+    "llvmlite>0.36.0"  # To prevent conflicts with `uv` dependency manager
 ]
 
 [project.optional-dependencies]
@@ -99,10 +100,6 @@ Repository = "https://github.com/MaartenGr/BERTopic.git"
 [tool.setuptools.packages.find]
 include = ["bertopic*"]
 exclude = ["tests"]
-
-[tool.uv]
-constraint-dependencies = ["llvmlite>0.43.0"]
-build-constraint-dependencies = ["llvmlite>0.43.0"]
 
 [tool.ruff]
 line-length = 120
