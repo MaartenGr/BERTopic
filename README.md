@@ -50,7 +50,13 @@ Corresponding medium posts can be found [here](https://medium.com/data-science/t
 
 ## Installation
 
-Installation, with sentence-transformers, can be done using [pypi](https://pypi.org/project/bertopic/):
+Installation, with sentence-transformers, can be done using [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv add bertopic
+```
+
+or with [pip](https://github.com/pypa/pip):
 
 ```bash
 pip install bertopic
@@ -66,7 +72,7 @@ pip install bertopic[flair,gensim,spacy,use]
 pip install bertopic[vision]
 ```
 
-For a *light-weight installation* without transformers, UMAP and/or HDBSCAN (for training with Model2Vec or perhaps for inference), see [this tutorial](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation).
+For a *light-weight installation* without transformers, UMAP and/or HDBSCAN (for training with Model2Vec or inference), see [this tutorial](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation).
 
 ## Getting Started
 For an in-depth overview of the features of BERTopic 
