@@ -184,7 +184,7 @@ For example, we can visualize the topics that were generated in a way very simil
 topic_model.visualize_topics()
 ``` 
 
-<img src="images/topic_visualization.gif" width="60%" height="60%" align="center" />
+<img src="images/topic_visualization.gif" width="80%" align="center" />
 
 ## Modularity
 By default, the [main steps](https://maartengr.github.io/BERTopic/algorithm/algorithm.html) for topic modeling with BERTopic are sentence-transformers, UMAP, HDBSCAN, and c-TF-IDF run in sequence. However, it assumes some independence between these steps which makes BERTopic quite modular. In other words, BERTopic not only allows you to build your own topic model but to explore several topic modeling techniques on top of your customized topic model:
