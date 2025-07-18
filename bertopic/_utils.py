@@ -226,3 +226,28 @@ def select_topic_representation(
             repr_, ctfidf_used = embeddings, False
 
     return to_ndarray(repr_) if output_ndarray else repr_, ctfidf_used
+
+
+# Visualization mocks in case plotly is not installed
+class MockPlotting:
+    """Mock plotting module when plotly is not installed."""
+
+    def __init__(self, logger: MyLogger):
+        self.logger = logger
+
+    def __getattr__(self, name):
+        def mock_function(*args, **kwargs):
+            self.logger.warning(f"Plotly is not installed. Cannot use {name} visualization function.")
+            return MockFigure()
+
+        return mock_function
+
+
+class MockFigure:
+    """Mock class for plotly.graph_objects.Figure when plotly is not installed."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+
+mock_plotly_go = type("MockPlotly", (), {"Figure": MockFigure})()

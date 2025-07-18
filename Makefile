@@ -1,6 +1,13 @@
 test:
 	pytest
 
+test-no-plotly:
+	uv sync --extra test
+	uv pip uninstall plotly
+	pytest tests/test_other.py -k plotly
+	uv sync --extra test
+	pytest tests/test_other.py -k plotly
+
 coverage:
 	pytest --cov
 
