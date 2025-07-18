@@ -53,7 +53,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 # BERTopic
-from bertopic import plotting
 from bertopic.cluster import BaseCluster
 from bertopic.backend import BaseEmbedder
 from bertopic.representation._mmr import mmr
@@ -73,11 +72,22 @@ from bertopic._utils import (
 )
 import bertopic._save_utils as save_utils
 
-# Visualization
-import plotly.graph_objects as go
 
 logger = MyLogger()
 logger.configure("WARNING")
+
+try:
+    from bertopic import plotting
+    import plotly.graph_objects as go
+
+except ModuleNotFoundError as e:
+    if "No module named 'plotly'" in str(e):
+        logger.warning("Plotly is not installed. Please install it to use the plotting functions.")
+        from bertopic._utils import mock_plotly_go as go, MockPlotting
+
+        plotting = MockPlotting(logger)
+    else:
+        raise ModuleNotFoundError(e)
 
 
 class BERTopic:

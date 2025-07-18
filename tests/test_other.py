@@ -1,4 +1,14 @@
 from bertopic import BERTopic
+from bertopic.dimensionality import BaseDimensionalityReduction
+
+try:
+    import plotly.graph_objects as go
+
+    figure_type = go.Figure
+except ImportError:
+    from bertopic._utils import MockFigure
+
+    figure_type = MockFigure
 
 
 def test_load_save_model():
@@ -20,3 +30,17 @@ def test_get_params():
     assert params["n_gram_range"] == (1, 1)
     assert params["min_topic_size"] == 10
     assert params["language"] == "english"
+
+
+def test_no_plotly():
+    empty_dimensionality_model = BaseDimensionalityReduction()
+    model = BERTopic(
+        language="English",
+        embedding_model=None,
+        min_topic_size=2,
+        top_n_words=1,
+        umap_model=empty_dimensionality_model,
+    )
+    model.fit(["hello", "hi", "goodbye", "goodbye", "whats up"] * 10)
+    out = model.visualize_topics()
+    assert isinstance(out, figure_type)
