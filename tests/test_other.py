@@ -33,13 +33,12 @@ def test_get_params():
 
 
 def test_no_plotly():
-    empty_dimensionality_model = BaseDimensionalityReduction()
     model = BERTopic(
-        language="English",
+        language="Dutch",
         embedding_model=None,
         min_topic_size=2,
         top_n_words=1,
-        umap_model=empty_dimensionality_model,
+        umap_model=BaseDimensionalityReduction(),
     )
     model.fit(["hello", "hi", "goodbye", "goodbye", "whats up"] * 10)
     out = model.visualize_topics()
