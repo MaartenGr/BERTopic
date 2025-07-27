@@ -4922,7 +4922,6 @@ class TopicMapper:
             for key, value in topics_to_map.items():
                 mapping[value].append(key)
 
-            print(f'len of mapping: {len(mapping)}')
             for topic_to, topics_from in mapping.items():
                 # which of the original topics are zero-shot
                 zeroshot_topic_ids = [
@@ -4937,25 +4936,18 @@ class TopicMapper:
                     topic_model.zeroshot_topic_list[topic_model._topic_id_to_zeroshot_topic_idx[topic_id]]
                     for topic_id in zeroshot_topic_ids
                 ]
-                print(f'topics_from: {topics_from} and topic_to: {topic_to}')
-                print(f'zeroshot_labels: {zeroshot_labels}')
                 zeroshot_embeddings = topic_model._extract_embeddings(zeroshot_labels)
                 cosine_similarities = cosine_similarity(
                     zeroshot_embeddings, [topic_model.topic_embeddings_[topic_to]]
                 ).flatten()
-                print(f'cosine_similarities: {cosine_similarities}')
                 best_zeroshot_topic_idx = np.argmax(cosine_similarities)
                 best_cosine_similarity = cosine_similarities[best_zeroshot_topic_idx]
-                print(f'best_cosine_similarity: {best_cosine_similarity}')
                 if best_cosine_similarity >= topic_model.zeroshot_min_similarity:
                     # Using the topic ID from before mapping, get the idx into the zeroshot topic list
                     new_topic_id_to_zeroshot_topic_idx[topic_to] = topic_model._topic_id_to_zeroshot_topic_idx[
                         zeroshot_topic_ids[best_zeroshot_topic_idx]
                     ]
-            print(f'new_topic_id_to_zeroshot_topic_idx: {new_topic_id_to_zeroshot_topic_idx}')
-            # print('running without updating topic_model._topic_id_to_zeroshot_topic_idx!')
             topic_model._topic_id_to_zeroshot_topic_idx = new_topic_id_to_zeroshot_topic_idx
-            print(f'after add_mappings: topic_model._topic_id_to_zeroshot_topic_idx: {topic_model._topic_id_to_zeroshot_topic_idx}')
 
     def add_new_topics(self, mappings: Mapping[int, int]):
         """Add new row(s) of topic mappings.
