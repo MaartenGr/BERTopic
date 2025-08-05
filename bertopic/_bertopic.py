@@ -4315,10 +4315,8 @@ class BERTopic:
         if embeddings is not None and documents is not None:
             topic_embeddings = []
             topics = documents.sort_values("Topic").Topic.unique()
-
             topic_ids = documents["Topic"].values
             doc_ids = documents["ID"].values.astype(int)
-            
             for topic in topics:
                 mask = topic_ids == topic
                 topic_embeddings.append(embeddings[doc_ids[mask]].mean(axis=0))
