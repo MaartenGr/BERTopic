@@ -2,13 +2,9 @@ from bertopic import BERTopic
 from bertopic.dimensionality import BaseDimensionalityReduction
 
 try:
-    import plotly.graph_objects as go
-
-    figure_type = go.Figure
+    from plotly.graph_objects import Figure
 except ImportError:
-    from bertopic._utils import MockFigure
-
-    figure_type = MockFigure
+    Figure = None
 
 
 def test_load_save_model():
@@ -41,5 +37,9 @@ def test_no_plotly():
         umap_model=BaseDimensionalityReduction(),
     )
     model.fit(["hello", "hi", "goodbye", "goodbye", "whats up"] * 10)
-    out = model.visualize_topics()
-    assert isinstance(out, figure_type)
+    
+    try:
+        out = model.visualize_topics()
+        assert isinstance(out, Figure) if Figure  else False
+    except ImportError as e:
+        assert "Plotly is required to use" in str(e)

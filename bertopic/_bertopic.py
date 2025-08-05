@@ -26,6 +26,7 @@ from tempfile import TemporaryDirectory
 from collections import defaultdict, Counter
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
+from importlib.util import find_spec
 
 # Typing
 import sys
@@ -34,7 +35,19 @@ if sys.version_info >= (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING
+
+# Plotting
+if find_spec("plotly") is None:
+    from bertopic._utils import MockPlotlyModule
+    plotting = MockPlotlyModule()
+
+else:
+    from bertopic import plotting
+    if TYPE_CHECKING:
+        import plotly.graph_objs as go
+        import matplotlib.figure as fig
+
 
 # Models
 try:
@@ -72,22 +85,8 @@ from bertopic._utils import (
 )
 import bertopic._save_utils as save_utils
 
-
 logger = MyLogger()
 logger.configure("WARNING")
-
-try:
-    from bertopic import plotting
-    import plotly.graph_objects as go
-
-except ModuleNotFoundError as e:
-    if "No module named 'plotly'" in str(e):
-        logger.warning("Plotly is not installed. Please install it to use the plotting functions.")
-        from bertopic._utils import mock_plotly_go as go, MockPlotting
-
-        plotting = MockPlotting(logger)
-    else:
-        raise ModuleNotFoundError(e)
 
 
 class BERTopic:
@@ -2415,7 +2414,7 @@ class BERTopic:
         title: str = "<b>Intertopic Distance Map</b>",
         width: int = 650,
         height: int = 650,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize topics, their sizes, and their corresponding words.
 
         This visualization is highly inspired by LDAvis, a great visualization
@@ -2473,7 +2472,7 @@ class BERTopic:
         title: str = "<b>Documents and Topics</b>",
         width: int = 1200,
         height: int = 750,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize documents and their topics in 2D.
 
         Arguments:
@@ -2575,7 +2574,7 @@ class BERTopic:
         topic_prefix: bool = False,
         datamap_kwds: dict = {},
         int_datamap_kwds: dict = {},
-    ):
+    ) -> "fig.Figure":
         """Visualize documents and their topics in 2D as a static plot for publication using
         DataMapPlot. This works best if there are between 5 and 60 topics. It is therefore best
         to use a sufficiently large `min_topic_size` or set `nr_topics` when building the model.
@@ -2686,7 +2685,7 @@ class BERTopic:
         title: str = "<b>Hierarchical Documents and Topics</b>",
         width: int = 1200,
         height: int = 750,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize documents and their topics in 2D at different levels of hierarchy.
 
         Arguments:
@@ -2798,7 +2797,7 @@ class BERTopic:
         title: str = "<b>Term score decline per Topic</b>",
         width: int = 800,
         height: int = 500,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize the ranks of all terms across all topics.
 
         Each topic is represented by a set of words. These words, however,
@@ -2863,7 +2862,7 @@ class BERTopic:
         title: str = "<b>Topics over Time</b>",
         width: int = 1250,
         height: int = 450,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize topics over time.
 
         Arguments:
@@ -2919,7 +2918,7 @@ class BERTopic:
         title: str = "<b>Topics per Class</b>",
         width: int = 1250,
         height: int = 900,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize topics per class.
 
         Arguments:
@@ -2973,7 +2972,7 @@ class BERTopic:
         title: str = "<b>Topic Probability Distribution</b>",
         width: int = 800,
         height: int = 600,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize the distribution of topic probabilities.
 
         Arguments:
@@ -3080,7 +3079,7 @@ class BERTopic:
         linkage_function: Callable[[csr_matrix], np.ndarray] = None,
         distance_function: Callable[[csr_matrix], csr_matrix] = None,
         color_threshold: int = 1,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize a hierarchical structure of the topics.
 
         A ward linkage function is used to perform the
@@ -3176,7 +3175,7 @@ class BERTopic:
         title: str = "<b>Similarity Matrix</b>",
         width: int = 800,
         height: int = 800,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize a heatmap of the topic's similarity matrix.
 
         Based on the cosine similarity matrix between c-TF-IDFs or semantic embeddings of the topics,
@@ -3236,7 +3235,7 @@ class BERTopic:
         width: int = 250,
         height: int = 250,
         autoscale: bool = False,
-    ) -> go.Figure:
+    ) -> "go.Figure":
         """Visualize a barchart of selected topics.
 
         Arguments:

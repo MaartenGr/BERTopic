@@ -4,7 +4,7 @@ import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Any
 
 
 class MyLogger:
@@ -228,26 +228,11 @@ def select_topic_representation(
     return to_ndarray(repr_) if output_ndarray else repr_, ctfidf_used
 
 
-# Visualization mocks in case plotly is not installed
-class MockPlotting:
-    """Mock plotting module when plotly is not installed."""
+class MockPlotlyModule:
+    """Mock module that raises an error when plotly functions are called."""
 
-    def __init__(self, logger: MyLogger):
-        self.logger = logger
-
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         def mock_function(*args, **kwargs):
-            self.logger.warning(f"Plotly is not installed. Cannot use {name} visualization function.")
-            return MockFigure()
+            raise ImportError(f"Plotly is required to use '{name}'. " "Install it with uv pip install plotly")
 
         return mock_function
-
-
-class MockFigure:
-    """Mock class for plotly.graph_objects.Figure when plotly is not installed."""
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-
-mock_plotly_go = type("MockPlotly", (), {"Figure": MockFigure})()
