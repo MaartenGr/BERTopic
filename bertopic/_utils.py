@@ -233,6 +233,6 @@ class MockPlotlyModule:
 
     def __getattr__(self, name: str) -> Any:
         def mock_function(*args, **kwargs):
-            raise ImportError(f"Plotly is required to use '{name}'. " "Install it with uv pip install plotly")
+            raise ImportError(f"Plotly is required to use '{name}'. Install it with uv pip install plotly")
 
         return mock_function

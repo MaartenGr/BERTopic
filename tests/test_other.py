@@ -37,9 +37,9 @@ def test_no_plotly():
         umap_model=BaseDimensionalityReduction(),
     )
     model.fit(["hello", "hi", "goodbye", "goodbye", "whats up"] * 10)
-    
+
     try:
         out = model.visualize_topics()
-        assert isinstance(out, Figure) if Figure  else False
+        assert isinstance(out, Figure) if Figure else False
     except ImportError as e:
         assert "Plotly is required to use" in str(e)

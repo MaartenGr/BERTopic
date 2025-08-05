@@ -40,10 +40,12 @@ from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CH
 # Plotting
 if find_spec("plotly") is None:
     from bertopic._utils import MockPlotlyModule
+
     plotting = MockPlotlyModule()
 
 else:
     from bertopic import plotting
+
     if TYPE_CHECKING:
         import plotly.graph_objs as go
         import matplotlib.figure as fig
