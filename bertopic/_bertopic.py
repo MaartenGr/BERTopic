@@ -18,6 +18,7 @@ import collections
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
+from copy import deepcopy
 
 from tqdm import tqdm
 from pathlib import Path
@@ -827,7 +828,7 @@ class BERTopic:
             nr_bins: The number of bins you want to create for the timestamps. The left interval will
                      be chosen as the timestamp. An additional column will be created with the
                      entire interval.
-            datetime_format: The datetime format of the timestamps if they are strings, eg “%d/%m/%Y”.
+            datetime_format: The datetime format of the timestamps if they are strings, eg "%d/%m/%Y".
                              Set this to None if you want to have it automatically detect the format.
                              See strftime documentation for more information on choices:
                              https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.
@@ -1778,7 +1779,6 @@ class BERTopic:
         # the topic distributions
         document_info = topic_model.get_document_info(docs, df=df,
                                                       metadata={"Topic_distribution": distributions})
-        ```
         """
         check_documents_type(docs)
         if df is not None:
@@ -2167,6 +2167,142 @@ class BERTopic:
         self._update_topic_size(documents)
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
+
+    def delete_topics(
+        self,
+        topics_to_delete: List[int],
+    ) -> None:
+        """Delete topics from the topic model.
+
+        The deleted topics will be mapped to -1 (outlier topic). Core topic attributes
+        like topic embeddings and c-TF-IDF will be automatically updated.
+
+        Arguments:
+            topics_to_delete: List of topics to delete
+        """
+        check_is_fitted(self)
+
+        topics_df = pd.DataFrame({"Topic": self.topics_})
+
+        # Check if -1 exists in the current topics
+        had_outliers = -1 in set(self.topics_)
+
+        # If adding -1 for the first time, initialize its attributes
+        if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
+            # Initialize c-TF-IDF for -1 topic (zeros)
+            outlier_row = np.zeros((1, self.c_tf_idf_.shape[1]))
+            outlier_row = sp.csr_matrix(outlier_row)
+            self.c_tf_idf_ = sp.vstack([outlier_row, self.c_tf_idf_])
+
+            # Initialize topic embeddings for -1 topic (zeros)
+            outlier_embedding = np.zeros((1, self.topic_embeddings_.shape[1]))
+            self.topic_embeddings_ = np.vstack([outlier_embedding, self.topic_embeddings_])
+
+            # Initialize topic representations for -1 topic: ("", 1e-05)
+            self.topic_representations_[-1] = [("", 1e-05)]
+
+            # Initialize representative docs for -1 topic (empty list)
+            self.representative_docs_[-1] = []
+
+            # Initialize representative images for -1 topic if images are being used
+            if self.representative_images_ is not None:
+                outlier_image = np.zeros((1, self.representative_images_.shape[1]))
+                self.representative_images_ = np.vstack([outlier_image, self.representative_images_])
+
+            # Initialize custom labels for -1 topic if they exist
+            if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
+                self.custom_labels_[-1] = ""
+
+            # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
+            if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
+                n_features = self.ctfidf_model._idf_diag.shape[1]
+                outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
+                self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
+
+            # Initialize topic aspects for -1 topic (empty dict for each aspect) if they exist
+            if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
+                for aspect in self.topic_aspects_:
+                    self.topic_aspects_[aspect][-1] = {}
+
+        # First map deleted topics to -1
+        mapping = {topic: -1 if topic in topics_to_delete else topic for topic in set(self.topics_)}
+        mapping[-1] = -1
+
+        # Track mappings and sizes of topics for merging topic embeddings
+        mappings = defaultdict(list)
+        for key, val in sorted(mapping.items()):
+            mappings[val].append(key)
+        mappings = {
+            topic_to: {
+                "topics_from": topics_from,
+                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
+            }
+            for topic_to, topics_from in mappings.items()
+        }
+
+        # remove deleted topics and update attributes
+        topics_df.Topic = topics_df.Topic.map(mapping)
+        self.topic_mapper_.add_mappings(mapping, topic_model=deepcopy(self))
+        topics_df = self._sort_mappings_by_frequency(topics_df)
+        self._update_topic_size(topics_df)
+        self.probabilities_ = self._map_probabilities(self.probabilities_)
+
+        final_mapping = self.topic_mapper_.get_mappings(original_topics=False)
+
+        # Update dictionary-based attributes to remove deleted topics
+        # Handle topic_aspects_ if it exists
+        if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
+            new_aspects = {
+                aspect: {
+                    (final_mapping[old_topic] if old_topic != -1 else -1): content
+                    for old_topic, content in topics.items()
+                    if old_topic not in topics_to_delete
+                }
+                for aspect, topics in self.topic_aspects_.items()
+            }
+            self.topic_aspects_ = new_aspects
+
+        # Update custom labels if they exist
+        if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
+            new_labels = {
+                (final_mapping[old_topic] if old_topic != -1 else -1): label
+                for old_topic, label in self.custom_labels_.items()
+                if old_topic not in topics_to_delete
+            }
+            self.custom_labels_ = new_labels
+
+        # Update topic representations
+        new_representations = {
+            (final_mapping[old_topic] if old_topic != -1 else -1): content
+            for old_topic, content in self.topic_representations_.items()
+            if old_topic not in topics_to_delete
+        }
+        self.topic_representations_ = new_representations
+
+        # Update representative docs if they exist
+        new_representative_docs = {
+            (final_mapping[old_topic] if old_topic != -1 else -1): docs
+            for old_topic, docs in self.representative_docs_.items()
+            if old_topic not in topics_to_delete
+        }
+        self.representative_docs_ = new_representative_docs
+
+        # Update representative images if they exist
+        if self.representative_images_ is not None:
+            # Create a mask for non-deleted topics
+            mask = np.array([topic not in topics_to_delete for topic in range(len(self.representative_images_))])
+            self.representative_images_ = self.representative_images_[mask] if mask.any() else None
+
+        # Update array-based attributes using masks to remove deleted topics
+        for attr in ["topic_embeddings_", "c_tf_idf_"]:
+            matrix = getattr(self, attr)
+            mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
+            setattr(self, attr, matrix[mask])
+
+        # Update ctfidf model to remove deleted topics if it exists
+        if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
+            mask = np.array([topic not in topics_to_delete for topic in range(self.ctfidf_model._idf_diag.shape[0])])
+            self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
 
     def reduce_topics(
         self,
@@ -4842,13 +4978,11 @@ class TopicMapper:
                 ).flatten()
                 best_zeroshot_topic_idx = np.argmax(cosine_similarities)
                 best_cosine_similarity = cosine_similarities[best_zeroshot_topic_idx]
-
                 if best_cosine_similarity >= topic_model.zeroshot_min_similarity:
                     # Using the topic ID from before mapping, get the idx into the zeroshot topic list
                     new_topic_id_to_zeroshot_topic_idx[topic_to] = topic_model._topic_id_to_zeroshot_topic_idx[
                         zeroshot_topic_ids[best_zeroshot_topic_idx]
                     ]
-
             topic_model._topic_id_to_zeroshot_topic_idx = new_topic_id_to_zeroshot_topic_idx
 
     def add_new_topics(self, mappings: Mapping[int, int]):
