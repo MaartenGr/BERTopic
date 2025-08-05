@@ -4,7 +4,7 @@ import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Any
 
 
 class MyLogger:
@@ -226,3 +226,13 @@ def select_topic_representation(
             repr_, ctfidf_used = embeddings, False
 
     return to_ndarray(repr_) if output_ndarray else repr_, ctfidf_used
+
+
+class MockPlotlyModule:
+    """Mock module that raises an error when plotly functions are called."""
+
+    def __getattr__(self, name: str) -> Any:
+        def mock_function(*args, **kwargs):
+            raise ImportError(f"Plotly is required to use '{name}'. Install it with uv pip install plotly")
+
+        return mock_function
