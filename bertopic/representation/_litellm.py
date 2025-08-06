@@ -1,6 +1,7 @@
 import time
 from litellm import completion
 import pandas as pd
+from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any
 from bertopic.representation._base import BaseRepresentation
@@ -120,7 +121,7 @@ class LiteLLM(BaseRepresentation):
 
         # Generate using a (Large) Language Model
         updated_topics = {}
-        for topic, docs in repr_docs_mappings.items():
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             prompt = self._create_prompt(docs, topic, topics)
 
             # Delay
