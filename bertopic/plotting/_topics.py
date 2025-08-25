@@ -99,11 +99,13 @@ def visualize_topics(
     if HAS_UMAP:
         if c_tfidf_used:
             embeddings = MinMaxScaler().fit_transform(embeddings)
-            embeddings = UMAP(n_neighbors=2, n_components=2, metric="hellinger", init=umap_init, random_state=42).fit_transform(
-                embeddings
-            )
+            embeddings = UMAP(
+                n_neighbors=2, n_components=2, metric="hellinger", init=umap_init, random_state=42
+            ).fit_transform(embeddings)
         else:
-            embeddings = UMAP(n_neighbors=2, n_components=2, metric="cosine", init=umap_init, random_state=42).fit_transform(embeddings)
+            embeddings = UMAP(
+                n_neighbors=2, n_components=2, metric="cosine", init=umap_init, random_state=42
+            ).fit_transform(embeddings)
     else:
         raise ModuleNotFoundError(
             "UMAP is required to reduce the embeddings.. Please install it using `pip install umap-learn`."
