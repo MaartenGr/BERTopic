@@ -3802,13 +3802,13 @@ class BERTopic:
                 if hasattr(self.umap_model, "fit_transform"):
                     umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
                 else:
-                    self.umap_model.fit(embeddings)
-                    umap_embeddings = self.umap_model.transform(embeddings, y=y)
+                    self.umap_model.fit(embeddings, y=y)
+                    umap_embeddings = self.umap_model.transform(embeddings)
             except TypeError:
                 if hasattr(self.umap_model, "fit_transform"):
-                    umap_embeddings = self.umap_model.fit_transform(embeddings)
+                    umap_embeddings = self.umap_model.fit_transform(embeddings, y=y)
                 else:
-                    self.umap_model.fit(embeddings)
+                    self.umap_model.fit(embeddings, y=y)
                     umap_embeddings = self.umap_model.transform(embeddings)
 
         logger.info("Dimensionality - Completed \u2713")
