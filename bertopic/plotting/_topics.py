@@ -20,7 +20,6 @@ def visualize_topics(
     topics: List[int] = None,
     top_n_topics: int = None,
     use_ctfidf: bool = False,
-    umap_init: str = "random",
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Intertopic Distance Map</b>",
     width: int = 650,
@@ -36,9 +35,6 @@ def visualize_topics(
         topics: A selection of topics to visualize
         top_n_topics: Only select the top n most frequent topics
         use_ctfidf: Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.
-        umap_init: Visualizing topics uses UMAP under the hood (if installed). By default UMAP will have init value of "spectral",
-                   which gives the best performance for dimensionality reduction but with no guarantee of reproducible result.
-                   Set umap_init to "spectral" if you need more performance. Keep the default value of "random" for reproducible result.
         custom_labels: If bool, whether to use custom topic labels that were defined using
                        `topic_model.set_topic_labels`.
                        If `str`, it uses labels from other aspects, e.g., "Aspect1".
@@ -100,11 +96,11 @@ def visualize_topics(
         if c_tfidf_used:
             embeddings = MinMaxScaler().fit_transform(embeddings)
             embeddings = UMAP(
-                n_neighbors=2, n_components=2, metric="hellinger", init=umap_init, random_state=42
+                n_neighbors=2, n_components=2, metric="hellinger", init="random", random_state=42
             ).fit_transform(embeddings)
         else:
             embeddings = UMAP(
-                n_neighbors=2, n_components=2, metric="cosine", init=umap_init, random_state=42
+                n_neighbors=2, n_components=2, metric="cosine", init="random", random_state=42
             ).fit_transform(embeddings)
     else:
         raise ModuleNotFoundError(

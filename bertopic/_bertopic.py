@@ -2548,7 +2548,6 @@ class BERTopic:
         topics: List[int] = None,
         top_n_topics: int = None,
         use_ctfidf: bool = False,
-        umap_init: str = "random",
         custom_labels: bool = False,
         title: str = "<b>Intertopic Distance Map</b>",
         width: int = 650,
@@ -2568,9 +2567,6 @@ class BERTopic:
             use_ctfidf: Whether to use c-TF-IDF representations instead of the embeddings from the embedding model.
             custom_labels: Whether to use custom topic labels that were defined using
                            `topic_model.set_topic_labels`.
-            umap_init: Visualizing topics uses UMAP under the hood (if installed). By default UMAP will have init value of "spectral",
-                       which gives the best performance for dimensionality reduction but with no guarantee of reproducible result.
-                       Set umap_init to "spectral" if you need more performance. Keep the default value of "random" for reproducible result.
             title: Title of the plot.
             width: The width of the figure.
             height: The height of the figure.
