@@ -3785,14 +3785,13 @@ class BERTopic:
                 self.umap_model = self.umap_model.partial_fit(embeddings)
                 umap_embeddings = self.umap_model.transform(embeddings)
             elif self.topic_representations_ is None:
-                self.umap_model.fit(embeddings)
-                umap_embeddings = self.umap_model.transform(embeddings)
-            else:
                 if hasattr(self.umap_model, "fit_transform"):
                     umap_embeddings = self.umap_model.fit_transform(embeddings)
                 else:
                     self.umap_model.fit(embeddings)
                     umap_embeddings = self.umap_model.transform(embeddings)
+            else:
+                umap_embeddings = self.umap_model.transform(embeddings)
 
         # Regular fit
         else:
