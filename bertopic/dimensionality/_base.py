@@ -19,7 +19,7 @@ class BaseDimensionalityReduction:
     ```
     """
 
-    def fit(self, X: np.ndarray = None):
+    def fit(self, X: np.ndarray = None, y: np.ndarray = None):
         return self
 
     def transform(self, X: np.ndarray) -> np.ndarray:
