@@ -8,7 +8,7 @@ version = "0.17.3"
 description = "BERTopic performs topic Modeling with state-of-the-art transformer models."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Maarten P. Grootendorst", email = "maartengrootendorst@gmail.com" },
 ]
@@ -28,7 +28,6 @@ classifiers = [
     "Operating System :: POSIX",
     "Operating System :: Unix",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

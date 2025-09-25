@@ -32,7 +32,7 @@ To start contributing, make sure to first start from a fresh environment. Using 
 
 If you are using conda, you can approach it as follows:
 
-1. Create and activate a new conda environment (e.g., `conda create -n bertopic python=3.9`)
+1. Create and activate a new conda environment (e.g., `conda create -n bertopic python=3.10`)
 2. Install requirements (e.g., `pip install .[dev]`)
   * This makes sure to also install documentation and testing packages
 3. (Optional) Run `make docs` to build your documentation
