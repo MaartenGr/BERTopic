@@ -18,8 +18,8 @@ jobs:
     - uses: actions/setup-python@v6
       with:
         python-version: "3.13"
-    # Ref: https://github.com/pre-commit/action
-    - uses: pre-commit/action@v3.0.1
+    # Ref: https://github.com/tox-dev/action-pre-commit-uv
+    - uses: tox-dev/action-pre-commit-uv@246b66536e366bb885f52d61983bf32f7c95e8b1 # v1.0.3
 
   build:
     runs-on: ubuntu-latest
