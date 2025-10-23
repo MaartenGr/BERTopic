@@ -29,14 +29,7 @@ from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from importlib.util import find_spec
 
-# Typing
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
 
 # Plotting
 if find_spec("plotly") is None:
