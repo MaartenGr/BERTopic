@@ -29,13 +29,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+    - name: Install latest version of uv and set up Python ${{ matrix.python-version }}
+      uses: astral-sh/setup-uv@v7
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[test]"
+        activate-environment: "true"
+    - name: Install dependencies (including test group)
+      run: uv sync --extra test
     - name: Run Checking Mechanisms
       run: make check
