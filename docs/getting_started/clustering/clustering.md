@@ -110,12 +110,23 @@ The great thing about using cuML's HDBSCAN implementation is that it supports ma
     However, it is still possible to calculate the topic-document probability matrix for the data on which the model was trained (i.e., `.fit` and `.fit_transform`).
 
 !!! note
-    If you want to install cuML together with BERTopic using Google Colab, you can run the following code:
+    To install cuML with BERTopic, run these commands:
 
+    **For CUDA 12:**
     ```bash
+    !pip install cuml-cu12
     !pip install bertopic
-    !pip install cudf-cu11 dask-cudf-cu11 --extra-index-url=https://pypi.nvidia.com
-    !pip install cuml-cu11 --extra-index-url=https://pypi.nvidia.com
-    !pip install cugraph-cu11 --extra-index-url=https://pypi.nvidia.com
-    !pip install --upgrade cupy-cuda11x -f https://pip.cupy.dev/aarch64
     ```
+
+    **For CUDA 13:**
+    ```bash
+    !pip install cuml-cu13
+    !pip install bertopic
+    ```
+
+    !!! warning
+        Install cuML first, then BERTopic. Installing both in a single command can fail due to pip resolver limitations with CUDA runtime dependencies.
+
+    **Note:** cuML is already installed on Google Colab.
+
+    For more detailed information on installing cuML, including additional dependencies and platform-specific instructions, see the [RAPIDS installation guide](https://docs.rapids.ai/install/).
