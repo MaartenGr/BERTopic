@@ -4,7 +4,7 @@
 <rect x="43.5" y="101.5" width="14" height="14" stroke="black"/>
 <rect x="57.5" y="101.5" width="14" height="14" stroke="black"/>
 <rect x="71.5" y="101.5" width="14" height="14" stroke="black"/>
-<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="33.3438" y="94.1758">&#34;Religion&#34;&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="8" letter-spacing="0em"><tspan x="33.3438" y="94.1758">&#34;Clustering&#34;&#10;</tspan></text>
 <rect x="47.5" y="154.5" width="249" height="68" rx="2.5" fill="#F5F5F5" stroke="black"/>
 <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" letter-spacing="0em"><tspan x="370.248" y="111.97"> the labels</tspan></text>
 <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="10" font-weight="bold" letter-spacing="0em"><tspan x="336" y="111.97">Embed</tspan></text>
