@@ -504,7 +504,7 @@ class BERTopic:
             documents = assigned_documents
             embeddings = assigned_embeddings
 
-             # Update topic sizes
+            # Update topic sizes
             self._update_topic_size(documents)
 
             # All documents matches zero-shot topics
