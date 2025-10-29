@@ -494,6 +494,19 @@ class BERTopic:
                     documents, embeddings, assigned_documents, assigned_embeddings
                 )
         else:
+            # Update topic id to zeroshot topic id mapping
+            self._topic_id_to_zeroshot_topic_idx = {
+                new_topic_id: zeroshot_topic_id
+                for new_topic_id, zeroshot_topic_id in enumerate(set(assigned_documents.Topic))
+            }
+
+            # All documents matches zero-shot topics
+            documents = assigned_documents
+            embeddings = assigned_embeddings
+
+             # Update topic sizes
+            self._update_topic_size(documents)
+
             # All documents matches zero-shot topics
             documents = assigned_documents
             embeddings = assigned_embeddings
