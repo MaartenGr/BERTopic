@@ -36,5 +36,7 @@ jobs:
         activate-environment: "true"
     - name: Install dependencies (including test group)
       run: uv sync --extra test
+    - name: Display the project's dependency tree (including information on outdated packages)
+      run: uv tree --outdated
     - name: Run Checking Mechanisms
       run: make check
