@@ -36,7 +36,7 @@ class LiteLLM(BaseRepresentation):
         exponential_backoff: Retry requests with a random exponential backoff.
                              A short sleep is used when a rate limit error is hit,
                              then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests.
+                             if errors are hit until 10 unsuccessful requests.
                              If True, overrides `delay_in_seconds`.
         nr_docs: The number of documents to pass to LiteLLM if a prompt
                  with the `["DOCUMENTS"]` tag is used.
