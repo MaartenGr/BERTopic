@@ -5,6 +5,12 @@ hide:
 
 # Changelog
 
+## **Unreleased**
+
+<h3><b>Fixes:</a></b></h3>
+
+* Fix `topic_sizes_` not being updated in zero-shot topic modeling when using `nr_topics` parameter ([#2384](https://github.com/MaartenGr/BERTopic/issues/2384))
+
 ## **Version 0.17.3**
 *Release date: 8 July, 2025*
 
