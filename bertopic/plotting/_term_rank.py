@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 def visualize_term_rank(
     topic_model,
-    topics: List[int] = None,
+    topics: List[int] | None = None,
     log_scale: bool = False,
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Term score decline per Topic</b>",
@@ -77,7 +77,7 @@ def visualize_term_rank(
         if not any(y > 1.5):
             # labels
             if isinstance(custom_labels, str):
-                label = f"{topic}_" + "_".join(list(zip(*topic_model.topic_aspects_[custom_labels][topic]))[0][:3])
+                label = f"{topic}_" + "_".join(next(zip(*topic_model.topic_aspects_[custom_labels][topic]))[:3])
             elif topic_model.custom_labels_ is not None and custom_labels:
                 label = topic_model.custom_labels_[topic + topic_model._outliers]
             else:

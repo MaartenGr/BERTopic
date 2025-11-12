@@ -149,7 +149,7 @@ class KeyBERTInspired(BaseRepresentation):
             ]
             for index, label in enumerate(labels)
         }
-        topics = {label: list(zip(*values[: self.nr_candidate_words]))[0] for label, values in topics.items()}
+        topics = {label: next(zip(*values[: self.nr_candidate_words])) for label, values in topics.items()}
 
         return topics
 

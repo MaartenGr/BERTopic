@@ -16,16 +16,16 @@ from bertopic._utils import validate_distance_matrix
 def visualize_hierarchy(
     topic_model,
     orientation: str = "left",
-    topics: List[int] = None,
-    top_n_topics: int = None,
+    topics: List[int] | None = None,
+    top_n_topics: int | None = None,
     use_ctfidf: bool = True,
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Hierarchical Clustering</b>",
     width: int = 1000,
     height: int = 600,
     hierarchical_topics: pd.DataFrame = None,
-    linkage_function: Callable[[csr_matrix], np.ndarray] = None,
-    distance_function: Callable[[csr_matrix], csr_matrix] = None,
+    linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
+    distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
     color_threshold: int = 1,
 ) -> go.Figure:
     """Visualize a hierarchical structure of the topics.
@@ -167,7 +167,7 @@ def visualize_hierarchy(
         ]
     else:
         new_labels = [
-            [[str(topics[int(x)]), None]] + topic_model.get_topic(topics[int(x)]) for x in fig.layout[axis]["ticktext"]
+            [[str(topics[int(x)]), None], *topic_model.get_topic(topics[int(x)])] for x in fig.layout[axis]["ticktext"]
         ]
         new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
         new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
@@ -297,7 +297,7 @@ def _get_annotations(
         if len(fst_topic) == 1:
             if isinstance(custom_labels, str):
                 fst_name = f"{fst_topic[0]}_" + "_".join(
-                    list(zip(*topic_model.topic_aspects_[custom_labels][fst_topic[0]]))[0][:3]
+                    next(zip(*topic_model.topic_aspects_[custom_labels][fst_topic[0]]))[:3]
                 )
             elif topic_model.custom_labels_ is not None and custom_labels:
                 fst_name = topic_model.custom_labels_[fst_topic[0] + topic_model._outliers]
@@ -311,7 +311,7 @@ def _get_annotations(
         if len(scnd_topic) == 1:
             if isinstance(custom_labels, str):
                 scnd_name = f"{scnd_topic[0]}_" + "_".join(
-                    list(zip(*topic_model.topic_aspects_[custom_labels][scnd_topic[0]]))[0][:3]
+                    next(zip(*topic_model.topic_aspects_[custom_labels][scnd_topic[0]]))[:3]
                 )
             elif topic_model.custom_labels_ is not None and custom_labels:
                 scnd_name = topic_model.custom_labels_[scnd_topic[0] + topic_model._outliers]

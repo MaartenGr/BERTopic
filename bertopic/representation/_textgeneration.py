@@ -85,13 +85,13 @@ class TextGeneration(BaseRepresentation):
     def __init__(
         self,
         model: Union[str, pipeline],
-        prompt: str = None,
+        prompt: str | None = None,
         pipeline_kwargs: Mapping[str, Any] = {},
         random_state: int = 42,
         nr_docs: int = 4,
-        diversity: float = None,
-        doc_length: int = None,
-        tokenizer: Union[str, Callable] = None,
+        diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
     ):
         self.random_state = random_state
         set_seed(random_state)
@@ -167,7 +167,7 @@ class TextGeneration(BaseRepresentation):
         return updated_topics
 
     def _create_prompt(self, docs, topic, topics):
-        keywords = ", ".join(list(zip(*topics[topic]))[0])
+        keywords = ", ".join(next(zip(*topics[topic])))
 
         # Use the default prompt and replace keywords
         if self.prompt == DEFAULT_PROMPT:

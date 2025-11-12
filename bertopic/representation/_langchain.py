@@ -133,11 +133,11 @@ class LangChain(BaseRepresentation):
     def __init__(
         self,
         chain,
-        prompt: str = None,
+        prompt: str | None = None,
         nr_docs: int = 4,
-        diversity: float = None,
-        doc_length: int = None,
-        tokenizer: Union[str, Callable] = None,
+        diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
         chain_config=None,
     ):
         self.chain = chain
@@ -192,7 +192,7 @@ class LangChain(BaseRepresentation):
         if "[KEYWORDS]" in self.prompt:
             prompts = []
             for topic in topics:
-                keywords = list(zip(*topics[topic]))[0]
+                keywords = next(zip(*topics[topic]))
                 prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
                 prompts.append(prompt)
 

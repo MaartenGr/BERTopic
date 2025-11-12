@@ -35,8 +35,8 @@ class OpenAIBackend(BaseEmbedder):
         self,
         client: openai.OpenAI,
         embedding_model: str = "text-embedding-ada-002",
-        delay_in_seconds: float = None,
-        batch_size: int = None,
+        delay_in_seconds: float | None = None,
+        batch_size: int | None = None,
         generator_kwargs: Mapping[str, Any] = {},
     ):
         super().__init__()

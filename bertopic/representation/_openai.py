@@ -134,15 +134,15 @@ class OpenAI(BaseRepresentation):
         self,
         client,
         model: str = "gpt-4o-mini",
-        prompt: str = None,
-        system_prompt: str = None,
+        prompt: str | None = None,
+        system_prompt: str | None = None,
         generator_kwargs: Mapping[str, Any] = {},
-        delay_in_seconds: float = None,
+        delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
         nr_docs: int = 4,
-        diversity: float = None,
-        doc_length: int = None,
-        tokenizer: Union[str, Callable] = None,
+        diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
         **kwargs,
     ):
         self.client = client
@@ -240,7 +240,7 @@ class OpenAI(BaseRepresentation):
         return updated_topics
 
     def _create_prompt(self, docs, topic, topics):
-        keywords = list(zip(*topics[topic]))[0]
+        keywords = next(zip(*topics[topic]))
 
         # Use the Default Chat Prompt
         if self.prompt == DEFAULT_CHAT_PROMPT:

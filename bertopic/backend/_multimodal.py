@@ -84,7 +84,7 @@ class MultiModalBackend(BaseEmbedder):
         except:  # noqa: E722
             self.tokenizer = None
 
-    def embed(self, documents: List[str], images: List[str] = None, verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: List[str], images: List[str] | None = None, verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words or images into an n-dimensional
         matrix of embeddings.
 

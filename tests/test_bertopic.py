@@ -68,7 +68,7 @@ def test_full_model(model, documents, request):
 
     # Test transform
     doc = "This is a new document to predict."
-    topics_test, probs_test = topic_model.transform([doc, doc])
+    topics_test, _probs_test = topic_model.transform([doc, doc])
 
     assert len(topics_test) == 2
 

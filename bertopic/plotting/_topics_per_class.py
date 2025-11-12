@@ -8,7 +8,7 @@ def visualize_topics_per_class(
     topic_model,
     topics_per_class: pd.DataFrame,
     top_n_topics: int = 10,
-    topics: List[int] = None,
+    topics: List[int] | None = None,
     normalize_frequency: bool = False,
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Topics per Class</b>",

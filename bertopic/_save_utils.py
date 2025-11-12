@@ -107,8 +107,8 @@ def push_to_hf_hub(
     model,
     repo_id: str,
     commit_message: str = "Add BERTopic model",
-    token: str = None,
-    revision: str = None,
+    token: str | None = None,
+    revision: str | None = None,
     private: bool = False,
     create_pr: bool = False,
     model_card: bool = True,
@@ -286,7 +286,7 @@ def generate_readme(model, repo_id: str):
         nr_documents = ""
 
     # Topic information
-    topic_keywords = [" - ".join(list(zip(*model.get_topic(topic)))[0][:5]) for topic in topics]
+    topic_keywords = [" - ".join(next(zip(*model.get_topic(topic)))[:5]) for topic in topics]
     topic_freq = [model.get_topic_freq(topic) for topic in topics]
     topic_labels = model.custom_labels_ if model.custom_labels_ else [model.topic_labels_[topic] for topic in topics]
     topics = [

@@ -49,12 +49,12 @@ except ModuleNotFoundError:
 
 __all__ = [
     "BaseEmbedder",
-    "WordDocEmbedder",
-    "OpenAIBackend",
     "CohereBackend",
-    "Model2VecBackend",
-    "MultiModalBackend",
     "FastEmbedBackend",
     "LangChainBackend",
+    "Model2VecBackend",
+    "MultiModalBackend",
+    "OpenAIBackend",
+    "WordDocEmbedder",
     "languages",
 ]

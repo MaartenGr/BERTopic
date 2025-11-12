@@ -79,12 +79,12 @@ class LiteLLM(BaseRepresentation):
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        prompt: str = None,
+        prompt: str | None = None,
         generator_kwargs: Mapping[str, Any] = {},
-        delay_in_seconds: float = None,
+        delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
         nr_docs: int = 4,
-        diversity: float = None,
+        diversity: float | None = None,
     ):
         self.model = model
         self.prompt = prompt if prompt else DEFAULT_PROMPT
@@ -144,7 +144,7 @@ class LiteLLM(BaseRepresentation):
         return updated_topics
 
     def _create_prompt(self, docs, topic, topics):
-        keywords = list(zip(*topics[topic]))[0]
+        keywords = next(zip(*topics[topic]))
 
         # Use the Default Chat Prompt
         if self.prompt == DEFAULT_PROMPT:

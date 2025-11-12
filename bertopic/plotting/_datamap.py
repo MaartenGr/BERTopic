@@ -16,8 +16,8 @@ except ImportError:
 
 def visualize_document_datamap(
     topic_model,
-    docs: List[str] = None,
-    topics: List[int] = None,
+    docs: List[str] | None = None,
+    topics: List[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
     custom_labels: Union[bool, str] = False,

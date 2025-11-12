@@ -13,16 +13,16 @@ from ._approximate_distribution import visualize_approximate_distribution
 
 
 __all__ = [
-    "visualize_topics",
-    "visualize_heatmap",
+    "visualize_approximate_distribution",
     "visualize_barchart",
-    "visualize_documents",
-    "visualize_term_rank",
-    "visualize_hierarchy",
     "visualize_distribution",
     "visualize_document_datamap",
+    "visualize_documents",
+    "visualize_heatmap",
+    "visualize_hierarchical_documents",
+    "visualize_hierarchy",
+    "visualize_term_rank",
+    "visualize_topics",
     "visualize_topics_over_time",
     "visualize_topics_per_class",
-    "visualize_hierarchical_documents",
-    "visualize_approximate_distribution",
 ]

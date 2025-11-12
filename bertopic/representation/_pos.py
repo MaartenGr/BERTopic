@@ -67,7 +67,7 @@ class PartOfSpeech(BaseRepresentation):
         self,
         model: Union[str, Language] = "en_core_web_sm",
         top_n_words: int = 10,
-        pos_patterns: List[str] = None,
+        pos_patterns: List[str] | None = None,
     ):
         if isinstance(model, str):
             self.model = spacy.load(model)
@@ -114,7 +114,7 @@ class PartOfSpeech(BaseRepresentation):
 
         candidate_topics = {}
         for topic, values in topics.items():
-            keywords = list(zip(*values))[0]
+            keywords = next(zip(*values))
 
             # Extract candidate documents
             candidate_documents = []
