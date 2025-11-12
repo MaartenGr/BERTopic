@@ -8,10 +8,10 @@ from typing import List, Union
 def visualize_documents(
     topic_model,
     docs: List[str],
-    topics: List[int] = None,
+    topics: List[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
-    sample: float = None,
+    sample: float | None = None,
     hide_annotations: bool = False,
     hide_document_hover: bool = False,
     custom_labels: Union[bool, str] = False,

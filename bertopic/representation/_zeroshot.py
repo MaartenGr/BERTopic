@@ -75,7 +75,7 @@ class ZeroShotClassification(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         # Classify topics
-        topic_descriptions = [" ".join(list(zip(*topics[topic]))[0]) for topic in topics.keys()]
+        topic_descriptions = [" ".join(next(zip(*topics[topic]))) for topic in topics.keys()]
         classifications = self.model(topic_descriptions, self.candidate_topics, **self.pipeline_kwargs)
 
         # Extract labels

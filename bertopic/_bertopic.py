@@ -148,11 +148,11 @@ class BERTopic:
         top_n_words: int = 10,
         n_gram_range: Tuple[int, int] = (1, 1),
         min_topic_size: int = 10,
-        nr_topics: Union[int, str] = None,
+        nr_topics: Union[int, str] | None = None,
         low_memory: bool = False,
         calculate_probabilities: bool = False,
-        seed_topic_list: List[List[str]] = None,
-        zeroshot_topic_list: List[str] = None,
+        seed_topic_list: List[List[str]] | None = None,
+        zeroshot_topic_list: List[str] | None = None,
         zeroshot_min_similarity: float = 0.7,
         embedding_model=None,
         umap_model=None,
@@ -351,7 +351,7 @@ class BERTopic:
         self,
         documents: List[str],
         embeddings: np.ndarray = None,
-        images: List[str] = None,
+        images: List[str] | None = None,
         y: Union[List[int], np.ndarray] = None,
     ):
         """Fit the models on a collection of documents and generate topics.
@@ -396,7 +396,7 @@ class BERTopic:
         self,
         documents: List[str],
         embeddings: np.ndarray = None,
-        images: List[str] = None,
+        images: List[str] | None = None,
         y: Union[List[int], np.ndarray] = None,
     ) -> Tuple[List[int], Union[np.ndarray, None]]:
         """Fit the models on a collection of documents, generate topics,
@@ -546,7 +546,7 @@ class BERTopic:
         self,
         documents: Union[str, List[str]],
         embeddings: np.ndarray = None,
-        images: List[str] = None,
+        images: List[str] | None = None,
     ) -> Tuple[List[int], np.ndarray]:
         """After having fit a model, use transform to predict new instances.
 
@@ -798,9 +798,9 @@ class BERTopic:
         self,
         docs: List[str],
         timestamps: Union[List[str], List[int]],
-        topics: List[int] = None,
-        nr_bins: int = None,
-        datetime_format: str = None,
+        topics: List[int] | None = None,
+        nr_bins: int | None = None,
+        datetime_format: str | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
     ) -> pd.DataFrame:
@@ -1036,8 +1036,8 @@ class BERTopic:
         self,
         docs: List[str],
         use_ctfidf: bool = True,
-        linkage_function: Callable[[csr_matrix], np.ndarray] = None,
-        distance_function: Callable[[csr_matrix], csr_matrix] = None,
+        linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
+        distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
     ) -> pd.DataFrame:
         """Create a hierarchy of topics.
 
@@ -1428,7 +1428,9 @@ class BERTopic:
 
         return topic_distributions, topic_token_distributions
 
-    def find_topics(self, search_term: str = None, image: str = None, top_n: int = 5) -> Tuple[List[int], List[float]]:
+    def find_topics(
+        self, search_term: str | None = None, image: str | None = None, top_n: int = 5
+    ) -> Tuple[List[int], List[float]]:
         """Find topics most similar to a search_term.
 
         Creates an embedding for a search query and compares that with
@@ -1486,10 +1488,10 @@ class BERTopic:
     def update_topics(
         self,
         docs: List[str],
-        images: List[str] = None,
-        topics: List[int] = None,
+        images: List[str] | None = None,
+        topics: List[int] | None = None,
         top_n_words: int = 10,
-        n_gram_range: Tuple[int, int] = None,
+        n_gram_range: Tuple[int, int] | None = None,
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: ClassTfidfTransformer = None,
         representation_model: BaseRepresentation = None,
@@ -1645,7 +1647,7 @@ class BERTopic:
         else:
             return False
 
-    def get_topic_info(self, topic: int = None) -> pd.DataFrame:
+    def get_topic_info(self, topic: int | None = None) -> pd.DataFrame:
         """Get information about each topic including its ID, frequency, and name.
 
         Arguments:
@@ -1671,7 +1673,7 @@ class BERTopic:
                 info["CustomName"] = info["Topic"].map(labels)
 
         # Main Keywords
-        values = {topic: list(list(zip(*values))[0]) for topic, values in self.topic_representations_.items()}
+        values = {topic: list(next(zip(*values))) for topic, values in self.topic_representations_.items()}
         info["Representation"] = info["Topic"].map(values)
 
         # Extract all topic aspects
@@ -1681,7 +1683,7 @@ class BERTopic:
                     if isinstance(list(values.values())[-1][0], tuple) or isinstance(
                         list(values.values())[-1][0], list
                     ):
-                        values = {topic: list(list(zip(*value))[0]) for topic, value in values.items()}
+                        values = {topic: list(next(zip(*value))) for topic, value in values.items()}
                     elif isinstance(list(values.values())[-1][0], str):
                         values = {topic: " ".join(value).strip() for topic, value in values.items()}
                 info[aspect] = info["Topic"].map(values)
@@ -1698,7 +1700,7 @@ class BERTopic:
 
         return info.reset_index(drop=True)
 
-    def get_topic_freq(self, topic: int = None) -> Union[pd.DataFrame, int]:
+    def get_topic_freq(self, topic: int | None = None) -> Union[pd.DataFrame, int]:
         """Return the size of topics (descending order).
 
         Arguments:
@@ -1733,7 +1735,7 @@ class BERTopic:
         self,
         docs: List[str],
         df: pd.DataFrame = None,
-        metadata: Mapping[str, Any] = None,
+        metadata: Mapping[str, Any] | None = None,
     ) -> pd.DataFrame:
         """Get information about the documents on which the topic was trained
         including the documents themselves, their respective topics, the name
@@ -1797,7 +1799,7 @@ class BERTopic:
         document_info = pd.merge(document_info, topic_info, on="Topic", how="left")
 
         # Add top n words
-        top_n_words = {topic: " - ".join(list(zip(*self.get_topic(topic)))[0]) for topic in set(self.topics_)}
+        top_n_words = {topic: " - ".join(next(zip(*self.get_topic(topic)))) for topic in set(self.topics_)}
         document_info["Top_n_words"] = document_info.Topic.map(top_n_words)
 
         # Add flat probabilities
@@ -1821,7 +1823,7 @@ class BERTopic:
                 document_info[column] = values
         return document_info
 
-    def get_representative_docs(self, topic: int = None) -> List[str]:
+    def get_representative_docs(self, topic: int | None = None) -> List[str]:
         """Extract the best representing documents per topic.
 
         Note:
@@ -1869,7 +1871,7 @@ class BERTopic:
     @staticmethod
     def get_topic_tree(
         hier_topics: pd.DataFrame,
-        max_distance: float = None,
+        max_distance: float | None = None,
         tight_layout: bool = False,
     ) -> str:
         """Extract the topic tree such that it can be printed.
@@ -2041,9 +2043,9 @@ class BERTopic:
         self,
         nr_words: int = 3,
         topic_prefix: bool = True,
-        word_length: int = None,
+        word_length: int | None = None,
         separator: str = "_",
-        aspect: str = None,
+        aspect: str | None = None,
     ) -> List[str]:
         """Get labels for each topic in a user-defined format.
 
@@ -2100,7 +2102,7 @@ class BERTopic:
         self,
         docs: List[str],
         topics_to_merge: List[Union[Iterable[int], int]],
-        images: List[str] = None,
+        images: List[str] | None = None,
     ) -> None:
         """Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
@@ -2312,7 +2314,7 @@ class BERTopic:
         self,
         docs: List[str],
         nr_topics: Union[int, str] = 20,
-        images: List[str] = None,
+        images: List[str] | None = None,
         use_ctfidf: bool = False,
     ) -> None:
         """Reduce the number of topics to a fixed number of topics
@@ -2379,7 +2381,7 @@ class BERTopic:
         self,
         documents: List[str],
         topics: List[int],
-        images: List[str] = None,
+        images: List[str] | None = None,
         strategy: str = "distributions",
         probabilities: np.ndarray = None,
         threshold: float = 0,
@@ -2538,8 +2540,8 @@ class BERTopic:
 
     def visualize_topics(
         self,
-        topics: List[int] = None,
-        top_n_topics: int = None,
+        topics: List[int] | None = None,
+        top_n_topics: int | None = None,
         use_ctfidf: bool = False,
         custom_labels: bool = False,
         title: str = "<b>Intertopic Distance Map</b>",
@@ -2593,10 +2595,10 @@ class BERTopic:
     def visualize_documents(
         self,
         docs: List[str],
-        topics: List[int] = None,
+        topics: List[int] | None = None,
         embeddings: np.ndarray = None,
         reduced_embeddings: np.ndarray = None,
-        sample: float = None,
+        sample: float | None = None,
         hide_annotations: bool = False,
         hide_document_hover: bool = False,
         custom_labels: bool = False,
@@ -2691,8 +2693,8 @@ class BERTopic:
 
     def visualize_document_datamap(
         self,
-        docs: List[str] = None,
-        topics: List[int] = None,
+        docs: List[str] | None = None,
+        topics: List[int] | None = None,
         embeddings: np.ndarray = None,
         reduced_embeddings: np.ndarray = None,
         custom_labels: Union[bool, str] = False,
@@ -2804,10 +2806,10 @@ class BERTopic:
         self,
         docs: List[str],
         hierarchical_topics: pd.DataFrame,
-        topics: List[int] = None,
+        topics: List[int] | None = None,
         embeddings: np.ndarray = None,
         reduced_embeddings: np.ndarray = None,
-        sample: Union[float, int] = None,
+        sample: Union[float, int] | None = None,
         hide_annotations: bool = False,
         hide_document_hover: bool = True,
         nr_levels: int = 10,
@@ -2922,7 +2924,7 @@ class BERTopic:
 
     def visualize_term_rank(
         self,
-        topics: List[int] = None,
+        topics: List[int] | None = None,
         log_scale: bool = False,
         custom_labels: bool = False,
         title: str = "<b>Term score decline per Topic</b>",
@@ -2986,8 +2988,8 @@ class BERTopic:
     def visualize_topics_over_time(
         self,
         topics_over_time: pd.DataFrame,
-        top_n_topics: int = None,
-        topics: List[int] = None,
+        top_n_topics: int | None = None,
+        topics: List[int] | None = None,
         normalize_frequency: bool = False,
         custom_labels: bool = False,
         title: str = "<b>Topics over Time</b>",
@@ -3043,7 +3045,7 @@ class BERTopic:
         self,
         topics_per_class: pd.DataFrame,
         top_n_topics: int = 10,
-        topics: List[int] = None,
+        topics: List[int] | None = None,
         normalize_frequency: bool = False,
         custom_labels: bool = False,
         title: str = "<b>Topics per Class</b>",
@@ -3199,16 +3201,16 @@ class BERTopic:
     def visualize_hierarchy(
         self,
         orientation: str = "left",
-        topics: List[int] = None,
-        top_n_topics: int = None,
+        topics: List[int] | None = None,
+        top_n_topics: int | None = None,
         use_ctfidf: bool = True,
         custom_labels: bool = False,
         title: str = "<b>Hierarchical Clustering</b>",
         width: int = 1000,
         height: int = 600,
         hierarchical_topics: pd.DataFrame = None,
-        linkage_function: Callable[[csr_matrix], np.ndarray] = None,
-        distance_function: Callable[[csr_matrix], csr_matrix] = None,
+        linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
+        distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
         color_threshold: int = 1,
     ) -> "go.Figure":
         """Visualize a hierarchical structure of the topics.
@@ -3298,9 +3300,9 @@ class BERTopic:
 
     def visualize_heatmap(
         self,
-        topics: List[int] = None,
-        top_n_topics: int = None,
-        n_clusters: int = None,
+        topics: List[int] | None = None,
+        top_n_topics: int | None = None,
+        n_clusters: int | None = None,
         use_ctfidf: bool = False,
         custom_labels: bool = False,
         title: str = "<b>Similarity Matrix</b>",
@@ -3358,7 +3360,7 @@ class BERTopic:
 
     def visualize_barchart(
         self,
-        topics: List[int] = None,
+        topics: List[int] | None = None,
         top_n_topics: int = 8,
         n_words: int = 5,
         custom_labels: bool = False,
@@ -3750,8 +3752,8 @@ class BERTopic:
         self,
         repo_id: str,
         commit_message: str = "Add BERTopic model",
-        token: str = None,
-        revision: str = None,
+        token: str | None = None,
+        revision: str | None = None,
         private: bool = False,
         create_pr: bool = False,
         model_card: bool = True,
@@ -3842,9 +3844,9 @@ class BERTopic:
     def _extract_embeddings(
         self,
         documents: Union[List[str], str],
-        images: List[str] = None,
+        images: List[str] | None = None,
         method: str = "document",
-        verbose: bool = None,
+        verbose: bool | None = None,
     ) -> np.ndarray:
         """Extract sentence/document embeddings through pre-trained embeddings
         For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html.
@@ -4237,7 +4239,7 @@ class BERTopic:
         topics: Mapping[str, List[Tuple[str, float]]],
         nr_samples: int = 500,
         nr_repr_docs: int = 5,
-        diversity: float = None,
+        diversity: float | None = None,
     ) -> Union[List[str], List[List[int]]]:
         """Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
@@ -4554,7 +4556,7 @@ class BERTopic:
                         aspects = aspect_model.extract_topics(self, documents, c_tf_idf, aspects)
                     else:
                         raise TypeError(
-                            f"unsupported type {type(aspect_model).__name__} for representation_model[{repr(aspect)}]"
+                            f"unsupported type {type(aspect_model).__name__} for representation_model[{aspect!r}]"
                         )
                     self.topic_aspects_[aspect] = aspects
 
@@ -5017,9 +5019,9 @@ def _create_model_from_files(
     topics: Mapping[str, Any],
     params: Mapping[str, Any],
     tensors: Mapping[str, np.array],
-    ctfidf_tensors: Mapping[str, Any] = None,
-    ctfidf_config: Mapping[str, Any] = None,
-    images: Mapping[int, Any] = None,
+    ctfidf_tensors: Mapping[str, Any] | None = None,
+    ctfidf_config: Mapping[str, Any] | None = None,
+    images: Mapping[int, Any] | None = None,
     warn_no_backend: bool = True,
 ):
     """Create a BERTopic model from a variety of inputs.

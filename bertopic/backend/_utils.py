@@ -68,7 +68,7 @@ languages = [
 ]
 
 
-def select_backend(embedding_model, language: str = None, verbose: bool = False) -> BaseEmbedder:
+def select_backend(embedding_model, language: str | None = None, verbose: bool = False) -> BaseEmbedder:
     """Select an embedding model based on language or a specific provided model.
     When selecting a language, we choose all-MiniLM-L6-v2 for English and
     paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
