@@ -5,6 +5,36 @@ hide:
 
 # Changelog
 
+
+## **Version 0.17.4**
+*Release date: 3 December, 2025*
+
+<h3><b>Highlights:</a></b></h3>
+
+* Add `.delete_topics` by [@shuanglovesdata](https://github.com/shuanglovesdata) in [#2322](https://github.com/MaartenGr/BERTopic/pull/2322)
+* Allow execution without plotly by [@luismavs](https://github.com/luismavs) in [#2401](https://github.com/MaartenGr/BERTopic/pull/2401)
+* Add tqdm to _litellm.py [@NFrnk](https://github.com/NFrnk) in [#2408](https://github.com/MaartenGr/BERTopic/pull/2408)
+* Drop support for python 3.9 by [@afuetterer](https://github.com/afuetterer) in [#2419](https://github.com/MaartenGr/BERTopic/pull/2419)
+* Make UMAP's init default to random on visualize_topics for reproducible visualization by [@makramab](https://github.com/makramab) in [#2412](https://github.com/MaartenGr/BERTopic/pull/2412)
+
+<h3><b>cuML:</a></b></h3>
+
+Preparing for MEGA!-scale BERTopic with [Multi-GPU UMAP](https://github.com/rapidsai/cuml/issues/3330#issuecomment-3376951158) and the following necessary updates:
+
+* Update installation instructions for cuML with BERTopic by [@csadorf](https://github.com/csadorf) in [#2446](https://github.com/MaartenGr/BERTopic/pull/2446)
+* Speed up `._create_topic_vectors` by replacing DataFrame .loc with NumPy masking [@jinsolp](https://github.com/jinsolp) in [#2406](https://github.com/MaartenGr/BERTopic/pull/2406)
+* Modify _reduce_dimensionality to use fit_transform by [@betatim](https://github.com/betatim) in [#2416](https://github.com/MaartenGr/BERTopic/pull/2416)
+
+<h3><b>Fixes:</a></b></h3>
+* Fix incorrect label in zero-shot svg in documentation by [@huisman](https://github.com/huisman) in [#2448](https://github.com/MaartenGr/BERTopic/pull/2448)
+* Enable ruff rule RUF by [@afuetterer](https://github.com/afuetterer) in [#2457](https://github.com/MaartenGr/BERTopic/pull/2457)
+* CI: bump github actions versions by [@afuetterer](https://github.com/afuetterer) in [#2427](https://github.com/MaartenGr/BERTopic/pull/2427)
+* CI: prefer action-pre-commit-uv for lint job by [@afuetterer](https://github.com/afuetterer) in [#2434](https://github.com/MaartenGr/BERTopic/pull/2434)
+* CI: switch to uv based project installation by [@afuetterer](https://github.com/afuetterer) in [#2445](https://github.com/MaartenGr/BERTopic/pull/2445)
+* Chore: update pre-commit hooks by [@afuetterer](https://github.com/afuetterer) in [#2414](https://github.com/MaartenGr/BERTopic/pull/2414) and [#2443](https://github.com/MaartenGr/BERTopic/pull/2443)
+* Chore: remove obsolete `version_info` check by [@afuetterer](https://github.com/afuetterer) in [#2444](https://github.com/MaartenGr/BERTopic/pull/2444)
+
+
 ## **Version 0.17.3**
 *Release date: 8 July, 2025*
 
