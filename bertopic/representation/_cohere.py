@@ -112,13 +112,13 @@ class Cohere(BaseRepresentation):
         self,
         client,
         model: str = "command-r",
-        prompt: str = None,
-        system_prompt: str = None,
-        delay_in_seconds: float = None,
+        prompt: str | None = None,
+        system_prompt: str | None = None,
+        delay_in_seconds: float | None = None,
         nr_docs: int = 4,
-        diversity: float = None,
-        doc_length: int = None,
-        tokenizer: Union[str, Callable] = None,
+        diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
     ):
         self.client = client
         self.model = model
@@ -182,7 +182,7 @@ class Cohere(BaseRepresentation):
         return updated_topics
 
     def _create_prompt(self, docs, topic, topics):
-        keywords = list(zip(*topics[topic]))[0]
+        keywords = next(zip(*topics[topic]))
 
         # Use the Default Chat Prompt
         if self.prompt == DEFAULT_PROMPT:

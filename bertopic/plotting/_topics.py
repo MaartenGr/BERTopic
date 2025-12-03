@@ -17,8 +17,8 @@ import plotly.graph_objects as go
 
 def visualize_topics(
     topic_model,
-    topics: List[int] = None,
-    top_n_topics: int = None,
+    topics: List[int] | None = None,
+    top_n_topics: int | None = None,
     use_ctfidf: bool = False,
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Intertopic Distance Map</b>",

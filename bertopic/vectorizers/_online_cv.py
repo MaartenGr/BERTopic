@@ -68,7 +68,7 @@ class OnlineCountVectorizer(CountVectorizer):
         Adapted from: https://github.com/idoshlomo/online_vectorizers
     """
 
-    def __init__(self, decay: float = None, delete_min_df: float = None, **kwargs):
+    def __init__(self, decay: float | None = None, delete_min_df: float | None = None, **kwargs):
         self.decay = decay
         self.delete_min_df = delete_min_df
         super(OnlineCountVectorizer, self).__init__(**kwargs)

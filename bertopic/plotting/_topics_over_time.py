@@ -7,8 +7,8 @@ from sklearn.preprocessing import normalize
 def visualize_topics_over_time(
     topic_model,
     topics_over_time: pd.DataFrame,
-    top_n_topics: int = None,
-    topics: List[int] = None,
+    top_n_topics: int | None = None,
+    topics: List[int] | None = None,
     normalize_frequency: bool = False,
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Topics over Time</b>",

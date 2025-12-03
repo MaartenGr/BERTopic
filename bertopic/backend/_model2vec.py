@@ -56,7 +56,7 @@ class Model2VecBackend(BaseEmbedder):
         embedding_model: Union[str, StaticModel],
         distill: bool = False,
         distill_kwargs: dict = {},
-        distill_vectorizer: str = None,
+        distill_vectorizer: str | None = None,
     ):
         super().__init__()
 

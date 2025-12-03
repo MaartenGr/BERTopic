@@ -115,13 +115,13 @@ class LlamaCPP(BaseRepresentation):
     def __init__(
         self,
         model: Union[str, Llama],
-        prompt: str = None,
-        system_prompt: str = None,
+        prompt: str | None = None,
+        system_prompt: str | None = None,
         pipeline_kwargs: Mapping[str, Any] = {},
         nr_docs: int = 4,
-        diversity: float = None,
-        doc_length: int = None,
-        tokenizer: Union[str, Callable] = None,
+        diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
     ):
         if isinstance(model, str):
             self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="ChatML")
@@ -188,7 +188,7 @@ class LlamaCPP(BaseRepresentation):
         return updated_topics
 
     def _create_prompt(self, docs, topic, topics):
-        keywords = list(zip(*topics[topic]))[0]
+        keywords = next(zip(*topics[topic]))
 
         # Use the Default Chat Prompt
         if self.prompt == DEFAULT_PROMPT:

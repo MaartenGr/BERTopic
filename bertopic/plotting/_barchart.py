@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 
 def visualize_barchart(
     topic_model,
-    topics: List[int] = None,
+    topics: List[int] | None = None,
     top_n_topics: int = 8,
     n_words: int = 5,
     custom_labels: Union[bool, str] = False,

@@ -62,15 +62,15 @@ except ModuleNotFoundError:
 
 __all__ = [
     "BaseRepresentation",
-    "TextGeneration",
-    "ZeroShotClassification",
-    "KeyBERTInspired",
-    "PartOfSpeech",
-    "MaximalMarginalRelevance",
     "Cohere",
-    "OpenAI",
+    "KeyBERTInspired",
     "LangChain",
     "LiteLLM",
     "LlamaCPP",
+    "MaximalMarginalRelevance",
+    "OpenAI",
+    "PartOfSpeech",
+    "TextGeneration",
     "VisualRepresentation",
+    "ZeroShotClassification",
 ]

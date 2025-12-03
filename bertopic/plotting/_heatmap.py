@@ -10,9 +10,9 @@ import plotly.graph_objects as go
 
 def visualize_heatmap(
     topic_model,
-    topics: List[int] = None,
-    top_n_topics: int = None,
-    n_clusters: int = None,
+    topics: List[int] | None = None,
+    top_n_topics: int | None = None,
+    n_clusters: int | None = None,
     use_ctfidf: bool = False,
     custom_labels: Union[bool, str] = False,
     title: str = "<b>Similarity Matrix</b>",
@@ -105,7 +105,7 @@ def visualize_heatmap(
     elif topic_model.custom_labels_ is not None and custom_labels:
         new_labels = [topic_model.custom_labels_[topic + topic_model._outliers] for topic in sorted_topics]
     else:
-        new_labels = [[[str(topic), None]] + topic_model.get_topic(topic) for topic in sorted_topics]
+        new_labels = [[[str(topic), None], *topic_model.get_topic(topic)] for topic in sorted_topics]
         new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
         new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
 

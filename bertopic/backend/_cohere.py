@@ -44,8 +44,8 @@ class CohereBackend(BaseEmbedder):
         self,
         client,
         embedding_model: str = "large",
-        delay_in_seconds: float = None,
-        batch_size: int = None,
+        delay_in_seconds: float | None = None,
+        batch_size: int | None = None,
         embed_kwargs: Mapping[str, Any] = {},
     ):
         super().__init__()
