@@ -162,7 +162,7 @@ def visualize_document_datamap(
                 topic_name_mapping[topic_num] = "Unlabelled"
 
     # Map in topic names and plot
-    named_topic_per_doc = pd.Series(topic_per_doc).map(topic_name_mapping).values
+    named_topic_per_doc = pd.Series(topic_per_doc).map(topic_name_mapping).to_numpy()
 
     if interactive:
         figure = datamapplot.create_interactive_plot(

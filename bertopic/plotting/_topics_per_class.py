@@ -96,10 +96,10 @@ def visualize_topics_per_class(
         else:
             visible = "legendonly"
         trace_data = data.loc[data.Topic == topic, :]
-        topic_name = trace_data.Name.values[0]
-        words = trace_data.Words.values
+        topic_name = trace_data.Name.to_numpy()[0]
+        words = trace_data.Words.to_numpy()
         if normalize_frequency:
-            x = normalize(trace_data.Frequency.values.reshape(1, -1))[0]
+            x = normalize(trace_data.Frequency.to_numpy().reshape(1, -1))[0]
         else:
             x = trace_data.Frequency
         fig.add_trace(

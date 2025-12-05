@@ -110,6 +110,7 @@ select = [
   "E9",
   "F",   # pyflakes
   "D",   # pydocstyle
+  "PD",  # pandas-vet
   "RUF", # ruff
 ]
 
