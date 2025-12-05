@@ -230,7 +230,7 @@ def visualize_hierarchical_documents(
         else:
             trace_name = (
                 f"{topic}_"
-                + hierarchical_topics.loc[hierarchical_topics.Parent_ID == str(topic), "Parent_Name"].values[0]
+                + hierarchical_topics.loc[hierarchical_topics.Parent_ID == str(topic), "Parent_Name"].to_numpy()[0]
             )
             plot_text = "_".join([name[:20] for name in trace_name.split("_")[:3]])
             topic_names[topic] = {

@@ -457,7 +457,7 @@ class BERTopic:
             logger.info("Embedding - Transforming documents to embeddings.")
             self.embedding_model = select_backend(self.embedding_model, language=self.language, verbose=self.verbose)
             embeddings = self._extract_embeddings(
-                documents.Document.values.tolist(),
+                documents.Document.to_numpy().tolist(),
                 images=images,
                 method="document",
                 verbose=self.verbose,
@@ -503,7 +503,7 @@ class BERTopic:
             documents = self._sort_mappings_by_frequency(documents)
 
         # Create documents from images if we have images only
-        if documents.Document.values[0] is None:
+        if documents.Document.to_numpy()[0] is None:
             custom_documents = self._images_to_text(documents, embeddings)
 
             # Extract topics by calculating c-TF-IDF, reduce topics if needed, and get representations.
@@ -726,7 +726,7 @@ class BERTopic:
                     self.embedding_model, language=self.language, verbose=self.verbose
                 )
             embeddings = self._extract_embeddings(
-                documents.Document.values.tolist(),
+                documents.Document.to_numpy().tolist(),
                 method="document",
                 verbose=self.verbose,
             )
@@ -926,7 +926,7 @@ class BERTopic:
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
             # by simply taking the average of the two
             if global_tuning:
-                selected_topics = [all_topics_indices[topic] for topic in documents_per_topic.Topic.values]
+                selected_topics = [all_topics_indices[topic] for topic in documents_per_topic.Topic.to_numpy()]
                 c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
             # Extract the words per topic
@@ -1010,11 +1010,11 @@ class BERTopic:
             # by simply taking the average of the two
             if global_tuning:
                 c_tf_idf = normalize(c_tf_idf, axis=1, norm="l1", copy=False)
-                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.values + self._outliers] + c_tf_idf) / 2.0
+                c_tf_idf = (global_c_tf_idf[documents_per_topic.Topic.to_numpy() + self._outliers] + c_tf_idf) / 2.0
 
             # Extract the words per topic
             words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
-            topic_frequency = pd.Series(documents_per_topic.Class.values, index=documents_per_topic.Topic).to_dict()
+            topic_frequency = pd.Series(documents_per_topic.Class.to_numpy(), index=documents_per_topic.Topic).to_dict()
 
             # Fill dataframe with results
             topics_at_class = [
@@ -1796,7 +1796,7 @@ class BERTopic:
 
         # Add topic info through `.get_topic_info()`
         topic_info = self.get_topic_info().drop("Count", axis=1)
-        document_info = pd.merge(document_info, topic_info, on="Topic", how="left")
+        document_info = document_info.merge(topic_info, on="Topic", how="left")
 
         # Add top n words
         top_n_words = {topic: " - ".join(next(zip(*self.get_topic(topic)))) for topic in set(self.topics_)}
@@ -1941,7 +1941,7 @@ class BERTopic:
                     (hier_topics.Child_Left_ID == parent) | (hier_topics.Child_Right_ID == parent),
                     "Distance",
                 ]
-                distance = distance.values[0] if len(distance) > 0 else 10
+                distance = distance.to_numpy()[0] if len(distance) > 0 else 10
 
                 if parent != start:
                     if grandpa is None:
@@ -4059,7 +4059,7 @@ class BERTopic:
         embeddings = embeddings[non_assigned_ids]
 
         if len(documents) == 0:
-            self.topics_ = assigned_documents["Topic"].values.tolist()
+            self.topics_ = assigned_documents["Topic"].to_numpy().tolist()
             self.topic_mapper_ = TopicMapper(self.topics_)
 
         logger.info("Zeroshot Step 1 - Completed \u2713")
@@ -4280,7 +4280,7 @@ class BERTopic:
         for index, topic in enumerate(labels):
             # Slice data
             selection = documents_per_topic.loc[documents_per_topic.Topic == topic, :]
-            selected_docs = selection["Document"].values
+            selected_docs = selection["Document"].to_numpy()
             selected_docs_ids = selection.index.tolist()
 
             # Calculate similarity
@@ -4335,8 +4335,8 @@ class BERTopic:
         if embeddings is not None and documents is not None:
             topic_embeddings = []
             topics = documents.sort_values("Topic").Topic.unique()
-            topic_ids = documents["Topic"].values
-            doc_ids = documents["ID"].values.astype(int)
+            topic_ids = documents["Topic"].to_numpy()
+            doc_ids = documents["ID"].to_numpy().astype(int)
             for topic in topics:
                 mask = topic_ids == topic
                 topic_embeddings.append(embeddings[doc_ids[mask]].mean(axis=0))
@@ -4458,7 +4458,7 @@ class BERTopic:
         Arguments:
             documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
         """
-        self.topic_sizes_ = collections.Counter(documents.Topic.values.tolist())
+        self.topic_sizes_ = collections.Counter(documents.Topic.to_numpy().tolist())
         self.topics_ = documents.Topic.astype(int).tolist()
 
     def _extract_words_per_topic(

@@ -306,7 +306,7 @@ def _get_annotations(
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(fst_topic):
-                    fst_name = df.loc[df.Parent_ID == key, "Parent_Name"].values[0]
+                    fst_name = df.loc[df.Parent_ID == key, "Parent_Name"].to_numpy()[0]
 
         if len(scnd_topic) == 1:
             if isinstance(custom_labels, str):
@@ -320,7 +320,7 @@ def _get_annotations(
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(scnd_topic):
-                    scnd_name = df.loc[df.Parent_ID == key, "Parent_Name"].values[0]
+                    scnd_name = df.loc[df.Parent_ID == key, "Parent_Name"].to_numpy()[0]
 
         text_annotations.append([fst_name, "", "", scnd_name])
 

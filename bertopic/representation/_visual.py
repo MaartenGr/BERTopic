@@ -92,7 +92,7 @@ class VisualRepresentation(BaseRepresentation):
             representative_images: Representative images per topic
         """
         # Extract image ids of most representative documents
-        images = documents["Image"].values.tolist()
+        images = documents["Image"].to_numpy().tolist()
         (_, _, _, repr_docs_ids) = topic_model._extract_representative_docs(
             c_tf_idf,
             documents,
@@ -156,10 +156,10 @@ class VisualRepresentation(BaseRepresentation):
     def image_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
         """Convert images to text."""
         # Create image topic embeddings
-        topics = documents.Topic.values.tolist()
-        images = documents.Image.values.tolist()
+        topics = documents.Topic.to_numpy().tolist()
+        images = documents.Image.to_numpy().tolist()
         df = pd.DataFrame(np.hstack([np.array(topics).reshape(-1, 1), embeddings]))
-        image_topic_embeddings = df.groupby(0).mean().values
+        image_topic_embeddings = df.groupby(0).mean().to_numpy()
 
         # Extract image centroids
         image_centroids = {}
