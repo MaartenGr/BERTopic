@@ -65,4 +65,4 @@ class SklearnEmbedder(BaseEmbedder):
         except NotFittedError:
             embeddings = self.pipe.fit_transform(documents)
 
-        return embeddings
+        return embeddings.toarray() if hasattr(embeddings, "toarray") else embeddings
