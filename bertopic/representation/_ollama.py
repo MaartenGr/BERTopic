@@ -7,7 +7,6 @@ from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
-    truncate_document,
     validate_truncate_document_parameters,
 )
 from json.decoder import JSONDecodeError
@@ -144,9 +143,7 @@ class Ollama(LLMRepresentation):
         # Generate using Ollama's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            # Extract documents and create prompt
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
-            prompt = self._create_prompt(docs=truncated_docs, topic=topic, topics=topics)
+            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
             self.prompts_.append(prompt)
 
             # Call Ollama API

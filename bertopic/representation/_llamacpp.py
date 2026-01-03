@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from llama_cpp import Llama
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from bertopic.representation._utils import validate_truncate_document_parameters
 from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
 
@@ -150,8 +150,7 @@ class LlamaCPP(LLMRepresentation):
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             # Prepare prompt
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
-            prompt = self._create_prompt(docs=truncated_docs, topic=topic, topics=topics)
+            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
