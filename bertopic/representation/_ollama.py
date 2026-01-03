@@ -1,43 +1,37 @@
-import time
-from litellm import completion
+import json
 import pandas as pd
-from typing import Union, Callable
+from ollama import chat
+from ollama import ChatResponse
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any
+from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
-    retry_with_exponential_backoff,
-    validate_truncate_document_parameters,
     truncate_document,
+    validate_truncate_document_parameters,
 )
-from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
+from json.decoder import JSONDecodeError
+from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT, DEFAULT_JSON_SCHEMA
 
 
-class LiteLLM(LLMRepresentation):
-    """Using the LiteLLM API to generate topic labels.
-
-    For an overview of models see:
-    https://docs.litellm.ai/docs/providers
+class Ollama(LLMRepresentation):
+    r"""Using the Ollama API to generate topic labels based on a local LLM.
 
     Arguments:
-        model: Model to use. Defaults to OpenAI's "gpt-3.5-turbo".
-        generator_kwargs: Kwargs passed to `litellm.completion`.
+        model: Model to use within Ollama.
+        generator_kwargs: Kwargs passed to `ollama.chat` for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
-        delay_in_seconds: The delay in seconds between consecutive prompts
-                          in order to prevent RateLimitErrors.
-        exponential_backoff: Retry requests with a random exponential backoff.
-                             A short sleep is used when a rate limit error is hit,
-                             then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests.
-                             If True, overrides `delay_in_seconds`.
-        nr_docs: The number of documents to pass to LiteLLM if a prompt
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+        nr_docs: The number of documents to pass to Ollama if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to LiteLLM.
+        diversity: The diversity of documents to pass to Ollama.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -59,22 +53,18 @@ class LiteLLM(LLMRepresentation):
 
     Usage:
 
-    To use this, you will need to install the litellm package first:
+    To use this, you will need to install the ollama package first:
 
-    `pip install litellm`
+    `pip install ollama`
 
-    Then, get yourself an API key of any provider (for instance OpenAI) and use it as follows:
+    Then, you can use the Ollama representation model as follows:
 
     ```python
-    import os
-    from bertopic.representation import LiteLLM
+    from bertopic.representation import Ollama
     from bertopic import BERTopic
 
-    # set ENV variables
-    os.environ["OPENAI_API_KEY"] = "your-openai-key"
-
     # Create your representation model
-    representation_model = LiteLLM(model="gpt-3.5-turbo")
+    representation_model = Ollama("gemma3")
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -84,17 +74,17 @@ class LiteLLM(LLMRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = LiteLLM(model="gpt", prompt=prompt)
+    representation_model = Ollama("gemma3", prompt=prompt)
     ```
-    """  # noqa: D301
+    """
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str,
         prompt: str | None = None,
+        system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
         generator_kwargs: Mapping[str, Any] = {},
-        delay_in_seconds: float | None = None,
-        exponential_backoff: bool = False,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
@@ -102,11 +92,13 @@ class LiteLLM(LLMRepresentation):
         **kwargs,
     ):
         self.model = model
-        self.prompt = prompt if prompt else DEFAULT_CHAT_PROMPT
 
-        # Retry parameters
-        self.delay_in_seconds = delay_in_seconds
-        self.exponential_backoff = exponential_backoff
+        # Prompts
+        self.prompt = DEFAULT_CHAT_PROMPT if prompt is None else prompt
+        self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
+
+        # JSON Schema for structured output
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
 
         # Representative document extraction parameters
         self.nr_docs = nr_docs
@@ -117,18 +109,21 @@ class LiteLLM(LLMRepresentation):
         self.tokenizer = tokenizer
         validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
-        # Generator kwargs
+        # Store generator kwargs
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
             self.model = generator_kwargs.get("model")
-        if self.generator_kwargs.get("prompt"):
-            del self.generator_kwargs["prompt"]
+            del self.generator_kwargs["model"]
 
         # Store prompts for inspection
         self.prompts_ = []
 
     def extract_topics(
-        self, topic_model, documents: pd.DataFrame, c_tf_idf: csr_matrix, topics: Mapping[str, List[Tuple[str, float]]]
+        self,
+        topic_model,
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
         """Extract topics.
 
@@ -146,32 +141,34 @@ class LiteLLM(LLMRepresentation):
             c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
         )
 
-        # Generate using a (Large) Language Model
+        # Generate using Ollama's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            # Extract documents and create prompt
             truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
             prompt = self._create_prompt(docs=truncated_docs, topic=topic, topics=topics)
             self.prompts_.append(prompt)
 
-            # Delay
-            if self.delay_in_seconds:
-                time.sleep(self.delay_in_seconds)
-
+            # Call Ollama API
             messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ]
-            kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
+            kwargs = {
+                "model": self.model,
+                "messages": messages,
+                **self.generator_kwargs,
+            }
+            response: ChatResponse = chat(**kwargs)
 
-            # Generate response
-            response = chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
-            label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
+            # Update labels
+            if self.json_schema:
+                try:
+                    label = json.loads(response.message.content)["topic_label"]
+                except (JSONDecodeError, KeyError):
+                    label = response.message.content.strip().replace("topic: ", "")
+            else:
+                label = response.message.content.strip().replace("topic: ", "")
             updated_topics[topic] = [(label, 1)]
 
         return updated_topics
-
-
-def chat_completions_with_backoff(**kwargs):
-    return retry_with_exponential_backoff(
-        completion,
-    )(**kwargs)

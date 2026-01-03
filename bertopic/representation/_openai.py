@@ -4,50 +4,16 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
-from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
     truncate_document,
     validate_truncate_document_parameters,
 )
+from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
 
-DEFAULT_CHAT_PROMPT = """You will extract a short topic label from given documents and keywords.
-Here are two examples of topics you created before:
-
-# Example 1
-Sample texts from this topic:
-- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
-- Meat, but especially beef, is the worst food in terms of emissions.
-- Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
-
-Keywords: meat beef eat eating emissions steak food health processed chicken
-topic: Environmental impacts of eating meat
-
-# Example 2
-Sample texts from this topic:
-- I have ordered the product weeks ago but it still has not arrived!
-- The website mentions that it only takes a couple of days to deliver but I still have not received mine.
-- I got a message stating that I received the monitor but that is not true!
-- It took a month longer to deliver than was advised...
-
-Keywords: deliver weeks product shipping long delivery received arrived arrive week
-topic: Shipping and delivery issues
-
-# Your task
-Sample texts from this topic:
-[DOCUMENTS]
-
-Keywords: [KEYWORDS]
-
-Based on the information above, extract a short topic label (three words at most) in the following format:
-topic: <topic_label>
-"""
-
-DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
-
-
-class OpenAI(BaseRepresentation):
+class OpenAI(LLMRepresentation):
     r"""Using the OpenAI API to generate topic labels based
     on one of their Completion of ChatCompletion models.
 
@@ -60,12 +26,12 @@ class OpenAI(BaseRepresentation):
         generator_kwargs: Kwargs passed to `openai.Completion.create`
                           for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
         system_prompt: The system prompt to be used in the model. If no system prompt is given,
-                       `self.default_system_prompt_` is used instead.
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
         exponential_backoff: Retry requests with a random exponential backoff.
@@ -145,31 +111,31 @@ class OpenAI(BaseRepresentation):
         tokenizer: Union[str, Callable] | None = None,
         **kwargs,
     ):
+        # Model
         self.client = client
         self.model = model
 
-        if prompt is None:
-            self.prompt = DEFAULT_CHAT_PROMPT
-        else:
-            self.prompt = prompt
+        # Prompts
+        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
+        self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
 
-        if system_prompt is None:
-            self.system_prompt = DEFAULT_SYSTEM_PROMPT
-        else:
-            self.system_prompt = system_prompt
-
-        self.default_prompt_ = DEFAULT_CHAT_PROMPT
-        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
+        # Retry parameters
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
+
+        # Representative document extraction parameters
         self.nr_docs = nr_docs
         self.diversity = diversity
+
+        # Document truncation
         self.doc_length = doc_length
         self.tokenizer = tokenizer
         validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
+        # Store prompts for inspection
         self.prompts_ = []
 
+        # Generator kwargs
         self.generator_kwargs = generator_kwargs
         if self.generator_kwargs.get("model"):
             self.model = generator_kwargs.get("model")
@@ -206,7 +172,7 @@ class OpenAI(BaseRepresentation):
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
-            prompt = self._create_prompt(truncated_docs, topic, topics)
+            prompt = self._create_prompt(docs=truncated_docs, topic=topic, topics=topics)
             self.prompts_.append(prompt)
 
             # Delay
@@ -238,33 +204,6 @@ class OpenAI(BaseRepresentation):
             updated_topics[topic] = [(label, 1)]
 
         return updated_topics
-
-    def _create_prompt(self, docs, topic, topics):
-        keywords = next(zip(*topics[topic]))
-
-        # Use the Default Chat Prompt
-        if self.prompt == DEFAULT_CHAT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
-            prompt = self._replace_documents(prompt, docs)
-
-        # Use a custom prompt that leverages keywords, documents or both using
-        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
-        else:
-            prompt = self.prompt
-            if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", ", ".join(keywords))
-            if "[DOCUMENTS]" in prompt:
-                prompt = self._replace_documents(prompt, docs)
-
-        return prompt
-
-    @staticmethod
-    def _replace_documents(prompt, docs):
-        to_replace = ""
-        for doc in docs:
-            to_replace += f"- {doc}\n"
-        prompt = prompt.replace("[DOCUMENTS]", to_replace)
-        return prompt
 
 
 def chat_completions_with_backoff(client, **kwargs):

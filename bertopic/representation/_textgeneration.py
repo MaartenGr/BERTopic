@@ -4,17 +4,12 @@ from scipy.sparse import csr_matrix
 from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
 from typing import Mapping, List, Tuple, Any, Union, Callable
-from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
 
-DEFAULT_PROMPT = """
-I have a topic described by the following keywords: [KEYWORDS].
-The name of this topic is:
-"""
-
-
-class TextGeneration(BaseRepresentation):
+class TextGeneration(LLMRepresentation):
     """Text2Text or text generation with transformers.
 
     Arguments:
@@ -23,7 +18,7 @@ class TextGeneration(BaseRepresentation):
                For example, `pipeline('text-generation', model='gpt2')`. If a string
                is passed, "text-generation" will be selected by default.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
@@ -92,9 +87,13 @@ class TextGeneration(BaseRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
+        **kwargs,
     ):
+        # Fix random state
         self.random_state = random_state
         set_seed(random_state)
+
+        # Model
         if isinstance(model, str):
             self.model = pipeline("text-generation", model=model)
         elif isinstance(model, Pipeline):
@@ -105,15 +104,19 @@ class TextGeneration(BaseRepresentation):
                 "pass is either a string referring to a"
                 "HF model or a `transformers.pipeline` object."
             )
-        self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
         self.pipeline_kwargs = pipeline_kwargs
+        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
+
+        # Representative document extraction parameters
         self.nr_docs = nr_docs
         self.diversity = diversity
+
+        # Document truncation
         self.doc_length = doc_length
         self.tokenizer = tokenizer
         validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
+        # Store prompts for inspection
         self.prompts_ = []
 
     def extract_topics(
@@ -134,23 +137,16 @@ class TextGeneration(BaseRepresentation):
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top 4 representative documents per topic
-        if self.prompt != DEFAULT_PROMPT and "[DOCUMENTS]" in self.prompt:
-            repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-                c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
-            )
-        else:
-            repr_docs_mappings = {topic: None for topic in topics.keys()}
+        # Extract the top n representative documents per topic
+        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+        )
 
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             # Prepare prompt
-            truncated_docs = (
-                [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
-                if docs is not None
-                else docs
-            )
-            prompt = self._create_prompt(truncated_docs, topic, topics)
+            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+            prompt = self._create_prompt(docs=truncated_docs, topic=topic, topics=topics)
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
@@ -165,24 +161,3 @@ class TextGeneration(BaseRepresentation):
             updated_topics[topic] = topic_description
 
         return updated_topics
-
-    def _create_prompt(self, docs, topic, topics):
-        keywords = ", ".join(next(zip(*topics[topic])))
-
-        # Use the default prompt and replace keywords
-        if self.prompt == DEFAULT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", keywords)
-
-        # Use a prompt that leverages either keywords or documents in
-        # a custom location
-        else:
-            prompt = self.prompt
-            if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", keywords)
-            if "[DOCUMENTS]" in prompt:
-                to_replace = ""
-                for doc in docs:
-                    to_replace += f"- {doc}\n"
-                prompt = prompt.replace("[DOCUMENTS]", to_replace)
-
-        return prompt

@@ -3,54 +3,24 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from llama_cpp import Llama
 from typing import Mapping, List, Tuple, Any, Union, Callable
-from bertopic.representation._base import BaseRepresentation
+from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
 
-DEFAULT_PROMPT = """
-This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
----
-Topic:
-Sample texts from this topic:
-- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
-- Meat, but especially beef, is the word food in terms of emissions.
-- Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
-
-Keywords: meat beef eat eating emissions steak food health processed chicken
-Topic name: Environmental impacts of eating meat
----
-Topic:
-Sample texts from this topic:
-- I have ordered the product weeks ago but it still has not arrived!
-- The website mentions that it only takes a couple of days to deliver but I still have not received mine.
-- I got a message stating that I received the monitor but that is not true!
-- It took a month longer to deliver than was advised...
-
-Keywords: deliver weeks product shipping long delivery received arrived arrive week
-Topic name: Shipping and delivery issues
----
-Topic:
-Sample texts from this topic:
-[DOCUMENTS]
-Keywords: [KEYWORDS]
-Topic name:"""
-
-DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
-
-
-class LlamaCPP(BaseRepresentation):
+class LlamaCPP(LLMRepresentation):
     """A llama.cpp implementation to use as a representation model.
 
     Arguments:
         model: Either a string pointing towards a local LLM or a
                 `llama_cpp.Llama` object.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
         system_prompt: The system prompt to be used in the model. If no system prompt is given,
-                       `self.default_system_prompt_` is used instead.
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
         pipeline_kwargs: Kwargs that you can pass to the `llama_cpp.Llama`
                          when it is called such as `max_tokens` to be generated.
         nr_docs: The number of documents to pass to OpenAI if a prompt
@@ -123,6 +93,7 @@ class LlamaCPP(BaseRepresentation):
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
     ):
+        # Model
         if isinstance(model, str):
             self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="ChatML")
         elif isinstance(model, Llama):
@@ -133,17 +104,24 @@ class LlamaCPP(BaseRepresentation):
                 "pass is either a string referring to a"
                 "local LLM or a ` llama_cpp.Llama` object."
             )
-        self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
+
+        # Prompts
+        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
-        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
+
+        # Pipeline kwargs
         self.pipeline_kwargs = pipeline_kwargs
+
+        # Representative document extraction parameters
         self.nr_docs = nr_docs
         self.diversity = diversity
+
+        # Document truncation
         self.doc_length = doc_length
         self.tokenizer = tokenizer
         validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
+        # Store prompts for inspection
         self.prompts_ = []
 
     def extract_topics(
@@ -173,7 +151,7 @@ class LlamaCPP(BaseRepresentation):
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             # Prepare prompt
             truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
-            prompt = self._create_prompt(truncated_docs, topic, topics)
+            prompt = self._create_prompt(docs=truncated_docs, topic=topic, topics=topics)
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
@@ -186,30 +164,3 @@ class LlamaCPP(BaseRepresentation):
             updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
 
         return updated_topics
-
-    def _create_prompt(self, docs, topic, topics):
-        keywords = next(zip(*topics[topic]))
-
-        # Use the Default Chat Prompt
-        if self.prompt == DEFAULT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
-            prompt = self._replace_documents(prompt, docs)
-
-        # Use a custom prompt that leverages keywords, documents or both using
-        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
-        else:
-            prompt = self.prompt
-            if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", ", ".join(keywords))
-            if "[DOCUMENTS]" in prompt:
-                prompt = self._replace_documents(prompt, docs)
-
-        return prompt
-
-    @staticmethod
-    def _replace_documents(prompt, docs):
-        to_replace = ""
-        for doc in docs:
-            to_replace += f"- {doc}\n"
-        prompt = prompt.replace("[DOCUMENTS]", to_replace)
-        return prompt
