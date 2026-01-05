@@ -4,7 +4,6 @@ from scipy.sparse import csr_matrix
 from llama_cpp import Llama
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import validate_truncate_document_parameters
 from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
 
@@ -93,7 +92,15 @@ class LlamaCPP(LLMRepresentation):
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
     ):
-        # Model
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # Llama.cpp specific parameters
         if isinstance(model, str):
             self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="ChatML")
         elif isinstance(model, Llama):
@@ -104,25 +111,8 @@ class LlamaCPP(LLMRepresentation):
                 "pass is either a string referring to a"
                 "local LLM or a ` llama_cpp.Llama` object."
             )
-
-        # Prompts
-        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-
-        # Pipeline kwargs
         self.pipeline_kwargs = pipeline_kwargs
-
-        # Representative document extraction parameters
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        # Document truncation
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
-
-        # Store prompts for inspection
-        self.prompts_ = []
 
     def extract_topics(
         self,

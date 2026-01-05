@@ -1,10 +1,10 @@
 import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
-from typing import Mapping, List, Tuple
+from typing import Mapping, List, Tuple, Union, Callable
 
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
-from bertopic.representation._utils import truncate_document
+from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 
 
 class BaseRepresentation(BaseEstimator):
@@ -44,7 +44,59 @@ class BaseRepresentation(BaseEstimator):
 
 
 class LLMRepresentation(BaseRepresentation):
-    """An LLM-based representation model for fine-tuning topic representations."""
+    """Base class for LLM-based representation models."""
+
+    def __init__(
+        self,
+        prompt: str | None = None,
+        nr_docs: int = 4,
+        diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
+    ):
+        """Generate a representation model that leverages LLMs.
+
+        Arguments:
+            prompt: The prompt to be used in the model. If no prompt is given,
+                    `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
+                    NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
+                    to decide where the keywords and documents need to be
+                    inserted.
+            nr_docs: The number of documents to pass to Ollama if a prompt
+                    with the `["DOCUMENTS"]` tag is used.
+            diversity: The diversity of documents to pass to Ollama.
+                    Accepts values between 0 and 1. A higher
+                    values results in passing more diverse documents
+                    whereas lower values passes more similar documents.
+            doc_length: The maximum length of each document. If a document is longer,
+                        it will be truncated. If None, the entire document is passed.
+            tokenizer: The tokenizer used to calculate to split the document into segments
+                    used to count the length of a document.
+                        * If tokenizer is 'char', then the document is split up
+                            into characters which are counted to adhere to `doc_length`
+                        * If tokenizer is 'whitespace', the document is split up
+                            into words separated by whitespaces. These words are counted
+                            and truncated depending on `doc_length`
+                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                            is used to tokenize the document. These tokens are counted
+                            and truncated depending on `doc_length`
+                        * If tokenizer is a callable, then that callable is used to tokenize
+                            the document. These tokens are counted and truncated depending
+                            on `doc_length`
+        """
+        self.prompt = prompt
+
+        # Representative document extraction parameters
+        self.nr_docs = nr_docs
+        self.diversity = diversity
+
+        # Document truncation
+        self.doc_length = doc_length
+        self.tokenizer = tokenizer
+        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
+
+        # Store prompts for inspection
+        self.prompts_ = []
 
     def _create_prompt(
         self, docs: list[str], topic: int, topics: Mapping[str, List[Tuple[str, float]]], topic_model

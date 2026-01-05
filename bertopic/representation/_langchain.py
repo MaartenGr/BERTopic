@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from bertopic.representation._utils import truncate_document
 from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
 
 
@@ -139,21 +139,17 @@ class LangChain(LLMRepresentation):
         tokenizer: Union[str, Callable] | None = None,
         chain_config=None,
     ):
-        # Model
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_COMPLETION_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # LangChain specific parameters
         self.chain = chain
         self.chain_config = chain_config
-
-        # Prompts
-        self.prompt = prompt if prompt is not None else DEFAULT_COMPLETION_PROMPT
-
-        # Representative document extraction parameters
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        # Document truncation
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
     def extract_topics(
         self,

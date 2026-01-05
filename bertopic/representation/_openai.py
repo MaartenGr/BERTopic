@@ -7,7 +7,6 @@ from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
-    validate_truncate_document_parameters,
 )
 from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
@@ -108,41 +107,22 @@ class OpenAI(LLMRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
-        **kwargs,
     ):
-        # Model
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # OpenAI specific parameters
         self.client = client
         self.model = model
-
-        # Prompts
-        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-
-        # Retry parameters
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-
-        # Representative document extraction parameters
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        # Document truncation
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
-
-        # Store prompts for inspection
-        self.prompts_ = []
-
-        # Generator kwargs
         self.generator_kwargs = generator_kwargs
-        if self.generator_kwargs.get("model"):
-            self.model = generator_kwargs.get("model")
-            del self.generator_kwargs["model"]
-        if self.generator_kwargs.get("prompt"):
-            del self.generator_kwargs["prompt"]
-        if not self.generator_kwargs.get("stop"):
-            self.generator_kwargs["stop"] = "\n"
 
     def extract_topics(
         self,

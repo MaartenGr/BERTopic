@@ -5,7 +5,6 @@ from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import validate_truncate_document_parameters
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
 
@@ -87,13 +86,19 @@ class TextGeneration(LLMRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
-        **kwargs,
     ):
-        # Fix random state
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # Transformer specific parameters
         self.random_state = random_state
         set_seed(random_state)
 
-        # Model
         if isinstance(model, str):
             self.model = pipeline("text-generation", model=model)
         elif isinstance(model, Pipeline):
@@ -105,19 +110,6 @@ class TextGeneration(LLMRepresentation):
                 "HF model or a `transformers.pipeline` object."
             )
         self.pipeline_kwargs = pipeline_kwargs
-        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
-
-        # Representative document extraction parameters
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        # Document truncation
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
-
-        # Store prompts for inspection
-        self.prompts_ = []
 
     def extract_topics(
         self,

@@ -6,9 +6,6 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import (
-    validate_truncate_document_parameters,
-)
 from json.decoder import JSONDecodeError
 from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT, DEFAULT_JSON_SCHEMA
 
@@ -88,34 +85,20 @@ class Ollama(LLMRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
-        **kwargs,
     ):
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # Ollama specific parameters
         self.model = model
-
-        # Prompts
-        self.prompt = DEFAULT_CHAT_PROMPT if prompt is None else prompt
         self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
-
-        # JSON Schema for structured output
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
-
-        # Representative document extraction parameters
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        # Document truncation
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
-
-        # Store generator kwargs
         self.generator_kwargs = generator_kwargs
-        if self.generator_kwargs.get("model"):
-            self.model = generator_kwargs.get("model")
-            del self.generator_kwargs["model"]
-
-        # Store prompts for inspection
-        self.prompts_ = []
 
     def extract_topics(
         self,

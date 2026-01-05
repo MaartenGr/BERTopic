@@ -8,7 +8,6 @@ from typing import Mapping, List, Tuple, Any
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
-    validate_truncate_document_parameters,
 )
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
@@ -98,33 +97,20 @@ class LiteLLM(LLMRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
-        **kwargs,
     ):
-        self.model = model
-        self.prompt = prompt if prompt else DEFAULT_CHAT_PROMPT
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
 
-        # Retry parameters
+        # LiteLLM specific parameters
+        self.model = model
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-
-        # Representative document extraction parameters
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        # Document truncation
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
-
-        # Generator kwargs
         self.generator_kwargs = generator_kwargs
-        if self.generator_kwargs.get("model"):
-            self.model = generator_kwargs.get("model")
-        if self.generator_kwargs.get("prompt"):
-            del self.generator_kwargs["prompt"]
-
-        # Store prompts for inspection
-        self.prompts_ = []
 
     def extract_topics(
         self, topic_model, documents: pd.DataFrame, c_tf_idf: csr_matrix, topics: Mapping[str, List[Tuple[str, float]]]
