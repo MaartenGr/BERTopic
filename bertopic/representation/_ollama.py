@@ -1,28 +1,21 @@
-import time
-import openai
+import json
 import pandas as pd
+from ollama import chat
+from ollama import ChatResponse
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import (
-    retry_with_exponential_backoff,
-)
-from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
+from json.decoder import JSONDecodeError
+from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT, DEFAULT_JSON_SCHEMA
 
 
-class OpenAI(LLMRepresentation):
-    r"""Using the OpenAI API to generate topic labels based
-    on one of their Completion of ChatCompletion models.
-
-    For an overview see:
-    https://platform.openai.com/docs/models
+class Ollama(LLMRepresentation):
+    r"""Using the Ollama API to generate topic labels based on a local LLM.
 
     Arguments:
-        client: A `openai.OpenAI` client
-        model: Model to use within OpenAI, defaults to `"gpt-4o-mini"`.
-        generator_kwargs: Kwargs passed to `openai.Completion.create`
-                          for fine-tuning the output.
+        model: Model to use within Ollama.
+        generator_kwargs: Kwargs passed to `ollama.chat` for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -30,16 +23,11 @@ class OpenAI(LLMRepresentation):
                 inserted.
         system_prompt: The system prompt to be used in the model. If no system prompt is given,
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
-        delay_in_seconds: The delay in seconds between consecutive prompts
-                          in order to prevent RateLimitErrors.
-        exponential_backoff: Retry requests with a random exponential backoff.
-                             A short sleep is used when a rate limit error is hit,
-                             then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccessful requests.
-                             If True, overrides `delay_in_seconds`.
-        nr_docs: The number of documents to pass to OpenAI if a prompt
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+        nr_docs: The number of documents to pass to Ollama if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to OpenAI.
+        diversity: The diversity of documents to pass to Ollama.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -61,20 +49,18 @@ class OpenAI(LLMRepresentation):
 
     Usage:
 
-    To use this, you will need to install the openai package first:
+    To use this, you will need to install the ollama package first:
 
-    `pip install openai`
+    `pip install ollama`
 
-    Then, get yourself an API key and use OpenAI's API as follows:
+    Then, you can use the Ollama representation model as follows:
 
     ```python
-    import openai
-    from bertopic.representation import OpenAI
+    from bertopic.representation import Ollama
     from bertopic import BERTopic
 
     # Create your representation model
-    client = openai.OpenAI(api_key=MY_API_KEY)
-    representation_model = OpenAI(client, delay_in_seconds=5)
+    representation_model = Ollama("gemma3")
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -84,25 +70,17 @@ class OpenAI(LLMRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = OpenAI(client, prompt=prompt, delay_in_seconds=5)
-    ```
-
-    To choose a model:
-
-    ```python
-    representation_model = OpenAI(client, model="gpt-4o-mini", delay_in_seconds=10)
+    representation_model = Ollama("gemma3", prompt=prompt)
     ```
     """
 
     def __init__(
         self,
-        client,
-        model: str = "gpt-4o-mini",
+        model: str,
         prompt: str | None = None,
         system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
         generator_kwargs: Mapping[str, Any] = {},
-        delay_in_seconds: float | None = None,
-        exponential_backoff: bool = False,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
@@ -116,12 +94,10 @@ class OpenAI(LLMRepresentation):
             tokenizer=tokenizer,
         )
 
-        # OpenAI specific parameters
-        self.client = client
+        # Ollama specific parameters
         self.model = model
-        self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-        self.delay_in_seconds = delay_in_seconds
-        self.exponential_backoff = exponential_backoff
+        self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.generator_kwargs = generator_kwargs
 
     def extract_topics(
@@ -147,16 +123,13 @@ class OpenAI(LLMRepresentation):
             c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
         )
 
-        # Generate using OpenAI's Language Model
+        # Generate using Ollama's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
             self.prompts_.append(prompt)
 
-            # Delay
-            if self.delay_in_seconds:
-                time.sleep(self.delay_in_seconds)
-
+            # Call Ollama API
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
@@ -166,26 +139,16 @@ class OpenAI(LLMRepresentation):
                 "messages": messages,
                 **self.generator_kwargs,
             }
-            if self.exponential_backoff:
-                response = chat_completions_with_backoff(self.client, **kwargs)
-            else:
-                response = self.client.chat.completions.create(**kwargs)
+            response: ChatResponse = chat(**kwargs)
 
-            # Check whether content was actually generated
-            # Addresses #1570 for potential issues with OpenAI's content filter
-            # Addresses #2176 for potential issues when openAI returns a None type object
-            if response and hasattr(response.choices[0].message, "content"):
-                label = response.choices[0].message.content.strip().replace("topic: ", "")
+            # Update labels
+            if self.json_schema:
+                try:
+                    label = json.loads(response.message.content)["topic_label"]
+                except (JSONDecodeError, KeyError):
+                    label = response.message.content.strip().replace("topic: ", "")
             else:
-                label = "No label returned"
-
+                label = response.message.content.strip().replace("topic: ", "")
             updated_topics[topic] = [(label, 1)]
 
         return updated_topics
-
-
-def chat_completions_with_backoff(client, **kwargs):
-    return retry_with_exponential_backoff(
-        client.chat.completions.create,
-        errors=(openai.RateLimitError,),
-    )(**kwargs)

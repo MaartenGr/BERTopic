@@ -3,13 +3,12 @@ from langchain.docstore.document import Document
 from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 
-from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from bertopic.representation._base import LLMRepresentation
+from bertopic.representation._utils import truncate_document
+from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
 
-DEFAULT_PROMPT = "What are these documents about? Please give a single label."
 
-
-class LangChain(BaseRepresentation):
+class LangChain(LLMRepresentation):
     """Using chains in langchain to generate topic labels.
 
     The classic example uses `langchain.chains.question_answering.load_qa_chain`.
@@ -22,7 +21,7 @@ class LangChain(BaseRepresentation):
                Input keys must be `input_documents` and `question`.
                Output key must be `output_text`.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_COMPLETION_PROMPT` is used instead.
                  NOTE: Use `"[KEYWORDS]"` in the prompt
                  to decide where the keywords need to be
                  inserted. Keywords won't be included unless
@@ -140,15 +139,17 @@ class LangChain(BaseRepresentation):
         tokenizer: Union[str, Callable] | None = None,
         chain_config=None,
     ):
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_COMPLETION_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # LangChain specific parameters
         self.chain = chain
-        self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
         self.chain_config = chain_config
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
 
     def extract_topics(
         self,

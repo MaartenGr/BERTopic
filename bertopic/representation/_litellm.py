@@ -1,23 +1,18 @@
 import time
 from litellm import completion
 import pandas as pd
+from typing import Union, Callable
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, List, Tuple, Any
-from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import retry_with_exponential_backoff
+from bertopic.representation._base import LLMRepresentation
+from bertopic.representation._utils import (
+    retry_with_exponential_backoff,
+)
+from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
 
-DEFAULT_PROMPT = """
-I have a topic that contains the following documents:
-[DOCUMENTS]
-The topic is described by the following keywords: [KEYWORDS]
-Based on the information above, extract a short topic label in the following format:
-topic: <topic label>
-"""
-
-
-class LiteLLM(BaseRepresentation):
+class LiteLLM(LLMRepresentation):
     """Using the LiteLLM API to generate topic labels.
 
     For an overview of models see:
@@ -27,7 +22,7 @@ class LiteLLM(BaseRepresentation):
         model: Model to use. Defaults to OpenAI's "gpt-3.5-turbo".
         generator_kwargs: Kwargs passed to `litellm.completion`.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
@@ -44,6 +39,21 @@ class LiteLLM(BaseRepresentation):
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
+        doc_length: The maximum length of each document. If a document is longer,
+                    it will be truncated. If None, the entire document is passed.
+        tokenizer: The tokenizer used to calculate to split the document into segments
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
+                         into characters which are counted to adhere to `doc_length`
+                       * If tokenizer is 'whitespace', the document is split up
+                         into words separated by whitespaces. These words are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                         is used to tokenize the document. These tokens are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is a callable, then that callable is used to tokenize
+                         the document. These tokens are counted and truncated depending
+                         on `doc_length`
 
     Usage:
 
@@ -85,20 +95,22 @@ class LiteLLM(BaseRepresentation):
         exponential_backoff: bool = False,
         nr_docs: int = 4,
         diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
     ):
+        super().__init__(
+            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # LiteLLM specific parameters
         self.model = model
-        self.prompt = prompt if prompt else DEFAULT_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
         self.generator_kwargs = generator_kwargs
-        if self.generator_kwargs.get("model"):
-            self.model = generator_kwargs.get("model")
-        if self.generator_kwargs.get("prompt"):
-            del self.generator_kwargs["prompt"]
 
     def extract_topics(
         self, topic_model, documents: pd.DataFrame, c_tf_idf: csr_matrix, topics: Mapping[str, List[Tuple[str, float]]]
@@ -122,7 +134,8 @@ class LiteLLM(BaseRepresentation):
         # Generate using a (Large) Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(docs, topic, topics)
+            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
+            self.prompts_.append(prompt)
 
             # Delay
             if self.delay_in_seconds:
@@ -133,42 +146,13 @@ class LiteLLM(BaseRepresentation):
                 {"role": "user", "content": prompt},
             ]
             kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
-            if self.exponential_backoff:
-                response = chat_completions_with_backoff(**kwargs)
-            else:
-                response = completion(**kwargs)
-            label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
 
+            # Generate response
+            response = chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
+            label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
             updated_topics[topic] = [(label, 1)]
 
         return updated_topics
-
-    def _create_prompt(self, docs, topic, topics):
-        keywords = next(zip(*topics[topic]))
-
-        # Use the Default Chat Prompt
-        if self.prompt == DEFAULT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", " ".join(keywords))
-            prompt = self._replace_documents(prompt, docs)
-
-        # Use a custom prompt that leverages keywords, documents or both using
-        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
-        else:
-            prompt = self.prompt
-            if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", " ".join(keywords))
-            if "[DOCUMENTS]" in prompt:
-                prompt = self._replace_documents(prompt, docs)
-
-        return prompt
-
-    @staticmethod
-    def _replace_documents(prompt, docs):
-        to_replace = ""
-        for doc in docs:
-            to_replace += f"- {doc[:255]}\n"
-        prompt = prompt.replace("[DOCUMENTS]", to_replace)
-        return prompt
 
 
 def chat_completions_with_backoff(**kwargs):

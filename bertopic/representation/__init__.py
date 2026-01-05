@@ -33,6 +33,13 @@ except ModuleNotFoundError:
     msg = "`pip install openai` \n\n"
     OpenAI = NotInstalled("OpenAI", "openai", custom_msg=msg)
 
+# Ollama Generator
+try:
+    from bertopic.representation._ollama import Ollama
+except ModuleNotFoundError:
+    msg = "`pip install ollama` \n\n"
+    Ollama = NotInstalled("Ollama", "ollama", custom_msg=msg)
+
 # LiteLLM Generator
 try:
     from bertopic.representation._litellm import LiteLLM
@@ -68,6 +75,7 @@ __all__ = [
     "LiteLLM",
     "LlamaCPP",
     "MaximalMarginalRelevance",
+    "Ollama",
     "OpenAI",
     "PartOfSpeech",
     "TextGeneration",
