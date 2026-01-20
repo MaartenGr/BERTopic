@@ -1,10 +1,10 @@
-import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from typing import Mapping, List, Tuple, Union, Callable
 
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from bertopic._corpus import Corpus
 
 
 class BaseRepresentation(BaseEstimator):
@@ -13,14 +13,14 @@ class BaseRepresentation(BaseEstimator):
     def extract_topics(
         self,
         topic_model,
-        documents: pd.DataFrame,
+        corpus: Corpus,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
         """Extract topics.
 
         Each representation model that inherits this class will have
-        its arguments (topic_model, documents, c_tf_idf, topics)
+        its arguments (topic_model, docs, c_tf_idf, topics)
         automatically passed. Therefore, the representation model
         will only have access to the information about topics related
         to those arguments.
@@ -28,9 +28,7 @@ class BaseRepresentation(BaseEstimator):
         Arguments:
             topic_model: The BERTopic model that is fitted until topic
                          representations are calculated.
-            documents: A dataframe with columns "Document" and "Topic"
-                       that contains all documents with each corresponding
-                       topic.
+            corpus: Documents and their metadata.
             c_tf_idf: A c-TF-IDF representation that is typically
                       identical to `topic_model.c_tf_idf_` except for
                       dynamic, class-based, and hierarchical topic modeling
@@ -146,7 +144,9 @@ class LLMRepresentation(BaseRepresentation):
             The prompt with the [DOCUMENTS] tag replaced by actual documents.
         """
         # Truncate documents if needed
-        truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
+        truncated_docs = [
+            truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs
+        ]
 
         # Replace tag with documents
         formatted_docs = "\n".join([f"- {doc}" for doc in truncated_docs])

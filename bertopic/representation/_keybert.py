@@ -1,11 +1,12 @@
 import numpy as np
-import pandas as pd
 
 from packaging import version
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union
+from typing import Union
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
+from bertopic._topics import Keywords
+from bertopic._corpus import Corpus
 from sklearn import __version__ as sklearn_version
 
 
@@ -68,18 +69,18 @@ class KeyBERTInspired(BaseRepresentation):
     def extract_topics(
         self,
         topic_model,
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
         embeddings: np.ndarray = None,
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+    ) -> dict[int, Keywords]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
             embeddings: Pre-trained document embeddings. These can be used
                         instead of an embedding model
 
@@ -88,7 +89,10 @@ class KeyBERTInspired(BaseRepresentation):
         """
         # We extract the top n representative documents per class
         _, representative_docs, repr_doc_indices, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, self.nr_samples, self.nr_repr_docs
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=self.nr_samples,
+            nr_repr_docs=self.nr_repr_docs,
         )
 
         # If document embeddings are precomputed, extract the embeddings of the representative documents based on repr_doc_indices
@@ -97,15 +101,23 @@ class KeyBERTInspired(BaseRepresentation):
             repr_embeddings = [embeddings[index] for index in np.concatenate(repr_doc_indices)]
 
         # We extract the top n words per class
-        topics = self._extract_candidate_words(topic_model, c_tf_idf, topics)
+        topic_representations = self._extract_candidate_words(
+            topic_model=topic_model, c_tf_idf=c_tf_idf, topic_representations=topic_representations
+        )
 
         # We calculate the similarity between word and document embeddings and create
         # topic embeddings from the representative document embeddings
-        sim_matrix, words = self._extract_embeddings(
-            topic_model, topics, representative_docs, repr_doc_indices, repr_embeddings
+        sim_matrix, vocab = self._extract_embeddings(
+            topic_model=topic_model,
+            topic_representations=topic_representations,
+            representative_docs=representative_docs,
+            repr_doc_indices=repr_doc_indices,
+            repr_embeddings=repr_embeddings,
         )
         # Find the best matching words based on the similarity matrix for each topic
-        updated_topics = self._extract_top_words(words, topics, sim_matrix)
+        updated_topics = self._extract_top_words(
+            vocab=vocab, topic_representations=topic_representations, sim_matrix=sim_matrix
+        )
 
         return updated_topics
 
@@ -113,20 +125,20 @@ class KeyBERTInspired(BaseRepresentation):
         self,
         topic_model,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topic_representations: dict[int, Keywords],
+    ) -> dict[int, Keywords]:
         """For each topic, extract candidate words based on the c-TF-IDF
         representation.
 
         Arguments:
             topic_model: A BERTopic model
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The top words per topic
+            topic_representations: The top words per topic
 
         Returns:
             topics: The `self.top_n_words` per topic
         """
-        labels = [int(label) for label in sorted(list(topics.keys()))]
+        labels = [int(label) for label in sorted(list(topic_representations.keys()))]
 
         # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
         # and will be removed in 1.2. Please use get_feature_names_out instead.
@@ -142,25 +154,26 @@ class KeyBERTInspired(BaseRepresentation):
         scores = np.take_along_axis(scores, sorted_indices, axis=1)
 
         # Get top 30 words per topic based on c-TF-IDF score
-        topics = {
-            label: [
-                (words[word_index], score) if word_index is not None and score > 0 else ("", 0.00001)
-                for word_index, score in zip(indices[index][::-1], scores[index][::-1])
-            ]
+        updated_topic_representations = {
+            label: Keywords(
+                [
+                    (words[word_index], score) if word_index is not None and score > 0 else ("", 0.00001)
+                    for word_index, score in zip(indices[index][::-1], scores[index][::-1])
+                ]
+            )
             for index, label in enumerate(labels)
         }
-        topics = {label: next(zip(*values[: self.nr_candidate_words])) for label, values in topics.items()}
 
-        return topics
+        return updated_topic_representations
 
     def _extract_embeddings(
         self,
         topic_model,
-        topics: Mapping[str, List[Tuple[str, float]]],
-        representative_docs: List[str],
-        repr_doc_indices: List[List[int]],
+        topic_representations: dict[int, Keywords],
+        representative_docs: list[str],
+        repr_doc_indices: list[list[int]],
         repr_embeddings: np.ndarray = None,
-    ) -> Union[np.ndarray, List[str]]:
+    ) -> Union[np.ndarray, list[str]]:
         """Extract the representative document embeddings and create topic embeddings.
         Then extract word embeddings and calculate the cosine similarity between topic
         embeddings and the word embeddings. Topic embeddings are the average of
@@ -168,7 +181,7 @@ class KeyBERTInspired(BaseRepresentation):
 
         Arguments:
             topic_model: A BERTopic model
-            topics: The top words per topic
+            topic_representations: The top words per topic
             representative_docs: A flat list of representative documents
             repr_doc_indices: The indices of representative documents
                               that belong to each topic
@@ -180,43 +193,42 @@ class KeyBERTInspired(BaseRepresentation):
         """
         # Calculate representative document embeddings if there are no precomputed embeddings.
         if repr_embeddings is None:
-            repr_embeddings = topic_model._extract_embeddings(representative_docs, method="document", verbose=False)
+            repr_embeddings = topic_model._extract_embeddings(representative_docs, verbose=False)
 
         topic_embeddings = [np.mean(repr_embeddings[i[0] : i[-1] + 1], axis=0) for i in repr_doc_indices]
 
         # Calculate word embeddings and extract best matching with updated topic_embeddings
-        vocab = list(set([word for words in topics.values() for word in words]))
-        word_embeddings = topic_model._extract_embeddings(vocab, method="document", verbose=False)
+        # vocab = list(set([word for words in topic_repr.words for word in words]))
+        vocab = list(set([word for keywords in topic_representations.values() for word in keywords.words]))
+        word_embeddings = topic_model._extract_embeddings(vocab, verbose=False)
         sim = cosine_similarity(topic_embeddings, word_embeddings)
 
         return sim, vocab
 
     def _extract_top_words(
         self,
-        vocab: List[str],
-        topics: Mapping[str, List[Tuple[str, float]]],
-        sim: np.ndarray,
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        vocab: list[str],
+        topic_representations: dict[int, Keywords],
+        sim_matrix: np.ndarray,
+    ) -> dict[int, Keywords]:
         """Extract the top n words per topic based on the
         similarity matrix between topics and words.
 
         Arguments:
             vocab: The complete vocabulary of input documents
             labels: All topic labels
-            topics: The top words per topic
-            sim: The similarity matrix between word and topic embeddings
+            topic_representations: The top words per topic
+            sim_matrix: The similarity matrix between word and topic embeddings
 
         Returns:
             updated_topics: The updated topic representations
         """
-        labels = [int(label) for label in sorted(list(topics.keys()))]
+        labels = [int(label) for label in sorted(list(topic_representations.keys()))]
         updated_topics = {}
         for i, topic in enumerate(labels):
-            indices = [vocab.index(word) for word in topics[topic]]
-            values = sim[:, indices][i]
-            word_indices = [indices[index] for index in np.argsort(values)[-self.top_n_words :]]
-            updated_topics[topic] = [
-                (vocab[index], val) for val, index in zip(np.sort(values)[-self.top_n_words :], word_indices)
-            ][::-1]
+            indices = [vocab.index(word) for word in topic_representations[topic].words]
+            values = sim_matrix[:, indices][i]
+            word_indices = np.argsort(values)[-self.top_n_words :][::-1]
+            updated_topics[topic] = Keywords([(vocab[indices[idx]], values[idx]) for idx in word_indices])
 
         return updated_topics

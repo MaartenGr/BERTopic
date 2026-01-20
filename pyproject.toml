@@ -101,7 +101,7 @@ include = ["bertopic*"]
 exclude = ["tests"]
 
 [tool.ruff]
-line-length = 120
+line-length = 110
 
 [tool.ruff.lint]
 select = [

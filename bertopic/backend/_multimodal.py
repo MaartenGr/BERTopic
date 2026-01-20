@@ -138,21 +138,6 @@ class MultiModalBackend(BaseEmbedder):
         embeddings = self.embedding_model.encode(truncated_docs, show_progress_bar=verbose)
         return embeddings
 
-    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
-        """Embed a list of n words into an n-dimensional
-        matrix of embeddings.
-
-        Arguments:
-            words: A list of words to be embedded
-            verbose: Controls the verbosity of the process
-
-        Returns:
-            Document/words embeddings with shape (n, m) with `n` documents/words
-            that each have an embeddings size of `m`
-        """
-        embeddings = self.embedding_model.encode(words, show_progress_bar=verbose)
-        return embeddings
-
     def embed_images(self, images, verbose):
         if self.batch_size:
             nr_iterations = int(np.ceil(len(images) / self.batch_size))
