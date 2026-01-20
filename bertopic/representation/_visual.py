@@ -9,6 +9,12 @@ from transformers.pipelines import Pipeline, pipeline
 
 from bertopic.representation._mmr import mmr
 from bertopic.representation._base import BaseRepresentation
+from bertopic._corpus import Corpus
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 class VisualRepresentation(BaseRepresentation):
@@ -75,7 +81,7 @@ class VisualRepresentation(BaseRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
@@ -117,7 +123,9 @@ class VisualRepresentation(BaseRepresentation):
             ]
 
             # Concatenate representative images
-            representative_image = get_concat_tile_resize(images_to_combine, self.image_height, self.image_squares)
+            representative_image = get_concat_tile_resize(
+                images_to_combine, self.image_height, self.image_squares
+            )
             representative_images[topic] = representative_image
 
             # Make sure to properly close images
@@ -153,53 +161,45 @@ class VisualRepresentation(BaseRepresentation):
 
         return documents
 
-    def image_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
+    def image_to_text(self, corpus: Corpus) -> Corpus:
         """Convert images to text."""
-        # Create image topic embeddings
-        topics = documents.Topic.to_numpy().tolist()
-        images = documents.Image.to_numpy().tolist()
-        df = pd.DataFrame(np.hstack([np.array(topics).reshape(-1, 1), embeddings]))
-        image_topic_embeddings = df.groupby(0).mean().to_numpy()
-
-        # Extract image centroids
+        # Extract image centroids using MMR to remove (near-)duplicates
+        image_topic_embeddings = corpus.average_embeddings_by_topic()
         image_centroids = {}
-        unique_topics = sorted(list(set(topics)))
-        for topic, topic_embedding in zip(unique_topics, image_topic_embeddings):
-            indices = np.array([index for index, t in enumerate(topics) if t == topic])
+        selected_indices = []
+        for topic, topic_embedding in image_topic_embeddings.items():
+            indices = np.array([index for index, t in enumerate(corpus.topics) if t == topic])
             top_n = min([self.nr_repr_images, len(indices)])
             indices = mmr(
                 topic_embedding.reshape(1, -1),
-                embeddings[indices],
+                corpus.embeddings[indices],
                 indices,
                 top_n=top_n,
                 diversity=0.1,
             )
             image_centroids[topic] = indices
+            selected_indices.extend(indices)
 
         # Extract documents
-        documents = pd.DataFrame(columns=["Document", "ID", "Topic", "Image"])
-        current_id = 0
-        for topic, image_ids in tqdm(image_centroids.items()):
-            selected_images = [
-                Image.open(images[index]) if isinstance(images[index], str) else images[index] for index in image_ids
-            ]
-            text = self._convert_image_to_text(selected_images)
+        selected_corpus = corpus.get_corpus_by_indices(selected_indices)
+        selected_images = []
+        for image in selected_corpus.images:
+            if isinstance(image, str):
+                selected_images.append(Image.open(image))
+            else:
+                selected_images.append(image)
+        documents = self._convert_image_to_text(selected_images)
+        selected_corpus.documents = documents
 
-            for doc, image_id in zip(text, image_ids):
-                documents.loc[len(documents), :] = [
-                    doc,
-                    current_id,
-                    topic,
-                    images[image_id],
-                ]
-                current_id += 1
+        # Properly close images
+        for image in selected_images:
+            if isinstance(image, Image.Image):
+                image.close()
+        for image in selected_corpus.images:
+            if isinstance(image, Image.Image):
+                image.close()
 
-            # Properly close images
-            if isinstance(images[image_ids[0]], str):
-                for image in selected_images:
-                    image.close()
-
-        return documents
+        return corpus
 
     def _chunks(self, images):
         for i in range(0, len(images), self.batch_size):
@@ -228,7 +228,9 @@ def get_concat_v_multi_resize(im_list):
     """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
     min_width = min(im.width for im in im_list)
     min_width = max(im.width for im in im_list)
-    im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=0) for im in im_list]
+    im_list_resize = [
+        im.resize((min_width, int(im.height * min_width / im.width)), resample=0) for im in im_list
+    ]
     total_height = sum(im.height for im in im_list_resize)
     dst = Image.new("RGB", (min_width, total_height), (255, 255, 255))
     pos_y = 0
@@ -260,7 +262,9 @@ def get_concat_tile_resize(im_list_2d, image_height=600, image_squares=False):
                         resample=0,
                     )
                 elif img.width > img.height:
-                    images[i][j] = img.resize((min_width, int(img.height * min_width / img.width)), resample=0)
+                    images[i][j] = img.resize(
+                        (min_width, int(img.height * min_width / img.width)), resample=0
+                    )
                 else:
                     images[i][j] = img.resize((min_width, min_width))
 

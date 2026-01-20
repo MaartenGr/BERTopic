@@ -11,6 +11,12 @@ from bertopic.representation._utils import (
 from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
+
 class OpenAI(LLMRepresentation):
     r"""Using the OpenAI API to generate topic labels based
     on one of their Completion of ChatCompletion models.
@@ -126,7 +132,7 @@ class OpenAI(LLMRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],

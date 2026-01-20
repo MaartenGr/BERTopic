@@ -82,6 +82,10 @@ from bertopic._utils import (
 )
 import bertopic._save_utils as save_utils
 
+# Variations
+from bertopic.variations import _zeroshot as zeroshot
+from bertopic.variations import _guided as guided
+
 logger = MyLogger()
 logger.configure("WARNING")
 
@@ -147,13 +151,13 @@ class BERTopic:
         self,
         language: str = "english",
         top_n_words: int = 10,
-        n_gram_range: Tuple[int, int] = (1, 1),
+        n_gram_range: tuple[int, int] = (1, 1),
         min_topic_size: int = 10,
-        nr_topics: Union[int, str] | None = None,
+        nr_topics: int | str | None = None,
         low_memory: bool = False,
         calculate_probabilities: bool = False,
-        seed_topic_list: List[List[str]] | None = None,
-        zeroshot_topic_list: List[str] | None = None,
+        seed_topic_list: list[list[str]] | None = None,
+        zeroshot_topic_list: list[str] | None = None,
         zeroshot_min_similarity: float = 0.7,
         embedding_model=None,
         umap_model=None,
@@ -297,7 +301,7 @@ class BERTopic:
             )
 
         # Public attributes
-        self.topics_ = Topics()
+        self.topics_: Topics = Topics()
 
         self.probabilities_ = None
 
@@ -322,13 +326,22 @@ class BERTopic:
 
     def fit_transform(
         self,
-        documents: List[str],
-        embeddings: np.ndarray = None,
-        images: List[str] | None = None,
-        y: Union[List[int], np.ndarray] = None,
-    ) -> Tuple[List[int], Union[np.ndarray, None]]:
+        documents: list[str],
+        embeddings: np.ndarray | None = None,
+        images: list[str] | None = None,
+        y: list[int] | np.ndarray | None = None,
+    ) -> tuple[list[int], np.ndarray | None]:
         """Fit the models on a collection of documents, generate topics,
         and return the probabilities and topic per document.
+
+        Note that the inline docstrings follow the standard pipeline of BERTopic:
+
+        * 1. Embed documents
+        * 2. Dimensionality reduction
+        * 3. Cluster Documents
+        * 4. Bag-of-words
+        * 5. Topic representation
+        * 6. (Optional) Fine-tune Topic representation
 
         Arguments:
             documents: A list of documents to fit on
@@ -373,15 +386,14 @@ class BERTopic:
         topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
-        corpus = Corpus(documents=documents, embeddings=embeddings, images=images)
+        corpus = Corpus(documents=documents, embeddings=embeddings, images=images, y=y)
 
-        # Select embedding model
+        # 1) Extract embeddings
         if self.embedding_model is not None:
             self.embedding_model = select_backend(
                 embedding_model=self.embedding_model, language=self.language, verbose=self.verbose
             )
 
-        # Extract embeddings
         if embeddings is None:
             logger.info("Embedding - Transforming documents to embeddings.")
             corpus.embeddings = self._extract_embeddings(
@@ -392,69 +404,36 @@ class BERTopic:
             logger.info("Embedding - Completed \u2713")
 
         # Guided Topic Modeling
-        if self.seed_topic_list is not None and self.embedding_model is not None:
-            corpus = self._guided_topic_modeling(corpus)
+        corpus = guided.guided_tm(self, corpus)
 
-        # Reduce dimensionality and fit UMAP model
+        # 2) Reduce dimensionality and fit UMAP model
         corpus = self._reduce_dimensionality(corpus)
 
         # Zero-shot Topic Modeling
-        zeroshot_docs = Corpus()
-        if self._is_zeroshot():
-            # documents, embeddings, assigned_documents, assigned_embeddings = self._zeroshot_topic_modeling(
-            #     documents, embeddings
-            # )
-            corpus, zeroshot_docs = self._zeroshot_topic_modeling(corpus)
+        corpus, zeroshot_docs = zeroshot.zeroshot_tm(self, corpus)
 
-        # Cluster reduced embeddings
-        if len(corpus) > 0:
-            corpus = self._cluster_embeddings(corpus)
-            if len(zeroshot_docs) > 0:
-                corpus = self._combine_zeroshot_topics(corpus, zeroshot_docs)
+        # 3) Cluster reduced embeddings
+        corpus = self._cluster_embeddings(corpus)
 
-        # if len(documents) > 0:
-        #     # Cluster reduced embeddings
-        #     documents, probabilities = self._cluster_embeddings(umap_embeddings, documents, y=y)
-        #     if self._is_zeroshot() and len(assigned_documents) > 0:
-        #         documents, embeddings = self._combine_zeroshot_topics(
-        #             documents, embeddings, assigned_documents, assigned_embeddings
-        #         )
-        # else:
-        #     # All documents matches zero-shot topics
-        #     documents = assigned_documents
-        #     embeddings = assigned_embeddings
+        # Combine zero-shot topics with clustered topics
+        corpus = zeroshot.combine_zeroshot_topics(self, corpus, zeroshot_docs)
 
-        # TODO: Refactor to use data object throughout
-        if corpus.has_only_images:
-            # custom_documents = self._images_to_text(documents, embeddings)
+        # Convert images to text if there are any (creates a new corpus)
+        corpus = self._images_to_text(corpus) if corpus.has_only_images else corpus
 
-            # Extract topics by calculating c-TF-IDF, reduce topics if needed, and get representations.
-            # self._extract_representations(
-            #     custom_documents, embeddings=embeddings, fine_tune_representation=not self.nr_topics
-            # )
-            # if self.nr_topics:
-            #     custom_documents = self._reduce_topics(custom_documents)
-            # self._create_topic_vectors(documents=documents, embeddings=embeddings)
-
-            # # Save the top 3 most representative documents per topic
-            # self._save_representative_docs(custom_documents)
-            pass
-
-        # Extract topics by calculating c-TF-IDF, reduce topics if needed, and get representations.
-        if corpus.has_documents:
-            self._extract_representations(
-                corpus=corpus, verbose=self.verbose, fine_tune_representation=not self.nr_topics
-            )
-            corpus = self._reduce_topics(corpus)
-            self._save_representative_docs(corpus)
+        # 4/5/6) Process text documents
+        self._extract_representations(corpus, self.verbose, fine_tune=not self.nr_topics)
+        corpus = self._reduce_topics(corpus)
+        self._save_representative_docs(corpus)
 
         # With zero-shot topics, probability will come from cosine similarity, and the HDBSCAN model will be removed
-        corpus = self._update_probabilities_zeroshot(corpus=corpus, zeroshot_docs=zeroshot_docs)
+        # corpus = self._update_probabilities_zeroshot(corpus=corpus, zeroshot_docs=zeroshot_docs)
+        corpus = zeroshot.update_probabilities(topic_model=self, corpus=corpus, zeroshot_docs=zeroshot_docs)
 
         # Assign to public attributes
-        self.topics_.predictions = corpus.topics
-        self.topics_.probabilities = corpus.probabilities
         self._data = corpus
+
+        return self.topics_.predictions, self.topics_.probabilities
 
     @property
     def _outliers(self):
@@ -3908,22 +3887,22 @@ class BERTopic:
             )
         return embeddings
 
-    def _images_to_text(self, documents: pd.DataFrame, embeddings: np.ndarray) -> pd.DataFrame:
+    def _images_to_text(self, corpus: Corpus) -> pd.DataFrame:
         """Convert images to text."""
         logger.info("Images - Converting images to text. This might take a while.")
         if isinstance(self.representation_model, dict):
             for tuner in self.representation_model.values():
                 if getattr(tuner, "image_to_text_model", False):
-                    documents = tuner.image_to_text(documents, embeddings)
+                    corpus = tuner.image_to_text(corpus)
         elif isinstance(self.representation_model, list):
             for tuner in self.representation_model:
                 if getattr(tuner, "image_to_text_model", False):
-                    documents = tuner.image_to_text(documents, embeddings)
+                    corpus = tuner.image_to_text(corpus)
         elif isinstance(self.representation_model, BaseRepresentation):
             if getattr(self.representation_model, "image_to_text_model", False):
-                documents = self.representation_model.image_to_text(documents, embeddings)
+                corpus = self.representation_model.image_to_text(corpus)
         logger.info("Images - Completed \u2713")
-        return documents
+        return corpus
 
     def _map_predictions(self, predictions: List[int]) -> List[int]:
         """Map predictions to the correct topics if topics were reduced."""
@@ -3995,6 +3974,9 @@ class BERTopic:
         Returns:
             data: The data containing topic assignments
         """
+        if len(corpus) == 0:
+            return corpus
+
         logger.info("Cluster - Start clustering the reduced embeddings")
 
         # Fit cluster model
@@ -4031,6 +4013,7 @@ class BERTopic:
                 if -1 in corpus.topics:
                     outlier_probs = 1 - np.sum(corpus.probabilities, axis=1)
                     corpus.probabilities = np.hstack([outlier_probs.reshape(-1, 1), corpus.probabilities])
+            self.topics_.original_probabilities_ = corpus.probabilities.copy()
 
         logger.info("Cluster - Completed \u2713")
 
@@ -4187,29 +4170,30 @@ class BERTopic:
             y: The labels for each seeded topic
             embeddings: Updated embeddings
         """
-        logger.info("Guided - Find embeddings highly related to seeded topics.")
-        embeddings = corpus.embeddings
+        if self.seed_topic_list is not None and self.embedding_model is not None:
+            logger.info("Guided - Find embeddings highly related to seeded topics.")
+            embeddings = corpus.embeddings
 
-        # Create embeddings from the seeded topics
-        seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
-        seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
-        seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
+            # Create embeddings from the seeded topics
+            seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
+            seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
+            seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
 
-        # Label documents that are most similar to one of the seeded topics
-        sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
-        y = [np.argmax(sim_matrix[index]) for index in range(sim_matrix.shape[0])]
-        y = [val if val != len(seed_topic_list) else -1 for val in y]
+            # Label documents that are most similar to one of the seeded topics
+            sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
+            y = [np.argmax(sim_matrix[index]) for index in range(sim_matrix.shape[0])]
+            y = [val if val != len(seed_topic_list) else -1 for val in y]
 
-        # Average the document embeddings related to the seeded topics with the
-        # embedding of the seeded topic to force the documents in a cluster
-        for seed_topic in range(len(seed_topic_list)):
-            indices = [index for index, topic in enumerate(y) if topic == seed_topic]
-            embeddings[indices] = embeddings[indices] * 0.75 + seed_topic_embeddings[seed_topic] * 0.25
+            # Average the document embeddings related to the seeded topics with the
+            # embedding of the seeded topic to force the documents in a cluster
+            for seed_topic in range(len(seed_topic_list)):
+                indices = [index for index, topic in enumerate(y) if topic == seed_topic]
+                embeddings[indices] = embeddings[indices] * 0.75 + seed_topic_embeddings[seed_topic] * 0.25
 
-        # Update docs
-        corpus.y = np.array(corpus.y) if corpus.y is not None else None
-        corpus.embeddings = embeddings
-        logger.info("Guided - Completed \u2713")
+            # Update docs
+            corpus.y = np.array(corpus.y) if corpus.y is not None else None
+            corpus.embeddings = embeddings
+            logger.info("Guided - Completed \u2713")
 
         return corpus
 
@@ -4218,7 +4202,7 @@ class BERTopic:
         corpus: Corpus,
         mappings=None,
         verbose: bool = False,
-        fine_tune_representation: bool = True,
+        fine_tune: bool = True,
     ):
         """Extract topics from the clusters using a class-based TF-IDF.
 
@@ -4226,15 +4210,15 @@ class BERTopic:
             corpus: A Corpus object containing documents and their corresponding IDs
             mappings: The mappings from topic to word
             verbose: Whether to log the process of extracting topics
-            fine_tune_representation: If True, the topic representation will be fine-tuned using representation models.
-                                      If False, the topic representation will remain as the base c-TF-IDF representation.
+            fine_tune: If True, the topic representation will be fine-tuned using representation models.
+                       If False, the topic representation will remain as the base c-TF-IDF representation.
 
         Returns:
             c_tf_idf: The resulting matrix giving a value (importance score) for each word per topic
         """
         if verbose:
-            action = "Fine-tuning" if fine_tune_representation else "Extracting"
-            method = "representation models" if fine_tune_representation else "c-TF-IDF for topic reduction"
+            action = "Fine-tuning" if fine_tune else "Extracting"
+            method = "representation models" if fine_tune else "c-TF-IDF for topic reduction"
             logger.info(f"Representation - {action} topics using {method}.")
 
         # Calculate c-TF-IDF
@@ -4246,8 +4230,8 @@ class BERTopic:
         topic_representations = self._extract_words_per_topic(
             words=words,
             corpus=corpus,
-            fine_tune_representation=fine_tune_representation,
-            calculate_aspects=fine_tune_representation,
+            fine_tune=fine_tune,
+            calculate_aspects=fine_tune,
         )
         self.topics_.set_data(representations={"Main": topic_representations})
 
@@ -4484,7 +4468,7 @@ class BERTopic:
         words: list[str],
         corpus: Corpus,
         c_tf_idf: csr_matrix = None,
-        fine_tune_representation: bool = True,
+        fine_tune: bool = True,
         calculate_aspects: bool = True,
     ) -> dict[int, TopicRepresentation]:
         """Based on tf_idf scores per topic, extract the top n words per topic.
@@ -4498,8 +4482,8 @@ class BERTopic:
             words: List of all words (sorted according to tf_idf matrix position)
             corpus: Corpus object with documents and their corresponding IDs and Topics
             c_tf_idf: A c-TF-IDF matrix from which to calculate the top words
-            fine_tune_representation: If True, the topic representation will be fine-tuned using representation models.
-                                      If False, the topic representation will remain as the base c-TF-IDF representation.
+            fine_tune: If True, the topic representation will be fine-tuned using representation models.
+                       If False, the topic representation will remain as the base c-TF-IDF representation.
             calculate_aspects: Whether to calculate additional topic aspects
             embeddings: Pre-trained document embeddings. These can be used
                         instead of an embedding model
@@ -4530,7 +4514,7 @@ class BERTopic:
         }
 
         # Main topic representation fine-tuning
-        if fine_tune_representation:
+        if fine_tune:
             topic_representations = self._apply_representation_models(
                 representation_models=self.representation_model,
                 corpus=corpus,
@@ -4668,6 +4652,7 @@ class BERTopic:
         # Update frequency
         self.topics_.sort_by_frequency()
         corpus.map_topics_and_probabilities(self.topics_, from_original=False)
+
         # Recalculate topic representations
         self._extract_representations(corpus=corpus, verbose=self.verbose)
 

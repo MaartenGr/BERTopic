@@ -10,6 +10,12 @@ from bertopic._corpus import Corpus
 from sklearn import __version__ as sklearn_version
 
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
+
 class KeyBERTInspired(BaseRepresentation):
     def __init__(
         self,
@@ -68,7 +74,7 @@ class KeyBERTInspired(BaseRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         corpus: Corpus,
         topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
@@ -123,7 +129,7 @@ class KeyBERTInspired(BaseRepresentation):
 
     def _extract_candidate_words(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         c_tf_idf: csr_matrix,
         topic_representations: dict[int, Keywords],
     ) -> dict[int, Keywords]:
@@ -168,7 +174,7 @@ class KeyBERTInspired(BaseRepresentation):
 
     def _extract_embeddings(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         topic_representations: dict[int, Keywords],
         representative_docs: list[str],
         repr_doc_indices: list[list[int]],
@@ -216,7 +222,6 @@ class KeyBERTInspired(BaseRepresentation):
 
         Arguments:
             vocab: The complete vocabulary of input documents
-            labels: All topic labels
             topic_representations: The top words per topic
             sim_matrix: The similarity matrix between word and topic embeddings
 

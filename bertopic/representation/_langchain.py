@@ -7,6 +7,11 @@ from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import truncate_document
 from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class LangChain(LLMRepresentation):
     """Using chains in langchain to generate topic labels.
@@ -153,7 +158,7 @@ class LangChain(LLMRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
@@ -197,7 +202,9 @@ class LangChain(LLMRepresentation):
                 prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
                 prompts.append(prompt)
 
-            inputs = [{"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)]
+            inputs = [
+                {"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)
+            ]
 
         else:
             inputs = [{"input_documents": docs, "question": self.prompt} for docs in chain_docs]
@@ -208,7 +215,8 @@ class LangChain(LLMRepresentation):
         labels = [output["output_text"].strip() for output in outputs]
 
         updated_topics = {
-            topic: [(label, 1)] + [("", 0) for _ in range(9)] for topic, label in zip(repr_docs_mappings.keys(), labels)
+            topic: [(label, 1)] + [("", 0) for _ in range(9)]
+            for topic, label in zip(repr_docs_mappings.keys(), labels)
         }
 
         return updated_topics

@@ -11,6 +11,11 @@ from typing import List, Mapping, Tuple, Union
 from sklearn import __version__ as sklearn_version
 from bertopic.representation._base import BaseRepresentation
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class PartOfSpeech(BaseRepresentation):
     """Extract Topic Keywords based on their Part-of-Speech.
@@ -93,7 +98,7 @@ class PartOfSpeech(BaseRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
@@ -156,6 +161,8 @@ class PartOfSpeech(BaseRepresentation):
             topic_words = [(words[word_indices[index]], val) for index, val in zip(indices, vals)]
             updated_topics[topic] = topic_words
             if len(updated_topics[topic]) < self.top_n_words:
-                updated_topics[topic] += [("", 0) for _ in range(self.top_n_words - len(updated_topics[topic]))]
+                updated_topics[topic] += [
+                    ("", 0) for _ in range(self.top_n_words - len(updated_topics[topic]))
+                ]
 
         return updated_topics

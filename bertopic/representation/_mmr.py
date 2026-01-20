@@ -6,6 +6,11 @@ from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class MaximalMarginalRelevance(BaseRepresentation):
     """Calculate Maximal Marginal Relevance (MMR)
@@ -42,7 +47,7 @@ class MaximalMarginalRelevance(BaseRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
@@ -69,9 +74,9 @@ class MaximalMarginalRelevance(BaseRepresentation):
         for topic, topic_words in topics.items():
             words = [word[0] for word in topic_words]
             word_embeddings = topic_model._extract_embeddings(words, method="word", verbose=False)
-            topic_embedding = topic_model._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(
-                1, -1
-            )
+            topic_embedding = topic_model._extract_embeddings(
+                " ".join(words), method="word", verbose=False
+            ).reshape(1, -1)
             topic_words = mmr(
                 topic_embedding,
                 word_embeddings,

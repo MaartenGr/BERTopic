@@ -6,13 +6,18 @@ from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 from bertopic._corpus import Corpus
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class BaseRepresentation(BaseEstimator):
     """The base representation model for fine-tuning topic representations."""
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         corpus: Corpus,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],

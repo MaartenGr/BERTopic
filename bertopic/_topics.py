@@ -143,6 +143,21 @@ class TopicMapping:
         else:
             return [self.map(prediction, from_original=False) for prediction in predictions]
 
+    def map_probabilities(self, probabilities: np.ndarray, from_original: bool = True) -> np.ndarray:
+        """Map a 2D array of probabilities to current IDs."""
+        if from_original:
+            mapped_probs = np.zeros((probabilities.shape[0], len(set(self._mapping.values()))))
+            for original_id, current_id in self._mapping.items():
+                if original_id >= 0 and current_id >= 0:
+                    mapped_probs[:, current_id] = probabilities[:, original_id]
+            return mapped_probs
+        else:
+            mapped_probs = np.zeros((probabilities.shape[0], len(set(self._recent_mapping.values()))))
+            for last_id, current_id in self._recent_mapping.items():
+                if last_id >= 0 and current_id >= 0:
+                    mapped_probs[:, current_id] = probabilities[:, last_id]
+            return mapped_probs
+
     def reset(self) -> None:
         """Clear the mapping (e.g., after re-fitting)."""
         self._mapping.clear()
@@ -203,8 +218,13 @@ class Topics:
     mapping: TopicMapping = field(default_factory=TopicMapping)
 
     # Document metadata (optional)
-    predictions: np.ndarray = field(default_factory=lambda: np.array([]))
-    probabilities: np.ndarray | None = None
+    # NOTE: These are the original predictions/probabilities from the
+    # clustering algorithm before any remapping.
+    _original_predictions: np.ndarray = field(default_factory=lambda: np.array([]))
+    _original_probabilities: np.ndarray | None = None
+
+    # Zero-shot probabilities (optional)
+    _zeroshot_probabilities: np.ndarray | None = None
 
     # History of actions applied to this collection
     actions: list[TopicAction] = field(default_factory=list)
@@ -215,6 +235,22 @@ class Topics:
     def frequencies(self) -> dict[int, int]:
         """Get the number of documents for each topic."""
         return {topic.id: topic.nr_documents for topic in self.topics.values()}
+
+    @property
+    def predictions(self) -> np.ndarray | None:
+        """Get original predictions."""
+        return self.mapping.map_predictions(self._original_predictions.tolist(), from_original=True)
+
+    @property
+    def probabilities(self) -> np.ndarray | None:
+        """Get current probabilities."""
+        if self._zeroshot_probabilities is not None:
+            return self._zeroshot_probabilities
+        elif self._original_probabilities is not None:
+            if self._original_probabilities.ndim == 1:
+                return self._original_probabilities
+            elif self._original_probabilities.ndim == 2:
+                return self.mapping.map_probabilities(self._original_probabilities, from_original=True)
 
     @property
     def c_tf_idf(self) -> csr_matrix:
@@ -305,6 +341,9 @@ class Topics:
                 nr_documents=predictions.count(topic_id),
                 label=label,
             )
+
+        # Set original predictions/probabilities
+        self._original_predictions = np.array(predictions)
 
         # Log the initialization
         self.add_action(TopicAction.INITIALIZED)

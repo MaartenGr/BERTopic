@@ -6,6 +6,11 @@ from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class LlamaCPP(LLMRepresentation):
     """A llama.cpp implementation to use as a representation model.
@@ -116,7 +121,7 @@ class LlamaCPP(LLMRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],
@@ -146,7 +151,10 @@ class LlamaCPP(LLMRepresentation):
             # Extract result from generator and use that as label
             # topic_description = self.model(prompt, **self.pipeline_kwargs)["choices"]
             topic_description = self.model.create_chat_completion(
-                messages=[{"role": "system", "content": self.system_prompt}, {"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
                 **self.pipeline_kwargs,
             )
             label = topic_description["choices"][0]["message"]["content"].strip()

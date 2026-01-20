@@ -7,6 +7,11 @@ from typing import Mapping, List, Tuple, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class TextGeneration(LLMRepresentation):
     """Text2Text or text generation with transformers.
@@ -113,7 +118,7 @@ class TextGeneration(LLMRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],

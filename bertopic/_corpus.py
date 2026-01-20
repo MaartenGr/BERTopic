@@ -178,32 +178,6 @@ class Corpus:
 
             self.probabilities = new_probabilities
 
-    # def map_probabilities(self, mappings: dict[int, int]) -> Optional[np.ndarray]:
-    #     """Map the probabilities to the reduced topics.
-    #     This is achieved by adding together the probabilities
-    #     of all topics that are mapped to the same topic. Then,
-    #     the topics that were mapped from are set to 0 as they
-    #     were reduced. Note that the probabilities are always 2-dimensional
-    #     where the first dimension corresponds to the document and the second to the topic.
-
-    #     Note that the outlier topic (-1), if present, is skipped during this process
-    #     and is at the zero-th index of the initial probabilities matrix.
-
-    #     Arguments:
-    #         mappings: A dictionary mapping old topic IDs to new topic IDs.
-    #     """
-    #     nr_new_topics = len(set(mappings.values()))
-    #     new_probabilities = np.zeros((self.probabilities.shape[0], nr_new_topics))
-
-    #     for old_topic, new_topic in mappings.items():
-    #         if old_topic == -1:
-    #             continue  # Skip outlier topic
-    #         new_topic_idx = new_topic + self._outliers
-    #         old_topic_idx = old_topic + self._outliers
-    #         new_probabilities[:, new_topic_idx] += self.probabilities[:, old_topic_idx]
-
-    #     self.probabilities = new_probabilities
-
     def group_documents_by_topic(self) -> dict[int, str]:
         """Groups documents by their assigned topic."""
         # Group documents by topic
@@ -215,6 +189,21 @@ class Corpus:
         aggregated = {topic: " ".join(docs) for topic, docs in grouped.items()}
         aggregated_sorted = dict(sorted(aggregated.items()))
         return aggregated_sorted
+
+    def average_embeddings_by_topic(self) -> dict[int, np.ndarray]:
+        """Averages embeddings by their assigned topic."""
+        if self.embeddings is None:
+            raise ValueError("Embeddings are not available to average by topic.")
+
+        # Group embeddings by topic
+        grouped = defaultdict(list)
+        for embedding, topic in zip(self.embeddings, self.topics):
+            grouped[topic].append(embedding)
+
+        # Average embeddings per topic
+        averaged = {topic: np.mean(embs, axis=0) for topic, embs in grouped.items()}
+        averaged_sorted = dict(sorted(averaged.items()))
+        return averaged_sorted
 
     def get_topic(self, topic_id: int, nr_samples: int = None) -> "Corpus":
         """Return a Data object containing only documents of the specified topic.
@@ -299,6 +288,27 @@ class Corpus:
     def get_documents_by_indices(self, indices: list[int]) -> list[str]:
         """Returns documents corresponding to the provided indices."""
         return [self.documents[index] for index in indices]
+
+    def get_corpus_by_indices(self, indices: list[int]) -> "Corpus":
+        """Returns a Corpus object corresponding to the provided indices."""
+        sorted_indices = sorted(indices)
+        selected_documents = [self.documents[index] for index in sorted_indices]
+        selected_topics = (
+            [self.topics[index] for index in sorted_indices] if self.topics is not None else None
+        )
+        selected_embeddings = self.embeddings[sorted_indices] if self.embeddings is not None else None
+        selected_images = (
+            [self.images[index] for index in sorted_indices] if self.images is not None else None
+        )
+        selected_original_indices = [self.original_indices[index] for index in sorted_indices]
+        return Corpus(
+            documents=selected_documents,
+            topics=selected_topics,
+            embeddings=selected_embeddings,
+            images=selected_images,
+            original_indices=selected_original_indices,
+            _zeroshot_labels=self._zeroshot_labels,
+        )
 
     def __len__(self):
         return len(self.documents)

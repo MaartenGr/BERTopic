@@ -11,6 +11,11 @@ from bertopic.representation._utils import (
 )
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 class LiteLLM(LLMRepresentation):
     """Using the LiteLLM API to generate topic labels.
@@ -113,7 +118,11 @@ class LiteLLM(LLMRepresentation):
         self.generator_kwargs = generator_kwargs
 
     def extract_topics(
-        self, topic_model, documents: pd.DataFrame, c_tf_idf: csr_matrix, topics: Mapping[str, List[Tuple[str, float]]]
+        self,
+        topic_model: "BERTopic",
+        documents: pd.DataFrame,
+        c_tf_idf: csr_matrix,
+        topics: Mapping[str, List[Tuple[str, float]]],
     ) -> Mapping[str, List[Tuple[str, float]]]:
         """Extract topics.
 
@@ -148,7 +157,9 @@ class LiteLLM(LLMRepresentation):
             kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
 
             # Generate response
-            response = chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
+            response = (
+                chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
+            )
             label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
             updated_topics[topic] = [(label, 1)]
 
