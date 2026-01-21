@@ -43,7 +43,6 @@ else:
         import plotly.graph_objs as go
         import matplotlib.figure as fig
 
-
 # Models
 try:
     from hdbscan import HDBSCAN
@@ -61,15 +60,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 # BERTopic
-from bertopic.cluster import BaseCluster
 from bertopic.backend import BaseEmbedder
+from bertopic.cluster import BaseCluster
+from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
 from bertopic._topics import Keywords, Topics, TopicRepresentation
 from bertopic._corpus import Corpus
-from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger,
@@ -83,6 +82,7 @@ from bertopic._utils import (
 import bertopic._save_utils as save_utils
 
 # Variations
+from bertopic import variations
 from bertopic.variations import _zeroshot as zeroshot
 from bertopic.variations import _guided as guided
 
@@ -324,6 +324,32 @@ class BERTopic:
         else:
             logger.set_level("WARNING")
 
+    @property
+    def c_tf_idf_(self) -> csr_matrix:
+        """Get the c-TF-IDF matrix."""
+        return self.topics_.c_tf_idf
+
+    @property
+    def topic_embeddings_(self) -> np.ndarray:
+        """Get the embeddings for all topics."""
+        return self.topics_.embeddings
+
+    @property
+    def topic_labels_(self) -> dict[int, str]:
+        """Get labels for all topics."""
+        return self.topics_.labels
+
+    @property
+    def _outliers(self) -> int:
+        """Some algorithms have outlier labels (-1) that can be tricky to work
+        with if you are slicing data based on that labels. Therefore, we
+        track if there are outlier labels and act accordingly when slicing.
+
+        Returns:
+            An integer indicating whether outliers are present in the topic model
+        """
+        return 1 if self.topics_.outlier_exists else 0
+
     def fit_transform(
         self,
         documents: list[str],
@@ -422,7 +448,7 @@ class BERTopic:
         corpus = self._images_to_text(corpus) if corpus.has_only_images else corpus
 
         # 4/5/6) Process text documents
-        self._extract_representations(corpus, self.verbose, fine_tune=not self.nr_topics)
+        self._extract_representations(corpus, verbose=self.verbose, fine_tune=not self.nr_topics)
         corpus = self._reduce_topics(corpus)
         self._save_representative_docs(corpus)
 
@@ -435,46 +461,13 @@ class BERTopic:
 
         return self.topics_.predictions, self.topics_.probabilities
 
-    @property
-    def _outliers(self):
-        """Some algorithms have outlier labels (-1) that can be tricky to work
-        with if you are slicing data based on that labels. Therefore, we
-        track if there are outlier labels and act accordingly when slicing.
-
-        Returns:
-            An integer indicating whether outliers are present in the topic model
-        """
-        return 1 if self.topics_.outlier_exists else 0
-
-    @property
-    def topic_labels_(self):
-        """Map topic IDs to their labels.
-        A label is the topic ID, along with the first four words of the topic representation, joined using '_'.
-        Zeroshot topic labels come from self.zeroshot_topic_list rather than the calculated representation.
-
-        Returns:
-            topic_labels: a dict mapping a topic ID (int) to its label (str)
-        """
-        topic_labels = {
-            key: f"{key}_" + "_".join([word[0] for word in values[:4]])
-            for key, values in self.topic_representations_.items()
-        }
-        if self._is_zeroshot():
-            # Need to correct labels from zero-shot topics
-            topic_id_to_zeroshot_label = {
-                topic_id: self.zeroshot_topic_list[zeroshot_topic_idx]
-                for topic_id, zeroshot_topic_idx in self._topic_id_to_zeroshot_topic_idx.items()
-            }
-            topic_labels.update(topic_id_to_zeroshot_label)
-        return topic_labels
-
     def fit(
         self,
-        documents: List[str],
+        documents: list[str],
         embeddings: np.ndarray = None,
-        images: List[str] | None = None,
-        y: Union[List[int], np.ndarray] = None,
-    ):
+        images: list[str] | None = None,
+        y: list[int] | np.ndarray = None,
+    ) -> "BERTopic":
         """Fit the models on a collection of documents and generate topics.
 
         Arguments:
@@ -515,10 +508,10 @@ class BERTopic:
 
     def transform(
         self,
-        documents: Union[str, List[str]],
+        documents: str | list[str],
         embeddings: np.ndarray = None,
-        images: List[str] | None = None,
-    ) -> Tuple[List[int], np.ndarray]:
+        images: list[str] | None = None,
+    ) -> tuple[list[int], np.ndarray]:
         """After having fit a model, use transform to predict new instances.
 
         Arguments:
@@ -562,16 +555,16 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        check_embeddings_shape(embeddings, documents)
+        corpus = Corpus(documents=documents, embeddings=embeddings, images=images)
 
-        if isinstance(documents, str) or documents is None:
-            documents = [documents]
-
-        if embeddings is None:
-            embeddings = self._extract_embeddings(documents, images=images, verbose=self.verbose)
+        # Extract embeddings
+        if corpus.embeddings is None:
+            corpus.embeddings = self._extract_embeddings(
+                documents=corpus.documents, images=corpus.images, verbose=self.verbose
+            )
 
         # Check if an embedding model was found
-        if embeddings is None:
+        if corpus.embeddings is None:
             raise ValueError(
                 "No embedding model was found to embed the documents."
                 "Make sure when loading in the model using BERTopic.load()"
@@ -583,7 +576,7 @@ class BERTopic:
             logger.info(
                 "Predicting topic assignments through cosine similarity of topic and document embeddings."
             )
-            sim_matrix = cosine_similarity(embeddings, np.array(self.topic_embeddings_))
+            sim_matrix = cosine_similarity(corpus.embeddings, np.array(self.topic_embeddings_))
             predictions = np.argmax(sim_matrix, axis=1) - self._outliers
 
             if self.calculate_probabilities:
@@ -594,31 +587,32 @@ class BERTopic:
         # Transform with full pipeline
         else:
             logger.info("Dimensionality - Reducing dimensionality of input embeddings.")
-            umap_embeddings = self.umap_model.transform(embeddings)
+            corpus.umap_embeddings = self.umap_model.transform(corpus.embeddings)
             logger.info("Dimensionality - Completed \u2713")
 
             # Extract predictions and probabilities if it is a HDBSCAN-like model
             logger.info("Clustering - Approximating new points with `hdbscan_model`")
             if is_supported_hdbscan(self.hdbscan_model):
                 predictions, probabilities = hdbscan_delegator(
-                    self.hdbscan_model, "approximate_predict", umap_embeddings
+                    self.hdbscan_model, "approximate_predict", corpus.umap_embeddings
                 )
 
                 # Calculate probabilities
                 if self.calculate_probabilities:
                     logger.info("Probabilities - Start calculation of probabilities with HDBSCAN")
                     probabilities = hdbscan_delegator(
-                        self.hdbscan_model, "membership_vector", umap_embeddings
+                        self.hdbscan_model, "membership_vector", corpus.umap_embeddings
                     )
                     logger.info("Probabilities - Completed \u2713")
             else:
-                predictions = self.hdbscan_model.predict(umap_embeddings)
+                predictions = self.hdbscan_model.predict(corpus.umap_embeddings)
                 probabilities = None
             logger.info("Cluster - Completed \u2713")
 
             # Map probabilities and predictions
-            probabilities = self._map_probabilities(probabilities, original_topics=True)
-            predictions = self._map_predictions(predictions)
+            predictions = self.topics_.map_predictions(predictions, original_topics=True)
+            probabilities = self.topics_.map_probabilities(probabilities, original_topics=True)
+
         return predictions, probabilities
 
     def partial_fit(
@@ -774,14 +768,13 @@ class BERTopic:
 
     def topics_over_time(
         self,
-        docs: List[str],
-        timestamps: Union[List[str], List[int]],
-        topics: List[int] | None = None,
+        docs: list[str],
+        timestamps: list[str] | list[int],
+        topics: list[int] | None = None,
         nr_bins: int | None = None,
-        datetime_format: str | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, Topics]:
         """Create topics over time.
 
         To create the topics over time, BERTopic needs to be already fitted once.
@@ -808,22 +801,18 @@ class BERTopic:
                     a subset of the data. Make sure that `docs`, `timestamps`, and `topics`
                     all correspond to one another and have the same size.
             nr_bins: The number of bins you want to create for the timestamps. The left interval will
-                     be chosen as the timestamp. An additional column will be created with the
-                     entire interval.
-            datetime_format: The datetime format of the timestamps if they are strings, eg "%d/%m/%Y".
-                             Set this to None if you want to have it automatically detect the format.
-                             See strftime documentation for more information on choices:
-                             https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior.
+                        be chosen as the timestamp. An additional column will be created with the
+                        entire interval.
             evolution_tuning: Fine-tune each topic representation at timestamp *t* by averaging its
-                              c-TF-IDF matrix with the c-TF-IDF matrix at timestamp *t-1*. This creates
-                              evolutionary topic representations.
+                                c-TF-IDF matrix with the c-TF-IDF matrix at timestamp *t-1*. This creates
+                                evolutionary topic representations.
             global_tuning: Fine-tune each topic representation at timestamp *t* by averaging its c-TF-IDF matrix
-                       with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
-                       topic representations that could not be found in the documents at timestamp *t*.
+                        with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                        topic representations that could not be found in the documents at timestamp *t*.
 
         Returns:
-            topics_over_time: A dataframe that contains the topic, words, and frequency of topic
-                              at timestamp *t*.
+            topics_over_time: A dictionary where each key is a timestamp and each value
+                              is a Topics object containing the topics at that timestamp.
 
         Examples:
         The timestamps variable represents the timestamp of each document. If you have over
@@ -836,104 +825,15 @@ class BERTopic:
         topics_over_time = topic_model.topics_over_time(docs, timestamps, nr_bins=20)
         ```
         """
-        check_is_fitted(self)
-        check_documents_type(docs)
-        selected_topics = topics if topics else self.topics_
-        documents = pd.DataFrame({"Document": docs, "Topic": selected_topics, "Timestamps": timestamps})
-        global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm="l1", copy=False)
-
-        all_topics = sorted(list(documents.Topic.unique()))
-        all_topics_indices = {topic: index for index, topic in enumerate(all_topics)}
-
-        if isinstance(timestamps[0], str):
-            infer_datetime_format = True if not datetime_format else False
-            documents["Timestamps"] = pd.to_datetime(
-                documents["Timestamps"],
-                infer_datetime_format=infer_datetime_format,
-                format=datetime_format,
-            )
-
-        if nr_bins:
-            documents["Bins"] = pd.cut(documents.Timestamps, bins=nr_bins)
-            documents["Timestamps"] = documents.apply(lambda row: row.Bins.left, 1)
-
-        # Sort documents in chronological order
-        documents = documents.sort_values("Timestamps")
-        timestamps = documents.Timestamps.unique()
-        if len(timestamps) > 100:
-            logger.warning(
-                f"There are more than 100 unique timestamps (i.e., {len(timestamps)}) "
-                "which significantly slows down the application. Consider setting `nr_bins` "
-                "to a value lower than 100 to speed up calculation. "
-            )
-
-        # For each unique timestamp, create topic representations
-        topics_over_time = []
-        for index, timestamp in tqdm(enumerate(timestamps), disable=not self.verbose):
-            # Calculate c-TF-IDF representation for a specific timestamp
-            selection = documents.loc[documents.Timestamps == timestamp, :]
-            documents_per_topic = selection.groupby(["Topic"], as_index=False).agg(
-                {"Document": " ".join, "Timestamps": "count"}
-            )
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
-
-            if global_tuning or evolution_tuning:
-                c_tf_idf = normalize(c_tf_idf, axis=1, norm="l1", copy=False)
-
-            # Fine-tune the c-TF-IDF matrix at timestamp t by averaging it with the c-TF-IDF
-            # matrix at timestamp t-1
-            if evolution_tuning and index != 0:
-                current_topics = sorted(list(documents_per_topic.Topic.values))
-                overlapping_topics = sorted(
-                    list(set(previous_topics).intersection(set(current_topics)))  # noqa: F821
-                )
-
-                current_overlap_idx = [current_topics.index(topic) for topic in overlapping_topics]
-                previous_overlap_idx = [
-                    previous_topics.index(topic)  # noqa: F821
-                    for topic in overlapping_topics
-                ]
-
-                c_tf_idf.tolil()[current_overlap_idx] = (
-                    (
-                        c_tf_idf[current_overlap_idx] + previous_c_tf_idf[previous_overlap_idx]  # noqa: F821
-                    )
-                    / 2.0
-                ).tolil()
-
-            # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
-            # by simply taking the average of the two
-            if global_tuning:
-                selected_topics = [
-                    all_topics_indices[topic] for topic in documents_per_topic.Topic.to_numpy()
-                ]
-                c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
-
-            # Extract the words per topic
-            words_per_topic = self._extract_words_per_topic(
-                words, selection, c_tf_idf, calculate_aspects=False
-            )
-            topic_frequency = pd.Series(
-                documents_per_topic.Timestamps.values, index=documents_per_topic.Topic
-            ).to_dict()
-
-            # Fill dataframe with results
-            topics_at_timestamp = [
-                (
-                    topic,
-                    ", ".join([words[0] for words in values][:5]),
-                    topic_frequency[topic],
-                    timestamp,
-                )
-                for topic, values in words_per_topic.items()
-            ]
-            topics_over_time.extend(topics_at_timestamp)
-
-            if evolution_tuning:
-                previous_topics = sorted(list(documents_per_topic.Topic.values))  # noqa: F841
-                previous_c_tf_idf = c_tf_idf.copy()  # noqa: F841
-
-        return pd.DataFrame(topics_over_time, columns=["Topic", "Words", "Frequency", "Timestamp"])
+        return variations.topics_over_time(
+            topic_model=self,
+            docs=docs,
+            timestamps=timestamps,
+            topics=topics,
+            nr_bins=nr_bins,
+            evolution_tuning=evolution_tuning,
+            global_tuning=global_tuning,
+        )
 
     def topics_per_class(
         self,
@@ -4019,75 +3919,6 @@ class BERTopic:
 
         return corpus
 
-    def _zeroshot_topic_modeling(self, corpus: Corpus) -> Corpus:
-        """Find documents that could be assigned to either one of the topics in self.zeroshot_topic_list.
-
-        We transform the topics in `self.zeroshot_topic_list` to embeddings and
-        compare them through cosine similarity with the document embeddings.
-        If they pass the `self.zeroshot_min_similarity` threshold, they are assigned.
-
-        Arguments:
-            corpus: The documents and their embeddings
-
-        Returns:
-            zeroshot_data: Documents containing documents assigned to zero-shot topics
-            cluster_data: Documents containing documents to be clustered
-        """
-        logger.info(
-            "Zeroshot Step 1 - Finding documents that could be assigned to either one of the zero-shot topics"
-        )
-
-        # Similarity between document and zero-shot topic embeddings
-        zeroshot_embeddings = self._extract_embeddings(self.zeroshot_topic_list)
-        cosine_similarities = cosine_similarity(corpus.embeddings, zeroshot_embeddings)
-        assignment = np.argmax(cosine_similarities, 1)
-        assignment_vals = np.max(cosine_similarities, 1)
-        assigned_ids = [
-            index for index, value in enumerate(assignment_vals) if value >= self.zeroshot_min_similarity
-        ]
-        non_assigned_ids = [
-            index for index, value in enumerate(assignment_vals) if value < self.zeroshot_min_similarity
-        ]
-
-        # Assign topics to zero-shot documents
-        zeroshot_data = None
-        if len(assigned_ids) > 0:
-            zeroshot_documents = corpus.get_documents_by_indices(assigned_ids)
-            zeroshot_topics = [topic for topic in assignment[assigned_ids]]
-            zeroshot_labels = [self.zeroshot_topic_list[i] for i in sorted(list(set(zeroshot_topics)))]
-            zeroshot_data = Corpus(
-                documents=zeroshot_documents,
-                embeddings=corpus.embeddings[assigned_ids],
-                topics=zeroshot_topics,
-                original_indices=assigned_ids,
-                _zeroshot_labels=zeroshot_labels,
-            )
-
-        # Select non-assigned topics to be clustered
-        cluster_data = Corpus(
-            documents=corpus.get_documents_by_indices(non_assigned_ids),
-            embeddings=corpus.embeddings[non_assigned_ids],
-            original_indices=non_assigned_ids,
-            y=corpus.y[non_assigned_ids] if corpus.y is not None else None,
-        )
-        cluster_data.umap_embeddings = self.umap_model.transform(cluster_data.embeddings)
-        # If all documents were assigned to zero-shot topics
-        if len(assigned_ids) == len(corpus.documents):
-            corpus.topics = zeroshot_data.topics
-
-        logger.info("Zeroshot Step 1 - Completed \u2713")
-
-        # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
-        num_zeroshot_topics = zeroshot_data.nr_topics()
-        if self.nr_topics != "auto":
-            if self.nr_topics and not self.nr_topics > num_zeroshot_topics:
-                raise ValueError(
-                    f"The set nr_topics ({self.nr_topics}) must exceed the number of matched zero-shot topics "
-                    f"({num_zeroshot_topics}). Consider raising nr_topics or raising the "
-                    f"zeroshot_min_similarity ({self.zeroshot_min_similarity})."
-                )
-        return cluster_data, zeroshot_data
-
     def _is_zeroshot(self):
         """Check whether zero-shot topic modeling is possible.
 
@@ -4097,105 +3928,6 @@ class BERTopic:
         if self.zeroshot_topic_list is not None and self.embedding_model is not None:
             return True
         return False
-
-    def _combine_zeroshot_topics(self, corpus: Corpus, zeroshot_data: Corpus) -> Corpus:
-        """Combine the zero-shot topics with the clustered topics.
-
-        The zero-shot topics will be inserted between the outlier topic (that may or may not exist) and the rest of the
-        topics from clustering. The rest of the topics from clustering will be given new IDs to correspond to topics
-        after zero-shot topics.
-
-        Documents and embeddings used in zero-shot topic modeling and clustering and re-merged.
-
-        Arguments:
-            corpus: Clustered documents
-            zeroshot_data: Documents belonging to zero-shot topics
-
-        Returns:
-            corpus: Documents containing all the original documents with their topic assignments
-        """
-        logger.info(
-            "Zeroshot Step 2 - Combining topics from zero-shot topic modeling with topics from clustering..."
-        )
-
-        # Combine data
-        corpus.sort_topics_by_frequency()
-        zeroshot_data.sort_topics_by_frequency()
-        corpus = corpus + zeroshot_data
-
-        # Create new Topics
-        self.topics_ = Topics().initialize(corpus.topics, corpus._zeroshot_labels).sort_by_frequency()
-        corpus.map_topics_and_probabilities(self.topics_, from_original=True)
-        logger.info("Zeroshot Step 2 - Completed \u2713")
-
-        return corpus
-
-    def _update_probabilities_zeroshot(self, corpus: Corpus, zeroshot_docs: Corpus):
-        """Update probabilities in the case of zero-shot topics.
-
-        Arguments:
-            corpus: The documents containing all topic assignments
-            zeroshot_docs: The documents assigned to zero-shot topics
-
-        Returns:
-            corpus: The documents containing updated probabilities
-        """
-        # In the case of zero-shot topics, probability will come from cosine similarity,
-        # and the HDBSCAN model will be removed
-        if len(zeroshot_docs) > 0:
-            self.hdbscan_model = BaseCluster()
-            sim_matrix = cosine_similarity(corpus.embeddings, self.topics_.embeddings)
-            corpus.probabilities = sim_matrix if self.calculate_probabilities else np.max(sim_matrix, axis=1)
-
-        return corpus
-
-    def _guided_topic_modeling(self, corpus: Corpus) -> Corpus:
-        """Apply Guided Topic Modeling.
-
-        We transform the seeded topics to embeddings using the
-        same embedder as used for generating document embeddings.
-
-        Then, we apply cosine similarity between the embeddings
-        and set labels for documents that are more similar to
-        one of the topics than the average document.
-
-        If a document is more similar to the average document
-        than any of the topics, it gets the -1 label and is
-        thereby not included in UMAP.
-
-        Arguments:
-            corpus: A Corpus object containing documents and their embeddings
-
-        Returns:
-            y: The labels for each seeded topic
-            embeddings: Updated embeddings
-        """
-        if self.seed_topic_list is not None and self.embedding_model is not None:
-            logger.info("Guided - Find embeddings highly related to seeded topics.")
-            embeddings = corpus.embeddings
-
-            # Create embeddings from the seeded topics
-            seed_topic_list = [" ".join(seed_topic) for seed_topic in self.seed_topic_list]
-            seed_topic_embeddings = self._extract_embeddings(seed_topic_list, verbose=self.verbose)
-            seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
-
-            # Label documents that are most similar to one of the seeded topics
-            sim_matrix = cosine_similarity(embeddings, seed_topic_embeddings)
-            y = [np.argmax(sim_matrix[index]) for index in range(sim_matrix.shape[0])]
-            y = [val if val != len(seed_topic_list) else -1 for val in y]
-
-            # Average the document embeddings related to the seeded topics with the
-            # embedding of the seeded topic to force the documents in a cluster
-            for seed_topic in range(len(seed_topic_list)):
-                indices = [index for index, topic in enumerate(y) if topic == seed_topic]
-                embeddings[indices] = embeddings[indices] * 0.75 + seed_topic_embeddings[seed_topic] * 0.25
-
-            # Update docs
-            corpus.y = np.array(corpus.y) if corpus.y is not None else None
-            corpus.embeddings = embeddings
-            logger.info("Guided - Completed \u2713")
-
-        return corpus
 
     def _extract_representations(
         self,

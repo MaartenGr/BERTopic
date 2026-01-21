@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 import numpy as np
-from typing import List, Optional
 from scipy.sparse import csr_matrix
 from collections import defaultdict
 
@@ -12,11 +11,12 @@ class Corpus:
     """Temporary container used to track the input and generated data during fitting."""
 
     # Input data
-    documents: List[str] | np.ndarray = field(default_factory=list)
-    topics: np.ndarray = None
-    probabilities: np.ndarray = None
-    embeddings: Optional[np.ndarray] = None
-    images: Optional[List[str]] = None
+    documents: list[str] | np.ndarray = field(default_factory=list)
+    topics: np.ndarray | None = None
+    probabilities: np.ndarray | None = None
+    embeddings: np.ndarray | None = None
+    images: list[str] | None = None
+    timestamps: list[str] | list[int] | np.ndarray | None = None
 
     # Generated data
     umap_embeddings: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -26,17 +26,48 @@ class Corpus:
     original_indices: np.ndarray = None
 
     # Zero-shot topic labels
-    _zeroshot_labels: List[str] = field(default_factory=list)
+    _zeroshot_labels: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.original_indices is None:
             self.original_indices = np.arange(len(self.documents))
 
+        # For inference where a single document is passed as a string
+        if isinstance(self.documents, str):
+            self.documents = [self.documents]
+
         if isinstance(self.documents, np.ndarray):
             self.documents = self.documents.tolist()
 
+        # Processing timestamps
+        if self.timestamps is not None:
+            self.timestamps = np.array(self.timestamps, dtype="datetime64[ns]")
+
         check_documents_type(self.documents)
         check_embeddings_shape(self.embeddings, self.documents)
+
+    def sort_by_timestamps(self) -> "Corpus":
+        """Sorts the corpus by timestamps in ascending order."""
+        if self.timestamps is None:
+            raise ValueError("Timestamps are not available to sort the corpus.")
+
+        sort_order = np.argsort(self.timestamps)
+
+        self.documents = [self.documents[i] for i in sort_order]
+        self.topics = np.array(self.topics)[sort_order] if self.topics is not None else None
+        self.probabilities = self.probabilities[sort_order] if self.probabilities is not None else None
+        self.embeddings = self.embeddings[sort_order] if self.embeddings is not None else None
+        self.images = list(np.array(self.images)[sort_order]) if self.images is not None else None
+        self.timestamps = self.timestamps[sort_order]
+        self.umap_embeddings = (
+            self.umap_embeddings[sort_order] if self.umap_embeddings.size > 0 else self.umap_embeddings
+        )
+        self.y = np.array(self.y)[sort_order] if self.y is not None else None
+        self.original_indices = (
+            np.array(self.original_indices)[sort_order] if self.original_indices is not None else None
+        )
+
+        return self
 
     def sort_topics_by_frequency(self) -> "Corpus":
         """Maps the label of each topic to its frequency rank with
@@ -206,7 +237,7 @@ class Corpus:
         return averaged_sorted
 
     def get_topic(self, topic_id: int, nr_samples: int = None) -> "Corpus":
-        """Return a Data object containing only documents of the specified topic.
+        """Return a Corpus object containing only documents of the specified topic.
 
         Arguments:
             topic_id: The topic ID to filter by.

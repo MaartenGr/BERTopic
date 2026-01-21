@@ -72,7 +72,7 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
     ]
 
     # Assign topics to zero-shot documents
-    zeroshot_data = None
+    zeroshot_data = Corpus()
     if len(assigned_ids) > 0:
         zeroshot_documents = corpus.get_documents_by_indices(assigned_ids)
         zeroshot_topics = [topic for topic in assignment[assigned_ids]]
@@ -100,7 +100,7 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
     logger.info("Zeroshot Step 1 - Completed \u2713")
 
     # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
-    num_zeroshot_topics = zeroshot_data.nr_topics()
+    num_zeroshot_topics = zeroshot_data.nr_topics() if zeroshot_data is not None else 0
     if topic_model.nr_topics != "auto":
         if topic_model.nr_topics and not topic_model.nr_topics > num_zeroshot_topics:
             raise ValueError(

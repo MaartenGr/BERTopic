@@ -176,7 +176,7 @@ class Topic:
     representations: dict[str, TopicRepresentation] = field(default_factory=dict)
     representative_documents: list[str] | None = field(default_factory=list)
     representative_images: np.ndarray | None = field(default_factory=lambda: np.array([]))
-    label: str | None = None
+    _label: str | None = None
 
     # Data matrices
     embedding: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -190,6 +190,21 @@ class Topic:
         """Auto-assign OUTLIER type if id is -1."""
         if self.id == -1:
             self.topic_type = TopicType.OUTLIER
+
+    @property
+    def label(self) -> str | None:
+        """Get the label of the topic."""
+        # Set label representation if no is provided
+        if self._label is None:
+            representation = self.representations.get("Main")
+            if isinstance(representation, Label):
+                self._label = representation.data
+            elif isinstance(representation, Keywords):
+                self._label = "_".join(representation.words[:4])
+            else:
+                self._label = "No label could be created"
+
+        return self._label
 
     def __getitem__(self, source: str) -> TopicRepresentation:
         """Get representation for a specific source, or default if not found."""
@@ -235,6 +250,12 @@ class Topics:
     def frequencies(self) -> dict[int, int]:
         """Get the number of documents for each topic."""
         return {topic.id: topic.nr_documents for topic in self.topics.values()}
+
+    @property
+    def labels(self) -> dict[int, str]:
+        """Get labels for all topics."""
+        labels = {topic.id: topic.label if topic.label is not None else "" for topic in self.topics.values()}
+        return dict(sorted(labels.items()))
 
     @property
     def predictions(self) -> np.ndarray | None:
@@ -339,7 +360,7 @@ class Topics:
                 id=topic_id,
                 topic_type=topic_type_to_use,
                 nr_documents=predictions.count(topic_id),
-                label=label,
+                _label=label,
             )
 
         # Set original predictions/probabilities
@@ -543,6 +564,19 @@ class Topics:
                            If False, map from last applied mapping to current.
         """
         return [self.mapping.map(prediction, from_original=from_original) for prediction in predictions]
+
+    def map_probabilities(self, probabilities: np.ndarray, from_original: bool) -> np.ndarray:
+        """Map a 2D array of probabilities to current IDs.
+
+        Arguments:
+            probabilities: 2D array of shape (n_samples, n_topics) to map.
+            from_original: If True, map from original IDs to current.
+                           If False, map from last applied mapping to current.
+        """
+        if probabilities is not None:
+            return self.mapping.map_probabilities(probabilities, from_original=from_original)
+        else:
+            return None
 
     def get_mappings(self, from_original: bool = True) -> dict[int, int]:
         """Get the current topic ID mappings.
