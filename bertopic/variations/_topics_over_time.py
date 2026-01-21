@@ -1,6 +1,21 @@
+"""Topics over time (dynamic topic modeling) variation for BERTopic.
+
+# Methodology
+
+BERTopic allows for DTM by calculating the topic representation at each timestep without the need to
+run the entire model several times. To do this, we first need to fit BERTopic as if there were no temporal aspect in the data.
+Thus, a general topic model will be created. We use the global representation as to the main topics that can be found at,
+most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF representation.
+This will result in a specific topic representation at each timestep without the need to create clusters from embeddings
+as they were already created.
+
+"""
+
 import numpy as np
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
+from tqdm import tqdm
+
 from bertopic._utils import check_is_fitted, MyLogger
 from bertopic._corpus import Corpus
 from bertopic._topics import Topics
@@ -90,7 +105,7 @@ def topics_over_time(
         )
 
     topics = {}
-    for index, timestamp in enumerate(set(corpus.timestamps)):
+    for index, timestamp in tqdm(enumerate(set(corpus.timestamps))):
         timestamp_indices = np.where(corpus.timestamps == timestamp)[0]
         selected_corpus = corpus.get_corpus_by_indices(indices=timestamp_indices)
         documents_per_topic = selected_corpus.group_documents_by_topic()

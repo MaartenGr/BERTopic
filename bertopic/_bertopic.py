@@ -837,10 +837,10 @@ class BERTopic:
 
     def topics_per_class(
         self,
-        docs: List[str],
-        classes: Union[List[int], List[str]],
+        docs: list[str],
+        classes: list[int | str],
         global_tuning: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, Topics]:
         """Create topics per class.
 
         To create the topics per class, BERTopic needs to be already fitted once.
@@ -856,15 +856,16 @@ class BERTopic:
             Having a large number of unique classes can take some time to be calculated.
 
         Arguments:
+            topic_model: The BERTopic instance
             docs: The documents you used when calling either `fit` or `fit_transform`
             classes: The class of each document. This can be either a list of strings or ints.
             global_tuning: Fine-tune each topic representation for class c by averaging its c-TF-IDF matrix
-                           with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
-                           topic representations that could not be found in the documents for class c.
+                        with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
+                        topic representations that could not be found in the documents for class c.
 
         Returns:
-            topics_per_class: A dataframe that contains the topic, words, and frequency of topics
-                              for each class.
+            topics: A dictionary where keys are the unique classes and values are Topics objects
+                    representing the topics for that class.
 
         Examples:
         ```python
@@ -874,51 +875,12 @@ class BERTopic:
         topics_per_class = topic_model.topics_per_class(docs, classes)
         ```
         """
-        check_documents_type(docs)
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Class": classes})
-        global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm="l1", copy=False)
-
-        # For each unique timestamp, create topic representations
-        topics_per_class = []
-        for _, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
-            # Calculate c-TF-IDF representation for a specific timestamp
-            selection = documents.loc[documents.Class == class_, :]
-            documents_per_topic = selection.groupby(["Topic"], as_index=False).agg(
-                {"Document": " ".join, "Class": "count"}
-            )
-            c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
-
-            # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
-            # by simply taking the average of the two
-            if global_tuning:
-                c_tf_idf = normalize(c_tf_idf, axis=1, norm="l1", copy=False)
-                c_tf_idf = (
-                    global_c_tf_idf[documents_per_topic.Topic.to_numpy() + self._outliers] + c_tf_idf
-                ) / 2.0
-
-            # Extract the words per topic
-            words_per_topic = self._extract_words_per_topic(
-                words, selection, c_tf_idf, calculate_aspects=False
-            )
-            topic_frequency = pd.Series(
-                documents_per_topic.Class.to_numpy(), index=documents_per_topic.Topic
-            ).to_dict()
-
-            # Fill dataframe with results
-            topics_at_class = [
-                (
-                    topic,
-                    ", ".join([words[0] for words in values][:5]),
-                    topic_frequency[topic],
-                    class_,
-                )
-                for topic, values in words_per_topic.items()
-            ]
-            topics_per_class.extend(topics_at_class)
-
-        topics_per_class = pd.DataFrame(topics_per_class, columns=["Topic", "Words", "Frequency", "Class"])
-
-        return topics_per_class
+        return variations.topics_per_class(
+            topic_model=self,
+            docs=docs,
+            classes=classes,
+            global_tuning=global_tuning,
+        )
 
     def hierarchical_topics(
         self,

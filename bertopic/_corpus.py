@@ -17,6 +17,7 @@ class Corpus:
     embeddings: np.ndarray | None = None
     images: list[str] | None = None
     timestamps: list[str] | list[int] | np.ndarray | None = None
+    classes: list[str] | list[int] | np.ndarray | None = None
 
     # Generated data
     umap_embeddings: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -39,70 +40,14 @@ class Corpus:
         if isinstance(self.documents, np.ndarray):
             self.documents = self.documents.tolist()
 
-        # Processing timestamps
+        if isinstance(self.classes, list):
+            self.classes = np.array(self.classes)
+
         if self.timestamps is not None:
             self.timestamps = np.array(self.timestamps, dtype="datetime64[ns]")
 
         check_documents_type(self.documents)
         check_embeddings_shape(self.embeddings, self.documents)
-
-    def sort_by_timestamps(self) -> "Corpus":
-        """Sorts the corpus by timestamps in ascending order."""
-        if self.timestamps is None:
-            raise ValueError("Timestamps are not available to sort the corpus.")
-
-        sort_order = np.argsort(self.timestamps)
-
-        self.documents = [self.documents[i] for i in sort_order]
-        self.topics = np.array(self.topics)[sort_order] if self.topics is not None else None
-        self.probabilities = self.probabilities[sort_order] if self.probabilities is not None else None
-        self.embeddings = self.embeddings[sort_order] if self.embeddings is not None else None
-        self.images = list(np.array(self.images)[sort_order]) if self.images is not None else None
-        self.timestamps = self.timestamps[sort_order]
-        self.umap_embeddings = (
-            self.umap_embeddings[sort_order] if self.umap_embeddings.size > 0 else self.umap_embeddings
-        )
-        self.y = np.array(self.y)[sort_order] if self.y is not None else None
-        self.original_indices = (
-            np.array(self.original_indices)[sort_order] if self.original_indices is not None else None
-        )
-
-        return self
-
-    def sort_topics_by_frequency(self) -> "Corpus":
-        """Maps the label of each topic to its frequency rank with
-        the outlier topic (-1) always being the -1 topic.
-        """
-        unique, counts = np.unique(self.topics, return_counts=True)
-        topic_freq = dict(zip(unique, counts))
-
-        # Sort topics by frequency, excluding outlier topic (-1)
-        sorted_topics = sorted(
-            [t for t in topic_freq.keys() if t != -1],
-            key=lambda x: topic_freq[x],
-            reverse=True,
-        )
-
-        # Create mapping from old topic to new topic
-        topic_mapping = {old_topic: new_topic for new_topic, old_topic in enumerate(sorted_topics)}
-        topic_mapping[-1] = -1  # Keep outlier topic as -1
-
-        # Remap topics
-        self.topics = np.array([topic_mapping[t] for t in self.topics])
-
-        # Reorder zero-shot labels if they exist
-        # The zero-shot labels always start at index 0 and go up to the number of zero-shot topics - 1
-        # The resulting zero-labels should therefore be the same size as the original zero-shot labels
-        # Thus, we can create a new list of zero-shot labels based on the new topic mapping
-        if self._zeroshot_labels:
-            nr_zeroshot = len(self._zeroshot_labels)
-            new_zeroshot_labels = [""] * nr_zeroshot
-            for old_topic, new_topic in topic_mapping.items():
-                if 0 <= old_topic < nr_zeroshot:
-                    new_zeroshot_labels[new_topic] = self._zeroshot_labels[old_topic]
-            self._zeroshot_labels = new_zeroshot_labels
-
-        return self
 
     @property
     def has_only_images(self) -> bool:
@@ -134,6 +79,42 @@ class Corpus:
         """Returns the unique topics in the data."""
         topics = [int(topic) for topic in self.topics] if self.topics is not None else []
         return sorted(list(set(topics)))
+
+    def nr_topics(self, include_outliers: bool = True) -> int:
+        """Returns the number of unique topics in the data."""
+        if self.topics is None:
+            return 0
+        elif include_outliers:
+            return len(set(self.topics))
+        else:
+            return len(set(self.topics)) - (1 if -1 in self.topics else 0)
+
+    def group_documents_by_topic(self) -> dict[int, str]:
+        """Groups documents by their assigned topic."""
+        # Group documents by topic
+        grouped = defaultdict(list)
+        for doc, topic in zip(self.documents, self.topics):
+            grouped[topic].append(doc)
+
+        # Aggregate documents per topic into a single string
+        aggregated = {topic: " ".join(docs) for topic, docs in grouped.items()}
+        aggregated_sorted = dict(sorted(aggregated.items()))
+        return aggregated_sorted
+
+    def average_embeddings_by_topic(self) -> dict[int, np.ndarray]:
+        """Averages embeddings by their assigned topic."""
+        if self.embeddings is None:
+            raise ValueError("Embeddings are not available to average by topic.")
+
+        # Group embeddings by topic
+        grouped = defaultdict(list)
+        for embedding, topic in zip(self.embeddings, self.topics):
+            grouped[topic].append(embedding)
+
+        # Average embeddings per topic
+        averaged = {topic: np.mean(embs, axis=0) for topic, embs in grouped.items()}
+        averaged_sorted = dict(sorted(averaged.items()))
+        return averaged_sorted
 
     def map_topics_and_probabilities(self, topics: Topics, from_original: bool = False) -> None:
         """Map both topics and probabilities to the reduced topics using the provided Topics object.
@@ -209,32 +190,89 @@ class Corpus:
 
             self.probabilities = new_probabilities
 
-    def group_documents_by_topic(self) -> dict[int, str]:
-        """Groups documents by their assigned topic."""
-        # Group documents by topic
-        grouped = defaultdict(list)
-        for doc, topic in zip(self.documents, self.topics):
-            grouped[topic].append(doc)
+    def sort_topics_by_frequency(self) -> "Corpus":
+        """Maps the label of each topic to its frequency rank with
+        the outlier topic (-1) always being the -1 topic.
+        """
+        unique, counts = np.unique(self.topics, return_counts=True)
+        topic_freq = dict(zip(unique, counts))
 
-        # Aggregate documents per topic into a single string
-        aggregated = {topic: " ".join(docs) for topic, docs in grouped.items()}
-        aggregated_sorted = dict(sorted(aggregated.items()))
-        return aggregated_sorted
+        # Sort topics by frequency, excluding outlier topic (-1)
+        sorted_topics = sorted(
+            [t for t in topic_freq.keys() if t != -1],
+            key=lambda x: topic_freq[x],
+            reverse=True,
+        )
 
-    def average_embeddings_by_topic(self) -> dict[int, np.ndarray]:
-        """Averages embeddings by their assigned topic."""
-        if self.embeddings is None:
-            raise ValueError("Embeddings are not available to average by topic.")
+        # Create mapping from old topic to new topic
+        topic_mapping = {old_topic: new_topic for new_topic, old_topic in enumerate(sorted_topics)}
+        topic_mapping[-1] = -1  # Keep outlier topic as -1
 
-        # Group embeddings by topic
-        grouped = defaultdict(list)
-        for embedding, topic in zip(self.embeddings, self.topics):
-            grouped[topic].append(embedding)
+        # Remap topics
+        self.topics = np.array([topic_mapping[t] for t in self.topics])
 
-        # Average embeddings per topic
-        averaged = {topic: np.mean(embs, axis=0) for topic, embs in grouped.items()}
-        averaged_sorted = dict(sorted(averaged.items()))
-        return averaged_sorted
+        # Reorder zero-shot labels if they exist
+        # The zero-shot labels always start at index 0 and go up to the number of zero-shot topics - 1
+        # The resulting zero-labels should therefore be the same size as the original zero-shot labels
+        # Thus, we can create a new list of zero-shot labels based on the new topic mapping
+        if self._zeroshot_labels:
+            nr_zeroshot = len(self._zeroshot_labels)
+            new_zeroshot_labels = [""] * nr_zeroshot
+            for old_topic, new_topic in topic_mapping.items():
+                if 0 <= old_topic < nr_zeroshot:
+                    new_zeroshot_labels[new_topic] = self._zeroshot_labels[old_topic]
+            self._zeroshot_labels = new_zeroshot_labels
+
+        return self
+
+    def sort_by_timestamps(self) -> "Corpus":
+        """Sorts the corpus by timestamps in ascending order."""
+        if self.timestamps is None:
+            raise ValueError("Timestamps are not available to sort the corpus.")
+
+        sort_order = np.argsort(self.timestamps)
+
+        self.documents = [self.documents[i] for i in sort_order]
+        self.topics = np.array(self.topics)[sort_order] if self.topics is not None else None
+        self.probabilities = self.probabilities[sort_order] if self.probabilities is not None else None
+        self.embeddings = self.embeddings[sort_order] if self.embeddings is not None else None
+        self.images = list(np.array(self.images)[sort_order]) if self.images is not None else None
+        self.timestamps = self.timestamps[sort_order]
+        self.classes = np.array(self.classes)[sort_order] if self.classes is not None else None
+        self.umap_embeddings = (
+            self.umap_embeddings[sort_order] if self.umap_embeddings.size > 0 else self.umap_embeddings
+        )
+        self.y = np.array(self.y)[sort_order] if self.y is not None else None
+        self.original_indices = (
+            np.array(self.original_indices)[sort_order] if self.original_indices is not None else None
+        )
+
+        return self
+
+    def get_documents_by_indices(self, indices: list[int]) -> list[str]:
+        """Returns documents corresponding to the provided indices."""
+        return [self.documents[index] for index in indices]
+
+    def get_corpus_by_indices(self, indices: list[int]) -> "Corpus":
+        """Returns a Corpus object corresponding to the provided indices."""
+        sorted_indices = sorted(indices)
+        selected_documents = [self.documents[index] for index in sorted_indices]
+        selected_topics = (
+            [self.topics[index] for index in sorted_indices] if self.topics is not None else None
+        )
+        selected_embeddings = self.embeddings[sorted_indices] if self.embeddings is not None else None
+        selected_images = (
+            [self.images[index] for index in sorted_indices] if self.images is not None else None
+        )
+        selected_original_indices = [self.original_indices[index] for index in sorted_indices]
+        return Corpus(
+            documents=selected_documents,
+            topics=selected_topics,
+            embeddings=selected_embeddings,
+            images=selected_images,
+            original_indices=selected_original_indices,
+            _zeroshot_labels=self._zeroshot_labels,
+        )
 
     def get_topic(self, topic_id: int, nr_samples: int = None) -> "Corpus":
         """Return a Corpus object containing only documents of the specified topic.
@@ -305,40 +343,6 @@ class Corpus:
             embeddings=sorted_embeddings,
             original_indices=sorted_indices,
             _zeroshot_labels=other._zeroshot_labels if other.has_zeroshot_labels else None,
-        )
-
-    def nr_topics(self, include_outliers: bool = True) -> int:
-        """Returns the number of unique topics in the data."""
-        if self.topics is None:
-            return 0
-        elif include_outliers:
-            return len(set(self.topics))
-        else:
-            return len(set(self.topics)) - (1 if -1 in self.topics else 0)
-
-    def get_documents_by_indices(self, indices: list[int]) -> list[str]:
-        """Returns documents corresponding to the provided indices."""
-        return [self.documents[index] for index in indices]
-
-    def get_corpus_by_indices(self, indices: list[int]) -> "Corpus":
-        """Returns a Corpus object corresponding to the provided indices."""
-        sorted_indices = sorted(indices)
-        selected_documents = [self.documents[index] for index in sorted_indices]
-        selected_topics = (
-            [self.topics[index] for index in sorted_indices] if self.topics is not None else None
-        )
-        selected_embeddings = self.embeddings[sorted_indices] if self.embeddings is not None else None
-        selected_images = (
-            [self.images[index] for index in sorted_indices] if self.images is not None else None
-        )
-        selected_original_indices = [self.original_indices[index] for index in sorted_indices]
-        return Corpus(
-            documents=selected_documents,
-            topics=selected_topics,
-            embeddings=selected_embeddings,
-            images=selected_images,
-            original_indices=selected_original_indices,
-            _zeroshot_labels=self._zeroshot_labels,
         )
 
     def __len__(self):
