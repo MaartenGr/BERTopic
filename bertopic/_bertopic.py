@@ -1130,15 +1130,14 @@ class BERTopic:
         else:
             return False
 
-    # TODO: Update
-    def get_topic_info(self, topic: int | None = None) -> pd.DataFrame:
+    def get_topic_info(self, topic: int | None = None) -> pl.DataFrame:
         """Get information about each topic including its ID, frequency, and name.
 
         Arguments:
             topic: A specific topic for which you want the frequency
 
         Returns:
-            info: The information relating to either a single topic or all topics
+            df: A dataframe containing information about each topic
 
         Examples:
         ```python
@@ -1146,43 +1145,11 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
+        df = self._topics.to_polars(topic=topic)
 
-        info = pd.DataFrame(self.topic_sizes_.items(), columns=["Topic", "Count"]).sort_values("Topic")
-        info["Name"] = info.Topic.map(self.topic_labels_)
-
-        # Custom label
-        if self.custom_labels_ is not None:
-            if len(self.custom_labels_) == len(info):
-                labels = {topic - self._outliers: label for topic, label in enumerate(self.custom_labels_)}
-                info["CustomName"] = info["Topic"].map(labels)
-
-        # Main Keywords
-        values = {topic: list(next(zip(*values))) for topic, values in self.topic_representations_.items()}
-        info["Representation"] = info["Topic"].map(values)
-
-        # Extract all topic aspects
-        if self.topic_aspects_:
-            for aspect, values in self.topic_aspects_.items():
-                if isinstance(list(values.values())[-1], list):
-                    if isinstance(list(values.values())[-1][0], tuple) or isinstance(
-                        list(values.values())[-1][0], list
-                    ):
-                        values = {topic: list(next(zip(*value))) for topic, value in values.items()}
-                    elif isinstance(list(values.values())[-1][0], str):
-                        values = {topic: " ".join(value).strip() for topic, value in values.items()}
-                info[aspect] = info["Topic"].map(values)
-
-        # Representative Docs / Images
-        if self.representative_docs_ is not None:
-            info["Representative_Docs"] = info["Topic"].map(self.representative_docs_)
-        if self.representative_images_ is not None:
-            info["Representative_Images"] = info["Topic"].map(self.representative_images_)
-
-        # Select specific topic to return
-        if topic is not None:
-            info = info.loc[info.Topic == topic, :]
-
-        return info.reset_index(drop=True)
+        # Slice representative documents for better readability
+        df = df.with_columns(pl.col("Representative_Docs").list.eval(pl.element().str.slice(0, 80)))
+        return df
 
     def get_topic_freq(self, topic: int | None = None) -> pl.DataFrame | int:
         """Return the size of topics (descending order).
@@ -2606,7 +2573,6 @@ class BERTopic:
             save_ctfidf=save_ctfidf,
         )
 
-    # TODO: Update
     def get_params(self, deep: bool = False) -> Mapping[str, Any]:
         """Get parameters for this estimator.
 

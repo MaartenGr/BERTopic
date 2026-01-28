@@ -246,6 +246,24 @@ class Topic:
         """Set representation for a specific source."""
         self.representations[source] = rep
 
+    def to_dict(self) -> dict:
+        """Serialize topic info to a flat dictionary for tabular output."""
+        info = {"Topic": self.id, "Count": self.nr_documents, "Name": self.label}
+        info["Representation"] = str(self.representations.get("Main"))
+
+        # Extract all other representations
+        for name, rep in self.representations.items():
+            if name != "Main":
+                info[name] = str(rep)
+
+        # Representative documents and images
+        if self.representative_documents:
+            info["Representative_Docs"] = self.representative_documents
+        if self.representative_images is not None and self.representative_images.size > 0:
+            info["Representative_Images"] = self.representative_images
+
+        return info
+
     def __str__(self) -> str:
         """Pretty print all representations of the topic."""
         lines = [f"Topic {self.id} Representations:"]
@@ -620,6 +638,18 @@ class Topics:
             return self.mapping._mapping.copy()
         else:
             return self.mapping._recent_mapping.copy()
+
+    def to_polars(self, topic: int | None = None) -> pl.DataFrame:
+        """Convert topic info to a polars DataFrame."""
+        if topic is not None:
+            selected_topic = self.topics.get(topic)
+            rows = [selected_topic.to_dict()] if selected_topic else []
+        else:
+            rows = [topic.to_dict() for topic in self]
+
+        columns = list(rows[0].keys())
+        data = {col: [row.get(col) for row in rows] for col in columns}
+        return pl.DataFrame(data)
 
 
 @dataclass
