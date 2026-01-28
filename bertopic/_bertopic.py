@@ -965,14 +965,13 @@ class BERTopic:
 
         return similar_topics, similarity
 
-    # TODO: Update
     def update_topics(
         self,
-        docs: List[str],
-        images: List[str] | None = None,
-        topics: List[int] | None = None,
+        docs: list[str],
+        images: list[str] | None = None,
+        topics: list[int] | None = None,
         top_n_words: int = 10,
-        n_gram_range: Tuple[int, int] | None = None,
+        n_gram_range: tuple[int, int] | None = None,
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: ClassTfidfTransformer = None,
         representation_model: BaseRepresentation = None,
@@ -982,7 +981,7 @@ class BERTopic:
 
         When you have trained a model and viewed the topics and the words that represent them,
         you might not be satisfied with the representation. Perhaps you forgot to remove
-        stop_words or you want to try out a different n_gram_range. This function allows you
+        stop_words or you want to try out a different `n_gram_range`. This function allows you
         to update the topic representation after they have been formed.
 
         Arguments:
@@ -1023,58 +1022,49 @@ class BERTopic:
         You can update them as follows:
 
         ```python
-        topic_model.update_topics(docs, my_updated_topics)
+        topic_model.update_topics(docs, topics=my_updated_topics)
         ```
         """
         check_documents_type(docs)
         check_is_fitted(self)
-        if not n_gram_range:
-            n_gram_range = self.n_gram_range
 
+        # Update models
         if top_n_words > 100:
             logger.warning(
                 "Note that extracting more than 100 words from a sparse can slow down computation quite a bit."
             )
         self.top_n_words = top_n_words
-        self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
+        self.vectorizer_model = vectorizer_model or CountVectorizer(
+            ngram_range=n_gram_range or self.n_gram_range
+        )
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
         self.representation_model = representation_model
 
+        # Determine topic assignments
+        topics_changed = False
         if topics is None:
             topics = self.topics_
         else:
-            logger.warning(
-                "Using a custom list of topic assignments may lead to errors if "
-                "topic reduction techniques are used afterwards. Make sure that "
-                "manually assigning topics is the last step in the pipeline."
-                "Note that topic embeddings will also be created through weighted"
-                "c-TF-IDF embeddings instead of centroid embeddings."
-            )
+            topics_changed = set(topics) != set(self.topics_)
+            if topics_changed:
+                logger.warning(
+                    "Using a custom list of topic assignments may lead to errors if "
+                    "topic reduction techniques are used afterwards. Make sure that "
+                    "manually assigning topics is the last step in the pipeline. "
+                    "Note that topic embeddings will also be created through weighted "
+                    "c-TF-IDF embeddings instead of centroid embeddings."
+                )
+                # Rebuild Topics from scratch
+                self._topics = Topics().initialize(predictions=topics)
 
-        documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        # Build corpus with embeddings from existing topic embeddings
+        # (duplicate topic embedding for each document based on assignment)
+        topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
+        doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in topics])
+        corpus = Corpus(documents=docs, topics=np.array(topics), images=images, embeddings=doc_embeddings)
 
-        # Update topic sizes and assignments
-        self._update_topic_size(documents)
-
-        # Extract words and update topic labels
-        self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
-        self.topic_representations_ = self._extract_words_per_topic(words, documents)
-
-        # Update topic vectors
-        if set(topics) != set(self.topics_):
-            # Remove outlier topic embedding if all that has changed is the outlier class
-            same_position = all(
-                [
-                    True if old_topic == new_topic else False
-                    for old_topic, new_topic in zip(self.topics_, topics)
-                    if old_topic != -1
-                ]
-            )
-            if same_position and -1 not in topics and -1 in self.topics_:
-                self.topic_embeddings_ = self.topic_embeddings_[1:]
-            else:
-                self._create_topic_vectors()
+        self._extract_representations(corpus, fine_tune=True)
+        self._save_representative_docs(corpus)
 
     def get_topics(self, full: bool = False) -> dict[str, tuple[str, float]]:
         """Return topics with top n words and their c-TF-IDF score.
@@ -1180,11 +1170,10 @@ class BERTopic:
         else:
             return pl.DataFrame({"Topic": self.topic_sizes_.keys(), "Count": self.topic_sizes_.values()})
 
-    # TODO: Update
     def get_document_info(
         self,
         docs: list[str],
-        df: pl.DataFrame = None,
+        df: pl.DataFrame | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> pl.DataFrame:
         """Get information about the documents on which the topic was trained
@@ -1193,13 +1182,9 @@ class BERTopic:
         representative document, and probability of the clustering if the cluster
         model supports it.
 
-        There are also options to include other meta data, such as the topic
-        distributions or the x and y coordinates of the reduced embeddings.
-
         Arguments:
             docs: The documents on which the topic model was trained.
-            df: A dataframe containing the metadata and the documents on which
-                the topic model was originally trained on.
+            df: A polars DataFrame with extra columns to include in the output.
             metadata: A dictionary with meta data for each document in the form
                       of column name (key) and the respective values (value).
 
@@ -1207,71 +1192,53 @@ class BERTopic:
             document_info: A dataframe with several statistics regarding
                            the documents on which the topic model was trained.
 
-        Usage:
-
-        To get the document info, you will only need to pass the documents on which
-        the topic model was trained:
-
+        Examples:
         ```python
         document_info = topic_model.get_document_info(docs)
         ```
-
-        There are additionally options to include meta data, such as the topic
-        distributions. Moreover, we can pass the original dataframe that contains
-        the documents and extend it with the information retrieved from BERTopic:
-
-        ```python
-        from sklearn.datasets import fetch_20newsgroups
-
-        # The original data in a dataframe format to include the target variable
-        data = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))
-        df = pd.DataFrame({"Document": data['data'], "Class": data['target']})
-
-        # Add information about the percentage of the document that relates to the topic
-        topic_distr, _ = topic_model.approximate_distribution(docs, batch_size=1000)
-        distributions = [distr[topic] if topic != -1 else 0 for topic, distr in zip(topics, topic_distr)]
-
-        # Create our documents dataframe using the original dataframe and meta data about
-        # the topic distributions
-        document_info = topic_model.get_document_info(docs, df=df,
-                                                      metadata={"Topic_distribution": distributions})
         """
         check_documents_type(docs)
-        if df is not None:
-            document_info = df.copy()
-            document_info["Document"] = docs
-            document_info["Topic"] = self.topics_
-        else:
-            document_info = pl.DataFrame({"Document": docs, "Topic": self.topics_})
+        check_is_fitted(self)
 
-        # Add topic info through `.get_topic_info()`
-        topic_info = self.get_topic_info().drop("Count", axis=1)
-        document_info = document_info.merge(topic_info, on="Topic", how="left")
+        predictions = self.topics_
+        topics_lookup = self._topics.topics
 
-        # Add top n words
-        top_n_words = {topic: " - ".join(next(zip(*self.get_topic(topic)))) for topic in set(self.topics_)}
-        document_info["Top_n_words"] = document_info.Topic.map(top_n_words)
+        # Build per-document info from Topic objects
+        repr_docs_set = set()
+        for topic in self._topics:
+            if topic.representative_documents:
+                repr_docs_set.update(topic.representative_documents)
 
-        # Add flat probabilities
+        # Core columns
+        data: dict[str, list] = {
+            "Document": docs,
+            "Topic": predictions,
+            "Name": [topics_lookup[tid].label for tid in predictions],
+            "Top_n_words": [
+                " - ".join(topics_lookup[tid].representations["Main"].words) for tid in predictions
+            ],
+            "Representative_document": [doc in repr_docs_set for doc in docs],
+        }
+
+        # Probabilities
         if self.probabilities_ is not None:
             if len(self.probabilities_.shape) == 1:
-                document_info["Probability"] = self.probabilities_
+                data["Probability"] = self.probabilities_.tolist()
             else:
-                document_info["Probability"] = [
-                    max(probs) if topic != -1 else 1 - sum(probs)
-                    for topic, probs in zip(self.topics_, self.probabilities_)
+                data["Probability"] = [
+                    max(probs) if tid != -1 else 1 - sum(probs)
+                    for tid, probs in zip(predictions, self.probabilities_)
                 ]
 
-        # Add representative document labels
-        repr_docs = [repr_doc for repr_docs in self.representative_docs_.values() for repr_doc in repr_docs]
-        document_info["Representative_document"] = False
-        document_info.loc[document_info.Document.isin(repr_docs), "Representative_document"] = True
-
-        # Add custom meta data provided by the user
+        # Custom metadata
         if metadata is not None:
-            for column, values in metadata.items():
-                document_info[column] = values
-        return document_info
+            data.update(metadata)
+
+        # Convert to polars DataFrame
+        result = pl.DataFrame(data)
+        if df is not None:
+            result = pl.concat([df, result], how="horizontal")
+        return result
 
     def get_representative_docs(self, topic: int | None = None) -> list[str] | dict[int, list[str]] | None:
         """Extract the best representing documents per topic.
@@ -2807,8 +2774,6 @@ class BERTopic:
             calculate_aspects=fine_tune,
         )
         self._topics.set_data(representations={"Main": topic_representations})
-
-        # Create topic vectors
         self._create_topic_vectors(corpus, mappings=mappings)
 
         if verbose:
