@@ -307,7 +307,9 @@ class Topics:
 
     def __iter__(self):
         """Iterate over all topics."""
-        return iter(self.topics.values())
+        sorted_ids = sorted(self.topics.keys())
+        for topic_id in sorted_ids:
+            yield self.topics[topic_id]
 
     def __len__(self):
         """Get number of topics."""

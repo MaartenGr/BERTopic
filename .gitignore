@@ -84,6 +84,7 @@ venv.bak/
 .idea/
 .vscode
 .DS_Store
+CLAUDE.md
 
 # mkdocs
 site/
