@@ -583,6 +583,7 @@ class Topics:
             rep_docs = [doc for t in old_topics for doc in (t.representative_documents or [])]
 
             # NORMAL if any merged topic is NORMAL
+            # TODO: Think about improving this for MERGED/ZEROSHOT instances.
             topic_type = (
                 TopicType.NORMAL
                 if any(t.topic_type == TopicType.NORMAL for t in old_topics)

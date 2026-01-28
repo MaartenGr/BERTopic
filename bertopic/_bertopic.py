@@ -494,7 +494,6 @@ class BERTopic:
         self._save_representative_docs(corpus)
 
         # With zero-shot topics, probability will come from cosine similarity, and the HDBSCAN model will be removed
-        # corpus = self._update_probabilities_zeroshot(corpus=corpus, zeroshot_docs=zeroshot_docs)
         corpus = zeroshot.update_probabilities(topic_model=self, corpus=corpus, zeroshot_docs=zeroshot_docs)
 
         # Assign to public attributes
@@ -1731,14 +1730,13 @@ class BERTopic:
             )
             self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
 
-    # TODO: Update
     def reduce_topics(
         self,
-        docs: List[str],
-        nr_topics: Union[int, str] = 20,
-        images: List[str] | None = None,
+        docs: list[str],
+        nr_topics: int | str = 20,
+        images: list[str] | None = None,
         use_ctfidf: bool = False,
-    ) -> None:
+    ) -> "BERTopic":
         """Reduce the number of topics to a fixed number of topics
         or automatically.
 
@@ -1759,10 +1757,6 @@ class BERTopic:
             use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
                         embeddings from the embedding model are used.
 
-        Updates:
-            topics_ : Assigns topics to their merged representations.
-            probabilities_ : Assigns probabilities to their merged representations.
-
         Examples:
         You can further reduce the topics by passing the documents with their
         topics and probabilities (if they were calculated):
@@ -1782,20 +1776,24 @@ class BERTopic:
         check_documents_type(docs)
 
         self.nr_topics = nr_topics
-        documents = pd.DataFrame(
-            {
-                "Document": docs,
-                "Topic": self.topics_,
-                "Image": images,
-                "ID": range(len(docs)),
-            }
+
+        # Build Corpus with current topic assignments
+        # Add embedings by duplicating the topic embedding for each document
+        topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
+        doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
+        corpus = Corpus(
+            documents=docs,
+            topics=np.array(self.topics_),
+            images=images,
+            embeddings=doc_embeddings,
         )
 
         # Reduce number of topics
-        documents = self._reduce_topics(documents, use_ctfidf)
-        self._merged_topics = None
-        self._save_representative_docs(documents)
-        self.probabilities_ = self._map_probabilities(self.probabilities_)
+        corpus = self._reduce_topics(corpus, use_ctfidf)
+        self._save_representative_docs(corpus)
+
+        # TODO: Check if zeroshot probabilities need to be updated
+        # corpus = zeroshot.update_probabilities(topic_model=self, corpus=corpus, zeroshot_docs=zeroshot_docs)
 
         return self
 
