@@ -376,6 +376,11 @@ class BERTopic:
         return self._topics.labels
 
     @property
+    def custom_labels_(self) -> list[str]:
+        """For backwards compatibility."""
+        return [topic.label for topic in self._topics]
+
+    @property
     def _outliers(self) -> int:
         """Some algorithms have outlier labels (-1) that can be tricky to work
         with if you are slicing data based on that labels. Therefore, we
@@ -1301,29 +1306,17 @@ class BERTopic:
                 document_info[column] = values
         return document_info
 
-    # TODO: Update
-    def get_representative_docs(self, topic: int | None = None) -> List[str]:
+    def get_representative_docs(self, topic: int | None = None) -> list[str] | dict[int, list[str]] | None:
         """Extract the best representing documents per topic.
-
-        Note:
-            This does not extract all documents per topic as all documents
-            are not saved within BERTopic. To get all documents, please
-            run the following:
-
-            ```python
-            # When you used `.fit_transform`:
-            df = pd.DataFrame({"Document": docs, "Topic": topic})
-
-            # When you used `.fit`:
-            df = pd.DataFrame({"Document": docs, "Topic": topic_model.topics_})
-            ```
 
         Arguments:
             topic: A specific topic for which you want
                    the representative documents
 
         Returns:
-            Representative documents of the chosen topic
+            Representative documents of the chosen topic, or a dict
+            of all topics to their representative documents if no
+            topic is specified.
 
         Examples:
         To extract the representative docs of all topics:
@@ -1340,12 +1333,12 @@ class BERTopic:
         """
         check_is_fitted(self)
         if isinstance(topic, int):
-            if self.representative_docs_.get(topic):
-                return self.representative_docs_[topic]
-            else:
-                return None
+            selected_topic = self._topics.get(topic)
+            if selected_topic and selected_topic.representative_documents:
+                return selected_topic.representative_documents
+            return None
         else:
-            return self.representative_docs_
+            return {t.id: t.representative_documents for t in self._topics if t.representative_documents}
 
     def get_topic_tree(
         self,
@@ -1464,9 +1457,10 @@ class BERTopic:
 
         return get_tree(str(root_id), tree)
 
-    # TODO: Update
-    def set_topic_labels(self, topic_labels: Union[List[str], Mapping[int, str]]) -> None:
+    def set_topic_labels(self, topic_labels: list[str] | dict[int, str]) -> None:
         """Set custom topic labels in your fitted BERTopic model.
+
+        Labels are stored directly on each `Topic` object via `topic._label`.
 
         Arguments:
             topic_labels: If a list of topic labels, it should contain the same number
@@ -1482,10 +1476,12 @@ class BERTopic:
         we can customize our topic labels:
 
         ```python
-        topic_labels = topic_model.generate_topic_labels(nr_words=2,
-                                                    topic_prefix=True,
-                                                    word_length=10,
-                                                    separator=", ")
+        topic_labels = topic_model.generate_topic_labels(
+            nr_words=2,
+            topic_prefix=True,
+            word_length=10,
+            separator=", "
+        )
         ```
 
         Then, we pass these `topic_labels` to our topic model which
@@ -1505,30 +1501,23 @@ class BERTopic:
         topic_model.custom_labels_
         ```
         """
-        unique_topics = sorted(set(self.topics_))
+        check_is_fitted(self)
+        sorted_topics = list(self._topics)  # sorted by ID
 
         if isinstance(topic_labels, dict):
-            if self.custom_labels_ is not None:
-                original_labels = {topic: label for topic, label in zip(unique_topics, self.custom_labels_)}
-            else:
-                info = self.get_topic_info()
-                original_labels = dict(zip(info.Topic, info.Name))
-            custom_labels = [
-                topic_labels.get(topic) if topic_labels.get(topic) else original_labels[topic]
-                for topic in unique_topics
-            ]
+            for topic_id, label in topic_labels.items():
+                selected_topic = self._topics.get(topic_id)
+                if selected_topic is not None:
+                    selected_topic._label = label
 
         elif isinstance(topic_labels, list):
-            if len(topic_labels) == len(unique_topics):
-                custom_labels = topic_labels
-            else:
+            if len(topic_labels) != len(sorted_topics):
                 raise ValueError(
                     "Make sure that `topic_labels` contains the same number of labels as there are topics."
                 )
+            for selected_topic, label in zip(sorted_topics, topic_labels):
+                selected_topic._label = label
 
-        self.custom_labels_ = custom_labels
-
-    # TODO: Update
     def generate_topic_labels(
         self,
         nr_words: int = 3,
@@ -1536,7 +1525,7 @@ class BERTopic:
         word_length: int | None = None,
         separator: str = "_",
         aspect: str | None = None,
-    ) -> List[str]:
+    ) -> list[str]:
         """Get labels for each topic in a user-defined format.
 
         Arguments:
@@ -1565,14 +1554,14 @@ class BERTopic:
         topic_labels = topic_model.generate_topic_labels(nr_words=2, separator=", ")
         ```
         """
-        unique_topics = sorted(set(self.topics_))
-
+        check_is_fitted(self)
         topic_labels = []
-        for topic in unique_topics:
+        for topic in self._topics:
             if aspect:
-                words, _ = zip(*self.topic_aspects_[aspect][topic])
+                representation = topic.representations.get(aspect)
+                words = representation.words if representation else []
             else:
-                words, _ = zip(*self.get_topic(topic))
+                words = topic.representations["Main"].words
 
             if word_length:
                 words = [word[:word_length] for word in words][:nr_words]
@@ -1580,7 +1569,7 @@ class BERTopic:
                 words = list(words)[:nr_words]
 
             if topic_prefix:
-                topic_label = f"{topic}{separator}" + separator.join(words)
+                topic_label = f"{topic.id}{separator}" + separator.join(words)
             else:
                 topic_label = separator.join(words)
 
