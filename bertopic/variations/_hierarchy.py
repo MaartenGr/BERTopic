@@ -1,27 +1,9 @@
-# ruff: noqa: E402
-import yaml
-import warnings
-
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
-
-try:
-    yaml._warnings_enabled["YAMLLoadWarning"] = False
-except (KeyError, AttributeError, TypeError):
-    pass
-
 import numpy as np
-import pandas as pd
 
 from tqdm import tqdm
-from packaging import version
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-
-from typing import List, Callable
-
-
-from sklearn import __version__ as sklearn_version
+from typing import Callable, TYPE_CHECKING
 from sklearn.metrics.pairwise import cosine_similarity
 
 # BERTopic
@@ -31,15 +13,21 @@ from bertopic._utils import (
     select_topic_representation,
     get_unique_distances,
 )
+from bertopic._topics import TopicHierarchy, Topic, Keywords
+from bertopic._corpus import Corpus
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 def hierarchical_topics(
-    self,
-    docs: List[str],
+    topic_model: "BERTopic",
+    docs: list[str],
     use_ctfidf: bool = True,
     linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
     distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
-) -> pd.DataFrame:
+    use_representation_model: bool | str = False,
+) -> TopicHierarchy:
     """Create a hierarchy of topics.
 
     To create this hierarchy, BERTopic needs to be already fitted once.
@@ -52,6 +40,7 @@ def hierarchical_topics(
     topic representation.
 
     Arguments:
+        topic_model: The BERTopic instance
         docs: The documents you used when calling either `fit` or `fit_transform`
         use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
                     embeddings from the embedding model are used.
@@ -64,17 +53,23 @@ def hierarchical_topics(
                             non-negative values or condensed distance matrix of shape
                             (n_samples * (n_samples - 1) / 2,) containing the upper
                             triangular of the distance matrix.
+        use_representation_model: Whether to use the representation model to extract topic words.
+                                  This will make the process slower but can yield better topic representations.
+                                  If a string is provided, the representation model with that name will be used.
 
     Returns:
-        hierarchical_topics: A dataframe that contains a hierarchy of topics
-                                represented by their parents and their children
+        hierarchy: A TopicHierarchy containing all topics (leaves and merged)
+                   that can be cut at any level to get a Topics object.
 
     Examples:
     ```python
     from bertopic import BERTopic
     topic_model = BERTopic()
     topics, probs = topic_model.fit_transform(docs)
-    hierarchical_topics = topic_model.hierarchical_topics(docs)
+    hierarchy = topic_model.hierarchical_topics(docs)
+
+    # Get topics at a specific level
+    topics_at_10 = hierarchy.get_topics(nr_topics=10)
     ```
 
     A custom linkage function can be used as follows:
@@ -87,7 +82,7 @@ def hierarchical_topics(
 
     # Hierarchical topics
     linkage_function = lambda x: sch.linkage(x, 'ward', optimal_ordering=True)
-    hierarchical_topics = topic_model.hierarchical_topics(docs, linkage_function=linkage_function)
+    hierarchy = topic_model.hierarchical_topics(docs, linkage_function=linkage_function)
     ```
     """
     check_documents_type(docs)
@@ -97,107 +92,129 @@ def hierarchical_topics(
     if linkage_function is None:
         linkage_function = lambda x: sch.linkage(x, "ward", optimal_ordering=True)
 
-    # Calculate distance
-    embeddings = select_topic_representation(self.c_tf_idf_, self.topic_embeddings_, use_ctfidf)[0][
-        self._outliers :
-    ]
+    # Determine representation model parameters
+    if isinstance(use_representation_model, str):
+        aspect_to_return, fine_tune, calculate_aspects = use_representation_model, False, True
+    elif use_representation_model is True:
+        aspect_to_return, fine_tune, calculate_aspects = None, True, False
+    else:
+        aspect_to_return, fine_tune, calculate_aspects = None, False, False
+
+    # Calculate distance matrix and linkage matrix (excluding outlier topic)
+    embeddings = select_topic_representation(
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
+    )[0][topic_model._outliers :]
     X = distance_function(embeddings)
     X = validate_distance_matrix(X, embeddings.shape[0])
-
-    # Use the 1-D condensed distance matrix as an input instead of the raw distance matrix
     Z = linkage_function(X)
 
-    # Ensuring that the distances between clusters are unique otherwise the flatting of the hierarchy with
-    # `sch.fcluster(...)` would produce incorrect values for "Topics" for these clusters
+    # Ensure distances are unique for correct fcluster behavior
     if len(Z[:, 2]) != len(np.unique(Z[:, 2])):
         Z[:, 2] = get_unique_distances(Z[:, 2])
 
-    # Calculate basic bag-of-words to be iteratively merged later
-    documents = pd.DataFrame({"Document": docs, "ID": range(len(docs)), "Topic": self.topics_})
-    documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
-    documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
-    clean_documents = self._preprocess_text(documents_per_topic.Document.values)
+    # Get leaf topic IDs (excluding outlier)
+    leaf_topic_ids = [tid for tid in sorted(topic_model.topic_sizes_.keys()) if tid != -1]
+    n_leaves = len(leaf_topic_ids)
 
-    # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
-    # and will be removed in 1.2. Please use get_feature_names_out instead.
-    if version.parse(sklearn_version) >= version.parse("1.0.0"):
-        words = self.vectorizer_model.get_feature_names_out()
-    else:
-        words = self.vectorizer_model.get_feature_names()
+    # Bag-of-words
+    documents_per_topic = Corpus(
+        documents=docs, topics=np.array(topic_model.topics_)
+    ).group_documents_by_topic()
+    clean_documents = topic_model._preprocess_text([documents_per_topic[tid] for tid in leaf_topic_ids])
+    words = topic_model.vectorizer_model.get_feature_names_out()
+    bow = topic_model.vectorizer_model.transform(clean_documents)
 
-    bow = self.vectorizer_model.transform(clean_documents)
-
-    # Extract clusters
-    hier_topics = pd.DataFrame(
-        columns=[
-            "Parent_ID",
-            "Parent_Name",
-            "Topics",
-            "Child_Left_ID",
-            "Child_Left_Name",
-            "Child_Right_ID",
-            "Child_Right_Name",
-        ]
+    # Initialize hierarchy with leaf topics
+    hierarchy = TopicHierarchy(
+        linkage_matrix=Z,
+        n_leaves=n_leaves,
+        _original_predictions=np.array(topic_model.topics_),
+        _original_probabilities=topic_model.probabilities_,
     )
+
+    # Add outlier topic if it exists
+    if -1 in topic_model.topic_sizes_:
+        embedding = (
+            topic_model.topic_embeddings_[0] if topic_model.topic_embeddings_ is not None else np.array([])
+        )
+        hierarchy.outlier_topic = Topic(
+            id=-1,
+            representations={"Main": Keywords(data=topic_model.get_topic(-1))},
+            c_tf_idf=topic_model.c_tf_idf_[0] if topic_model._outliers else csr_matrix([]),
+            embedding=embedding,
+            nr_documents=topic_model.topic_sizes_[-1],
+        )
+
+    # Add leaf topics (IDs 0 to n_leaves-1)
+    for topic_id in leaf_topic_ids:
+        embedding = (
+            topic_model.topic_embeddings_[topic_id + topic_model._outliers]
+            if topic_model.topic_embeddings_ is not None
+            else np.array([])
+        )
+        hierarchy.nodes[topic_id] = Topic(
+            id=topic_id,
+            representations={"Main": Keywords(data=topic_model.get_topic(topic_id))},
+            c_tf_idf=topic_model.c_tf_idf_[topic_id + topic_model._outliers],
+            embedding=embedding,
+            nr_documents=topic_model.topic_sizes_[topic_id],
+            leaf_topic_ids=[topic_id],
+        )
+
+    # Build merged topics from linkage matrix
     for index in tqdm(range(len(Z))):
-        # Find clustered documents
-        clusters = sch.fcluster(Z, t=Z[index][2], criterion="distance") - self._outliers
-        nr_clusters = len(clusters)
+        left_child_id = int(Z[index][0])
+        right_child_id = int(Z[index][1])
+        merge_distance = Z[index][2]
+        new_id = n_leaves + index
 
-        # Extract first topic we find to get the set of topics in a merged topic
-        topic = None
-        val = Z[index][0]
-        while topic is None:
-            if val - len(clusters) < 0:
-                topic = int(val)
-            else:
-                val = Z[int(val - len(clusters))][0]
-        clustered_topics = [i for i, x in enumerate(clusters) if x == clusters[topic]]
+        # Get child topics and merged topic
+        left_child = hierarchy.nodes[left_child_id]
+        right_child = hierarchy.nodes[right_child_id]
+        merged_leaf_ids = left_child.leaf_topic_ids + right_child.leaf_topic_ids
 
-        # Group bow per cluster, calculate c-TF-IDF and extract words
-        grouped = csr_matrix(bow[clustered_topics].sum(axis=0))
-        c_tf_idf = self.ctfidf_model.transform(grouped)
-        selection = documents.loc[documents.Topic.isin(clustered_topics), :]
-        selection.Topic = 0
-        words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
+        # Compute c-TF-IDF for merged topic
+        grouped_bow = csr_matrix(bow[merged_leaf_ids].sum(axis=0))
+        c_tf_idf = topic_model.ctfidf_model.transform(grouped_bow)
 
-        # Extract parent's name and ID
-        parent_id = index + len(clusters)
-        parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
+        # Select documents belonging to any of the merged leaf topics
+        merged_leaf_set = set(merged_leaf_ids)
+        topics_array = np.array(topic_model.topics_)
+        doc_indices = np.where(np.isin(topics_array, list(merged_leaf_set)))[0]
+        merged_docs = [docs[index] for index in doc_indices]
 
-        # Extract child's name and ID
-        Z_id = Z[index][0]
-        child_left_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
+        # Create corpus with merged documents (all assigned to topic 0)
+        merged_corpus = Corpus(documents=merged_docs, topics=np.zeros(len(merged_docs), dtype=int))
+        words_per_topic = topic_model._extract_words_per_topic(
+            words=words,
+            corpus=merged_corpus,
+            c_tf_idf=c_tf_idf,
+            fine_tune=fine_tune,
+            calculate_aspects=calculate_aspects,
+            aspect_to_return=aspect_to_return,
+        )
 
-        if Z_id - nr_clusters < 0:
-            child_left_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
-        else:
-            child_left_name = hier_topics.iloc[int(child_left_id)].Parent_Name
+        # Compute weighted average embedding
+        total_docs = left_child.nr_documents + right_child.nr_documents
+        embedding = (
+            left_child.embedding * left_child.nr_documents + right_child.embedding * right_child.nr_documents
+        ) / total_docs
 
-        # Extract child's name and ID
-        Z_id = Z[index][1]
-        child_right_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
+        # Create merged topic
+        hierarchy.nodes[new_id] = Topic(
+            id=new_id,
+            representations={"Main": words_per_topic.get(0, Keywords())},
+            c_tf_idf=c_tf_idf,
+            embedding=embedding,
+            nr_documents=total_docs,
+            parent_id=None,  # Will be set if this gets merged later
+            child_ids=(left_child_id, right_child_id),
+            merge_distance=merge_distance,
+            leaf_topic_ids=merged_leaf_ids,
+        )
 
-        if Z_id - nr_clusters < 0:
-            child_right_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
-        else:
-            child_right_name = hier_topics.iloc[int(child_right_id)].Parent_Name
+        # Set parent_id on children
+        left_child.parent_id = new_id
+        right_child.parent_id = new_id
 
-        # Save results
-        hier_topics.loc[len(hier_topics), :] = [
-            parent_id,
-            parent_name,
-            clustered_topics,
-            int(Z[index][0]),
-            child_left_name,
-            int(Z[index][1]),
-            child_right_name,
-        ]
-
-    hier_topics["Distance"] = Z[:, 2]
-    hier_topics = hier_topics.sort_values("Parent_ID", ascending=False)
-    hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]] = hier_topics[
-        ["Parent_ID", "Child_Left_ID", "Child_Right_ID"]
-    ].astype(str)
-
-    return hier_topics
+    return hierarchy

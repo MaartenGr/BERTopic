@@ -2,7 +2,9 @@ from abc import ABC
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+import polars as pl
 from scipy.sparse import csr_matrix, vstack
+from scipy.cluster.hierarchy import fcluster
 import numpy as np
 from collections import defaultdict
 
@@ -168,6 +170,21 @@ class TopicMapping:
 class Topic:
     """A topic with multiple representations from different sources.
     Sources are strings identifying the method used (e.g., 'c-tf-idf', 'gemma3').
+
+    Attributes:
+        id: Unique identifier for the topic.
+        representations: A dictionary mapping source names to TopicRepresentation instances.
+        representative_documents: A list of representative documents for the topic.
+        representative_images: An array of representative images for the topic.
+        label: A human-readable label for the topic.
+        embedding: The embedding vector representing the topic.
+        c_tf_idf: The c-TF-IDF vector representing the topic.
+        topic_type: The type of topic (NORMAL, ZERO_SHOT, OUTLIER).
+        nr_documents: The number of documents assigned to this topic.
+        parent_id: The ID of the parent topic in a hierarchy (None for root).
+        child_ids: A tuple of (left_child_id, right_child_id) for merged topics (None for leaves).
+        merge_distance: The distance at which this topic was merged (None for leaves).
+        leaf_topic_ids: A list of original leaf topic IDs contained in this node.
     """
 
     id: int
@@ -186,10 +203,25 @@ class Topic:
     topic_type: TopicType = TopicType.NORMAL
     nr_documents: int = 0
 
+    # Hierarchy fields
+    parent_id: int | None = None
+    child_ids: tuple[int, int] | None = None
+    merge_distance: float | None = None
+    leaf_topic_ids: list[int] = field(default_factory=list)
+
     def __post_init__(self):
-        """Auto-assign OUTLIER type if id is -1."""
+        # Set outlier
         if self.id == -1:
             self.topic_type = TopicType.OUTLIER
+
+        # Leaves contain only themselves (ignoring the outlier)
+        if not self.leaf_topic_ids and self.child_ids is None and self.id >= 0:
+            self.leaf_topic_ids = [self.id]
+
+    @property
+    def is_leaf(self) -> bool:
+        """Check if this topic is a leaf (not merged from other topics)."""
+        return self.child_ids is None
 
     @property
     def label(self) -> str | None:
@@ -243,9 +275,6 @@ class Topics:
 
     # History of actions applied to this collection
     actions: list[TopicAction] = field(default_factory=list)
-
-    # TODO: For hierarchical topics, indicates the level in the hierarchy
-    level: int = 0
 
     def frequencies(self) -> dict[int, int]:
         """Get the number of documents for each topic."""
@@ -591,3 +620,182 @@ class Topics:
             return self.mapping._mapping.copy()
         else:
             return self.mapping._recent_mapping.copy()
+
+
+@dataclass
+class TopicHierarchy:
+    """Binary tree of topics from hierarchical clustering.
+
+    Node IDs follow scipy's linkage convention. Example with 5 leaf topics:
+
+    ```
+    Leaf IDs:   0   1   2   3   4      (IDs 0 to n_leaves-1)
+                │   │   │   │   │
+                └─┬─┘   │   └─┬─┘
+                  │     │     │
+    Merge 0:      5     │     │        (creates ID n_leaves = 5)
+                  │     │     │
+                  └──┬──┘     │
+                     │        │
+    Merge 1:         6        │        (creates ID n_leaves+1 = 6)
+                     │        │
+                     └───┬────┘
+                         │
+    Merge 2:             7             (creates ID n_leaves+2 = 7)
+                         │
+    Merge 3:             8             (root = ID 2*n_leaves-2 = 8)
+    ```
+
+    The outlier topic (-1) is stored separately and is not part of the tree.
+
+    Attributes:
+        nodes: A dictionary mapping node IDs to Topic instances.
+        linkage_matrix: The scipy linkage matrix used to create the hierarchy.
+        n_leaves: The number of leaf topics (excluding the outlier topic).
+        outlier_topic: The outlier topic (if any). Not part of the hierarchy tree.
+        _original_predictions: Original document-to-leaf-topic predictions from fit.
+        _original_probabilities: Original document-to-leaf-topic probabilities from fit.
+    """
+
+    # Hierarchy structure
+    nodes: dict[int, Topic] = field(default_factory=dict)
+    linkage_matrix: np.ndarray = field(default_factory=lambda: np.array([]))
+    n_leaves: int = 0
+
+    # The outlier topic is not part of the hierarchy
+    outlier_topic: Topic | None = None
+
+    # Original values from fitting
+    _original_predictions: np.ndarray = field(default_factory=lambda: np.array([]))
+    _original_probabilities: np.ndarray | None = None
+
+    @property
+    def root(self) -> Topic:
+        """Root node (everything merged into one) excluding the outlier Topic."""
+        root_id = 2 * self.n_leaves - 2
+        return self.nodes[root_id]
+
+    @property
+    def leaves(self) -> list[Topic]:
+        """Leaf topics (most granular level) excluding the outlier Topic."""
+        return [self.nodes[i] for i in range(self.n_leaves)]
+
+    def get_topics(self, nr_topics: int) -> Topics:
+        """Cut the hierarchy to get a Topics object with `nr_topics`.
+
+        Arguments:
+            nr_topics: Desired number of topics (excluding the outlier topic).
+
+        Returns:
+            A Topics object at this granularity.
+        """
+        nr_topics = min(nr_topics, self.n_leaves)
+
+        if nr_topics >= self.n_leaves:
+            selected_ids = list(range(self.n_leaves))
+        else:
+            # fcluster assigns each leaf to a cluster (1-indexed)
+            clusters = fcluster(self.linkage_matrix, t=nr_topics, criterion="maxclust")
+
+            # Group leaves by cluster assignment
+            cluster_to_leaves: dict[int, list[int]] = {}
+            for leaf_id, cluster in enumerate(clusters):
+                cluster_to_leaves.setdefault(cluster, []).append(leaf_id)
+
+            # For each cluster, find the appropriate node
+            selected_ids = []
+            for leaf_ids in cluster_to_leaves.values():
+                if len(leaf_ids) == 1:
+                    selected_ids.append(leaf_ids[0])
+                else:
+                    lca = self._find_lowest_common_ancestor(leaf_ids)
+                    selected_ids.append(lca)
+
+        return self._build_topics(selected_ids)
+
+    def _find_lowest_common_ancestor(self, leaf_ids: list[int]) -> int:
+        """Find the lowest common ancestor of a set of leaves."""
+        # Get all ancestors of first leaf
+        ancestors = set()
+        node_id = leaf_ids[0]
+        while node_id is not None:
+            ancestors.add(node_id)
+            node_id = self.nodes[node_id].parent_id
+
+        # Intersect with ancestors of other leaves
+        for leaf_id in leaf_ids[1:]:
+            leaf_ancestors = set()
+            node_id = leaf_id
+            while node_id is not None:
+                leaf_ancestors.add(node_id)
+                node_id = self.nodes[node_id].parent_id
+            ancestors &= leaf_ancestors
+
+        # lowest common ancestor is the ancestor with highest ID (most recent merge)
+        return max(ancestors)
+
+    def _build_topics(self, selected_ids: list[int]) -> Topics:
+        """Build a Topics object selected IDs."""
+        # Sort selected topics by document count (descending)
+        selected_topics = [self.nodes[id] for id in selected_ids]
+        selected_topics.sort(key=lambda t: t.nr_documents, reverse=True)
+
+        # Build mapping: original_leaf_id -> new_topic_id
+        old_to_new = {-1: -1}
+        for new_id, topic in enumerate(selected_topics):
+            for leaf_id in topic.leaf_topic_ids:
+                old_to_new[leaf_id] = new_id
+
+        # Create Topics
+        topics = Topics()
+        topics._original_predictions = self._original_predictions.copy()
+        topics._original_probabilities = (
+            self._original_probabilities.copy() if self._original_probabilities is not None else None
+        )
+        topics.mapping.apply(old_to_new)
+
+        # Add outlier topic
+        if self.outlier_topic is not None:
+            topics.topics[-1] = self._create_topic_copy(self.outlier_topic, -1)
+
+        # Add selected topics with new IDs
+        for new_id, topic in enumerate(selected_topics):
+            topics.topics[new_id] = self._create_topic_copy(topic, new_id)
+
+        topics.add_action(TopicAction.HIERARCHICAL)
+        return topics
+
+    def _create_topic_copy(self, topic: Topic, new_id: int) -> Topic:
+        """Create a copy of a topic with a new ID (without hierarchy fields)."""
+        return Topic(
+            id=new_id,
+            representations={k: v for k, v in topic.representations.items()},
+            representative_documents=list(topic.representative_documents or []),
+            embedding=topic.embedding.copy() if topic.embedding.size else np.array([]),
+            c_tf_idf=topic.c_tf_idf.copy(),
+            topic_type=topic.topic_type,
+            nr_documents=topic.nr_documents,
+            _label=topic._label,
+        )
+
+    def to_polars(self) -> "pl.DataFrame":
+        """Convert hierarchy to a polars DataFrame."""
+        rows = []
+        for node_id in sorted(self.nodes.keys(), reverse=True):
+            topic = self.nodes[node_id]
+            if topic.child_ids is not None:
+                left_id, right_id = topic.child_ids
+                rows.append(
+                    {
+                        "Parent_ID": str(node_id),
+                        "Parent_Name": topic.label,
+                        "Topics": topic.leaf_topic_ids,
+                        "Child_Left_ID": str(left_id),
+                        "Child_Left_Name": self.nodes[left_id].label,
+                        "Child_Right_ID": str(right_id),
+                        "Child_Right_Name": self.nodes[right_id].label,
+                        "Distance": topic.merge_distance,
+                    }
+                )
+
+        return pl.DataFrame(rows)
