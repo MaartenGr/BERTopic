@@ -67,13 +67,12 @@ from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
-from bertopic._topics import Keywords, Topics, TopicRepresentation, TopicHierarchy
+from bertopic._topics import Keywords, Topic, Topics, TopicRepresentation, TopicHierarchy
 from bertopic._corpus import Corpus
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger,
     check_documents_type,
-    check_embeddings_shape,
     check_is_fitted,
     select_topic_representation,
 )
@@ -644,17 +643,17 @@ class BERTopic:
                     )
                     logger.info("Probabilities - Completed \u2713")
             else:
+                corpus.umap_embeddings = corpus.umap_embeddings.astype(np.float32)  # Fixes #2097
                 predictions = self.hdbscan_model.predict(corpus.umap_embeddings)
                 probabilities = None
             logger.info("Cluster - Completed \u2713")
 
             # Map probabilities and predictions
-            predictions = self._topics.map_predictions(predictions, original_topics=True)
-            probabilities = self._topics.map_probabilities(probabilities, original_topics=True)
+            predictions = self._topics.map_predictions(predictions, from_original=True)
+            probabilities = self._topics.map_probabilities(probabilities, from_original=True)
 
         return predictions, probabilities
 
-    # TODO: Update
     def partial_fit(
         self,
         documents: List[str],
@@ -685,6 +684,10 @@ class BERTopic:
 
         Note that it is advised to use `partial_fit` with batches and
         not single documents for the best performance.
+
+        After fitting, `model.topics_` contains topic IDs for all documents seen
+        across all batches (accumulated), and `model._topics` contains the Topics
+        object with cumulative document counts per topic.
 
         Arguments:
             documents: A list of documents to fit on
@@ -718,91 +721,74 @@ class BERTopic:
             topic_model.partial_fit(docs[index: index+1000])
         ```
         """
-        # Checks
-        check_embeddings_shape(embeddings, documents)
         if not hasattr(self.hdbscan_model, "partial_fit"):
             raise ValueError(
                 "In order to use `.partial_fit`, the cluster model should have a `.partial_fit` function."
             )
 
-        # Prepare documents
-        if isinstance(documents, str):
-            documents = [documents]
-        documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
+        # Embed documents
+        corpus = Corpus(documents=documents, embeddings=embeddings, y=y)
+        is_first_fit = self._topics is None or len(self._topics) == 0
 
-        # Extract embeddings
-        if embeddings is None:
-            if self.topic_representations_ is None:
-                self.embedding_model = select_backend(
-                    self.embedding_model, language=self.language, verbose=self.verbose
-                )
-            embeddings = self._extract_embeddings(
-                documents.Document.to_numpy().tolist(),
-                verbose=self.verbose,
+        if is_first_fit and self.embedding_model is not None:
+            self.embedding_model = select_backend(
+                self.embedding_model, language=self.language, verbose=self.verbose
             )
+
+        if corpus.embeddings is None:
+            corpus.embeddings = self._extract_embeddings(corpus.documents, verbose=self.verbose)
+
+        # Guided Topic Modeling
+        if self.seed_topic_list is not None and self.embedding_model is not None:
+            corpus = guided.guided_tm(self, corpus)
+
+        # Reduce dimensionality and cluster
+        corpus = self._reduce_dimensionality(corpus, partial_fit=True)
+        corpus.umap_embeddings = corpus.umap_embeddings.astype(np.float32)  # Fixes #2097
+        corpus = self._cluster_embeddings(corpus, partial_fit=True)
+
+        # Use cluster labels directly as topic IDs
+        if is_first_fit:
+            self._topics = Topics().initialize(corpus.topics)
+
+        # Add new topics and accumulate predictions/counts
         else:
-            if self.embedding_model is not None and self.topic_representations_ is None:
-                self.embedding_model = select_backend(
-                    self.embedding_model, language=self.language, verbose=self.verbose
+            new_topic_ids = set(corpus.topics) - set(self._topics.unique_ids)
+
+            for topic_id in new_topic_ids:
+                self._topics.topics[topic_id] = Topic(id=topic_id, nr_documents=0)
+
+            self._topics._original_predictions = np.concatenate(
+                [self._topics._original_predictions, np.array(corpus.topics)]
+            )
+
+            if corpus.probabilities is not None:
+                self._topics._original_probabilities = np.concatenate(
+                    [self._topics._original_probabilities, corpus.probabilities]
                 )
 
-        # Reduce dimensionality
-        if self.seed_topic_list is not None and self.embedding_model is not None:
-            y, embeddings = self._guided_topic_modeling(embeddings)
-        umap_embeddings = self._reduce_dimensionality(embeddings, y, partial_fit=True)
-
-        # Cluster reduced embeddings
-        documents, self.probabilities_ = self._cluster_embeddings(
-            umap_embeddings, documents, partial_fit=True
-        )
-        topics = documents.Topic.to_list()
-
-        # Map and find new topics
-        if not self.topic_mapper_:
-            self.topic_mapper_ = TopicMapper(topics)
-        mappings = self.topic_mapper_.get_mappings()
-        new_topics = set(topics).difference(set(mappings.keys()))
-        new_topic_ids = {topic: max(mappings.values()) + index + 1 for index, topic in enumerate(new_topics)}
-        self.topic_mapper_.add_new_topics(new_topic_ids)
-        updated_mappings = self.topic_mapper_.get_mappings()
-        updated_topics = [updated_mappings[topic] for topic in topics]
-        documents["Topic"] = updated_topics
-
-        # Add missing topics (topics that were originally created but are now missing)
-        if self.topic_representations_:
-            missing_topics = set(self.topic_representations_.keys()).difference(set(updated_topics))
-            for missing_topic in missing_topics:
-                documents.loc[len(documents), :] = [" ", len(documents), missing_topic]
-        else:
-            missing_topics = {}
-
-        # Prepare documents
-        documents_per_topic = documents.sort_values("Topic").groupby(["Topic"], as_index=False)
-        updated_topics = documents_per_topic.first().Topic.astype(int)
-        documents_per_topic = documents_per_topic.agg({"Document": " ".join})
+            for topic_id in set(corpus.topics):
+                count = int(np.sum(corpus.topics == topic_id))
+                self._topics[topic_id].nr_documents += count
 
         # Update topic representations
-        self.c_tf_idf_, updated_words = self._c_tf_idf(documents_per_topic, partial_fit=True)
-        self.topic_representations_ = self._extract_words_per_topic(
-            updated_words, documents, self.c_tf_idf_, calculate_aspects=False
+        documents_per_topic = corpus.group_documents_by_topic()
+        for topic_id in self._topics.topic_ids():
+            if topic_id not in documents_per_topic:
+                documents_per_topic[topic_id] = " "  # Keep missing topics in vocabulary
+
+        c_tf_idf, words = self._c_tf_idf(documents_per_topic, partial_fit=True)
+        self._topics.set_data(c_tf_idf=c_tf_idf)
+
+        topic_representations = self._extract_words_per_topic(
+            words=words,
+            corpus=corpus,
+            c_tf_idf=c_tf_idf,
+            fine_tune=False,
+            calculate_aspects=False,
         )
-        self._create_topic_vectors()
-
-        # Update topic sizes
-        if len(missing_topics) > 0:
-            documents = documents.iloc[: -len(missing_topics)]
-
-        if self.topic_sizes_ is None:
-            self._update_topic_size(documents)
-        else:
-            sizes = documents.groupby(["Topic"], as_index=False).count()
-            for _, row in sizes.iterrows():
-                topic = int(row.Topic)
-                if self.topic_sizes_.get(topic) is not None and topic not in missing_topics:
-                    self.topic_sizes_[topic] += int(row.Document)
-                elif self.topic_sizes_.get(topic) is None:
-                    self.topic_sizes_[topic] = int(row.Document)
-            self.topics_ = documents.Topic.astype(int).tolist()
+        self._topics.set_data(representations={"Main": topic_representations})
+        self._create_topic_vectors(corpus)
 
         return self
 
@@ -2580,8 +2566,9 @@ class BERTopic:
                 corpus.topics = corpus.y
 
         # Create Topics object and sort by frequency
-        self._topics.initialize(corpus.topics).sort_by_frequency()
-        corpus.map_topics_and_probabilities(self._topics, from_original=True)
+        if not partial_fit:
+            self._topics.initialize(corpus.topics).sort_by_frequency()
+            corpus.map_topics_and_probabilities(self._topics, from_original=True)
 
         # Extract probabilities
         if hasattr(self.hdbscan_model, "probabilities_"):
@@ -2596,7 +2583,9 @@ class BERTopic:
                 if -1 in corpus.topics:
                     outlier_probs = 1 - np.sum(corpus.probabilities, axis=1)
                     corpus.probabilities = np.hstack([outlier_probs.reshape(-1, 1), corpus.probabilities])
-            self._topics._original_probabilities = corpus.probabilities.copy()
+
+            if not partial_fit:
+                self._topics._original_probabilities = corpus.probabilities.copy()
 
         logger.info("Cluster - Completed \u2713")
 

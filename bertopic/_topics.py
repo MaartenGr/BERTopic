@@ -160,6 +160,15 @@ class TopicMapping:
                     mapped_probs[:, current_id] = probabilities[:, last_id]
             return mapped_probs
 
+    def add_new_topics(self, new_mappings: dict[int, int]) -> None:
+        """Add mappings for newly discovered topics in online learning.
+
+        Arguments:
+            new_mappings: Mapping from new cluster IDs to new topic IDs
+        """
+        self._mapping.update(new_mappings)
+        self._recent_mapping.update(new_mappings)
+
     def reset(self) -> None:
         """Clear the mapping (e.g., after re-fitting)."""
         self._mapping.clear()
@@ -680,7 +689,7 @@ class Topics:
             from_original: If True, map from original IDs to current.
                            If False, map from last applied mapping to current.
         """
-        return [self.mapping.map(prediction, from_original=from_original) for prediction in predictions]
+        return [int(self.mapping.map(prediction, from_original=from_original)) for prediction in predictions]
 
     def map_probabilities(self, probabilities: np.ndarray, from_original: bool) -> np.ndarray:
         """Map a 2D array of probabilities to current IDs.
