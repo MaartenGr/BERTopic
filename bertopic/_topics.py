@@ -24,7 +24,7 @@ class TopicRepresentation(ABC):
 class Keywords(TopicRepresentation):
     """Weighted keywords representing a topic."""
 
-    data: list[tuple[str, float]] = field(default_factory=list)
+    data: list[tuple[str, float]] = field(default_factory=lambda: [("", 1e-05)])
 
     def top_n(self, n: int = 10) -> list[tuple[str, float]]:
         """Get the top N keywords by score."""
@@ -257,8 +257,7 @@ class Topic:
                 info[name] = str(rep)
 
         # Representative documents and images
-        if self.representative_documents:
-            info["Representative_Docs"] = self.representative_documents
+        info["Representative_Docs"] = self.representative_documents if self.representative_documents else [""]
         if self.representative_images is not None and self.representative_images.size > 0:
             info["Representative_Images"] = self.representative_images
 
@@ -604,6 +603,74 @@ class Topics:
         self.topics = merged_topics
         self.mapping.apply(old_to_new)
         self.add_action(TopicAction.MERGED)
+
+    def delete(self, topics: list[int] | int) -> None:
+        """Delete topics by mapping them to the outlier topic (-1).
+
+        This will:
+            * Create an outlier topic if it doesn't exist
+            * Map deleted topic predictions to -1
+            * Remove deleted Topic objects from the collection
+            * Update outlier's nr_documents with the sum of deleted topic counts
+
+        Arguments:
+            topics: List of topic IDs to delete or a single topic ID.
+        """
+        if isinstance(topics, int):
+            topics = {topics}
+        else:
+            topics = set(topics)
+
+        topics = {topics} if isinstance(topics, int) else set(topics)
+
+        # Calculate total documents being moved to outlier
+        deleted_doc_count = sum(
+            self.topics[topic_id].nr_documents for topic_id in topics if topic_id in self.topics
+        )
+
+        # Create outlier topic if it doesn't exist
+        if -1 not in self.topics:
+            sample_topic = next(iter(self.topics.values()))
+
+            # If only one topic is deleted, we use its data for the outlier
+            if len(topics) == 1:
+                selected_topic = self.topics[next(iter(topics))]
+                embedding = selected_topic.embedding
+                c_tf_idf = selected_topic.c_tf_idf
+                representative_documents = selected_topic.representative_documents
+                representations = selected_topic.representations
+            else:
+                embedding_dim = sample_topic.embedding.shape[0]
+                embedding = np.zeros(embedding_dim) if embedding_dim > 0 else np.array([])
+                c_tf_idf_dim = sample_topic.c_tf_idf.shape[1]
+                c_tf_idf = csr_matrix((1, c_tf_idf_dim)) if c_tf_idf_dim > 0 else csr_matrix([])
+                representative_documents = [""]
+                representations = {name: type(rep)() for name, rep in sample_topic.representations.items()}
+
+            # Build outlier topic
+            self.topics[-1] = Topic(
+                id=-1,
+                representations=representations,
+                representative_documents=representative_documents,
+                embedding=embedding,
+                c_tf_idf=c_tf_idf,
+                topic_type=TopicType.OUTLIER,
+                nr_documents=deleted_doc_count,
+            )
+        else:
+            self.topics[-1].nr_documents += deleted_doc_count
+
+        # Build mapping: deleted -> -1, others -> themselves
+        old_to_new = {topic_id: -1 if topic_id in topics else topic_id for topic_id in self.topics.keys()}
+        old_to_new[-1] = -1
+
+        # Remove deleted topics
+        for topic_id in topics:
+            if topic_id in self.topics:
+                del self.topics[topic_id]
+
+        self.mapping.apply(old_to_new)
+        self.add_action(TopicAction.DELETED)
 
     def map_predictions(self, predictions: list[int], from_original: bool) -> list[int]:
         """Map a list of original predictions to current IDs.

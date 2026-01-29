@@ -18,7 +18,6 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import scipy.sparse as sp
-from copy import deepcopy
 
 
 from pathlib import Path
@@ -1510,14 +1509,15 @@ class BERTopic:
 
         return topic_labels
 
-    # TODO: Update
     def merge_topics(
         self,
-        docs: List[str],
-        topics_to_merge: List[Union[Iterable[int], int]],
-        images: List[str] | None = None,
+        docs: list[str],
+        topics_to_merge: list[Iterable[int] | int],
+        images: list[str] | None = None,
     ) -> None:
-        """Arguments:
+        """Merge multiple topics into a single topic.
+
+        Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             topics_to_merge: Either a list of topics or a list of list of topics
                              to merge. For example:
@@ -1546,15 +1546,8 @@ class BERTopic:
         """
         check_is_fitted(self)
         check_documents_type(docs)
-        documents = pd.DataFrame(
-            {
-                "Document": docs,
-                "Topic": self.topics_,
-                "Image": images,
-                "ID": range(len(docs)),
-            }
-        )
 
+        # Build mapping: all topics map to themselves, except merged topics map to target
         mapping = {topic: topic for topic in set(self.topics_)}
         if isinstance(topics_to_merge[0], int):
             for topic in sorted(topics_to_merge):
@@ -1565,170 +1558,52 @@ class BERTopic:
                     mapping[topic] = topic_group[0]
         else:
             raise ValueError(
-                "Make sure that `topics_to_merge` is eithera list of topics or a list of list of topics."
+                "Make sure that `topics_to_merge` is either a list of topics or a list of list of topics."
             )
 
-        # Track mappings and sizes of topics for merging topic embeddings
-        mappings = defaultdict(list)
-        for key, val in sorted(mapping.items()):
-            mappings[val].append(key)
-        mappings = {
-            topic_to: {
-                "topics_from": topics_from,
-                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
-            }
-            for topic_to, topics_from in mappings.items()
-        }
+        # Build Corpus BEFORE merge with current topic assignments and embeddings.
+        # This ensures embeddings correspond to original topics, so after merge
+        # the mean embedding correctly produces a weighted average.
+        topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
+        doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
+        corpus = Corpus(
+            documents=docs,
+            topics=np.array(self.topics_),
+            images=images,
+            embeddings=doc_embeddings,
+        )
 
-        # Update topics
-        documents.Topic = documents.Topic.map(mapping)
-        self.topic_mapper_.add_mappings(mapping, topic_model=self)
-        documents = self._sort_mappings_by_frequency(documents)
-        self._extract_representations(documents, mappings=mappings)
-        self._update_topic_size(documents)
-        self._save_representative_docs(documents)
-        self.probabilities_ = self._map_probabilities(self.probabilities_)
+        # Merge topics (updates topic IDs and cumulative mapping)
+        self._topics.merge(mapping)
 
-    # TODO: Update
-    def delete_topics(
-        self,
-        topics_to_delete: List[int],
-    ) -> None:
+        # Map corpus topics to match merged state and then sort by frequency
+        corpus.map_topics_and_probabilities(self._topics, from_original=False)
+        self._topics.sort_by_frequency()
+        corpus.map_topics_and_probabilities(self._topics, from_original=False)
+
+        # Recalculate representations from merged documents
+        self._extract_representations(corpus)
+        self._save_representative_docs(corpus)
+
+    def delete_topics(self, topics_to_delete: list[int] | int) -> None:
         """Delete topics from the topic model.
 
-        The deleted topics will be mapped to -1 (outlier topic). Core topic attributes
-        like topic embeddings and c-TF-IDF will be automatically updated.
+        The deleted topics will be mapped to -1 (outlier topic). Document predictions
+        for deleted topics become -1. Remaining topics are renumbered by frequency.
 
         Arguments:
-            topics_to_delete: List of topics to delete
+            topics_to_delete: List of topic IDs to delete or a single topic ID.
+
+        Examples:
+        ```python
+        # Delete topics 3 and 5
+        topic_model.delete_topics([3, 5])
+        ```
         """
         check_is_fitted(self)
 
-        topics_df = pd.DataFrame({"Topic": self.topics_})
-
-        # Check if -1 exists in the current topics
-        had_outliers = -1 in set(self.topics_)
-
-        # If adding -1 for the first time, initialize its attributes
-        if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
-            # Initialize c-TF-IDF for -1 topic (zeros)
-            outlier_row = np.zeros((1, self.c_tf_idf_.shape[1]))
-            outlier_row = sp.csr_matrix(outlier_row)
-            self.c_tf_idf_ = sp.vstack([outlier_row, self.c_tf_idf_])
-
-            # Initialize topic embeddings for -1 topic (zeros)
-            outlier_embedding = np.zeros((1, self.topic_embeddings_.shape[1]))
-            self.topic_embeddings_ = np.vstack([outlier_embedding, self.topic_embeddings_])
-
-            # Initialize topic representations for -1 topic: ("", 1e-05)
-            self.topic_representations_[-1] = [("", 1e-05)]
-
-            # Initialize representative docs for -1 topic (empty list)
-            self.representative_docs_[-1] = []
-
-            # Initialize representative images for -1 topic if images are being used
-            if self.representative_images_ is not None:
-                outlier_image = np.zeros((1, self.representative_images_.shape[1]))
-                self.representative_images_ = np.vstack([outlier_image, self.representative_images_])
-
-            # Initialize custom labels for -1 topic if they exist
-            if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-                self.custom_labels_[-1] = ""
-
-            # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
-            if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
-                n_features = self.ctfidf_model._idf_diag.shape[1]
-                outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
-                self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
-
-            # Initialize topic aspects for -1 topic (empty dict for each aspect) if they exist
-            if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
-                for aspect in self.topic_aspects_:
-                    self.topic_aspects_[aspect][-1] = {}
-
-        # First map deleted topics to -1
-        mapping = {topic: -1 if topic in topics_to_delete else topic for topic in set(self.topics_)}
-        mapping[-1] = -1
-
-        # Track mappings and sizes of topics for merging topic embeddings
-        mappings = defaultdict(list)
-        for key, val in sorted(mapping.items()):
-            mappings[val].append(key)
-        mappings = {
-            topic_to: {
-                "topics_from": topics_from,
-                "topic_sizes": [self.topic_sizes_[topic] for topic in topics_from],
-            }
-            for topic_to, topics_from in mappings.items()
-        }
-
-        # remove deleted topics and update attributes
-        topics_df.Topic = topics_df.Topic.map(mapping)
-        self.topic_mapper_.add_mappings(mapping, topic_model=deepcopy(self))
-        topics_df = self._sort_mappings_by_frequency(topics_df)
-        self._update_topic_size(topics_df)
-        self.probabilities_ = self._map_probabilities(self.probabilities_)
-
-        final_mapping = self.topic_mapper_.get_mappings(original_topics=False)
-
-        # Update dictionary-based attributes to remove deleted topics
-        # Handle topic_aspects_ if it exists
-        if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
-            new_aspects = {
-                aspect: {
-                    (final_mapping[old_topic] if old_topic != -1 else -1): content
-                    for old_topic, content in topics.items()
-                    if old_topic not in topics_to_delete
-                }
-                for aspect, topics in self.topic_aspects_.items()
-            }
-            self.topic_aspects_ = new_aspects
-
-        # Update custom labels if they exist
-        if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-            new_labels = {
-                (final_mapping[old_topic] if old_topic != -1 else -1): label
-                for old_topic, label in self.custom_labels_.items()
-                if old_topic not in topics_to_delete
-            }
-            self.custom_labels_ = new_labels
-
-        # Update topic representations
-        new_representations = {
-            (final_mapping[old_topic] if old_topic != -1 else -1): content
-            for old_topic, content in self.topic_representations_.items()
-            if old_topic not in topics_to_delete
-        }
-        self.topic_representations_ = new_representations
-
-        # Update representative docs if they exist
-        new_representative_docs = {
-            (final_mapping[old_topic] if old_topic != -1 else -1): docs
-            for old_topic, docs in self.representative_docs_.items()
-            if old_topic not in topics_to_delete
-        }
-        self.representative_docs_ = new_representative_docs
-
-        # Update representative images if they exist
-        if self.representative_images_ is not None:
-            # Create a mask for non-deleted topics
-            mask = np.array(
-                [topic not in topics_to_delete for topic in range(len(self.representative_images_))]
-            )
-            self.representative_images_ = self.representative_images_[mask] if mask.any() else None
-
-        # Update array-based attributes using masks to remove deleted topics
-        for attr in ["topic_embeddings_", "c_tf_idf_"]:
-            matrix = getattr(self, attr)
-            mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
-            setattr(self, attr, matrix[mask])
-
-        # Update ctfidf model to remove deleted topics if it exists
-        if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
-            mask = np.array(
-                [topic not in topics_to_delete for topic in range(self.ctfidf_model._idf_diag.shape[0])]
-            )
-            self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
+        self._topics.delete(topics_to_delete)
+        self._topics.sort_by_frequency()
 
     def reduce_topics(
         self,
