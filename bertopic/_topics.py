@@ -2,11 +2,15 @@ from abc import ABC
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+from importlib.metadata import version
+
 import polars as pl
 from scipy.sparse import csr_matrix, vstack
 from scipy.cluster.hierarchy import fcluster
 import numpy as np
 from collections import defaultdict
+
+BERTOPIC_VERSION = version("bertopic")
 
 
 @dataclass
@@ -18,6 +22,15 @@ class TopicRepresentation(ABC):
     def __str__(self) -> str:
         """String representation of the topic representation."""
         return str(self.data)
+
+    def to_dict(self) -> dict:
+        """Serialize to dictionary."""
+        return {"type": "base", "data": self.data}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "TopicRepresentation":
+        """Deserialize from dictionary."""
+        return cls(data=d.get("data"))
 
 
 @dataclass
@@ -44,6 +57,13 @@ class Keywords(TopicRepresentation):
         """String representation of the top 5 keywords."""
         return ", ".join([word for word, _ in self.top_n(5)])
 
+    def to_dict(self) -> dict:
+        return {"type": "keywords", "data": [list(item) for item in self.data]}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Keywords":
+        return cls(data=[tuple(item) for item in d["data"]])
+
 
 @dataclass
 class Label(TopicRepresentation):
@@ -51,12 +71,26 @@ class Label(TopicRepresentation):
 
     data: str = ""
 
+    def to_dict(self) -> dict:
+        return {"type": "label", "data": self.data}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Label":
+        return cls(data=d["data"])
+
 
 @dataclass
 class StructuredJSON(TopicRepresentation):
     """A structured JSON representation for a topic."""
 
     data: dict[str, str] = field(default_factory=dict)
+
+    def to_dict(self) -> dict:
+        return {"type": "structured_json", "data": self.data}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "StructuredJSON":
+        return cls(data=d["data"])
 
 
 @dataclass
@@ -72,6 +106,27 @@ class Metadata(TopicRepresentation):
     def __setitem__(self, key: str, value: Any):
         """Set metadata value by key."""
         self.data[key] = value
+
+    def to_dict(self) -> dict:
+        return {"type": "metadata", "data": self.data}
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Metadata":
+        return cls(data=d["data"])
+
+
+def representation_from_dict(d: dict) -> TopicRepresentation:
+    """Deserialize a TopicRepresentation from a dictionary based on its type field."""
+    type_map = {
+        "keywords": Keywords,
+        "label": Label,
+        "structured_json": StructuredJSON,
+        "metadata": Metadata,
+        "base": TopicRepresentation,
+    }
+    rep_type = d.get("type", "base")
+    cls = type_map.get(rep_type, TopicRepresentation)
+    return cls.from_dict(d)
 
 
 class TopicAction(str, Enum):
@@ -174,6 +229,21 @@ class TopicMapping:
         self._mapping.clear()
         self._recent_mapping.clear()
 
+    def to_dict(self) -> dict:
+        """Serialize to dictionary."""
+        return {
+            "mapping": {str(k): v for k, v in self._mapping.items()},
+            "recent_mapping": {str(k): v for k, v in self._recent_mapping.items()},
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "TopicMapping":
+        """Deserialize from dictionary."""
+        mapping = cls()
+        mapping._mapping = {int(k): v for k, v in d.get("mapping", {}).items()}
+        mapping._recent_mapping = {int(k): v for k, v in d.get("recent_mapping", {}).items()}
+        return mapping
+
 
 @dataclass
 class Topic:
@@ -255,7 +325,7 @@ class Topic:
         """Set representation for a specific source."""
         self.representations[source] = rep
 
-    def to_dict(self) -> dict:
+    def to_info_dict(self) -> dict:
         """Serialize topic info to a flat dictionary for tabular output."""
         info = {"Topic": self.id, "Count": self.nr_documents, "Name": self.label}
         info["Representation"] = str(self.representations.get("Main"))
@@ -271,6 +341,48 @@ class Topic:
             info["Representative_Images"] = self.representative_images
 
         return info
+
+    def to_dict(self) -> dict:
+        """Serialize topic for storage."""
+        d = {
+            "id": self.id,
+            "label": self._label,
+            "nr_documents": self.nr_documents,
+            "topic_type": self.topic_type.value,
+            "representations": {name: rep.to_dict() for name, rep in self.representations.items()},
+            "representative_documents": self.representative_documents,
+        }
+        # Hierarchy fields (only if set)
+        if self.parent_id is not None:
+            d["parent_id"] = self.parent_id
+        if self.child_ids is not None:
+            d["child_ids"] = list(self.child_ids)
+        if self.merge_distance is not None:
+            d["merge_distance"] = self.merge_distance
+        if self.leaf_topic_ids:
+            d["leaf_topic_ids"] = self.leaf_topic_ids
+        return d
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Topic":
+        """Deserialize topic from storage."""
+        representations = {
+            name: representation_from_dict(rep_dict)
+            for name, rep_dict in d.get("representations", {}).items()
+        }
+        child_ids = tuple(d["child_ids"]) if d.get("child_ids") else None
+        return cls(
+            id=d["id"],
+            _label=d.get("label"),
+            nr_documents=d.get("nr_documents", 0),
+            topic_type=TopicType(d.get("topic_type", "normal")),
+            representations=representations,
+            representative_documents=d.get("representative_documents", []),
+            parent_id=d.get("parent_id"),
+            child_ids=child_ids,
+            merge_distance=d.get("merge_distance"),
+            leaf_topic_ids=d.get("leaf_topic_ids", []),
+        )
 
     def __str__(self) -> str:
         """Pretty print all representations of the topic."""
@@ -720,13 +832,33 @@ class Topics:
         """Convert topic info to a polars DataFrame."""
         if topic is not None:
             selected_topic = self.topics.get(topic)
-            rows = [selected_topic.to_dict()] if selected_topic else []
+            rows = [selected_topic.to_info_dict()] if selected_topic else []
         else:
-            rows = [topic.to_dict() for topic in self]
+            rows = [t.to_info_dict() for t in self]
 
         columns = list(rows[0].keys())
         data = {col: [row.get(col) for row in rows] for col in columns}
         return pl.DataFrame(data)
+
+    def to_dict(self) -> dict:
+        """Serialize Topics for storage."""
+        return {
+            "bertopic_version": BERTOPIC_VERSION,
+            "topics": {str(tid): topic.to_dict() for tid, topic in self.topics.items()},
+            "mapping": self.mapping.to_dict(),
+            "predictions": self._original_predictions.tolist() if self._original_predictions.size > 0 else [],
+            "actions": [a.value for a in self.actions],
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Topics":
+        """Deserialize Topics from storage."""
+        topics = cls()
+        topics.topics = {int(tid): Topic.from_dict(td) for tid, td in d.get("topics", {}).items()}
+        topics.mapping = TopicMapping.from_dict(d.get("mapping", {}))
+        topics._original_predictions = np.array(d.get("predictions", []))
+        topics.actions = [TopicAction(a) for a in d.get("actions", [])]
+        return topics
 
 
 @dataclass
@@ -906,3 +1038,25 @@ class TopicHierarchy:
                 )
 
         return pl.DataFrame(rows)
+
+    def to_dict(self) -> dict:
+        """Serialize hierarchy for storage."""
+        return {
+            "bertopic_version": BERTOPIC_VERSION,
+            "nodes": {str(nid): node.to_dict() for nid, node in self.nodes.items()},
+            "linkage_matrix": self.linkage_matrix.tolist() if self.linkage_matrix.size > 0 else [],
+            "n_leaves": self.n_leaves,
+            "outlier_topic": self.outlier_topic.to_dict() if self.outlier_topic else None,
+            "predictions": self._original_predictions.tolist() if self._original_predictions.size > 0 else [],
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "TopicHierarchy":
+        """Deserialize hierarchy from storage."""
+        hierarchy = cls()
+        hierarchy.nodes = {int(nid): Topic.from_dict(nd) for nid, nd in d.get("nodes", {}).items()}
+        hierarchy.linkage_matrix = np.array(d.get("linkage_matrix", []))
+        hierarchy.n_leaves = d.get("n_leaves", 0)
+        hierarchy.outlier_topic = Topic.from_dict(d["outlier_topic"]) if d.get("outlier_topic") else None
+        hierarchy._original_predictions = np.array(d.get("predictions", []))
+        return hierarchy

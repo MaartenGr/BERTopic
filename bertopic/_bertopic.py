@@ -28,7 +28,7 @@ from collections import defaultdict, Counter
 from scipy.sparse import csr_matrix
 from importlib.util import find_spec
 
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
+from typing import List, Tuple, Union, Any, Callable, Iterable, TYPE_CHECKING, Literal
 
 # Plotting
 if find_spec("plotly") is None:
@@ -95,26 +95,25 @@ class BERTopic:
     The default embedding model is `all-MiniLM-L6-v2` when selecting `language="english"`
     and `paraphrase-multilingual-MiniLM-L12-v2` when selecting `language="multilingual"`.
 
+    # TODO: Update docstrings
     Attributes:
-        topics_ (List[int]) : The topics that are generated for each document after training or updating
+        topics_ (list[int]) : The topics that are generated for each document after training or updating
                               the topic model. The most recent topics are tracked.
-        probabilities_ (List[float]): The probability of the assigned topic per document. These are
+        probabilities_ (list[float]): The probability of the assigned topic per document. These are
                                       only calculated if a HDBSCAN model is used for the clustering step.
                                       When `calculate_probabilities=True`, then it is the probabilities
                                       of all topics per document.
-        topic_sizes_ (Mapping[int, int]) : The size of each topic.
-        topic_mapper_ (TopicMapper) : A class for tracking topics and their mappings anytime they are
-                                      merged, reduced, added, or removed.
-        topic_representations_ (Mapping[int, Tuple[int, float]]) : The top n terms per topic and their respective
+        topic_sizes_ (dict[int, int]) : The size of each topic.
+        topic_representations_ (dict[int, tuple[int, float]]) : The top n terms per topic and their respective
                                                                    c-TF-IDF values.
         c_tf_idf_ (csr_matrix) : The topic-term matrix as calculated through c-TF-IDF. To access its respective
                                  words, run `.vectorizer_model.get_feature_names()`  or
                                  `.vectorizer_model.get_feature_names_out()`
-        topic_labels_ (Mapping[int, str]) : The default labels for each topic.
-        custom_labels_ (List[str]) : Custom labels for each topic.
+        topic_labels_ (dict[int, str]) : The default labels for each topic.
+        custom_labels_ (list[str]) : Custom labels for each topic.
         topic_embeddings_ (np.ndarray) : The embeddings for each topic. They are calculated by taking the
                                          centroid embedding of each cluster.
-        representative_docs_ (Mapping[int, str]) : The representative documents for each topic.
+        representative_docs_ (dict[int, str]) : The representative documents for each topic.
 
     Examples:
     ```python
@@ -2399,7 +2398,7 @@ class BERTopic:
             save_ctfidf=save_ctfidf,
         )
 
-    def get_params(self, deep: bool = False) -> Mapping[str, Any]:
+    def get_params(self, deep: bool = False) -> dict[str, Any]:
         """Get parameters for this estimator.
 
         Adapted from:
@@ -3345,7 +3344,7 @@ class TopicMapper:
         topics = base_topics.copy().reshape(-1, 1)
         self.mappings_ = np.hstack([topics.copy(), topics.copy()]).tolist()
 
-    def get_mappings(self, original_topics: bool = True) -> Mapping[int, int]:
+    def get_mappings(self, original_topics: bool = True) -> dict[int, int]:
         """Get mappings from either the original topics or
         the second-most recent topics to the current topics.
 
@@ -3372,7 +3371,7 @@ class TopicMapper:
             mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
         return mappings
 
-    def add_mappings(self, mappings: Mapping[int, int], topic_model: BERTopic):
+    def add_mappings(self, mappings: dict[int, int], topic_model: BERTopic):
         """Add new column(s) of topic mappings.
 
         Arguments:
@@ -3432,7 +3431,7 @@ class TopicMapper:
                     )
             topic_model._topic_id_to_zeroshot_topic_idx = new_topic_id_to_zeroshot_topic_idx
 
-    def add_new_topics(self, mappings: Mapping[int, int]):
+    def add_new_topics(self, mappings: dict[int, int]):
         """Add new row(s) of topic mappings.
 
         Arguments:
@@ -3445,34 +3444,30 @@ class TopicMapper:
 
 
 def _create_model_from_files(
-    topics: Mapping[str, Any],
-    params: Mapping[str, Any],
-    tensors: Mapping[str, np.array],
-    ctfidf_tensors: Mapping[str, Any] | None = None,
-    ctfidf_config: Mapping[str, Any] | None = None,
-    images: Mapping[int, Any] | None = None,
+    topics: dict[str, Any],
+    params: dict[str, Any],
+    tensors: dict[str, np.array],
+    ctfidf_tensors: dict[str, Any] | None = None,
+    ctfidf_config: dict[str, Any] | None = None,
+    images: dict[int, Any] | None = None,  # TODO: Handle images
     warn_no_backend: bool = True,
 ):
     """Create a BERTopic model from a variety of inputs.
 
     Arguments:
-        topics: A dictionary containing topic metadata, including:
-                - Topic representations, labels, sizes, custom labels, etc.
-        params: BERTopic-specific hyperparams, including HF embedding_model ID
-                if given.
-        tensors: The topic embeddings
-        ctfidf_tensors: The c-TF-IDF representations
-        ctfidf_config: The config for CountVectorizer and c-TF-IDF
-        images: The images per topic
-        warn_no_backend: Whether to warn the user if no backend is given
+        topics: A dictionary containing topic metadata (old or new format).
+        params: BERTopic-specific hyperparams, including HF embedding_model ID if given.
+        tensors: The topic embeddings.
+        ctfidf_tensors: The c-TF-IDF representations.
+        ctfidf_config: The config for CountVectorizer and c-TF-IDF.
+        images: The images per topic.
+        warn_no_backend: Whether to warn the user if no backend is given.
     """
     params["n_gram_range"] = tuple(params["n_gram_range"])
 
     if ctfidf_config is not None:
         ngram_range = ctfidf_config["vectorizer_model"]["params"]["ngram_range"]
         ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
-
-    params["n_gram_range"] = tuple(params["n_gram_range"])
 
     # Select HF model through SentenceTransformers
     try:
@@ -3496,44 +3491,32 @@ def _create_model_from_files(
     empty_dimensionality_model = BaseDimensionalityReduction()
     empty_cluster_model = BaseCluster()
 
-    # Fit BERTopic without actually performing any clustering
+    # Create BERTopic model
     topic_model = BERTopic(
         embedding_model=embedding_model,
         umap_model=empty_dimensionality_model,
         hdbscan_model=empty_cluster_model,
         **params,
     )
-    topic_model.topic_embeddings_ = tensors["topic_embeddings"]
-    topic_model.topic_representations_ = {
-        int(key): val for key, val in topics["topic_representations"].items()
-    }
-    topic_model.topics_ = topics["topics"]
-    topic_model.topic_sizes_ = {int(key): val for key, val in topics["topic_sizes"].items()}
-    topic_model.custom_labels_ = topics["custom_labels"]
 
-    if topics.get("topic_aspects"):
-        topic_aspects = {}
-        for aspect, values in topics["topic_aspects"].items():
-            if aspect != "Visual_Aspect":
-                topic_aspects[aspect] = {int(topic): value for topic, value in values.items()}
-        topic_model.topic_aspects_ = topic_aspects
+    # Detect format and load Topics
+    is_new_format = "bertopic_version" in topics
+    if is_new_format:
+        topic_model._topics = Topics.from_dict(topics)
+    else:
+        topic_model._topics = save_utils.migrate_topics_pre_0_17_4(topics)
 
-        if images is not None:
-            topic_model.topic_aspects_["Visual_Aspect"] = images
+    # Set embeddings on Topics (stored separately for efficiency)
+    topic_embeddings = tensors["topic_embeddings"]
+    topic_model._topics.set_data(embeddings=topic_embeddings)
 
-    # Topic Mapper
-    topic_model.topic_mapper_ = TopicMapper([0])
-    topic_model.topic_mapper_.mappings_ = topics["topic_mapper"]
-
+    # Set c-TF-IDF if available
     if ctfidf_tensors is not None:
-        topic_model.c_tf_idf_ = csr_matrix(
-            (
-                ctfidf_tensors["data"],
-                ctfidf_tensors["indices"],
-                ctfidf_tensors["indptr"],
-            ),
+        c_tf_idf = csr_matrix(
+            (ctfidf_tensors["data"], ctfidf_tensors["indices"], ctfidf_tensors["indptr"]),
             shape=ctfidf_tensors["shape"],
         )
+        topic_model._topics.set_data(c_tf_idf=c_tf_idf)
 
         # CountVectorizer
         topic_model.vectorizer_model = CountVectorizer(**ctfidf_config["vectorizer_model"]["params"])
@@ -3548,4 +3531,7 @@ def _create_model_from_files(
         topic_model.ctfidf_model._idf_diag = sp.diags(
             idf, offsets=0, shape=(len(idf), len(idf)), format="csr", dtype=np.float64
         )
+
+    # TODO: Handle images - they're currently stored in topic_aspects_ but should move to Topic
+
     return topic_model

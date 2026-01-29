@@ -40,6 +40,8 @@ try:
 except ImportError:
     _has_vision = False
 
+from bertopic._topics import Topics
+
 
 TOPICS_NAME = "topics.json"
 CONFIG_NAME = "config.json"
@@ -103,6 +105,92 @@ topic_model.get_topic_info()
 """
 
 
+def migrate_topics_pre_0_17_4(topics_dict: dict) -> Topics:
+    """Migrate old format (<=0.17.4) topics dict to new format.
+
+    Old format:
+        {
+            "topic_representations": {"-1": [["word", 0.5], ...], ...},
+            "topics": [0, 1, -1, ...],
+            "topic_sizes": {"-1": 100, ...},
+            "topic_mapper": [[...], [...]],
+            "topic_labels": {"-1": "...", ...},
+            "custom_labels": null or [...],
+            "_outliers": 1,
+            "topic_aspects": {"Aspect": {"-1": [...], ...}, ...}
+        }
+
+    New format uses Topics.to_dict() structure.
+    """
+    from bertopic._topics import Topics, Topic, Keywords, TopicType, TopicAction
+
+    # Get unique topic IDs from representations (more reliable than predictions)
+    topic_ids = sorted([int(k) for k in topics_dict.get("topic_representations", {}).keys()])
+
+    # Build Topics object
+    topics = Topics()
+    topics._original_predictions = np.array(topics_dict.get("topics", []))
+    topics.actions = [TopicAction.INITIALIZED]
+
+    # Reconstruct mapping from topic_mapper (2D array of mappings history)
+    topic_mapper = topics_dict.get("topic_mapper")
+    if topic_mapper and len(topic_mapper) > 0:
+        # The last row contains the most recent mapping
+        # Format: each row is [original_id_0_maps_to, original_id_1_maps_to, ...]
+        # Index corresponds to original ID (offset by outliers)
+        has_outliers = topics_dict.get("_outliers", 0)
+        last_mapping = topic_mapper[-1] if isinstance(topic_mapper[0], list) else topic_mapper
+
+        mapping_dict = {}
+        for idx, mapped_to in enumerate(last_mapping):
+            original_id = idx - has_outliers
+            mapping_dict[original_id] = int(mapped_to)
+
+        topics.mapping._mapping = mapping_dict
+        topics.mapping._recent_mapping = mapping_dict.copy()
+
+    # Custom labels (if set, these override generated labels)
+    custom_labels = topics_dict.get("custom_labels")
+    custom_labels_dict = {}
+    if custom_labels:
+        for idx, label in enumerate(custom_labels):
+            topic_id = idx - topics_dict.get("_outliers", 0)
+            custom_labels_dict[topic_id] = label
+
+    # Create Topic objects
+    for topic_id in topic_ids:
+        str_id = str(topic_id)
+        label = custom_labels_dict.get(topic_id) or topics_dict.get("topic_labels", {}).get(str_id)
+        topic_type = TopicType.OUTLIER if topic_id == -1 else TopicType.NORMAL
+        nr_documents = topics_dict.get("topic_sizes", {}).get(str_id, 0)
+
+        # Main representation in <= v0.17.4 is always "Keywords"
+        rep_data = topics_dict.get("topic_representations", {}).get(str_id, [])
+        representations = {"Main": Keywords(data=[tuple(item) for item in rep_data])}
+
+        # Topic aspects (additional representations)
+        for aspect_name, aspect_data in topics_dict.get("topic_aspects", {}).items():
+            if aspect_name == "Visual_Aspect":
+                continue  # TODO: Visual aspects currently not handled due to missing image representation
+
+            aspect_value = aspect_data[str_id]
+            representations[aspect_name] = Keywords(data=[tuple(item) for item in aspect_value])
+
+        # Create Topic
+        topic = Topic(
+            id=topic_id,
+            _label=label,
+            nr_documents=nr_documents,
+            topic_type=topic_type,
+            representations=representations,
+            representative_documents=[],
+        )
+
+        topics.topics[topic_id] = topic
+
+    return topics
+
+
 def push_to_hf_hub(
     model,
     repo_id: str,
@@ -135,7 +223,9 @@ def push_to_hf_hub(
         save_ctfidf: Whether to save c-TF-IDF information
     """
     if not _has_hf_hub:
-        raise ValueError("Make sure you have the huggingface hub installed via `pip install --upgrade huggingface_hub`")
+        raise ValueError(
+            "Make sure you have the huggingface hub installed via `pip install --upgrade huggingface_hub`"
+        )
 
     # Create repo if it doesn't exist yet and infer complete repo_id
     repo_url = create_repo(repo_id, token=token, private=private, exist_ok=True)
@@ -212,7 +302,11 @@ def load_local_files(path):
             _has_images = False
 
         if _has_images:
-            topic_list = list(topics["topic_representations"].keys())
+            # Detect format: new format has "bertopic_version", old has "topic_representations"
+            if "bertopic_version" in topics:
+                topic_list = list(topics["topics"].keys())
+            else:
+                topic_list = list(topics["topic_representations"].keys())
             images = {}
             for topic in topic_list:
                 image = Image.open(path / f"images/{topic}.jpg")
@@ -259,7 +353,11 @@ def load_files_from_hf(path):
             _has_images = False
 
         if _has_images:
-            topic_list = list(topics["topic_representations"].keys())
+            # Detect format: new format has "bertopic_version", old has "topic_representations"
+            if "bertopic_version" in topics:
+                topic_list = list(topics["topics"].keys())
+            else:
+                topic_list = list(topics["topic_representations"].keys())
             images = {}
             for topic in topic_list:
                 image = Image.open(hf_hub_download(path, f"images/{topic}.jpg", revision=None))
@@ -288,7 +386,9 @@ def generate_readme(model, repo_id: str):
     # Topic information
     topic_keywords = [" - ".join(next(zip(*model.get_topic(topic)))[:5]) for topic in topics]
     topic_freq = [model.get_topic_freq(topic) for topic in topics]
-    topic_labels = model.custom_labels_ if model.custom_labels_ else [model.topic_labels_[topic] for topic in topics]
+    topic_labels = (
+        model.custom_labels_ if model.custom_labels_ else [model.topic_labels_[topic] for topic in topics]
+    )
     topics = [
         f"| {topic} | {topic_keywords[index]} | {topic_freq[topic]} | {topic_labels[index]} | \n"
         for index, topic in enumerate(topics)
@@ -310,7 +410,9 @@ def generate_readme(model, repo_id: str):
     if not has_visual_aspect:
         model_card = model_card.replace("{PIPELINE_TAG}", "text-classification")
     else:
-        model_card = model_card.replace("pipeline_tag: {PIPELINE_TAG}\n", "")  # TODO add proper tag for this instance
+        model_card = model_card.replace(
+            "pipeline_tag: {PIPELINE_TAG}\n", ""
+        )  # TODO add proper tag for this instance
 
     return model_card
 
@@ -399,55 +501,48 @@ def save_config(model, path: str, embedding_model):
 
 
 def check_has_visual_aspect(model):
-    """Check if model has visual aspect."""
+    """Check if model has visual aspect by inspecting _topics directly."""
     if _has_vision:
-        for aspect, value in model.topic_aspects_.items():
-            if isinstance(value[0], Image.Image):
-                return True
+        for topic in model._topics:
+            for rep in topic.representations.values():
+                if hasattr(rep, "data") and isinstance(rep.data, Image.Image):
+                    return True
+    return False
 
 
 def save_images(model, path: str):
-    """Save topic images."""
+    """Save topic images by inspecting _topics directly."""
     if _has_vision:
-        visual_aspects = None
-        for aspect, value in model.topic_aspects_.items():
-            if isinstance(value[0], Image.Image):
-                visual_aspects = model.topic_aspects_[aspect]
+        # Find visual aspect name
+        visual_aspect_name = None
+        for topic in model._topics:
+            for aspect_name, rep in topic.representations.items():
+                if hasattr(rep, "data") and isinstance(rep.data, Image.Image):
+                    visual_aspect_name = aspect_name
+                    break
+            if visual_aspect_name:
                 break
 
-        if visual_aspects is not None:
+        # Save images if found
+        if visual_aspect_name:
             path.mkdir(exist_ok=True, parents=True)
-            for topic, image in visual_aspects.items():
-                image.save(path / f"{topic}.jpg")
+            for topic in model._topics:
+                rep = topic.representations.get(visual_aspect_name)
+                if rep and hasattr(rep, "data") and isinstance(rep.data, Image.Image):
+                    rep.data.save(path / f"{topic.id}.jpg")
 
 
 def save_topics(model, path: str):
-    """Save Topic-specific information."""
+    """Save Topic-specific information using new Topics format."""
     path = Path(path)
+    topics_dict = model._topics.to_dict()
 
-    if _has_vision:
-        selected_topic_aspects = {}
-        for aspect, value in model.topic_aspects_.items():
-            if not isinstance(value[0], Image.Image):
-                selected_topic_aspects[aspect] = value
-            else:
-                selected_topic_aspects["Visual_Aspect"] = True
-    else:
-        selected_topic_aspects = model.topic_aspects_
-
-    topics = {
-        "topic_representations": model.topic_representations_,
-        "topics": [int(topic) for topic in model.topics_],
-        "topic_sizes": model.topic_sizes_,
-        "topic_mapper": np.array(model.topic_mapper_.mappings_, dtype=int).tolist(),
-        "topic_labels": model.topic_labels_,
-        "custom_labels": model.custom_labels_,
-        "_outliers": int(model._outliers),
-        "topic_aspects": selected_topic_aspects,
-    }
+    # Mark visual aspects (images saved separately by save_images)
+    if check_has_visual_aspect(model):
+        topics_dict["has_visual_aspect"] = True
 
     with path.open("w") as f:
-        json.dump(topics, f, indent=2, cls=NumpyEncoder)
+        json.dump(topics_dict, f, indent=2, cls=NumpyEncoder)
 
 
 def load_cfg_from_json(json_file: Union[str, os.PathLike]):
