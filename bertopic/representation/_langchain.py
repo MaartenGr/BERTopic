@@ -1,5 +1,5 @@
 import pandas as pd
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from scipy.sparse import csr_matrix
 from typing import Callable, Mapping, List, Tuple, Union
 
