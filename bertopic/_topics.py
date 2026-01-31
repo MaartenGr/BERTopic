@@ -1,4 +1,3 @@
-from abc import ABC
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -14,7 +13,7 @@ BERTOPIC_VERSION = version("bertopic")
 
 
 @dataclass
-class TopicRepresentation(ABC):
+class TopicRepresentation:
     """Base class for all topic representations."""
 
     data: Any = None
@@ -177,28 +176,14 @@ class TopicMapping:
             from_original: If True, map from the original ID to current.
                            If False, map from the last applied mapping to current.
         """
-        # Map from the original IDs
         if from_original:
-            try:
-                new_id = self._mapping.get(topic_id, topic_id)
-                return new_id
-            except KeyError:
-                return topic_id
-
-        # Map from the last applied mapping
+            return self._mapping.get(topic_id, topic_id)
         else:
-            try:
-                new_id = self._recent_mapping.get(topic_id, topic_id)
-                return new_id
-            except KeyError:
-                return topic_id
+            return self._recent_mapping.get(topic_id, topic_id)
 
     def map_predictions(self, predictions: list[int], from_original: bool = True) -> list[int]:
         """Map a list of original predictions to current IDs."""
-        if from_original:
-            return [self.map(prediction, from_original=True) for prediction in predictions]
-        else:
-            return [self.map(prediction, from_original=False) for prediction in predictions]
+        return [self.map(p, from_original) for p in predictions]
 
     def map_probabilities(self, probabilities: np.ndarray, from_original: bool = True) -> np.ndarray:
         """Map a 2D array of probabilities to current IDs."""
@@ -274,8 +259,8 @@ class Topic:
 
     # Representations
     representations: dict[str, TopicRepresentation] = field(default_factory=dict)
-    representative_documents: list[str] | None = field(default_factory=list)
-    representative_images: np.ndarray | None = field(default_factory=lambda: np.array([]))
+    representative_documents: list[str] = field(default_factory=list)
+    representative_images: np.ndarray = field(default_factory=lambda: np.array([]))
     _label: str | None = None
 
     # Data matrices
@@ -307,19 +292,23 @@ class Topic:
         return self.child_ids is None
 
     @property
-    def label(self) -> str | None:
-        """Get the label of the topic."""
-        # Set label representation if no is provided
-        if self._label is None:
-            representation = self.representations.get("Main")
-            if isinstance(representation, Label):
-                self._label = representation.data
-            elif isinstance(representation, Keywords):
-                self._label = "_".join(representation.words[:4])
-            else:
-                self._label = "No label could be created"
+    def label(self) -> str:
+        """Get the label of the topic.
 
-        return self._label
+        If a custom label was set via `_label`, return it.
+        Otherwise, generate a label from the Main representation.
+        """
+        if self._label is not None:
+            return self._label
+
+        # Generate label from representation
+        representation = self.representations.get("Main")
+        if isinstance(representation, Label):
+            return representation.data
+        elif isinstance(representation, Keywords):
+            return "_".join(representation.words[:4])
+        else:
+            return "No label could be created"
 
     def __getitem__(self, source: str) -> TopicRepresentation:
         """Get representation for a specific source, or default if not found."""
@@ -341,7 +330,7 @@ class Topic:
 
         # Representative documents and images
         info["Representative_Docs"] = self.representative_documents if self.representative_documents else [""]
-        if self.representative_images is not None and self.representative_images.size > 0:
+        if self.representative_images.size > 0:
             info["Representative_Images"] = self.representative_images
 
         return info
@@ -371,7 +360,7 @@ class Topic:
                     "indptr": self.c_tf_idf.indptr.tolist(),
                     "shape": list(self.c_tf_idf.shape),
                 }
-            if self.representative_images is not None and self.representative_images.size:
+            if self.representative_images.size:
                 data["representative_images"] = self.representative_images.tolist()
 
         # Hierarchy fields (only if set)
@@ -417,7 +406,7 @@ class Topic:
             representative_documents=data.get("representative_documents", []),
             embedding=embedding,
             c_tf_idf=c_tf_idf,
-            representative_images=representative_images if representative_images.size else None,
+            representative_images=representative_images,
             parent_id=data.get("parent_id"),
             child_ids=tuple(data["child_ids"]) if data.get("child_ids") else None,
             merge_distance=data.get("merge_distance"),
@@ -472,8 +461,8 @@ class Topics:
         return dict(sorted(labels.items()))
 
     @property
-    def predictions(self) -> np.ndarray | None:
-        """Get original predictions."""
+    def predictions(self) -> list[int]:
+        """Get current predictions (mapped from original)."""
         return self.mapping.map_predictions(self._original_predictions.tolist(), from_original=True)
 
     @property
@@ -500,11 +489,6 @@ class Topics:
         """Get embeddings matrix for all topics in ascending topic ID order."""
         sorted_ids = sorted(self.topic_ids())
         return np.array([self.topics[topic_id].embedding for topic_id in sorted_ids])
-
-    @property
-    def unique_ids(self) -> list[int]:
-        """Get list of unique topic IDs."""
-        return sorted(list(self.topics.keys()))
 
     def topic_ids(self, outliers: bool = True) -> list[int]:
         """Get a list of all topic IDs in the collection."""
@@ -546,12 +530,9 @@ class Topics:
 
         return "\n".join(lines)
 
-    def get(self, topic) -> Topic:
-        """Get topic by ID, raising KeyError if not found."""
-        if self.topics.get(topic):
-            return self.topics[topic]
-        else:
-            raise KeyError(f"Topic ID {topic} not found.")
+    def get(self, topic_id: int) -> Topic | None:
+        """Get topic by ID, returning None if not found."""
+        return self.topics.get(topic_id)
 
     def initialize(
         self,
@@ -658,37 +639,6 @@ class Topics:
 
         return self
 
-    def add_topics(self, other: "Topics") -> None:
-        """Combine another Topics collection into this one.
-
-        The other's topic IDs are remapped to start after this collection's max ID.
-        Outlier topics (-1) are merged (other's outlier predictions join this outlier).
-        """
-        # Find the next available ID (after max, excluding -1)
-        next_id = max((self.topic_ids(outliers=False)), default=-1) + 1
-
-        # Build mapping from other's IDs to new IDs
-        old_to_new = {}
-        for old_topic in other.topics.values():
-            if old_topic.id == -1:
-                old_to_new[-1] = -1
-                # Merge outlier if we already have one, otherwise add it
-                if -1 not in self.topics:
-                    self.topics[-1] = old_topic
-            else:
-                old_to_new[old_topic.id] = next_id
-                old_topic.id = next_id
-                self.topics[next_id] = old_topic
-                next_id += 1
-
-        # Sort topics
-        self.topics = dict(sorted(self.topics.items()))
-        self.sort_by_frequency()
-        self.mapping.reset()
-
-        # Register the merge action
-        self.add_action(TopicAction.MERGED)
-
     def get_topics(self, topic_ids: list[int]) -> "Topics":
         """Get a subset of topics by their IDs as a new Topics collection."""
         return Topics(
@@ -788,8 +738,6 @@ class Topics:
             topics = {topics}
         else:
             topics = set(topics)
-
-        topics = {topics} if isinstance(topics, int) else set(topics)
 
         # Calculate total documents being moved to outlier
         deleted_doc_count = sum(
@@ -1155,16 +1103,13 @@ class TopicHierarchy:
 
     def _create_topic_copy(self, topic: Topic, new_id: int) -> Topic:
         """Create a copy of a topic with a new ID (without hierarchy fields)."""
-        return Topic(
-            id=new_id,
-            representations={k: v for k, v in topic.representations.items()},
-            representative_documents=list(topic.representative_documents or []),
-            embedding=topic.embedding.copy() if topic.embedding.size else np.array([]),
-            c_tf_idf=topic.c_tf_idf.copy(),
-            topic_type=topic.topic_type,
-            nr_documents=topic.nr_documents,
-            _label=topic._label,
-        )
+        copied = topic.copy(new_id=new_id)
+        # Clear hierarchy fields
+        copied.parent_id = None
+        copied.child_ids = None
+        copied.merge_distance = None
+        copied.leaf_topic_ids = []
+        return copied
 
     def to_polars(self) -> "pl.DataFrame":
         """Convert hierarchy to a polars DataFrame."""

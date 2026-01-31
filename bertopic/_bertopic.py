@@ -750,7 +750,7 @@ class BERTopic:
 
         # Add new topics and accumulate predictions/counts
         else:
-            new_topic_ids = set(corpus.topics) - set(self._topics.unique_ids)
+            new_topic_ids = set(corpus.topics) - set(self._topics.topic_ids())
 
             for topic_id in new_topic_ids:
                 self._topics.topics[topic_id] = Topic(id=topic_id, nr_documents=0)

@@ -81,9 +81,9 @@ def topics_over_time(
     check_is_fitted(topic_model)
 
     corpus = Corpus(
-        documents=docs, topics=topics if topics else topic_model.topics_.predictions, timestamps=timestamps
+        documents=docs, topics=topics if topics else topic_model._topics.predictions, timestamps=timestamps
     )
-    selected_topics = topics if topics else topic_model.topics_.predictions
+    selected_topics = topics if topics else topic_model._topics.predictions
     global_c_tf_idf = normalize(topic_model.c_tf_idf_, axis=1, norm="l1", copy=False)
     corpus.timestamps = bin_timestamps(corpus, nr_bins=nr_bins) if nr_bins else corpus.timestamps
     corpus.sort_by_timestamps()

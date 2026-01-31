@@ -59,7 +59,7 @@ def topics_per_class(
     topics_per_class = topic_model.topics_per_class(docs, classes)
     ```
     """
-    corpus = Corpus(documents=docs, topics=topic_model.topics_.predictions, classes=classes)
+    corpus = Corpus(documents=docs, topics=topic_model._topics.predictions, classes=classes)
     global_c_tf_idf = normalize(topic_model.c_tf_idf_, axis=1, norm="l1", copy=False)
 
     # For each unique class, create topic representations
