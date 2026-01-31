@@ -1,25 +1,5 @@
 """Approximate topic distributions across documents.
-
-# Methodology
-
-To perform this approximation, each document is split into tokens according to the provided tokenizer in the CountVectorizer.
-Then, a sliding window is applied on each document creating subsets of the document.
-For example, with a window size of 3 and stride of 1, the document:
-
-`Solving the right problem is difficult.`
-
-can be split up into `solving the right`, `the right problem`, `right problem is`, and `problem is difficult`.
-
-These are called token sets. For each of these token sets, we calculate their c-TF-IDF representation and
-find out how similar they are to the previously generated topics. Then, the similarities to the topics for each token
-set are summed to create a topic distribution for the entire document.
-
-Although it is often said that documents can contain a mixture of topics, these are often modeled by assigning each
-word to a single topic. With this approach, we take into account that there may be multiple topics for a single word.
-
-We can make this multiple-topic word assignment a bit more accurate by then splitting these token sets up into
-individual tokens and assigning the topic distributions for each token set to each individual token. That way, we can
-visualize the extent to which a certain word contributes to a document's topic distribution.
+See: https://maartengr.github.io/BERTopic/getting_started/distribution/distribution.html.
 """
 
 import math

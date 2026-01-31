@@ -1,21 +1,5 @@
 """Guided Topic Modeling Variation for BERTopic.
-
-# Methodology
-
-This method has two main steps:
-
-## Step 1: Semi-Supervised UMAP
-
-* Create embeddings for each seeded topic using the same embedder as for documents
-* For each document, compute cosine similarity with each seeded topic embedding
-* Similarity is used to assign labels to documents (-1 is assigned if most similar to average document embedding)
-* UMAP is applied in a semi-supervised manner using these labels to nudge topic creation towards seeded topics
-
-## Step 2: IDF Adjustment
-
-* All words in seeded topics are given a multiplier larger than 1
-* These multipliers are used to increase the IDF values of the words across all topics
-* This increases the likelihood that a seeded topic word will appear in a topic
+See: https://maartengr.github.io/BERTopic/getting_started/guided/guided.html.
 """
 
 import numpy as np

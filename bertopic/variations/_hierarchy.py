@@ -1,3 +1,7 @@
+"""Hierarchical topic variation for BERTopic.
+See: https://maartengr.github.io/BERTopic/getting_started/hierarchicaltopics/hierarchicaltopics.html.
+"""
+
 import numpy as np
 
 from tqdm import tqdm

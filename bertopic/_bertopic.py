@@ -23,8 +23,6 @@ import scipy.sparse as sp
 from pathlib import Path
 from functools import wraps
 from packaging import version
-from tempfile import TemporaryDirectory
-from collections import defaultdict, Counter
 from scipy.sparse import csr_matrix
 from importlib.util import find_spec
 
@@ -1977,7 +1975,6 @@ class BERTopic:
             autoscale=autoscale,
         )
 
-    # TODO: Update
     def save(
         self,
         path,
@@ -2095,7 +2092,6 @@ class BERTopic:
                     )
                     save_utils.save_ctfidf_config(model=self, path=save_directory / "ctfidf_config.json")
 
-    # TODO: Update
     @classmethod
     def load(cls, path: str, embedding_model=None):
         """Loads the model from the specified path or directory.
@@ -2156,34 +2152,26 @@ class BERTopic:
 
         return topic_model
 
-    # TODO: Update
     @classmethod
-    def merge_models(cls, models, min_similarity: float = 0.7, embedding_model=None):
+    def merge_models(
+        cls, models: list["BERTopic"], min_similarity: float = 0.7, embedding_model=None
+    ) -> "BERTopic":
         """Merge multiple pre-trained BERTopic models into a single model.
 
-        The models are merged as if they were all saved using pytorch or
-        safetensors, so a minimal version without c-TF-IDF.
+        Topics are deduplicated based on embedding similarity. Topics with
+        cosine similarity >= min_similarity are considered duplicates and
+        merged. Dissimilar topics are added as new topics.
 
-        To do this, we choose the first model in the list of
-        models as a baseline. Then, we check each model whether
-        they contain topics that are not in the baseline.
-        This check is based on the cosine similarity between
-        topics embeddings. If topic embeddings between two models
-        are similar, then the topic of the second model is re-assigned
-        to the first. If they are dissimilar, the topic of the second
-        model is assigned to the first.
-
-        In essence, we simply check whether sufficiently "new"
-        topics emerge and add them.
+        The resulting model can be used for inference (transform) but not
+        for fitting new data, as it lacks UMAP and HDBSCAN models.
 
         Arguments:
-            models: A list of fitted BERTopic models
-            min_similarity: The minimum similarity for when topics are merged.
-            embedding_model: Additionally load in an embedding model if necessary.
+            models: A list of fitted BERTopic models to merge.
+            min_similarity: Minimum cosine similarity to deduplicate topics.
+            embedding_model: Optional embedding model to use for the merged model.
 
         Returns:
-            A new BERTopic model that was created as if you were
-            loading a model from the HuggingFace Hub without c-TF-IDF
+            A new BERTopic model containing topics from all input models.
 
         Examples:
         ```python
@@ -2201,133 +2189,31 @@ class BERTopic:
         merged_model = BERTopic.merge_models([topic_model_1, topic_model_2, topic_model_3])
         ```
         """
+        if not models:
+            raise ValueError("At least one model is required")
 
-        def choose_backend():
-            """Choose the backend to use for saving the model."""
-            try:
-                import torch  # noqa: F401
+        # Copy and merge topics
+        merged_topics = models[0]._topics.copy()
+        for model in models[1:]:
+            merged_topics.merge_similar(model._topics, min_similarity)
 
-                return "pytorch"
-            except (ModuleNotFoundError, ImportError):
-                try:
-                    import safetensors  # noqa: F401
-
-                    return "safetensors"
-                except (ModuleNotFoundError, ImportError):
-                    raise ImportError(
-                        "Neither pytorch nor safetensors is installed. "
-                        "Please install at least one of these packages:\n"
-                        "  pip install torch\n"
-                        "  pip install safetensors"
-                    )
-
-        # Temporarily save model and push to HF
-        with TemporaryDirectory() as tmpdir:
-            # Save model weights and config.
-            all_topics, all_params, all_tensors = [], [], []
-            for index, model in enumerate(models):
-                model.save(tmpdir, serialization=choose_backend())
-                topics, params, tensors, _, _, _ = save_utils.load_local_files(Path(tmpdir))
-                all_topics.append(topics)
-                all_params.append(params)
-                all_tensors.append(np.array(tensors["topic_embeddings"]))
-
-                # Create a base set of parameters
-                if index == 0:
-                    merged_topics = topics
-                    merged_params = params
-                    merged_tensors = np.array(tensors["topic_embeddings"])
-                    merged_topics["custom_labels"] = None
-
-        for tensors, selected_topics in zip(all_tensors[1:], all_topics[1:]):
-            # Calculate similarity matrix
-            sim_matrix = cosine_similarity(tensors, merged_tensors)
-            sims = np.max(sim_matrix, axis=1)
-
-            # Extract new topics
-            new_topics = sorted(
-                [
-                    index - selected_topics["_outliers"]
-                    for index, sim in enumerate(sims)
-                    if sim < min_similarity
-                ]
-            )
-            max_topic = max(set(merged_topics["topics"]))
-
-            # Merge Topic Representations
-            new_topics_dict = {}
-            for new_topic in new_topics:
-                if new_topic != -1:
-                    max_topic += 1
-                    new_topics_dict[new_topic] = max_topic
-                    merged_topics["topic_representations"][str(max_topic)] = selected_topics[
-                        "topic_representations"
-                    ][str(new_topic)]
-                    merged_topics["topic_labels"][str(max_topic)] = selected_topics["topic_labels"][
-                        str(new_topic)
-                    ]
-
-                    # Add new aspects
-                    if selected_topics["topic_aspects"]:
-                        aspects_1 = set(merged_topics["topic_aspects"].keys())
-                        aspects_2 = set(selected_topics["topic_aspects"].keys())
-                        aspects_diff = aspects_2.difference(aspects_1)
-                        if aspects_diff:
-                            for aspect in aspects_diff:
-                                merged_topics["topic_aspects"][aspect] = {}
-
-                        # If the original model does not have topic aspects but the to be added model does
-                        if not merged_topics.get("topic_aspects"):
-                            merged_topics["topic_aspects"] = selected_topics["topic_aspects"]
-
-                        # If they both contain topic aspects, add to the existing set of aspects
-                        else:
-                            for aspect, values in selected_topics["topic_aspects"].items():
-                                merged_topics["topic_aspects"][aspect][str(max_topic)] = values[
-                                    str(new_topic)
-                                ]
-
-                    # Add new embeddings
-                    new_tensors = tensors[new_topic + selected_topics["_outliers"]]
-                    merged_tensors = np.vstack([merged_tensors, new_tensors])
-
-            # Topic Mapper
-            merged_topics["topic_mapper"] = TopicMapper(list(range(-1, max_topic + 1, 1))).mappings_
-
-            # Find similar topics and re-assign those from the new models
-            sims_idx = np.argmax(sim_matrix, axis=1)
-            sims = np.max(sim_matrix, axis=1)
-            to_merge = {
-                a - selected_topics["_outliers"]: b - merged_topics["_outliers"]
-                for a, (b, val) in enumerate(zip(sims_idx, sims))
-                if val >= min_similarity
-            }
-            to_merge.update(new_topics_dict)
-            to_merge[-1] = -1
-            topics = [to_merge[topic] for topic in selected_topics["topics"]]
-            merged_topics["topics"].extend(topics)
-            merged_topics["topic_sizes"] = dict(Counter(merged_topics["topics"]))
-
-        # Create a new model from the merged parameters
-        merged_tensors = {"topic_embeddings": merged_tensors}
-        merged_model = _create_model_from_files(
-            merged_topics,
-            merged_params,
-            merged_tensors,
-            None,
-            None,
-            None,
-            warn_no_backend=False,
+        # Create model with minimal sub-models (no UMAP/HDBSCAN)
+        merged_model = BERTopic(
+            embedding_model=BaseEmbedder(),
+            umap_model=BaseDimensionalityReduction(),
+            hdbscan_model=BaseCluster(),
         )
-        merged_model.embedding_model = models[0].embedding_model
+        merged_model._topics = merged_topics
+        merged_model.hierarchy_ = None
 
-        # Replace embedding model if one is specifically chosen
-        verbose = any([model.verbose for model in models])
-        if embedding_model is not None and type(merged_model.embedding_model) is BaseEmbedder:
+        # Set embedding model
+        merged_model.embedding_model = models[0].embedding_model
+        if embedding_model is not None:
+            verbose = any(m.verbose for m in models)
             merged_model.embedding_model = select_backend(embedding_model, verbose=verbose)
+
         return merged_model
 
-    # TODO: Update
     def push_to_hf_hub(
         self,
         repo_id: str,
@@ -3305,142 +3191,6 @@ class BERTopic:
             parameters += f"{parameter}={value}, "
 
         return f"BERTopic({parameters[:-2]})"
-
-
-# TODO: Remove
-class TopicMapper:
-    """Keep track of Topic Mappings.
-
-    The number of topics can be reduced
-    by merging them together. This mapping
-    needs to be tracked in BERTopic as new
-    predictions need to be mapped to the new
-    topics.
-
-    These mappings are tracked in the `self.mappings_`
-    attribute where each set of topic is stacked horizontally.
-    For example, the most recent topics can be found in the
-    last column. To get a mapping, simply take two columns
-    of topics.
-
-    In other words, it is represented as graph:
-    Topic 1 --> Topic 11 --> Topic 4 --> etc.
-
-    Attributes:
-        self.mappings_ (np.ndarray) : A  matrix indicating the mappings from one topic
-                                      to another. The columns represent a collection of topics
-                                      at any time. The last column represents the current state
-                                      of topics and the first column represents the initial state
-                                      of topics.
-    """
-
-    def __init__(self, topics: List[int]):
-        """Initialization of Topic Mapper.
-
-        Arguments:
-            topics: A list of topics per document
-        """
-        base_topics = np.array(sorted(set(topics)))
-        topics = base_topics.copy().reshape(-1, 1)
-        self.mappings_ = np.hstack([topics.copy(), topics.copy()]).tolist()
-
-    def get_mappings(self, original_topics: bool = True) -> dict[int, int]:
-        """Get mappings from either the original topics or
-        the second-most recent topics to the current topics.
-
-        Arguments:
-            original_topics: Whether we want to map from the
-                             original topics to the most recent topics
-                             or from the second-most recent topics.
-
-        Returns:
-            mappings: The mappings from old topics to new topics
-
-        Examples:
-        To get mappings, simply call:
-        ```python
-        mapper = TopicMapper(topics)
-        mappings = mapper.get_mappings(original_topics=False)
-        ```
-        """
-        if original_topics:
-            mappings = np.array(self.mappings_)[:, [0, -1]]
-            mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
-        else:
-            mappings = np.array(self.mappings_)[:, [-3, -1]]
-            mappings = dict(zip(mappings[:, 0], mappings[:, 1]))
-        return mappings
-
-    def add_mappings(self, mappings: dict[int, int], topic_model: BERTopic):
-        """Add new column(s) of topic mappings.
-
-        Arguments:
-            mappings: The mappings to add
-            topic_model: The topic model this TopicMapper belongs to
-        """
-        for topics in self.mappings_:
-            topic = topics[-1]
-            if topic in mappings:
-                topics.append(mappings[topic])
-            else:
-                topics.append(-1)
-
-        # When zero-shot topic(s) are present in the topics to merge,
-        # determine whether to take one of the zero-shot topic labels
-        # or use a calculated representation.
-        if topic_model._is_zeroshot() and len(topic_model._topic_id_to_zeroshot_topic_idx) > 0:
-            new_topic_id_to_zeroshot_topic_idx = {}
-            topics_to_map = {
-                topic_mapping[0]: topic_mapping[1]
-                for topic_mapping in np.array(topic_model.topic_mapper_.mappings_)[:, -2:]
-            }
-
-            # Map topic_to to topics_from
-            mapping = defaultdict(list)
-            for key, value in topics_to_map.items():
-                mapping[value].append(key)
-
-            for topic_to, topics_from in mapping.items():
-                # which of the original topics are zero-shot
-                zeroshot_topic_ids = [
-                    topic_id
-                    for topic_id in topics_from
-                    if topic_id in topic_model._topic_id_to_zeroshot_topic_idx
-                ]
-                if len(zeroshot_topic_ids) == 0:
-                    continue
-
-                # If any of the original topics are zero-shot, take the best fitting zero-shot label
-                # if the cosine similarity with the new topic exceeds the zero-shot threshold
-                zeroshot_labels = [
-                    topic_model.zeroshot_topic_list[topic_model._topic_id_to_zeroshot_topic_idx[topic_id]]
-                    for topic_id in zeroshot_topic_ids
-                ]
-                zeroshot_embeddings = topic_model._extract_embeddings(zeroshot_labels)
-                cosine_similarities = cosine_similarity(
-                    zeroshot_embeddings, [topic_model.topic_embeddings_[topic_to]]
-                ).flatten()
-                best_zeroshot_topic_idx = np.argmax(cosine_similarities)
-                best_cosine_similarity = cosine_similarities[best_zeroshot_topic_idx]
-                if best_cosine_similarity >= topic_model.zeroshot_min_similarity:
-                    # Using the topic ID from before mapping, get the idx into the zeroshot topic list
-                    new_topic_id_to_zeroshot_topic_idx[topic_to] = (
-                        topic_model._topic_id_to_zeroshot_topic_idx[
-                            zeroshot_topic_ids[best_zeroshot_topic_idx]
-                        ]
-                    )
-            topic_model._topic_id_to_zeroshot_topic_idx = new_topic_id_to_zeroshot_topic_idx
-
-    def add_new_topics(self, mappings: dict[int, int]):
-        """Add new row(s) of topic mappings.
-
-        Arguments:
-            mappings: The mappings to add
-        """
-        length = len(self.mappings_[0])
-        for key, value in mappings.items():
-            to_append = [key] + ([None] * (length - 2)) + [value]
-            self.mappings_.append(to_append)
 
 
 def _create_model_from_files(

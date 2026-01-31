@@ -1,22 +1,5 @@
 """Zero-Shot Topic Modeling Variation for BERTopic.
-
-# Methodology
-
-This method works as follows:
-
-* Create labels for predefined topics and embed each label
-* For each document, compute cosine similarity with each predefined topic label
-* If the similarity exceeds a threshold, assign the topic to the document
-* Otherwise, cluster the document using BERTopic's regular pipeline
-
-# Three Scenarios
-
-There are three main scenarios when using Zero-Shot Topic Modeling:
-
-* Both zero-shot topics and clustered topics are detected --> both techqniques are used and topics combined
-* Only zero-shot topics are detected --> no clustering is needed.
-* No zero-shot topics are detected --> regular BERTopic is run.
-
+See: https://maartengr.github.io/BERTopic/getting_started/zeroshot/zeroshot.html.
 """
 
 import numpy as np

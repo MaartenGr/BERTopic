@@ -1,3 +1,7 @@
+"""Outlier reduction variation for BERTopic.
+See: https://maartengr.github.io/BERTopic/getting_started/outlier_reduction/outlier_reduction.html.
+"""
+
 import numpy as np
 from typing import Any
 from sklearn.metrics.pairwise import cosine_similarity

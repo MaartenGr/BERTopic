@@ -28,9 +28,9 @@ class TopicRepresentation(ABC):
         return {"type": "base", "data": self.data}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "TopicRepresentation":
+    def from_dict(cls, data: dict) -> "TopicRepresentation":
         """Deserialize from dictionary."""
-        return cls(data=d.get("data"))
+        return cls(data=data.get("data"))
 
 
 @dataclass
@@ -61,8 +61,8 @@ class Keywords(TopicRepresentation):
         return {"type": "keywords", "data": [list(item) for item in self.data]}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Keywords":
-        return cls(data=[tuple(item) for item in d["data"]])
+    def from_dict(cls, data: dict) -> "Keywords":
+        return cls(data=[tuple(item) for item in data["data"]])
 
 
 @dataclass
@@ -75,8 +75,8 @@ class Label(TopicRepresentation):
         return {"type": "label", "data": self.data}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Label":
-        return cls(data=d["data"])
+    def from_dict(cls, data: dict) -> "Label":
+        return cls(data=data["data"])
 
 
 @dataclass
@@ -89,8 +89,8 @@ class StructuredJSON(TopicRepresentation):
         return {"type": "structured_json", "data": self.data}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "StructuredJSON":
-        return cls(data=d["data"])
+    def from_dict(cls, data: dict) -> "StructuredJSON":
+        return cls(data=data["data"])
 
 
 @dataclass
@@ -111,8 +111,8 @@ class Metadata(TopicRepresentation):
         return {"type": "metadata", "data": self.data}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Metadata":
-        return cls(data=d["data"])
+    def from_dict(cls, data: dict) -> "Metadata":
+        return cls(data=data["data"])
 
 
 def representation_from_dict(d: dict) -> TopicRepresentation:
@@ -237,12 +237,16 @@ class TopicMapping:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "TopicMapping":
+    def from_dict(cls, data: dict) -> "TopicMapping":
         """Deserialize from dictionary."""
         mapping = cls()
-        mapping._mapping = {int(k): v for k, v in d.get("mapping", {}).items()}
-        mapping._recent_mapping = {int(k): v for k, v in d.get("recent_mapping", {}).items()}
+        mapping._mapping = {int(k): v for k, v in data.get("mapping", {}).items()}
+        mapping._recent_mapping = {int(k): v for k, v in data.get("recent_mapping", {}).items()}
         return mapping
+
+    def copy(self) -> "TopicMapping":
+        """Create a copy of this mapping."""
+        return TopicMapping.from_dict(self.to_dict())
 
 
 @dataclass
@@ -342,9 +346,14 @@ class Topic:
 
         return info
 
-    def to_dict(self) -> dict:
-        """Serialize topic for storage."""
-        d = {
+    def to_dict(self, full: bool = False) -> dict:
+        """Serialize topic for storage.
+
+        Arguments:
+            full: If True, include embeddings and c_tf_idf (for in-memory copy).
+                  If False, exclude large arrays (for disk serialization).
+        """
+        data = {
             "id": self.id,
             "label": self._label,
             "nr_documents": self.nr_documents,
@@ -352,37 +361,75 @@ class Topic:
             "representations": {name: rep.to_dict() for name, rep in self.representations.items()},
             "representative_documents": self.representative_documents,
         }
+
+        if full:
+            data["embedding"] = self.embedding.tolist() if self.embedding.size else []
+            if self.c_tf_idf.nnz > 0:
+                data["c_tf_idf"] = {
+                    "data": self.c_tf_idf.data.tolist(),
+                    "indices": self.c_tf_idf.indices.tolist(),
+                    "indptr": self.c_tf_idf.indptr.tolist(),
+                    "shape": list(self.c_tf_idf.shape),
+                }
+            if self.representative_images is not None and self.representative_images.size:
+                data["representative_images"] = self.representative_images.tolist()
+
         # Hierarchy fields (only if set)
         if self.parent_id is not None:
-            d["parent_id"] = self.parent_id
+            data["parent_id"] = self.parent_id
         if self.child_ids is not None:
-            d["child_ids"] = list(self.child_ids)
+            data["child_ids"] = list(self.child_ids)
         if self.merge_distance is not None:
-            d["merge_distance"] = self.merge_distance
+            data["merge_distance"] = self.merge_distance
         if self.leaf_topic_ids:
-            d["leaf_topic_ids"] = self.leaf_topic_ids
-        return d
+            data["leaf_topic_ids"] = self.leaf_topic_ids
+        return data
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Topic":
+    def from_dict(cls, data: dict) -> "Topic":
         """Deserialize topic from storage."""
         representations = {
             name: representation_from_dict(rep_dict)
-            for name, rep_dict in d.get("representations", {}).items()
+            for name, rep_dict in data.get("representations", {}).items()
         }
-        child_ids = tuple(d["child_ids"]) if d.get("child_ids") else None
-        return cls(
-            id=d["id"],
-            _label=d.get("label"),
-            nr_documents=d.get("nr_documents", 0),
-            topic_type=TopicType(d.get("topic_type", "normal")),
-            representations=representations,
-            representative_documents=d.get("representative_documents", []),
-            parent_id=d.get("parent_id"),
-            child_ids=child_ids,
-            merge_distance=d.get("merge_distance"),
-            leaf_topic_ids=d.get("leaf_topic_ids", []),
+
+        # Handle full format fields
+        embedding = np.array(data["embedding"]) if "embedding" in data else np.array([])
+        c_tf_idf_data = data.get("c_tf_idf")
+        if c_tf_idf_data:
+            c_tf_idf = csr_matrix(
+                (c_tf_idf_data["data"], c_tf_idf_data["indices"], c_tf_idf_data["indptr"]),
+                shape=tuple(c_tf_idf_data["shape"]),
+            )
+        else:
+            c_tf_idf = csr_matrix([])
+
+        representative_images = (
+            np.array(data["representative_images"]) if "representative_images" in data else np.array([])
         )
+
+        return cls(
+            id=data["id"],
+            _label=data.get("label"),
+            nr_documents=data.get("nr_documents", 0),
+            topic_type=TopicType(data.get("topic_type", "normal")),
+            representations=representations,
+            representative_documents=data.get("representative_documents", []),
+            embedding=embedding,
+            c_tf_idf=c_tf_idf,
+            representative_images=representative_images if representative_images.size else None,
+            parent_id=data.get("parent_id"),
+            child_ids=tuple(data["child_ids"]) if data.get("child_ids") else None,
+            merge_distance=data.get("merge_distance"),
+            leaf_topic_ids=data.get("leaf_topic_ids", []),
+        )
+
+    def copy(self, new_id: int | None = None) -> "Topic":
+        """Create a copy of this topic, optionally with a new ID."""
+        copied = Topic.from_dict(self.to_dict(full=True))
+        if new_id is not None:
+            copied.id = new_id
+        return copied
 
     def __str__(self) -> str:
         """Pretty print all representations of the topic."""
@@ -840,25 +887,127 @@ class Topics:
         data = {col: [row.get(col) for row in rows] for col in columns}
         return pl.DataFrame(data)
 
-    def to_dict(self) -> dict:
-        """Serialize Topics for storage."""
-        return {
+    def to_dict(self, full: bool = False) -> dict:
+        """Serialize Topics for storage.
+
+        Arguments:
+            full: If True, include embeddings and probabilities (for in-memory copy).
+                  If False, exclude large arrays (for disk serialization).
+        """
+        data = {
             "bertopic_version": BERTOPIC_VERSION,
-            "topics": {str(tid): topic.to_dict() for tid, topic in self.topics.items()},
+            "topics": {str(tid): topic.to_dict(full=full) for tid, topic in self.topics.items()},
             "mapping": self.mapping.to_dict(),
             "predictions": self._original_predictions.tolist() if self._original_predictions.size > 0 else [],
             "actions": [a.value for a in self.actions],
         }
 
+        if full:
+            if self._original_probabilities is not None:
+                data["original_probabilities"] = self._original_probabilities.tolist()
+            if self._zeroshot_probabilities is not None:
+                data["zeroshot_probabilities"] = self._zeroshot_probabilities.tolist()
+
+        return data
+
     @classmethod
-    def from_dict(cls, d: dict) -> "Topics":
+    def from_dict(cls, data: dict) -> "Topics":
         """Deserialize Topics from storage."""
         topics = cls()
-        topics.topics = {int(tid): Topic.from_dict(td) for tid, td in d.get("topics", {}).items()}
-        topics.mapping = TopicMapping.from_dict(d.get("mapping", {}))
-        topics._original_predictions = np.array(d.get("predictions", []))
-        topics.actions = [TopicAction(a) for a in d.get("actions", [])]
+        topics.topics = {int(tid): Topic.from_dict(td) for tid, td in data.get("topics", {}).items()}
+        topics.mapping = TopicMapping.from_dict(data.get("mapping", {}))
+        topics._original_predictions = np.array(data.get("predictions", []))
+        topics.actions = [TopicAction(a) for a in data.get("actions", [])]
+
+        # Handle full format fields
+        if "original_probabilities" in data:
+            topics._original_probabilities = np.array(data["original_probabilities"])
+        if "zeroshot_probabilities" in data:
+            topics._zeroshot_probabilities = np.array(data["zeroshot_probabilities"])
+
         return topics
+
+    def copy(self) -> "Topics":
+        """Create a deep copy of this Topics collection."""
+        return Topics.from_dict(self.to_dict(full=True))
+
+    def merge_similar(self, other: "Topics", min_similarity: float = 0.7) -> "Topics":
+        """Merge another Topics collection based on embedding similarity.
+
+        Topics from `other` are compared against topics in `self`. Those with
+        cosine similarity >= min_similarity are deduplicated (their document
+        predictions map to the existing similar topic). Dissimilar topics are
+        added as new topics with new IDs.
+
+        After merging:
+        - New topics are added to self.topics
+        - Predictions from other are remapped and appended to self
+        - Document counts are recalculated
+        - The mapping is reset to identity
+
+        Arguments:
+            other: Another Topics collection to merge into this one.
+            min_similarity: Minimum cosine similarity to consider topics as duplicates.
+
+        Returns:
+            self (for method chaining)
+        """
+        from sklearn.metrics.pairwise import cosine_similarity
+        from collections import Counter
+
+        self_ids = self.topic_ids(outliers=False)
+        other_ids = other.topic_ids(outliers=False)
+
+        # Handle edge cases
+        if not other_ids:
+            return self
+
+        # Build ID mapping: other_id -> self_id
+        id_mapping = {-1: -1}
+
+        if not self_ids:
+            # Self has no real topics, just add all from other
+            for other_id in other_ids:
+                id_mapping[other_id] = other_id
+                self.topics[other_id] = other.topics[other_id].copy()
+        else:
+            # Compute similarity
+            self_emb = np.array([self.topics[tid].embedding for tid in self_ids])
+            other_emb = np.array([other.topics[tid].embedding for tid in other_ids])
+            sim_matrix = cosine_similarity(other_emb, self_emb)
+
+            max_sims = np.max(sim_matrix, axis=1)
+            best_matches = np.argmax(sim_matrix, axis=1)
+            next_id = max(self_ids) + 1
+
+            for i, other_id in enumerate(other_ids):
+                if max_sims[i] >= min_similarity:
+                    id_mapping[other_id] = self_ids[best_matches[i]]
+                else:
+                    id_mapping[other_id] = next_id
+                    self.topics[next_id] = other.topics[other_id].copy(new_id=next_id)
+                    next_id += 1
+
+        # Ensure outlier exists
+        if -1 in other.topics and -1 not in self.topics:
+            self.topics[-1] = other.topics[-1].copy()
+
+        # Merge predictions: get current, remap other's, concatenate
+        current_preds = list(self.predictions)
+        other_preds = [id_mapping[p] for p in other.predictions]
+        all_preds = current_preds + other_preds
+
+        # Store as new "original" with identity mapping
+        self._original_predictions = np.array(all_preds)
+        self.mapping.reset()
+
+        # Recalculate document counts
+        counts = Counter(all_preds)
+        for topic in self.topics.values():
+            topic.nr_documents = counts.get(topic.id, 0)
+
+        self.add_action(TopicAction.MERGED)
+        return self
 
 
 @dataclass
@@ -1051,12 +1200,14 @@ class TopicHierarchy:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "TopicHierarchy":
+    def from_dict(cls, data: dict) -> "TopicHierarchy":
         """Deserialize hierarchy from storage."""
         hierarchy = cls()
-        hierarchy.nodes = {int(nid): Topic.from_dict(nd) for nid, nd in d.get("nodes", {}).items()}
-        hierarchy.linkage_matrix = np.array(d.get("linkage_matrix", []))
-        hierarchy.n_leaves = d.get("n_leaves", 0)
-        hierarchy.outlier_topic = Topic.from_dict(d["outlier_topic"]) if d.get("outlier_topic") else None
-        hierarchy._original_predictions = np.array(d.get("predictions", []))
+        hierarchy.nodes = {int(nid): Topic.from_dict(nd) for nid, nd in data.get("nodes", {}).items()}
+        hierarchy.linkage_matrix = np.array(data.get("linkage_matrix", []))
+        hierarchy.n_leaves = data.get("n_leaves", 0)
+        hierarchy.outlier_topic = (
+            Topic.from_dict(data["outlier_topic"]) if data.get("outlier_topic") else None
+        )
+        hierarchy._original_predictions = np.array(data.get("predictions", []))
         return hierarchy

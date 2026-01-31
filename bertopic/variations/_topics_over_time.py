@@ -1,14 +1,5 @@
 """Topics over time (dynamic topic modeling) variation for BERTopic.
-
-# Methodology
-
-BERTopic allows for DTM by calculating the topic representation at each timestep without the need to
-run the entire model several times. To do this, we first need to fit BERTopic as if there were no temporal aspect in the data.
-Thus, a general topic model will be created. We use the global representation as to the main topics that can be found at,
-most likely, different timesteps. For each topic and timestep, we calculate the c-TF-IDF representation.
-This will result in a specific topic representation at each timestep without the need to create clusters from embeddings
-as they were already created.
-
+See: https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicsovertime.html.
 """
 
 import numpy as np

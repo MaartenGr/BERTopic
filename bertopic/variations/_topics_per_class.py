@@ -1,11 +1,5 @@
 """Topics per class variation for BERTopic.
-
-# Methodology
-
-Instead of running the topic model per class, we can simply create a topic model and then extract,
-for each topic, its representation per class. This allows you to see how certain topics, calculated over all documents,
-are represented for certain subgroups.
-
+See: https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsperclass.html.
 """
 
 import numpy as np
