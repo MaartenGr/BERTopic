@@ -458,8 +458,8 @@ class BERTopic:
         Arguments:
             documents: A single document or a list of documents to predict on.                    
                        Note that the behavior of the method might differ depending 
-                       on whether a single document or a list of documents is passed
-                       (especially when using the HDBSCAN algorithm)
+                       on whether a single document or a list of documents is passed,
+                       particularly when using HDBSCAN, where this distinction is algorithm-specific.
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model.
             images: A list of paths to the images to predict on or the images themselves
