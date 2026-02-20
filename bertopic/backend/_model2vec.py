@@ -73,7 +73,9 @@ class Model2VecBackend(BaseEmbedder):
             if isinstance(embedding_model, str):
                 self.embedding_model = embedding_model
             else:
-                raise ValueError("Please pass a string pointing to a sentence-transformer model when distilling.")
+                raise ValueError(
+                    "Please pass a string pointing to a sentence-transformer model when distilling."
+                )
 
         # If we don't distill, we can pass a model2vec model directly or load from a string
         elif isinstance(embedding_model, StaticModel):
@@ -108,7 +110,9 @@ class Model2VecBackend(BaseEmbedder):
                 X = self.distill_vectorizer.fit_transform(documents)
                 word_counts = np.array(X.sum(axis=0)).flatten()
                 words = self.distill_vectorizer.get_feature_names_out()
-                vocabulary = [word for word, _ in sorted(zip(words, word_counts), key=lambda x: x[1], reverse=True)]
+                vocabulary = [
+                    word for word, _ in sorted(zip(words, word_counts), key=lambda x: x[1], reverse=True)
+                ]
                 self.distill_kwargs["vocabulary"] = vocabulary
 
             # Distill the model
@@ -126,4 +130,6 @@ class Model2VecBackend(BaseEmbedder):
         try:
             from model2vec.distill import distill  # noqa: F401
         except ImportError:
-            raise ImportError("To distill a model using model2vec, you need to run `pip install model2vec[distill]`")
+            raise ImportError(
+                "To distill a model using model2vec, you need to run `pip install model2vec[distill]`"
+            )

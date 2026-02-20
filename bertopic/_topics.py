@@ -734,10 +734,7 @@ class Topics:
         Arguments:
             topics: List of topic IDs to delete or a single topic ID.
         """
-        if isinstance(topics, int):
-            topics = {topics}
-        else:
-            topics = set(topics)
+        topics = {topics} if isinstance(topics, int) else set(topics)
 
         # Calculate total documents being moved to outlier
         deleted_doc_count = sum(
@@ -830,6 +827,9 @@ class Topics:
             rows = [selected_topic.to_info_dict()] if selected_topic else []
         else:
             rows = [t.to_info_dict() for t in self]
+
+        if not rows:
+            return pl.DataFrame()
 
         columns = list(rows[0].keys())
         data = {col: [row.get(col) for row in rows] for col in columns}

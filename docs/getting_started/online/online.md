@@ -79,18 +79,8 @@ And that is it! During each iteration, you can access the predicted topics throu
 !!! tip Tip
     You can use any other dimensionality reduction and clustering algorithm as long as they have a `.partial_fit` function. Moreover, you can use dimensionality reduction algorithms that do not support `.partial_fit` functions but do have a `.fit` function to first train it on a large amount of data and then continuously  add documents. The dimensionality reduction will not be updated but may be trained sufficiently to properly reduce the embeddings without the need to continuously add documents.
 
-!!! warning
-    Only the most recent batch of documents is tracked. If you want to be using online topic modeling for low-memory use cases, then it is advised to also update the `.topics_` attribute. Otherwise, variations such as **hierarchical topic modeling** will not work.
-
-    ```python
-    # Incrementally fit the topic model by training on 1000 documents at a time and track the topics in each iteration
-    topics = []
-    for docs in doc_chunks:
-        topic_model.partial_fit(docs)
-        topics.extend(topic_model.topics_)
-
-    topic_model.topics_ = topics
-    ```
+!!! tip Tip
+    It is highly advised to create chuncks that are at least 5% of your data (so a minimum of about 20 chuncks). More might do the trick, but it might happen that there is not enough data in each chunk to properly represent a topic. If you need more chuncks, make sure that the size of the chunk itself is at least a couple thousand of documents.
 
 
 ## **River**
@@ -132,7 +122,6 @@ topic_model = BERTopic(
     vectorizer_model=vectorizer_model,
     ctfidf_model=ctfidf_model,
 )
-
 
 # Incrementally fit the topic model by training on 1000 documents at a time
 for docs in doc_chunks:

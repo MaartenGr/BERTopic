@@ -296,26 +296,17 @@ class BERTopic:
 
         # Track topics complete with metadata
         self._topics: Topics = Topics()
-        self.hierarchy_: TopicHierarchy | None = None
-
-        # Replaced by Topics()
-
-        # self.topic_sizes_ = None
-        # self.topic_mapper_ = None
-        # self.topic_representations_ = None
-        # self.topic_embeddings_ = None
-        # self._topic_id_to_zeroshot_topic_idx = {}
-        # self.custom_labels_ = None
-        # self.c_tf_idf_ = None
-        # self.representative_images_ = None
-        # self.representative_docs_ = {}
-        # self.topic_aspects_ = {}
-        # self._merged_topics = None
+        self._hierarchy: TopicHierarchy | None = None
 
         if verbose:
             logger.set_level("DEBUG")
         else:
             logger.set_level("WARNING")
+
+    @property
+    def hierarchy_(self) -> pl.DataFrame | None:
+        """Get the TopicHierarchy object that contains all hierarchical topic information."""
+        return self._hierarchy.to_polars() if self._hierarchy is not None else None
 
     @property
     def topics(self) -> Topics:
@@ -338,7 +329,7 @@ class BERTopic:
         representations = {}
         for topic in self._topics:
             representations[topic.id] = topic.representations["Main"].data
-        return representations
+        return representations if representations else None
 
     @property
     def topic_aspects_(self) -> dict[int, dict[str, list[tuple[str, float]]]]:
@@ -374,6 +365,24 @@ class BERTopic:
     def custom_labels_(self) -> list[str]:
         """For backwards compatibility."""
         return [topic.label for topic in self._topics]
+
+    @property
+    def representative_docs_(self) -> dict[int, str]:
+        """For backwards compatibility."""
+        return {
+            topic.id: topic.representative_documents
+            for topic in self._topics
+            if topic.representative_documents is not None
+        }
+
+    @property
+    def representative_images_(self) -> dict[int, str]:
+        """For backwards compatibility."""
+        return {
+            topic.id: topic.representative_images
+            for topic in self._topics
+            if topic.representative_images is not None
+        }
 
     @property
     def _outliers(self) -> int:
@@ -450,20 +459,18 @@ class BERTopic:
         """
         corpus = Corpus(documents=documents, embeddings=embeddings, images=images, y=y)
 
-        # 1) Extract embeddings
-        if self.embedding_model is not None:
+        # 1. Extract embeddings
+        if corpus.embeddings is None or (corpus.embeddings is not None and self.embedding_model is not None):
             self.embedding_model = select_backend(
                 embedding_model=self.embedding_model, language=self.language, verbose=self.verbose
             )
 
-        if embeddings is None:
-            logger.info("Embedding - Transforming documents to embeddings.")
+        if corpus.embeddings is None:
             corpus.embeddings = self._extract_embeddings(
                 documents=corpus.documents,
                 images=corpus.images,
                 verbose=self.verbose,
             )
-            logger.info("Embedding - Completed \u2713")
 
         # Guided Topic Modeling
         corpus = guided.guided_tm(self, corpus)
@@ -798,7 +805,7 @@ class BERTopic:
         nr_bins: int | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
-    ) -> dict[str, Topics]:
+    ) -> pl.DataFrame:
         return variations.topics_over_time(
             topic_model=self,
             docs=docs,
@@ -815,7 +822,7 @@ class BERTopic:
         docs: list[str],
         classes: list[int | str],
         global_tuning: bool = True,
-    ) -> dict[str, Topics]:
+    ) -> pl.DataFrame:
         return variations.topics_per_class(
             topic_model=self,
             docs=docs,
@@ -881,8 +888,8 @@ class BERTopic:
         linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
         distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
         use_representation_model: bool | str = False,
-    ) -> None:
-        self.hierarchy_ = variations.hierarchical_topics(
+    ) -> pl.DataFrame:
+        self._hierarchy = variations.hierarchical_topics(
             topic_model=self,
             docs=docs,
             use_ctfidf=use_ctfidf,
@@ -890,6 +897,7 @@ class BERTopic:
             distance_function=distance_function,
             use_representation_model=use_representation_model,
         )
+        return self._hierarchy.to_polars()
 
     def find_topics(
         self, search_term: str | None = None, image: str | None = None, top_n: int = 5
@@ -1119,7 +1127,8 @@ class BERTopic:
         df = self._topics.to_polars(topic=topic)
 
         # Slice representative documents for better readability
-        df = df.with_columns(pl.col("Representative_Docs").list.eval(pl.element().str.slice(0, 80)))
+        if len(df) > 0 and "Representative_Docs" in df.columns:
+            df = df.with_columns(pl.col("Representative_Docs").list.eval(pl.element().str.slice(0, 80)))
         return df
 
     def get_topic_freq(self, topic: int | None = None) -> pl.DataFrame | int:
@@ -1264,7 +1273,7 @@ class BERTopic:
 
         Arguments:
             hierarchy: A TopicHierarchy containing the tree structure.
-                       This is stored in `topic_model.hierarchy_` after calling
+                       This is stored in `topic_model._hierarchy` after calling
                        `topic_model.hierarchical_topics()`.
             max_distance: The maximum distance between two topics. Topics merged
                           at distances greater than this are shown as 'O'.
@@ -1295,28 +1304,28 @@ class BERTopic:
         topic_model.hierarchical_topics(docs)
 
         # Print topic tree
-        tree = topic_model.get_topic_tree(topic_model.hierarchy_)
+        tree = topic_model.get_topic_tree()
         print(tree)
         ```
         """
-        if isinstance(self.hierarchy_, TopicHierarchy) is False:
+        if isinstance(self._hierarchy, TopicHierarchy) is False:
             raise ValueError(
                 "You need to first create a topic hierarchy through "
                 "`topic_model.hierarchical_topics()` before you can "
                 "extract the topic tree."
             )
         width = 1 if tight_layout else 4
-        root_id = self.hierarchy_.root.id
+        root_id = self._hierarchy.root.id
 
         if max_distance is None:
-            max_distance = self.hierarchy_.root.merge_distance + 1
+            max_distance = self._hierarchy.root.merge_distance + 1
 
         # Extract mapping from ID to label (truncated to 100 chars)
-        topic_to_name = {node_id: topic.label[:100] for node_id, topic in self.hierarchy_.nodes.items()}
+        topic_to_name = {node_id: topic.label[:100] for node_id, topic in self._hierarchy.nodes.items()}
 
         # Create tree structure: parent_id -> [left_child_id, right_child_id]
         tree = {}
-        for node_id, topic in self.hierarchy_.nodes.items():
+        for node_id, topic in self._hierarchy.nodes.items():
             if topic.child_ids is not None:
                 tree[str(node_id)] = [str(topic.child_ids[0]), str(topic.child_ids[1])]
 
@@ -1325,11 +1334,11 @@ class BERTopic:
 
             def _tree(to_print, start, parent, tree, grandpa=None, indent=""):
                 parent_int = int(parent)
-                topic = self.hierarchy_.nodes.get(parent_int)
+                topic = self._hierarchy.nodes.get(parent_int)
 
                 # Get distance: use the parent's merge_distance if this node was merged
                 if topic and topic.parent_id is not None:
-                    parent_topic = self.hierarchy_.nodes.get(topic.parent_id)
+                    parent_topic = self._hierarchy.nodes.get(topic.parent_id)
                     distance = parent_topic.merge_distance if parent_topic else 10
                 else:
                     distance = 10
@@ -2204,7 +2213,7 @@ class BERTopic:
             hdbscan_model=BaseCluster(),
         )
         merged_model._topics = merged_topics
-        merged_model.hierarchy_ = None
+        merged_model._hierarchy = None
 
         # Set embedding model
         merged_model.embedding_model = models[0].embedding_model
@@ -2576,11 +2585,11 @@ class BERTopic:
         repr_docs_indices = []
         repr_docs_mappings = {}
         repr_docs_ids = []
-        labels = corpus.topic_labels
+        topic_ids = corpus.topic_ids()
 
-        for index, topic in enumerate(labels):
+        for index, topic_id in enumerate(topic_ids):
             # Slice data
-            selection = corpus.get_topic(topic, nr_samples=nr_samples)
+            selection = corpus.get_topic(topic_id, nr_samples=nr_samples)
 
             # Calculate similarity
             nr_docs = nr_repr_docs if len(selection.documents) > nr_repr_docs else len(selection.documents)
@@ -2616,7 +2625,7 @@ class BERTopic:
 
         # Create mapping from topic to representative documents
         repr_docs_mappings = {
-            topic: repr_docs[i[0] : i[-1] + 1] for topic, i in zip(labels, repr_docs_indices)
+            topic_id: repr_docs[i[0] : i[-1] + 1] for topic_id, i in zip(topic_ids, repr_docs_indices)
         }
 
         return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
@@ -2638,8 +2647,16 @@ class BERTopic:
         # Topic embeddings based on input embeddings
         if corpus.embeddings is not None and corpus.documents is not None:
             topic_embeddings = []
-            for topic in self._topics.topic_ids():
-                topic_embedding = corpus.get_topic(topic).embeddings.mean(axis=0)
+            for topic_id in self._topics.topic_ids():
+                # If there are no embeddings for a topic, use them from self._topics[topic_id].embedding
+                # This happens during `partial_fit` when new topics are added or only a subset of of topics is found
+                if topic_id not in corpus.topic_ids():
+                    topic_embedding = self._topics[topic_id].embedding
+                    topic_embedding = (
+                        np.zeros_like(topic_embedding) if topic_embedding is None else topic_embedding
+                    )
+                else:
+                    topic_embedding = corpus.get_topic(topic_id).embeddings.mean(axis=0)
                 topic_embeddings.append(topic_embedding)
             self._topics.set_data(embeddings=np.array(topic_embeddings))
 
@@ -2739,16 +2756,6 @@ class BERTopic:
 
         return c_tf_idf, words
 
-    def _update_topic_size(self, documents: pd.DataFrame):
-        """Calculate the topic sizes.
-
-        Arguments:
-            documents: Updated dataframe with documents and their corresponding IDs and newly added Topics
-        """
-        # self.topic_sizes_ = collections.Counter(documents.Topic.to_numpy().tolist())
-        # self.topics_ = documents.Topic.astype(int).tolist()
-        pass
-
     def _extract_words_per_topic(
         self,
         words: list[str],
@@ -2791,13 +2798,13 @@ class BERTopic:
 
         # Get top 30 words per topic based on c-TF-IDF score
         topic_representations = {
-            label: Keywords(
+            topic_id: Keywords(
                 [
                     (words[word_index], score) if word_index is not None and score > 0 else ("", 0.00001)
                     for word_index, score in zip(indices[index][::-1], scores[index][::-1])
                 ]
             )
-            for index, label in enumerate(corpus.topic_labels)
+            for index, topic_id in enumerate(corpus.topic_ids())
         }
 
         # Main topic representation fine-tuning
@@ -3025,86 +3032,6 @@ class BERTopic:
         self._extract_representations(corpus=corpus, verbose=self.verbose)
 
         return corpus
-
-    def _sort_mappings_by_frequency(self, documents: pd.DataFrame) -> pd.DataFrame:
-        """Reorder mappings by their frequency.
-
-        For example, if topic 88 was mapped to topic
-        5 and topic 5 turns out to be the largest topic,
-        then topic 5 will be topic 0. The second largest
-        will be topic 1, etc.
-
-        If there are no mappings since no reduction of topics
-        took place, then the topics will simply be ordered
-        by their frequency and will get the topic ids based
-        on that order.
-
-        This means that -1 will remain the outlier class, and
-        that the rest of the topics will be in descending order
-        of ids and frequency.
-
-        Arguments:
-            documents: Dataframe with documents and their corresponding IDs and Topics
-
-        Returns:
-            documents: Updated dataframe with documents and the mapped
-                       and re-ordered topic ids
-        """
-        # No need to sort if it's the first pass of zero-shot topic modeling
-        nr_zeroshot = len(self._topic_id_to_zeroshot_topic_idx)
-        if self._is_zeroshot and not self.nr_topics and nr_zeroshot > 0:
-            return documents
-
-        # Map topics based on frequency
-        self._update_topic_size(documents)
-        df = pd.DataFrame(self.topic_sizes_.items(), columns=["Old_Topic", "Size"]).sort_values(
-            "Size", ascending=False
-        )
-        df = df[df.Old_Topic != -1]
-        sorted_topics = {**{-1: -1}, **dict(zip(df.Old_Topic, range(len(df))))}
-        self.topic_mapper_.add_mappings(sorted_topics, topic_model=self)
-
-        # Map documents
-        documents.Topic = documents.Topic.map(sorted_topics).fillna(documents.Topic).astype(int)
-        self._update_topic_size(documents)
-        return documents
-
-    def _map_probabilities(
-        self, probabilities: Union[np.ndarray, None], original_topics: bool = False
-    ) -> Union[np.ndarray, None]:
-        """Map the probabilities to the reduced topics.
-        This is achieved by adding together the probabilities
-        of all topics that are mapped to the same topic. Then,
-        the topics that were mapped from are set to 0 as they
-        were reduced.
-
-        Arguments:
-            probabilities: An array containing probabilities
-            original_topics: Whether we want to map from the
-                             original topics to the most recent topics
-                             or from the second-most recent topics.
-
-        Returns:
-            mapped_probabilities: Updated probabilities
-        """
-        mappings = self.topic_mapper_.get_mappings(original_topics)
-
-        # Map array of probabilities (probability for assigned topic per document)
-        if probabilities is not None:
-            if len(probabilities.shape) == 2:
-                mapped_probabilities = np.zeros(
-                    (
-                        probabilities.shape[0],
-                        len(set(mappings.values())) - self._outliers,
-                    )
-                )
-                for from_topic, to_topic in mappings.items():
-                    if to_topic != -1 and from_topic != -1:
-                        mapped_probabilities[:, to_topic] += probabilities[:, from_topic]
-
-                return mapped_probabilities
-
-        return probabilities
 
     def _preprocess_text(self, documents: np.ndarray) -> List[str]:
         r"""Basic preprocessing of text.

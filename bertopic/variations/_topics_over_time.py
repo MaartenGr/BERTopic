@@ -3,6 +3,8 @@ See: https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicso
 """
 
 import numpy as np
+import polars as pl
+
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
 from tqdm import tqdm
@@ -26,7 +28,7 @@ def topics_over_time(
     nr_bins: int | None = None,
     evolution_tuning: bool = True,
     global_tuning: bool = True,
-) -> dict[str, Topics]:
+) -> pl.DataFrame:
     """Create topics over time.
 
     To create the topics over time, BERTopic needs to be already fitted once.
@@ -64,8 +66,11 @@ def topics_over_time(
                     topic representations that could not be found in the documents at timestamp *t*.
 
     Returns:
-        topics_over_time: A dictionary where each key is a timestamp and each value
-                          is a Topics object containing the topics at that timestamp.
+        topics_over_time: A polars DataFrame with columns:
+            - Topic: The topic ID
+            - Words: The top words for the topic at this timestamp
+            - Frequency: The number of documents for the topic at this timestamp
+            - Timestamp: The timestamp
 
     Examples:
     The timestamps variable represents the timestamp of each document. If you have over
@@ -95,7 +100,7 @@ def topics_over_time(
             "to a value lower than 100 to speed up calculation. "
         )
 
-    topics = {}
+    topics_dict: dict = {}
     for index, timestamp in tqdm(enumerate(set(corpus.timestamps))):
         timestamp_indices = np.where(corpus.timestamps == timestamp)[0]
         selected_corpus = corpus.get_corpus_by_indices(indices=timestamp_indices)
@@ -128,8 +133,8 @@ def topics_over_time(
         # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
         # by simply taking the average of the two
         if global_tuning:
-            topic_indices = {topic: index for index, topic in enumerate(selected_corpus.topic_labels)}
-            selected_topics = [topic_indices[topic] for topic in documents_per_topic.keys()]
+            topic_indices = {topic_id: index for index, topic_id in enumerate(selected_corpus.topic_ids())}
+            selected_topics = [topic_indices[topic_id] for topic_id in documents_per_topic.keys()]
             c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
         if evolution_tuning:
@@ -142,9 +147,44 @@ def topics_over_time(
         )
         new_topics = Topics().initialize(selected_corpus.topics)
         new_topics.set_data(representations={"Main": topic_representations})
-        topics[timestamp] = new_topics
+        topics_dict[timestamp] = new_topics
 
-    return topics
+    return _topics_over_time_to_dataframe(topics_dict)
+
+
+def _topics_over_time_to_dataframe(topics_dict: dict) -> pl.DataFrame:
+    """Convert topics over time dictionary to a polars DataFrame.
+
+    Arguments:
+        topics_dict: Dictionary mapping timestamps to Topics objects.
+
+    Returns:
+        DataFrame with columns: Topic, Words, Frequency, Timestamp
+    """
+    topic_ids, words_list, frequencies, timestamps = [], [], [], []
+
+    for timestamp, topics in topics_dict.items():
+        for topic in topics:
+            words_str = ", ".join(topic.representations["Main"].words[:5])
+            topic_ids.append(topic.id)
+            words_list.append(words_str)
+            frequencies.append(topic.nr_documents)
+            timestamps.append(timestamp)
+
+    # Convert numpy datetime64 values to Python datetime so polars infers a Datetime column
+    if timestamps and isinstance(timestamps[0], np.datetime64):
+        timestamps = np.array(timestamps, dtype="datetime64[ns]").tolist()
+
+    df = pl.DataFrame(
+        {
+            "Topic": topic_ids,
+            "Words": words_list,
+            "Frequency": frequencies,
+            "Timestamp": timestamps,
+        }
+    )
+    df = df.sort(["Timestamp", "Frequency"], descending=[False, True])
+    return df
 
 
 def bin_timestamps(corpus: Corpus, nr_bins: int) -> None:

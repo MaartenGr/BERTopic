@@ -1,29 +1,33 @@
 import numpy as np
-import pandas as pd
-from typing import Callable, List, Union
+import polars as pl
+from typing import Callable, TYPE_CHECKING
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from sklearn.metrics.pairwise import cosine_similarity
 
 from bertopic._utils import select_topic_representation
+from bertopic.plotting._utils import select_topics
 
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
 from bertopic._utils import validate_distance_matrix
 
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 def visualize_hierarchy(
-    topic_model,
+    topic_model: "BERTopic",
     orientation: str = "left",
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     top_n_topics: int | None = None,
     use_ctfidf: bool = True,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Hierarchical Clustering</b>",
     width: int = 1000,
     height: int = 600,
-    hierarchical_topics: pd.DataFrame = None,
+    hierarchical_topics: pl.DataFrame = None,
     linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
     distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
     color_threshold: int = 1,
@@ -109,26 +113,19 @@ def visualize_hierarchy(
         linkage_function = lambda x: sch.linkage(x, "ward", optimal_ordering=True)
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
-    if topics is not None:
-        topics = list(topics)
-    elif top_n_topics is not None:
-        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
-    else:
-        topics = sorted(freq_df.Topic.to_list())
+    topics = select_topics(topic_model, topics, top_n_topics)
 
     # Select embeddings
     all_topics = sorted(list(topic_model.get_topics().keys()))
     indices = np.array([all_topics.index(topic) for topic in topics])
 
     # Select topic embeddings
-    embeddings = select_topic_representation(topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf)[0][
-        indices
-    ]
+    embeddings = select_topic_representation(
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
+    )[0][indices]
 
     # Annotations
-    if hierarchical_topics is not None and len(topics) == len(freq_df.Topic.to_list()):
+    if hierarchical_topics is not None and len(topics) == len(topic_model._topics.topic_ids(outliers=False)):
         annotations = _get_annotations(
             topic_model=topic_model,
             hierarchical_topics=hierarchical_topics,
@@ -157,17 +154,20 @@ def visualize_hierarchy(
     axis = "yaxis" if orientation == "left" else "xaxis"
     if isinstance(custom_labels, str):
         new_labels = [
-            [[str(x), None]] + topic_model.topic_aspects_[custom_labels][x] for x in fig.layout[axis]["ticktext"]
+            [[str(x), None]] + topic_model.topic_aspects_[custom_labels][x]
+            for x in fig.layout[axis]["ticktext"]
         ]
         new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
         new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
     elif topic_model.custom_labels_ is not None and custom_labels:
         new_labels = [
-            topic_model.custom_labels_[topics[int(x)] + topic_model._outliers] for x in fig.layout[axis]["ticktext"]
+            topic_model.custom_labels_[topics[int(x)] + topic_model._outliers]
+            for x in fig.layout[axis]["ticktext"]
         ]
     else:
         new_labels = [
-            [[str(topics[int(x)]), None], *topic_model.get_topic(topics[int(x)])] for x in fig.layout[axis]["ticktext"]
+            [[str(topics[int(x)]), None], *topic_model.get_topic(topics[int(x)])]
+            for x in fig.layout[axis]["ticktext"]
         ]
         new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]
         new_labels = [label if len(label) < 30 else label[:27] + "..." for label in new_labels]
@@ -229,13 +229,13 @@ def visualize_hierarchy(
 
 def _get_annotations(
     topic_model,
-    hierarchical_topics: pd.DataFrame,
+    hierarchical_topics: pl.DataFrame,
     embeddings: csr_matrix,
     linkage_function: Callable[[csr_matrix], np.ndarray],
     distance_function: Callable[[csr_matrix], csr_matrix],
     orientation: str,
     custom_labels: bool = False,
-) -> List[List[str]]:
+) -> list[list[str]]:
     """Get annotations by replicating linkage function calculation in scipy.
 
     Arguments:
@@ -268,7 +268,7 @@ def _get_annotations(
     Returns:
         text_annotations: Annotations to be used within Plotly's `ff.create_dendogram`
     """
-    df = hierarchical_topics.loc[hierarchical_topics.Parent_Name != "Top", :]
+    df = hierarchical_topics.filter(pl.col("Parent_Name") != "Top")
 
     # Calculate distance
     X = distance_function(embeddings)
@@ -286,7 +286,7 @@ def _get_annotations(
     for key, val in x_topic.items():
         topic_vals[val] = [key]
 
-    parent_topic = dict(zip(df.Parent_ID, df.Topics))
+    parent_topic = dict(zip(df["Parent_ID"].to_list(), df["Topics"].to_list()))
 
     # loop through every trace (scatter plot) in dendrogram
     text_annotations = []
@@ -306,7 +306,7 @@ def _get_annotations(
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(fst_topic):
-                    fst_name = df.loc[df.Parent_ID == key, "Parent_Name"].to_numpy()[0]
+                    fst_name = df.filter(pl.col("Parent_ID") == key)["Parent_Name"][0]
 
         if len(scnd_topic) == 1:
             if isinstance(custom_labels, str):
@@ -320,7 +320,7 @@ def _get_annotations(
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(scnd_topic):
-                    scnd_name = df.loc[df.Parent_ID == key, "Parent_Name"].to_numpy()[0]
+                    scnd_name = df.filter(pl.col("Parent_ID") == key)["Parent_Name"][0]
 
         text_annotations.append([fst_name, "", "", scnd_name])
 

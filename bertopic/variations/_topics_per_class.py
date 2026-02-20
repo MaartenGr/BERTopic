@@ -3,6 +3,7 @@ See: https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsp
 """
 
 import numpy as np
+import polars as pl
 
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
@@ -24,7 +25,7 @@ def topics_per_class(
     docs: list[str],
     classes: list[int | str],
     global_tuning: bool = True,
-) -> dict[str, Topics]:
+) -> pl.DataFrame:
     """Create topics per class.
 
     To create the topics per class, BERTopic needs to be already fitted once.
@@ -48,8 +49,11 @@ def topics_per_class(
                        topic representations that could not be found in the documents for class c.
 
     Returns:
-        topics: A dictionary where keys are the unique classes and values are Topics objects
-                representing the topics for that class.
+        topics_per_class: A polars DataFrame with columns:
+            - Topic: The topic ID
+            - Words: The top words for the topic in this class
+            - Frequency: The number of documents for the topic in this class
+            - Class: The class label
 
     Examples:
     ```python
@@ -63,7 +67,7 @@ def topics_per_class(
     global_c_tf_idf = normalize(topic_model.c_tf_idf_, axis=1, norm="l1", copy=False)
 
     # For each unique class, create topic representations
-    topics = {}
+    topics_dict: dict[str | int, Topics] = {}
     for _, class_ in tqdm(enumerate(set(classes)), disable=not topic_model.verbose):
         # Calculate c-TF-IDF representation for a specific class
         class_indices = np.where(corpus.classes == class_)[0]
@@ -84,6 +88,33 @@ def topics_per_class(
         )
         new_topics = Topics().initialize(selected_corpus.topics)
         new_topics.set_data(representations={"Main": topic_representations})
-        topics[class_] = new_topics
+        topics_dict[class_] = new_topics
 
-    return topics
+    return _topics_per_class_to_dataframe(topics_dict)
+
+
+def _topics_per_class_to_dataframe(topics_dict: dict[str | int, Topics]) -> pl.DataFrame:
+    """Convert topics per class dictionary to a polars DataFrame.
+
+    Arguments:
+        topics_dict: Dictionary mapping class labels to Topics objects.
+
+    Returns:
+        DataFrame with columns: Topic, Words, Frequency, Class
+    """
+    rows = []
+    for class_, topics in topics_dict.items():
+        for topic in topics:
+            words_str = ", ".join(topic.representations["Main"].words[:5])
+            rows.append(
+                {
+                    "Topic": topic.id,
+                    "Words": words_str,
+                    "Frequency": topic.nr_documents,
+                    "Class": class_,
+                }
+            )
+
+    df = pl.DataFrame(rows)
+    df = df.sort(["Class", "Frequency"], descending=[False, True])
+    return df

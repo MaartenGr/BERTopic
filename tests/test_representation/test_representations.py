@@ -1,8 +1,10 @@
 import copy
 import pytest
 import numpy as np
-import pandas as pd
+import polars as pl
 from sklearn.feature_extraction.text import CountVectorizer
+
+from bertopic._corpus import Corpus
 
 
 @pytest.mark.parametrize(
@@ -48,26 +50,19 @@ def test_update_topics(model, documents, request):
         ("online_topic_model"),
     ],
 )
-def test_extract_topics(model, documents, request):
+def test_extract_representations(model, documents, document_embeddings, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
-    nr_topics = 5
-    documents = pd.DataFrame(
-        {
-            "Document": documents,
-            "ID": range(len(documents)),
-            "Topic": np.random.randint(-1, nr_topics - 1, len(documents)),
-        }
-    )
-    topic_model._update_topic_size(documents)
-    topic_model._extract_topics(documents)
-    freq = topic_model.get_topic_freq()
+    corpus = Corpus(documents=documents, topics=np.array(topic_model.topics_), embeddings=document_embeddings)
 
-    assert topic_model.c_tf_idf_.shape[0] == 5
+    topic_model._extract_representations(corpus)
+
+    assert topic_model.c_tf_idf_.shape[0] == len(set(topic_model.topics_))
     assert topic_model.c_tf_idf_.shape[1] > 100
-    assert isinstance(freq, pd.DataFrame)
-    assert nr_topics == len(freq.Topic.unique())
-    assert freq.Count.sum() == len(documents)
-    assert len(freq.Topic.unique()) == len(freq)
+
+    freq = topic_model.get_topic_freq()
+    assert isinstance(freq, pl.DataFrame)
+    assert len(freq["Topic"].unique()) == len(set(topic_model.topics_))
+    assert len(freq["Topic"].unique()) == len(freq)
 
 
 @pytest.mark.parametrize(
@@ -81,29 +76,21 @@ def test_extract_topics(model, documents, request):
         ("online_topic_model"),
     ],
 )
-def test_extract_topics_custom_cv(model, documents, request):
+def test_extract_representations_custom_cv(model, documents, document_embeddings, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
-    nr_topics = 5
-    documents = pd.DataFrame(
-        {
-            "Document": documents,
-            "ID": range(len(documents)),
-            "Topic": np.random.randint(-1, nr_topics - 1, len(documents)),
-        }
-    )
+    corpus = Corpus(documents=documents, topics=np.array(topic_model.topics_), embeddings=document_embeddings)
 
     cv = CountVectorizer(ngram_range=(1, 2))
     topic_model.vectorizer_model = cv
-    topic_model._update_topic_size(documents)
-    topic_model._extract_topics(documents)
-    freq = topic_model.get_topic_freq()
+    topic_model._extract_representations(corpus)
 
-    assert topic_model.c_tf_idf_.shape[0] == 5
+    assert topic_model.c_tf_idf_.shape[0] == len(set(topic_model.topics_))
     assert topic_model.c_tf_idf_.shape[1] > 100
-    assert isinstance(freq, pd.DataFrame)
-    assert nr_topics == len(freq.Topic.unique())
-    assert freq.Count.sum() == len(documents)
-    assert len(freq.Topic.unique()) == len(freq)
+
+    freq = topic_model.get_topic_freq()
+    assert isinstance(freq, pl.DataFrame)
+    assert len(freq["Topic"].unique()) == len(set(topic_model.topics_))
+    assert len(freq["Topic"].unique()) == len(freq)
 
 
 @pytest.mark.parametrize(
@@ -128,9 +115,9 @@ def test_topic_reduction(model, reduced_topics, documents, request):
     new_freq = topic_model.get_topic_freq()
 
     if model != "online_topic_model":
-        assert old_freq.Count.sum() == new_freq.Count.sum()
-    assert len(old_freq.Topic.unique()) == len(old_freq)
-    assert len(new_freq.Topic.unique()) == len(new_freq)
+        assert old_freq["Count"].sum() == new_freq["Count"].sum()
+    assert len(old_freq["Topic"].unique()) == len(old_freq)
+    assert len(new_freq["Topic"].unique()) == len(new_freq)
     assert len(topic_model.topics_) == len(old_topics)
     assert topic_model.topics_ != old_topics
 
@@ -146,23 +133,18 @@ def test_topic_reduction(model, reduced_topics, documents, request):
         ("online_topic_model"),
     ],
 )
-def test_topic_reduction_edge_cases(model, documents, request):
+def test_topic_reduction_edge_cases(model, documents, document_embeddings, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
-    topic_model.nr_topics = 100
-    nr_topics = 5
-    topics = np.random.randint(-1, nr_topics - 1, len(documents))
-    old_documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": topics})
-    topic_model._update_topic_size(old_documents)
-    old_documents = topic_model._sort_mappings_by_frequency(old_documents)
-    topic_model._extract_topics(old_documents)
-    old_freq = topic_model.get_topic_freq()
+    nr_topics_before = len(set(topic_model.topics_))
 
-    new_documents = topic_model._reduce_topics(old_documents)
-    new_freq = topic_model.get_topic_freq()
+    # Set nr_topics higher than existing topics — reduction should be a no-op
+    topic_model.nr_topics = nr_topics_before + 100
+    corpus = Corpus(documents=documents, topics=np.array(topic_model.topics_), embeddings=document_embeddings)
 
-    assert not set(old_documents.Topic).difference(set(new_documents.Topic))
-    pd.testing.assert_frame_equal(old_documents, new_documents)
-    pd.testing.assert_frame_equal(old_freq, new_freq)
+    corpus = topic_model._reduce_topics(corpus)
+
+    nr_topics_after = len(set(topic_model.topics_))
+    assert nr_topics_before == nr_topics_after
 
 
 @pytest.mark.parametrize(

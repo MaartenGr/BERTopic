@@ -1,10 +1,11 @@
 import warnings
 import numpy as np
-import pandas as pd
-from typing import List, Mapping, Tuple
+from typing import List
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
+from bertopic._topics import Keywords
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -48,17 +49,19 @@ class MaximalMarginalRelevance(BaseRepresentation):
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, Keywords]:
         """Extract topic representations.
 
         Arguments:
             topic_model: The BERTopic model
-            documents: Not used
-            c_tf_idf: Not used
-            topics: The candidate topics as calculated with c-TF-IDF
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
+            c_tf_idf: The topic c-TF-IDF representation
+            embeddings: Pre-trained document embeddings (not used)
 
         Returns:
             updated_topics: Updated topic representations
@@ -68,23 +71,24 @@ class MaximalMarginalRelevance(BaseRepresentation):
                 "MaximalMarginalRelevance can only be used BERTopic was instantiated"
                 "with the `embedding_model` parameter."
             )
-            return topics
+            return topic_representations
 
         updated_topics = {}
-        for topic, topic_words in topics.items():
-            words = [word[0] for word in topic_words]
-            word_embeddings = topic_model._extract_embeddings(words, method="word", verbose=False)
-            topic_embedding = topic_model._extract_embeddings(
-                " ".join(words), method="word", verbose=False
-            ).reshape(1, -1)
-            topic_words = mmr(
+        for topic, keywords in topic_representations.items():
+            words = keywords.words
+            word_embeddings = topic_model._extract_embeddings(words, verbose=False)
+            topic_embedding = topic_model._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
+            selected_words = mmr(
                 topic_embedding,
                 word_embeddings,
                 words,
                 self.diversity,
                 self.top_n_words,
             )
-            updated_topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+            # Filter the original keywords to keep only the selected words, preserving their scores
+            updated_topics[topic] = Keywords(
+                [(word, score) for word, score in keywords.data if word in selected_words]
+            )
         return updated_topics
 
 

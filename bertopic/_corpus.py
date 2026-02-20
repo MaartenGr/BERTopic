@@ -74,11 +74,16 @@ class Corpus:
         """Returns a boolean array indicating outlier documents."""
         return 1 if self.has_outliers else 0
 
-    @property
-    def topic_labels(self) -> set[int]:
+    def topic_ids(self, outliers: bool = True) -> list[int]:
         """Returns the unique topics in the data."""
-        topics = [int(topic) for topic in self.topics] if self.topics is not None else []
-        return sorted(list(set(topics)))
+        if self.topics is None:
+            return []
+        elif not outliers and self.has_outliers:
+            topics = [int(topic) for topic in set(self.topics) if topic != -1]
+            return sorted(topics)
+        else:
+            topics = [int(topic) for topic in set(self.topics)] if self.topics is not None else []
+            return sorted(topics)
 
     def nr_topics(self, include_outliers: bool = True) -> int:
         """Returns the number of unique topics in the data."""
@@ -274,7 +279,7 @@ class Corpus:
             _zeroshot_labels=self._zeroshot_labels,
         )
 
-    def get_topic(self, topic_id: int, nr_samples: int = None) -> "Corpus":
+    def get_topic(self, topic_id: int, nr_samples: int | None = None) -> "Corpus":
         """Return a Corpus object containing only documents of the specified topic.
 
         Arguments:
