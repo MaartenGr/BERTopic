@@ -1,15 +1,22 @@
 import time
+import numpy as np
 from litellm import completion
-import pandas as pd
 from typing import Union, Callable
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any
+from typing import Mapping, Any
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
 )
-from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
+from bertopic.representation._prompts import (
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, TopicRepresentation
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -31,6 +38,11 @@ class LiteLLM(LLMRepresentation):
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+                     Uses LiteLLM's `response_format` with `json_schema` type.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
         exponential_backoff: Retry requests with a random exponential backoff.
@@ -89,12 +101,20 @@ class LiteLLM(LLMRepresentation):
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
     representation_model = LiteLLM(model="gpt", prompt=prompt)
     ```
+
+    You can also use structured output with a JSON schema:
+
+    ```python
+    representation_model = LiteLLM(model="gpt-4o-mini", json_schema=True)
+    ```
     """  # noqa: D301
 
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
         prompt: str | None = None,
+        system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
         generator_kwargs: Mapping[str, Any] = {},
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
@@ -104,7 +124,7 @@ class LiteLLM(LLMRepresentation):
         tokenizer: Union[str, Callable] | None = None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,
@@ -113,55 +133,69 @@ class LiteLLM(LLMRepresentation):
 
         # LiteLLM specific parameters
         self.model = model
+        self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
+        self.generator_kwargs = generator_kwargs
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-        self.generator_kwargs = generator_kwargs
+        self.generator_kwargs["response_format"] = (
+            {"type": "json_schema", "json_schema": {"name": "Topic", "schema": self.json_schema}}
+            if self.json_schema
+            else None
+        )
 
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
         # Generate using a (Large) Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
             self.prompts_.append(prompt)
 
             # Delay
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
+            # Call LiteLLM API
             messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ]
             kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
-
-            # Generate response
             response = (
                 chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
             )
-            label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
-            updated_topics[topic] = [(label, 1)]
+            response_text = response["choices"][0]["message"]["content"].strip()
+            updated_topics[topic] = self._parse_response(response_text)
 
         return updated_topics
 

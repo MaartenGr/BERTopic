@@ -1,13 +1,18 @@
-import json
-import pandas as pd
+import numpy as np
 from ollama import chat
 from ollama import ChatResponse
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any, Union, Callable
+from typing import Mapping, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from json.decoder import JSONDecodeError
-from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT, DEFAULT_JSON_SCHEMA
+from bertopic.representation._prompts import (
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, TopicRepresentation
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -20,7 +25,6 @@ class Ollama(LLMRepresentation):
 
     Arguments:
         model: Model to use within Ollama.
-        generator_kwargs: Kwargs passed to `ollama.chat` for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -30,6 +34,7 @@ class Ollama(LLMRepresentation):
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
         json_schema: A dictionary representing the JSON schema to enforce structured output.
                      If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+        generator_kwargs: Kwargs passed to `ollama.chat` for fine-tuning the output.
         nr_docs: The number of documents to pass to Ollama if a prompt
                  with the `["DOCUMENTS"]` tag is used.
         diversity: The diversity of documents to pass to Ollama.
@@ -92,7 +97,7 @@ class Ollama(LLMRepresentation):
         tokenizer: Union[str, Callable] | None = None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,
@@ -104,34 +109,43 @@ class Ollama(LLMRepresentation):
         self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.generator_kwargs = generator_kwargs
+        self.generator_kwargs["format"] = self.json_schema
 
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
         # Generate using Ollama's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
             self.prompts_.append(prompt)
 
             # Call Ollama API
@@ -145,15 +159,6 @@ class Ollama(LLMRepresentation):
                 **self.generator_kwargs,
             }
             response: ChatResponse = chat(**kwargs)
-
-            # Update labels
-            if self.json_schema:
-                try:
-                    label = json.loads(response.message.content)["topic_label"]
-                except (JSONDecodeError, KeyError):
-                    label = response.message.content.strip().replace("topic: ", "")
-            else:
-                label = response.message.content.strip().replace("topic: ", "")
-            updated_topics[topic] = [(label, 1)]
+            updated_topics[topic] = self._parse_response(response.message.content.strip())
 
         return updated_topics

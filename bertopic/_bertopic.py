@@ -1483,19 +1483,29 @@ class BERTopic:
         for topic in self._topics:
             if aspect:
                 representation = topic.representations.get(aspect)
+            else:
+                representation = topic.representations.get("Main")
+
+            # For non-keyword representations (Label, StructuredJSON), use the
+            # topic label directly since word-level operations don't apply.
+            if representation and not isinstance(representation, Keywords):
+                label = topic.label
+                if topic_prefix:
+                    topic_label = f"{topic.id}{separator}{label}"
+                else:
+                    topic_label = label
+            else:
                 words = representation.words if representation else []
-            else:
-                words = topic.representations["Main"].words
 
-            if word_length:
-                words = [word[:word_length] for word in words][:nr_words]
-            else:
-                words = list(words)[:nr_words]
+                if word_length:
+                    words = [word[:word_length] for word in words][:nr_words]
+                else:
+                    words = list(words)[:nr_words]
 
-            if topic_prefix:
-                topic_label = f"{topic.id}{separator}" + separator.join(words)
-            else:
-                topic_label = separator.join(words)
+                if topic_prefix:
+                    topic_label = f"{topic.id}{separator}" + separator.join(words)
+                else:
+                    topic_label = separator.join(words)
 
             topic_labels.append(topic_label)
 

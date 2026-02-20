@@ -1,10 +1,17 @@
-import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from llama_cpp import Llama
-from typing import Mapping, List, Tuple, Any, Union, Callable
+from typing import Mapping, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
+from bertopic.representation._prompts import (
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, TopicRepresentation
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -25,11 +32,14 @@ class LlamaCPP(LLMRepresentation):
                 inserted.
         system_prompt: The system prompt to be used in the model. If no system prompt is given,
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
-        pipeline_kwargs: Kwargs that you can pass to the `llama_cpp.Llama`
-                         when it is called such as `max_tokens` to be generated.
-        nr_docs: The number of documents to pass to OpenAI if a prompt
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+                     Uses llama.cpp's `response_format` with `json_object` type.
+        generator_kwargs: Kwargs passed to `llama_cpp.Llama.create_chat_completion`
+                          for fine-tuning the output.
+        nr_docs: The number of documents to pass to the model if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to OpenAI.
+        diversity: The diversity of documents to pass to the model.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -39,7 +49,7 @@ class LlamaCPP(LLMRepresentation):
                    used to count the length of a document.
                        * If tokenizer is 'char', then the document is split up
                          into characters which are counted to adhere to `doc_length`
-                       * If tokenizer is 'whitespace', the the document is split up
+                       * If tokenizer is 'whitespace', the document is split up
                          into words separated by whitespaces. These words are counted
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
@@ -84,6 +94,12 @@ class LlamaCPP(LLMRepresentation):
     # Create our BERTopic model
     topic_model = BERTopic(representation_model=representation_model, verbose=True)
     ```
+
+    You can also use structured output with a JSON schema:
+
+    ```python
+    representation_model = LlamaCPP("zephyr-7b-alpha.Q4_K_M.gguf", json_schema=True)
+    ```
     """
 
     def __init__(
@@ -91,14 +107,15 @@ class LlamaCPP(LLMRepresentation):
         model: Union[str, Llama],
         prompt: str | None = None,
         system_prompt: str | None = None,
-        pipeline_kwargs: Mapping[str, Any] = {},
+        json_schema: Mapping[str, Any] | bool = False,
+        generator_kwargs: Mapping[str, Any] = {},
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,
@@ -117,47 +134,56 @@ class LlamaCPP(LLMRepresentation):
                 "local LLM or a ` llama_cpp.Llama` object."
             )
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-        self.pipeline_kwargs = pipeline_kwargs
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
+        self.generator_kwargs = generator_kwargs
+        self.generator_kwargs["response_format"] = (
+            {"type": "json_object", "schema": self.json_schema} if self.json_schema else None
+        )
 
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topic representations and return a single label.
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
+        """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: Not used
-            c_tf_idf: Not used
-            topics: The candidate topics as calculated with c-TF-IDF
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
+            c_tf_idf: The topic c-TF-IDF representation
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top 4 representative documents per topic
+        # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            # Prepare prompt
-            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
             self.prompts_.append(prompt)
 
-            # Extract result from generator and use that as label
-            # topic_description = self.model(prompt, **self.pipeline_kwargs)["choices"]
-            topic_description = self.model.create_chat_completion(
-                messages=[
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": prompt},
-                ],
-                **self.pipeline_kwargs,
-            )
-            label = topic_description["choices"][0]["message"]["content"].strip()
-            updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
+            # Call llama.cpp API
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+            kwargs = {"messages": messages, **self.generator_kwargs}
+            response = self.model.create_chat_completion(**kwargs)
+            response_text = response["choices"][0]["message"]["content"].strip()
+            updated_topics[topic] = self._parse_response(response_text)
 
         return updated_topics

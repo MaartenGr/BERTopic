@@ -1,11 +1,16 @@
-import pandas as pd
-from langchain.docstore.document import Document
+import numpy as np
+from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Callable, Mapping, List, Tuple, Union
-
+from typing import Mapping, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import truncate_document
-from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
+from bertopic.representation._prompts import (
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, StructuredJSON, TopicRepresentation
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -14,28 +19,30 @@ if TYPE_CHECKING:
 
 
 class LangChain(LLMRepresentation):
-    """Using chains in langchain to generate topic labels.
+    """Using a LangChain chat model to generate topic labels.
 
-    The classic example uses `langchain.chains.question_answering.load_qa_chain`.
-    This returns a chain that takes a list of documents and a question as input.
-
-    You can also use Runnables such as those composed using the LangChain Expression Language.
+    Accepts any LangChain chat model (e.g. from `init_chat_model`, `ChatOpenAI`,
+    `ChatAnthropic`, etc.). For structured output, uses `model.with_structured_output()`
+    which automatically selects the best method (provider-native or tool-calling fallback).
 
     Arguments:
-        chain: The langchain chain or Runnable with a `batch` method.
-               Input keys must be `input_documents` and `question`.
-               Output key must be `output_text`.
+        model: A LangChain chat model instance (e.g. `ChatOpenAI(...)`,
+               `init_chat_model("gpt-4")`, etc.).
         prompt: The prompt to be used in the model. If no prompt is given,
-                `bertopic.representation._prompts.DEFAULT_COMPLETION_PROMPT` is used instead.
-                 NOTE: Use `"[KEYWORDS]"` in the prompt
-                 to decide where the keywords need to be
-                 inserted. Keywords won't be included unless
-                 indicated. Unlike other representation models,
-                 Langchain does not use the `"[DOCUMENTS]"` tag
-                 to insert documents into the prompt. The load_qa_chain function
-                 formats the representative documents within the prompt.
-        nr_docs: The number of documents to pass to LangChain
-        diversity: The diversity of documents to pass to LangChain.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
+                NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
+                to decide where the keywords and documents need to be
+                inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+                     Uses LangChain's `with_structured_output()` for provider-native or
+                     tool-calling structured output.
+        generator_kwargs: Kwargs passed to `model.invoke()` for fine-tuning the output.
+        nr_docs: The number of documents to pass to the model if a prompt
+                 with the `["DOCUMENTS"]` tag is used.
+        diversity: The diversity of documents to pass to the model.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -50,37 +57,28 @@ class LangChain(LLMRepresentation):
                          and truncated depending on `doc_length`
                        * If tokenizer is 'vectorizer', then the internal CountVectorizer
                          is used to tokenize the document. These tokens are counted
-                         and truncated depending on `doc_length`. They are decoded with
-                         whitespaces.
+                         and truncated depending on `doc_length`
                        * If tokenizer is a callable, then that callable is used to tokenize
                          the document. These tokens are counted and truncated depending
                          on `doc_length`
-        chain_config: The configuration for the langchain chain. Can be used to set options
-                      like max_concurrency to avoid rate limiting errors.
+
     Usage:
 
     To use this, you will need to install the langchain package first.
-    Additionally, you will need an underlying LLM to support langchain,
-    like openai:
+    Additionally, you will need a provider package for your chosen model:
 
-    `pip install langchain`
-    `pip install openai`
+    `pip install langchain langchain-openai`
 
-    Then, you can create your chain as follows:
+    Then, you can use the LangChain representation model as follows:
 
     ```python
-    from langchain.chains.question_answering import load_qa_chain
-    from langchain.llms import OpenAI
-    chain = load_qa_chain(OpenAI(temperature=0, openai_api_key=my_openai_api_key), chain_type="stuff")
-    ```
-
-    Finally, you can pass the chain to BERTopic as follows:
-
-    ```python
+    from langchain.chat_models import init_chat_model
     from bertopic.representation import LangChain
+    from bertopic import BERTopic
 
     # Create your representation model
-    representation_model = LangChain(chain)
+    model = init_chat_model("gpt-4")
+    representation_model = LangChain(model)
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -89,63 +87,31 @@ class LangChain(LLMRepresentation):
     You can also use a custom prompt:
 
     ```python
-    prompt = "What are these documents about? Please give a single label."
-    representation_model = LangChain(chain, prompt=prompt)
+    prompt = "I have the following documents: [DOCUMENTS]. What topic do they contain?"
+    representation_model = LangChain(model, prompt=prompt)
     ```
 
-    You can also use a Runnable instead of a chain.
-    The example below uses the LangChain Expression Language:
+    You can also use structured output with a JSON schema:
 
     ```python
-    from bertopic.representation import LangChain
-    from langchain.chains.question_answering import load_qa_chain
-    from langchain.chat_models import ChatAnthropic
-    from langchain.schema.document import Document
-    from langchain.schema.runnable import RunnablePassthrough
-    from langchain_experimental.data_anonymizer.presidio import PresidioReversibleAnonymizer
-
-    prompt = ...
-    llm = ...
-
-    # We will construct a special privacy-preserving chain using Microsoft Presidio
-
-    pii_handler = PresidioReversibleAnonymizer(analyzed_fields=["PERSON"])
-
-    chain = (
-        {
-            "input_documents": (
-                lambda inp: [
-                    Document(
-                        page_content=pii_handler.anonymize(
-                            d.page_content,
-                            language="en",
-                        ),
-                    )
-                    for d in inp["input_documents"]
-                ]
-            ),
-            "question": RunnablePassthrough(),
-        }
-        | load_qa_chain(representation_llm, chain_type="stuff")
-        | (lambda output: {"output_text": pii_handler.deanonymize(output["output_text"])})
-    )
-
-    representation_model = LangChain(chain, prompt=representation_prompt)
+    representation_model = LangChain(model, json_schema=True)
     ```
     """
 
     def __init__(
         self,
-        chain,
+        model,
         prompt: str | None = None,
+        system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
+        generator_kwargs: Mapping[str, Any] = {},
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
-        chain_config=None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_COMPLETION_PROMPT,
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,
@@ -153,70 +119,67 @@ class LangChain(LLMRepresentation):
         )
 
         # LangChain specific parameters
-        self.chain = chain
-        self.chain_config = chain_config
+        self.model = model
+        self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
+        self.generator_kwargs = generator_kwargs
 
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, int]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top 4 representative documents per topic
+        # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
             c_tf_idf=c_tf_idf,
-            documents=documents,
-            topics=topics,
+            corpus=corpus,
             nr_samples=500,
             nr_repr_docs=self.nr_docs,
             diversity=self.diversity,
         )
 
-        # Generate label using langchain's batch functionality
-        chain_docs: List[List[Document]] = [
-            [
-                Document(page_content=truncate_document(topic_model, self.doc_length, self.tokenizer, doc))
-                for doc in docs
+        # Create structured model once if json_schema is set
+        llm = self.model.with_structured_output(self.json_schema) if self.json_schema else self.model
+
+        # Generate using LangChain model
+        updated_topics = {}
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
+            self.prompts_.append(prompt)
+
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
             ]
-            for docs in repr_docs_mappings.values()
-        ]
+            response = llm.invoke(messages, **self.generator_kwargs)
 
-        # `self.chain` must take `input_documents` and `question` as input keys
-        # Use a custom prompt that leverages keywords, using the tag: [KEYWORDS]
-        if "[KEYWORDS]" in self.prompt:
-            prompts = []
-            for topic in topics:
-                keywords = next(zip(*topics[topic]))
-                prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
-                prompts.append(prompt)
-
-            inputs = [
-                {"input_documents": docs, "question": prompt} for docs, prompt in zip(chain_docs, prompts)
-            ]
-
-        else:
-            inputs = [{"input_documents": docs, "question": self.prompt} for docs in chain_docs]
-
-        # `self.chain` must return a dict with an `output_text` key
-        # same output key as the `StuffDocumentsChain` returned by `load_qa_chain`
-        outputs = self.chain.batch(inputs=inputs, config=self.chain_config)
-        labels = [output["output_text"].strip() for output in outputs]
-
-        updated_topics = {
-            topic: [(label, 1)] + [("", 0) for _ in range(9)]
-            for topic, label in zip(repr_docs_mappings.keys(), labels)
-        }
+            # Update representation
+            if self.json_schema:
+                # with_structured_output returns a dict for JSON Schema input
+                if isinstance(response, dict):
+                    updated_topics[topic] = StructuredJSON(data=response)
+                else:
+                    updated_topics[topic] = StructuredJSON(
+                        data=response.model_dump() if hasattr(response, "model_dump") else dict(response)
+                    )
+            else:
+                updated_topics[topic] = self._parse_response(response.content.strip())
 
         return updated_topics

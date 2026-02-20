@@ -31,6 +31,25 @@ Based on the information above, extract a short topic label (three words at most
 topic: <topic_label>
 """
 
+DEFAULT_JSON_PROMPT = """You will extract various topic details from a number of given documents and keywords.
+The documents are merely a subset of all documents related to the topic, but they are representative of the overall topic. 
+The keywords are the most relevant keywords for this topic.
+
+# Texts
+
+These are sample texts from this topic:
+
+[DOCUMENTS]
+
+# Keywords
+
+These are the most relevant keywords for this topic:
+
+[KEYWORDS]
+
+Extract the most important topic details from the information above and return them in a JSON format.
+"""
+
 DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
 DEFAULT_JSON_SCHEMA = {
     "properties": {

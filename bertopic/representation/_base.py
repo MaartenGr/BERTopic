@@ -2,9 +2,12 @@ from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
 from typing import Mapping, List, Tuple, Union, Callable
 
+import json
+
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 from bertopic._corpus import Corpus
+from bertopic._topics import Keywords, Label, StructuredJSON, TopicRepresentation
 
 from typing import TYPE_CHECKING
 
@@ -101,24 +104,41 @@ class LLMRepresentation(BaseRepresentation):
         # Store prompts for inspection
         self.prompts_ = []
 
-    def _create_prompt(
-        self, docs: list[str], topic: int, topics: Mapping[str, List[Tuple[str, float]]], topic_model
-    ) -> str:
+    def _parse_response(self, response_text: str) -> TopicRepresentation:
+        """Parse an LLM response into a TopicRepresentation.
+
+        If `self.json_schema` is set, attempts to parse the response as JSON
+        and returns a `StructuredJSON`. Falls back to `Label` on parse failure.
+        Otherwise, returns a `Label` with the "topic: " prefix stripped.
+
+        Arguments:
+            response_text: The raw text response from the LLM.
+
+        Returns:
+            A `StructuredJSON` or `Label` representation.
+        """
+        if self.json_schema:
+            try:
+                return StructuredJSON(data=json.loads(response_text))
+            except json.JSONDecodeError:
+                return Label(data=response_text)
+        return Label(data=response_text.replace("topic: ", ""))
+
+    def _create_prompt(self, docs: list[str], topic: int, topics: dict[int, Keywords], topic_model) -> str:
         """Create prompt for LLM by either using the default prompt or replacing custom tags.
         Specifically, [KEYWORDS] and [DOCUMENTS] can be used in custom prompts to insert the topic's keywords and most representative documents.
 
         Arguments:
             docs: The most representative documents for a given topic.
             topic: The topic for which to create the prompt.
-            topics: A dictionary with topic (key) and tuple of word and
-                    weight (value) as calculated by c-TF-IDF.
+            topics: A dictionary mapping topic IDs to Keywords representations.
             topic_model: The BERTopic model that is fitted until topic
                          representations are calculated.
 
         Returns:
             prompt: The created prompt.
         """
-        keywords = next(zip(*topics[topic]))
+        keywords = topics[topic].words
 
         # Use the Default Chat Prompt
         if self.prompt == DEFAULT_CHAT_PROMPT:

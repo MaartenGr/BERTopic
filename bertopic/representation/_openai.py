@@ -1,15 +1,21 @@
 import time
 import openai
-import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any, Union, Callable
+from typing import Mapping, Any, Union, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._utils import (
     retry_with_exponential_backoff,
 )
-from bertopic.representation._prompts import DEFAULT_SYSTEM_PROMPT, DEFAULT_CHAT_PROMPT
-
+from bertopic.representation._prompts import (
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, TopicRepresentation
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -18,17 +24,18 @@ if TYPE_CHECKING:
 
 
 class OpenAI(LLMRepresentation):
-    r"""Using the OpenAI API to generate topic labels based
-    on one of their Completion of ChatCompletion models.
+    r"""Using the OpenAI Responses API to generate topic labels.
+
+    Uses OpenAI's recommended Responses API with Structured Outputs
+    for schema-adherent JSON generation.
 
     For an overview see:
-    https://platform.openai.com/docs/models
+    https://developers.openai.com/api/docs/guides/text
+    https://developers.openai.com/api/docs/guides/structured-outputs
 
     Arguments:
         client: A `openai.OpenAI` client
         model: Model to use within OpenAI, defaults to `"gpt-4o-mini"`.
-        generator_kwargs: Kwargs passed to `openai.Completion.create`
-                          for fine-tuning the output.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -36,6 +43,12 @@ class OpenAI(LLMRepresentation):
                 inserted.
         system_prompt: The system prompt to be used in the model. If no system prompt is given,
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+                     Uses OpenAI's Structured Outputs via the `text.format` parameter with
+                     `json_schema` type for strict schema adherence.
+        generator_kwargs: Kwargs passed to `openai.responses.create`
+                          for fine-tuning the output.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
         exponential_backoff: Retry requests with a random exponential backoff.
@@ -80,7 +93,7 @@ class OpenAI(LLMRepresentation):
 
     # Create your representation model
     client = openai.OpenAI(api_key=MY_API_KEY)
-    representation_model = OpenAI(client, delay_in_seconds=5)
+    representation_model = OpenAI(client)
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -90,13 +103,13 @@ class OpenAI(LLMRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = OpenAI(client, prompt=prompt, delay_in_seconds=5)
+    representation_model = OpenAI(client, prompt=prompt)
     ```
 
-    To choose a model:
+    You can also use structured output with a JSON schema:
 
     ```python
-    representation_model = OpenAI(client, model="gpt-4o-mini", delay_in_seconds=10)
+    representation_model = OpenAI(client, json_schema=True)
     ```
     """
 
@@ -106,6 +119,7 @@ class OpenAI(LLMRepresentation):
         model: str = "gpt-4o-mini",
         prompt: str | None = None,
         system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
         generator_kwargs: Mapping[str, Any] = {},
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
@@ -115,7 +129,7 @@ class OpenAI(LLMRepresentation):
         tokenizer: Union[str, Callable] | None = None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,
@@ -126,72 +140,80 @@ class OpenAI(LLMRepresentation):
         self.client = client
         self.model = model
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
         self.generator_kwargs = generator_kwargs
+        if self.json_schema:
+            self.generator_kwargs["text"] = {
+                "format": {
+                    "type": "json_schema",
+                    "name": "Topic",
+                    "schema": self.json_schema,
+                    "strict": True,
+                }
+            }
 
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
-        # Generate using OpenAI's Language Model
+        # Generate using OpenAI's Responses API
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
             self.prompts_.append(prompt)
 
             # Delay
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ]
             kwargs = {
                 "model": self.model,
-                "messages": messages,
+                "instructions": self.system_prompt,
+                "input": [{"role": "user", "content": prompt}],
                 **self.generator_kwargs,
             }
             if self.exponential_backoff:
-                response = chat_completions_with_backoff(self.client, **kwargs)
+                response = responses_create_with_backoff(self.client, **kwargs)
             else:
-                response = self.client.chat.completions.create(**kwargs)
+                response = self.client.responses.create(**kwargs)
 
-            # Check whether content was actually generated
-            # Addresses #1570 for potential issues with OpenAI's content filter
-            # Addresses #2176 for potential issues when openAI returns a None type object
-            if response and hasattr(response.choices[0].message, "content"):
-                label = response.choices[0].message.content.strip().replace("topic: ", "")
-            else:
-                label = "No label returned"
-
-            updated_topics[topic] = [(label, 1)]
+            response_text = response.output_text.strip()
+            updated_topics[topic] = self._parse_response(response_text)
 
         return updated_topics
 
 
-def chat_completions_with_backoff(client, **kwargs):
+def responses_create_with_backoff(client, **kwargs):
     return retry_with_exponential_backoff(
-        client.chat.completions.create,
+        client.responses.create,
         errors=(openai.RateLimitError,),
     )(**kwargs)

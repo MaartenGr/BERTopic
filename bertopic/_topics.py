@@ -18,6 +18,15 @@ class TopicRepresentation:
 
     data: Any = None
 
+    @property
+    def words(self) -> list[str]:
+        """Get word-like strings from this representation.
+
+        Subclasses override this to provide meaningful words.
+        The base implementation returns an empty list.
+        """
+        return []
+
     def __str__(self) -> str:
         """String representation of the topic representation."""
         return str(self.data)
@@ -70,6 +79,11 @@ class Label(TopicRepresentation):
 
     data: str = ""
 
+    @property
+    def words(self) -> list[str]:
+        """Return the label as a single-element list."""
+        return [self.data] if self.data else []
+
     def to_dict(self) -> dict:
         return {"type": "label", "data": self.data}
 
@@ -83,6 +97,11 @@ class StructuredJSON(TopicRepresentation):
     """A structured JSON representation for a topic."""
 
     data: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def words(self) -> list[str]:
+        """Return the values of the structured JSON as a list of strings."""
+        return [str(v) for v in self.data.values()] if self.data else []
 
     def to_dict(self) -> dict:
         return {"type": "structured_json", "data": self.data}
@@ -305,6 +324,10 @@ class Topic:
         representation = self.representations.get("Main")
         if isinstance(representation, Label):
             return representation.data
+        elif isinstance(representation, StructuredJSON):
+            return representation.data.get(
+                "topic_label", representation.data.get("label", str(representation.data))
+            )
         elif isinstance(representation, Keywords):
             return "_".join(representation.words[:4])
         else:
