@@ -1,7 +1,7 @@
 import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
-from typing import Mapping, List, Tuple
+from collections.abc import Mapping
 
 
 class BaseRepresentation(BaseEstimator):
@@ -12,8 +12,8 @@ class BaseRepresentation(BaseEstimator):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topics.
 
         Each representation model that inherits this class will have

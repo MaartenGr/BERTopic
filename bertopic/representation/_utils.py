@@ -1,9 +1,9 @@
 import random
 import time
-from typing import Union
+from collections.abc import Callable
 
 
-def truncate_document(topic_model, doc_length: Union[int, None], tokenizer: Union[str, callable], document: str) -> str:
+def truncate_document(topic_model, doc_length: int | None, tokenizer: str | Callable, document: str) -> str:
     """Truncate a document to a certain length.
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and
@@ -59,7 +59,7 @@ def truncate_document(topic_model, doc_length: Union[int, None], tokenizer: Unio
     return document
 
 
-def validate_truncate_document_parameters(tokenizer, doc_length) -> Union[None, ValueError]:
+def validate_truncate_document_parameters(tokenizer, doc_length) -> None | ValueError:
     """Validates parameters that are used in the function `truncate_document`."""
     if tokenizer is None and doc_length is not None:
         raise ValueError(

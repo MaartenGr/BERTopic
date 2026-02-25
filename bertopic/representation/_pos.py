@@ -7,7 +7,7 @@ from spacy.language import Language
 
 from packaging import version
 from scipy.sparse import csr_matrix
-from typing import List, Mapping, Tuple, Union
+from collections.abc import Mapping
 from sklearn import __version__ as sklearn_version
 from bertopic.representation._base import BaseRepresentation
 
@@ -65,9 +65,9 @@ class PartOfSpeech(BaseRepresentation):
 
     def __init__(
         self,
-        model: Union[str, Language] = "en_core_web_sm",
+        model: str | Language = "en_core_web_sm",
         top_n_words: int = 10,
-        pos_patterns: List[str] | None = None,
+        pos_patterns: list[str] | None = None,
     ):
         if isinstance(model, str):
             self.model = spacy.load(model)
@@ -96,8 +96,8 @@ class PartOfSpeech(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topics.
 
         Arguments:

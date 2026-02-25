@@ -82,10 +82,10 @@ def visualize_approximate_distribution(
     # Style the resulting dataframe
     def text_color(val):
         color = "white" if val == 0 else "black"
-        return "color: %s" % color
+        return f"color: {color}"
 
     def highligh_color(data, color="white"):
-        attr = "background-color: {}".format(color)
+        attr = f"background-color: {color}"
         return pd.DataFrame(np.where(data == 0, attr, ""), index=data.index, columns=data.columns)
 
     if len(df) == 0:

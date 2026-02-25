@@ -21,9 +21,6 @@ try:
 except ImportError:
     _has_hf_hub = False
 
-# Typing
-from typing import Union
-
 # Pytorch check
 try:
     import torch
@@ -113,7 +110,7 @@ def push_to_hf_hub(
     create_pr: bool = False,
     model_card: bool = True,
     serialization: str = "safetensors",
-    save_embedding_model: Union[str, bool] = True,
+    save_embedding_model: str | bool = True,
     save_ctfidf: bool = False,
 ):
     """Push your BERTopic model to a HuggingFace Hub.
@@ -450,9 +447,9 @@ def save_topics(model, path: str):
         json.dump(topics, f, indent=2, cls=NumpyEncoder)
 
 
-def load_cfg_from_json(json_file: Union[str, os.PathLike]):
+def load_cfg_from_json(json_file: str | os.PathLike):
     """Load configuration from json."""
-    with open(json_file, "r", encoding="utf-8") as reader:
+    with open(json_file, encoding="utf-8") as reader:
         text = reader.read()
     return json.loads(text)
 
@@ -463,7 +460,7 @@ class NumpyEncoder(json.JSONEncoder):
             return int(obj)
         if isinstance(obj, np.floating):
             return float(obj)
-        return super(NumpyEncoder, self).default(obj)
+        return super().default(obj)
 
 
 def get_package_versions():

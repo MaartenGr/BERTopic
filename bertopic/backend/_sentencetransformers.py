@@ -1,5 +1,4 @@
 import numpy as np
-from typing import List, Union
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.models import StaticEmbedding
 
@@ -50,7 +49,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     ```
     """
 
-    def __init__(self, embedding_model: Union[str, SentenceTransformer], model2vec: bool = False):
+    def __init__(self, embedding_model: str | SentenceTransformer, model2vec: bool = False):
         super().__init__()
 
         self._hf_model = None
@@ -69,7 +68,7 @@ class SentenceTransformerBackend(BaseEmbedder):
                 "`model = SentenceTransformer('all-MiniLM-L6-v2')`"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

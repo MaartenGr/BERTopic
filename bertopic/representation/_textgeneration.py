@@ -3,7 +3,8 @@ from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
-from typing import Mapping, List, Tuple, Any, Union, Callable
+from typing import Any
+from collections.abc import Mapping, Callable
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 
@@ -84,14 +85,14 @@ class TextGeneration(BaseRepresentation):
 
     def __init__(
         self,
-        model: Union[str, pipeline],
+        model: str | pipeline,
         prompt: str | None = None,
         pipeline_kwargs: Mapping[str, Any] = {},
         random_state: int = 42,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
     ):
         self.random_state = random_state
         set_seed(random_state)
@@ -121,8 +122,8 @@ class TextGeneration(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topic representations and return a single label.
 
         Arguments:

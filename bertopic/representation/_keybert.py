@@ -3,7 +3,7 @@ import pandas as pd
 
 from packaging import version
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union
+from collections.abc import Mapping
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
 from sklearn import __version__ as sklearn_version
@@ -70,9 +70,9 @@ class KeyBERTInspired(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
+        topics: Mapping[str, list[tuple[str, float]]],
         embeddings: np.ndarray = None,
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topics.
 
         Arguments:
@@ -113,8 +113,8 @@ class KeyBERTInspired(BaseRepresentation):
         self,
         topic_model,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """For each topic, extract candidate words based on the c-TF-IDF
         representation.
 
@@ -156,11 +156,11 @@ class KeyBERTInspired(BaseRepresentation):
     def _extract_embeddings(
         self,
         topic_model,
-        topics: Mapping[str, List[Tuple[str, float]]],
-        representative_docs: List[str],
-        repr_doc_indices: List[List[int]],
+        topics: Mapping[str, list[tuple[str, float]]],
+        representative_docs: list[str],
+        repr_doc_indices: list[list[int]],
         repr_embeddings: np.ndarray = None,
-    ) -> Union[np.ndarray, List[str]]:
+    ) -> np.ndarray | list[str]:
         """Extract the representative document embeddings and create topic embeddings.
         Then extract word embeddings and calculate the cosine similarity between topic
         embeddings and the word embeddings. Topic embeddings are the average of
@@ -193,10 +193,10 @@ class KeyBERTInspired(BaseRepresentation):
 
     def _extract_top_words(
         self,
-        vocab: List[str],
-        topics: Mapping[str, List[Tuple[str, float]]],
+        vocab: list[str],
+        topics: Mapping[str, list[tuple[str, float]]],
         sim: np.ndarray,
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract the top n words per topic based on the
         similarity matrix between topics and words.
 

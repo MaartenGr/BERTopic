@@ -2,7 +2,8 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from llama_cpp import Llama
-from typing import Mapping, List, Tuple, Any, Union, Callable
+from typing import Any
+from collections.abc import Mapping, Callable
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
 
@@ -114,14 +115,14 @@ class LlamaCPP(BaseRepresentation):
 
     def __init__(
         self,
-        model: Union[str, Llama],
+        model: str | Llama,
         prompt: str | None = None,
         system_prompt: str | None = None,
         pipeline_kwargs: Mapping[str, Any] = {},
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
     ):
         if isinstance(model, str):
             self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="ChatML")
@@ -151,8 +152,8 @@ class LlamaCPP(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topic representations and return a single label.
 
         Arguments:
