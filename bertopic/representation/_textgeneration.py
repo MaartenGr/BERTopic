@@ -85,7 +85,7 @@ class TextGeneration(BaseRepresentation):
 
     def __init__(
         self,
-        model: str | pipeline,
+        model: str | Pipeline,
         prompt: str | None = None,
         pipeline_kwargs: Mapping[str, Any] = {},
         random_state: int = 42,
