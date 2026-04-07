@@ -5006,12 +5006,18 @@ class TopicMapper:
     def add_new_topics(self, mappings: Mapping[int, int]):
         """Add new row(s) of topic mappings.
 
+        New topics did not exist at earlier states, so the intermediate
+        history columns are backfilled with the topic's own ``key`` to
+        keep ``mappings_`` a homogeneous integer matrix. Without this,
+        ``None`` placeholders break ``model.save(serialization="safetensors")``
+        which casts the matrix to ``np.array(..., dtype=int)``.
+
         Arguments:
             mappings: The mappings to add
         """
         length = len(self.mappings_[0])
         for key, value in mappings.items():
-            to_append = [key] + ([None] * (length - 2)) + [value]
+            to_append = [key] * (length - 1) + [value]
             self.mappings_.append(to_append)
 
 
