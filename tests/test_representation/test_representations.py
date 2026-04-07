@@ -182,3 +182,28 @@ def test_find_topics(model, request):
 
     assert np.mean(similarity) > 0.1
     assert len(similar_topics) > 0
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+    ],
+)
+@pytest.mark.parametrize("search_term", [["car"], ["car", "vehicle"]])
+def test_find_topics_with_list(model, search_term, request):
+    """Regression test for #2392 / #2475: ``find_topics`` must accept a list
+    of search terms (including a single-element list) without crashing."""
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+    similar_topics, similarity = topic_model.find_topics(search_term)
+
+    assert len(similar_topics) > 0
+    assert len(similar_topics) == len(similarity)
+
+
+def test_find_topics_empty_list_raises(base_topic_model):
+    """An empty ``search_term`` list must raise instead of silently returning NaN similarities."""
+    topic_model = copy.deepcopy(base_topic_model)
+    with pytest.raises(ValueError, match="non-empty"):
+        topic_model.find_topics([])
