@@ -1,7 +1,7 @@
 import pandas as pd
 from langchain.docstore.document import Document
 from scipy.sparse import csr_matrix
-from typing import Callable, Mapping, List, Tuple, Union
+from collections.abc import Callable, Mapping
 
 from bertopic.representation._base import BaseRepresentation
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
@@ -137,7 +137,7 @@ class LangChain(BaseRepresentation):
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
         chain_config=None,
     ):
         self.chain = chain
@@ -155,8 +155,8 @@ class LangChain(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, int]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, int]]]:
         """Extract topics.
 
         Arguments:
@@ -179,7 +179,7 @@ class LangChain(BaseRepresentation):
         )
 
         # Generate label using langchain's batch functionality
-        chain_docs: List[List[Document]] = [
+        chain_docs: list[list[Document]] = [
             [
                 Document(page_content=truncate_document(topic_model, self.doc_length, self.tokenizer, doc))
                 for doc in docs

@@ -4,7 +4,7 @@ import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import squareform
-from typing import Optional, Union, Tuple, Any
+from typing import Any
 
 
 class MyLogger:
@@ -142,7 +142,7 @@ def validate_distance_matrix(X, n_samples):
             "distance matrix of shape (n*(n-1)/2,) or a "
             "2-D square distance matrix of shape (n, n)."
             "where n is the number of documents."
-            "Got a distance matrix of shape %s" % str(s)
+            f"Got a distance matrix of shape {s}"
         )
 
     # Make sure its entries are non-negative
@@ -177,11 +177,11 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
 
 
 def select_topic_representation(
-    ctfidf_embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
-    embeddings: Optional[Union[np.ndarray, csr_matrix]] = None,
+    ctfidf_embeddings: np.ndarray | csr_matrix | None = None,
+    embeddings: np.ndarray | csr_matrix | None = None,
     use_ctfidf: bool = True,
     output_ndarray: bool = False,
-) -> Tuple[np.ndarray, bool]:
+) -> tuple[np.ndarray, bool]:
     """Select the topic representation.
 
     Arguments:
@@ -199,7 +199,7 @@ def select_topic_representation(
         The selected topic representation and a boolean indicating whether it is c-TF-IDF.
     """
 
-    def to_ndarray(array: Union[np.ndarray, csr_matrix]) -> np.ndarray:
+    def to_ndarray(array: np.ndarray | csr_matrix) -> np.ndarray:
         if isinstance(array, csr_matrix):
             return array.toarray()
         return array

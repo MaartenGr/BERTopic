@@ -1,6 +1,5 @@
 import numpy as np
 from tqdm import tqdm
-from typing import Union, List
 from flair.data import Sentence
 from flair.embeddings import DocumentEmbeddings, TokenEmbeddings, DocumentPoolEmbeddings
 
@@ -30,7 +29,7 @@ class FlairBackend(BaseEmbedder):
     ```
     """
 
-    def __init__(self, embedding_model: Union[TokenEmbeddings, DocumentEmbeddings]):
+    def __init__(self, embedding_model: TokenEmbeddings | DocumentEmbeddings):
         super().__init__()
 
         # Flair word embeddings
@@ -52,7 +51,7 @@ class FlairBackend(BaseEmbedder):
                 "`roberta = TransformerDocumentEmbeddings('roberta-base')`"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

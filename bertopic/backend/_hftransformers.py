@@ -1,7 +1,6 @@
 import numpy as np
 
 from tqdm import tqdm
-from typing import List
 from torch.utils.data import Dataset
 from sklearn.preprocessing import normalize
 from transformers.pipelines import Pipeline
@@ -42,7 +41,7 @@ class HFTransformerBackend(BaseEmbedder):
                 "pipeline('feature-extraction', model='distilbert-base-cased', device=0)"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

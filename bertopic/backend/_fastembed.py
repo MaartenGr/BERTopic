@@ -1,5 +1,4 @@
 import numpy as np
-from typing import List
 from fastembed import TextEmbedding
 
 from bertopic.backend import BaseEmbedder
@@ -38,7 +37,7 @@ class FastEmbedBackend(BaseEmbedder):
                 "The supported TextEmbedding model list is here: https://qdrant.github.io/fastembed/examples/Supported_Models/"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

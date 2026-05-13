@@ -112,6 +112,7 @@ select = [
   "D",   # pydocstyle
   "PD",  # pandas-vet
   "RUF", # ruff
+  "UP",  # pyupgrade
 ]
 
 ignore = [

@@ -1,5 +1,4 @@
 import numpy as np
-from typing import List, Union
 from model2vec import StaticModel
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -53,7 +52,7 @@ class Model2VecBackend(BaseEmbedder):
 
     def __init__(
         self,
-        embedding_model: Union[str, StaticModel],
+        embedding_model: str | StaticModel,
         distill: bool = False,
         distill_kwargs: dict = {},
         distill_vectorizer: str | None = None,
@@ -87,7 +86,7 @@ class Model2VecBackend(BaseEmbedder):
                 "`model = StaticModel.from_pretrained('minishlab/potion-base-8M')`"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 
