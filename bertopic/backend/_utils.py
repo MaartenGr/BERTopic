@@ -144,7 +144,9 @@ def select_backend(embedding_model, language: str | None = None, verbose: bool =
             if language.lower() in ["English", "english", "en"]:
                 return SentenceTransformerBackend("sentence-transformers/all-MiniLM-L6-v2")
             elif language.lower() in languages or language == "multilingual":
-                return SentenceTransformerBackend("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+                return SentenceTransformerBackend(
+                    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+                )
             else:
                 raise ValueError(
                     f"{language} is currently not supported. However, you can "

@@ -1,4 +1,6 @@
 import numpy as np
+from ollama import chat
+from ollama import ChatResponse
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, Any, Union, Callable
@@ -9,7 +11,7 @@ from bertopic.representation._prompts import (
     DEFAULT_JSON_SCHEMA,
     DEFAULT_JSON_PROMPT,
 )
-from bertopic._topics import Keywords, StructuredJSON, TopicRepresentation
+from bertopic._topics import Keywords, TopicRepresentation
 from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
@@ -18,16 +20,11 @@ if TYPE_CHECKING:
     from bertopic import BERTopic
 
 
-class LangChain(LLMRepresentation):
-    """Using a LangChain chat model to generate topic labels.
-
-    Accepts any LangChain chat model (e.g. from `init_chat_model`, `ChatOpenAI`,
-    `ChatAnthropic`, etc.). For structured output, uses `model.with_structured_output()`
-    which automatically selects the best method (provider-native or tool-calling fallback).
+class Ollama(LLMRepresentation):
+    r"""Using the Ollama API to generate topic labels based on a local LLM.
 
     Arguments:
-        model: A LangChain chat model instance (e.g. `ChatOpenAI(...)`,
-               `init_chat_model("gpt-4")`, etc.).
+        model: Model to use within Ollama.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -37,12 +34,10 @@ class LangChain(LLMRepresentation):
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
         json_schema: A dictionary representing the JSON schema to enforce structured output.
                      If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
-                     Uses LangChain's `with_structured_output()` for provider-native or
-                     tool-calling structured output.
-        generator_kwargs: Kwargs passed to `model.invoke()` for fine-tuning the output.
-        nr_docs: The number of documents to pass to the model if a prompt
+        generator_kwargs: Kwargs passed to `ollama.chat` for fine-tuning the output.
+        nr_docs: The number of documents to pass to Ollama if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to the model.
+        diversity: The diversity of documents to pass to Ollama.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -64,21 +59,18 @@ class LangChain(LLMRepresentation):
 
     Usage:
 
-    To use this, you will need to install the langchain package first.
-    Additionally, you will need a provider package for your chosen model:
+    To use this, you will need to install the ollama package first:
 
-    `pip install langchain langchain-openai`
+    `pip install ollama`
 
-    Then, you can use the LangChain representation model as follows:
+    Then, you can use the Ollama representation model as follows:
 
     ```python
-    from langchain.chat_models import init_chat_model
-    from bertopic.representation import LangChain
+    from bertopic.representation import Ollama
     from bertopic import BERTopic
 
     # Create your representation model
-    model = init_chat_model("gpt-4")
-    representation_model = LangChain(model)
+    representation_model = Ollama("gemma3")
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -87,20 +79,14 @@ class LangChain(LLMRepresentation):
     You can also use a custom prompt:
 
     ```python
-    prompt = "I have the following documents: [DOCUMENTS]. What topic do they contain?"
-    representation_model = LangChain(model, prompt=prompt)
-    ```
-
-    You can also use structured output with a JSON schema:
-
-    ```python
-    representation_model = LangChain(model, json_schema=True)
+    prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
+    representation_model = Ollama("gemma3", prompt=prompt)
     ```
     """
 
     def __init__(
         self,
-        model,
+        model: str,
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: Mapping[str, Any] | bool = False,
@@ -118,11 +104,12 @@ class LangChain(LLMRepresentation):
             tokenizer=tokenizer,
         )
 
-        # LangChain specific parameters
+        # Ollama specific parameters
         self.model = model
-        self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
+        self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.generator_kwargs = generator_kwargs
+        self.generator_kwargs["format"] = self.json_schema
 
     def extract_topics(
         self,
@@ -153,10 +140,7 @@ class LangChain(LLMRepresentation):
             diversity=self.diversity,
         )
 
-        # Create structured model once if json_schema is set
-        llm = self.model.with_structured_output(self.json_schema) if self.json_schema else self.model
-
-        # Generate using LangChain model
+        # Generate using Ollama's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             prompt = self._create_prompt(
@@ -164,22 +148,17 @@ class LangChain(LLMRepresentation):
             )
             self.prompts_.append(prompt)
 
+            # Call Ollama API
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ]
-            response = llm.invoke(messages, **self.generator_kwargs)
-
-            # Update representation
-            if self.json_schema:
-                # with_structured_output returns a dict for JSON Schema input
-                if isinstance(response, dict):
-                    updated_topics[topic] = StructuredJSON(data=response)
-                else:
-                    updated_topics[topic] = StructuredJSON(
-                        data=response.model_dump() if hasattr(response, "model_dump") else dict(response)
-                    )
-            else:
-                updated_topics[topic] = self._parse_response(response.content.strip())
+            kwargs = {
+                "model": self.model,
+                "messages": messages,
+                **self.generator_kwargs,
+            }
+            response: ChatResponse = chat(**kwargs)
+            updated_topics[topic] = self._parse_response(response.message.content.strip())
 
         return updated_topics

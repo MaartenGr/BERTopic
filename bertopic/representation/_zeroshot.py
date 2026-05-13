@@ -6,6 +6,12 @@ from typing import Mapping, List, Tuple, Any
 from bertopic.representation._base import BaseRepresentation
 
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
+
 class ZeroShotClassification(BaseRepresentation):
     """Zero-shot Classification on topic keywords with candidate labels.
 
@@ -58,7 +64,7 @@ class ZeroShotClassification(BaseRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
+        topic_model: "BERTopic",
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
         topics: Mapping[str, List[Tuple[str, float]]],

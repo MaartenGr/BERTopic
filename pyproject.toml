@@ -43,8 +43,9 @@ dependencies = [
     "plotly>=4.7.0",
     "scikit-learn>=1.0",
     "sentence-transformers>=0.4.1",
-    "tqdm>=4.41.1",
-    "llvmlite>0.36.0"  # To prevent conflicts with `uv` dependency manager
+    "tqdm>=4.41.1", # To prevent conflicts with `uv` dependency manager
+    "llvmlite>0.36.0",
+    "polars>=1.37.1",
 ]
 
 [project.optional-dependencies]
@@ -101,7 +102,7 @@ include = ["bertopic*"]
 exclude = ["tests"]
 
 [tool.ruff]
-line-length = 120
+line-length = 110
 
 [tool.ruff.lint]
 select = [

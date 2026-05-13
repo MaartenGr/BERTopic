@@ -1,13 +1,17 @@
 import numpy as np
-from typing import Union
 import plotly.graph_objects as go
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 def visualize_distribution(
-    topic_model,
+    topic_model: "BERTopic",
     probabilities: np.ndarray,
     min_probability: float = 0.015,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Topic Probability Distribution</b>",
     width: int = 800,
     height: int = 600,
@@ -60,7 +64,9 @@ def visualize_distribution(
 
     # Create labels
     if isinstance(custom_labels, str):
-        labels = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in labels_idx]
+        labels = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in labels_idx
+        ]
         labels = ["_".join([label[0] for label in l[:4]]) for l in labels]  # noqa: E741
         labels = [label if len(label) < 30 else label[:27] + "..." for label in labels]
     elif topic_model.custom_labels_ is not None and custom_labels:

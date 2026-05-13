@@ -1,44 +1,25 @@
 import time
-import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union, Callable
-from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
+from typing import Mapping, Any, Union, Callable
+from bertopic.representation._base import LLMRepresentation
+from bertopic.representation._prompts import (
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, TopicRepresentation
+from bertopic._corpus import Corpus
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
-DEFAULT_PROMPT = """
-This is a list of texts where each collection of texts describe a topic. After each collection of texts, the name of the topic they represent is mentioned as a short-highly-descriptive title
----
-Topic:
-Sample texts from this topic:
-- Traditional diets in most cultures were primarily plant-based with a little meat on top, but with the rise of industrial style meat production and factory farming, meat has become a staple food.
-- Meat, but especially beef, is the word food in terms of emissions.
-- Eating meat doesn't make you a bad person, not eating meat doesn't make you a good one.
-
-Keywords: meat beef eat eating emissions steak food health processed chicken
-Topic name: Environmental impacts of eating meat
----
-Topic:
-Sample texts from this topic:
-- I have ordered the product weeks ago but it still has not arrived!
-- The website mentions that it only takes a couple of days to deliver but I still have not received mine.
-- I got a message stating that I received the monitor but that is not true!
-- It took a month longer to deliver than was advised...
-
-Keywords: deliver weeks product shipping long delivery received arrived arrive week
-Topic name: Shipping and delivery issues
----
-Topic:
-Sample texts from this topic:
-[DOCUMENTS]
-Keywords: [KEYWORDS]
-Topic name:"""
-
-DEFAULT_SYSTEM_PROMPT = "You are an assistant that extracts high-level topics from texts."
-
-
-class Cohere(BaseRepresentation):
+class Cohere(LLMRepresentation):
     """Use the Cohere API to generate topic labels based on their
     generative model.
 
@@ -46,20 +27,24 @@ class Cohere(BaseRepresentation):
     https://docs.cohere.ai/docs
 
     Arguments:
-        client: A `cohere.Client`
-        model: Model to use within Cohere, defaults to `"xlarge"`.
+        client: A `cohere.ClientV2`
+        model: Model to use within Cohere, defaults to `"command-r"`.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
         system_prompt: The system prompt to be used in the model. If no system prompt is given,
-                       `self.default_system_prompt_` is used instead.
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+                     Uses Cohere's `response_format` with `json_object` type.
+        generator_kwargs: Kwargs passed to `cohere.ClientV2.chat` for fine-tuning the output.
         delay_in_seconds: The delay in seconds between consecutive prompts
                                 in order to prevent RateLimitErrors.
-        nr_docs: The number of documents to pass to OpenAI if a prompt
+        nr_docs: The number of documents to pass to Cohere if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to OpenAI.
+        diversity: The diversity of documents to pass to Cohere.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -93,7 +78,7 @@ class Cohere(BaseRepresentation):
     from bertopic import BERTopic
 
     # Create your representation model
-    co = cohere.Client(my_api_key)
+    co = cohere.ClientV2(my_api_key)
     representation_model = Cohere(co)
 
     # Use the representation model in BERTopic on top of the default pipeline
@@ -106,6 +91,12 @@ class Cohere(BaseRepresentation):
     prompt = "I have the following documents: [DOCUMENTS]. What topic do they contain?"
     representation_model = Cohere(co, prompt=prompt)
     ```
+
+    You can also use structured output with a JSON schema:
+
+    ```python
+    representation_model = Cohere(co, json_schema=True)
+    ```
     """
 
     def __init__(
@@ -114,96 +105,86 @@ class Cohere(BaseRepresentation):
         model: str = "command-r",
         prompt: str | None = None,
         system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
+        generator_kwargs: Mapping[str, Any] = {},
         delay_in_seconds: float | None = None,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: Union[str, Callable] | None = None,
     ):
+        super().__init__(
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # Cohere specific parameters
         self.client = client
         self.model = model
-        self.prompt = prompt if prompt is not None else DEFAULT_PROMPT
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
-        self.default_system_prompt_ = DEFAULT_SYSTEM_PROMPT
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
+        self.generator_kwargs = generator_kwargs
         self.delay_in_seconds = delay_in_seconds
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-        self.doc_length = doc_length
-        self.tokenizer = tokenizer
-        validate_truncate_document_parameters(self.tokenizer, self.doc_length)
-
-        self.prompts_ = []
+        self.generator_kwargs["response_format"] = (
+            {"type": "json_object", "schema": self.json_schema} if self.json_schema else None
+        )
 
     def extract_topics(
         self,
-        topic_model,
-        documents: pd.DataFrame,
+        topic_model: "BERTopic",
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Arguments:
-            topic_model: Not used
-            documents: Not used
-            c_tf_idf: Not used
-            topics: The candidate topics as calculated with c-TF-IDF
+            topic_model: A BERTopic model
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
+            c_tf_idf: The topic c-TF-IDF representation
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
-        # Extract the top 4 representative documents per topic
+        # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
         # Generate using Cohere's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            truncated_docs = [truncate_document(topic_model, self.doc_length, self.tokenizer, doc) for doc in docs]
-            prompt = self._create_prompt(truncated_docs, topic, topics)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
             self.prompts_.append(prompt)
 
             # Delay
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
-            request = self.client.chat(
-                model=self.model,
-                preamble=self.system_prompt,
-                message=prompt,
-                max_tokens=50,
-                stop_sequences=["\n"],
-            )
-            label = request.text.strip()
-            updated_topics[topic] = [(label, 1)] + [("", 0) for _ in range(9)]
+            # Call Cohere API
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+            kwargs = {
+                "model": self.model,
+                "messages": messages,
+                **self.generator_kwargs,
+            }
+            response = self.client.chat(**kwargs)
+            response_text = response.message.content[0].text.strip()
+            updated_topics[topic] = self._parse_response(response_text)
 
         return updated_topics
-
-    def _create_prompt(self, docs, topic, topics):
-        keywords = next(zip(*topics[topic]))
-
-        # Use the Default Chat Prompt
-        if self.prompt == DEFAULT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", ", ".join(keywords))
-            prompt = self._replace_documents(prompt, docs)
-
-        # Use a custom prompt that leverages keywords, documents or both using
-        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
-        else:
-            prompt = self.prompt
-            if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", ", ".join(keywords))
-            if "[DOCUMENTS]" in prompt:
-                prompt = self._replace_documents(prompt, docs)
-
-        return prompt
-
-    @staticmethod
-    def _replace_documents(prompt, docs):
-        to_replace = ""
-        for doc in docs:
-            to_replace += f"- {doc}\n"
-        prompt = prompt.replace("[DOCUMENTS]", to_replace)
-        return prompt

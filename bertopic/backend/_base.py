@@ -32,21 +32,6 @@ class BaseEmbedder:
         """
         pass
 
-    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
-        """Embed a list of n words into an n-dimensional
-        matrix of embeddings.
-
-        Arguments:
-            words: A list of words to be embedded
-            verbose: Controls the verbosity of the process
-
-        Returns:
-            Word embeddings with shape (n, m) with `n` words
-            that each have an embeddings size of `m`
-
-        """
-        return self.embed(words, verbose)
-
     def embed_documents(self, document: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings.

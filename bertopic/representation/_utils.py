@@ -2,8 +2,15 @@ import random
 import time
 from typing import Union
 
+from typing import TYPE_CHECKING
 
-def truncate_document(topic_model, doc_length: Union[int, None], tokenizer: Union[str, callable], document: str) -> str:
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
+
+def truncate_document(
+    topic_model: "BERTopic", doc_length: Union[int, None], tokenizer: Union[str, callable], document: str
+) -> str:
     """Truncate a document to a certain length.
 
     If you want to add a custom tokenizer, then it will need to have a `decode` and

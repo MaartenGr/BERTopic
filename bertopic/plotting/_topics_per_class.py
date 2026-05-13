@@ -1,12 +1,17 @@
-import pandas as pd
-from typing import List, Union
+import polars as pl
+from typing import List, Union, TYPE_CHECKING
 import plotly.graph_objects as go
 from sklearn.preprocessing import normalize
 
+from bertopic.plotting._utils import select_topics
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 def visualize_topics_per_class(
-    topic_model,
-    topics_per_class: pd.DataFrame,
+    topic_model: "BERTopic",
+    topics_per_class: pl.DataFrame,
     top_n_topics: int = 10,
     topics: List[int] | None = None,
     normalize_frequency: bool = False,
@@ -62,31 +67,30 @@ def visualize_topics_per_class(
     ]
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
-    if topics is not None:
-        selected_topics = list(topics)
-    elif top_n_topics is not None:
-        selected_topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
-    else:
-        selected_topics = sorted(freq_df.Topic.to_list())
+    selected_topics = select_topics(topic_model, topics, top_n_topics)
 
     # Prepare data
     if isinstance(custom_labels, str):
-        topic_names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        topic_names = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics
+        ]
         topic_names = ["_".join([label[0] for label in labels[:4]]) for labels in topic_names]
         topic_names = [label if len(label) < 30 else label[:27] + "..." for label in topic_names]
         topic_names = {key: topic_names[index] for index, key in enumerate(topic_model.topic_labels_.keys())}
     elif topic_model.custom_labels_ is not None and custom_labels:
         topic_names = {
-            key: topic_model.custom_labels_[key + topic_model._outliers] for key, _ in topic_model.topic_labels_.items()
+            key: topic_model.custom_labels_[key + topic_model._outliers]
+            for key, _ in topic_model.topic_labels_.items()
         }
     else:
         topic_names = {
-            key: value[:40] + "..." if len(value) > 40 else value for key, value in topic_model.topic_labels_.items()
+            key: value[:40] + "..." if len(value) > 40 else value
+            for key, value in topic_model.topic_labels_.items()
         }
-    topics_per_class["Name"] = topics_per_class.Topic.map(topic_names)
-    data = topics_per_class.loc[topics_per_class.Topic.isin(selected_topics), :]
+    topics_per_class = topics_per_class.with_columns(
+        pl.col("Topic").replace_strict(topic_names, default=None).alias("Name")
+    )
+    data = topics_per_class.filter(pl.col("Topic").is_in(selected_topics))
 
     # Add traces
     fig = go.Figure()
@@ -95,16 +99,16 @@ def visualize_topics_per_class(
             visible = True
         else:
             visible = "legendonly"
-        trace_data = data.loc[data.Topic == topic, :]
-        topic_name = trace_data.Name.to_numpy()[0]
-        words = trace_data.Words.to_numpy()
+        trace_data = data.filter(pl.col("Topic") == topic)
+        topic_name = trace_data["Name"][0]
+        words = trace_data["Words"].to_list()
         if normalize_frequency:
-            x = normalize(trace_data.Frequency.to_numpy().reshape(1, -1))[0]
+            x = normalize(trace_data["Frequency"].to_numpy().reshape(1, -1))[0]
         else:
-            x = trace_data.Frequency
+            x = trace_data["Frequency"].to_list()
         fig.add_trace(
             go.Bar(
-                y=trace_data.Class,
+                y=trace_data["Class"].to_list(),
                 x=x,
                 visible=visible,
                 marker_color=colors[index % 7],

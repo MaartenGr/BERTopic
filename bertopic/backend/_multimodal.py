@@ -84,7 +84,9 @@ class MultiModalBackend(BaseEmbedder):
         except:  # noqa: E722
             self.tokenizer = None
 
-    def embed(self, documents: List[str], images: List[str] | None = None, verbose: bool = False) -> np.ndarray:
+    def embed(
+        self, documents: List[str], images: List[str] | None = None, verbose: bool = False
+    ) -> np.ndarray:
         """Embed a list of n documents/words or images into an n-dimensional
         matrix of embeddings.
 
@@ -138,21 +140,6 @@ class MultiModalBackend(BaseEmbedder):
         embeddings = self.embedding_model.encode(truncated_docs, show_progress_bar=verbose)
         return embeddings
 
-    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
-        """Embed a list of n words into an n-dimensional
-        matrix of embeddings.
-
-        Arguments:
-            words: A list of words to be embedded
-            verbose: Controls the verbosity of the process
-
-        Returns:
-            Document/words embeddings with shape (n, m) with `n` documents/words
-            that each have an embeddings size of `m`
-        """
-        embeddings = self.embedding_model.encode(words, show_progress_bar=verbose)
-        return embeddings
-
     def embed_images(self, images, verbose):
         if self.batch_size:
             nr_iterations = int(np.ceil(len(images) / self.batch_size))
@@ -164,7 +151,8 @@ class MultiModalBackend(BaseEmbedder):
                 end_index = (i * self.batch_size) + self.batch_size
 
                 images_to_embed = [
-                    Image.open(image) if isinstance(image, str) else image for image in images[start_index:end_index]
+                    Image.open(image) if isinstance(image, str) else image
+                    for image in images[start_index:end_index]
                 ]
                 if self.image_model is not None:
                     img_emb = self.image_model.encode(images_to_embed)

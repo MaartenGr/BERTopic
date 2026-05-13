@@ -1,23 +1,30 @@
 import time
+import numpy as np
 from litellm import completion
-import pandas as pd
+from typing import Union, Callable
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any
-from bertopic.representation._base import BaseRepresentation
-from bertopic.representation._utils import retry_with_exponential_backoff
+from typing import Mapping, Any
+from bertopic.representation._base import LLMRepresentation
+from bertopic.representation._utils import (
+    retry_with_exponential_backoff,
+)
+from bertopic.representation._prompts import (
+    DEFAULT_CHAT_PROMPT,
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_JSON_SCHEMA,
+    DEFAULT_JSON_PROMPT,
+)
+from bertopic._topics import Keywords, TopicRepresentation
+from bertopic._corpus import Corpus
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
-DEFAULT_PROMPT = """
-I have a topic that contains the following documents:
-[DOCUMENTS]
-The topic is described by the following keywords: [KEYWORDS]
-Based on the information above, extract a short topic label in the following format:
-topic: <topic label>
-"""
-
-
-class LiteLLM(BaseRepresentation):
+class LiteLLM(LLMRepresentation):
     """Using the LiteLLM API to generate topic labels.
 
     For an overview of models see:
@@ -27,10 +34,15 @@ class LiteLLM(BaseRepresentation):
         model: Model to use. Defaults to OpenAI's "gpt-3.5-turbo".
         generator_kwargs: Kwargs passed to `litellm.completion`.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `self.default_prompt_` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
+        system_prompt: The system prompt to be used in the model. If no system prompt is given,
+                       `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
+        json_schema: A dictionary representing the JSON schema to enforce structured output.
+                     If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
+                     Uses LiteLLM's `response_format` with `json_schema` type.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
         exponential_backoff: Retry requests with a random exponential backoff.
@@ -44,6 +56,21 @@ class LiteLLM(BaseRepresentation):
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
+        doc_length: The maximum length of each document. If a document is longer,
+                    it will be truncated. If None, the entire document is passed.
+        tokenizer: The tokenizer used to calculate to split the document into segments
+                   used to count the length of a document.
+                       * If tokenizer is 'char', then the document is split up
+                         into characters which are counted to adhere to `doc_length`
+                       * If tokenizer is 'whitespace', the document is split up
+                         into words separated by whitespaces. These words are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is 'vectorizer', then the internal CountVectorizer
+                         is used to tokenize the document. These tokens are counted
+                         and truncated depending on `doc_length`
+                       * If tokenizer is a callable, then that callable is used to tokenize
+                         the document. These tokens are counted and truncated depending
+                         on `doc_length`
 
     Usage:
 
@@ -74,101 +101,103 @@ class LiteLLM(BaseRepresentation):
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
     representation_model = LiteLLM(model="gpt", prompt=prompt)
     ```
+
+    You can also use structured output with a JSON schema:
+
+    ```python
+    representation_model = LiteLLM(model="gpt-4o-mini", json_schema=True)
+    ```
     """  # noqa: D301
 
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
         prompt: str | None = None,
+        system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
         generator_kwargs: Mapping[str, Any] = {},
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
         nr_docs: int = 4,
         diversity: float | None = None,
+        doc_length: int | None = None,
+        tokenizer: Union[str, Callable] | None = None,
     ):
+        super().__init__(
+            prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
+            nr_docs=nr_docs,
+            diversity=diversity,
+            doc_length=doc_length,
+            tokenizer=tokenizer,
+        )
+
+        # LiteLLM specific parameters
         self.model = model
-        self.prompt = prompt if prompt else DEFAULT_PROMPT
-        self.default_prompt_ = DEFAULT_PROMPT
+        self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
+        self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
+        self.generator_kwargs = generator_kwargs
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-        self.nr_docs = nr_docs
-        self.diversity = diversity
-
-        self.generator_kwargs = generator_kwargs
-        if self.generator_kwargs.get("model"):
-            self.model = generator_kwargs.get("model")
-        if self.generator_kwargs.get("prompt"):
-            del self.generator_kwargs["prompt"]
+        self.generator_kwargs["response_format"] = (
+            {"type": "json_schema", "json_schema": {"name": "Topic", "schema": self.json_schema}}
+            if self.json_schema
+            else None
+        )
 
     def extract_topics(
-        self, topic_model, documents: pd.DataFrame, c_tf_idf: csr_matrix, topics: Mapping[str, List[Tuple[str, float]]]
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        self,
+        topic_model: "BERTopic",
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
+        c_tf_idf: csr_matrix,
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
         # Generate using a (Large) Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(docs, topic, topics)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
+            self.prompts_.append(prompt)
 
             # Delay
             if self.delay_in_seconds:
                 time.sleep(self.delay_in_seconds)
 
+            # Call LiteLLM API
             messages = [
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ]
             kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
-            if self.exponential_backoff:
-                response = chat_completions_with_backoff(**kwargs)
-            else:
-                response = completion(**kwargs)
-            label = response["choices"][0]["message"]["content"].strip().replace("topic: ", "")
-
-            updated_topics[topic] = [(label, 1)]
+            response = (
+                chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
+            )
+            response_text = response["choices"][0]["message"]["content"].strip()
+            updated_topics[topic] = self._parse_response(response_text)
 
         return updated_topics
-
-    def _create_prompt(self, docs, topic, topics):
-        keywords = next(zip(*topics[topic]))
-
-        # Use the Default Chat Prompt
-        if self.prompt == DEFAULT_PROMPT:
-            prompt = self.prompt.replace("[KEYWORDS]", " ".join(keywords))
-            prompt = self._replace_documents(prompt, docs)
-
-        # Use a custom prompt that leverages keywords, documents or both using
-        # custom tags, namely [KEYWORDS] and [DOCUMENTS] respectively
-        else:
-            prompt = self.prompt
-            if "[KEYWORDS]" in prompt:
-                prompt = prompt.replace("[KEYWORDS]", " ".join(keywords))
-            if "[DOCUMENTS]" in prompt:
-                prompt = self._replace_documents(prompt, docs)
-
-        return prompt
-
-    @staticmethod
-    def _replace_documents(prompt, docs):
-        to_replace = ""
-        for doc in docs:
-            to_replace += f"- {doc[:255]}\n"
-        prompt = prompt.replace("[DOCUMENTS]", to_replace)
-        return prompt
 
 
 def chat_completions_with_backoff(**kwargs):
