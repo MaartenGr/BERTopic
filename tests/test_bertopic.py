@@ -153,3 +153,27 @@ def test_full_model(model, documents, request):
     merged_model = BERTopic.merge_models([topic_model, topic_model1])
 
     assert len(merged_model.get_topic_info()) > len(topic_model.get_topic_info())
+
+def test_transform_flexibility(documents, document_embeddings,  request):
+
+    topic_model = copy.deepcopy(request.getfixturevalue('base_topic_model'))
+    print(document_embeddings[0].shape)
+    try:
+        topic_model.transform(documents[0], document_embeddings[0])
+    except ValueError:
+        pytest.fail('Error thrown for transform with single document and embeddings')
+
+    try:
+        topic_model.transform(documents[0:2], document_embeddings[0:2])
+    except ValueError:
+        pytest.fail('Error thrown for transform with multiple documents and embeddings')
+    
+    with pytest.raises(ValueError):
+        topic_model.transform(documents[0], document_embeddings[0:2])
+
+    with pytest.raises(ValueError):
+        topic_model.transform(documents[0:2], document_embeddings[0])
+
+    with pytest.raises(ValueError):
+        topic_model.transform(documents[0], [1, 2, 3])
+
