@@ -64,7 +64,7 @@ def image_formatter(im):
     return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
 
 # Extract dataframe
-df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
+df = topic_model.get_topic_info().drop(["Representative_Docs","Name"], axis=1)
 
 # Visualize the images
 HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
@@ -179,7 +179,7 @@ def image_formatter(im):
     return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
 
 # Extract dataframe
-df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
+df = topic_model.get_topic_info().drop(["Representative_Docs","Name"], axis=1)
 
 # Visualize the images
 HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
