@@ -84,7 +84,14 @@ class SpacyBackend(BaseEmbedder):
             if embedding.has_vector:
                 embedding = embedding.vector
             else:
-                embedding = embedding._.trf_data.tensors[-1][0]
+                # Transformer pipeline design: https://spacy.io/models#design-trf
+                try:
+                    # For spaCy v3.0-v3.6, trf pipelines use spacy-transformers and the transformer output in doc._.trf_data is a TransformerData object.
+                    embedding = embedding._.trf_data.tensors[-1][0]
+                except AttributeError:
+                    # For spaCy v3.7+, trf pipelines use spacy-curated-transformers and doc._.trf_data is a DocTransformerOutput object.
+                    # embedding = embedding._.trf_data.all_outputs[-1].data.mean(axis=0)
+                    embedding = embedding._.trf_data.last_hidden_layer_state.data.mean(axis=0)
 
             if not isinstance(embedding, np.ndarray) and hasattr(embedding, "get"):
                 # Convert cupy array to numpy array
