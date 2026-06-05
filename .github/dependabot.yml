@@ -1,0 +1,27 @@
+# dependabot
+# Ref: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# ------------------------------------------------------------------------------
+version: 2
+updates:
+- package-ecosystem: github-actions
+  directory: /
+  open-pull-requests-limit: 1
+  schedule:
+    interval: quarterly
+  groups:
+    github-actions:
+      patterns:
+      - '*'
+  cooldown:
+    default-days: 7
+- package-ecosystem: pre-commit
+  directory: /
+  open-pull-requests-limit: 1
+  schedule:
+    interval: quarterly
+  groups:
+    pre-commit:
+      patterns:
+      - '*'
+  cooldown:
+    default-days: 7
