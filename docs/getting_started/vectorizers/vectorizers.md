@@ -297,3 +297,38 @@ As a result, the vocabulary of the resulting bag-of-words matrix can become quit
 
 !!! note
 	Although the `delete_min_df` parameter removes words from the bag-of-words matrix, it is not permanent. If new documents come in where those previously deleted words are used frequently, they get added back to the matrix.
+
+
+## **Pre-tokenized documents**
+
+If your documents require custom tokenization — for example, morphological
+analysis, domain-specific splitting, or languages with complex word boundaries —
+you can pass pre-tokenized documents directly:
+
+```python
+# Tokenize with your own pipeline
+tokenized_docs = [my_tokenizer(doc) for doc in docs]
+
+# Pass both raw docs (for display) and tokenized docs (for analysis)
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(
+    docs, tokenized_documents=tokenized_docs, embeddings=embeddings
+)
+```
+
+Pre-tokenized documents are supported throughout the pipeline:
+
+- `fit()` / `fit_transform()`: Builds topic representations from your tokens
+- `update_topics()`: Re-computes representations with new tokenization
+- `hierarchical_topics()`: Uses your tokens for parent topic naming
+- `reduce_outliers()`: Uses your tokens for c-TF-IDF and distribution strategies
+- `approximate_distribution()`: Uses your tokens for sliding-window analysis
+
+!!! important
+    `tokenized_documents` must have exactly the same length as `documents`.
+    Each element should be a list (or tuple) of strings representing tokens.
+
+!!! tip
+    When using pre-tokenized documents, BERTopic automatically configures the
+    internal `CountVectorizer` to use a passthrough analyzer. You do **not** need
+    to set up a custom vectorizer.

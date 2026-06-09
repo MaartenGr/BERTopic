@@ -307,9 +307,6 @@ class BERTopic:
         self.representative_docs_ = {}
         self.topic_aspects_ = {}
 
-        # Cache flag for representative docs
-        self._repr_docs_valid = False
-
         # Private attributes for internal tracking purposes
         self._merged_topics = None
 
@@ -357,6 +354,7 @@ class BERTopic:
         embeddings: np.ndarray = None,
         images: List[str] | None = None,
         y: Union[List[int], np.ndarray] = None,
+        tokenized_documents: List[List[str]] | None = None,
     ):
         """Fit the models on a collection of documents and generate topics.
 
@@ -367,6 +365,9 @@ class BERTopic:
             images: A list of paths to the images to fit on or the images themselves
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Examples:
         ```python
@@ -393,7 +394,9 @@ class BERTopic:
         topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
-        self.fit_transform(documents=documents, embeddings=embeddings, y=y, images=images)
+        self.fit_transform(
+            documents=documents, embeddings=embeddings, y=y, images=images, tokenized_documents=tokenized_documents
+        )
         return self
 
     def fit_transform(
@@ -402,6 +405,7 @@ class BERTopic:
         embeddings: np.ndarray = None,
         images: List[str] | None = None,
         y: Union[List[int], np.ndarray] = None,
+        tokenized_documents: List[List[str]] | None = None,
     ) -> Tuple[List[int], Union[np.ndarray, None]]:
         """Fit the models on a collection of documents, generate topics,
         and return the probabilities and topic per document.
@@ -413,6 +417,9 @@ class BERTopic:
             images: A list of paths to the images to fit on or the images themselves
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Returns:
             predictions: Topic predictions for each documents
@@ -455,6 +462,10 @@ class BERTopic:
 
         doc_ids = range(len(documents)) if documents is not None else range(len(images))
         documents = pd.DataFrame({"Document": documents, "ID": doc_ids, "Topic": None, "Image": images})
+
+        # Store pre-tokenized documents if provided
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
 
         # Extract embeddings
         if embeddings is None:
@@ -655,6 +666,7 @@ class BERTopic:
         documents: List[str],
         embeddings: np.ndarray = None,
         y: Union[List[int], np.ndarray] = None,
+        tokenized_documents: List[List[str]] | None = None,
     ):
         """Fit BERTopic on a subset of the data and perform online learning
         with batch-like data.
@@ -687,6 +699,9 @@ class BERTopic:
                         instead of the sentence-transformer model
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Examples:
         ```python
@@ -722,6 +737,10 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
         documents = pd.DataFrame({"Document": documents, "ID": range(len(documents)), "Topic": None})
+
+        # Store pre-tokenized documents if provided
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
 
         # Extract embeddings
         if embeddings is None:
@@ -771,7 +790,10 @@ class BERTopic:
         # Prepare documents
         documents_per_topic = documents.sort_values("Topic").groupby(["Topic"], as_index=False)
         updated_topics = documents_per_topic.first().Topic.astype(int)
-        documents_per_topic = documents_per_topic.agg({"Document": " ".join})
+        agg_dict = {"Document": " ".join}
+        if "Tokenized_Document" in documents.columns:
+            agg_dict["Tokenized_Document"] = "sum"
+        documents_per_topic = documents_per_topic.agg(agg_dict)
 
         # Update topic representations
         self.c_tf_idf_, updated_words = self._c_tf_idf(documents_per_topic, partial_fit=True)
@@ -807,6 +829,7 @@ class BERTopic:
         datetime_format: str | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
+        tokenized_documents: List[List[str]] | None = None,
     ) -> pd.DataFrame:
         """Create topics over time.
 
@@ -846,6 +869,9 @@ class BERTopic:
             global_tuning: Fine-tune each topic representation at timestamp *t* by averaging its c-TF-IDF matrix
                        with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                        topic representations that could not be found in the documents at timestamp *t*.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Returns:
             topics_over_time: A dataframe that contains the topic, words, and frequency of topic
@@ -866,6 +892,11 @@ class BERTopic:
         check_documents_type(docs)
         selected_topics = topics if topics else self.topics_
         documents = pd.DataFrame({"Document": docs, "Topic": selected_topics, "Timestamps": timestamps})
+
+        # Store pre-tokenized documents if provided
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
+
         global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm="l1", copy=False)
 
         all_topics = sorted(list(documents.Topic.unique()))
@@ -898,9 +929,10 @@ class BERTopic:
         for index, timestamp in tqdm(enumerate(timestamps), disable=not self.verbose):
             # Calculate c-TF-IDF representation for a specific timestamp
             selection = documents.loc[documents.Timestamps == timestamp, :]
-            documents_per_topic = selection.groupby(["Topic"], as_index=False).agg(
-                {"Document": " ".join, "Timestamps": "count"}
-            )
+            agg_dict = {"Document": " ".join, "Timestamps": "count"}
+            if "Tokenized_Document" in selection.columns:
+                agg_dict["Tokenized_Document"] = "sum"
+            documents_per_topic = selection.groupby(["Topic"], as_index=False).agg(agg_dict)
             c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
 
             if global_tuning or evolution_tuning:
@@ -962,6 +994,7 @@ class BERTopic:
         docs: List[str],
         classes: Union[List[int], List[str]],
         global_tuning: bool = True,
+        tokenized_documents: List[List[str]] | None = None,
     ) -> pd.DataFrame:
         """Create topics per class.
 
@@ -983,6 +1016,9 @@ class BERTopic:
             global_tuning: Fine-tune each topic representation for class c by averaging its c-TF-IDF matrix
                            with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                            topic representations that could not be found in the documents for class c.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Returns:
             topics_per_class: A dataframe that contains the topic, words, and frequency of topics
@@ -998,6 +1034,11 @@ class BERTopic:
         """
         check_documents_type(docs)
         documents = pd.DataFrame({"Document": docs, "Topic": self.topics_, "Class": classes})
+
+        # Store pre-tokenized documents if provided
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
+
         global_c_tf_idf = normalize(self.c_tf_idf_, axis=1, norm="l1", copy=False)
 
         # For each unique timestamp, create topic representations
@@ -1005,9 +1046,10 @@ class BERTopic:
         for _, class_ in tqdm(enumerate(set(classes)), disable=not self.verbose):
             # Calculate c-TF-IDF representation for a specific timestamp
             selection = documents.loc[documents.Class == class_, :]
-            documents_per_topic = selection.groupby(["Topic"], as_index=False).agg(
-                {"Document": " ".join, "Class": "count"}
-            )
+            agg_dict = {"Document": " ".join, "Class": "count"}
+            if "Tokenized_Document" in selection.columns:
+                agg_dict["Tokenized_Document"] = "sum"
+            documents_per_topic = selection.groupby(["Topic"], as_index=False).agg(agg_dict)
             c_tf_idf, words = self._c_tf_idf(documents_per_topic, fit=False)
 
             # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
@@ -1042,6 +1084,7 @@ class BERTopic:
         use_ctfidf: bool = True,
         linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
         distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
+        tokenized_documents: List[List[str]] | None = None,
     ) -> pd.DataFrame:
         """Create a hierarchy of topics.
 
@@ -1067,6 +1110,9 @@ class BERTopic:
                                non-negative values or condensed distance matrix of shape
                                (n_samples * (n_samples - 1) / 2,) containing the upper
                                triangular of the distance matrix.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Returns:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -1117,9 +1163,17 @@ class BERTopic:
 
         # Calculate basic bag-of-words to be iteratively merged later
         documents = pd.DataFrame({"Document": docs, "ID": range(len(docs)), "Topic": self.topics_})
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
+        agg_dict = {"Document": " ".join}
+        if "Tokenized_Document" in documents.columns:
+            agg_dict["Tokenized_Document"] = "sum"
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(agg_dict)
         documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
-        clean_documents = self._preprocess_text(documents_per_topic.Document.values)
+        if "Tokenized_Document" in documents_per_topic.columns:
+            clean_documents = documents_per_topic.Tokenized_Document.to_numpy()
+        else:
+            clean_documents = self._preprocess_text(documents_per_topic.Document.values)
 
         # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
         # and will be removed in 1.2. Please use get_feature_names_out instead.
@@ -1128,7 +1182,17 @@ class BERTopic:
         else:
             words = self.vectorizer_model.get_feature_names()
 
+        # When using pre-tokenized input, set analyzer to identity (passthrough)
+        original_analyzer = None
+        if "Tokenized_Document" in documents_per_topic.columns:
+            original_analyzer = self.vectorizer_model.analyzer
+            self.vectorizer_model.analyzer = lambda doc: doc
+
         bow = self.vectorizer_model.transform(clean_documents)
+
+        # Restore original analyzer
+        if original_analyzer is not None:
+            self.vectorizer_model.analyzer = original_analyzer
 
         # Extract clusters
         hier_topics = pd.DataFrame(
@@ -1216,6 +1280,7 @@ class BERTopic:
         use_embedding_model: bool = False,
         calculate_tokens: bool = False,
         separator: str = " ",
+        tokenized_documents: List[List[str]] | None = None,
     ) -> Tuple[np.ndarray, Union[List[np.ndarray], None]]:
         """A post-hoc approximation of topic distributions across documents.
 
@@ -1265,6 +1330,9 @@ class BERTopic:
                               can require more memory. Using this over batches of
                               documents might be preferred.
             separator: The separator used to merge tokens into tokensets.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Returns:
             topic_distributions: A `n` x `m` matrix containing the topic distributions
@@ -1298,6 +1366,12 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
+        if tokenized_documents is not None and len(tokenized_documents) != len(documents):
+            raise ValueError(
+                f"tokenized_documents has {len(tokenized_documents)} entries "
+                f"but {len(documents)} documents were provided"
+            )
+
         if batch_size is None:
             batch_size = len(documents)
             batches = 1
@@ -1311,8 +1385,11 @@ class BERTopic:
             doc_set = documents[i * batch_size : (i + 1) * batch_size]
 
             # Extract tokens
-            analyzer = self.vectorizer_model.build_tokenizer()
-            tokens = [analyzer(document) for document in doc_set]
+            if tokenized_documents is not None:
+                tokens = tokenized_documents[i * batch_size : (i + 1) * batch_size]
+            else:
+                analyzer = self.vectorizer_model.build_tokenizer()
+                tokens = [analyzer(document) for document in doc_set]
 
             # Extract token sets
             all_sentences = []
@@ -1499,6 +1576,7 @@ class BERTopic:
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: ClassTfidfTransformer = None,
         representation_model: BaseRepresentation = None,
+        tokenized_documents: List[List[str]] | None = None,
     ):
         """Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
@@ -1525,6 +1603,9 @@ class BERTopic:
             representation_model: Pass in a model that fine-tunes the topic representations
                                   calculated through c-TF-IDF. Models from `bertopic.representation`
                                   are supported.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Examples:
         In order to update the topic representation, you will need to first fit the topic
@@ -1562,7 +1643,6 @@ class BERTopic:
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
         self.representation_model = representation_model
-        self._repr_docs_valid = False
 
         if topics is None:
             topics = self.topics_
@@ -1576,7 +1656,12 @@ class BERTopic:
             )
 
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
+        agg_dict = {"Document": " ".join}
+        if "Tokenized_Document" in documents.columns:
+            agg_dict["Tokenized_Document"] = "sum"
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(agg_dict)
 
         # Update topic sizes and assignments
         self._update_topic_size(documents)
@@ -2108,6 +2193,7 @@ class BERTopic:
         docs: List[str],
         topics_to_merge: List[Union[Iterable[int], int]],
         images: List[str] | None = None,
+        tokenized_documents: List[List[str]] | None = None,
     ) -> None:
         """Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
@@ -2147,6 +2233,10 @@ class BERTopic:
             }
         )
 
+        # Store pre-tokenized documents if provided
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
+
         mapping = {topic: topic for topic in set(self.topics_)}
         if isinstance(topics_to_merge[0], int):
             for topic in sorted(topics_to_merge):
@@ -2176,7 +2266,6 @@ class BERTopic:
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents, mappings=mappings)
         self._update_topic_size(documents)
-        self._repr_docs_valid = False
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
@@ -2322,6 +2411,7 @@ class BERTopic:
         nr_topics: Union[int, str] = 20,
         images: List[str] | None = None,
         use_ctfidf: bool = False,
+        tokenized_documents: List[List[str]] | None = None,
     ) -> None:
         """Reduce the number of topics to a fixed number of topics
         or automatically.
@@ -2342,6 +2432,9 @@ class BERTopic:
                     `fit` or `fit_transform`
             use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
                         embeddings from the embedding model are used.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
         Updates:
             topics_ : Assigns topics to their merged representations.
@@ -2375,10 +2468,13 @@ class BERTopic:
             }
         )
 
+        # Store pre-tokenized documents if provided
+        if tokenized_documents is not None:
+            documents["Tokenized_Document"] = [tuple(tokens) for tokens in tokenized_documents]
+
         # Reduce number of topics
         documents = self._reduce_topics(documents, use_ctfidf)
         self._merged_topics = None
-        self._repr_docs_valid = False
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
@@ -2394,6 +2490,7 @@ class BERTopic:
         threshold: float = 0,
         embeddings: np.ndarray = None,
         distributions_params: Mapping[str, Any] = {},
+        tokenized_documents: List[List[str]] | None = None,
     ) -> List[int]:
         """Reduce outliers by merging them with their nearest topic according
         to one of several strategies.
@@ -2430,6 +2527,9 @@ class BERTopic:
                         * "probabilities"
                             This uses the soft-clustering as performed by HDBSCAN
                             to find the best matching topic for each outlier document.
+            tokenized_documents: Pre-tokenized documents as a list of token lists.
+                                  When provided, these are used by the vectorizer
+                                  instead of re-tokenizing the raw documents.
 
                         * "distributions"
                             Use the topic distributions, as calculated with `.approximate_distribution`
@@ -2494,8 +2594,11 @@ class BERTopic:
         elif strategy.lower() == "distributions":
             outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
             outlier_docs = [documents[index] for index in outlier_ids]
+            outlier_tokenized = (
+                [tokenized_documents[index] for index in outlier_ids] if tokenized_documents is not None else None
+            )
             topic_distr, _ = self.approximate_distribution(
-                outlier_docs, min_similarity=threshold, **distributions_params
+                outlier_docs, min_similarity=threshold, tokenized_documents=outlier_tokenized, **distributions_params
             )
             outlier_topics = iter([np.argmax(prob) if sum(prob) > 0 else -1 for prob in topic_distr])
             new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
@@ -2506,7 +2609,14 @@ class BERTopic:
             outlier_docs = [documents[index] for index in outlier_ids]
 
             # Calculate c-TF-IDF of outlier documents with all topics
-            bow_doc = self.vectorizer_model.transform(outlier_docs)
+            if tokenized_documents is not None:
+                outlier_tokenized = [tokenized_documents[index] for index in outlier_ids]
+                original_analyzer = self.vectorizer_model.analyzer
+                self.vectorizer_model.analyzer = lambda doc: doc
+                bow_doc = self.vectorizer_model.transform(outlier_tokenized)
+                self.vectorizer_model.analyzer = original_analyzer
+            else:
+                bow_doc = self.vectorizer_model.transform(outlier_docs)
             c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
             similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers :])
 
@@ -4207,7 +4317,10 @@ class BERTopic:
             method = "representation models" if fine_tune_representation else "c-TF-IDF for topic reduction"
             logger.info(f"Representation - {action} topics using {method}.")
 
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        agg_dict = {"Document": " ".join}
+        if "Tokenized_Document" in documents.columns:
+            agg_dict["Tokenized_Document"] = "sum"
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg(agg_dict)
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(
             words,
@@ -4224,19 +4337,12 @@ class BERTopic:
     def _save_representative_docs(self, documents: pd.DataFrame):
         """Save the 3 most representative docs per topic.
 
-        Uses a simple cache: if representative docs have already been computed
-        and no topic-changing operation has occurred since, return the cached
-        result.  Cache is invalidated by ``update_topics``, ``merge_topics``,
-        ``reduce_topics``, and ``reduce_outliers``.
-
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
 
         Updates:
             self.representative_docs_: Populate each topic with 3 representative docs
         """
-        if self._repr_docs_valid and self.representative_docs_:
-            return
         repr_docs, _, _, _ = self._extract_representative_docs(
             self.c_tf_idf_,
             documents,
@@ -4245,7 +4351,6 @@ class BERTopic:
             nr_repr_docs=3,
         )
         self.representative_docs_ = repr_docs
-        self._repr_docs_valid = True
 
     def _extract_representative_docs(
         self,
@@ -4298,9 +4403,17 @@ class BERTopic:
             selected_docs = selection["Document"].to_numpy()
             selected_docs_ids = selection.index.tolist()
 
-            # Calculate similarity
+            # Calculate similarity — use pre-tokenized docs when available
             nr_docs = nr_repr_docs if len(selected_docs) > nr_repr_docs else len(selected_docs)
-            bow = self.vectorizer_model.transform(selected_docs)
+            if "Tokenized_Document" in selection.columns:
+                vectorizer_input = selection["Tokenized_Document"].to_numpy()
+                original_analyzer = self.vectorizer_model.analyzer
+                self.vectorizer_model.analyzer = lambda doc: doc
+                bow = self.vectorizer_model.transform(vectorizer_input)
+                self.vectorizer_model.analyzer = original_analyzer
+            else:
+                vectorizer_input = selected_docs
+                bow = self.vectorizer_model.transform(vectorizer_input)
             ctfidf = self.ctfidf_model.transform(bow)
             sim_matrix = cosine_similarity(ctfidf, c_tf_idf[index])
 
@@ -4431,12 +4544,29 @@ class BERTopic:
         """
         documents = self._preprocess_text(documents_per_topic.Document.values)
 
+        # Use pre-tokenized documents when available
+        tokenized_documents = None
+        if "Tokenized_Document" in documents_per_topic.columns:
+            tokenized_documents = documents_per_topic.Tokenized_Document.to_numpy()
+
+        vectorizer_input = tokenized_documents if tokenized_documents is not None else documents
+
+        # When using pre-tokenized input, set analyzer to identity (passthrough)
+        original_analyzer = None
+        if tokenized_documents is not None:
+            original_analyzer = self.vectorizer_model.analyzer
+            self.vectorizer_model.analyzer = lambda doc: doc
+
         if partial_fit:
-            X = self.vectorizer_model.partial_fit(documents).update_bow(documents)
+            X = self.vectorizer_model.partial_fit(vectorizer_input).update_bow(vectorizer_input)
         elif fit:
-            X = self.vectorizer_model.fit_transform(documents)
+            X = self.vectorizer_model.fit_transform(vectorizer_input)
         else:
-            X = self.vectorizer_model.transform(documents)
+            X = self.vectorizer_model.transform(vectorizer_input)
+
+        # Restore original analyzer
+        if original_analyzer is not None:
+            self.vectorizer_model.analyzer = original_analyzer
 
         # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
         # and will be removed in 1.2. Please use get_feature_names_out instead.
