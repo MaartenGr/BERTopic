@@ -4298,13 +4298,16 @@ class BERTopic:
                     top_n=nr_docs,
                     diversity=diversity,
                 )
+                # MMR returns document strings; map back to positional indices
+                doc_set = set(docs)
+                selected_indices = [i for i, d in enumerate(selected_docs) if d in doc_set]
 
             # Extract top n most representative documents
             else:
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
-                docs = [selected_docs[index] for index in indices]
+                selected_indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
+                docs = [selected_docs[i] for i in selected_indices]
 
-            doc_ids = [selected_docs_ids[index] for index, doc in enumerate(selected_docs) if doc in docs]
+            doc_ids = [selected_docs_ids[i] for i in selected_indices]
             repr_docs_ids.append(doc_ids)
             repr_docs.extend(docs)
             repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
