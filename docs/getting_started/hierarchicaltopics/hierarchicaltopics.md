@@ -35,6 +35,36 @@ hierarchical_topics = topic_model.hierarchical_topics(docs)
 The resulting `hierarchical_topics` is a dataframe in which merged topics are described. For example, if you would
 merge two topics, what would the topic representation of the new topic be?
 
+
+## **Rich labels for parent topics**
+
+By default, parent topics in the hierarchy are named using raw keyword
+concatenation (e.g., `"safety_equipment_ppe_wear_worker"`). If you have a
+representation model configured (e.g., KeyBERTInspired, LLM-based), you can
+use it to generate rich labels for parent topics too:
+
+```python
+from bertopic.representation import KeyBERTInspired
+
+representation_model = KeyBERTInspired()
+topic_model = BERTopic(representation_model=representation_model)
+topics, probs = topic_model.fit_transform(docs)
+
+# Rich labels for the hierarchy
+hierarchical_topics = topic_model.hierarchical_topics(
+    docs, use_representation_model=True
+)
+```
+
+This runs the representation model on all parent topics in a single batch
+call after the hierarchy is built, so it adds only one round of inference
+regardless of the number of merge steps.
+
+!!! note
+    When `representation_model` is `None`, setting `use_representation_model=True`
+    is a no-op — parent names default to keyword concatenation.
+
+
 ## **Linkage functions**
 
 When creating the potential hierarchical nature of topics, we use Scipy's ward `linkage` function as a default

@@ -1038,6 +1038,7 @@ class BERTopic:
         use_ctfidf: bool = True,
         linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
         distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
+        use_representation_model: bool = False,
     ) -> pd.DataFrame:
         """Create a hierarchy of topics.
 
@@ -1063,6 +1064,11 @@ class BERTopic:
                                non-negative values or condensed distance matrix of shape
                                (n_samples * (n_samples - 1) / 2,) containing the upper
                                triangular of the distance matrix.
+            use_representation_model: If True, after computing the hierarchy, run the
+                               representation model (including aspects) on all parent
+                               topics in a single batch to generate human-readable labels.
+                               The ``Parent_Name`` column will contain the representation
+                               model output instead of raw c-TF-IDF keyword concatenations.
 
         Returns:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -1126,6 +1132,10 @@ class BERTopic:
 
         bow = self.vectorizer_model.transform(clean_documents)
 
+        # Collect per-parent data for batch relabeling
+        parent_c_tf_idf_rows = []
+        parent_doc_selections = []
+
         # Extract clusters
         hier_topics = pd.DataFrame(
             columns=[
@@ -1159,6 +1169,11 @@ class BERTopic:
             selection = documents.loc[documents.Topic.isin(clustered_topics), :]
             selection.Topic = 0
             words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
+
+            # Save per-parent data for batch relabeling
+            if use_representation_model:
+                parent_c_tf_idf_rows.append(c_tf_idf)
+                parent_doc_selections.append(selection)
 
             # Extract parent's name and ID
             parent_id = index + len(clusters)
@@ -1198,6 +1213,107 @@ class BERTopic:
         hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]] = hier_topics[
             ["Parent_ID", "Child_Left_ID", "Child_Right_ID"]
         ].astype(str)
+
+        # Batch relabeling with representation model
+        if use_representation_model and self.representation_model and parent_c_tf_idf_rows:
+            hier_topics = self._label_hierarchical_topics(
+                hier_topics, words, parent_c_tf_idf_rows, parent_doc_selections
+            )
+
+        return hier_topics
+
+    def _label_hierarchical_topics(
+        self,
+        hier_topics: pd.DataFrame,
+        words: np.ndarray,
+        parent_c_tf_idf_rows: list,
+        parent_doc_selections: list,
+    ) -> pd.DataFrame:
+        """Relabel parent topics using the representation model in a single batch.
+
+        Stacks all per-parent c-TF-IDF rows into one matrix, builds a combined
+        documents DataFrame with unique synthetic topic IDs, and calls
+        ``_extract_words_per_topic`` once so that both the Main model and aspect
+        models run on all parents together.
+
+        Arguments:
+            hier_topics: The hierarchy DataFrame produced by the merge loop.
+            words: Feature names from the fitted vectorizer.
+            parent_c_tf_idf_rows: One c-TF-IDF row (sparse matrix) per parent.
+            parent_doc_selections: Document selection DataFrames per parent.
+
+        Returns:
+            The updated ``hier_topics`` DataFrame with ``Parent_Name`` relabeled.
+        """
+        from scipy.sparse import vstack as sparse_vstack
+
+        n_parents = len(parent_c_tf_idf_rows)
+        batched_c_tf_idf = sparse_vstack(parent_c_tf_idf_rows, format="csr")
+
+        # Build combined documents with unique topic IDs per parent
+        combined_docs_parts = []
+        for parent_idx, selection in enumerate(parent_doc_selections):
+            part = selection.copy()
+            part["Topic"] = parent_idx
+            combined_docs_parts.append(part)
+        combined_docs = pd.concat(combined_docs_parts, ignore_index=True)
+
+        # Save mutable state that _extract_words_per_topic overwrites
+        saved_topic_aspects = getattr(self, "topic_aspects_", {})
+        saved_representative_docs = getattr(self, "representative_docs_", {})
+        self.topic_aspects_ = {}
+
+        try:
+            # Run representation model (Main + aspects) in one batched call
+            labeled_topics = self._extract_words_per_topic(
+                words,
+                combined_docs,
+                batched_c_tf_idf,
+                fine_tune_representation=True,
+                calculate_aspects=True,
+            )
+
+            parent_aspects = dict(self.topic_aspects_)
+        finally:
+            # Restore leaf-topic state even if _extract_words_per_topic raises
+            self.topic_aspects_ = saved_topic_aspects
+            self.representative_docs_ = saved_representative_docs
+
+        # Determine the best label source (prefer non-Main aspect)
+        llm_aspect_name = None
+        if isinstance(self.representation_model, dict):
+            for aspect in self.representation_model:
+                if aspect != "Main":
+                    llm_aspect_name = aspect
+                    break
+
+        # Build parent index to label mapping
+        parent_labels = {}
+        for parent_idx in range(n_parents):
+            label = None
+            if llm_aspect_name and llm_aspect_name in parent_aspects:
+                aspect_data = parent_aspects[llm_aspect_name].get(parent_idx, [])
+                if aspect_data:
+                    label = str(aspect_data[0][0])
+            if not label:
+                topic_words = labeled_topics.get(parent_idx, [])
+                if topic_words:
+                    label = "_".join([w for w, _ in topic_words[:5]])
+            if label:
+                parent_labels[parent_idx] = label
+
+        # Update Parent_Name and propagate to child references
+        old_to_new = {}
+        for original_idx, new_name in parent_labels.items():
+            if original_idx in hier_topics.index:
+                old_name = hier_topics.loc[original_idx, "Parent_Name"]
+                if old_name != new_name:
+                    old_to_new[old_name] = new_name
+                    hier_topics.loc[original_idx, "Parent_Name"] = new_name
+
+        if old_to_new:
+            hier_topics["Child_Left_Name"] = hier_topics["Child_Left_Name"].replace(old_to_new)
+            hier_topics["Child_Right_Name"] = hier_topics["Child_Right_Name"].replace(old_to_new)
 
         return hier_topics
 
