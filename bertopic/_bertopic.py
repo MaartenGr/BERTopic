@@ -1,6 +1,7 @@
 # ruff: noqa: E402
-import yaml
 import warnings
+
+import yaml
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -10,26 +11,25 @@ try:
 except (KeyError, AttributeError, TypeError):
     pass
 
-import re
-import math
-import joblib
-import inspect
 import collections
+import inspect
+import math
+import re
+from collections import Counter, defaultdict
+from copy import deepcopy
+from importlib.util import find_spec
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Literal, Mapping, Tuple, Union
+
+import joblib
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from copy import deepcopy
-
-from tqdm import tqdm
-from pathlib import Path
 from packaging import version
-from tempfile import TemporaryDirectory
-from collections import defaultdict, Counter
-from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from importlib.util import find_spec
-
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
+from scipy.sparse import csr_matrix
+from tqdm import tqdm
 
 # Plotting
 if find_spec("plotly") is None:
@@ -41,8 +41,8 @@ else:
     from bertopic import plotting
 
     if TYPE_CHECKING:
-        import plotly.graph_objs as go
         import matplotlib.figure as fig
+        import plotly.graph_objs as go
 
 
 # Models
@@ -54,32 +54,33 @@ except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
     from sklearn.cluster import HDBSCAN as SK_HDBSCAN
 
-from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import normalize
 
-# BERTopic
-from bertopic.cluster import BaseCluster
-from bertopic.backend import BaseEmbedder
-from bertopic.representation._mmr import mmr
-from bertopic.backend._utils import select_backend
-from bertopic.vectorizers import ClassTfidfTransformer
-from bertopic.representation import BaseRepresentation, KeyBERTInspired
-from bertopic.dimensionality import BaseDimensionalityReduction
-from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+import bertopic._save_utils as save_utils
 from bertopic._utils import (
     MyLogger,
     check_documents_type,
     check_embeddings_shape,
     check_is_fitted,
-    validate_distance_matrix,
-    select_topic_representation,
     get_unique_distances,
+    select_topic_representation,
+    validate_distance_matrix,
 )
-import bertopic._save_utils as save_utils
+from bertopic.backend import BaseEmbedder
+from bertopic.backend._utils import select_backend
+
+# BERTopic
+from bertopic.cluster import BaseCluster
+from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
+from bertopic.representation._mmr import mmr
+from bertopic.vectorizers import ClassTfidfTransformer
 
 logger = MyLogger()
 logger.configure("WARNING")
@@ -1876,60 +1877,6 @@ class BERTopic:
         else:
             return self.representative_docs_
 
-    def recalculate_representative_docs(
-        self,
-        docs: List[str],
-        nr_repr_docs: int | None = None,
-        nr_samples: int | None = None,
-    ):
-        """Recalculate representative documents with a configurable count.
-
-        After fitting a model, you may want more (or fewer) representative
-        documents per topic without re-fitting. This method recalculates
-        ``representative_docs_`` using the same c-TF-IDF similarity approach
-        as the initial fit, but with the given ``nr_repr_docs`` and
-        ``nr_samples`` values.
-
-        Arguments:
-            docs: The documents you used when calling either ``fit`` or
-                  ``fit_transform``.
-            nr_repr_docs: The number of representative documents to extract
-                          per topic. Defaults to ``self.nr_repr_docs``.
-            nr_samples: The number of candidate documents to sample per
-                        topic before ranking by similarity. Defaults to
-                        ``self.nr_repr_docs_nr_samples``.
-
-        Examples:
-        Recalculate with more representative docs after training:
-
-        ```python
-        topic_model.recalculate_representative_docs(docs, nr_repr_docs=10)
-        ```
-
-        Use a larger sampling pool for better selection:
-
-        ```python
-        topic_model.recalculate_representative_docs(
-            docs, nr_repr_docs=5, nr_samples=1000
-        )
-        ```
-        """
-        check_is_fitted(self)
-        if nr_repr_docs is None:
-            nr_repr_docs = self.nr_repr_docs
-        if nr_samples is None:
-            nr_samples = self.nr_repr_docs_nr_samples
-
-        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_})
-        repr_docs, _, _, _ = self._extract_representative_docs(
-            self.c_tf_idf_,
-            documents,
-            self.topic_representations_,
-            nr_samples=nr_samples,
-            nr_repr_docs=nr_repr_docs,
-        )
-        self.representative_docs_ = repr_docs
-
     @staticmethod
     def get_topic_tree(
         hier_topics: pd.DataFrame,
@@ -2449,6 +2396,8 @@ class BERTopic:
         threshold: float = 0,
         embeddings: np.ndarray = None,
         distributions_params: Mapping[str, Any] = {},
+        outliers_percentage_target: float | None = None,
+        min_threshold: float = 0.0,
     ) -> List[int]:
         """Reduce outliers by merging them with their nearest topic according
         to one of several strategies.
@@ -2505,6 +2454,12 @@ class BERTopic:
                         If this is None, then it will compute the embeddings for the outlier documents.
             distributions_params: The parameters used in `.approximate_distribution` when using
                                   the strategy `"distributions"`.
+            outliers_percentage_target: Target fraction of documents that should remain as outliers
+                                        after reduction. When provided, the method automatically
+                                        searches for the optimal threshold. Must be between 0 and 1.
+                                        Cannot be used together with a non-zero ``threshold``.
+            min_threshold: Minimum threshold to consider during automatic search.
+                           Prevents overly aggressive outlier reassignment.
 
         Returns:
             new_topics: The updated topics
@@ -2534,12 +2489,29 @@ class BERTopic:
         if images is not None:
             strategy = "embeddings"
 
+        # Auto-threshold: compute target number of outliers
+        if outliers_percentage_target is not None:
+            if threshold is not None and threshold != 0:
+                raise ValueError("Specify either `threshold` or `outliers_percentage_target`, not both.")
+            if not 0.0 <= outliers_percentage_target <= 1.0:
+                raise ValueError("outliers_percentage_target must be between 0 and 1.")
+            outliers_nb_target = int(outliers_percentage_target * len(topics))
+            current_outliers = sum(1 for t in topics if t == -1)
+            if current_outliers <= outliers_nb_target:
+                return list(topics)
+        else:
+            outliers_nb_target = None
+
         # Check correct use of parameters
         if strategy.lower() == "probabilities" and probabilities is None:
             raise ValueError("Make sure to pass in `probabilities` in order to use the probabilities strategy")
 
         # Reduce outliers by extracting most likely topics through the topic-term probability matrix
         if strategy.lower() == "probabilities":
+            if outliers_nb_target is not None:
+                # Auto-threshold: find the probability threshold achieving the target
+                outlier_probs = np.array([np.max(prob) for topic, prob in zip(topics, probabilities) if topic == -1])
+                threshold = self._find_threshold(outlier_probs, outliers_nb_target, min_threshold)
             new_topics = [
                 np.argmax(prob) if np.max(prob) >= threshold and topic == -1 else topic
                 for topic, prob in zip(topics, probabilities)
@@ -2549,9 +2521,18 @@ class BERTopic:
         elif strategy.lower() == "distributions":
             outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
             outlier_docs = [documents[index] for index in outlier_ids]
-            topic_distr, _ = self.approximate_distribution(
-                outlier_docs, min_similarity=threshold, **distributions_params
-            )
+            if outliers_nb_target is not None:
+                # Use a low min_similarity to get full similarity matrix, then auto-threshold
+                topic_distr, _ = self.approximate_distribution(
+                    outlier_docs, min_similarity=min_threshold, **distributions_params
+                )
+                max_sims = np.max(topic_distr, axis=1)
+                threshold = self._find_threshold(max_sims, outliers_nb_target, min_threshold)
+                topic_distr[topic_distr < threshold] = 0
+            else:
+                topic_distr, _ = self.approximate_distribution(
+                    outlier_docs, min_similarity=threshold, **distributions_params
+                )
             outlier_topics = iter([np.argmax(prob) if sum(prob) > 0 else -1 for prob in topic_distr])
             new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
 
@@ -2564,6 +2545,11 @@ class BERTopic:
             bow_doc = self.vectorizer_model.transform(outlier_docs)
             c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
             similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers :])
+
+            # Auto-threshold or fixed threshold
+            if outliers_nb_target is not None:
+                max_sims = np.max(similarity, axis=1)
+                threshold = self._find_threshold(max_sims, outliers_nb_target, min_threshold)
 
             # Update topics
             similarity[similarity < threshold] = 0
@@ -2593,12 +2579,52 @@ class BERTopic:
                 outlier_embeddings = self.embedding_model.embed_documents(outlier_docs)
             similarity = cosine_similarity(outlier_embeddings, self.topic_embeddings_[self._outliers :])
 
+            # Auto-threshold or fixed threshold
+            if outliers_nb_target is not None:
+                max_sims = np.max(similarity, axis=1)
+                threshold = self._find_threshold(max_sims, outliers_nb_target, min_threshold)
+
             # Update topics
             similarity[similarity < threshold] = 0
             outlier_topics = iter([np.argmax(sim) if sum(sim) > 0 else -1 for sim in similarity])
             new_topics = [topic if topic != -1 else next(outlier_topics) for topic in topics]
 
         return new_topics
+
+    @staticmethod
+    def _find_threshold(
+        scores: np.ndarray,
+        outliers_nb_target: int,
+        min_threshold: float = 0.0,
+    ) -> float:
+        """Find the threshold that yields at most ``outliers_nb_target`` remaining outliers.
+
+        For each unique score value (above ``min_threshold``), count how many
+        outlier documents would *not* be reassigned (i.e., their max score is
+        below that candidate threshold).  Choose the lowest threshold where the
+        remaining-outlier count is closest to (but not below) the target.
+
+        Arguments:
+            scores: Per-outlier maximum similarity/probability scores.
+            outliers_nb_target: Desired number of remaining outliers.
+            min_threshold: Lower bound on candidate thresholds.
+
+        Returns:
+            The optimal threshold value, or ``np.inf`` if no suitable value exists.
+        """
+        candidates = np.unique(scores)
+        candidates = candidates[candidates >= min_threshold]
+        if len(candidates) == 0:
+            return np.inf
+
+        remaining = np.array([np.sum(scores < t) for t in candidates])
+        valid = remaining >= outliers_nb_target
+        if not np.any(valid):
+            return np.inf
+
+        candidates = candidates[valid]
+        remaining = remaining[valid]
+        return float(candidates[np.argmin(remaining - outliers_nb_target)])
 
     def visualize_topics(
         self,
