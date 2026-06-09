@@ -44,3 +44,31 @@ After we have fitted our model, we can access all representations with `topic_mo
 <br><br>
 
 As you can see, there are a number of different representations for our topics that we can inspect. All aspects are found in `topic_model.topic_aspects_`.
+
+
+## **Feature Importance**
+
+The `FeatureImportance` representation model re-ranks topic words using statistical
+methods rather than c-TF-IDF scores. Currently supports the "fighting words" method
+(Monroe et al. 2008), which computes log-odds ratios with informative Dirichlet priors:
+
+```python
+from bertopic.representation import FeatureImportance
+
+fi = FeatureImportance(method="fighting_words", top_n_words=10)
+topic_model = BERTopic(representation_model=fi)
+```
+
+You can combine it with other models using multi-aspect representations:
+
+```python
+from bertopic.representation import KeyBERTInspired, FeatureImportance
+
+representation_model = {
+    "Main": KeyBERTInspired(),
+    "Fighting Words": FeatureImportance(method="fighting_words"),
+}
+topic_model = BERTopic(representation_model=representation_model)
+```
+
+After fitting, access results via `topic_model.topic_aspects_["Fighting Words"]`.
