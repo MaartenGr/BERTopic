@@ -765,9 +765,9 @@ class BERTopic:
             missing_topics = {}
 
         # Prepare documents
-        documents_per_topic = documents.sort_values("Topic").groupby(["Topic"], as_index=False)
-        updated_topics = documents_per_topic.first().Topic.astype(int)
-        documents_per_topic = documents_per_topic.agg({"Document": " ".join})
+        documents_sorted = documents.sort_values("Topic")
+        updated_topics = documents_sorted.groupby(["Topic"], as_index=False).first().Topic.astype(int)
+        documents_per_topic = self._aggregate_documents(documents_sorted)
 
         # Update topic representations
         self.c_tf_idf_, updated_words = self._c_tf_idf(documents_per_topic, partial_fit=True)
@@ -1113,16 +1113,11 @@ class BERTopic:
 
         # Calculate basic bag-of-words to be iteratively merged later
         documents = pd.DataFrame({"Document": docs, "ID": range(len(docs)), "Topic": self.topics_})
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        documents_per_topic = self._aggregate_documents(documents)
         documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
         clean_documents = self._preprocess_text(documents_per_topic.Document.values)
 
-        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
-        # and will be removed in 1.2. Please use get_feature_names_out instead.
-        if version.parse(sklearn_version) >= version.parse("1.0.0"):
-            words = self.vectorizer_model.get_feature_names_out()
-        else:
-            words = self.vectorizer_model.get_feature_names()
+        words = self._get_feature_names()
 
         bow = self.vectorizer_model.transform(clean_documents)
 
@@ -1162,14 +1157,14 @@ class BERTopic:
 
             # Extract parent's name and ID
             parent_id = index + len(clusters)
-            parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
+            parent_name = self._topic_name_from_words(words_per_topic[0])
 
             # Extract child's name and ID
             Z_id = Z[index][0]
             child_left_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
 
             if Z_id - nr_clusters < 0:
-                child_left_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
+                child_left_name = self._topic_name_from_words(self.get_topic(Z_id))
             else:
                 child_left_name = hier_topics.iloc[int(child_left_id)].Parent_Name
 
@@ -1178,7 +1173,7 @@ class BERTopic:
             child_right_id = Z_id if Z_id - nr_clusters < 0 else Z_id - nr_clusters
 
             if Z_id - nr_clusters < 0:
-                child_right_name = "_".join([x[0] for x in self.get_topic(Z_id)][:5])
+                child_right_name = self._topic_name_from_words(self.get_topic(Z_id))
             else:
                 child_right_name = hier_topics.iloc[int(child_right_id)].Parent_Name
 
@@ -1571,7 +1566,7 @@ class BERTopic:
             )
 
         documents = pd.DataFrame({"Document": docs, "Topic": topics, "ID": range(len(docs)), "Image": images})
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        documents_per_topic = self._aggregate_documents(documents)
 
         # Update topic sizes and assignments
         self._update_topic_size(documents)
@@ -4200,7 +4195,7 @@ class BERTopic:
             method = "representation models" if fine_tune_representation else "c-TF-IDF for topic reduction"
             logger.info(f"Representation - {action} topics using {method}.")
 
-        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        documents_per_topic = self._aggregate_documents(documents)
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
         self.topic_representations_ = self._extract_words_per_topic(
             words,
@@ -4423,12 +4418,7 @@ class BERTopic:
         else:
             X = self.vectorizer_model.transform(documents)
 
-        # Scikit-Learn Deprecation: get_feature_names is deprecated in 1.0
-        # and will be removed in 1.2. Please use get_feature_names_out instead.
-        if version.parse(sklearn_version) >= version.parse("1.0.0"):
-            words = self.vectorizer_model.get_feature_names_out()
-        else:
-            words = self.vectorizer_model.get_feature_names()
+        words = self._get_feature_names()
 
         multiplier = None
         if self.ctfidf_model.seed_words and self.seed_topic_list:
@@ -4460,6 +4450,44 @@ class BERTopic:
         """
         self.topic_sizes_ = collections.Counter(documents.Topic.to_numpy().tolist())
         self.topics_ = documents.Topic.astype(int).tolist()
+
+    @staticmethod
+    def _aggregate_documents(documents: pd.DataFrame) -> pd.DataFrame:
+        """Group documents by topic, joining text.
+
+        Arguments:
+            documents: DataFrame with at least ``Document`` and ``Topic`` columns.
+
+        Returns:
+            DataFrame with one row per topic, text joined per topic.
+        """
+        return documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+
+    def _get_feature_names(self) -> List[str]:
+        """Return feature names from the fitted vectorizer (sklearn-version safe).
+
+        Returns:
+            List of feature name strings from the fitted vectorizer.
+        """
+        if version.parse(sklearn_version) >= version.parse("1.0.0"):
+            return list(self.vectorizer_model.get_feature_names_out())
+        return list(self.vectorizer_model.get_feature_names())
+
+    @staticmethod
+    def _topic_name_from_words(
+        words_per_topic: List[Tuple[str, float]],
+        n: int = 5,
+    ) -> str:
+        """Build a topic name by joining the top *n* words with underscores.
+
+        Arguments:
+            words_per_topic: List of (word, score) tuples for a single topic.
+            n: Number of top words to include in the name.
+
+        Returns:
+            A string like ``"word1_word2_word3_word4_word5"``.
+        """
+        return "_".join([w for w, _ in words_per_topic[:n]])
 
     def _extract_words_per_topic(
         self,
