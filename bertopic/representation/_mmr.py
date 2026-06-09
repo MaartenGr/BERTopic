@@ -1,9 +1,12 @@
 import warnings
+from collections.abc import Mapping
+from typing import List
+
 import numpy as np
 import pandas as pd
-from typing import List, Mapping, Tuple
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
+
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -45,9 +48,13 @@ class MaximalMarginalRelevance(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
-        """Extract topic representations.
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
+        """Extract topic representations using batched embedding extraction.
+
+        Instead of calling _extract_embeddings 2N times (once for words and once
+        for the concatenated sentence per topic), this collects all items and makes
+        a single embedding call.
 
         Arguments:
             topic_model: The BERTopic model
@@ -60,26 +67,48 @@ class MaximalMarginalRelevance(BaseRepresentation):
         """
         if topic_model.embedding_model is None:
             warnings.warn(
-                "MaximalMarginalRelevance can only be used BERTopic was instantiated"
+                "MaximalMarginalRelevance can only be used if BERTopic was instantiated "
                 "with the `embedding_model` parameter."
             )
             return topics
 
+        # ---- CHANGED: batch all embedding calls into one ----
+        # Collect all items to embed: individual words + joined sentence per topic
+        items_to_embed = []
+        words_index_ranges = {}  # topic -> (start, end) for word embeddings
+        sentence_indices = {}  # topic -> index for sentence embedding
+
+        for topic, topic_words in topics.items():
+            words = [word[0] for word in topic_words]
+
+            # Record word embedding indices
+            start = len(items_to_embed)
+            items_to_embed.extend(words)
+            words_index_ranges[topic] = (start, len(items_to_embed))
+
+            # Record sentence embedding index
+            sentence_indices[topic] = len(items_to_embed)
+            items_to_embed.append(" ".join(words))
+
+        # Single embedding call for all items across all topics
+        all_embeddings = topic_model._extract_embeddings(items_to_embed, method="word", verbose=False)
+        # ---- END CHANGED ----
+
         updated_topics = {}
         for topic, topic_words in topics.items():
             words = [word[0] for word in topic_words]
-            word_embeddings = topic_model._extract_embeddings(words, method="word", verbose=False)
-            topic_embedding = topic_model._extract_embeddings(" ".join(words), method="word", verbose=False).reshape(
-                1, -1
-            )
-            topic_words = mmr(
+            w_start, w_end = words_index_ranges[topic]
+            word_embeddings = all_embeddings[w_start:w_end]
+            topic_embedding = all_embeddings[sentence_indices[topic]].reshape(1, -1)
+
+            topic_words_selected = mmr(
                 topic_embedding,
                 word_embeddings,
                 words,
                 self.diversity,
                 self.top_n_words,
             )
-            updated_topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words]
+            updated_topics[topic] = [(word, value) for word, value in topics[topic] if word in topic_words_selected]
         return updated_topics
 
 
@@ -111,15 +140,15 @@ def mmr(
     keywords_idx = [np.argmax(word_doc_similarity)]
     candidates_idx = [i for i in range(len(words)) if i != keywords_idx[0]]
 
-    for _ in range(top_n - 1):
+    for _ in range(min(top_n - 1, len(candidates_idx))):
         # Extract similarities within candidates and
         # between candidates and selected keywords/phrases
         candidate_similarities = word_doc_similarity[candidates_idx, :]
         target_similarities = np.max(word_similarity[candidates_idx][:, keywords_idx], axis=1)
 
         # Calculate MMR
-        mmr = (1 - diversity) * candidate_similarities - diversity * target_similarities.reshape(-1, 1)
-        mmr_idx = candidates_idx[np.argmax(mmr)]
+        mmr_score = (1 - diversity) * candidate_similarities - diversity * target_similarities.reshape(-1, 1)
+        mmr_idx = candidates_idx[np.argmax(mmr_score)]
 
         # Update keywords & candidates
         keywords_idx.append(mmr_idx)
