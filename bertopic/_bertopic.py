@@ -357,6 +357,7 @@ class BERTopic:
         embeddings: np.ndarray = None,
         images: List[str] | None = None,
         y: Union[List[int], np.ndarray] = None,
+        umap_embeddings: np.ndarray = None,
     ):
         """Fit the models on a collection of documents and generate topics.
 
@@ -367,6 +368,8 @@ class BERTopic:
             images: A list of paths to the images to fit on or the images themselves
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
+            umap_embeddings: Pre-computed UMAP embeddings. If provided, skips the
+                             UMAP dimensionality reduction step entirely.
 
         Examples:
         ```python
@@ -393,7 +396,9 @@ class BERTopic:
         topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
-        self.fit_transform(documents=documents, embeddings=embeddings, y=y, images=images)
+        self.fit_transform(
+            documents=documents, embeddings=embeddings, y=y, images=images, umap_embeddings=umap_embeddings
+        )
         return self
 
     def fit_transform(
@@ -402,6 +407,7 @@ class BERTopic:
         embeddings: np.ndarray = None,
         images: List[str] | None = None,
         y: Union[List[int], np.ndarray] = None,
+        umap_embeddings: np.ndarray = None,
     ) -> Tuple[List[int], Union[np.ndarray, None]]:
         """Fit the models on a collection of documents, generate topics,
         and return the probabilities and topic per document.
@@ -413,6 +419,9 @@ class BERTopic:
             images: A list of paths to the images to fit on or the images themselves
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
+            umap_embeddings: Pre-computed reduced (UMAP) embeddings. When provided,
+                             the dimensionality reduction step is skipped and these
+                             embeddings are used directly for clustering.
 
         Returns:
             predictions: Topic predictions for each documents
@@ -478,7 +487,8 @@ class BERTopic:
             y, embeddings = self._guided_topic_modeling(embeddings)
 
         # Reduce dimensionality and fit UMAP model
-        umap_embeddings = self._reduce_dimensionality(embeddings, y)
+        if umap_embeddings is None:
+            umap_embeddings = self._reduce_dimensionality(embeddings, y)
 
         # Zero-shot Topic Modeling
         if self._is_zeroshot():
@@ -551,6 +561,7 @@ class BERTopic:
         documents: Union[str, List[str]],
         embeddings: np.ndarray = None,
         images: List[str] | None = None,
+        umap_embeddings: np.ndarray = None,
     ) -> Tuple[List[int], np.ndarray]:
         """After having fit a model, use transform to predict new instances.
 
@@ -559,6 +570,9 @@ class BERTopic:
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model.
             images: A list of paths to the images to predict on or the images themselves
+            umap_embeddings: Pre-computed reduced (UMAP) embeddings. When provided,
+                             the UMAP transform step is skipped and these embeddings
+                             are used directly for prediction.
 
         Returns:
             predictions: Topic predictions for each documents
@@ -625,7 +639,8 @@ class BERTopic:
         # Transform with full pipeline
         else:
             logger.info("Dimensionality - Reducing dimensionality of input embeddings.")
-            umap_embeddings = self.umap_model.transform(embeddings)
+            if umap_embeddings is None:
+                umap_embeddings = self.umap_model.transform(embeddings)
             logger.info("Dimensionality - Completed \u2713")
 
             # Extract predictions and probabilities if it is a HDBSCAN-like model

@@ -376,6 +376,13 @@ topics, probs = topic_model.fit_transform(docs, embeddings)
 As you can see above, we used a SentenceTransformer model to create the embedding. You could also have used
 `🤗 transformers`, `Doc2Vec`, or any other embedding method.
 
+!!! note
+    In addition to pre-computed document embeddings via `embeddings=`, you can
+    also pass pre-computed **reduced** embeddings via `umap_embeddings=` to skip
+    the dimensionality reduction step entirely. See
+    [Dimensionality Reduction](../dim_reduction/dim_reduction.md#pre-computed-embeddings)
+    for details.
+
 ### **TF-IDF**
 As mentioned above, any embedding technique can be used. However, when running UMAP, the typical distance metric is
 `cosine` which does not work quite well for a TF-IDF matrix. Instead, BERTopic will recognize that a sparse matrix
@@ -398,5 +405,3 @@ topics, probs = topic_model.fit_transform(docs, embeddings)
 ```
 
 Here, you will probably notice that creating the embeddings is quite fast whereas `fit_transform` is quite slow.
-This is to be expected as reducing the dimensionality of a large sparse matrix takes some time. The inverse of using
-transformer embeddings is true: creating the embeddings is slow whereas `fit_transform` is quite fast.

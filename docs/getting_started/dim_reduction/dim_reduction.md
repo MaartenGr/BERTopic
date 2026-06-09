@@ -119,6 +119,41 @@ topic_model = BERTopic(umap_model=umap_model)
     For more detailed information on installing cuML, including additional dependencies and platform-specific instructions, see the [RAPIDS installation guide](https://docs.rapids.ai/install/).
 
 
+## **Pre-computed embeddings**
+
+If you already have reduced embeddings (from a cached UMAP run, grid search
+checkpoint, or external dimensionality reduction), you can skip the UMAP step
+entirely:
+
+```python
+from umap import UMAP
+
+# Compute UMAP separately
+umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine')
+umap_embeddings = umap_model.fit_transform(embeddings)
+
+# Pass pre-computed UMAP embeddings to BERTopic
+topic_model = BERTopic()
+topics, probs = topic_model.fit_transform(
+    docs, embeddings=embeddings, umap_embeddings=umap_embeddings
+)
+```
+
+This also works with `transform` for new documents:
+
+```python
+new_umap_embeddings = umap_model.transform(new_embeddings)
+topics, probs = topic_model.transform(
+    new_docs, embeddings=new_embeddings, umap_embeddings=new_umap_embeddings
+)
+```
+
+!!! tip
+    This is particularly useful for **hyperparameter tuning**. Compute UMAP once,
+    then try different clustering configurations without re-running dimensionality
+    reduction each time.
+
+
 ## **Skip dimensionality reduction**
 Although BERTopic applies dimensionality reduction as a default in its pipeline, this is a step that you might want to skip. We generate an "empty" model that simply returns the data pass it to:
 
