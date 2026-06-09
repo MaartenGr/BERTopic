@@ -1215,12 +1215,14 @@ class BERTopic:
         documents: Union[str, List[str]],
         window: int = 4,
         stride: int = 1,
-        min_similarity: float = 0.1,
+        min_similarity: float | None = 0.1,
         batch_size: int = 1000,
         padding: bool = False,
         use_embedding_model: bool = False,
         calculate_tokens: bool = False,
         separator: str = " ",
+        outliers_nb_target: int | None = None,
+        min_similarity_min_threshold: float = 0.1,
     ) -> Tuple[np.ndarray, Union[List[np.ndarray], None]]:
         """A post-hoc approximation of topic distributions across documents.
 
@@ -1270,6 +1272,11 @@ class BERTopic:
                               can require more memory. Using this over batches of
                               documents might be preferred.
             separator: The separator used to merge tokens into tokensets.
+            outliers_nb_target: Target number of documents with zero topic distribution.
+                                When provided, ``min_similarity`` is ignored and the method
+                                automatically searches for the optimal value.
+            min_similarity_min_threshold: Minimum ``min_similarity`` to consider during
+                                          automatic search.
 
         Returns:
             topic_distributions: A `n` x `m` matrix containing the topic distributions
@@ -1303,14 +1310,89 @@ class BERTopic:
         if isinstance(documents, str):
             documents = [documents]
 
+        # Validation
+        if outliers_nb_target is not None and min_similarity is not None:
+            raise ValueError("Please provide either min_similarity or outliers_nb_target, not both.")
+
+        # Phase 1: Compute similarities (done once, reused across threshold candidates)
+        (
+            batches,
+            all_tokens_nb,
+            all_indices,
+            all_token_sets_ids,
+            all_similarity,
+        ) = self._compute_similarities_for_approximate_distribution(
+            documents=documents,
+            batch_size=batch_size,
+            window=window,
+            stride=stride,
+            padding=padding,
+            separator=separator,
+            use_embedding_model=use_embedding_model,
+        )
+
+        # Phase 2: Determine candidate min_similarity values
+        if outliers_nb_target is not None:
+            candidates = sorted({round(float(s), 3) for sim in all_similarity for s in sim.flatten()})
+            candidates = [v for v in candidates if v >= min_similarity_min_threshold]
+            if not candidates:
+                candidates = [float("inf")]
+        else:
+            candidates = [min_similarity]
+
+        # Phase 3: Try each candidate and pick the best
+        best_distributions = None
+        best_token_distributions = None
+        best_nb_outliers = None
+
+        for _min_similarity in candidates:
+            _distributions, _token_distributions = self._compute_topic_distributions_for_approximate_distribution(
+                batches=batches,
+                all_tokens_nb=all_tokens_nb,
+                all_indices=all_indices,
+                all_token_sets_ids=all_token_sets_ids,
+                all_similarity=all_similarity,
+                min_similarity=_min_similarity,
+                calculate_tokens=calculate_tokens,
+            )
+
+            if outliers_nb_target is None:
+                return _distributions, _token_distributions
+
+            nb_outliers = int(np.sum(np.sum(_distributions, axis=1) == 0))
+            if nb_outliers >= outliers_nb_target:
+                if best_nb_outliers is None or nb_outliers < best_nb_outliers:
+                    best_distributions = _distributions
+                    best_token_distributions = _token_distributions
+                    best_nb_outliers = nb_outliers
+
+        return best_distributions, best_token_distributions
+
+    def _compute_similarities_for_approximate_distribution(
+        self,
+        documents: List[str],
+        window: int = 4,
+        stride: int = 1,
+        batch_size: int = 1000,
+        padding: bool = False,
+        use_embedding_model: bool = False,
+        separator: str = " ",
+    ):
+        """Extract tokensets from documents and compute their similarity to topics.
+
+        Returns:
+            Tuple of (batches, all_tokens_nb, all_indices, all_token_sets_ids, all_similarity)
+        """
         if batch_size is None:
             batch_size = len(documents)
             batches = 1
         else:
             batches = math.ceil(len(documents) / batch_size)
 
-        topic_distributions = []
-        topic_token_distributions = []
+        all_tokens_nb = []
+        all_indices_list = []
+        all_token_sets_ids_list = []
+        all_similarity = []
 
         for i in tqdm(range(batches), disable=not self.verbose):
             doc_set = documents[i * batch_size : (i + 1) * batch_size]
@@ -1321,79 +1403,100 @@ class BERTopic:
 
             # Extract token sets
             all_sentences = []
-            all_indices = [0]
-            all_token_sets_ids = []
+            all_idx = [0]
+            all_tsi = []
 
             for tokenset in tokens:
                 if len(tokenset) < window:
                     token_sets = [tokenset]
                     token_sets_ids = [list(range(len(tokenset)))]
                 else:
-                    # Extract tokensets using window and stride parameters
                     stride_indices = list(range(len(tokenset)))[::stride]
                     token_sets = []
                     token_sets_ids = []
                     for stride_index in stride_indices:
                         selected_tokens = tokenset[stride_index : stride_index + window]
-
                         if padding or len(selected_tokens) == window:
                             token_sets.append(selected_tokens)
-                            token_sets_ids.append(
-                                list(
-                                    range(
-                                        stride_index,
-                                        stride_index + len(selected_tokens),
-                                    )
-                                )
-                            )
+                            token_sets_ids.append(list(range(stride_index, stride_index + len(selected_tokens))))
 
-                    # Add empty tokens at the beginning and end of a document
                     if padding:
                         padded = []
                         padded_ids = []
                         t = math.ceil(window / stride) - 1
-                        for i in range(math.ceil(window / stride) - 1):
-                            padded.append(tokenset[: window - ((t - i) * stride)])
-                            padded_ids.append(list(range(0, window - ((t - i) * stride))))
-
+                        for j in range(math.ceil(window / stride) - 1):
+                            padded.append(tokenset[: window - ((t - j) * stride)])
+                            padded_ids.append(list(range(0, window - ((t - j) * stride))))
                         token_sets = padded + token_sets
                         token_sets_ids = padded_ids + token_sets_ids
 
-                # Join the tokens
                 sentences = [separator.join(token) for token in token_sets]
                 all_sentences.extend(sentences)
-                all_token_sets_ids.extend(token_sets_ids)
-                all_indices.append(all_indices[-1] + len(sentences))
+                all_tsi.extend(token_sets_ids)
+                all_idx.append(all_idx[-1] + len(sentences))
 
-            # Calculate similarity between embeddings of token sets and the topics
             if use_embedding_model:
                 embeddings = self._extract_embeddings(all_sentences, method="document", verbose=True)
                 similarity = cosine_similarity(embeddings, self.topic_embeddings_[self._outliers :])
-
-            # Calculate similarity between c-TF-IDF of token sets and the topics
             else:
                 bow_doc = self.vectorizer_model.transform(all_sentences)
                 c_tf_idf_doc = self.ctfidf_model.transform(bow_doc)
                 similarity = cosine_similarity(c_tf_idf_doc, self.c_tf_idf_[self._outliers :])
 
-            # Only keep similarities that exceed the minimum
+            all_tokens_nb.append([len(t) for t in tokens])
+            all_indices_list.append(all_idx)
+            all_token_sets_ids_list.append(all_tsi)
+            all_similarity.append(similarity)
+
+        return batches, all_tokens_nb, all_indices_list, all_token_sets_ids_list, all_similarity
+
+    def _compute_topic_distributions_for_approximate_distribution(
+        self,
+        batches: int,
+        all_tokens_nb: list,
+        all_indices: list,
+        all_token_sets_ids: list,
+        all_similarity: list,
+        min_similarity: float,
+        calculate_tokens: bool,
+    ) -> Tuple[np.ndarray, Union[List[np.ndarray], None]]:
+        """Compute topic distributions from pre-computed similarities.
+
+        Arguments:
+            batches: Number of batches.
+            all_tokens_nb: Per-batch list of token counts per document.
+            all_indices: Per-batch list of sentence start indices.
+            all_token_sets_ids: Per-batch list of token set id mappings.
+            all_similarity: Per-batch similarity matrices.
+            min_similarity: Minimum similarity threshold.
+            calculate_tokens: Whether to compute token-level distributions.
+
+        Returns:
+            Tuple of (topic_distributions, topic_token_distributions).
+        """
+        topic_distributions = []
+        topic_token_distributions = []
+
+        for batch_idx in range(batches):
+            tokens_nb = all_tokens_nb[batch_idx]
+            indices = all_indices[batch_idx]
+            token_sets_ids = all_token_sets_ids[batch_idx]
+            similarity = all_similarity[batch_idx].copy()
+
             similarity[similarity < min_similarity] = 0
 
-            # Aggregate results on an individual token level
             if calculate_tokens:
                 topic_distribution = []
                 topic_token_distribution = []
-                for index, token in enumerate(tokens):
-                    start = all_indices[index]
-                    end = all_indices[index + 1]
-
+                for doc_idx, n_tokens in enumerate(tokens_nb):
+                    start = indices[doc_idx]
+                    end = indices[doc_idx + 1]
                     if start == end:
                         end = end + 1
 
-                    # Assign topics to individual tokens
-                    token_id = [i for i in range(len(token))]
-                    token_val = {index: [] for index in token_id}
-                    for sim, token_set in zip(similarity[start:end], all_token_sets_ids[start:end]):
+                    token_id = list(range(n_tokens))
+                    token_val = {idx: [] for idx in token_id}
+                    for sim, token_set in zip(similarity[start:end], token_sets_ids[start:end]):
                         for token in token_set:
                             if token in token_val:
                                 token_val[token].append(sim)
@@ -1402,7 +1505,6 @@ class BERTopic:
                     for _, value in token_val.items():
                         matrix.append(np.add.reduce(value))
 
-                    # Take empty documents into account
                     matrix = np.array(matrix)
                     if len(matrix.shape) == 1:
                         matrix = np.zeros((1, len(self.topic_labels_) - self._outliers))
@@ -1411,14 +1513,11 @@ class BERTopic:
                     topic_distribution.append(np.add.reduce(matrix))
 
                 topic_distribution = normalize(topic_distribution, norm="l1", axis=1)
-
-            # Aggregate on a tokenset level indicated by the window and stride
             else:
                 topic_distribution = []
-                for index in range(len(all_indices) - 1):
-                    start = all_indices[index]
-                    end = all_indices[index + 1]
-
+                for doc_idx in range(len(indices) - 1):
+                    start = indices[doc_idx]
+                    end = indices[doc_idx + 1]
                     if start == end:
                         end = end + 1
                     group = similarity[start:end].sum(axis=0)
@@ -1426,7 +1525,6 @@ class BERTopic:
                 topic_distribution = normalize(np.array(topic_distribution), norm="l1", axis=1)
                 topic_token_distribution = None
 
-            # Combine results
             topic_distributions.append(topic_distribution)
             if topic_token_distribution is None:
                 topic_token_distributions = None
@@ -1434,7 +1532,6 @@ class BERTopic:
                 topic_token_distributions.extend(topic_token_distribution)
 
         topic_distributions = np.vstack(topic_distributions)
-
         return topic_distributions, topic_token_distributions
 
     def find_topics(
@@ -2491,7 +2588,7 @@ class BERTopic:
 
         # Auto-threshold: compute target number of outliers
         if outliers_percentage_target is not None:
-            if threshold is not None and threshold != 0:
+            if threshold:
                 raise ValueError("Specify either `threshold` or `outliers_percentage_target`, not both.")
             if not 0.0 <= outliers_percentage_target <= 1.0:
                 raise ValueError("outliers_percentage_target must be between 0 and 1.")

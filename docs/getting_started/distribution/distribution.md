@@ -105,3 +105,29 @@ As a default, we compare the c-TF-IDF calculations between the token sets and al
 ```python
 topic_distr, _ = topic_model.approximate_distribution(docs, use_embedding_model=True)
 ```
+
+
+## **Automatic min_similarity selection**
+
+Instead of manually choosing `min_similarity`, you can specify how many documents
+should have zero topic distributions and let BERTopic find the optimal value:
+
+```python
+# Target 5 documents with zero distributions
+topic_distr, _ = topic_model.approximate_distribution(docs, outliers_nb_target=5)
+
+# Remove all zero-distribution documents
+topic_distr, _ = topic_model.approximate_distribution(docs, outliers_nb_target=0)
+```
+
+You can constrain the search range with `min_similarity_min_threshold`:
+
+```python
+topic_distr, _ = topic_model.approximate_distribution(
+    docs, outliers_nb_target=5, min_similarity_min_threshold=0.05
+)
+```
+
+!!! note
+    `min_similarity` and `outliers_nb_target` are mutually exclusive.
+    Setting both will raise a `ValueError`.
