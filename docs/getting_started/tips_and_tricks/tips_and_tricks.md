@@ -76,6 +76,25 @@ topic_model = BERTopic(embedding_model=sentence_model, representation_model=repr
 ```
 
 
+## **Configuring representative documents**
+
+By default, BERTopic selects 3 representative documents per topic from a pool of 500
+sampled candidates. You can configure both values at construction time or recalculate
+them after training:
+
+```python
+# Configure at construction time
+topic_model = BERTopic(nr_repr_docs=10, nr_repr_docs_nr_samples=1000)
+topic_model.fit(docs)
+
+# Or recalculate after training with different settings
+topic_model.recalculate_representative_docs(docs, nr_repr_docs=10)
+
+# Access them
+topic_model.get_representative_docs(topic=0)
+```
+
+
 ## **Topic-term matrix**
 Although BERTopic focuses on clustering our documents, the end result does contain a topic-term matrix.
 This topic-term matrix is calculated using c-TF-IDF, a TF-IDF procedure optimized for class-based analyses.

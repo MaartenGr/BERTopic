@@ -161,6 +161,8 @@ class BERTopic:
         ctfidf_model: TfidfTransformer = None,
         representation_model: BaseRepresentation = None,
         verbose: bool = False,
+        nr_repr_docs: int = 3,
+        nr_repr_docs_nr_samples: int = 500,
     ):
         """BERTopic initialization.
 
@@ -208,6 +210,10 @@ class BERTopic:
                                      confident the model needs to be to assign a zero-shot topic to a document.
             verbose: Changes the verbosity of the model, Set to True if you want
                      to track the stages of the model.
+            nr_repr_docs: The number of representative documents to save per topic.
+                          These are accessible via ``topic_model.representative_docs_``.
+            nr_repr_docs_nr_samples: The number of candidate documents to sample per topic
+                                      when extracting representative documents.
             embedding_model: Use a custom embedding model.
                              The following backends are currently supported
                                * SentenceTransformers
@@ -245,6 +251,8 @@ class BERTopic:
         self.seed_topic_list = seed_topic_list
         self.zeroshot_topic_list = zeroshot_topic_list
         self.zeroshot_min_similarity = zeroshot_min_similarity
+        self.nr_repr_docs = nr_repr_docs
+        self.nr_repr_docs_nr_samples = nr_repr_docs_nr_samples
 
         # Embedding model
         self.language = language if not embedding_model else None
@@ -1867,6 +1875,60 @@ class BERTopic:
                 return None
         else:
             return self.representative_docs_
+
+    def recalculate_representative_docs(
+        self,
+        docs: List[str],
+        nr_repr_docs: int | None = None,
+        nr_samples: int | None = None,
+    ):
+        """Recalculate representative documents with a configurable count.
+
+        After fitting a model, you may want more (or fewer) representative
+        documents per topic without re-fitting. This method recalculates
+        ``representative_docs_`` using the same c-TF-IDF similarity approach
+        as the initial fit, but with the given ``nr_repr_docs`` and
+        ``nr_samples`` values.
+
+        Arguments:
+            docs: The documents you used when calling either ``fit`` or
+                  ``fit_transform``.
+            nr_repr_docs: The number of representative documents to extract
+                          per topic. Defaults to ``self.nr_repr_docs``.
+            nr_samples: The number of candidate documents to sample per
+                        topic before ranking by similarity. Defaults to
+                        ``self.nr_repr_docs_nr_samples``.
+
+        Examples:
+        Recalculate with more representative docs after training:
+
+        ```python
+        topic_model.recalculate_representative_docs(docs, nr_repr_docs=10)
+        ```
+
+        Use a larger sampling pool for better selection:
+
+        ```python
+        topic_model.recalculate_representative_docs(
+            docs, nr_repr_docs=5, nr_samples=1000
+        )
+        ```
+        """
+        check_is_fitted(self)
+        if nr_repr_docs is None:
+            nr_repr_docs = self.nr_repr_docs
+        if nr_samples is None:
+            nr_samples = self.nr_repr_docs_nr_samples
+
+        documents = pd.DataFrame({"Document": docs, "Topic": self.topics_})
+        repr_docs, _, _, _ = self._extract_representative_docs(
+            self.c_tf_idf_,
+            documents,
+            self.topic_representations_,
+            nr_samples=nr_samples,
+            nr_repr_docs=nr_repr_docs,
+        )
+        self.representative_docs_ = repr_docs
 
     @staticmethod
     def get_topic_tree(
@@ -4215,20 +4277,20 @@ class BERTopic:
             logger.info("Representation - Completed \u2713")
 
     def _save_representative_docs(self, documents: pd.DataFrame):
-        """Save the 3 most representative docs per topic.
+        """Save the most representative docs per topic.
 
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
 
         Updates:
-            self.representative_docs_: Populate each topic with 3 representative docs
+            self.representative_docs_: Populate each topic with nr_repr_docs representative docs
         """
         repr_docs, _, _, _ = self._extract_representative_docs(
             self.c_tf_idf_,
             documents,
             self.topic_representations_,
-            nr_samples=500,
-            nr_repr_docs=3,
+            nr_samples=self.nr_repr_docs_nr_samples,
+            nr_repr_docs=self.nr_repr_docs,
         )
         self.representative_docs_ = repr_docs
 
