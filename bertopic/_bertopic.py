@@ -1,6 +1,7 @@
 # ruff: noqa: E402
-import yaml
 import warnings
+
+import yaml
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -10,26 +11,25 @@ try:
 except (KeyError, AttributeError, TypeError):
     pass
 
-import re
-import math
-import joblib
-import inspect
 import collections
+import inspect
+import math
+import re
+from collections import Counter, defaultdict
+from copy import deepcopy
+from importlib.util import find_spec
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Literal, Mapping, Tuple, Union
+
+import joblib
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from copy import deepcopy
-
-from tqdm import tqdm
-from pathlib import Path
 from packaging import version
-from tempfile import TemporaryDirectory
-from collections import defaultdict, Counter
-from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from importlib.util import find_spec
-
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
+from scipy.sparse import csr_matrix
+from tqdm import tqdm
 
 # Plotting
 if find_spec("plotly") is None:
@@ -41,8 +41,8 @@ else:
     from bertopic import plotting
 
     if TYPE_CHECKING:
-        import plotly.graph_objs as go
         import matplotlib.figure as fig
+        import plotly.graph_objs as go
 
 
 # Models
@@ -54,32 +54,33 @@ except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
     from sklearn.cluster import HDBSCAN as SK_HDBSCAN
 
-from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import normalize
 
-# BERTopic
-from bertopic.cluster import BaseCluster
-from bertopic.backend import BaseEmbedder
-from bertopic.representation._mmr import mmr
-from bertopic.backend._utils import select_backend
-from bertopic.vectorizers import ClassTfidfTransformer
-from bertopic.representation import BaseRepresentation, KeyBERTInspired
-from bertopic.dimensionality import BaseDimensionalityReduction
-from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+import bertopic._save_utils as save_utils
 from bertopic._utils import (
     MyLogger,
     check_documents_type,
     check_embeddings_shape,
     check_is_fitted,
-    validate_distance_matrix,
-    select_topic_representation,
     get_unique_distances,
+    select_topic_representation,
+    validate_distance_matrix,
 )
-import bertopic._save_utils as save_utils
+from bertopic.backend import BaseEmbedder
+from bertopic.backend._utils import select_backend
+
+# BERTopic
+from bertopic.cluster import BaseCluster
+from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
+from bertopic.representation._mmr import mmr
+from bertopic.vectorizers import ClassTfidfTransformer
 
 logger = MyLogger()
 logger.configure("WARNING")
@@ -305,6 +306,9 @@ class BERTopic:
         self.representative_images_ = None
         self.representative_docs_ = {}
         self.topic_aspects_ = {}
+
+        # Cache flag for representative docs
+        self._repr_docs_valid = False
 
         # Private attributes for internal tracking purposes
         self._merged_topics = None
@@ -1558,6 +1562,7 @@ class BERTopic:
         self.vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
         self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
         self.representation_model = representation_model
+        self._repr_docs_valid = False
 
         if topics is None:
             topics = self.topics_
@@ -2171,6 +2176,7 @@ class BERTopic:
         documents = self._sort_mappings_by_frequency(documents)
         self._extract_topics(documents, mappings=mappings)
         self._update_topic_size(documents)
+        self._repr_docs_valid = False
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
@@ -2372,6 +2378,7 @@ class BERTopic:
         # Reduce number of topics
         documents = self._reduce_topics(documents, use_ctfidf)
         self._merged_topics = None
+        self._repr_docs_valid = False
         self._save_representative_docs(documents)
         self.probabilities_ = self._map_probabilities(self.probabilities_)
 
@@ -4217,12 +4224,19 @@ class BERTopic:
     def _save_representative_docs(self, documents: pd.DataFrame):
         """Save the 3 most representative docs per topic.
 
+        Uses a simple cache: if representative docs have already been computed
+        and no topic-changing operation has occurred since, return the cached
+        result.  Cache is invalidated by ``update_topics``, ``merge_topics``,
+        ``reduce_topics``, and ``reduce_outliers``.
+
         Arguments:
             documents: Dataframe with documents and their corresponding IDs
 
         Updates:
             self.representative_docs_: Populate each topic with 3 representative docs
         """
+        if self._repr_docs_valid and self.representative_docs_:
+            return
         repr_docs, _, _, _ = self._extract_representative_docs(
             self.c_tf_idf_,
             documents,
@@ -4231,6 +4245,7 @@ class BERTopic:
             nr_repr_docs=3,
         )
         self.representative_docs_ = repr_docs
+        self._repr_docs_valid = True
 
     def _extract_representative_docs(
         self,
