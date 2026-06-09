@@ -119,6 +119,50 @@ new_topics = topic_model.reduce_outliers(docs, new_topics, strategy="distributio
 ```
 
 
+## **Automatic threshold selection**
+
+Instead of manually tuning the `threshold` parameter, you can specify a target outlier
+percentage and let BERTopic find the optimal threshold automatically:
+
+```python
+# Target roughly 5% outlier documents
+new_topics = topic_model.reduce_outliers(docs, topics, outliers_percentage_target=0.05)
+```
+
+This works with all four strategies:
+
+```python
+# Auto-threshold with embeddings strategy
+new_topics = topic_model.reduce_outliers(
+    docs, topics,
+    strategy="embeddings",
+    embeddings=embeddings,
+    outliers_percentage_target=0.05,
+)
+
+# Auto-threshold with c-TF-IDF strategy
+new_topics = topic_model.reduce_outliers(
+    docs, topics,
+    strategy="c-tf-idf",
+    outliers_percentage_target=0.0,  # remove all outliers
+)
+```
+
+You can also constrain the search range with `min_threshold` to prevent over-assignment:
+
+```python
+new_topics = topic_model.reduce_outliers(
+    docs, topics,
+    outliers_percentage_target=0.05,
+    min_threshold=0.2,  # never use a threshold below 0.2
+)
+```
+
+!!! note
+    `threshold` and `outliers_percentage_target` are mutually exclusive.
+    Setting both will raise a `ValueError`.
+
+
 ## **Update Topics**
 
 After generating our updated topics, we can feed them back into BERTopic in one of two ways. We can either update the topic representations themselves based on the documents that now belong to new topics or we can only update the topic frequency without updating the topic representations themselves.
