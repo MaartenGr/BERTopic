@@ -341,6 +341,34 @@ to view, we can see better which topics could be logically merged:
 </details>
 
 
+## **Divisive hierarchy**
+
+By default, `hierarchical_topics` uses an agglomerative (bottom-up) strategy.
+You can also use a divisive (top-down) strategy that recursively splits topics:
+
+```python
+hierarchical_topics = topic_model.hierarchical_topics(docs, strategy="divisive")
+```
+
+The divisive strategy produces a binary tree where each split maximizes the
+distance between the resulting sub-clusters. This can be more intuitive when you
+have a natural hierarchy of broad-to-specific topics.
+
+Both strategies produce the same DataFrame format, so `get_topic_tree()` and
+`visualize_hierarchy()` work with either:
+
+```python
+# Works with both strategies
+tree = topic_model.get_topic_tree(hierarchical_topics)
+fig = topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics)
+```
+
+!!! tip
+    The agglomerative strategy tends to work better when topics are
+    well-separated, while the divisive strategy can be better at identifying
+    fine-grained sub-topics within broad categories.
+
+
 ## **Merge topics**
 
 After seeing the potential hierarchy of your topic, you might want to merge specific

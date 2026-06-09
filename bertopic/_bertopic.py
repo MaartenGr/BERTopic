@@ -1,6 +1,7 @@
 # ruff: noqa: E402
-import yaml
 import warnings
+
+import yaml
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -10,26 +11,25 @@ try:
 except (KeyError, AttributeError, TypeError):
     pass
 
-import re
-import math
-import joblib
-import inspect
 import collections
+import inspect
+import math
+import re
+from collections import Counter, defaultdict
+from copy import deepcopy
+from importlib.util import find_spec
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Literal, Mapping, Tuple, Union
+
+import joblib
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from copy import deepcopy
-
-from tqdm import tqdm
-from pathlib import Path
 from packaging import version
-from tempfile import TemporaryDirectory
-from collections import defaultdict, Counter
-from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from importlib.util import find_spec
-
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
+from scipy.sparse import csr_matrix
+from tqdm import tqdm
 
 # Plotting
 if find_spec("plotly") is None:
@@ -41,8 +41,8 @@ else:
     from bertopic import plotting
 
     if TYPE_CHECKING:
-        import plotly.graph_objs as go
         import matplotlib.figure as fig
+        import plotly.graph_objs as go
 
 
 # Models
@@ -54,32 +54,33 @@ except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
     from sklearn.cluster import HDBSCAN as SK_HDBSCAN
 
-from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import normalize
 
-# BERTopic
-from bertopic.cluster import BaseCluster
-from bertopic.backend import BaseEmbedder
-from bertopic.representation._mmr import mmr
-from bertopic.backend._utils import select_backend
-from bertopic.vectorizers import ClassTfidfTransformer
-from bertopic.representation import BaseRepresentation, KeyBERTInspired
-from bertopic.dimensionality import BaseDimensionalityReduction
-from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+import bertopic._save_utils as save_utils
 from bertopic._utils import (
     MyLogger,
     check_documents_type,
     check_embeddings_shape,
     check_is_fitted,
-    validate_distance_matrix,
-    select_topic_representation,
     get_unique_distances,
+    select_topic_representation,
+    validate_distance_matrix,
 )
-import bertopic._save_utils as save_utils
+from bertopic.backend import BaseEmbedder
+from bertopic.backend._utils import select_backend
+
+# BERTopic
+from bertopic.cluster import BaseCluster
+from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
+from bertopic.representation._mmr import mmr
+from bertopic.vectorizers import ClassTfidfTransformer
 
 logger = MyLogger()
 logger.configure("WARNING")
@@ -1038,6 +1039,7 @@ class BERTopic:
         use_ctfidf: bool = True,
         linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
         distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
+        strategy: str = "agglomerative",
     ) -> pd.DataFrame:
         """Create a hierarchy of topics.
 
@@ -1063,6 +1065,9 @@ class BERTopic:
                                non-negative values or condensed distance matrix of shape
                                (n_samples * (n_samples - 1) / 2,) containing the upper
                                triangular of the distance matrix.
+            strategy: The hierarchy construction strategy. Either `"agglomerative"`
+                      (bottom-up merging, the default) or `"divisive"` (top-down
+                      splitting).
 
         Returns:
             hierarchical_topics: A dataframe that contains a hierarchy of topics
@@ -1090,6 +1095,10 @@ class BERTopic:
         ```
         """
         check_documents_type(docs)
+
+        if strategy == "divisive":
+            return self._divisive_hierarchical_topics(docs, use_ctfidf=use_ctfidf)
+
         if distance_function is None:
             distance_function = lambda x: 1 - cosine_similarity(x)
 
@@ -1198,6 +1207,194 @@ class BERTopic:
         hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]] = hier_topics[
             ["Parent_ID", "Child_Left_ID", "Child_Right_ID"]
         ].astype(str)
+
+        return hier_topics
+
+    def _divisive_hierarchical_topics(
+        self,
+        docs: List[str],
+        use_ctfidf: bool = True,
+    ) -> pd.DataFrame:
+        """Build a topic hierarchy using top-down recursive binary splitting.
+
+        At each step the set of topics with the highest internal diversity is split
+        into two children using rank-2 NMF on the c-TF-IDF matrix of the group.
+        The process repeats until every group contains a single topic.
+
+        Arguments:
+            docs: The documents used when calling ``fit`` or ``fit_transform``.
+            use_ctfidf: Whether to use c-TF-IDF embeddings for distance calculations.
+                        If ``False``, the embedding model's representations are used.
+
+        Returns:
+            A DataFrame with the same schema as the agglomerative variant:
+            ``Parent_ID``, ``Parent_Name``, ``Topics``, ``Child_Left_ID``,
+            ``Child_Left_Name``, ``Child_Right_ID``, ``Child_Right_Name``, ``Distance``.
+        """
+        from sklearn.decomposition import NMF
+
+        # Prepare embeddings and documents
+        embeddings = select_topic_representation(self.c_tf_idf_, self.topic_embeddings_, use_ctfidf)[0][
+            self._outliers :
+        ]
+        documents = pd.DataFrame({"Document": docs, "ID": range(len(docs)), "Topic": self.topics_})
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
+        clean_documents = self._preprocess_text(documents_per_topic.Document.values)
+
+        try:
+            words = self.vectorizer_model.get_feature_names_out()
+        except AttributeError:
+            words = self.vectorizer_model.get_feature_names()
+
+        bow = self.vectorizer_model.transform(clean_documents)
+
+        # Topic list (excluding outliers)
+        topic_ids = sorted([t for t in set(self.topics_) if t != -1])
+        n_topics = len(topic_ids)
+
+        # Internal node IDs start at n_topics (leaves are 0..n_topics-1).
+        # We assign IDs incrementally, then remap so the root (first split)
+        # gets the highest ID — matching the agglomerative convention that
+        # get_topic_tree expects.
+        next_id = n_topics
+
+        # Track each group's assigned internal ID
+        group_to_id = {}
+        initial_key = tuple(range(n_topics))
+        group_to_id[initial_key] = next_id
+        next_id += 1
+
+        groups = [list(range(n_topics))]
+        rows = []
+
+        def _child_name(indices):
+            """Derive a short name for a child node."""
+            if len(indices) == 1:
+                return "_".join([x[0] for x in self.get_topic(topic_ids[indices[0]])][:5])
+            child_bow = csr_matrix(bow[indices].sum(axis=0))
+            child_c_tf_idf = self.ctfidf_model.transform(child_bow)
+            child_sel = documents.loc[documents.Topic.isin([topic_ids[i] for i in indices]), :]
+            child_sel = child_sel.copy()
+            child_sel.Topic = 0
+            child_wpt = self._extract_words_per_topic(words, child_sel, child_c_tf_idf, calculate_aspects=False)
+            return "_".join([x[0] for x in child_wpt[0]][:5])
+
+        # Iteratively split the most diverse group
+        while any(len(g) > 1 for g in groups):
+            # Find the group with the highest internal diversity
+            best_group_idx = None
+            best_diversity = -1
+            for gi, group in enumerate(groups):
+                if len(group) <= 1:
+                    continue
+                group_emb = embeddings[group]
+                sim = cosine_similarity(group_emb)
+                diversity = 1 - sim[np.triu_indices_from(sim, k=1)].mean()
+                if diversity > best_diversity:
+                    best_diversity = diversity
+                    best_group_idx = gi
+
+            if best_group_idx is None:
+                break
+
+            group = groups.pop(best_group_idx)
+            parent_id = group_to_id[tuple(sorted(group))]
+
+            # Split using rank-2 NMF on the group's c-TF-IDF
+            group_c_tf_idf = self.ctfidf_model.transform(csr_matrix(np.vstack([bow[idx].toarray() for idx in group])))
+
+            if group_c_tf_idf.shape[0] < 2:
+                groups.append(group)
+                continue
+
+            try:
+                nmf = NMF(n_components=2, random_state=42, max_iter=300)
+                W = nmf.fit_transform(group_c_tf_idf)
+            except ValueError:
+                # NMF can fail on degenerate input (e.g., all-zero rows);
+                # fall back to a simple positional split.
+                W = None
+
+            if W is not None:
+                # Assign each topic to the component with highest weight
+                assignments = np.argmax(W, axis=1)
+                left_indices = [group[i] for i in range(len(group)) if assignments[i] == 0]
+                right_indices = [group[i] for i in range(len(group)) if assignments[i] == 1]
+
+                # Ensure non-empty splits
+                if not left_indices or not right_indices:
+                    mid = len(group) // 2
+                    left_indices, right_indices = group[:mid], group[mid:]
+            else:
+                mid = len(group) // 2
+                left_indices, right_indices = group[:mid], group[mid:]
+
+            # Parent name from c-TF-IDF of combined group
+            grouped_bow = csr_matrix(bow[group].sum(axis=0))
+            c_tf_idf = self.ctfidf_model.transform(grouped_bow)
+            selection = documents.loc[documents.Topic.isin([topic_ids[i] for i in group]), :]
+            selection = selection.copy()
+            selection.Topic = 0
+            words_per_topic = self._extract_words_per_topic(words, selection, c_tf_idf, calculate_aspects=False)
+            parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
+
+            # Assign child IDs: leaves get their topic ID, non-leaves get
+            # a fresh internal ID allocated immediately.
+            if len(left_indices) == 1:
+                left_id = topic_ids[left_indices[0]]
+            else:
+                left_id = next_id
+                group_to_id[tuple(sorted(left_indices))] = next_id
+                next_id += 1
+
+            if len(right_indices) == 1:
+                right_id = topic_ids[right_indices[0]]
+            else:
+                right_id = next_id
+                group_to_id[tuple(sorted(right_indices))] = next_id
+                next_id += 1
+
+            left_name = _child_name(left_indices)
+            right_name = _child_name(right_indices)
+
+            rows.append(
+                {
+                    "Parent_ID": parent_id,
+                    "Parent_Name": parent_name,
+                    "Topics": [topic_ids[i] for i in group],
+                    "Child_Left_ID": left_id,
+                    "Child_Left_Name": left_name,
+                    "Child_Right_ID": right_id,
+                    "Child_Right_Name": right_name,
+                    "Distance": best_diversity,
+                }
+            )
+
+            # Add children back as groups
+            groups.append(left_indices)
+            groups.append(right_indices)
+
+        # Remap internal node IDs so the root (first split) has the highest
+        # ID.  get_topic_tree identifies the root via max(Parent_ID).
+        if rows:
+            id_min = n_topics
+            id_max = next_id - 1
+
+            def _remap(node_id):
+                return node_id if node_id < n_topics else id_min + id_max - node_id
+
+            for row in rows:
+                row["Parent_ID"] = _remap(row["Parent_ID"])
+                row["Child_Left_ID"] = _remap(row["Child_Left_ID"])
+                row["Child_Right_ID"] = _remap(row["Child_Right_ID"])
+
+        hier_topics = pd.DataFrame(rows)
+        if not hier_topics.empty:
+            hier_topics = hier_topics.sort_values("Parent_ID", ascending=False)
+            hier_topics[["Parent_ID", "Child_Left_ID", "Child_Right_ID"]] = hier_topics[
+                ["Parent_ID", "Child_Left_ID", "Child_Right_ID"]
+            ].astype(str)
 
         return hier_topics
 
