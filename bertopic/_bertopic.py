@@ -547,6 +547,7 @@ class BERTopic:
         documents: Union[str, List[str]],
         embeddings: np.ndarray = None,
         images: List[str] | None = None,
+        soft_clustering_temp: float | None = None,
     ) -> Tuple[List[int], np.ndarray]:
         """After having fit a model, use transform to predict new instances.
 
@@ -555,6 +556,12 @@ class BERTopic:
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model.
             images: A list of paths to the images to predict on or the images themselves
+            soft_clustering_temp: Temperature for soft topic assignments via softmax.
+                                   When provided, probabilities are computed as
+                                   ``softmax(-distance / temp)`` over topic centroid distances.
+                                   Low values yield sharper (near-hard) assignments;
+                                   high values yield softer distributions.
+                                   Clustering-agnostic — works with any clustering model.
 
         Returns:
             predictions: Topic predictions for each documents
@@ -644,6 +651,15 @@ class BERTopic:
             # Map probabilities and predictions
             probabilities = self._map_probabilities(probabilities, original_topics=True)
             predictions = self._map_predictions(predictions)
+
+        # Override probabilities with soft clustering if requested
+        if soft_clustering_temp is not None:
+            from scipy.special import softmax as scipy_softmax
+
+            topic_embs = np.array(self.topic_embeddings_[self._outliers :])
+            distances = np.linalg.norm(embeddings[:, np.newaxis, :] - topic_embs[np.newaxis, :, :], axis=2)
+            probabilities = scipy_softmax(-distances / soft_clustering_temp, axis=1)
+
         return predictions, probabilities
 
     def partial_fit(

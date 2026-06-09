@@ -105,3 +105,37 @@ As a default, we compare the c-TF-IDF calculations between the token sets and al
 ```python
 topic_distr, _ = topic_model.approximate_distribution(docs, use_embedding_model=True)
 ```
+
+
+## **Soft clustering with temperature scaling**
+
+BERTopic can produce soft topic assignments using temperature-scaled softmax
+over embedding-to-centroid distances. This works with **any** clustering model,
+not just HDBSCAN:
+
+```python
+# Get soft probabilities for each document
+topics, probs = topic_model.transform(docs, soft_clustering_temp=0.5)
+```
+
+The `probs` matrix has shape `(n_documents, n_topics)` with each row summing to 1.0.
+
+**Temperature controls sharpness:**
+
+- **Low temperature (e.g., 0.1):** Sharp distributions, nearly equivalent to hard
+  clustering. Most probability mass on one topic.
+- **Medium temperature (e.g., 0.5–1.0):** Balanced soft assignments.
+- **High temperature (e.g., 10.0):** Near-uniform distributions across all topics.
+
+```python
+# Sharp (almost hard) assignments
+topics, probs_sharp = topic_model.transform(docs, soft_clustering_temp=0.1)
+
+# Soft assignments
+topics, probs_soft = topic_model.transform(docs, soft_clustering_temp=1.0)
+```
+
+!!! tip
+    This is a lightweight alternative to HDBSCAN's `calculate_probabilities=True`,
+    which only provides in-cluster membership (not a full distribution over all
+    topics) and is computationally expensive.
