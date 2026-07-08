@@ -1,6 +1,7 @@
 # ruff: noqa: E402
-import yaml
 import warnings
+
+import yaml
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -10,26 +11,25 @@ try:
 except (KeyError, AttributeError, TypeError):
     pass
 
-import re
-import math
-import joblib
-import inspect
 import collections
+import inspect
+import math
+import re
+from collections import Counter, defaultdict
+from copy import deepcopy
+from importlib.util import find_spec
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Literal, Mapping, Tuple, Union
+
+import joblib
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from copy import deepcopy
-
-from tqdm import tqdm
-from pathlib import Path
 from packaging import version
-from tempfile import TemporaryDirectory
-from collections import defaultdict, Counter
-from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
-from importlib.util import find_spec
-
-from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
+from scipy.sparse import csr_matrix
+from tqdm import tqdm
 
 # Plotting
 if find_spec("plotly") is None:
@@ -41,8 +41,8 @@ else:
     from bertopic import plotting
 
     if TYPE_CHECKING:
-        import plotly.graph_objs as go
         import matplotlib.figure as fig
+        import plotly.graph_objs as go
 
 
 # Models
@@ -54,32 +54,33 @@ except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
     from sklearn.cluster import HDBSCAN as SK_HDBSCAN
 
-from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import normalize
 
-# BERTopic
-from bertopic.cluster import BaseCluster
-from bertopic.backend import BaseEmbedder
-from bertopic.representation._mmr import mmr
-from bertopic.backend._utils import select_backend
-from bertopic.vectorizers import ClassTfidfTransformer
-from bertopic.representation import BaseRepresentation, KeyBERTInspired
-from bertopic.dimensionality import BaseDimensionalityReduction
-from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+import bertopic._save_utils as save_utils
 from bertopic._utils import (
     MyLogger,
     check_documents_type,
     check_embeddings_shape,
     check_is_fitted,
-    validate_distance_matrix,
-    select_topic_representation,
     get_unique_distances,
+    select_topic_representation,
+    validate_distance_matrix,
 )
-import bertopic._save_utils as save_utils
+from bertopic.backend import BaseEmbedder
+from bertopic.backend._utils import select_backend
+
+# BERTopic
+from bertopic.cluster import BaseCluster
+from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
+from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
+from bertopic.representation._mmr import mmr
+from bertopic.vectorizers import ClassTfidfTransformer
 
 logger = MyLogger()
 logger.configure("WARNING")
@@ -4266,9 +4267,17 @@ class BERTopic:
         # Sample documents per topic
         documents_per_topic = (
             documents.drop("Image", axis=1, errors="ignore")
+            .drop_duplicates(subset=["Topic", "Document"])
             .groupby("Topic")
-            .sample(n=nr_samples, replace=True, random_state=42)
-            .drop_duplicates()
+            .apply(
+                lambda x: x.sample(
+                    n=min(nr_samples, len(x)),
+                    replace=False,
+                    random_state=42,
+                ),
+                include_groups=False,
+            )
+            .reset_index(level=0)
         )
 
         # Find and extract documents that are most similar to the topic
@@ -4298,13 +4307,16 @@ class BERTopic:
                     top_n=nr_docs,
                     diversity=diversity,
                 )
+                # MMR returns document strings; map back to positional indices
+                doc_set = set(docs)
+                selected_indices = [i for i, d in enumerate(selected_docs) if d in doc_set]
 
             # Extract top n most representative documents
             else:
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
-                docs = [selected_docs[index] for index in indices]
+                selected_indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
+                docs = [selected_docs[i] for i in selected_indices]
 
-            doc_ids = [selected_docs_ids[index] for index, doc in enumerate(selected_docs) if doc in docs]
+            doc_ids = [selected_docs_ids[i] for i in selected_indices]
             repr_docs_ids.append(doc_ids)
             repr_docs.extend(docs)
             repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
