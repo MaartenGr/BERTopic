@@ -1201,6 +1201,362 @@ class BERTopic:
 
         return hier_topics
 
+    def create_topic_taxonomy(
+        self,
+        docs: List[str],
+        nr_topics_per_level: List[int],
+        embeddings: np.ndarray = None,
+        min_children: int = 2,
+        doc_embedding_weight: float = 0.5,
+        use_ctfidf: bool = False,
+    ) -> pd.DataFrame:
+        """Builds a deterministic N-level taxonomy on top of the fitted leaf topics.
+        Each level is created by clustering the level below using agglomerative
+        clustering with cosine distance, then repairing any clusters that have
+        fewer than ``min_children`` by merging them into the most similar neighbor.
+
+        The leaf-level topic model remains unchanged - parent topics are derived
+        through a lookup table and are not used during inference.
+
+        Arguments:
+            docs: The documents you used when calling either ``fit`` or ``fit_transform``
+            nr_topics_per_level: Target number of topics for each level above the leaves.
+                For example, ``[20, 5]`` creates two parent levels: level 1 with ~20 topics
+                and level 2 with ~5 topics. Each entry must be less than the number of
+                topics at the level below.
+            embeddings: Pre-trained document embeddings used to compute document centroids
+                per topic. If ``None``, only BERTopic's internal topic embeddings are used
+                and ``doc_embedding_weight`` is ignored.
+            min_children: Minimum number of children each parent must have at every level.
+                Clusters with fewer children are merged into their most similar neighbor.
+                Must be >= 1. Default is 2.
+            doc_embedding_weight: Weight for document centroids when computing leaf topic
+                vectors. The topic embedding weight is ``1 - doc_embedding_weight``.
+                Only used when ``embeddings`` is provided. Must be in [0, 1]. Default is 0.5.
+            use_ctfidf: Whether to use c-TF-IDF representations for clustering distance
+                computation. If ``False``, topic embedding vectors are used. Default is ``False``.
+
+        Returns:
+            hierarchy: A DataFrame with the full hierarchy. Columns:
+
+                - ``Topic_ID``: Unique topic identifier. Leaf IDs match the fitted model's
+                  topic IDs. Parent IDs are auto-incremented integers.
+                - ``Topic_Name``: Top-5 c-TF-IDF words joined by ``_``.
+                - ``Level``: Hierarchy level (0 = leaf, 1 = first parent, etc.).
+                - ``Parent_ID``: ID of the parent topic at the next level up. ``-2`` for
+                  top-level topics.
+                - ``Parent_Name``: Name of the parent topic. ``"Root"`` for top-level.
+                - ``Document_Count``: Number of documents. For parents this is the sum of
+                  their children's counts.
+
+        Examples:
+        ```python
+        from bertopic import BERTopic
+        topic_model = BERTopic()
+        topics, probs = topic_model.fit_transform(docs)
+
+        # Two-level hierarchy: ~20 parents, ~5 grandparents
+        hierarchy = topic_model.create_topic_taxonomy(
+            docs, nr_topics_per_level=[20, 5], min_children=2
+        )
+
+        # With document embeddings for richer topic vectors
+        hierarchy = topic_model.create_topic_taxonomy(
+            docs, nr_topics_per_level=[20, 5],
+            embeddings=embeddings, doc_embedding_weight=0.7
+        )
+        ```
+        """
+        check_is_fitted(self)
+        check_documents_type(docs)
+
+        # Validate parameters
+        if not isinstance(nr_topics_per_level, list) or len(nr_topics_per_level) == 0:
+            raise ValueError("`nr_topics_per_level` must be a non-empty list of positive integers.")
+        if any(n < 1 for n in nr_topics_per_level):
+            raise ValueError("All entries in `nr_topics_per_level` must be >= 1.")
+        if min_children < 1:
+            raise ValueError("`min_children` must be >= 1.")
+        if not 0.0 <= doc_embedding_weight <= 1.0:
+            raise ValueError("`doc_embedding_weight` must be between 0.0 and 1.0.")
+
+        # Non-outlier leaf topics
+        topic_ids = sorted([t for t in self.topic_sizes_.keys() if t != -1])
+        n_leaves = len(topic_ids)
+        if n_leaves < 2:
+            raise ValueError("Cannot create hierarchy with fewer than 2 non-outlier topics.")
+
+        # Validate level targets against available topics
+        n_at_level = n_leaves
+        for k, target_n in enumerate(nr_topics_per_level):
+            if target_n >= n_at_level:
+                raise ValueError(
+                    f"nr_topics_per_level[{k}] = {target_n} must be less than the "
+                    f"number of topics at the level below ({n_at_level})."
+                )
+            n_at_level = target_n
+
+        if embeddings is not None:
+            check_embeddings_shape(embeddings, docs)
+
+        # Phase 1: Prepare leaf level
+        topic_to_idx = {tid: i for i, tid in enumerate(topic_ids)}
+        topic_embeds = self.topic_embeddings_[self._outliers :]
+
+        # Compute leaf topic vectors
+        if embeddings is not None:
+            doc_topics = np.array(self.topics_)
+            doc_centroids = np.zeros_like(topic_embeds)
+            for tid in topic_ids:
+                mask = doc_topics == tid
+                doc_centroids[topic_to_idx[tid]] = embeddings[mask].mean(axis=0)
+            w = doc_embedding_weight
+            level_vectors = w * doc_centroids + (1.0 - w) * topic_embeds
+        else:
+            level_vectors = topic_embeds.copy()
+
+        doc_counts = np.array([self.topic_sizes_[tid] for tid in topic_ids])
+
+        # Prepare BoW for label generation
+        documents = pd.DataFrame({"Document": docs, "ID": range(len(docs)), "Topic": self.topics_})
+        documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        documents_per_topic = documents_per_topic.loc[documents_per_topic.Topic != -1, :]
+        clean_documents = self._preprocess_text(documents_per_topic.Document.values)
+
+        # Support older sklearn versions, as was done in other parts as well.
+        if version.parse(sklearn_version) >= version.parse("1.0.0"):
+            words = self.vectorizer_model.get_feature_names_out()
+        else:
+            words = self.vectorizer_model.get_feature_names()
+
+        bow = self.vectorizer_model.transform(clean_documents)
+
+        # Reorder BoW rows to match topic_ids order
+        bow_topic_order = documents_per_topic.Topic.tolist()
+        bow_idx_map = {tid: i for i, tid in enumerate(bow_topic_order)}
+        reorder = [bow_idx_map[tid] for tid in topic_ids]
+        bow = bow[reorder]
+
+        # Initialize hierarchy records with leaf topics
+        has_outliers = self._outliers == 1
+        records = []
+
+        # Add outlier topic as a leaf if it exists
+        if has_outliers:
+            outlier_label = self.topic_labels_.get(-1, "-1_Outlier")
+            outlier_doc_count = self.topic_sizes_.get(-1, 0)
+            records.append(
+                {
+                    "Topic_ID": -1,
+                    "Topic_Name": outlier_label,
+                    "Level": 0,
+                    "Parent_ID": None,
+                    "Parent_Name": None,
+                    "Document_Count": outlier_doc_count,
+                }
+            )
+
+        for tid in topic_ids:
+            label = self.topic_labels_.get(tid, f"Topic_{tid}")
+            records.append(
+                {
+                    "Topic_ID": tid,
+                    "Topic_Name": label,
+                    "Level": 0,
+                    "Parent_ID": None,
+                    "Parent_Name": None,
+                    "Document_Count": self.topic_sizes_[tid],
+                }
+            )
+
+        # Track current level state (outliers are handled separately)
+        current_ids = list(topic_ids)
+        current_vectors = level_vectors
+        current_doc_counts = doc_counts
+        current_bow = bow
+        next_parent_id = max(topic_ids) + 1
+        # Track which original leaf topic IDs each node covers (for BoW/doc lookups)
+        current_leaf_sets = [[tid] for tid in topic_ids]
+        # Track the outlier node ID at each level so we can chain it upward
+        outlier_child_id = -1 if has_outliers else None
+
+        # Phase 2: Build each parent level
+        for k, target_n in enumerate(nr_topics_per_level, start=1):
+            n_current = len(current_ids)
+
+            # Clamp target to actual available topics (prior-level repair may have reduced the count)
+            if target_n >= n_current:
+                target_n = n_current - 1
+            if target_n < 1:
+                break
+
+            # Compute distance matrix
+            if use_ctfidf:
+                c_tf_idf_level = self.ctfidf_model.transform(current_bow)
+                if isinstance(c_tf_idf_level, csr_matrix):
+                    c_tf_idf_level = c_tf_idf_level.toarray()
+                dist_matrix = 1 - cosine_similarity(c_tf_idf_level)
+            else:
+                dist_matrix = 1 - cosine_similarity(current_vectors)
+            np.fill_diagonal(dist_matrix, 0)
+
+            # Agglomerative clustering (again, support older versions)
+            if version.parse(sklearn_version) >= version.parse("1.4.0"):
+                agg = AgglomerativeClustering(target_n, metric="precomputed", linkage="average")
+            else:
+                agg = AgglomerativeClustering(target_n, affinity="precomputed", linkage="average")
+            agg.fit(dist_matrix)
+
+            # Build cluster-to-children mapping
+            cluster_to_children = defaultdict(list)
+            for i, cl in enumerate(agg.labels_):
+                cluster_to_children[cl].append(i)
+
+            # "Repair": merge clusters with fewer than min_children
+            changed = True
+            while changed:
+                changed = False
+                centroids = {}
+                for cl, children_idxs in cluster_to_children.items():
+                    weights = current_doc_counts[children_idxs]
+                    centroids[cl] = np.average(current_vectors[children_idxs], axis=0, weights=weights)
+
+                small_clusters = [cl for cl, ch in cluster_to_children.items() if len(ch) < min_children]
+                for cl in small_clusters:
+                    if cl not in cluster_to_children or len(cluster_to_children) <= 1:
+                        continue
+
+                    # Find most similar neighbor by cosine similarity
+                    cl_centroid = centroids[cl].reshape(1, -1)
+                    best_neighbor = None
+                    best_sim = -1.0
+                    for other_cl, other_centroid in centroids.items():
+                        if other_cl == cl:
+                            continue
+                        sim = cosine_similarity(cl_centroid, other_centroid.reshape(1, -1))[0, 0]
+                        if sim > best_sim:
+                            best_sim = sim
+                            best_neighbor = other_cl
+
+                    # Merge into best neighbor
+                    cluster_to_children[best_neighbor].extend(cluster_to_children[cl])
+                    del cluster_to_children[cl]
+                    # Recompute merged centroid
+                    idxs = cluster_to_children[best_neighbor]
+                    weights = current_doc_counts[idxs]
+                    centroids[best_neighbor] = np.average(current_vectors[idxs], axis=0, weights=weights)
+                    del centroids[cl]
+                    changed = True
+
+            # Build parent nodes for this level
+            next_level_ids = []
+            next_level_vectors = []
+            next_level_doc_counts = []
+            next_level_bow = []
+            next_level_leaf_sets = []
+
+            for cl in sorted(cluster_to_children.keys()):
+                children_idxs = cluster_to_children[cl]
+                parent_id = next_parent_id
+                next_parent_id += 1
+
+                # Collect all original leaf topic IDs covered by this parent
+                parent_leaf_ids = []
+                for i in children_idxs:
+                    parent_leaf_ids.extend(current_leaf_sets[i])
+
+                # Compute parent label via c-TF-IDF on merged BoW
+                parent_bow = csr_matrix(current_bow[children_idxs].sum(axis=0))
+                c_tf_idf_parent = self.ctfidf_model.transform(parent_bow)
+                temp_docs = documents.loc[documents.Topic.isin(parent_leaf_ids)].copy()
+                temp_docs["Topic"] = 0
+                words_per_topic = self._extract_words_per_topic(
+                    words,
+                    temp_docs,
+                    c_tf_idf_parent,
+                    calculate_aspects=False,
+                    fine_tune_representation=False,
+                )
+                parent_name = "_".join([x[0] for x in words_per_topic[0]][:5])
+
+                # Compute parent vector and doc count
+                weights = current_doc_counts[children_idxs]
+                parent_vector = np.average(current_vectors[children_idxs], axis=0, weights=weights)
+                parent_doc_count = int(current_doc_counts[children_idxs].sum())
+
+                # Update children's parent references
+                for idx in children_idxs:
+                    child_id = current_ids[idx]
+                    for rec in records:
+                        if rec["Topic_ID"] == child_id and rec["Level"] == k - 1:
+                            rec["Parent_ID"] = parent_id
+                            rec["Parent_Name"] = parent_name
+                            break
+
+                records.append(
+                    {
+                        "Topic_ID": parent_id,
+                        "Topic_Name": parent_name,
+                        "Level": k,
+                        "Parent_ID": None,
+                        "Parent_Name": None,
+                        "Document_Count": parent_doc_count,
+                    }
+                )
+
+                next_level_ids.append(parent_id)
+                next_level_vectors.append(parent_vector)
+                next_level_doc_counts.append(parent_doc_count)
+                next_level_bow.append(parent_bow)
+                next_level_leaf_sets.append(parent_leaf_ids)
+
+            # Create outlier parent for this level (single-child chain, bypasses clustering)
+            if has_outliers and outlier_child_id is not None:
+                outlier_parent_id = next_parent_id
+                next_parent_id += 1
+                outlier_name = "Outlier"
+
+                # Link the outlier child to this outlier parent
+                for rec in records:
+                    if rec["Topic_ID"] == outlier_child_id and rec["Parent_ID"] is None:
+                        rec["Parent_ID"] = outlier_parent_id
+                        rec["Parent_Name"] = outlier_name
+                        break
+
+                records.append(
+                    {
+                        "Topic_ID": outlier_parent_id,
+                        "Topic_Name": outlier_name,
+                        "Level": k,
+                        "Parent_ID": None,
+                        "Parent_Name": None,
+                        "Document_Count": outlier_doc_count,
+                    }
+                )
+                outlier_child_id = outlier_parent_id
+
+            # Prepare for next level
+            current_ids = next_level_ids
+            current_vectors = np.array(next_level_vectors)
+            current_doc_counts = np.array(next_level_doc_counts)
+            current_bow = sp.vstack(next_level_bow)
+            current_leaf_sets = next_level_leaf_sets
+
+            # Stop if we can't cluster further
+            if len(current_ids) <= 1:
+                break
+
+        # Phase 3: Finalize top-level parents (including outlier chain)
+        max_level = max(rec["Level"] for rec in records)
+        for rec in records:
+            if rec["Level"] == max_level and rec["Parent_ID"] is None:
+                rec["Parent_ID"] = -2
+                rec["Parent_Name"] = "Root"
+
+        hierarchy_df = pd.DataFrame(records)
+        hierarchy_df = hierarchy_df.sort_values(["Level", "Topic_ID"]).reset_index(drop=True)
+        return hierarchy_df
+
     def approximate_distribution(
         self,
         documents: Union[str, List[str]],
