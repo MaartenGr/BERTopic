@@ -5,10 +5,12 @@ on:
     branches:
     - master
     - dev
+    - v1.0
   pull_request:
     branches:
     - master
     - dev
+    - v1.0
 
 jobs:
   lint:
