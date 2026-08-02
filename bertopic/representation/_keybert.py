@@ -2,7 +2,6 @@ import numpy as np
 
 from packaging import version
 from scipy.sparse import csr_matrix
-from typing import Union
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
 from bertopic._topics import Keywords
@@ -179,7 +178,7 @@ class KeyBERTInspired(BaseRepresentation):
         representative_docs: list[str],
         repr_doc_indices: list[list[int]],
         repr_embeddings: np.ndarray = None,
-    ) -> Union[np.ndarray, list[str]]:
+    ) -> tuple[np.ndarray, list[str]]:
         """Extract the representative document embeddings and create topic embeddings.
         Then extract word embeddings and calculate the cosine similarity between topic
         embeddings and the word embeddings. Topic embeddings are the average of

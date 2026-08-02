@@ -1,6 +1,5 @@
 import warnings
 import numpy as np
-from typing import List
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic.representation._base import BaseRepresentation
@@ -95,10 +94,10 @@ class MaximalMarginalRelevance(BaseRepresentation):
 def mmr(
     doc_embedding: np.ndarray,
     word_embeddings: np.ndarray,
-    words: List[str],
+    words: list[str],
     diversity: float = 0.1,
     top_n: int = 10,
-) -> List[str]:
+) -> list[str]:
     """Maximal Marginal Relevance.
 
     Arguments:

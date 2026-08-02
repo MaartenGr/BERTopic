@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, Any, Union, Callable
+from typing import Any, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import (
     DEFAULT_SYSTEM_PROMPT,
@@ -103,12 +103,12 @@ class LangChain(LLMRepresentation):
         model,
         prompt: str | None = None,
         system_prompt: str | None = None,
-        json_schema: Mapping[str, Any] | bool = False,
-        generator_kwargs: Mapping[str, Any] = {},
+        json_schema: dict[str, Any] | bool = False,
+        generator_kwargs: dict[str, Any] = {},
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
     ):
         super().__init__(
             prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),

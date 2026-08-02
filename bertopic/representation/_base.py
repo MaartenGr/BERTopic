@@ -1,8 +1,9 @@
 from scipy.sparse import csr_matrix
 from sklearn.base import BaseEstimator
-from typing import Mapping, List, Tuple, Union, Callable
+from typing import Callable
 
 import json
+import numpy as np
 
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
@@ -22,29 +23,28 @@ class BaseRepresentation(BaseEstimator):
         self,
         topic_model: "BERTopic",
         corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray | None = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topics.
 
         Each representation model that inherits this class will have
-        its arguments (topic_model, docs, c_tf_idf, topics)
-        automatically passed. Therefore, the representation model
-        will only have access to the information about topics related
-        to those arguments.
+        its arguments automatically passed. Therefore, the representation
+        model will only have access to the information about topics
+        related to those arguments.
 
         Arguments:
             topic_model: The BERTopic model that is fitted until topic
                          representations are calculated.
             corpus: Documents and their metadata.
+            topic_representations: A dictionary mapping topic IDs to their
+                                   Keywords representations as calculated by c-TF-IDF.
             c_tf_idf: A c-TF-IDF representation that is typically
                       identical to `topic_model.c_tf_idf_` except for
                       dynamic, class-based, and hierarchical topic modeling
                       where it is calculated on a subset of the documents.
-            topics: A dictionary with topic (key) and tuple of word and
-                    weight (value) as calculated by c-TF-IDF. This is the
-                    default topics that are returned if no representation
-                    model is used.
+            embeddings: Pre-trained document embeddings.
         """
         return topic_model.topic_representations_
 
@@ -58,7 +58,7 @@ class LLMRepresentation(BaseRepresentation):
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
     ):
         """Generate a representation model that leverages LLMs.
 

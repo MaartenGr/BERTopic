@@ -1,11 +1,13 @@
-import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
-from typing import Mapping, List, Tuple, Any, Union, Callable
+from typing import Any, Callable, Union
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
+from bertopic._topics import Keywords, Label, TopicRepresentation
+from bertopic._corpus import Corpus
 
 from typing import TYPE_CHECKING
 
@@ -85,12 +87,12 @@ class TextGeneration(LLMRepresentation):
         self,
         model: Union[str, pipeline],
         prompt: str | None = None,
-        pipeline_kwargs: Mapping[str, Any] = {},
+        pipeline_kwargs: dict[str, Any] = {},
         random_state: int = 42,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
     ):
         super().__init__(
             prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
@@ -119,40 +121,42 @@ class TextGeneration(LLMRepresentation):
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, TopicRepresentation]:
         """Extract topic representations and return a single label.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: Not used
-            c_tf_idf: Not used
-            topics: The candidate topics as calculated with c-TF-IDF
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
+            c_tf_idf: The topic c-TF-IDF representation
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
             updated_topics: Updated topic representations
         """
         # Extract the top n representative documents per topic
         repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf, documents, topics, 500, self.nr_docs, self.diversity
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
+            nr_samples=500,
+            nr_repr_docs=self.nr_docs,
+            diversity=self.diversity,
         )
 
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(docs=docs, topic=topic, topics=topics, topic_model=topic_model)
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
             self.prompts_.append(prompt)
 
             # Extract result from generator and use that as label
             topic_description = self.model(prompt, **self.pipeline_kwargs)
-            topic_description = [
-                (description["generated_text"].replace(prompt, ""), 1) for description in topic_description
-            ]
-
-            if len(topic_description) < 10:
-                topic_description += [("", 0) for _ in range(10 - len(topic_description))]
-
-            updated_topics[topic] = topic_description
+            label = topic_description[0]["generated_text"].replace(prompt, "").strip()
+            updated_topics[topic] = Label(data=label)
 
         return updated_topics

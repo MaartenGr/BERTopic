@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from litellm import completion
-from typing import Union, Callable
+from typing import Callable
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from typing import Mapping, Any
@@ -121,7 +121,7 @@ class LiteLLM(LLMRepresentation):
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
-        tokenizer: Union[str, Callable] | None = None,
+        tokenizer: str | Callable | None = None,
     ):
         super().__init__(
             prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),
