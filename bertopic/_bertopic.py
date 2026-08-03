@@ -4265,19 +4265,18 @@ class BERTopic:
                           that belong to each topic
         """
         # Sample documents per topic
-        documents_per_topic = (
-            documents.drop("Image", axis=1, errors="ignore")
-            .drop_duplicates(subset=["Topic", "Document"])
-            .groupby("Topic")
-            .apply(
-                lambda x: x.sample(
-                    n=min(nr_samples, len(x)),
-                    replace=False,
-                    random_state=42,
-                ),
-                include_groups=False,
-            )
-            .reset_index(level=0)
+        # NOTE: Sampling is done per-group with a manual loop + concat rather than
+        # `groupby().apply()` because the `include_groups` kwarg needed to silence
+        # the "operated on the grouping columns" deprecation is pandas>=2.2 only,
+        # while this package supports pandas>=1.1.5.
+        deduplicated_documents = documents.drop("Image", axis=1, errors="ignore").drop_duplicates(
+            subset=["Topic", "Document"]
+        )
+        documents_per_topic = pd.concat(
+            [
+                group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42)
+                for _, group in deduplicated_documents.groupby("Topic")
+            ]
         )
 
         # Find and extract documents that are most similar to the topic
@@ -4307,9 +4306,14 @@ class BERTopic:
                     top_n=nr_docs,
                     diversity=diversity,
                 )
-                # MMR returns document strings; map back to positional indices
-                doc_set = set(docs)
-                selected_indices = [i for i, d in enumerate(selected_docs) if d in doc_set]
+                # MMR returns document strings in its own diversity-ranked order;
+                # map each one back to its positional index in `selected_docs`
+                # (safe: documents were deduplicated per (Topic, Document) above,
+                # so each text appears at most once), preserving that order so
+                # `docs`/`repr_docs` and `doc_ids`/`repr_docs_ids` stay aligned
+                # position-for-position.
+                doc_to_index = {d: i for i, d in enumerate(selected_docs)}
+                selected_indices = [doc_to_index[d] for d in docs]
 
             # Extract top n most representative documents
             else:
