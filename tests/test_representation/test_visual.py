@@ -11,7 +11,7 @@ def test_extract_topics_indexes_images_by_label_not_position(minimal_topic_model
     """`_extract_representative_docs` returns index labels (not positions) in
     `repr_docs_ids`. `VisualRepresentation.extract_topics` must look images up by
     those labels; using a non-contiguous/shifted DataFrame index catches any
-    accidental positional lookup (Gap C).
+    accidental positional lookup.
     """
     docs = [
         "doc alpha one",
