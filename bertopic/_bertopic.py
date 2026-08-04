@@ -4279,10 +4279,14 @@ class BERTopic:
         # `groupby().apply()` either warns about operating on the grouping columns or, with
         # `include_groups=False`, drops `Topic` from the result entirely. Sampling each group
         # explicitly keeps the `Topic` column and the original document index intact.
+        # `random_state=42 + i` decorrelates the sample across topics: a fixed seed applied to
+        # every group would draw the same positional pattern for equally-sized topics, so their
+        # samples would agree on e.g. "first document, third document, ..." rather than being
+        # independent draws.
         documents_per_topic = pd.concat(
             [
-                group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42)
-                for _, group in deduplicated_documents.groupby("Topic")
+                group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42 + i)
+                for i, (_, group) in enumerate(deduplicated_documents.groupby("Topic"))
             ]
         )
 
