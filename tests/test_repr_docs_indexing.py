@@ -38,7 +38,13 @@ def test_duplicate_text_across_topics(minimal_topic_model):
 
 
 def test_all_identical_docs(minimal_topic_model):
-    """When all docs are identical, doc_ids should still be correct per topic."""
+    """When all docs are identical, doc_ids should still be correct per topic.
+
+    All 3 docs per topic share the same text, so dedup collapses each topic
+    down to 1 candidate; `nr_repr_docs=2` can only return that 1. Asserting
+    the count pins the dedup interaction instead of looping over doc_ids
+    that a `[]` return would also satisfy.
+    """
     docs = ["same text"] * 6
     topics_list = [0, 0, 0, 1, 1, 1]
 
@@ -49,6 +55,7 @@ def test_all_identical_docs(minimal_topic_model):
     )
 
     for topic_id, doc_ids in zip(topics.keys(), repr_docs_ids):
+        assert len(doc_ids) == 1, f"topic {topic_id}: expected exactly 1 doc_id after dedup, got {doc_ids}"
         for doc_id in doc_ids:
             actual_topic = documents.loc[doc_id, "Topic"]
             assert actual_topic == topic_id, (
