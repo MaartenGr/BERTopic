@@ -257,7 +257,8 @@ def test_unsorted_topics_keys_map_docs_to_correct_topic(minimal_topic_model, div
 
 
 @pytest.mark.parametrize("diversity", [None, 0.5])
-def test_mappings_agree_with_repr_docs_ids(minimal_topic_model, diversity):
+@pytest.mark.parametrize("topic_order", [[0, 1], [1, 0]])
+def test_mappings_agree_with_repr_docs_ids(minimal_topic_model, diversity, topic_order):
     """`repr_docs_mappings[t]` texts must correspond to the same documents as
     `repr_docs_ids` for topic `t`, regardless of the `topics` dict key order.
     """
@@ -271,23 +272,22 @@ def test_mappings_agree_with_repr_docs_ids(minimal_topic_model, diversity):
     ]
     topics_list = [0, 0, 0, 1, 1, 1]
 
-    for topic_order in ([0, 1], [1, 0]):
-        model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list, topic_order=topic_order)
+    model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list, topic_order=topic_order)
 
-        repr_docs_mappings, _, _, repr_docs_ids = model._extract_representative_docs(
-            c_tf_idf,
-            documents,
-            topics,
-            nr_samples=500,
-            nr_repr_docs=2,
-            diversity=diversity,
+    repr_docs_mappings, _, _, repr_docs_ids = model._extract_representative_docs(
+        c_tf_idf,
+        documents,
+        topics,
+        nr_samples=500,
+        nr_repr_docs=2,
+        diversity=diversity,
+    )
+
+    # repr_docs_ids is built in sorted-label order regardless of topics dict order
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
+        expected_texts = set(documents.loc[doc_ids, "Document"].tolist())
+        actual_texts = set(repr_docs_mappings[topic_id])
+        assert actual_texts == expected_texts, (
+            f"topic {topic_id} (topic_order={topic_order}): mappings {actual_texts} "
+            f"do not match repr_docs_ids-derived texts {expected_texts}"
         )
-
-        # repr_docs_ids is built in sorted-label order regardless of topics dict order
-        for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
-            expected_texts = set(documents.loc[doc_ids, "Document"].tolist())
-            actual_texts = set(repr_docs_mappings[topic_id])
-            assert actual_texts == expected_texts, (
-                f"topic {topic_id} (topic_order={topic_order}): mappings {actual_texts} "
-                f"do not match repr_docs_ids-derived texts {expected_texts}"
-            )
