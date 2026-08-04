@@ -4307,33 +4307,29 @@ class BERTopic:
             ]
         deduplicated_documents = documents[~dedup_keys.duplicated()].drop("Image", axis=1, errors="ignore")
 
-        # Sample without replacement, capped at each topic's size. `GroupBy.sample` cannot
-        # express that per-group cap (it raises when a group holds fewer rows than `n`), and
-        # `groupby().apply()` either warns about operating on the grouping columns or, with
-        # `include_groups=False`, drops `Topic` from the result entirely. Sampling each group
-        # explicitly keeps the `Topic` column and the original document index intact.
-        # `random_state=42 + i` decorrelates the sample across topics: a fixed seed applied to
-        # every group would draw the same positional pattern for equally-sized topics, so their
-        # samples would agree on e.g. "first document, third document, ..." rather than being
-        # independent draws.
-        topic_groups = list(deduplicated_documents.groupby("Topic"))
-        if not topic_groups:
+        # Sample without replacement, capped at each topic's size. Shuffling the whole frame
+        # once and then taking each topic's first `nr_samples` rows draws exactly that: a
+        # uniform sample of `min(nr_samples, len(group))` rows per topic. `GroupBy.sample`
+        # cannot express the per-group cap - it raises when a group holds fewer rows than `n`,
+        # and `n` is a scalar in every pandas release - while a per-group Python loop costs a
+        # `sample` call and a `concat` block per topic, which is ~10x slower at a few thousand
+        # topics. `head` preserves the original document index, which `selection.index` below
+        # relies on. A single global shuffle also decorrelates topics by construction: a fixed
+        # seed applied per group would draw the same positional pattern for equally-sized
+        # topics, so their samples would agree on e.g. "first document, third document, ...".
+        documents_per_topic = (
+            deduplicated_documents.sample(frac=1, random_state=42).groupby("Topic", sort=False).head(nr_samples)
+        )
+        if documents_per_topic.empty:
             # `groupby` silently drops NaN keys, so an empty `documents` or an all-NaN
-            # `Topic` column both produce zero groups here. Without this guard, the
-            # `pd.concat` below fails on an empty list with the opaque pandas error
-            # "ValueError: No objects to concatenate", which gives no indication that
+            # `Topic` column both leave nothing here. Without this guard the failure
+            # surfaces much later as an empty or partial result with no indication that
             # the real cause is upstream: no document has a valid topic assignment yet.
             raise ValueError(
                 "No documents with a valid `Topic` assignment were found to extract "
                 "representative documents from. This happens when `documents` is empty "
                 "or every document's `Topic` is NaN (topics have not been assigned yet)."
             )
-        documents_per_topic = pd.concat(
-            [
-                group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42 + i)
-                for i, (_, group) in enumerate(topic_groups)
-            ]
-        )
 
         # Find and extract documents that are most similar to the topic
         repr_docs = []

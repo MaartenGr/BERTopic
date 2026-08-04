@@ -91,6 +91,39 @@ def test_repr_docs_count_with_nr_repr_docs_greater_than_topic_size(minimal_topic
         assert len(docs_list) == 1
 
 
+def test_nr_samples_caps_candidates_per_topic(minimal_topic_model):
+    """`nr_samples` must cap the candidate pool per topic, independently of topic size.
+
+    The cap is what makes this an *approximate* search: only `nr_samples` documents
+    per topic are scored. It is enforced by taking each topic's first `nr_samples`
+    rows from a globally shuffled frame, so - unlike the explicit `min(nr_samples,
+    len(group))` it replaced - nothing in the expression names the cap. With
+    `nr_samples=2` only 2 documents per topic are scored, so at most 2 can come back
+    even though `nr_repr_docs=5` and each topic holds 6 unique documents. Without a
+    cap this returns 5.
+    """
+    docs = [f"topic zero doc {i}" for i in range(6)] + [f"topic one doc {i}" for i in range(6)]
+    topics_list = [0] * 6 + [1] * 6
+
+    model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list)
+
+    repr_docs_mappings, _, _, repr_docs_ids = model._extract_representative_docs(
+        c_tf_idf,
+        documents,
+        topics,
+        nr_samples=2,
+        nr_repr_docs=5,
+    )
+
+    assert len(repr_docs_mappings[0]) == 2
+    assert len(repr_docs_mappings[1]) == 2
+
+    # Shuffling the frame before grouping must not leak documents across topics:
+    # every returned id has to belong to the topic it is reported under.
+    for topic, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
+        assert set(documents.loc[doc_ids, "Topic"]) == {topic}
+
+
 def test_with_diversity_no_duplicates(minimal_topic_model):
     """MMR branch (diversity > 0) should also produce no duplicates."""
     docs = [
