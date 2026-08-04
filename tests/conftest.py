@@ -1,4 +1,5 @@
 import copy
+import pandas as pd
 import pytest
 from umap import UMAP
 from hdbscan import HDBSCAN
@@ -7,10 +8,70 @@ from sklearn.datasets import fetch_20newsgroups
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.decomposition import PCA
-from bertopic.vectorizers import OnlineCountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from bertopic.vectorizers import OnlineCountVectorizer, ClassTfidfTransformer
 from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
+
+
+@pytest.fixture
+def minimal_topic_model():
+    """Factory fixture building a network-free BERTopic model (vectorizer + c-TF-IDF only),
+    for exercising `_extract_representative_docs` directly without fitting embeddings/UMAP/HDBSCAN.
+
+    Args passed to the returned builder:
+        docs: list of document strings
+        topics_list: list of topic ids, one per doc, aligned with `docs`
+        index: optional custom index for the resulting `documents` DataFrame (defaults to a
+               default RangeIndex). Use a non-contiguous/shifted index to exercise label-based
+               (as opposed to positional) indexing.
+        ids: optional values for the `ID` column (defaults to `range(len(docs))`). Pass values
+             distinct from `index` to mirror the zero-shot path where `ID` is reset independently
+             of the DataFrame index.
+        topic_order: optional explicit key insertion order for the returned `topics` dict
+                     (defaults to sorted topic ids). Use a non-sorted order to exercise code
+                     that (incorrectly) relies on dict insertion order instead of sorted labels.
+
+    Returns: (model, c_tf_idf, documents, topics)
+    """
+
+    def _build(docs, topics_list, index=None, ids=None, topic_order=None):
+        documents = pd.DataFrame(
+            {
+                "Document": docs,
+                "ID": ids if ids is not None else range(len(docs)),
+                "Topic": topics_list,
+            }
+        )
+        if index is not None:
+            documents.index = index
+
+        vectorizer = CountVectorizer()
+        docs_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
+        X = vectorizer.fit_transform(docs_per_topic.Document.values)
+        ctfidf_model = ClassTfidfTransformer()
+        ctfidf_model.fit(X)
+        c_tf_idf = ctfidf_model.transform(X)
+
+        model = BERTopic()
+        model.vectorizer_model = vectorizer
+        model.ctfidf_model = ctfidf_model
+
+        order = topic_order if topic_order is not None else sorted(documents.Topic.unique())
+        topics = {}
+        for topic_id in order:
+            topic_docs = docs_per_topic.loc[docs_per_topic.Topic == topic_id, "Document"].to_numpy()[0]
+            bow = vectorizer.transform([topic_docs])
+            tf = ctfidf_model.transform(bow)
+            feature_names = vectorizer.get_feature_names_out()
+            scores = tf.toarray().flatten()
+            top_indices = scores.argsort()[-5:][::-1]
+            topics[topic_id] = [(feature_names[i], float(scores[i])) for i in top_indices]
+
+        return model, c_tf_idf, documents, topics
+
+    return _build
 
 
 @pytest.fixture(scope="session")
