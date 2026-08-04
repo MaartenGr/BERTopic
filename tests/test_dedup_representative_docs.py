@@ -7,6 +7,8 @@ Run from BERTopic repo root:
     pytest tests/test_dedup_representative_docs.py -v
 """
 
+import pytest
+
 
 def test_no_duplicate_docs_per_topic(minimal_topic_model):
     """Each topic's representative docs should contain no duplicates."""
@@ -143,3 +145,39 @@ def test_multimodal_dedup_preserves_distinct_images(minimal_topic_model):
     assert len(repr_docs_mappings[0]) == 9
     assert len(repr_docs_ids[0]) == 9
     assert len(set(repr_docs_ids[0])) == 9
+
+
+def test_multimodal_dedup_handles_unhashable_loaded_images(minimal_topic_model):
+    """Loaded (non-`str`) images must not crash `_extract_representative_docs`.
+
+    Regression test for the crash M01 introduced: `drop_duplicates` hashes its
+    subset columns, but `PIL.Image` sets `__hash__ = None`, so putting the
+    `Image` column directly into the dedup subset raises `TypeError:
+    unhashable type: 'Image'` the moment a pipeline carries loaded images
+    rather than string paths (e.g. the documented multimodal quickstart, which
+    loads a `datasets` image column directly). Distinct images sharing a
+    caption must still survive, and two images that are pixel-identical
+    (PIL's own `Image.__eq__`) must still collapse to one candidate.
+    """
+    Image = pytest.importorskip("PIL.Image")
+
+    distinct = [Image.new("RGB", (4, 4), color) for color in ("red", "green", "blue")]
+    duplicate_of_first = Image.new("RGB", (4, 4), "red")  # pixel-identical to distinct[0]
+
+    docs = ["same caption"] * 4
+    images = [*distinct, duplicate_of_first]
+    topics_list = [0, 0, 0, 0]
+
+    model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list, images=images)
+
+    repr_docs_mappings, _, _, repr_docs_ids = model._extract_representative_docs(
+        c_tf_idf,
+        documents,
+        topics,
+        nr_samples=500,
+        nr_repr_docs=4,
+    )
+
+    # The pixel-identical duplicate collapses; the 3 distinct images survive.
+    assert len(repr_docs_mappings[0]) == 3
+    assert sorted(repr_docs_ids[0]) == [0, 1, 2]

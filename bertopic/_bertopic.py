@@ -1,5 +1,6 @@
 # ruff: noqa: E402
 import yaml
+import hashlib
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -4232,6 +4233,31 @@ class BERTopic:
         )
         self.representative_docs_ = repr_docs
 
+    @staticmethod
+    def _image_dedup_key(image) -> str | int:
+        """Hashable stand-in for an image, for use as a `drop_duplicates` subset key.
+
+        `drop_duplicates` hashes its subset columns, but PIL sets `Image.__hash__ =
+        None`, so a loaded `Image` can't be used as a key directly. Paths key on
+        themselves; loaded images key on their content (mode, size, pixel bytes),
+        matching PIL's own content-based `Image.__eq__` - so two pixel-identical
+        images collapse just as PIL considers them equal, while distinct images
+        (even with an identical caption) do not.
+
+        Arguments:
+            image: An image path (`str`) or a loaded image object (e.g. `PIL.Image`).
+
+        Returns:
+            A hashable key such that two images compare equal under this key iff
+            they should be treated as duplicates.
+        """
+        if isinstance(image, str):
+            return image
+        to_bytes = getattr(image, "tobytes", None)  # duck-typed: Pillow is an optional dep
+        if to_bytes is None:
+            return id(image)
+        return f"{image.mode}|{image.size}|{hashlib.sha1(to_bytes()).hexdigest()}"
+
     def _extract_representative_docs(
         self,
         c_tf_idf: csr_matrix,
@@ -4264,15 +4290,23 @@ class BERTopic:
                           that belong to each topic
         """
         # Sample documents per topic
-        # Include `Image` (when present) in the dedup key: in the multimodal path,
-        # distinct images can produce identical captions in `Document`, and
-        # deduplicating on `Document` alone would silently collapse them into a
-        # single candidate, starving `VisualRepresentation` of images below
-        # `nr_repr_images`. `Image` is all-`None` for text-only pipelines, where
-        # `NaN`/`None` are treated as equal by `drop_duplicates`, so this subset
-        # is a no-op there and behavior is unchanged.
-        dedup_subset = [c for c in ("Topic", "Document", "Image") if c in documents.columns]
-        deduplicated_documents = documents.drop_duplicates(subset=dedup_subset).drop("Image", axis=1, errors="ignore")
+        # Dedup on (Topic, Document) first; `Image` isn't hashable (PIL sets
+        # `Image.__hash__ = None`), so it can't be a `drop_duplicates` subset column
+        # directly, and content-hashing every image up front would cost a full
+        # pixel-buffer read per document. Only rows that collide on (Topic, Document)
+        # need their images compared - a row with unique text is already unique - so
+        # `_image_dedup_key` is computed for those rows only. In the multimodal path,
+        # distinct images can produce identical captions in `Document`; without this,
+        # deduplicating on `Document` alone would silently collapse them into a single
+        # candidate, starving `VisualRepresentation` of images below `nr_repr_images`.
+        dedup_keys = pd.DataFrame({"Topic": documents["Topic"], "Document": documents["Document"]})
+        if "Image" in documents.columns:
+            duplicated = dedup_keys.duplicated(keep=False).to_numpy()
+            dedup_keys["Image"] = [
+                self._image_dedup_key(image) if is_duplicate else None
+                for is_duplicate, image in zip(duplicated, documents["Image"].to_numpy())
+            ]
+        deduplicated_documents = documents[~dedup_keys.duplicated()].drop("Image", axis=1, errors="ignore")
 
         # Sample without replacement, capped at each topic's size. `GroupBy.sample` cannot
         # express that per-group cap (it raises when a group holds fewer rows than `n`), and
