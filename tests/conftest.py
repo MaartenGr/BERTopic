@@ -30,13 +30,16 @@ def minimal_topic_model():
              distinct from `index` to mirror the zero-shot path where `ID` is reset independently
              of the DataFrame index.
         topic_order: optional explicit key insertion order for the returned `topics` dict
-                     (defaults to sorted topic ids). Use a non-sorted order to exercise code
-                     that (incorrectly) relies on dict insertion order instead of sorted labels.
+                      (defaults to sorted topic ids). Use a non-sorted order to exercise code
+                      that (incorrectly) relies on dict insertion order instead of sorted labels.
+        images: optional list of per-document image identifiers, aligned with `docs`, adding an
+                `Image` column. Use distinct values on rows that otherwise share `Document` text
+                to exercise the multimodal dedup path.
 
     Returns: (model, c_tf_idf, documents, topics)
     """
 
-    def _build(docs, topics_list, index=None, ids=None, topic_order=None):
+    def _build(docs, topics_list, index=None, ids=None, topic_order=None, images=None):
         documents = pd.DataFrame(
             {
                 "Document": docs,
@@ -44,6 +47,8 @@ def minimal_topic_model():
                 "Topic": topics_list,
             }
         )
+        if images is not None:
+            documents["Image"] = images
         if index is not None:
             documents.index = index
 

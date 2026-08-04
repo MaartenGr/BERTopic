@@ -114,3 +114,32 @@ def test_with_diversity_no_duplicates(minimal_topic_model):
 
     for topic, docs_list in repr_docs_mappings.items():
         assert len(docs_list) == len(set(docs_list)), f"Topic {topic} has duplicate representative docs with diversity"
+
+
+def test_multimodal_dedup_preserves_distinct_images(minimal_topic_model):
+    """Distinct images sharing identical captions must not collapse into one candidate.
+
+    Regression test for M01: `_extract_representative_docs` deduplicated on
+    `Document` text alone after dropping the `Image` column, so multiple images
+    captioned identically by an image-to-text model were treated as a single
+    candidate, starving `VisualRepresentation` of images below `nr_repr_images`.
+    """
+    docs = ["scenic view"] * 5 + ["street scene"] * 4
+    images = [f"img_{i}.jpg" for i in range(9)]
+    topics_list = [0] * 9
+
+    model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list, images=images)
+
+    repr_docs_mappings, _, _, repr_docs_ids = model._extract_representative_docs(
+        c_tf_idf,
+        documents,
+        topics,
+        nr_samples=500,
+        nr_repr_docs=9,
+    )
+
+    # Only 2 distinct captions exist, but 9 distinct images back them. The buggy
+    # dedup collapsed this to 2 candidates total; the fix must keep all 9.
+    assert len(repr_docs_mappings[0]) == 9
+    assert len(repr_docs_ids[0]) == 9
+    assert len(set(repr_docs_ids[0])) == 9

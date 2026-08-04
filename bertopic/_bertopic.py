@@ -4264,9 +4264,15 @@ class BERTopic:
                           that belong to each topic
         """
         # Sample documents per topic
-        deduplicated_documents = documents.drop("Image", axis=1, errors="ignore").drop_duplicates(
-            subset=["Topic", "Document"]
-        )
+        # Include `Image` (when present) in the dedup key: in the multimodal path,
+        # distinct images can produce identical captions in `Document`, and
+        # deduplicating on `Document` alone would silently collapse them into a
+        # single candidate, starving `VisualRepresentation` of images below
+        # `nr_repr_images`. `Image` is all-`None` for text-only pipelines, where
+        # `NaN`/`None` are treated as equal by `drop_duplicates`, so this subset
+        # is a no-op there and behavior is unchanged.
+        dedup_subset = [c for c in ("Topic", "Document", "Image") if c in documents.columns]
+        deduplicated_documents = documents.drop_duplicates(subset=dedup_subset).drop("Image", axis=1, errors="ignore")
 
         # Sample without replacement, capped at each topic's size. `GroupBy.sample` cannot
         # express that per-group cap (it raises when a group holds fewer rows than `n`), and
