@@ -65,8 +65,8 @@ def test_repr_docs_count_respects_topic_size(minimal_topic_model):
         nr_repr_docs=5,
     )
 
-    assert len(repr_docs_mappings[0]) <= 2
-    assert len(repr_docs_mappings[1]) <= 4
+    assert len(repr_docs_mappings[0]) == 2
+    assert len(repr_docs_mappings[1]) == 4
 
 
 def test_repr_docs_count_with_nr_repr_docs_greater_than_topic_size(minimal_topic_model):
