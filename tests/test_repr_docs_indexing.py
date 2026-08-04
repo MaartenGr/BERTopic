@@ -7,7 +7,11 @@ Run from BERTopic repo root:
     pytest tests/test_repr_docs_indexing.py -v
 """
 
+import pandas as pd
 import pytest
+from scipy.sparse import csr_matrix
+
+from bertopic import BERTopic
 
 
 def test_duplicate_text_across_topics(minimal_topic_model):
@@ -291,3 +295,25 @@ def test_mappings_agree_with_repr_docs_ids(minimal_topic_model, diversity, topic
             f"topic {topic_id} (topic_order={topic_order}): mappings {actual_texts} "
             f"do not match repr_docs_ids-derived texts {expected_texts}"
         )
+
+
+@pytest.mark.parametrize(
+    "documents",
+    [
+        pytest.param(pd.DataFrame({"Document": [], "ID": [], "Topic": []}), id="empty_documents"),
+        pytest.param(
+            pd.DataFrame({"Document": ["doc one", "doc two"], "ID": [0, 1], "Topic": [None, None]}),
+            id="all_nan_topic",
+        ),
+    ],
+)
+def test_extract_representative_docs_raises_clear_error_on_no_valid_topics(documents):
+    """An empty `documents` or an all-NaN `Topic` column (topics not assigned yet) both make
+    `groupby("Topic")` drop every group, which previously reached `pd.concat([])` and raised
+    pandas's opaque `ValueError: No objects to concatenate`. A guard must raise a clear error
+    instead, before that point.
+    """
+    model = BERTopic()
+
+    with pytest.raises(ValueError, match="No documents with a valid `Topic` assignment"):
+        model._extract_representative_docs(c_tf_idf=csr_matrix((0, 0)), documents=documents, topics={})

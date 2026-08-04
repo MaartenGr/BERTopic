@@ -4317,10 +4317,22 @@ class BERTopic:
         # every group would draw the same positional pattern for equally-sized topics, so their
         # samples would agree on e.g. "first document, third document, ..." rather than being
         # independent draws.
+        topic_groups = list(deduplicated_documents.groupby("Topic"))
+        if not topic_groups:
+            # `groupby` silently drops NaN keys, so an empty `documents` or an all-NaN
+            # `Topic` column both produce zero groups here. Without this guard, the
+            # `pd.concat` below fails on an empty list with the opaque pandas error
+            # "ValueError: No objects to concatenate", which gives no indication that
+            # the real cause is upstream: no document has a valid topic assignment yet.
+            raise ValueError(
+                "No documents with a valid `Topic` assignment were found to extract "
+                "representative documents from. This happens when `documents` is empty "
+                "or every document's `Topic` is NaN (topics have not been assigned yet)."
+            )
         documents_per_topic = pd.concat(
             [
                 group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42 + i)
-                for i, (_, group) in enumerate(deduplicated_documents.groupby("Topic"))
+                for i, (_, group) in enumerate(topic_groups)
             ]
         )
 
