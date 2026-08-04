@@ -4344,21 +4344,21 @@ class BERTopic:
 
             # Use MMR to find representative but diverse documents
             if diversity:
-                docs = mmr(
+                # `mmr()` only inspects `word_embeddings`/`doc_embedding` for its
+                # similarity math; the `words` argument is returned as-is at the
+                # end (`[words[idx] for idx in keywords_idx]`) and is never used
+                # to compute anything. Passing positions instead of the document
+                # strings lets `mmr()` hand back the selected positions directly,
+                # so there is no text-keyed reverse lookup and therefore no
+                # assumption that `selected_docs` contains unique text.
+                selected_indices = mmr(
                     c_tf_idf[index],
                     ctfidf,
-                    selected_docs,
+                    list(range(len(selected_docs))),
                     top_n=nr_docs,
                     diversity=diversity,
                 )
-                # MMR returns document strings in its own diversity-ranked order;
-                # map each one back to its positional index in `selected_docs`
-                # (safe: documents were deduplicated per (Topic, Document) above,
-                # so each text appears at most once), preserving that order so
-                # `docs`/`repr_docs` and `doc_ids`/`repr_docs_ids` stay aligned
-                # position-for-position.
-                doc_to_index = {d: i for i, d in enumerate(selected_docs)}
-                selected_indices = [doc_to_index[d] for d in docs]
+                docs = [selected_docs[i] for i in selected_indices]
 
             # Extract top n most representative documents
             else:

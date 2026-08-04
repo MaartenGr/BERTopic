@@ -147,6 +147,36 @@ def test_multimodal_dedup_preserves_distinct_images(minimal_topic_model):
     assert len(set(repr_docs_ids[0])) == 9
 
 
+def test_diversity_with_duplicate_text_maps_correct_ids(minimal_topic_model):
+    """MMR branch must map indices positionally, not via a text-keyed lookup.
+
+    Regression test for the `doc_to_index` landmine noted in the PR review
+    (L04): once the dedup fix lets duplicate `Document` text survive dedup
+    (distinct images, same caption), a text-keyed reverse lookup collapses
+    every row sharing that text onto a single (wrong) index. `selected_indices`
+    must be computed positionally so `docs`/`repr_docs_ids` stay aligned.
+    """
+    docs = ["same caption"] * 4
+    images = ["img_0.jpg", "img_1.jpg", "img_2.jpg", "img_3.jpg"]
+    topics_list = [0, 0, 0, 0]
+
+    model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list, images=images)
+
+    _, _, _, repr_docs_ids = model._extract_representative_docs(
+        c_tf_idf,
+        documents,
+        topics,
+        nr_samples=500,
+        nr_repr_docs=4,
+        diversity=0.5,
+    )
+
+    # All 4 rows share identical text; only the distinct `Image`/row identity
+    # tells them apart. A text-keyed `doc_to_index` lookup would map every
+    # returned document to the same (last-enumerated) index, collapsing ids.
+    assert sorted(repr_docs_ids[0]) == [0, 1, 2, 3]
+
+
 def test_multimodal_dedup_handles_unhashable_loaded_images(minimal_topic_model):
     """Loaded (non-`str`) images must not crash `_extract_representative_docs`.
 
