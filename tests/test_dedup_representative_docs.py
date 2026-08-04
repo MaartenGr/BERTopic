@@ -88,7 +88,7 @@ def test_repr_docs_count_with_nr_repr_docs_greater_than_topic_size(minimal_topic
     )
 
     for topic, docs_list in repr_docs_mappings.items():
-        assert len(docs_list) == len(set(docs_list))
+        assert len(docs_list) == 1
 
 
 def test_with_diversity_no_duplicates(minimal_topic_model):
