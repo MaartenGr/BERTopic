@@ -4265,19 +4265,22 @@ class BERTopic:
                           that belong to each topic
         """
         # Sample documents per topic
-        # NOTE: Sampling is done per-group with a manual loop + concat rather than
-        # `groupby().apply()` because the `include_groups` kwarg needed to silence
-        # the "operated on the grouping columns" deprecation is pandas>=2.2 only,
-        # while this package supports pandas>=1.1.5.
         deduplicated_documents = documents.drop("Image", axis=1, errors="ignore").drop_duplicates(
             subset=["Topic", "Document"]
         )
-        documents_per_topic = pd.concat(
-            [
-                group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42)
-                for _, group in deduplicated_documents.groupby("Topic")
-            ]
-        )
+
+        def _sample_group(group: pd.DataFrame) -> pd.DataFrame:
+            return group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42)
+
+        if version.parse(pd.__version__) >= version.parse("2.2.0"):
+            # `include_groups=False` silences the "operated on the grouping columns"
+            # deprecation, but the kwarg itself is only available from pandas 2.2.
+            documents_per_topic = deduplicated_documents.groupby("Topic").apply(_sample_group, include_groups=False)
+        else:
+            # Fallback for pandas<2.2, which doesn't support `include_groups`.
+            documents_per_topic = pd.concat(
+                [_sample_group(group) for _, group in deduplicated_documents.groupby("Topic")]
+            )
 
         # Find and extract documents that are most similar to the topic
         repr_docs = []
