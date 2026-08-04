@@ -4268,18 +4268,17 @@ class BERTopic:
             subset=["Topic", "Document"]
         )
 
-        def _sample_group(group: pd.DataFrame) -> pd.DataFrame:
-            return group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42)
-
-        if version.parse(pd.__version__) >= version.parse("2.2.0"):
-            # `include_groups=False` silences the "operated on the grouping columns"
-            # deprecation, but the kwarg itself is only available from pandas 2.2.
-            documents_per_topic = deduplicated_documents.groupby("Topic").apply(_sample_group, include_groups=False)
-        else:
-            # Fallback for pandas<2.2, which doesn't support `include_groups`.
-            documents_per_topic = pd.concat(
-                [_sample_group(group) for _, group in deduplicated_documents.groupby("Topic")]
-            )
+        # Sample without replacement, capped at each topic's size. `GroupBy.sample` cannot
+        # express that per-group cap (it raises when a group holds fewer rows than `n`), and
+        # `groupby().apply()` either warns about operating on the grouping columns or, with
+        # `include_groups=False`, drops `Topic` from the result entirely. Sampling each group
+        # explicitly keeps the `Topic` column and the original document index intact.
+        documents_per_topic = pd.concat(
+            [
+                group.sample(n=min(nr_samples, len(group)), replace=False, random_state=42)
+                for _, group in deduplicated_documents.groupby("Topic")
+            ]
+        )
 
         # Find and extract documents that are most similar to the topic
         repr_docs = []
