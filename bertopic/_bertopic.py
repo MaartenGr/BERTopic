@@ -1,7 +1,6 @@
 # ruff: noqa: E402
-import warnings
-
 import yaml
+import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -11,25 +10,26 @@ try:
 except (KeyError, AttributeError, TypeError):
     pass
 
-import collections
-import inspect
-import math
 import re
-from collections import Counter, defaultdict
-from copy import deepcopy
-from importlib.util import find_spec
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Literal, Mapping, Tuple, Union
-
+import math
 import joblib
+import inspect
+import collections
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from packaging import version
-from scipy.cluster import hierarchy as sch
-from scipy.sparse import csr_matrix
+from copy import deepcopy
+
 from tqdm import tqdm
+from pathlib import Path
+from packaging import version
+from tempfile import TemporaryDirectory
+from collections import defaultdict, Counter
+from scipy.sparse import csr_matrix
+from scipy.cluster import hierarchy as sch
+from importlib.util import find_spec
+
+from typing import List, Tuple, Union, Mapping, Any, Callable, Iterable, TYPE_CHECKING, Literal
 
 # Plotting
 if find_spec("plotly") is None:
@@ -41,8 +41,8 @@ else:
     from bertopic import plotting
 
     if TYPE_CHECKING:
-        import matplotlib.figure as fig
         import plotly.graph_objs as go
+        import matplotlib.figure as fig
 
 
 # Models
@@ -54,33 +54,32 @@ except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
     from sklearn.cluster import HDBSCAN as SK_HDBSCAN
 
+from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import PCA
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import normalize
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
-import bertopic._save_utils as save_utils
+# BERTopic
+from bertopic.cluster import BaseCluster
+from bertopic.backend import BaseEmbedder
+from bertopic.representation._mmr import mmr
+from bertopic.backend._utils import select_backend
+from bertopic.vectorizers import ClassTfidfTransformer
+from bertopic.representation import BaseRepresentation, KeyBERTInspired
+from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger,
     check_documents_type,
     check_embeddings_shape,
     check_is_fitted,
-    get_unique_distances,
-    select_topic_representation,
     validate_distance_matrix,
+    select_topic_representation,
+    get_unique_distances,
 )
-from bertopic.backend import BaseEmbedder
-from bertopic.backend._utils import select_backend
-
-# BERTopic
-from bertopic.cluster import BaseCluster
-from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
-from bertopic.dimensionality import BaseDimensionalityReduction
-from bertopic.representation import BaseRepresentation, KeyBERTInspired
-from bertopic.representation._mmr import mmr
-from bertopic.vectorizers import ClassTfidfTransformer
+import bertopic._save_utils as save_utils
 
 logger = MyLogger()
 logger.configure("WARNING")
