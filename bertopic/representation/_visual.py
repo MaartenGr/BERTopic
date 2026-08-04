@@ -112,8 +112,8 @@ class VisualRepresentation(BaseRepresentation):
             sliced_examplars = [sliced_examplars[i : i + 3] for i in range(0, len(sliced_examplars), 3)]
             images_to_combine = [
                 [
-                    Image.open(images.loc[index]) if isinstance(images.loc[index], str) else images.loc[index]
-                    for index in sub_indices
+                    Image.open(img) if isinstance(img, str) else img
+                    for img in (images.loc[index] for index in sub_indices)
                 ]
                 for sub_indices in sliced_examplars
             ]
