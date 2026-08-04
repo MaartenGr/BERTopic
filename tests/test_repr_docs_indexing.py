@@ -88,7 +88,7 @@ def test_no_cross_topic_contamination(minimal_topic_model):
             )
 
 
-def test_selected_indices_variable_used(minimal_topic_model):
+def test_doc_ids_count_matches_nr_repr_docs(minimal_topic_model):
     """doc_ids count should match nr_repr_docs per topic."""
     docs = [
         "doc alpha one",
