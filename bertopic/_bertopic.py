@@ -4325,7 +4325,7 @@ class BERTopic:
             repr_docs_ids.append(doc_ids)
             repr_docs.extend(docs)
             repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
-        repr_docs_mappings = {topic: repr_docs[i[0] : i[-1] + 1] for topic, i in zip(topics.keys(), repr_docs_indices)}
+        repr_docs_mappings = {topic: repr_docs[i[0] : i[-1] + 1] for topic, i in zip(labels, repr_docs_indices)}
 
         return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
 
