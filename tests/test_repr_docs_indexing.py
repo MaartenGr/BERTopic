@@ -29,7 +29,7 @@ def test_duplicate_text_across_topics(minimal_topic_model):
 
     # Verify each topic's representative doc_ids point to documents
     # that actually belong to that topic
-    for topic_id, doc_ids in zip(topics.keys(), repr_docs_ids):
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
         for doc_id in doc_ids:
             actual_topic = documents.loc[doc_id, "Topic"]
             assert actual_topic == topic_id, (
@@ -54,7 +54,7 @@ def test_all_identical_docs(minimal_topic_model):
         c_tf_idf, documents, topics, nr_samples=500, nr_repr_docs=2
     )
 
-    for topic_id, doc_ids in zip(topics.keys(), repr_docs_ids):
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
         assert len(doc_ids) == 1, f"topic {topic_id}: expected exactly 1 doc_id after dedup, got {doc_ids}"
         for doc_id in doc_ids:
             actual_topic = documents.loc[doc_id, "Topic"]
@@ -106,7 +106,7 @@ def test_selected_indices_variable_used(minimal_topic_model):
         c_tf_idf, documents, topics, nr_samples=500, nr_repr_docs=2
     )
 
-    for topic_id, doc_ids in zip(topics.keys(), repr_docs_ids):
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
         assert len(doc_ids) == 2, f"Topic {topic_id} should have 2 doc_ids, got {len(doc_ids)}"
 
 
@@ -154,14 +154,14 @@ def test_duplicate_text_with_diversity(minimal_topic_model):
         diversity=0.5,
     )
 
-    for topic_id, doc_ids in zip(topics.keys(), repr_docs_ids):
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
         for doc_id in doc_ids:
             actual_topic = documents.loc[doc_id, "Topic"]
             assert actual_topic == topic_id, (
                 f"doc_id {doc_id} has topic {actual_topic} but assigned to topic {topic_id}"
             )
 
-    for topic_id, doc_ids in zip(topics.keys(), repr_docs_ids):
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
         # With positional indexing, doc_ids count should equal nr_repr_docs
         # (or fewer if topic has fewer docs)
         assert len(doc_ids) == 2, f"Topic {topic_id} should have 2 doc_ids, got {len(doc_ids)}"
