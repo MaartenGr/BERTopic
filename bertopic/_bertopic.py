@@ -4284,8 +4284,7 @@ class BERTopic:
         Returns:
             repr_docs_mappings: A dictionary from topic to representative documents
             representative_docs: A flat list of representative documents
-            repr_doc_indices: Ordered indices of representative documents
-                              that belong to each topic
+            repr_doc_indices: Positions into the flat `repr_docs` list, grouped by topic
             repr_doc_ids: The indices of representative documents
                           that belong to each topic
         """
