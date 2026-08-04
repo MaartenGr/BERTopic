@@ -317,3 +317,49 @@ def test_extract_representative_docs_raises_clear_error_on_no_valid_topics(docum
 
     with pytest.raises(ValueError, match="No documents with a valid `Topic` assignment"):
         model._extract_representative_docs(c_tf_idf=csr_matrix((0, 0)), documents=documents, topics={})
+
+
+def test_unequal_topic_sizes_offset_arithmetic(minimal_topic_model):
+    """`repr_docs_indices` offset arithmetic
+    (`repr_docs_indices[-1][-1] + i + 1 if index != 0 else i`) must produce a contiguous,
+    gap-free, non-overlapping partition of `repr_docs` even when topics have unequal sizes.
+    Every other test in this suite uses equal per-topic counts, where an off-by-one in the
+    offset cannot show up.
+    """
+    docs = [
+        "topic zero solo doc",
+        "topic one doc a",
+        "topic one doc b",
+        "topic one doc c",
+        "topic two doc a",
+        "topic two doc b",
+    ]
+    topics_list = [0, 1, 1, 1, 2, 2]
+
+    model, c_tf_idf, documents, topics = minimal_topic_model(docs, topics_list)
+
+    repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids = model._extract_representative_docs(
+        c_tf_idf, documents, topics, nr_samples=500, nr_repr_docs=3
+    )
+
+    expected_counts = {0: 1, 1: 3, 2: 2}
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
+        assert len(doc_ids) == expected_counts[topic_id], (
+            f"topic {topic_id}: expected {expected_counts[topic_id]} doc_ids, got {len(doc_ids)}"
+        )
+
+    # Contiguous, gap-free, non-overlapping: each topic's first index must pick up exactly
+    # where the previous topic's last index left off. An off-by-one in the offset arithmetic
+    # would either skip an index (gap) or repeat one (overlap), and this is where it would show.
+    flat_indices = [i for indices in repr_docs_indices for i in indices]
+    assert flat_indices == list(range(len(repr_docs))), (
+        f"repr_docs_indices is not a contiguous partition of range(len(repr_docs)): {flat_indices}"
+    )
+
+    # repr_docs_mappings slices must correspond to the same documents as repr_docs_ids.
+    for topic_id, doc_ids in zip(sorted(topics.keys()), repr_docs_ids):
+        expected_texts = set(documents.loc[doc_ids, "Document"].tolist())
+        actual_texts = set(repr_docs_mappings[topic_id])
+        assert actual_texts == expected_texts, (
+            f"topic {topic_id}: mappings {actual_texts} do not match repr_docs_ids-derived texts {expected_texts}"
+        )
