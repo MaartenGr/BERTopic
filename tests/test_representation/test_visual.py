@@ -52,7 +52,6 @@ def test_extract_topics_indexes_images_by_label_not_position(minimal_topic_model
     # to `get_concat_tile_resize`, so track it via the tqdm loop order, which is
     # `sorted(topics.keys())` (see `_visual.py`).
     current_topic = [None]
-    original_tqdm = visual_module.tqdm
 
     def fake_tqdm(iterable, *args, **kwargs):
         for item in iterable:
@@ -72,5 +71,3 @@ def test_extract_topics_indexes_images_by_label_not_position(minimal_topic_model
                 f"image with label {label} (topic {documents.loc[label, 'Topic']}) leaked into "
                 f"topic {topic_id}'s collage"
             )
-
-    monkeypatch.setattr(visual_module, "tqdm", original_tqdm)
