@@ -4266,7 +4266,7 @@ class BERTopic:
         nr_samples: int = 500,
         nr_repr_docs: int = 5,
         diversity: float | None = None,
-    ) -> Union[List[str], List[List[int]]]:
+    ) -> Tuple[Mapping[int, List[str]], List[str], List[List[int]], List[List[int]]]:
         """Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
         most representative to their topic based on the cosine similarity between
