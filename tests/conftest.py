@@ -1,4 +1,6 @@
 import copy
+import importlib.util
+
 import pytest
 from umap import UMAP
 from hdbscan import HDBSCAN
@@ -11,6 +13,32 @@ from bertopic.vectorizers import OnlineCountVectorizer
 from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
+
+
+def cuml_available():
+    """Check whether cuML is installed, since the GPU fixtures require CUDA."""
+    try:
+        return importlib.util.find_spec("cuml") is not None
+    except ImportError:
+        return False
+
+
+# Every fitted model fixture, for tests that must hold across all pipeline variants
+ALL_MODEL_FIXTURES = [
+    "base_topic_model",
+    "kmeans_pca_topic_model",
+    "custom_topic_model",
+    "merged_topic_model",
+    "reduced_topic_model",
+    "online_topic_model",
+    "supervised_topic_model",
+    "representation_topic_model",
+    "zeroshot_topic_model",
+    pytest.param(
+        "cuml_base_topic_model",
+        marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available"),
+    ),
+]
 
 
 @pytest.fixture(scope="session")
@@ -135,7 +163,7 @@ def merged_topic_model(custom_topic_model, documents):
 @pytest.fixture(scope="session")
 def kmeans_pca_topic_model(documents, document_embeddings):
     hdbscan_model = KMeans(n_clusters=15, random_state=42)
-    dim_model = PCA(n_components=5)
+    dim_model = PCA(n_components=5, random_state=42)
     model = BERTopic(
         hdbscan_model=hdbscan_model,
         umap_model=dim_model,
@@ -159,7 +187,7 @@ def supervised_topic_model(documents, document_embeddings, embedding_model, targ
 
 @pytest.fixture(scope="session")
 def online_topic_model(documents, document_embeddings, embedding_model):
-    umap_model = PCA(n_components=5)
+    umap_model = PCA(n_components=5, random_state=42)
     cluster_model = MiniBatchKMeans(n_clusters=50, random_state=0)
     vectorizer_model = OnlineCountVectorizer(stop_words="english", decay=0.01)
     model = BERTopic(
@@ -188,3 +216,21 @@ def cuml_base_topic_model(documents, document_embeddings, embedding_model):
     )
     model.fit(documents, document_embeddings)
     return model
+
+
+@pytest.fixture(scope="session")
+def image_paths(tmp_path_factory):
+    """Write small solid-colour images to disk and return their file paths."""
+    from PIL import Image
+
+    directory = tmp_path_factory.mktemp("images")
+    paths = []
+
+    for index in range(30):
+        # Cycle through red, green, and blue so the images form three clear groups
+        color = [(200, 40, 40), (40, 200, 40), (40, 40, 200)][index % 3]
+        path = directory / f"image_{index}.png"
+        Image.new("RGB", (32, 32), color).save(path)
+        paths.append(str(path))
+
+    return paths
