@@ -1,4 +1,6 @@
 import copy
+import importlib.util
+
 import pytest
 from umap import UMAP
 from hdbscan import HDBSCAN
@@ -11,6 +13,32 @@ from bertopic.vectorizers import OnlineCountVectorizer
 from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
+
+
+def cuml_available():
+    """Check whether cuML is installed, since the GPU fixtures require CUDA."""
+    try:
+        return importlib.util.find_spec("cuml") is not None
+    except ImportError:
+        return False
+
+
+# Every fitted model fixture, for tests that must hold across all pipeline variants
+ALL_MODEL_FIXTURES = [
+    "base_topic_model",
+    "kmeans_pca_topic_model",
+    "custom_topic_model",
+    "merged_topic_model",
+    "reduced_topic_model",
+    "online_topic_model",
+    "supervised_topic_model",
+    "representation_topic_model",
+    "zeroshot_topic_model",
+    pytest.param(
+        "cuml_base_topic_model",
+        marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available"),
+    ),
+]
 
 
 @pytest.fixture(scope="session")
@@ -44,6 +72,13 @@ def targets():
     data = fetch_20newsgroups(subset="all", remove=("headers", "footers", "quotes"))
     y = data["target"][:1000]
     return y
+
+
+@pytest.fixture(scope="session")
+def classes(targets):
+    """Human-readable class name per document, aligned with the `documents` fixture."""
+    data = fetch_20newsgroups(subset="all", remove=("headers", "footers", "quotes"))
+    return [data["target_names"][target] for target in targets]
 
 
 @pytest.fixture(scope="session")
@@ -188,3 +223,21 @@ def cuml_base_topic_model(documents, document_embeddings, embedding_model):
     )
     model.fit(documents, document_embeddings)
     return model
+
+
+@pytest.fixture(scope="session")
+def image_paths(tmp_path_factory):
+    """Write small solid-colour images to disk and return their file paths."""
+    from PIL import Image
+
+    directory = tmp_path_factory.mktemp("images")
+    paths = []
+
+    for index in range(30):
+        # Cycle through red, green, and blue so the images form three clear groups
+        color = [(200, 40, 40), (40, 200, 40), (40, 40, 200)][index % 3]
+        path = directory / f"image_{index}.png"
+        Image.new("RGB", (32, 32), color).save(path)
+        paths.append(str(path))
+
+    return paths

@@ -1,35 +1,12 @@
 import copy
 import pytest
 from bertopic import BERTopic
-import importlib.util
 import polars as pl
 
-
-def cuml_available():
-    try:
-        return importlib.util.find_spec("cuml") is not None
-    except ImportError:
-        return False
+from tests.conftest import ALL_MODEL_FIXTURES
 
 
-@pytest.mark.parametrize(
-    "model",
-    [
-        ("base_topic_model"),
-        ("kmeans_pca_topic_model"),
-        ("custom_topic_model"),
-        ("merged_topic_model"),
-        ("reduced_topic_model"),
-        ("online_topic_model"),
-        ("supervised_topic_model"),
-        ("representation_topic_model"),
-        ("zeroshot_topic_model"),
-        pytest.param(
-            "cuml_base_topic_model",
-            marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available"),
-        ),
-    ],
-)
+@pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
 def test_full_model(model, documents, request):
     """Tests the entire pipeline in one go. This serves as a sanity check to see if the default
     settings result in a good separation of topics.
