@@ -32,7 +32,7 @@ topic: <topic_label>
 """
 
 DEFAULT_JSON_PROMPT = """You will extract various topic details from a number of given documents and keywords.
-The documents are merely a subset of all documents related to the topic, but they are representative of the overall topic. 
+The documents are merely a subset of all documents related to the topic, but they are representative of the overall topic.
 The keywords are the most relevant keywords for this topic.
 
 # Texts

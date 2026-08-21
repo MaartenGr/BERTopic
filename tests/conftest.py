@@ -163,7 +163,7 @@ def merged_topic_model(custom_topic_model, documents):
 @pytest.fixture(scope="session")
 def kmeans_pca_topic_model(documents, document_embeddings):
     hdbscan_model = KMeans(n_clusters=15, random_state=42)
-    dim_model = PCA(n_components=5, random_state=42)
+    dim_model = PCA(n_components=5)
     model = BERTopic(
         hdbscan_model=hdbscan_model,
         umap_model=dim_model,
@@ -187,7 +187,7 @@ def supervised_topic_model(documents, document_embeddings, embedding_model, targ
 
 @pytest.fixture(scope="session")
 def online_topic_model(documents, document_embeddings, embedding_model):
-    umap_model = PCA(n_components=5, random_state=42)
+    umap_model = PCA(n_components=5)
     cluster_model = MiniBatchKMeans(n_clusters=50, random_state=0)
     vectorizer_model = OnlineCountVectorizer(stop_words="english", decay=0.01)
     model = BERTopic(
