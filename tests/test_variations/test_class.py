@@ -1,9 +1,5 @@
 import copy
 import pytest
-from sklearn.datasets import fetch_20newsgroups
-
-data = fetch_20newsgroups(subset="all", remove=("headers", "footers", "quotes"))
-classes = [data["target_names"][i] for i in data["target"]][:1000]
 
 
 @pytest.mark.parametrize(
@@ -16,7 +12,7 @@ classes = [data["target_names"][i] for i in data["target"]][:1000]
         ("online_topic_model"),
     ],
 )
-def test_class(model, documents, request):
+def test_class(model, documents, classes, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     topics_per_class_global = topic_model.topics_per_class(documents, classes=classes, global_tuning=True)
     topics_per_class_local = topic_model.topics_per_class(documents, classes=classes, global_tuning=False)

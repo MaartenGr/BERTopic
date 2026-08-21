@@ -75,6 +75,13 @@ def targets():
 
 
 @pytest.fixture(scope="session")
+def classes(targets):
+    """Human-readable class name per document, aligned with the `documents` fixture."""
+    data = fetch_20newsgroups(subset="all", remove=("headers", "footers", "quotes"))
+    return [data["target_names"][target] for target in targets]
+
+
+@pytest.fixture(scope="session")
 def base_topic_model(documents, document_embeddings, embedding_model):
     model = BERTopic(embedding_model=embedding_model, calculate_probabilities=True)
     model.umap_model.random_state = 42

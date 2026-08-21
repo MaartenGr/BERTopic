@@ -129,3 +129,34 @@ def test_save_and_load_preserves_the_invariants(model, tmp_path, request):
     assert loaded._topics.topic_ids() == topic_model._topics.topic_ids()
     assert loaded.topic_labels_ == topic_model.topic_labels_
     assert np.array_equal(loaded.c_tf_idf_.toarray(), topic_model.c_tf_idf_.toarray())
+
+
+# The models that `test_representation/test_representations.py::test_topic_reduction`
+# reduces down to 10 topics
+REDUCIBLE_MODEL_FIXTURES = [
+    "base_topic_model",
+    "kmeans_pca_topic_model",
+    "custom_topic_model",
+    "merged_topic_model",
+    "reduced_topic_model",
+    "online_topic_model",
+]
+
+
+@pytest.mark.parametrize("model", REDUCIBLE_MODEL_FIXTURES)
+def test_reduction_fixtures_have_more_topics_than_they_are_reduced_to(model, request):
+    """Fixtures must hold more topics than the reduction tests reduce them to.
+
+    `test_topic_reduction` reduces to 10 and then asserts the assignments changed. If a
+    fixture already holds 10 topics or fewer, `reduce_topics` takes its no-op branch and
+    that test fails for a reason unrelated to the code under test. Asserting it here
+    reports the actual topic count, which turns a confusing downstream failure into a
+    direct statement about the fixture.
+    """
+    topic_model = request.getfixturevalue(model)
+    nr_topics = len(topic_model.topic_sizes_)
+
+    assert nr_topics > 10, (
+        f"{model} produced only {nr_topics} topics; the reduction tests reduce to 10 "
+        "and need more than that to exercise a real reduction"
+    )
