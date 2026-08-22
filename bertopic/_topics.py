@@ -1,3 +1,4 @@
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -184,6 +185,12 @@ class TopicMapping:
             self._mapping = new_mapping.copy()
             self._recent_mapping = new_mapping.copy()
         else:
+            missing = sorted(set(self._mapping.values()) - set(new_mapping))
+            if missing:
+                raise ValueError(
+                    f"The mapping is missing topics {missing}. Every current topic must appear "
+                    "in a new mapping, including topics that hold no documents."
+                )
             self._mapping = {original: new_mapping[current] for original, current in self._mapping.items()}
             self._recent_mapping = new_mapping.copy()
 
@@ -376,13 +383,12 @@ class Topic:
 
         if full:
             data["embedding"] = self.embedding.tolist() if self.embedding.size else []
-            if self.c_tf_idf.nnz > 0:
-                data["c_tf_idf"] = {
-                    "data": self.c_tf_idf.data.tolist(),
-                    "indices": self.c_tf_idf.indices.tolist(),
-                    "indptr": self.c_tf_idf.indptr.tolist(),
-                    "shape": list(self.c_tf_idf.shape),
-                }
+            data["c_tf_idf"] = {
+                "data": self.c_tf_idf.data.tolist(),
+                "indices": self.c_tf_idf.indices.tolist(),
+                "indptr": self.c_tf_idf.indptr.tolist(),
+                "shape": list(self.c_tf_idf.shape),
+            }
             if self.representative_images.size:
                 data["representative_images"] = self.representative_images.tolist()
 
@@ -438,7 +444,7 @@ class Topic:
 
     def copy(self, new_id: int | None = None) -> "Topic":
         """Create a copy of this topic, optionally with a new ID."""
-        copied = Topic.from_dict(self.to_dict(full=True))
+        copied = deepcopy(self)
         if new_id is not None:
             copied.id = new_id
         return copied
@@ -706,12 +712,19 @@ class Topics:
             old_topics = [self.topics[old_id] for old_id in old_ids]
             total_docs = sum(t.nr_documents for t in old_topics)
 
-            # Calculate weights (handle zero documents edge case)
-            weights = np.array([t.nr_documents / total_docs for t in old_topics])
+            # Weight by document count, falling back to equal weights when a group holds
+            # no documents at all, which happens transiently during `partial_fit`
+            if total_docs:
+                weights = np.array([t.nr_documents / total_docs for t in old_topics])
+            else:
+                weights = np.full(len(old_topics), 1 / len(old_topics))
 
-            # Weighted average of embeddings
-            if old_topics[0].embedding.size > 0:
-                embedding = np.average([t.embedding for t in old_topics], weights=weights, axis=0)
+            # Weighted average of embeddings, which are optional and may never have been computed
+            embeddings = [t.embedding for t in old_topics if t.embedding.size > 0]
+            if len(embeddings) == len(old_topics):
+                embedding = np.average(embeddings, weights=weights, axis=0)
+            else:
+                embedding = np.array([])
 
             # Weighted average of c-TF-IDF vectors (sparse)
             c_tf_idf = sum(t.c_tf_idf * w for t, w in zip(old_topics, weights))
@@ -1160,10 +1173,10 @@ class TopicHierarchy:
         """Serialize hierarchy for storage."""
         return {
             "bertopic_version": BERTOPIC_VERSION,
-            "nodes": {str(nid): node.to_dict() for nid, node in self.nodes.items()},
+            "nodes": {str(nid): node.to_dict(full=True) for nid, node in self.nodes.items()},
             "linkage_matrix": self.linkage_matrix.tolist() if self.linkage_matrix.size > 0 else [],
             "n_leaves": self.n_leaves,
-            "outlier_topic": self.outlier_topic.to_dict() if self.outlier_topic else None,
+            "outlier_topic": self.outlier_topic.to_dict(full=True) if self.outlier_topic else None,
             "predictions": self._original_predictions.tolist() if self._original_predictions.size > 0 else [],
         }
 
