@@ -269,6 +269,20 @@ def test_merge_averages_embeddings_weighted_by_document_count():
     assert topics[0].embedding.tolist() == pytest.approx([8.0, 4.0])
 
 
+def test_merge_keeps_topics_that_hold_no_documents():
+    """A complete mapping carries zero-document topics through a merge.
+
+    This is what `_reduce_to_n_topics` and `_auto_reduce_topics` now guarantee by
+    building their mapping from `topic_ids()` rather than from document assignments.
+    """
+    topics = build_topics({0: 8, 1: 4, 2: 2})
+    topics[2].nr_documents = 0
+    topics.merge({0: 0, 1: 1, 2: 1})
+
+    assert topics.topic_ids() == [0, 1]
+    assert topics.frequencies() == {0: 8, 1: 4}
+
+
 def test_merge_composes_with_an_earlier_reordering():
     """The cumulative mapping tracks original topics through both operations."""
     topics = build_topics({-1: 5, 0: 2, 1: 8, 2: 4})
@@ -293,10 +307,6 @@ def test_merge_sums_probability_columns():
     assert topics.probabilities[0].tolist() == pytest.approx([0.1, 0.8, 0.1])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug 3: weights divide by a zero document total; fixed in unit 3",
-)
 def test_merge_handles_topics_with_no_documents():
     """Merging topics that hold no documents falls back to equal weighting."""
     topics = Topics().initialize([0, 1])
@@ -308,10 +318,6 @@ def test_merge_handles_topics_with_no_documents():
     assert topics[0].embedding.tolist() == pytest.approx([5.0, 10.0])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug 2: `embedding` is unbound when the first topic has none; fixed in unit 3",
-)
 def test_merge_handles_topics_without_embeddings():
     """Merging works even when no embeddings were ever computed."""
     topics = Topics().initialize([0] * 8 + [1] * 2)
@@ -403,21 +409,18 @@ def test_unknown_topic_ids_map_to_themselves():
     assert mapping.map(99, from_original=True) == 99
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug 10: apply raises KeyError when the new mapping omits a topic; fixed in unit 3",
-)
-def test_mapping_tolerates_an_incomplete_new_mapping():
-    """A topic missing from the incoming mapping keeps its current ID rather than raising.
+def test_mapping_rejects_an_incomplete_new_mapping():
+    """Omitting a current topic is a caller bug, and is reported as one.
 
-    `_reduce_to_n_topics` builds its mapping by zipping over documents, so a topic that
-    holds no documents never appears in it.
+    `_reduce_to_n_topics` used to build its mapping by zipping over documents, so a topic
+    holding no documents never appeared in it and the composition died on an opaque
+    `KeyError`. Callers now build from `topic_ids()`; this guards that from regressing.
     """
     mapping = TopicMapping()
     mapping.apply({0: 0, 1: 1, 2: 2})
-    mapping.apply({0: 0, 1: 1})
 
-    assert mapping.map(2, from_original=True) == 2
+    with pytest.raises(ValueError, match=r"missing topics \[2\]"):
+        mapping.apply({0: 0, 1: 1})
 
 
 # --------------------------------------------------------------------------------------
@@ -460,10 +463,6 @@ def test_disk_round_trip_omits_data_matrices():
     assert restored[0].embedding.size == 0
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug 11: an all-zero sparse row is dropped and loses its width; fixed in unit 3",
-)
 def test_round_trip_preserves_the_width_of_an_all_zero_c_tf_idf_row():
     """A topic whose c-TF-IDF is entirely zero keeps its column count.
 
@@ -480,10 +479,6 @@ def test_round_trip_preserves_the_width_of_an_all_zero_c_tf_idf_row():
     assert restored.c_tf_idf.shape == (2, 2)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Bug 8: TopicHierarchy.to_dict omits full=True, dropping node data; fixed in unit 3",
-)
 def test_hierarchy_round_trip_preserves_node_data():
     """Hierarchy nodes keep their embeddings and c-TF-IDF through serialisation."""
     hierarchy = TopicHierarchy(n_leaves=1)

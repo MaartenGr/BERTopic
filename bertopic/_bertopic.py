@@ -334,7 +334,8 @@ class BERTopic:
     @property
     def topic_aspects_(self) -> dict[int, dict[str, list[tuple[str, float]]]]:
         """For backwards compatibility."""
-        aspect_names = list(self._topics[0].representations.keys())
+        first_topic = next(iter(self._topics), None)
+        aspect_names = list(first_topic.representations) if first_topic else []
         aspects = {
             aspect_name: {topic.id: topic.representations[aspect_name].data for topic in self._topics}
             for aspect_name in aspect_names
@@ -372,7 +373,7 @@ class BERTopic:
         return {
             topic.id: topic.representative_documents
             for topic in self._topics
-            if topic.representative_documents is not None
+            if topic.representative_documents
         }
 
     @property
@@ -381,7 +382,7 @@ class BERTopic:
         return {
             topic.id: topic.representative_images
             for topic in self._topics
-            if topic.representative_images is not None
+            if topic.representative_images.size > 0
         }
 
     @property
@@ -2379,14 +2380,6 @@ class BERTopic:
         logger.info("Images - Completed \u2713")
         return corpus
 
-    def _map_predictions(self, predictions: List[int]) -> List[int]:
-        """Map predictions to the correct topics if topics were reduced."""
-        mappings = self.topic_mapper_.get_mappings(original_topics=True)
-        mapped_predictions = [
-            mappings[prediction] if prediction in mappings else -1 for prediction in predictions
-        ]
-        return mapped_predictions
-
     def _reduce_dimensionality(
         self,
         corpus: Corpus,
@@ -2964,10 +2957,12 @@ class BERTopic:
         else:
             cluster = AgglomerativeClustering(self.nr_topics, affinity="precomputed", linkage="average")
         cluster.fit(distance_matrix)
-        new_topics = [cluster.labels_[topic] if topic != -1 else -1 for topic in corpus.topics]
 
-        # Track mappings and group them
-        mappings = {from_topic: to_topic for from_topic, to_topic in zip(corpus.topics, new_topics)}
+        # Map every topic, not just those holding documents, so no topic is left behind
+        mappings = {
+            topic_id: -1 if topic_id == -1 else int(cluster.labels_[topic_id])
+            for topic_id in self._topics.topic_ids()
+        }
         self._topics.merge(mappings)
         corpus.map_topics_and_probabilities(self._topics, from_original=False)
 
@@ -3028,9 +3023,11 @@ class BERTopic:
             else:
                 mapped_topics[topic_id] = cluster_to_lowest[cluster]
 
-        # Track mappings and group them
-        new_topics = [mapped_topics[topic] if topic != -1 else -1 for topic in corpus.topics]
-        mappings = {from_topic: to_topic for from_topic, to_topic in zip(corpus.topics, new_topics)}
+        # Map every topic, not just those holding documents, so no topic is left behind
+        mappings = {
+            topic_id: -1 if topic_id == -1 else mapped_topics[topic_id]
+            for topic_id in self._topics.topic_ids()
+        }
         self._topics.merge(mappings)
         corpus.map_topics_and_probabilities(self._topics, from_original=False)
 
