@@ -2188,6 +2188,7 @@ class BERTopic:
         """
         check_is_fitted(self)
 
+        original_unique_topics = sorted(set(self.topics_))
         topics_df = pd.DataFrame({"Topic": self.topics_})
 
         # Check if -1 exists in the current topics
@@ -2214,10 +2215,6 @@ class BERTopic:
             if self.representative_images_ is not None:
                 outlier_image = np.zeros((1, self.representative_images_.shape[1]))
                 self.representative_images_ = np.vstack([outlier_image, self.representative_images_])
-
-            # Initialize custom labels for -1 topic if they exist
-            if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-                self.custom_labels_[-1] = ""
 
             # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
             if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
@@ -2268,14 +2265,23 @@ class BERTopic:
             }
             self.topic_aspects_ = new_aspects
 
-        # Update custom labels if they exist
+        # Update custom labels if they exist. `.custom_labels_` is a list aligned with
+        # sorted unique topic IDs (see `set_topic_labels`), not a dict.
         if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-            new_labels = {
-                (final_mapping[old_topic] if old_topic != -1 else -1): label
-                for old_topic, label in self.custom_labels_.items()
-                if old_topic not in topics_to_delete
-            }
-            self.custom_labels_ = new_labels
+            if isinstance(self.custom_labels_, dict):
+                labels_by_topic = dict(self.custom_labels_)
+            else:
+                labels_by_topic = dict(zip(original_unique_topics, self.custom_labels_))
+
+            remapped_labels = {}
+            for old_topic, label in labels_by_topic.items():
+                if old_topic in topics_to_delete:
+                    continue
+                new_topic = -1 if old_topic == -1 else final_mapping[old_topic]
+                remapped_labels[new_topic] = label
+
+            new_unique_topics = sorted(set(self.topics_))
+            self.custom_labels_ = [remapped_labels.get(topic, "") for topic in new_unique_topics]
 
         # Update topic representations
         new_representations = {
