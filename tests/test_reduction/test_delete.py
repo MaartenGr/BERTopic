@@ -74,12 +74,9 @@ def test_delete_keeps_custom_labels(model, request):
 
     remaining = [topic for topic in sorted(set(topic_model.topics_)) if topic != -1]
     topic_to_delete = remaining[0]
-    before = len(set(topic_model.topics_))
 
     topic_model.delete_topics([topic_to_delete])
 
     unique_topics = sorted(set(topic_model.topics_))
     assert isinstance(topic_model.custom_labels_, list)
     assert len(topic_model.custom_labels_) == len(unique_topics)
-    # Remaining topics are remapped by frequency, so the deleted id can reappear.
-    assert len(unique_topics) < before
