@@ -34,6 +34,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         activate-environment: "true"
+        enable-cache: false
     - name: Install dependencies (including test group)
       run: uv sync --extra test
     - name: Display the project's dependency tree (including information on outdated packages)
