@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 import numpy as np
 from scipy.sparse import csr_matrix
 from collections import defaultdict
@@ -6,16 +7,36 @@ from collections import defaultdict
 from bertopic._topics import Topics
 
 
+class Modality(str, Enum):
+    """What a row is, which determines whether its source lives in `documents` or `media`."""
+
+    TEXT = "text"
+    CODE = "code"
+    IMAGE = "image"
+    AUDIO = "audio"
+    VIDEO = "video"
+
+
 @dataclass
 class Corpus:
-    """Temporary container used to track the input and generated data during fitting."""
+    """Temporary container used to track the input and generated data during fitting.
+
+    A row's source lives in exactly one place, and `modality` says where: `TEXT` and
+    `CODE` rows are held in `documents` with no `media`, while `IMAGE`, `AUDIO` and
+    `VIDEO` rows are held in `media` with `documents` carrying their text surrogate.
+    A row may have both, which is how a captioned image is stored.
+
+    Only `documents` feeds c-TF-IDF, so media rows without a surrogate yield blank
+    keywords rather than an error.
+    """
 
     # Input data
     documents: list[str] | np.ndarray = field(default_factory=list)
+    media: list = field(default_factory=list)
+    modality: list[Modality] | Modality | None = None
     topics: np.ndarray | None = None
     probabilities: np.ndarray | None = None
     embeddings: np.ndarray | None = None
-    images: list[str] | None = None
     timestamps: list[str] | list[int] | np.ndarray | None = None
     classes: list[str] | list[int] | np.ndarray | None = None
 
@@ -30,15 +51,30 @@ class Corpus:
     _zeroshot_labels: list[str] = field(default_factory=list)
 
     def __post_init__(self):
-        if self.original_indices is None:
-            self.original_indices = np.arange(len(self.documents))
-
         # For inference where a single document is passed as a string
         if isinstance(self.documents, str):
             self.documents = [self.documents]
 
         if isinstance(self.documents, np.ndarray):
             self.documents = self.documents.tolist()
+
+        if self.documents is None:
+            self.documents = []
+
+        if self.media is None:
+            self.media = []
+
+        # Every row appears in both channels, with an empty surrogate until one is made
+        nr_rows = max(len(self.documents), len(self.media))
+        self.documents = self.documents or [""] * nr_rows
+        self.media = self.media or [None] * nr_rows
+
+        # A single modality applies to every row
+        if not isinstance(self.modality, list):
+            self.modality = [self.modality or Modality.TEXT] * nr_rows
+
+        if self.original_indices is None:
+            self.original_indices = np.arange(nr_rows)
 
         if isinstance(self.classes, list):
             self.classes = np.array(self.classes)
@@ -48,16 +84,21 @@ class Corpus:
 
         check_documents_type(self.documents)
         check_embeddings_shape(self.embeddings, self.documents)
+        self._validate_length("media", self.media)
+        self._validate_length("modality", self.modality)
+
+        # Later assignments are guarded too, now that every channel is normalised
+        self._initialized = True
+
+    @property
+    def images(self) -> list:
+        """The image rows of `media`."""
+        return [item for item, modality in zip(self.media, self.modality) if modality == Modality.IMAGE]
 
     @property
     def has_only_images(self) -> bool:
-        """Check whether only images are provided."""
-        return self.images is not None and self.documents is None
-
-    @property
-    def has_documents(self) -> bool:
-        """Check whether documents are provided."""
-        return self.documents is not None
+        """Check whether there are image rows and no text to describe them."""
+        return bool(self.images) and not any(self.documents)
 
     @property
     def has_outliers(self) -> bool:
@@ -237,11 +278,12 @@ class Corpus:
 
         sort_order = np.argsort(self.timestamps)
 
-        self.documents = [self.documents[i] for i in sort_order]
+        self.documents = [self.documents[index] for index in sort_order]
         self.topics = np.array(self.topics)[sort_order] if self.topics is not None else None
         self.probabilities = self.probabilities[sort_order] if self.probabilities is not None else None
         self.embeddings = self.embeddings[sort_order] if self.embeddings is not None else None
-        self.images = list(np.array(self.images)[sort_order]) if self.images is not None else None
+        self.media = [self.media[index] for index in sort_order]
+        self.modality = [self.modality[index] for index in sort_order]
         self.timestamps = self.timestamps[sort_order]
         self.classes = np.array(self.classes)[sort_order] if self.classes is not None else None
         self.umap_embeddings = (
@@ -266,15 +308,13 @@ class Corpus:
             [self.topics[index] for index in sorted_indices] if self.topics is not None else None
         )
         selected_embeddings = self.embeddings[sorted_indices] if self.embeddings is not None else None
-        selected_images = (
-            [self.images[index] for index in sorted_indices] if self.images is not None else None
-        )
         selected_original_indices = [self.original_indices[index] for index in sorted_indices]
         return Corpus(
             documents=selected_documents,
+            media=[self.media[index] for index in sorted_indices],
+            modality=[self.modality[index] for index in sorted_indices],
             topics=selected_topics,
             embeddings=selected_embeddings,
-            images=selected_images,
             original_indices=selected_original_indices,
             _zeroshot_labels=self._zeroshot_labels,
         )
@@ -304,6 +344,8 @@ class Corpus:
 
         return Corpus(
             documents=filtered_docs,
+            media=[self.media[index] for index in filtered_indices],
+            modality=[self.modality[index] for index in filtered_indices],
             topics=[topic_id] * len(filtered_docs),
             embeddings=filtered_embeddings,
             original_indices=filtered_indices,
@@ -319,9 +361,11 @@ class Corpus:
         # Get the sorting order to restore original order
         sort_order = np.argsort(combined_indices)
 
-        # Combine and reorder documents
+        # Combine and reorder both channels
         combined_documents = self.documents + other.documents
-        sorted_documents = [combined_documents[i] for i in sort_order]
+        sorted_documents = [combined_documents[index] for index in sort_order]
+        combined_media = self.media + other.media
+        combined_modality = self.modality + other.modality
 
         # Combine and reorder topics
         if other.has_zeroshot_labels:
@@ -344,6 +388,8 @@ class Corpus:
 
         return Corpus(
             documents=sorted_documents,
+            media=[combined_media[index] for index in sort_order],
+            modality=[combined_modality[index] for index in sort_order],
             topics=sorted_topics,
             embeddings=sorted_embeddings,
             original_indices=sorted_indices,
@@ -361,8 +407,8 @@ class Corpus:
             )
 
     def __setattr__(self, name: str, value) -> None:
-        """Whenever we update embeddings, images, or topics, validate their length."""
-        if name in ("embeddings", "images", "topics") and hasattr(self, "documents"):
+        """Whenever we update a per-row field after construction, validate its length."""
+        if name in ("embeddings", "media", "modality", "topics") and getattr(self, "_initialized", False):
             self._validate_length(name, value)
         super().__setattr__(name, value)
 
