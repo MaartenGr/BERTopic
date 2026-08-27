@@ -1,6 +1,5 @@
 import numpy as np
 from itertools import chain
-from typing import List
 
 from scipy import sparse
 from scipy.sparse import csr_matrix
@@ -71,9 +70,9 @@ class OnlineCountVectorizer(CountVectorizer):
     def __init__(self, decay: float | None = None, delete_min_df: float | None = None, **kwargs):
         self.decay = decay
         self.delete_min_df = delete_min_df
-        super(OnlineCountVectorizer, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
-    def partial_fit(self, raw_documents: List[str]) -> None:
+    def partial_fit(self, raw_documents: list[str]) -> None:
         """Perform a partial fit and update vocabulary with OOV tokens.
 
         Arguments:
@@ -99,7 +98,7 @@ class OnlineCountVectorizer(CountVectorizer):
 
         return self
 
-    def update_bow(self, raw_documents: List[str]) -> csr_matrix:
+    def update_bow(self, raw_documents: list[str]) -> csr_matrix:
         """Create or update the bag-of-words matrix.
 
         Update the bag-of-words matrix by adding the newly transformed

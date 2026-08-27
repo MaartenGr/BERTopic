@@ -4,7 +4,7 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Union
+from collections.abc import Mapping
 from transformers.pipelines import Pipeline, pipeline
 
 from bertopic.representation._mmr import mmr
@@ -49,9 +49,9 @@ class VisualRepresentation(BaseRepresentation):
         self,
         nr_repr_images: int = 9,
         nr_samples: int = 500,
-        image_height: Tuple[int, int] = 600,
+        image_height: tuple[int, int] = 600,
         image_squares: bool = False,
-        image_to_text_model: Union[str, Pipeline] = None,
+        image_to_text_model: str | Pipeline = None,
         batch_size: int = 32,
     ):
         self.nr_repr_images = nr_repr_images
@@ -78,8 +78,8 @@ class VisualRepresentation(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topics.
 
         Arguments:
@@ -128,7 +128,7 @@ class VisualRepresentation(BaseRepresentation):
 
         return representative_images
 
-    def _convert_image_to_text(self, images: List[str], verbose: bool = False) -> List[str]:
+    def _convert_image_to_text(self, images: list[str], verbose: bool = False) -> list[str]:
         """Convert a list of images to captions.
 
         Arguments:
@@ -268,7 +268,7 @@ def get_concat_tile_resize(im_list_2d, image_height=600, image_squares=False):
     images = [get_concat_h_multi_resize(im_list_h) for im_list_h in images]
     img = get_concat_v_multi_resize(images)
     height_percentage = image_height / float(img.size[1])
-    adjusted_width = int((float(img.size[0]) * float(height_percentage)))
+    adjusted_width = int(float(img.size[0]) * float(height_percentage))
     img = img.resize((adjusted_width, image_height), Image.Resampling.LANCZOS)
 
     return img

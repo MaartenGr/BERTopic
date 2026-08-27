@@ -2,7 +2,8 @@ import pandas as pd
 from transformers import pipeline
 from transformers.pipelines.base import Pipeline
 from scipy.sparse import csr_matrix
-from typing import Mapping, List, Tuple, Any
+from typing import Any
+from collections.abc import Mapping
 from bertopic.representation._base import BaseRepresentation
 
 
@@ -37,7 +38,7 @@ class ZeroShotClassification(BaseRepresentation):
 
     def __init__(
         self,
-        candidate_topics: List[str],
+        candidate_topics: list[str],
         model: str = "facebook/bart-large-mnli",
         pipeline_kwargs: Mapping[str, Any] = {},
         min_prob: float = 0.8,
@@ -61,8 +62,8 @@ class ZeroShotClassification(BaseRepresentation):
         topic_model,
         documents: pd.DataFrame,
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        topics: Mapping[str, list[tuple[str, float]]],
+    ) -> Mapping[str, list[tuple[str, float]]]:
         """Extract topics.
 
         Arguments:

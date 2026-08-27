@@ -2,19 +2,17 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from typing import List, Union
-
 
 def visualize_documents(
     topic_model,
-    docs: List[str],
-    topics: List[int] | None = None,
+    docs: list[str],
+    topics: list[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
     sample: float | None = None,
     hide_annotations: bool = False,
     hide_document_hover: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Documents and Topics</b>",
     width: int = 1200,
     height: int = 750,

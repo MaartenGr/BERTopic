@@ -1,13 +1,12 @@
 import numpy as np
-from typing import List, Union
 import plotly.graph_objects as go
 
 
 def visualize_term_rank(
     topic_model,
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     log_scale: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Term score decline per Topic</b>",
     width: int = 800,
     height: int = 500,

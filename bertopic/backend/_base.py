@@ -1,5 +1,4 @@
 import numpy as np
-from typing import List
 
 
 class BaseEmbedder:
@@ -18,7 +17,7 @@ class BaseEmbedder:
         self.embedding_model = embedding_model
         self.word_embedding_model = word_embedding_model
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 
@@ -32,7 +31,7 @@ class BaseEmbedder:
         """
         pass
 
-    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
+    def embed_words(self, words: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings.
 
@@ -47,7 +46,7 @@ class BaseEmbedder:
         """
         return self.embed(words, verbose)
 
-    def embed_documents(self, document: List[str], verbose: bool = False) -> np.ndarray:
+    def embed_documents(self, document: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings.
 

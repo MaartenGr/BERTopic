@@ -1,6 +1,5 @@
 import itertools
 import numpy as np
-from typing import List, Union
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -8,10 +7,10 @@ from plotly.subplots import make_subplots
 
 def visualize_barchart(
     topic_model,
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     top_n_topics: int = 8,
     n_words: int = 5,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Topic Word Scores</b>",
     width: int = 250,
     height: int = 250,

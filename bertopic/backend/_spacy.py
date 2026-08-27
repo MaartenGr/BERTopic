@@ -1,6 +1,5 @@
 import numpy as np
 from tqdm import tqdm
-from typing import List
 from bertopic.backend import BaseEmbedder
 
 
@@ -61,7 +60,7 @@ class SpacyBackend(BaseEmbedder):
                 "or create a nlp model using: `nlp = spacy.load('en_core_web_md')"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

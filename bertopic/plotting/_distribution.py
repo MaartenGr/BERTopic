@@ -1,5 +1,4 @@
 import numpy as np
-from typing import Union
 import plotly.graph_objects as go
 
 
@@ -7,7 +6,7 @@ def visualize_distribution(
     topic_model,
     probabilities: np.ndarray,
     min_probability: float = 0.015,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Topic Probability Distribution</b>",
     width: int = 800,
     height: int = 600,

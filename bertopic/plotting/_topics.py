@@ -8,7 +8,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     HAS_UMAP = False
 
-from typing import List, Union
 from sklearn.preprocessing import MinMaxScaler
 from bertopic._utils import select_topic_representation
 import plotly.express as px
@@ -17,10 +16,10 @@ import plotly.graph_objects as go
 
 def visualize_topics(
     topic_model,
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     top_n_topics: int | None = None,
     use_ctfidf: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Intertopic Distance Map</b>",
     width: int = 650,
     height: int = 650,
@@ -120,7 +119,7 @@ def visualize_topics(
     return _plotly_topic_visualization(df, topic_list, title, width, height)
 
 
-def _plotly_topic_visualization(df: pd.DataFrame, topic_list: List[str], title: str, width: int, height: int):
+def _plotly_topic_visualization(df: pd.DataFrame, topic_list: list[str], title: str, width: int, height: int):
     """Create plotly-based visualization of topics with a slider for topic selection."""
 
     def get_color(topic_selected):

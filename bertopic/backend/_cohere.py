@@ -1,7 +1,8 @@
 import time
 import numpy as np
 from tqdm import tqdm
-from typing import Any, List, Mapping
+from typing import Any
+from collections.abc import Mapping
 from bertopic.backend import BaseEmbedder
 
 
@@ -60,7 +61,7 @@ class CohereBackend(BaseEmbedder):
         else:
             self.embed_kwargs["model"] = self.embedding_model
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

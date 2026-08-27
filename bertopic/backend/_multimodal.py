@@ -1,7 +1,6 @@
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
-from typing import List, Union
 from sentence_transformers import SentenceTransformer
 
 from bertopic.backend import BaseEmbedder
@@ -44,8 +43,8 @@ class MultiModalBackend(BaseEmbedder):
 
     def __init__(
         self,
-        embedding_model: Union[str, SentenceTransformer],
-        image_model: Union[str, SentenceTransformer] = None,
+        embedding_model: str | SentenceTransformer,
+        image_model: str | SentenceTransformer = None,
         batch_size: int = 32,
     ):
         super().__init__()
@@ -84,7 +83,7 @@ class MultiModalBackend(BaseEmbedder):
         except:  # noqa: E722
             self.tokenizer = None
 
-    def embed(self, documents: List[str], images: List[str] | None = None, verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], images: list[str] | None = None, verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words or images into an n-dimensional
         matrix of embeddings.
 
@@ -122,7 +121,7 @@ class MultiModalBackend(BaseEmbedder):
         elif image_embeddings is not None:
             return image_embeddings
 
-    def embed_documents(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed_documents(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 
@@ -138,7 +137,7 @@ class MultiModalBackend(BaseEmbedder):
         embeddings = self.embedding_model.encode(truncated_docs, show_progress_bar=verbose)
         return embeddings
 
-    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
+    def embed_words(self, words: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
         matrix of embeddings.
 

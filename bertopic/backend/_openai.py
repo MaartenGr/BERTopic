@@ -2,7 +2,8 @@ import time
 import openai
 import numpy as np
 from tqdm import tqdm
-from typing import List, Mapping, Any
+from typing import Any
+from collections.abc import Mapping
 from bertopic.backend import BaseEmbedder
 
 
@@ -51,7 +52,7 @@ class OpenAIBackend(BaseEmbedder):
         elif not self.generator_kwargs.get("engine"):
             self.generator_kwargs["model"] = self.embedding_model
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

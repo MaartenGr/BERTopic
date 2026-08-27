@@ -3,22 +3,20 @@ import pandas as pd
 import plotly.graph_objects as go
 import math
 
-from typing import List, Union
-
 
 def visualize_hierarchical_documents(
     topic_model,
-    docs: List[str],
+    docs: list[str],
     hierarchical_topics: pd.DataFrame,
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
-    sample: Union[float, int] | None = None,
+    sample: float | int | None = None,
     hide_annotations: bool = False,
     hide_document_hover: bool = True,
     nr_levels: int = 10,
     level_scale: str = "linear",
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Hierarchical Documents and Topics</b>",
     width: int = 1200,
     height: int = 750,

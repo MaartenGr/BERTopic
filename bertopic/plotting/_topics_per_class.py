@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import List, Union
 import plotly.graph_objects as go
 from sklearn.preprocessing import normalize
 
@@ -8,9 +7,9 @@ def visualize_topics_per_class(
     topic_model,
     topics_per_class: pd.DataFrame,
     top_n_topics: int = 10,
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     normalize_frequency: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Topics per Class</b>",
     width: int = 1250,
     height: int = 900,

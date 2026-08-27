@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 from bertopic.backend import BaseEmbedder
 from langchain_core.embeddings import Embeddings
@@ -25,7 +23,7 @@ class LangChainBackend(BaseEmbedder):
     def __init__(self, embedding_model: Embeddings):
         self.embedding_model = embedding_model
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 

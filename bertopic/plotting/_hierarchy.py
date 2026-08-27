@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Callable, List, Union
+from collections.abc import Callable
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
 from sklearn.metrics.pairwise import cosine_similarity
@@ -16,10 +16,10 @@ from bertopic._utils import validate_distance_matrix
 def visualize_hierarchy(
     topic_model,
     orientation: str = "left",
-    topics: List[int] | None = None,
+    topics: list[int] | None = None,
     top_n_topics: int | None = None,
     use_ctfidf: bool = True,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Hierarchical Clustering</b>",
     width: int = 1000,
     height: int = 600,
@@ -235,7 +235,7 @@ def _get_annotations(
     distance_function: Callable[[csr_matrix], csr_matrix],
     orientation: str,
     custom_labels: bool = False,
-) -> List[List[str]]:
+) -> list[list[str]]:
     """Get annotations by replicating linkage function calculation in scipy.
 
     Arguments:

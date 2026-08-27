@@ -1,4 +1,3 @@
-from typing import List
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.preprocessing import normalize
 from sklearn.utils import check_array
@@ -42,14 +41,14 @@ class ClassTfidfTransformer(TfidfTransformer):
         self,
         bm25_weighting: bool = False,
         reduce_frequent_words: bool = False,
-        seed_words: List[str] | None = None,
+        seed_words: list[str] | None = None,
         seed_multiplier: float = 2,
     ):
         self.bm25_weighting = bm25_weighting
         self.reduce_frequent_words = reduce_frequent_words
         self.seed_words = seed_words
         self.seed_multiplier = seed_multiplier
-        super(ClassTfidfTransformer, self).__init__()
+        super().__init__()
 
     def fit(self, X: sp.csr_matrix, multiplier: np.ndarray = None):
         """Learn the idf vector (global term weights).

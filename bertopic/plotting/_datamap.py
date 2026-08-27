@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from typing import List, Union
 from warnings import warn
 
 try:
@@ -10,19 +9,19 @@ except ImportError:
     warn("Data map plotting is unavailable unless datamapplot is installed.")
 
     # Create a dummy figure type for typing
-    class Figure(object):
+    class Figure:
         pass
 
 
 def visualize_document_datamap(
     topic_model,
-    docs: List[str] | None = None,
-    topics: List[int] | None = None,
+    docs: list[str] | None = None,
+    topics: list[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "Documents and Topics",
-    sub_title: Union[str, None] = None,
+    sub_title: str | None = None,
     width: int = 1200,
     height: int = 750,
     interactive: bool = False,

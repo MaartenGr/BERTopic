@@ -1,6 +1,5 @@
 import numpy as np
 from tqdm import tqdm
-from typing import List
 from bertopic.backend import BaseEmbedder
 from gensim.models.keyedvectors import Word2VecKeyedVectors
 
@@ -36,7 +35,7 @@ class GensimBackend(BaseEmbedder):
                 "`ft = api.load('fasttext-wiki-news-subwords-300')`"
             )
 
-    def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:
+    def embed(self, documents: list[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n documents/words into an n-dimensional
         matrix of embeddings.
 
