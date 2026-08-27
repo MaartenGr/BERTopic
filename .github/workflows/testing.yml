@@ -14,26 +14,27 @@ jobs:
   lint:
     runs-on: ubuntu-slim
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v7
       with:
-        python-version: "3.13"
+        python-version: "3.14"
     # Ref: https://github.com/tox-dev/action-pre-commit-uv
-    - uses: tox-dev/action-pre-commit-uv@246b66536e366bb885f52d61983bf32f7c95e8b1 # v1.0.3
+    - uses: tox-dev/action-pre-commit-uv@e09b8958484dfe71f4ac3bc7afb230ba506402ec # v1.0.5
 
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install latest version of uv and set up Python ${{ matrix.python-version }}
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         python-version: ${{ matrix.python-version }}
         activate-environment: "true"
+        enable-cache: false
     - name: Install dependencies (including test group)
       run: uv sync --extra test
     - name: Display the project's dependency tree (including information on outdated packages)
