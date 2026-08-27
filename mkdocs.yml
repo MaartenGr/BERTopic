@@ -72,6 +72,7 @@ nav:
         - Hierarchical topics: api/plotting/hierarchy.md
         - Distribution: api/plotting/distribution.md
         - Heatmap: api/plotting/heatmap.md
+        - Representative Images: api/plotting/representative_images.md
         - Term Scores: api/plotting/term.md
         - Topics: api/plotting/topics.md
         - Topics per Class: api/plotting/topics_per_class.md

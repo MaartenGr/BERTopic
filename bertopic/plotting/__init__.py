@@ -6,6 +6,7 @@ from ._term_rank import visualize_term_rank
 from ._hierarchy import visualize_hierarchy
 from ._datamap import visualize_document_datamap
 from ._distribution import visualize_distribution
+from ._images import visualize_representative_images
 from ._topics_over_time import visualize_topics_over_time
 from ._topics_per_class import visualize_topics_per_class
 from ._hierarchical_documents import visualize_hierarchical_documents
@@ -21,6 +22,7 @@ __all__ = [
     "visualize_heatmap",
     "visualize_hierarchical_documents",
     "visualize_hierarchy",
+    "visualize_representative_images",
     "visualize_term_rank",
     "visualize_topics",
     "visualize_topics_over_time",

@@ -2691,6 +2691,70 @@ class BERTopic:
             height=height,
         )
 
+    def visualize_representative_images(
+        self,
+        topics: List[int] | None = None,
+        aspect: str = "Visual_Aspect",
+        custom_labels: Union[bool, str] = False,
+        title: str = "<b>Representative Images per Topic</b>",
+        width: int = 1200,
+        height: int = 800,
+    ) -> "go.Figure":
+        """Visualize the representative images of each topic with a slider for topic selection.
+
+        When BERTopic is fitted on images with a `VisualRepresentation` aspect, each topic
+        is represented by a collage of its most representative images. This visualization
+        shows those collages at their original resolution, one topic at a time, with a
+        slider to step through the topics.
+
+        Arguments:
+            topics: A selection of topics to visualize.
+                    For example, if you want to visualize only topics 1 through 5:
+                    `topics = [1, 2, 3, 4, 5]`.
+            aspect: The name of the topic aspect that contains the representative images
+                    as created by `bertopic.representation.VisualRepresentation`.
+            custom_labels: If bool, whether to use custom topic labels that were defined using
+                           `topic_model.set_topic_labels`.
+                           If `str`, it uses labels from other aspects, e.g., "Aspect1".
+            title: Title of the plot.
+            width: The width of the figure.
+            height: The height of the figure.
+
+        Examples:
+        To visualize the representative images of each topic, make sure to fit BERTopic
+        with a `VisualRepresentation` aspect first:
+
+        ```python
+        from bertopic import BERTopic
+        from bertopic.representation import VisualRepresentation
+
+        # Additional representation of topics as a collage of images
+        representation_model = {"Visual_Aspect": VisualRepresentation()}
+        topic_model = BERTopic(embedding_model="clip-ViT-B-32", representation_model=representation_model)
+        topics, probs = topic_model.fit_transform(documents=None, images=images)
+
+        # Run the visualization
+        topic_model.visualize_representative_images()
+        ```
+
+        Or if you want to save the resulting figure:
+
+        ```python
+        fig = topic_model.visualize_representative_images()
+        fig.write_html("path/to/file.html")
+        ```
+        """
+        check_is_fitted(self)
+        return plotting.visualize_representative_images(
+            self,
+            topics=topics,
+            aspect=aspect,
+            custom_labels=custom_labels,
+            title=title,
+            width=width,
+            height=height,
+        )
+
     def visualize_document_datamap(
         self,
         docs: List[str] | None = None,

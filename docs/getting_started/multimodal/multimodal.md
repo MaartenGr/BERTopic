@@ -74,6 +74,12 @@ HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
 <img src="images_and_text.jpg">
 <br><br>
 
+You can also step through the representative images of each topic, at their original resolution, with a slider:
+
+```python
+topic_model.visualize_representative_images()
+```
+
 !!! Tip
     In the example above, we are clustering the documents but since you have
     images, you might want to cluster those or cluster an aggregation of both
@@ -188,3 +194,9 @@ HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
 <br><br>
 <img src="images_only.jpg">
 <br><br>
+
+You can also step through the representative images of each topic, at their original resolution, with a slider:
+
+```python
+topic_model.visualize_representative_images()
+```
