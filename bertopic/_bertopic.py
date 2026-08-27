@@ -66,7 +66,7 @@ from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
 from bertopic._topics import Keywords, Topic, Topics, TopicRepresentation, TopicHierarchy
-from bertopic._corpus import Corpus
+from bertopic._corpus import Corpus, Modality
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
     MyLogger,
@@ -458,7 +458,13 @@ class BERTopic:
         topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
-        corpus = Corpus(documents=documents, embeddings=embeddings, images=images, y=y)
+        corpus = Corpus(
+            documents=documents,
+            media=images,
+            modality=Modality.IMAGE if images else Modality.TEXT,
+            embeddings=embeddings,
+            y=y,
+        )
 
         # 1. Extract embeddings
         if corpus.embeddings is None or (corpus.embeddings is not None and self.embedding_model is not None):
@@ -598,7 +604,12 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        corpus = Corpus(documents=documents, embeddings=embeddings, images=images)
+        corpus = Corpus(
+            documents=documents,
+            media=images,
+            modality=Modality.IMAGE if images else Modality.TEXT,
+            embeddings=embeddings,
+        )
 
         # Extract embeddings
         if corpus.embeddings is None:
@@ -1051,7 +1062,13 @@ class BERTopic:
         # (duplicate topic embedding for each document based on assignment)
         topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
         doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in topics])
-        corpus = Corpus(documents=docs, topics=np.array(topics), images=images, embeddings=doc_embeddings)
+        corpus = Corpus(
+            documents=docs,
+            media=images,
+            modality=Modality.IMAGE if images else Modality.TEXT,
+            topics=np.array(topics),
+            embeddings=doc_embeddings,
+        )
 
         self._extract_representations(corpus, fine_tune=True)
         self._save_representative_docs(corpus)
@@ -1571,8 +1588,9 @@ class BERTopic:
         doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
         corpus = Corpus(
             documents=docs,
+            media=images,
+            modality=Modality.IMAGE if images else Modality.TEXT,
             topics=np.array(self.topics_),
-            images=images,
             embeddings=doc_embeddings,
         )
 
@@ -1661,8 +1679,9 @@ class BERTopic:
         doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
         corpus = Corpus(
             documents=docs,
+            media=images,
+            modality=Modality.IMAGE if images else Modality.TEXT,
             topics=np.array(self.topics_),
-            images=images,
             embeddings=doc_embeddings,
         )
 
@@ -2348,6 +2367,7 @@ class BERTopic:
             documents = [documents]
 
         if images is not None and hasattr(self.embedding_model, "embed_images"):
+            documents = documents if any(documents) else [None]
             embeddings = self.embedding_model.embed(documents=documents, images=images, verbose=verbose)
         elif documents is not None:
             embeddings = self.embedding_model.embed_documents(documents, verbose=verbose)
