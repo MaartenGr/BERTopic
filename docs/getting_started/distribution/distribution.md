@@ -70,7 +70,7 @@ df
     You can also approximate the topic distributions for unseen documents. It will not be as accurate as `.transform` but it is quite fast and can serve you well in a production setting.
 
 !!! note
-     To get the stylized dataframe for `.visualize_approximate_distribution` you will need to have Jinja installed. If you do not have this installed, an unstylized dataframe will be returned instead. You can install Jinja via `pip install jinja2`
+     To get the styled table for `.visualize_approximate_distribution` you will need to have Great Tables installed. If you do not have this installed, a plain polars DataFrame will be returned instead. You can install Great Tables via `pip install great_tables`
 
 ## **Parameters**
 There are a few parameters that are of interest which will be discussed below.

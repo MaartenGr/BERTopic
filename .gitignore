@@ -59,6 +59,7 @@ docs/_build/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 notebooks/
 
 # IPython
@@ -83,6 +84,8 @@ venv.bak/
 .idea/
 .vscode
 .DS_Store
+CLAUDE.md
+GEMINI.md
 
 # mkdocs
 site/

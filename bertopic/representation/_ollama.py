@@ -1,17 +1,13 @@
-import time
 import numpy as np
-from litellm import completion
-from typing import Callable
+from ollama import chat
+from ollama import ChatResponse
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
-from typing import Mapping, Any
+from typing import Any, Callable
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._utils import (
-    retry_with_exponential_backoff,
-)
 from bertopic.representation._prompts import (
-    DEFAULT_CHAT_PROMPT,
     DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_CHAT_PROMPT,
     DEFAULT_JSON_SCHEMA,
     DEFAULT_JSON_PROMPT,
 )
@@ -24,15 +20,11 @@ if TYPE_CHECKING:
     from bertopic import BERTopic
 
 
-class LiteLLM(LLMRepresentation):
-    """Using the LiteLLM API to generate topic labels.
-
-    For an overview of models see:
-    https://docs.litellm.ai/docs/providers
+class Ollama(LLMRepresentation):
+    r"""Using the Ollama API to generate topic labels based on a local LLM.
 
     Arguments:
-        model: Model to use. Defaults to OpenAI's "gpt-3.5-turbo".
-        generator_kwargs: Kwargs passed to `litellm.completion`.
+        model: Model to use within Ollama.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -42,17 +34,10 @@ class LiteLLM(LLMRepresentation):
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
         json_schema: A dictionary representing the JSON schema to enforce structured output.
                      If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
-                     Uses LiteLLM's `response_format` with `json_schema` type.
-        delay_in_seconds: The delay in seconds between consecutive prompts
-                          in order to prevent RateLimitErrors.
-        exponential_backoff: Retry requests with a random exponential backoff.
-                             A short sleep is used when a rate limit error is hit,
-                             then the requests is retried. Increase the sleep length
-                             if errors are hit until 10 unsuccesfull requests.
-                             If True, overrides `delay_in_seconds`.
-        nr_docs: The number of documents to pass to LiteLLM if a prompt
+        generator_kwargs: Kwargs passed to `ollama.chat` for fine-tuning the output.
+        nr_docs: The number of documents to pass to Ollama if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to LiteLLM.
+        diversity: The diversity of documents to pass to Ollama.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -74,22 +59,18 @@ class LiteLLM(LLMRepresentation):
 
     Usage:
 
-    To use this, you will need to install the litellm package first:
+    To use this, you will need to install the ollama package first:
 
-    `pip install litellm`
+    `pip install ollama`
 
-    Then, get yourself an API key of any provider (for instance OpenAI) and use it as follows:
+    Then, you can use the Ollama representation model as follows:
 
     ```python
-    import os
-    from bertopic.representation import LiteLLM
+    from bertopic.representation import Ollama
     from bertopic import BERTopic
 
-    # set ENV variables
-    os.environ["OPENAI_API_KEY"] = "your-openai-key"
-
     # Create your representation model
-    representation_model = LiteLLM(model="gpt-3.5-turbo")
+    representation_model = Ollama("gemma3")
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -99,25 +80,17 @@ class LiteLLM(LLMRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = LiteLLM(model="gpt", prompt=prompt)
+    representation_model = Ollama("gemma3", prompt=prompt)
     ```
-
-    You can also use structured output with a JSON schema:
-
-    ```python
-    representation_model = LiteLLM(model="gpt-4o-mini", json_schema=True)
-    ```
-    """  # noqa: D301
+    """
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str,
         prompt: str | None = None,
         system_prompt: str | None = None,
-        json_schema: Mapping[str, Any] | bool = False,
-        generator_kwargs: Mapping[str, Any] = {},
-        delay_in_seconds: float | None = None,
-        exponential_backoff: bool = False,
+        json_schema: dict[str, Any] | bool = False,
+        generator_kwargs: dict[str, Any] = {},
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
@@ -131,18 +104,12 @@ class LiteLLM(LLMRepresentation):
             tokenizer=tokenizer,
         )
 
-        # LiteLLM specific parameters
+        # Ollama specific parameters
         self.model = model
         self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.generator_kwargs = generator_kwargs
-        self.delay_in_seconds = delay_in_seconds
-        self.exponential_backoff = exponential_backoff
-        self.generator_kwargs["response_format"] = (
-            {"type": "json_schema", "json_schema": {"name": "Topic", "schema": self.json_schema}}
-            if self.json_schema
-            else None
-        )
+        self.generator_kwargs["format"] = self.json_schema
 
     def extract_topics(
         self,
@@ -173,7 +140,7 @@ class LiteLLM(LLMRepresentation):
             diversity=self.diversity,
         )
 
-        # Generate using a (Large) Language Model
+        # Generate using Ollama's Language Model
         updated_topics = {}
         for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
             prompt = self._create_prompt(
@@ -181,26 +148,17 @@ class LiteLLM(LLMRepresentation):
             )
             self.prompts_.append(prompt)
 
-            # Delay
-            if self.delay_in_seconds:
-                time.sleep(self.delay_in_seconds)
-
-            # Call LiteLLM API
+            # Call Ollama API
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt},
             ]
-            kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
-            response = (
-                chat_completions_with_backoff(**kwargs) if self.exponential_backoff else completion(**kwargs)
-            )
-            response_text = response["choices"][0]["message"]["content"].strip()
-            updated_topics[topic] = self._parse_response(response_text)
+            kwargs = {
+                "model": self.model,
+                "messages": messages,
+                **self.generator_kwargs,
+            }
+            response: ChatResponse = chat(**kwargs)
+            updated_topics[topic] = self._parse_response(response.message.content.strip())
 
         return updated_topics
-
-
-def chat_completions_with_backoff(**kwargs):
-    return retry_with_exponential_backoff(
-        completion,
-    )(**kwargs)

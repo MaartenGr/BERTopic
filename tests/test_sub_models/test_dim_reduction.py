@@ -5,6 +5,7 @@ from umap import UMAP
 from sklearn.decomposition import PCA
 
 from bertopic import BERTopic
+from bertopic._corpus import Corpus
 
 
 @pytest.mark.parametrize("dim_model", [UMAP, PCA])
@@ -18,8 +19,9 @@ from bertopic import BERTopic
 )
 def test_reduce_dimensionality(dim_model, embeddings, shape, n_components):
     model = BERTopic(umap_model=dim_model(n_components=n_components))
-    umap_embeddings = model._reduce_dimensionality(embeddings)
-    assert umap_embeddings.shape == (shape, n_components)
+    corpus = Corpus(documents=["doc"] * shape, embeddings=embeddings)
+    corpus = model._reduce_dimensionality(corpus)
+    assert corpus.umap_embeddings.shape == (shape, n_components)
 
 
 @pytest.mark.parametrize(
@@ -36,5 +38,6 @@ def test_reduce_dimensionality(dim_model, embeddings, shape, n_components):
 def test_custom_reduce_dimensionality(model, request):
     embeddings = np.random.rand(500, 128)
     topic_model = copy.deepcopy(request.getfixturevalue(model))
-    umap_embeddings = topic_model._reduce_dimensionality(embeddings)
-    assert umap_embeddings.shape[1] < embeddings.shape[1]
+    corpus = Corpus(documents=["doc"] * 500, embeddings=embeddings)
+    corpus = topic_model._reduce_dimensionality(corpus)
+    assert corpus.umap_embeddings.shape[1] < embeddings.shape[1]

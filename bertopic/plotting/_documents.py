@@ -2,19 +2,17 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from typing import List, Union
-
 
 def visualize_documents(
     topic_model,
-    docs: List[str],
-    topics: List[int] | None = None,
+    docs: list[str],
+    topics: list[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
     sample: float | None = None,
     hide_annotations: bool = False,
     hide_document_hover: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Documents and Topics</b>",
     width: int = 1200,
     height: int = 750,
@@ -108,21 +106,23 @@ def visualize_documents(
     # Extract embeddings if not already done
     if sample is None:
         if embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
+            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list())
         else:
             embeddings_to_reduce = embeddings
     else:
         if embeddings is not None:
             embeddings_to_reduce = embeddings[indices]
         elif embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
+            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list())
 
     # Reduce input embeddings
     if reduced_embeddings is None:
         try:
             from umap import UMAP
 
-            umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(embeddings_to_reduce)
+            umap_model = UMAP(n_neighbors=10, n_components=2, min_dist=0.0, metric="cosine").fit(
+                embeddings_to_reduce
+            )
             embeddings_2d = umap_model.embedding_
         except (ImportError, ModuleNotFoundError):
             raise ModuleNotFoundError(
@@ -143,7 +143,9 @@ def visualize_documents(
 
     # Prepare text and names
     if isinstance(custom_labels, str):
-        names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in unique_topics]
+        names = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in unique_topics
+        ]
         names = ["_".join([label[0] for label in labels[:4]]) for labels in names]
         names = [label if len(label) < 30 else label[:27] + "..." for label in names]
     elif topic_model.custom_labels_ is not None and custom_labels:

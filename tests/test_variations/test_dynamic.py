@@ -17,6 +17,6 @@ def test_dynamic(model, documents, request):
     timestamps = [i % 10 for i in range(len(documents))]
     topics_over_time = topic_model.topics_over_time(documents, timestamps)
 
-    assert topics_over_time.Frequency.sum() == len(documents)
-    assert set(topics_over_time.Topic.unique()) == set(topic_model.topics_)
-    assert len(topics_over_time.Timestamp.unique()) == len(set(timestamps))
+    assert topics_over_time["Frequency"].sum() == len(documents)
+    assert set(topics_over_time["Topic"].unique().to_list()) == set(topic_model.topics_)
+    assert len(topics_over_time["Timestamp"].unique()) == len(set(timestamps))

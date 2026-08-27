@@ -1,28 +1,31 @@
+from __future__ import annotations
+
 import numpy as np
-import pandas as pd
-from typing import List, Union
-from warnings import warn
+from typing import TYPE_CHECKING
 
 try:
     import datamapplot
-    from matplotlib.figure import Figure
-except ImportError:
-    warn("Data map plotting is unavailable unless datamapplot is installed.")
+    import pandas as pd
 
-    # Create a dummy figure type for typing
-    class Figure(object):
-        pass
+    HAS_DATAMAPPLOT = True
+except (ImportError, ModuleNotFoundError):
+    HAS_DATAMAPPLOT = False
+
+if TYPE_CHECKING:
+    from matplotlib.figure import Figure
+
+    from bertopic import BERTopic
 
 
 def visualize_document_datamap(
-    topic_model,
-    docs: List[str] | None = None,
-    topics: List[int] | None = None,
+    topic_model: BERTopic,
+    docs: list[str] | None = None,
+    topics: list[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "Documents and Topics",
-    sub_title: Union[str, None] = None,
+    sub_title: str | None = None,
     width: int = 1200,
     height: int = 750,
     interactive: bool = False,
@@ -107,15 +110,17 @@ def visualize_document_datamap(
     <img src="../../getting_started/visualization/datamapplot.png",
          alt="DataMapPlot of 20-Newsgroups", width=800, height=800></img>
     """
-    topic_per_doc = topic_model.topics_
+    if not HAS_DATAMAPPLOT:
+        raise ModuleNotFoundError(
+            "The `datamapplot` and `matplotlib` packages are required for this visualization. "
+            "Install them using `pip install datamapplot`."
+        )
 
-    df = pd.DataFrame({"topic": np.array(topic_per_doc)})
-    df["doc"] = docs
-    df["topic"] = topic_per_doc
+    topic_per_doc = topic_model.topics_
 
     # Extract embeddings if not already done
     if embeddings is None and reduced_embeddings is None:
-        embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list(), method="document")
+        embeddings_to_reduce = topic_model._extract_embeddings(docs)
     else:
         embeddings_to_reduce = embeddings
 
@@ -124,7 +129,9 @@ def visualize_document_datamap(
         try:
             from umap import UMAP
 
-            umap_model = UMAP(n_neighbors=15, n_components=2, min_dist=0.15, metric="cosine").fit(embeddings_to_reduce)
+            umap_model = UMAP(n_neighbors=15, n_components=2, min_dist=0.15, metric="cosine").fit(
+                embeddings_to_reduce
+            )
             embeddings_2d = umap_model.embedding_
         except (ImportError, ModuleNotFoundError):
             raise ModuleNotFoundError(
@@ -137,7 +144,9 @@ def visualize_document_datamap(
 
     # Prepare text and names
     if isinstance(custom_labels, str):
-        names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in unique_topics]
+        names = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in unique_topics
+        ]
         names = [" ".join([label[0] for label in labels[:4]]) for labels in names]
         names = [label if len(label) < 30 else label[:27] + "..." for label in names]
     elif topic_model.custom_labels_ is not None and custom_labels:
@@ -149,7 +158,10 @@ def visualize_document_datamap(
                 for topic in unique_topics
             ]
         else:
-            names = [" ".join([word for word, value in topic_model.get_topic(topic)][:3]) for topic in unique_topics]
+            names = [
+                " ".join([word for word, value in topic_model.get_topic(topic)][:3])
+                for topic in unique_topics
+            ]
 
     topic_name_mapping = {topic_num: topic_name for topic_num, topic_name in zip(unique_topics, names)}
     topic_name_mapping[-1] = "Unlabelled"

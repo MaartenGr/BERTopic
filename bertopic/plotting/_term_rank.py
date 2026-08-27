@@ -1,13 +1,16 @@
 import numpy as np
-from typing import List, Union
 import plotly.graph_objects as go
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 def visualize_term_rank(
-    topic_model,
-    topics: List[int] | None = None,
+    topic_model: "BERTopic",
+    topics: list[int] | None = None,
     log_scale: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Term score decline per Topic</b>",
     width: int = 800,
     height: int = 500,
@@ -65,7 +68,7 @@ def visualize_term_rank(
     """
     topics = [] if topics is None else topics
 
-    topic_ids = topic_model.get_topic_info().Topic.unique().tolist()
+    topic_ids = topic_model._topics.topic_ids()
     topic_words = [topic_model.get_topic(topic) for topic in topic_ids]
 
     values = np.array([[value[1] for value in values] for values in topic_words])
@@ -77,11 +80,15 @@ def visualize_term_rank(
         if not any(y > 1.5):
             # labels
             if isinstance(custom_labels, str):
-                label = f"{topic}_" + "_".join(next(zip(*topic_model.topic_aspects_[custom_labels][topic]))[:3])
+                label = f"{topic}_" + "_".join(
+                    next(zip(*topic_model.topic_aspects_[custom_labels][topic]))[:3]
+                )
             elif topic_model.custom_labels_ is not None and custom_labels:
                 label = topic_model.custom_labels_[topic + topic_model._outliers]
             else:
-                label = f"<b>Topic {topic}</b>:" + "_".join([word[0] for word in topic_model.get_topic(topic)])
+                label = f"<b>Topic {topic}</b>:" + "_".join(
+                    [word[0] for word in topic_model.get_topic(topic)]
+                )
                 label = label[:50]
 
             # line parameters
@@ -123,9 +130,7 @@ def visualize_term_rank(
     )
 
     fig.update_xaxes(title_text="Term Rank")
-    if log_scale:
-        fig.update_yaxes(title_text="c-TF-IDF score (log scale)")
-    else:
-        fig.update_yaxes(title_text="c-TF-IDF score")
+    title_text = "Logarithmic c-TF-IDF score decline" if log_scale else "c-TF-IDF score decline"
+    fig.update_yaxes(title_text=title_text)
 
     return fig

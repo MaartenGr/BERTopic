@@ -625,7 +625,7 @@ df
 <br><br>
 
 !!! note
-     To get the stylized dataframe for `.visualize_approximate_distribution` you will need to have Jinja installed. If you do not have this installed, an unstylized dataframe will be returned instead. You can install Jinja via `pip install jinja2`
+     To get the styled table for `.visualize_approximate_distribution` you will need to have Great Tables installed. If you do not have this installed, a plain polars DataFrame will be returned instead. You can install Great Tables via `pip install great_tables`
 
 !!! note
     The distribution of the probabilities does not give an indication to

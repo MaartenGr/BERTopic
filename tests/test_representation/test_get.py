@@ -1,7 +1,6 @@
 import copy
 import pytest
-import numpy as np
-import pandas as pd
+import polars as pl
 
 
 @pytest.mark.parametrize(
@@ -60,17 +59,17 @@ def test_get_topics(model, request):
 def test_get_topic_freq(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     for topic in set(topic_model.topics_):
-        assert not isinstance(topic_model.get_topic_freq(topic), pd.DataFrame)
+        assert not isinstance(topic_model.get_topic_freq(topic), pl.DataFrame)
 
     topic_freq = topic_model.get_topic_freq()
     unique_topics = set(topic_model.topics_)
-    topics_in_mapper = set(np.array(topic_model.topic_mapper_.mappings_)[:, -1])
+    topics_in_model = set(topic_model._topics.topic_ids())
 
-    assert isinstance(topic_freq, pd.DataFrame)
+    assert isinstance(topic_freq, pl.DataFrame)
 
     assert len(topic_freq) == len(set(topic_model.topics_))
-    assert len(topics_in_mapper.difference(unique_topics)) == 0
-    assert len(unique_topics.difference(topics_in_mapper)) == 0
+    assert len(topics_in_model.difference(unique_topics)) == 0
+    assert len(unique_topics.difference(topics_in_model)) == 0
 
 
 @pytest.mark.parametrize(
@@ -86,10 +85,10 @@ def test_get_representative_docs(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     all_docs = topic_model.get_representative_docs()
     unique_topics = set(topic_model.topics_)
-    topics_in_mapper = set(np.array(topic_model.topic_mapper_.mappings_)[:, -1])
+    topics_in_model = set(topic_model._topics.topic_ids())
 
     assert len(all_docs) == len(topic_model.topic_sizes_.keys())
-    assert len(all_docs) == len(topics_in_mapper)
+    assert len(all_docs) == len(topics_in_model)
     assert len(all_docs) == topic_model.c_tf_idf_.shape[0]
     assert len(all_docs) == len(topic_model.topic_labels_)
     assert all([True if len(docs) == 3 else False for docs in all_docs.values()])
@@ -97,7 +96,7 @@ def test_get_representative_docs(model, request):
     topics = set(list(all_docs.keys()))
 
     assert len(topics.difference(unique_topics)) == 0
-    assert len(topics.difference(topics_in_mapper)) == 0
+    assert len(topics.difference(topics_in_model)) == 0
 
 
 @pytest.mark.parametrize(
@@ -116,9 +115,9 @@ def test_get_topic_info(model, request):
     info = topic_model.get_topic_info()
 
     if topic_model._outliers:
-        assert info.iloc[0].Topic == -1
+        assert info.row(0, named=True)["Topic"] == -1
     else:
-        assert info.iloc[0].Topic == 0
+        assert info.row(0, named=True)["Topic"] == 0
 
     for topic in set(topic_model.topics_):
         assert len(topic_model.get_topic_info(topic)) == 1
