@@ -57,3 +57,26 @@ def test_delete(model, request):
         assert mapped_labels == topic_model.topics_[950:]
     else:
         assert mapped_labels == topic_model.topics_
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+    ],
+)
+def test_delete_keeps_custom_labels(model, request):
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+    labels = topic_model.generate_topic_labels()
+    topic_model.set_topic_labels(labels)
+
+    remaining = [topic for topic in sorted(set(topic_model.topics_)) if topic != -1]
+    topic_to_delete = remaining[0]
+
+    topic_model.delete_topics([topic_to_delete])
+
+    unique_topics = sorted(set(topic_model.topics_))
+    assert isinstance(topic_model.custom_labels_, list)
+    assert len(topic_model.custom_labels_) == len(unique_topics)
