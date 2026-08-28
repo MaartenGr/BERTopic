@@ -64,7 +64,7 @@ def test_media_may_be_supplied_without_documents(image_paths):
 
     assert len(corpus) == len(image_paths)
     assert corpus.images == image_paths
-    assert corpus.has_only_images
+    assert not any(corpus.documents)
 
 
 def test_documents_default_to_the_text_modality():
@@ -88,7 +88,7 @@ def test_a_row_may_carry_both_text_and_media():
 
     assert corpus.documents == ["a cat", "a dog"]
     assert corpus.images == ["cat.png", "dog.png"]
-    assert not corpus.has_only_images
+    assert all(corpus.documents)
 
 
 def test_rows_may_each_have_their_own_modality():

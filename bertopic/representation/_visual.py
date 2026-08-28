@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 from PIL import Image
 from tqdm import tqdm
@@ -7,8 +6,9 @@ from scipy.sparse import csr_matrix
 from transformers.pipelines import Pipeline, pipeline
 
 from bertopic.representation._mmr import mmr
-from bertopic.representation._base import BaseRepresentation
-from bertopic._corpus import Corpus
+from bertopic.representation._base import TextConverter
+from bertopic._corpus import Corpus, Modality
+from bertopic._topics import Images, Keywords
 
 from typing import TYPE_CHECKING
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from bertopic import BERTopic
 
 
-class VisualRepresentation(BaseRepresentation):
+class VisualRepresentation(TextConverter):
     """From a collection of representative documents, extract
     images to represent topics. These topics are represented by a
     collage of images.
@@ -77,63 +77,58 @@ class VisualRepresentation(BaseRepresentation):
                 "pipeline('image-to-text', model='nlpconnect/vit-gpt2-image-captioning')"
             )
         self.batch_size = batch_size
+        self.modality = Modality.IMAGE
 
     def extract_topics(
         self,
         topic_model: "BERTopic",
-        documents: pd.DataFrame,
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: dict[str, list[tuple[str, float]]],
-    ) -> dict[str, list[tuple[str, float]]]:
-        """Extract topics.
+        embeddings: np.ndarray = None,
+    ) -> dict[int, Images]:
+        """Extract a collage of representative images per topic.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
-            representative_images: Representative images per topic
+            An `Images` representation per topic, carrying the collage and its captions
         """
-        # Extract image ids of most representative documents
-        images = documents["Image"].to_numpy().tolist()
+        # Find the rows that best represent each topic
         (_, _, _, repr_docs_ids) = topic_model._extract_representative_docs(
-            c_tf_idf,
-            documents,
-            topics,
+            c_tf_idf=c_tf_idf,
+            corpus=corpus,
             nr_samples=self.nr_samples,
             nr_repr_docs=self.nr_repr_images,
         )
-        unique_topics = sorted(list(topics.keys()))
 
-        # Combine representative images into a single representation
-        representative_images = {}
-        for topic in tqdm(unique_topics):
-            # Get and order represetnative images
-            sliced_examplars = repr_docs_ids[topic + topic_model._outliers]
-            sliced_examplars = [sliced_examplars[i : i + 3] for i in range(0, len(sliced_examplars), 3)]
-            images_to_combine = [
-                [
-                    Image.open(images[index]) if isinstance(images[index], str) else images[index]
-                    for index in sub_indices
-                ]
-                for sub_indices in sliced_examplars
-            ]
+        # Combine each topic's images into a single collage
+        representations = {}
+        for index, topic in enumerate(tqdm(sorted(topic_representations))):
+            row_indices = repr_docs_ids[index]
+            images = [self._open(corpus.media[row]) for row in row_indices]
 
-            # Concatenate representative images
-            representative_image = get_concat_tile_resize(
-                images_to_combine, self.image_height, self.image_squares
-            )
-            representative_images[topic] = representative_image
+            # Tile the images three to a row before resizing them into one image
+            rows = [images[start : start + 3] for start in range(0, len(images), 3)]
+            collage = get_concat_tile_resize(rows, self.image_height, self.image_squares)
 
-            # Make sure to properly close images
-            if isinstance(images[0], str):
-                for image_list in images_to_combine:
-                    for image in image_list:
-                        image.close()
+            captions = [corpus.documents[row] for row in row_indices if corpus.documents[row]]
+            representations[topic] = Images(data=collage, captions=captions)
 
-        return representative_images
+            for image in images:
+                image.close()
+
+        return representations
+
+    @staticmethod
+    def _open(image):
+        """Open an image from a path, or copy one that is already loaded."""
+        return Image.open(image) if isinstance(image, str) else image.copy()
 
     def _convert_image_to_text(self, images: list[str], verbose: bool = False) -> list[str]:
         """Convert a list of images to captions.
@@ -160,45 +155,43 @@ class VisualRepresentation(BaseRepresentation):
 
         return documents
 
-    def image_to_text(self, corpus: Corpus) -> Corpus:
-        """Convert images to text."""
-        # Extract image centroids using MMR to remove (near-)duplicates
-        image_topic_embeddings = corpus.average_embeddings_by_topic()
-        image_centroids = {}
+    def to_text(self, corpus: Corpus) -> Corpus:
+        """Caption the most representative images per topic, keeping only those rows.
+
+        Captioning every image is the expensive step, so a diverse sample per topic
+        stands in for the whole: MMR picks images near each topic centroid while
+        discarding near-duplicates. The returned corpus holds only those rows, with
+        their captions in the text channel for c-TF-IDF to read.
+        """
+        image_rows = [index for index, modality in enumerate(corpus.modality) if modality == self.modality]
+        if self.image_to_text_model is None or not image_rows:
+            return corpus
+
+        # Pick a diverse sample of images near each topic's centroid
         selected_indices = []
-        for topic, topic_embedding in image_topic_embeddings.items():
-            indices = np.array([index for index, t in enumerate(corpus.topics) if t == topic])
-            top_n = min([self.nr_repr_images, len(indices)])
-            indices = mmr(
-                topic_embedding.reshape(1, -1),
-                corpus.embeddings[indices],
-                indices,
-                top_n=top_n,
-                diversity=0.1,
+        for topic, topic_embedding in corpus.average_embeddings_by_topic().items():
+            indices = np.array([index for index in image_rows if corpus.topics[index] == topic])
+            if not len(indices):
+                continue
+            selected_indices.extend(
+                mmr(
+                    topic_embedding.reshape(1, -1),
+                    corpus.embeddings[indices],
+                    indices,
+                    top_n=min(self.nr_repr_images, len(indices)),
+                    diversity=0.1,
+                )
             )
-            image_centroids[topic] = indices
-            selected_indices.extend(indices)
 
-        # Extract documents
+        # Caption them, so the text channel describes what the images show
         selected_corpus = corpus.get_corpus_by_indices(selected_indices)
-        selected_images = []
-        for image in selected_corpus.images:
-            if isinstance(image, str):
-                selected_images.append(Image.open(image))
-            else:
-                selected_images.append(image)
-        documents = self._convert_image_to_text(selected_images)
-        selected_corpus.documents = documents
+        images = [self._open(image) for image in selected_corpus.media]
+        selected_corpus.documents = self._convert_image_to_text(images)
 
-        # Properly close images
-        for image in selected_images:
-            if isinstance(image, Image.Image):
-                image.close()
-        for image in selected_corpus.images:
-            if isinstance(image, Image.Image):
-                image.close()
+        for image in images:
+            image.close()
 
-        return corpus
+        return selected_corpus
 
     def _chunks(self, images):
         for i in range(0, len(images), self.batch_size):

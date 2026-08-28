@@ -96,11 +96,6 @@ class Corpus:
         return [item for item, modality in zip(self.media, self.modality) if modality == Modality.IMAGE]
 
     @property
-    def has_only_images(self) -> bool:
-        """Check whether there are image rows and no text to describe them."""
-        return bool(self.images) and not any(self.documents)
-
-    @property
     def has_outliers(self) -> bool:
         """Check whether outlier topic (-1) is present."""
         return -1 in self.topics

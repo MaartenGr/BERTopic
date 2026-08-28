@@ -7,7 +7,7 @@ import numpy as np
 
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
-from bertopic._corpus import Corpus
+from bertopic._corpus import Corpus, Modality
 from bertopic._topics import Keywords, Label, StructuredJSON, TopicRepresentation
 
 from typing import TYPE_CHECKING
@@ -47,6 +47,22 @@ class BaseRepresentation(BaseEstimator):
             embeddings: Pre-trained document embeddings.
         """
         return topic_model.topic_representations_
+
+
+class TextConverter(BaseRepresentation):
+    """A representation model that can also turn its own modality into text.
+
+    c-TF-IDF is defined over words, so a topic whose rows are all images or audio has
+    nothing to describe it. A converter turns the rows of the modality it declares into
+    a text surrogate, which is why it runs earlier in the pipeline than representation
+    models otherwise do. Several converters can coexist, each handling its own rows.
+    """
+
+    modality: Modality
+
+    def to_text(self, corpus: Corpus) -> Corpus:
+        """Return a corpus whose text channel describes this modality's rows."""
+        raise NotImplementedError
 
 
 class LLMRepresentation(BaseRepresentation):

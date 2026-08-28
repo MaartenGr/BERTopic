@@ -171,7 +171,8 @@ def migrate_topics_pre_0_17_4(topics_dict: dict) -> Topics:
         # Topic aspects (additional representations)
         for aspect_name, aspect_data in topics_dict.get("topic_aspects", {}).items():
             if aspect_name == "Visual_Aspect":
-                continue  # TODO: Visual aspects currently not handled due to missing image representation
+                # 0.17.x wrote a `True` marker here; the images live beside the model as JPEGs
+                continue
 
             aspect_value = aspect_data[str_id]
             representations[aspect_name] = Keywords(data=[tuple(item) for item in aspect_value])

@@ -65,7 +65,8 @@ from bertopic.representation._mmr import mmr
 from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
-from bertopic._topics import Keywords, Topic, Topics, TopicRepresentation, TopicHierarchy
+from bertopic.representation._base import TextConverter
+from bertopic._topics import Images, Keywords, Topic, Topics, TopicRepresentation, TopicHierarchy
 from bertopic._corpus import Corpus, Modality
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
@@ -377,13 +378,16 @@ class BERTopic:
         }
 
     @property
-    def representative_images_(self) -> dict[int, str]:
+    def representative_images_(self) -> dict[int, Any]:
         """For backwards compatibility."""
-        return {
-            topic.id: topic.representative_images
-            for topic in self._topics
-            if topic.representative_images.size > 0
-        }
+        representative_images = {}
+        for topic in self._topics:
+            images = next(
+                (rep for rep in topic.representations.values() if isinstance(rep, Images)), None
+            )
+            if images is not None and images.data is not None:
+                representative_images[topic.id] = images.data
+        return representative_images
 
     @property
     def _outliers(self) -> int:
@@ -494,8 +498,8 @@ class BERTopic:
         # Combine zero-shot topics with clustered topics
         corpus = zeroshot.combine_zeroshot_topics(self, corpus, zeroshot_docs)
 
-        # Convert images to text if there are any (creates a new corpus)
-        corpus = self._images_to_text(corpus) if corpus.has_only_images else corpus
+        # Let converters describe their own modality in text, since c-TF-IDF needs words
+        corpus = self._convert_media_to_text(corpus)
 
         # 4/5/6) Process text documents
         self._extract_representations(corpus, verbose=self.verbose, fine_tune=not self.nr_topics)
@@ -2383,21 +2387,27 @@ class BERTopic:
             )
         return embeddings
 
-    def _images_to_text(self, corpus: Corpus) -> pd.DataFrame:
-        """Convert images to text."""
-        logger.info("Images - Converting images to text. This might take a while.")
+    def _flatten_representation_models(self) -> list[BaseRepresentation]:
+        """Every configured representation model, whether passed alone, in a list, or per aspect."""
         if isinstance(self.representation_model, dict):
-            for tuner in self.representation_model.values():
-                if getattr(tuner, "image_to_text_model", False):
-                    corpus = tuner.image_to_text(corpus)
+            configured = list(self.representation_model.values())
         elif isinstance(self.representation_model, list):
-            for tuner in self.representation_model:
-                if getattr(tuner, "image_to_text_model", False):
-                    corpus = tuner.image_to_text(corpus)
-        elif isinstance(self.representation_model, BaseRepresentation):
-            if getattr(self.representation_model, "image_to_text_model", False):
-                corpus = self.representation_model.image_to_text(corpus)
-        logger.info("Images - Completed \u2713")
+            configured = self.representation_model
+        elif self.representation_model is not None:
+            configured = [self.representation_model]
+        else:
+            return []
+
+        # An aspect may itself be a list of models applied in sequence
+        return [model for entry in configured for model in (entry if isinstance(entry, list) else [entry])]
+
+    def _convert_media_to_text(self, corpus: Corpus) -> Corpus:
+        """Let each converter turn the rows of its own modality into text for c-TF-IDF."""
+        for model in self._flatten_representation_models():
+            if isinstance(model, TextConverter):
+                logger.info(f"Media - Converting {model.modality.value} to text. This might take a while.")
+                corpus = model.to_text(corpus)
+                logger.info("Media - Completed ✓")
         return corpus
 
     def _reduce_dimensionality(
@@ -3153,7 +3163,7 @@ def _create_model_from_files(
     tensors: dict[str, np.array],
     ctfidf_tensors: dict[str, Any] | None = None,
     ctfidf_config: dict[str, Any] | None = None,
-    images: dict[int, Any] | None = None,  # TODO: Handle images
+    images: dict[int, Any] | None = None,
     warn_no_backend: bool = True,
 ):
     """Create a BERTopic model from a variety of inputs.
@@ -3236,6 +3246,16 @@ def _create_model_from_files(
             idf, offsets=0, shape=(len(idf), len(idf)), format="csr", dtype=np.float64
         )
 
-    # TODO: Handle images - they're currently stored in topic_aspects_ but should move to Topic
+    # Representative images are saved beside the model as JPEGs rather than in the JSON,
+    # so they are attached back to the representation that describes them
+    for topic_id, image in (images or {}).items():
+        topic = topic_model._topics.get(topic_id)
+        if topic is None:
+            continue
+        restored = next((rep for rep in topic.representations.values() if isinstance(rep, Images)), None)
+        if restored is None:
+            restored = Images()
+            topic.representations["Visual_Aspect"] = restored
+        restored.data = image
 
     return topic_model
