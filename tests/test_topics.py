@@ -55,7 +55,7 @@ def build_topics(counts: dict[int, int], probabilities: np.ndarray | None = None
     )
 
     if probabilities is not None:
-        topics._original_probabilities = probabilities
+        topics.probabilities = probabilities
 
     return topics
 
@@ -133,13 +133,9 @@ def test_sort_by_frequency_records_the_cumulative_mapping():
     topics = build_topics({-1: 5, 0: 2, 1: 8, 2: 4})
     topics.sort_by_frequency()
 
-    assert topics.get_mappings(from_original=True) == {-1: -1, 1: 0, 2: 1, 0: 2}
+    assert topics.get_mappings() == {-1: -1, 1: 0, 2: 1, 0: 2}
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="TopicMapping.map_probabilities ignores the outlier column; fixed in unit 5",
-)
 def test_reordering_permutes_probability_columns():
     """Reordering topics permutes the columns without losing or duplicating mass."""
     probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
@@ -150,10 +146,6 @@ def test_reordering_permutes_probability_columns():
     assert topics.probabilities[0].tolist() == pytest.approx([0.1, 0.6, 0.1, 0.2])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="TopicMapping.map_probabilities drops the outlier column; fixed in unit 5",
-)
 def test_reordering_preserves_total_probability_mass():
     """A permutation cannot change how much mass a document carries."""
     probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
@@ -209,7 +201,7 @@ def test_zeroshot_topics_are_placed_before_clustered_topics():
 
     # Zero-shot topics keep their order even though topic 0 holds the fewest documents,
     # while the clustered topics 2, 3 and 4 are sorted by frequency behind them
-    assert topics.get_mappings(from_original=True) == {0: 0, 1: 1, 3: 2, 4: 3, 2: 4}
+    assert topics.get_mappings() == {0: 0, 1: 1, 3: 2, 4: 3, 2: 4}
     assert topics.labels[0] == "alpha"
     assert topics.labels[1] == "beta"
 
@@ -219,7 +211,7 @@ def test_zeroshot_only_model_keeps_every_topic_in_label_order():
     topics = Topics().initialize([0] * 1 + [1] * 7, zeroshot_labels=["alpha", "beta"])
     topics.sort_by_frequency()
 
-    assert topics.get_mappings(from_original=True) == {0: 0, 1: 1}
+    assert topics.get_mappings() == {0: 0, 1: 1}
     assert [topics[topic_id].topic_type for topic_id in topics.topic_ids()] == [
         TopicType.ZERO_SHOT,
         TopicType.ZERO_SHOT,
@@ -231,7 +223,7 @@ def test_clustered_only_model_is_sorted_purely_by_frequency():
     topics = Topics().initialize([0] * 1 + [1] * 7 + [2] * 3)
     topics.sort_by_frequency()
 
-    assert topics.get_mappings(from_original=True) == {1: 0, 2: 1, 0: 2}
+    assert topics.get_mappings() == {1: 0, 2: 1, 0: 2}
 
 
 def test_zeroshot_topics_survive_alongside_an_outlier():
@@ -242,7 +234,7 @@ def test_zeroshot_topics_survive_alongside_an_outlier():
 
     assert topics.topic_ids() == [-1, 0, 1, 2]
     assert topics[-1].topic_type == TopicType.OUTLIER
-    assert topics.get_mappings(from_original=True) == {-1: -1, 0: 0, 1: 1, 2: 2}
+    assert topics.get_mappings() == {-1: -1, 0: 0, 1: 1, 2: 2}
 
 
 # --------------------------------------------------------------------------------------
@@ -290,13 +282,9 @@ def test_merge_composes_with_an_earlier_reordering():
     topics.merge({-1: -1, 0: 0, 1: 0, 2: 1})
 
     # Original 1 and 2 were sorted to 0 and 1, then merged together into 0
-    assert topics.get_mappings(from_original=True) == {-1: -1, 1: 0, 2: 0, 0: 1}
+    assert topics.get_mappings() == {-1: -1, 1: 0, 2: 0, 0: 1}
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Corpus.map_probabilities sums but TopicMapping overwrites; fixed in unit 5",
-)
 def test_merge_sums_probability_columns():
     """Merging topics adds their probability mass together rather than discarding it."""
     probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
@@ -361,10 +349,6 @@ def test_delete_accepts_a_single_topic_id():
     assert topics[-1].nr_documents == 9
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="delete_topics never touches probabilities, leaving them stale; fixed in unit 5",
-)
 def test_delete_sums_probability_mass_into_the_outlier():
     """A deleted topic's probability mass moves to the outlier, mirroring its documents."""
     probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
@@ -387,18 +371,9 @@ def test_mapping_composes_successive_operations():
     mapping.apply({0: 0, 1: 1, 2: 0})
 
     # Original 0 went to 2 then to 0, original 1 went to 0 then stayed, original 2 went to 1 then 1
-    assert mapping.map(0, from_original=True) == 0
-    assert mapping.map(1, from_original=True) == 0
-    assert mapping.map(2, from_original=True) == 1
-
-
-def test_mapping_reports_the_most_recent_step_separately():
-    """The recent mapping describes the last step only, which is what Corpus consumes."""
-    mapping = TopicMapping()
-    mapping.apply({0: 2, 1: 0, 2: 1})
-    mapping.apply({0: 0, 1: 1, 2: 0})
-
-    assert mapping.map(2, from_original=False) == 0
+    assert mapping.map(0) == 0
+    assert mapping.map(1) == 0
+    assert mapping.map(2) == 1
 
 
 def test_unknown_topic_ids_map_to_themselves():
@@ -406,7 +381,7 @@ def test_unknown_topic_ids_map_to_themselves():
     mapping = TopicMapping()
     mapping.apply({0: 1, 1: 0})
 
-    assert mapping.map(99, from_original=True) == 99
+    assert mapping.map(99) == 99
 
 
 def test_mapping_rejects_an_incomplete_new_mapping():
@@ -475,7 +450,7 @@ def test_round_trip_preserves_topics_and_mapping():
     assert restored.topic_ids() == topics.topic_ids()
     assert restored.frequencies() == topics.frequencies()
     assert restored.predictions == topics.predictions
-    assert restored.get_mappings(from_original=True) == topics.get_mappings(from_original=True)
+    assert restored.get_mappings() == topics.get_mappings()
     assert restored[0].representations["Main"].words == topics[0].representations["Main"].words
 
 
@@ -535,21 +510,26 @@ def test_hierarchy_round_trip_preserves_node_data():
 # --------------------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Corpus holds a second copy of assignments that needs manual syncing; fixed in unit 5",
-)
-def test_corpus_assignments_follow_topic_mutations_without_a_manual_sync():
-    """Reading assignments after a mutation must not require a separate sync step.
+def test_corpus_cannot_remap_assignments_itself():
+    """Assignments have one owner: `Topics` decides them, `Corpus` only carries them.
 
-    Today `Topics` and `Corpus` each hold document assignments, kept in step by hand
-    through `map_topics_and_probabilities` at nine call sites. Collapsing them to one
-    store is what makes this test pass.
+    The two used to be kept in step by hand at nine call sites, with probability
+    remapping implemented twice under contradicting semantics — one summing on merge,
+    the other overwriting. `Corpus` no longer has the machinery to remap anything, which
+    is what makes them unable to disagree.
     """
-    topics = build_topics({-1: 2, 0: 4, 1: 2})
-    corpus = Corpus(documents=[f"document {index}" for index in range(8)])
-    corpus.topics = np.array(topics.predictions)
+    assert not hasattr(Corpus, "map_topics")
+    assert not hasattr(Corpus, "map_probabilities")
+    assert not hasattr(Corpus, "map_topics_and_probabilities")
 
-    topics.merge({-1: -1, 0: 0, 1: 0})
 
-    assert list(corpus.topics) == topics.predictions
+def test_topics_keeps_rows_and_probabilities_consistent_through_a_merge():
+    """Every mutation moves the rows with the topics, in one step."""
+    probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
+    topics = build_topics({-1: 5, 0: 8, 1: 4, 2: 2}, probabilities)
+
+    topics.merge({-1: -1, 0: 0, 1: 0, 2: 1})
+
+    assert set(topics.predictions) <= set(topics.topic_ids())
+    assert topics.probabilities.shape == (19, len(topics.topic_ids()))
+    assert topics.probabilities[0].sum() == pytest.approx(1.0)

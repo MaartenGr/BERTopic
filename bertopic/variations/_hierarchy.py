@@ -132,8 +132,8 @@ def hierarchical_topics(
     hierarchy = TopicHierarchy(
         linkage_matrix=Z,
         n_leaves=n_leaves,
-        _original_predictions=np.array(topic_model.topics_),
-        _original_probabilities=topic_model.probabilities_,
+        predictions=list(topic_model.topics_),
+        probabilities=topic_model.probabilities_,
     )
 
     # Add outlier topic if it exists

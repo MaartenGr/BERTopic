@@ -667,8 +667,8 @@ class BERTopic:
             logger.info("Cluster - Completed \u2713")
 
             # Map probabilities and predictions
-            predictions = self._topics.map_predictions(predictions, from_original=True)
-            probabilities = self._topics.map_probabilities(probabilities, from_original=True)
+            predictions = self._topics.map_predictions(predictions)
+            probabilities = self._topics.align_probabilities(probabilities)
 
         return predictions, probabilities
 
@@ -776,13 +776,11 @@ class BERTopic:
             for topic_id in new_topic_ids:
                 self._topics.topics[topic_id] = Topic(id=topic_id, nr_documents=0)
 
-            self._topics._original_predictions = np.concatenate(
-                [self._topics._original_predictions, np.array(corpus.topics)]
-            )
+            self._topics.predictions.extend(int(topic) for topic in corpus.topics)
 
-            if corpus.probabilities is not None:
-                self._topics._original_probabilities = np.concatenate(
-                    [self._topics._original_probabilities, corpus.probabilities]
+            if corpus.probabilities is not None and self._topics.probabilities is not None:
+                self._topics.probabilities = np.concatenate(
+                    [self._topics.probabilities, corpus.probabilities]
                 )
 
             for topic_id in set(corpus.topics):
@@ -1235,9 +1233,12 @@ class BERTopic:
             if len(self.probabilities_.shape) == 1:
                 data["Probability"] = self.probabilities_.tolist()
             else:
+                # Column `j` holds topic `topic_ids()[j]`, so the assigned topic's
+                # probability is read directly rather than derived
+                topic_ids = self._topics.topic_ids()
                 data["Probability"] = [
-                    max(probs) if tid != -1 else 1 - sum(probs)
-                    for tid, probs in zip(predictions, self.probabilities_)
+                    float(probabilities[topic_ids.index(topic_id)])
+                    for topic_id, probabilities in zip(predictions, self.probabilities_)
                 ]
 
         # Custom metadata
@@ -1600,9 +1601,8 @@ class BERTopic:
         self._topics.merge(mapping)
 
         # Map corpus topics to match merged state and then sort by frequency
-        corpus.map_topics_and_probabilities(self._topics, from_original=False)
         self._topics.sort_by_frequency()
-        corpus.map_topics_and_probabilities(self._topics, from_original=False)
+        corpus.topics, corpus.probabilities = self._topics.predictions, self._topics.probabilities
 
         # Recalculate representations from merged documents
         self._extract_representations(corpus)
@@ -2490,27 +2490,25 @@ class BERTopic:
             except AttributeError:
                 corpus.topics = corpus.y
 
-        # Create Topics object and sort by frequency
-        if not partial_fit:
-            self._topics.initialize(corpus.topics).sort_by_frequency()
-            corpus.map_topics_and_probabilities(self._topics, from_original=True)
-
-        # Extract probabilities
+        # Extract probabilities in the cluster model's own label order
         if hasattr(self.hdbscan_model, "probabilities_"):
             corpus.probabilities = self.hdbscan_model.probabilities_
 
             if self.calculate_probabilities and is_supported_hdbscan(self.hdbscan_model):
                 corpus.probabilities = hdbscan_delegator(self.hdbscan_model, "all_points_membership_vectors")
 
-                # HDBSCAN only produces probabilities for non-outliers. The outliers
-                # get a probability of 1 - sum(probabilities). Update the `corpus.probabilities` to
-                # add this new column at the beginning of the array.
+                # HDBSCAN gives a column per cluster and none for outliers, whose share is
+                # therefore whatever is left over. Column 0 then lines up with topic -1.
                 if -1 in corpus.topics:
-                    outlier_probs = 1 - np.sum(corpus.probabilities, axis=1)
-                    corpus.probabilities = np.hstack([outlier_probs.reshape(-1, 1), corpus.probabilities])
+                    outlier_probabilities = 1 - np.sum(corpus.probabilities, axis=1)
+                    corpus.probabilities = np.hstack(
+                        [outlier_probabilities.reshape(-1, 1), corpus.probabilities]
+                    )
 
-            if not partial_fit:
-                self._topics._original_probabilities = corpus.probabilities.copy()
+        # Hand the rows to Topics, which owns them from here on, and renumber by frequency
+        if not partial_fit:
+            self._topics.initialize(corpus.topics, probabilities=corpus.probabilities).sort_by_frequency()
+            corpus.topics, corpus.probabilities = self._topics.predictions, self._topics.probabilities
 
         logger.info("Cluster - Completed \u2713")
 
@@ -2992,11 +2990,10 @@ class BERTopic:
             for topic_id in self._topics.topic_ids()
         }
         self._topics.merge(mappings)
-        corpus.map_topics_and_probabilities(self._topics, from_original=False)
 
-        # Update frequency
+        # Update frequency, then take the rows back from the single store that owns them
         self._topics.sort_by_frequency()
-        corpus.map_topics_and_probabilities(self._topics, from_original=False)
+        corpus.topics, corpus.probabilities = self._topics.predictions, self._topics.probabilities
 
         # Recalculate topic representations
         self._extract_representations(corpus=corpus, verbose=self.verbose)
@@ -3057,11 +3054,10 @@ class BERTopic:
             for topic_id in self._topics.topic_ids()
         }
         self._topics.merge(mappings)
-        corpus.map_topics_and_probabilities(self._topics, from_original=False)
 
-        # Update frequency
+        # Update frequency, then take the rows back from the single store that owns them
         self._topics.sort_by_frequency()
-        corpus.map_topics_and_probabilities(self._topics, from_original=False)
+        corpus.topics, corpus.probabilities = self._topics.predictions, self._topics.probabilities
 
         # Recalculate topic representations
         self._extract_representations(corpus=corpus, verbose=self.verbose)

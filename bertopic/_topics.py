@@ -202,92 +202,52 @@ class TopicType(str, Enum):
 
 @dataclass
 class TopicMapping:
-    """Tracks cumulative topic ID transformations from original to current state.
-    Also keeps track of the most recent mapping applied.
+    """Tracks how a cluster model's original labels map to the current topic IDs.
+
+    Only `transform` needs this. A cluster model hands back the labels it invented while
+    fitting, which have to be translated into whatever the topics were renumbered to
+    since. Rows that were part of the fit keep their assignments in `Topics.predictions`
+    instead, so nothing here describes the fitted corpus.
     """
 
     _mapping: dict[int, int] = field(default_factory=dict)
-    _recent_mapping: dict[int, int] = field(default_factory=dict)
 
-    def apply(self, new_mapping: dict[int, int]) -> None:
-        """Compose a new mapping: original -> current becomes original -> new_current."""
+    def apply(self, old_to_new: dict[int, int]) -> None:
+        """Compose a renumbering, keeping the mapping original -> current."""
         if not self._mapping:
-            self._mapping = new_mapping.copy()
-            self._recent_mapping = new_mapping.copy()
-        else:
-            missing = sorted(set(self._mapping.values()) - set(new_mapping))
-            if missing:
-                raise ValueError(
-                    f"The mapping is missing topics {missing}. Every current topic must appear "
-                    "in a new mapping, including topics that hold no documents."
-                )
-            self._mapping = {original: new_mapping[current] for original, current in self._mapping.items()}
-            self._recent_mapping = new_mapping.copy()
+            self._mapping = old_to_new.copy()
+            return
 
-    def map(self, topic_id: int, from_original: bool = True) -> int:
-        """Map an ID to its current ID.
+        missing = sorted(set(self._mapping.values()) - set(old_to_new))
+        if missing:
+            raise ValueError(
+                f"The mapping is missing topics {missing}. Every current topic must appear "
+                "in a new mapping, including topics that hold no documents."
+            )
+        self._mapping = {original: old_to_new[current] for original, current in self._mapping.items()}
 
-        Arguments:
-            topic_id: The topic ID to map.
-            from_original: If True, map from the original ID to current.
-                           If False, map from the last applied mapping to current.
-        """
-        if from_original:
-            return self._mapping.get(topic_id, topic_id)
-        else:
-            return self._recent_mapping.get(topic_id, topic_id)
+    def map(self, topic_id: int) -> int:
+        """Translate one original cluster label into its current topic ID."""
+        return self._mapping.get(topic_id, topic_id)
 
-    def map_predictions(self, predictions: list[int], from_original: bool = True) -> list[int]:
-        """Map a list of original predictions to current IDs."""
-        return [self.map(p, from_original) for p in predictions]
-
-    def map_probabilities(self, probabilities: np.ndarray, from_original: bool = True) -> np.ndarray:
-        """Map a 2D array of probabilities to current IDs."""
-        if from_original:
-            mapped_probs = np.zeros((probabilities.shape[0], len(set(self._mapping.values()))))
-            for original_id, current_id in self._mapping.items():
-                if original_id >= 0 and current_id >= 0:
-                    mapped_probs[:, current_id] = probabilities[:, original_id]
-            return mapped_probs
-        else:
-            mapped_probs = np.zeros((probabilities.shape[0], len(set(self._recent_mapping.values()))))
-            for last_id, current_id in self._recent_mapping.items():
-                if last_id >= 0 and current_id >= 0:
-                    mapped_probs[:, current_id] = probabilities[:, last_id]
-            return mapped_probs
-
-    def add_new_topics(self, new_mappings: dict[int, int]) -> None:
-        """Add mappings for newly discovered topics in online learning.
-
-        Arguments:
-            new_mappings: Mapping from new cluster IDs to new topic IDs
-        """
-        self._mapping.update(new_mappings)
-        self._recent_mapping.update(new_mappings)
+    def map_predictions(self, predictions: list[int] | np.ndarray) -> list[int]:
+        """Translate a cluster model's labels into current topic IDs."""
+        return [self.map(int(prediction)) for prediction in predictions]
 
     def reset(self) -> None:
-        """Clear the mapping (e.g., after re-fitting)."""
+        """Clear the mapping, so current IDs become the originals."""
         self._mapping.clear()
-        self._recent_mapping.clear()
 
     def to_dict(self) -> dict:
         """Serialize to dictionary."""
-        return {
-            "mapping": {str(k): v for k, v in self._mapping.items()},
-            "recent_mapping": {str(k): v for k, v in self._recent_mapping.items()},
-        }
+        return {"mapping": {str(original): current for original, current in self._mapping.items()}}
 
     @classmethod
     def from_dict(cls, data: dict) -> "TopicMapping":
         """Deserialize from dictionary."""
         mapping = cls()
-        mapping._mapping = {int(k): v for k, v in data.get("mapping", {}).items()}
-        mapping._recent_mapping = {int(k): v for k, v in data.get("recent_mapping", {}).items()}
+        mapping._mapping = {int(original): current for original, current in data.get("mapping", {}).items()}
         return mapping
-
-    def copy(self) -> "TopicMapping":
-        """Create a copy of this mapping."""
-        return TopicMapping.from_dict(self.to_dict())
 
 
 @dataclass
@@ -486,14 +446,10 @@ class Topics:
     topics: dict[int, Topic] = field(default_factory=dict)
     mapping: TopicMapping = field(default_factory=TopicMapping)
 
-    # Document metadata (optional)
-    # NOTE: These are the original predictions/probabilities from the
-    # clustering algorithm before any remapping.
-    _original_predictions: np.ndarray = field(default_factory=lambda: np.array([]))
-    _original_probabilities: np.ndarray | None = None
-
-    # Zero-shot probabilities (optional)
-    _zeroshot_probabilities: np.ndarray | None = None
+    # One assignment per row, always in current topic IDs. Rows are whatever was fitted,
+    # which is not necessarily the user's documents.
+    predictions: list[int] = field(default_factory=list)
+    probabilities: np.ndarray | None = None
 
     # History of actions applied to this collection
     actions: list[TopicAction] = field(default_factory=list)
@@ -507,22 +463,6 @@ class Topics:
         """Get labels for all topics."""
         labels = {topic.id: topic.label if topic.label is not None else "" for topic in self.topics.values()}
         return dict(sorted(labels.items()))
-
-    @property
-    def predictions(self) -> list[int]:
-        """Get current predictions (mapped from original)."""
-        return self.mapping.map_predictions(self._original_predictions.tolist(), from_original=True)
-
-    @property
-    def probabilities(self) -> np.ndarray | None:
-        """Get current probabilities."""
-        if self._zeroshot_probabilities is not None:
-            return self._zeroshot_probabilities
-        elif self._original_probabilities is not None:
-            if self._original_probabilities.ndim == 1:
-                return self._original_probabilities
-            elif self._original_probabilities.ndim == 2:
-                return self.mapping.map_probabilities(self._original_probabilities, from_original=True)
 
     @property
     def c_tf_idf(self) -> csr_matrix:
@@ -587,8 +527,9 @@ class Topics:
         predictions: list[int] | np.ndarray = None,
         zeroshot_labels: list[str] | None = None,
         topic_type: TopicType = TopicType.NORMAL,
+        probabilities: np.ndarray | None = None,
     ):
-        """Initialize topics from clustering predictions."""
+        """Initialize topics from a cluster model's assignments."""
         if isinstance(predictions, np.ndarray):
             predictions = predictions.tolist()
 
@@ -608,8 +549,8 @@ class Topics:
                 _label=label,
             )
 
-        # Set original predictions/probabilities
-        self._original_predictions = np.array(predictions)
+        self.predictions = list(predictions)
+        self.probabilities = probabilities
 
         # Log the initialization
         self.add_action(TopicAction.INITIALIZED)
@@ -694,13 +635,33 @@ class Topics:
             actions=self.actions.copy(),
         )
 
+    def _apply_to_rows(self, old_to_new: dict[int, int], column_order: list[int]) -> None:
+        """Move every row's assignment and probability column to the new topic IDs.
+
+        Columns are summed rather than overwritten, so this covers merging and deleting
+        as well as renumbering: topics that collapse into one add their mass together,
+        and deleted topics map to -1 and so add theirs to the outlier.
+        """
+        self.predictions = [old_to_new[prediction] for prediction in self.predictions]
+
+        if self.probabilities is None or self.probabilities.ndim != 2:
+            return
+
+        new_ids = sorted(set(old_to_new.values()))
+        remapped = np.zeros((self.probabilities.shape[0], len(new_ids)))
+        for position, old_id in enumerate(column_order):
+            remapped[:, new_ids.index(old_to_new[old_id])] += self.probabilities[:, position]
+        self.probabilities = remapped
+
     def remap(self, old_to_new: dict[int, int]) -> None:
         """Apply an ID remapping to topics and update cumulative mapping.
         This is expected to be a one to one mapping.
         """
+        column_order = sorted(self.topics)
         for topic in self.topics.values():
             topic.id = old_to_new[topic.id]
         self.topics = {topic.id: topic for topic in self.topics.values()}
+        self._apply_to_rows(old_to_new, column_order)
         self.mapping.apply(old_to_new)
 
     def merge(self, old_to_new: dict[int, int]) -> None:
@@ -721,6 +682,8 @@ class Topics:
             old_to_new: A dictionary mapping old topic IDs to new topic IDs.
                         New topics are fewer than old topics.
         """
+        column_order = sorted(self.topics)
+
         # Group old topic IDs by their new target ID
         new_to_old: dict[int, list[int]] = defaultdict(list)
         for old_id, new_id in old_to_new.items():
@@ -773,6 +736,7 @@ class Topics:
             )
 
         self.topics = merged_topics
+        self._apply_to_rows(old_to_new, column_order)
         self.mapping.apply(old_to_new)
         self.add_action(TopicAction.MERGED)
 
@@ -828,6 +792,7 @@ class Topics:
             self.topics[-1].nr_documents += deleted_doc_count
 
         # Build mapping: deleted -> -1, others -> themselves
+        column_order = sorted(self.topics)
         old_to_new = {topic_id: -1 if topic_id in topics else topic_id for topic_id in self.topics.keys()}
         old_to_new[-1] = -1
 
@@ -836,43 +801,38 @@ class Topics:
             if topic_id in self.topics:
                 del self.topics[topic_id]
 
+        self._apply_to_rows(old_to_new, column_order)
         self.mapping.apply(old_to_new)
         self.add_action(TopicAction.DELETED)
 
-    def map_predictions(self, predictions: list[int], from_original: bool) -> list[int]:
-        """Map a list of original predictions to current IDs.
+    def map_predictions(self, predictions: list[int] | np.ndarray) -> list[int]:
+        """Translate a cluster model's labels into current topic IDs, for new rows."""
+        return self.mapping.map_predictions(predictions)
 
-        Arguments:
-            predictions: List of topic IDs to map.
-            from_original: If True, map from original IDs to current.
-                           If False, map from last applied mapping to current.
+    def align_probabilities(self, probabilities: np.ndarray | None) -> np.ndarray | None:
+        """Turn a cluster model's raw membership matrix into one column per current topic.
+
+        Cluster models emit a column per cluster in their own label order and none for
+        outliers, whose share is therefore whatever is left over. Columns are summed so
+        that clusters which have since been merged land on the same topic.
         """
-        return [int(self.mapping.map(prediction, from_original=from_original)) for prediction in predictions]
+        if probabilities is None or probabilities.ndim != 2:
+            return probabilities
 
-    def map_probabilities(self, probabilities: np.ndarray, from_original: bool) -> np.ndarray:
-        """Map a 2D array of probabilities to current IDs.
+        topic_ids = self.topic_ids()
+        aligned = np.zeros((probabilities.shape[0], len(topic_ids)))
+        for label in range(probabilities.shape[1]):
+            topic_id = self.mapping.map(label)
+            if topic_id in topic_ids:
+                aligned[:, topic_ids.index(topic_id)] += probabilities[:, label]
 
-        Arguments:
-            probabilities: 2D array of shape (n_samples, n_topics) to map.
-            from_original: If True, map from original IDs to current.
-                           If False, map from last applied mapping to current.
-        """
-        if probabilities is not None:
-            return self.mapping.map_probabilities(probabilities, from_original=from_original)
-        else:
-            return None
+        if -1 in topic_ids:
+            aligned[:, 0] = 1 - aligned.sum(axis=1)
+        return aligned
 
-    def get_mappings(self, from_original: bool = True) -> dict[int, int]:
-        """Get the current topic ID mappings.
-
-        Arguments:
-            from_original: If True, get mapping from original IDs to current.
-                           If False, get mapping from last applied mapping to current.
-        """
-        if from_original:
-            return self.mapping._mapping.copy()
-        else:
-            return self.mapping._recent_mapping.copy()
+    def get_mappings(self) -> dict[int, int]:
+        """Get the mapping from the cluster model's original labels to current topic IDs."""
+        return self.mapping._mapping.copy()
 
     def to_polars(self, topic: int | None = None) -> pl.DataFrame:
         """Convert topic info to a polars DataFrame."""
@@ -900,15 +860,12 @@ class Topics:
             "bertopic_version": BERTOPIC_VERSION,
             "topics": {str(tid): topic.to_dict(full=full) for tid, topic in self.topics.items()},
             "mapping": self.mapping.to_dict(),
-            "predictions": self._original_predictions.tolist() if self._original_predictions.size > 0 else [],
+            "predictions": list(self.predictions),
             "actions": [a.value for a in self.actions],
         }
 
-        if full:
-            if self._original_probabilities is not None:
-                data["original_probabilities"] = self._original_probabilities.tolist()
-            if self._zeroshot_probabilities is not None:
-                data["zeroshot_probabilities"] = self._zeroshot_probabilities.tolist()
+        if full and self.probabilities is not None:
+            data["probabilities"] = self.probabilities.tolist()
 
         return data
 
@@ -918,14 +875,11 @@ class Topics:
         topics = cls()
         topics.topics = {int(tid): Topic.from_dict(td) for tid, td in data.get("topics", {}).items()}
         topics.mapping = TopicMapping.from_dict(data.get("mapping", {}))
-        topics._original_predictions = np.array(data.get("predictions", []))
+        topics.predictions = list(data.get("predictions", []))
         topics.actions = [TopicAction(a) for a in data.get("actions", [])]
 
-        # Handle full format fields
-        if "original_probabilities" in data:
-            topics._original_probabilities = np.array(data["original_probabilities"])
-        if "zeroshot_probabilities" in data:
-            topics._zeroshot_probabilities = np.array(data["zeroshot_probabilities"])
+        if "probabilities" in data:
+            topics.probabilities = np.array(data["probabilities"])
 
         return topics
 
@@ -999,8 +953,8 @@ class Topics:
         other_preds = [id_mapping[p] for p in other.predictions]
         all_preds = current_preds + other_preds
 
-        # Store as new "original" with identity mapping
-        self._original_predictions = np.array(all_preds)
+        # These rows are now the reference point, so the cluster mapping starts over
+        self.predictions = all_preds
         self.mapping.reset()
 
         # Recalculate document counts
@@ -1043,8 +997,8 @@ class TopicHierarchy:
         linkage_matrix: The scipy linkage matrix used to create the hierarchy.
         n_leaves: The number of leaf topics (excluding the outlier topic).
         outlier_topic: The outlier topic (if any). Not part of the hierarchy tree.
-        _original_predictions: Original document-to-leaf-topic predictions from fit.
-        _original_probabilities: Original document-to-leaf-topic probabilities from fit.
+        predictions: Row-to-leaf-topic assignments from the fit this hierarchy was built on.
+        probabilities: Row-to-leaf-topic probabilities from that same fit.
     """
 
     # Hierarchy structure
@@ -1056,8 +1010,8 @@ class TopicHierarchy:
     outlier_topic: Topic | None = None
 
     # Original values from fitting
-    _original_predictions: np.ndarray = field(default_factory=lambda: np.array([]))
-    _original_probabilities: np.ndarray | None = None
+    predictions: list[int] = field(default_factory=list)
+    probabilities: np.ndarray | None = None
 
     @property
     def root(self) -> Topic:
@@ -1136,12 +1090,11 @@ class TopicHierarchy:
             for leaf_id in topic.leaf_topic_ids:
                 old_to_new[leaf_id] = new_id
 
-        # Create Topics
+        # Create Topics, moving the rows onto the topic IDs at this level of the tree
         topics = Topics()
-        topics._original_predictions = self._original_predictions.copy()
-        topics._original_probabilities = (
-            self._original_probabilities.copy() if self._original_probabilities is not None else None
-        )
+        topics.predictions = list(self.predictions)
+        topics.probabilities = self.probabilities.copy() if self.probabilities is not None else None
+        topics._apply_to_rows(old_to_new, sorted(old_to_new))
         topics.mapping.apply(old_to_new)
 
         # Add outlier topic
@@ -1195,7 +1148,7 @@ class TopicHierarchy:
             "linkage_matrix": self.linkage_matrix.tolist() if self.linkage_matrix.size > 0 else [],
             "n_leaves": self.n_leaves,
             "outlier_topic": self.outlier_topic.to_dict(full=True) if self.outlier_topic else None,
-            "predictions": self._original_predictions.tolist() if self._original_predictions.size > 0 else [],
+            "predictions": list(self.predictions),
         }
 
     @classmethod
@@ -1208,5 +1161,5 @@ class TopicHierarchy:
         hierarchy.outlier_topic = (
             Topic.from_dict(data["outlier_topic"]) if data.get("outlier_topic") else None
         )
-        hierarchy._original_predictions = np.array(data.get("predictions", []))
+        hierarchy.predictions = list(data.get("predictions", []))
         return hierarchy
