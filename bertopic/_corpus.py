@@ -5,7 +5,6 @@ from scipy.sparse import csr_matrix
 from collections import defaultdict
 
 
-
 class Modality(str, Enum):
     """What a row is, which determines whether its source lives in `documents` or `media`."""
 
