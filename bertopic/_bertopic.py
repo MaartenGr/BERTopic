@@ -382,9 +382,7 @@ class BERTopic:
         """For backwards compatibility."""
         representative_images = {}
         for topic in self._topics:
-            images = next(
-                (rep for rep in topic.representations.values() if isinstance(rep, Images)), None
-            )
+            images = next((rep for rep in topic.representations.values() if isinstance(rep, Images)), None)
             if images is not None and images.data is not None:
                 representative_images[topic.id] = images.data
         return representative_images
