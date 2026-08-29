@@ -176,7 +176,7 @@ class OpenAI(BaseRepresentation):
             del self.generator_kwargs["model"]
         if self.generator_kwargs.get("prompt"):
             del self.generator_kwargs["prompt"]
-        if not self.generator_kwargs.get("stop"):
+        if "stop" not in self.generator_kwargs:
             self.generator_kwargs["stop"] = "\n"
 
     def extract_topics(
