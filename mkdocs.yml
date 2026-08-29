@@ -40,6 +40,7 @@ nav:
       - Variations:
         - Dynamic Topic Modeling: getting_started/topicsovertime/topicsovertime.md
         - Hierarchical Topic Modeling: getting_started/hierarchicaltopics/hierarchicaltopics.md
+        - Topic Taxonomy: getting_started/taxonomy/taxonomy.md
         - Multimodal Topic Modeling: getting_started/multimodal/multimodal.md
         - Online Topic Modeling: getting_started/online/online.md
         - Merge Multiple Models: getting_started/merge/merge.md
