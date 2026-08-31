@@ -66,10 +66,10 @@ If you want to install BERTopic with other embedding models, you can choose one 
 
 ```bash
 # Choose an embedding backend
-pip install bertopic[flair,gensim,spacy,use]
+pip install "bertopic[flair,gensim,spacy,use]"
 
 # Topic modeling with images
-pip install bertopic[vision]
+pip install "bertopic[vision]"
 ```
 
 For a *light-weight installation* without transformers, UMAP and/or HDBSCAN (for training with Model2Vec or inference), see [this tutorial](https://maartengr.github.io/BERTopic/getting_started/tips_and_tricks/tips_and_tricks.html#lightweight-installation).
