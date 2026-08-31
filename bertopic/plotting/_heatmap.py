@@ -1,20 +1,24 @@
 import numpy as np
-from typing import List, Union
 from scipy.cluster.hierarchy import fcluster, linkage
 from sklearn.metrics.pairwise import cosine_similarity
 from bertopic._utils import select_topic_representation
+from bertopic.plotting._utils import select_topics
 
 import plotly.express as px
 import plotly.graph_objects as go
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 def visualize_heatmap(
-    topic_model,
-    topics: List[int] | None = None,
+    topic_model: "BERTopic",
+    topics: list[int] | None = None,
     top_n_topics: int | None = None,
     n_clusters: int | None = None,
     use_ctfidf: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Similarity Matrix</b>",
     width: int = 800,
     height: int = 800,
@@ -59,19 +63,12 @@ def visualize_heatmap(
     <iframe src="../../getting_started/visualization/heatmap.html"
     style="width:1000px; height: 720px; border: 0px;""></iframe>
     """
-    embeddings = select_topic_representation(topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf)[0][
-        topic_model._outliers :
-    ]
+    embeddings = select_topic_representation(
+        topic_model.c_tf_idf_, topic_model.topic_embeddings_, use_ctfidf
+    )[0][topic_model._outliers :]
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
-    if topics is not None:
-        topics = list(topics)
-    elif top_n_topics is not None:
-        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
-    else:
-        topics = sorted(freq_df.Topic.to_list())
+    topics = select_topics(topic_model, topics, top_n_topics)
 
     # Order heatmap by similar clusters of topics
     sorted_topics = topics

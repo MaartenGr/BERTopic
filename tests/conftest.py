@@ -169,11 +169,9 @@ def online_topic_model(documents, document_embeddings, embedding_model):
         embedding_model=embedding_model,
     )
 
-    topics = []
-    for index in range(0, len(documents), 50):
-        model.partial_fit(documents[index : index + 50], document_embeddings[index : index + 50])
-        topics.extend(model.topics_)
-    model.topics_ = topics
+    for index in range(0, len(documents), 200):
+        model.partial_fit(documents[index : index + 200], document_embeddings[index : index + 200])
+
     return model
 
 

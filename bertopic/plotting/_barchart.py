@@ -1,17 +1,21 @@
 import itertools
 import numpy as np
-from typing import List, Union
+from typing import TYPE_CHECKING
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from bertopic.plotting._utils import select_topics
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 def visualize_barchart(
-    topic_model,
-    topics: List[int] | None = None,
+    topic_model: "BERTopic",
+    topics: list[int] | None = None,
     top_n_topics: int = 8,
     n_words: int = 5,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Topic Word Scores</b>",
     width: int = 250,
     height: int = 250,
@@ -55,18 +59,13 @@ def visualize_barchart(
     colors = itertools.cycle(["#D55E00", "#0072B2", "#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442"])
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
-    if topics is not None:
-        topics = list(topics)
-    elif top_n_topics is not None:
-        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
-    else:
-        topics = sorted(freq_df.Topic.to_list()[0:6])
+    topics = select_topics(topic_model, topics, top_n_topics)
 
     # Initialize figure
     if isinstance(custom_labels, str):
-        subplot_titles = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        subplot_titles = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics
+        ]
         subplot_titles = ["_".join([label[0] for label in labels[:4]]) for labels in subplot_titles]
         subplot_titles = [label if len(label) < 30 else label[:27] + "..." for label in subplot_titles]
     elif topic_model.custom_labels_ is not None and custom_labels:

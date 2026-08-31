@@ -8,19 +8,24 @@ try:
 except (ImportError, ModuleNotFoundError):
     HAS_UMAP = False
 
-from typing import List, Union
+from typing import List, TYPE_CHECKING
 from sklearn.preprocessing import MinMaxScaler
 from bertopic._utils import select_topic_representation
 import plotly.express as px
 import plotly.graph_objects as go
 
+from bertopic.plotting._utils import select_topics
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
+
 
 def visualize_topics(
-    topic_model,
-    topics: List[int] | None = None,
+    topic_model: "BERTopic",
+    topics: list[int] | None = None,
     top_n_topics: int | None = None,
     use_ctfidf: bool = False,
-    custom_labels: Union[bool, str] = False,
+    custom_labels: bool | str = False,
     title: str = "<b>Intertopic Distance Map</b>",
     width: int = 650,
     height: int = 650,
@@ -59,20 +64,15 @@ def visualize_topics(
     style="width:1000px; height: 680px; border: 0px;""></iframe>
     """
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
-    if topics is not None:
-        topics = list(topics)
-    elif top_n_topics is not None:
-        topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
-    else:
-        topics = sorted(freq_df.Topic.to_list())
+    topics = select_topics(topic_model, topics, top_n_topics)
 
     # Extract topic words and their frequencies
     topic_list = sorted(topics)
     frequencies = [topic_model.topic_sizes_[topic] for topic in topic_list]
     if isinstance(custom_labels, str):
-        words = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topic_list]
+        words = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topic_list
+        ]
         words = ["_".join([label[0] for label in labels[:4]]) for labels in words]
         words = [label if len(label) < 30 else label[:27] + "..." for label in words]
     elif custom_labels and topic_model.custom_labels_ is not None:

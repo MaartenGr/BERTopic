@@ -1,12 +1,12 @@
 import numpy as np
-import pandas as pd
+import polars as pl
 
 try:
-    from pandas.io.formats.style import Styler  # noqa: F401
+    from great_tables import loc, style  # noqa: F401
 
-    HAS_JINJA = True
+    HAS_GREAT_TABLES = True
 except (ModuleNotFoundError, ImportError):
-    HAS_JINJA = False
+    HAS_GREAT_TABLES = False
 
 
 def visualize_approximate_distribution(
@@ -22,10 +22,10 @@ def visualize_approximate_distribution(
     a single document.
 
     Note:
-    This function will return a stylized pandas dataframe if Jinja2 is installed. If not,
-    it will only return a pandas dataframe without color highlighting. To install jinja:
+    This function will return a styled GT table if Great Tables is installed. If not,
+    it will return a plain polars DataFrame. To install great_tables:
 
-    `pip install jinja2`
+    `pip install great_tables`
 
     Arguments:
         topic_model: A fitted BERTopic instance.
@@ -37,7 +37,7 @@ def visualize_approximate_distribution(
                    topic distribution values.
 
     Returns:
-        df: A stylized dataframe indicating the best fitting topics
+        df: A styled GT table or polars DataFrame indicating the best fitting topics
             for each token.
 
     Examples:
@@ -52,14 +52,6 @@ def visualize_approximate_distribution(
     df = topic_model.visualize_approximate_distribution(docs[0], topic_token_distr[0])
     df
     ```
-
-    To revert this stylized dataframe back to a regular dataframe,
-    you can run the following:
-
-    ```python
-    df.data.columns = [column.strip() for column in df.data.columns]
-    df = df.data
-    ```
     """
     # Tokenize document
     analyzer = topic_model.vectorizer_model.build_tokenizer()
@@ -70,31 +62,30 @@ def visualize_approximate_distribution(
 
     # Prepare dataframe with results
     if normalize:
-        df = pd.DataFrame(topic_token_distribution / topic_token_distribution.sum()).T
+        data = (topic_token_distribution / topic_token_distribution.sum()).T
     else:
-        df = pd.DataFrame(topic_token_distribution).T
+        data = topic_token_distribution.T
 
-    df.columns = [f"{token}_{i}" for i, token in enumerate(tokens)]
-    df.columns = [f"{token}{' ' * i}" for i, token in enumerate(tokens)]
-    df.index = list(topic_model.topic_labels_.values())[topic_model._outliers :]
-    df = df.loc[(df.sum(axis=1) != 0), :]
+    columns = [f"{token}{' ' * i}" for i, token in enumerate(tokens)]
+    topic_labels = list(topic_model.topic_labels_.values())[topic_model._outliers :]
 
-    # Style the resulting dataframe
-    def text_color(val):
-        color = "white" if val == 0 else "black"
-        return "color: %s" % color
+    df = pl.from_numpy(data, schema=columns)
+    df = df.insert_column(0, pl.Series("Topic", topic_labels))
 
-    def highligh_color(data, color="white"):
-        attr = "background-color: {}".format(color)
-        return pd.DataFrame(np.where(data == 0, attr, ""), index=data.index, columns=data.columns)
+    # Filter rows where all token values are 0
+    value_cols = [c for c in df.columns if c != "Topic"]
+    df = df.filter(pl.sum_horizontal(value_cols) != 0)
 
     if len(df) == 0:
         return df
-    elif HAS_JINJA:
-        df = (
-            df.style.format("{:.3f}")
-            .background_gradient(cmap="Blues", axis=None)
-            .applymap(lambda x: text_color(x))
-            .apply(highligh_color, axis=None)
+
+    # Style the resulting dataframe using Great Tables
+    if HAS_GREAT_TABLES:
+        max_val = df.select(value_cols).max_horizontal().max()
+        return (
+            df.style.tab_stub(rowname_col="Topic")
+            .fmt_number(columns=value_cols, decimals=3)
+            .data_color(columns=value_cols, palette="Blues", domain=[0, max_val])
         )
+
     return df

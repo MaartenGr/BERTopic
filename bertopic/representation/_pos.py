@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 import spacy
 from spacy.matcher import Matcher
@@ -7,9 +6,15 @@ from spacy.language import Language
 
 from packaging import version
 from scipy.sparse import csr_matrix
-from typing import List, Mapping, Tuple, Union
 from sklearn import __version__ as sklearn_version
 from bertopic.representation._base import BaseRepresentation
+from bertopic._topics import Keywords
+from bertopic._corpus import Corpus
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 class PartOfSpeech(BaseRepresentation):
@@ -65,9 +70,9 @@ class PartOfSpeech(BaseRepresentation):
 
     def __init__(
         self,
-        model: Union[str, Language] = "en_core_web_sm",
+        model: str | Language = "en_core_web_sm",
         top_n_words: int = 10,
-        pos_patterns: List[str] | None = None,
+        pos_patterns: list[str] | None = None,
     ):
         if isinstance(model, str):
             self.model = spacy.load(model)
@@ -93,18 +98,20 @@ class PartOfSpeech(BaseRepresentation):
 
     def extract_topics(
         self,
-        topic_model,
-        documents: pd.DataFrame,
+        topic_model: "BERTopic",
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
         c_tf_idf: csr_matrix,
-        topics: Mapping[str, List[Tuple[str, float]]],
-    ) -> Mapping[str, List[Tuple[str, float]]]:
+        embeddings: np.ndarray = None,
+    ) -> dict[int, Keywords]:
         """Extract topics.
 
         Arguments:
             topic_model: A BERTopic model
-            documents: All input documents
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
             c_tf_idf: Not used
-            topics: The candidate topics as calculated with c-TF-IDF
+            embeddings: Not used
 
         Returns:
             updated_topics: Updated topic representations
@@ -112,18 +119,21 @@ class PartOfSpeech(BaseRepresentation):
         matcher = Matcher(self.model.vocab)
         matcher.add("Pattern", self.pos_patterns)
 
+        # Build a lookup of documents per topic for efficient filtering
+        docs_by_topic = {}
+        for doc, topic_id in zip(corpus.documents, corpus.topics):
+            docs_by_topic.setdefault(topic_id, []).append(doc)
+
         candidate_topics = {}
-        for topic, values in topics.items():
-            keywords = next(zip(*values))
+        for topic, keywords_repr in topic_representations.items():
+            keywords = keywords_repr.words
 
             # Extract candidate documents
             candidate_documents = []
+            topic_docs = docs_by_topic.get(topic, [])
             for keyword in keywords:
-                selection = documents.loc[documents.Topic == topic, :]
-                selection = selection.loc[selection.Document.str.contains(keyword, regex=False), "Document"]
-                if len(selection) > 0:
-                    for document in selection[:2]:
-                        candidate_documents.append(document)
+                selection = [doc for doc in topic_docs if keyword in doc]
+                candidate_documents.extend(selection[:2])
             candidate_documents = list(set(candidate_documents))
 
             # Extract keywords
@@ -144,18 +154,18 @@ class PartOfSpeech(BaseRepresentation):
 
         # Match updated keywords with c-TF-IDF values
         words_lookup = dict(zip(words, range(len(words))))
-        updated_topics = {topic: [] for topic in topics.keys()}
+        updated_topics = {}
 
         for topic, candidate_keywords in candidate_topics.items():
             word_indices = np.sort(
                 [words_lookup.get(keyword) for keyword in candidate_keywords if keyword in words_lookup]
             )
-            vals = topic_model.c_tf_idf_[:, word_indices][topic + topic_model._outliers]
+            vals = topic_model.c_tf_idf_[:, word_indices][topic + corpus._outliers]
             indices = np.argsort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words :][::-1]
             vals = np.sort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words :][::-1]
             topic_words = [(words[word_indices[index]], val) for index, val in zip(indices, vals)]
-            updated_topics[topic] = topic_words
-            if len(updated_topics[topic]) < self.top_n_words:
-                updated_topics[topic] += [("", 0) for _ in range(self.top_n_words - len(updated_topics[topic]))]
+            if len(topic_words) < self.top_n_words:
+                topic_words += [("", 0) for _ in range(self.top_n_words - len(topic_words))]
+            updated_topics[topic] = Keywords(topic_words)
 
         return updated_topics

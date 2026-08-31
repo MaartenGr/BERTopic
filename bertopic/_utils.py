@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import polars as pl
 import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
@@ -39,7 +39,7 @@ class MyLogger:
 
 def check_documents_type(documents):
     """Check whether the input documents are indeed a list of strings."""
-    if isinstance(documents, pd.DataFrame):
+    if isinstance(documents, pl.DataFrame):
         raise TypeError("Make sure to supply a list of strings, not a dataframe.")
     elif isinstance(documents, Iterable) and not isinstance(documents, str):
         if not any([isinstance(doc, str) for doc in documents]):
@@ -52,7 +52,9 @@ def check_embeddings_shape(embeddings, docs):
     """Check if the embeddings have the correct shape."""
     if embeddings is not None:
         if not any([isinstance(embeddings, np.ndarray), isinstance(embeddings, csr_matrix)]):
-            raise ValueError("Make sure to input embeddings as a numpy array or scipy.sparse.csr.csr_matrix. ")
+            raise ValueError(
+                "Make sure to input embeddings as a numpy array or scipy.sparse.csr.csr_matrix. "
+            )
         else:
             if embeddings.shape[0] != len(docs):
                 raise ValueError(
@@ -172,7 +174,9 @@ def get_unique_distances(dists: np.array, noise_max=1e-7) -> np.array:
 
             # the noise can never be large then the difference between the next unique distance and the current one
             curr_max_noise = min(noise_max, next_unique_dist - dists_cp[i])
-            dists_cp[i + 1] = np.random.uniform(low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise)
+            dists_cp[i + 1] = np.random.uniform(
+                low=dists_cp[i] + curr_max_noise / 2, high=dists_cp[i] + curr_max_noise
+            )
     return dists_cp
 
 

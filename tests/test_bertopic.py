@@ -2,6 +2,7 @@ import copy
 import pytest
 from bertopic import BERTopic
 import importlib.util
+import polars as pl
 
 
 def cuml_available():
@@ -55,7 +56,7 @@ def test_full_model(model, documents, request):
         words = topic_model.get_topic(topic)[:10]
         assert len(words) == 10
 
-    for topic in topic_model.get_topic_freq().Topic:
+    for topic in topic_model.get_topic_freq()["Topic"]:
         words = topic_model.get_topic(topic)[:10]
         assert len(words) == 10
 
@@ -83,17 +84,17 @@ def test_full_model(model, documents, request):
     timestamps = [i % 10 for i in range(len(documents))]
     topics_over_time = topic_model.topics_over_time(documents, timestamps)
 
-    assert topics_over_time.Frequency.sum() == len(documents)
-    assert len(topics_over_time.Topic.unique()) == len(set(topics))
+    assert topics_over_time.select(pl.sum("Frequency")).item() == len(documents)
+    assert topics_over_time.select(pl.col("Topic").n_unique()).item() == len(set(topics))
 
     # Test hierarchical topics
-    hier_topics = topic_model.hierarchical_topics(documents)
+    topic_model.hierarchical_topics(documents)
 
-    assert len(hier_topics) > 0
-    assert hier_topics.Parent_ID.astype(int).min() > max(topics)
+    assert len(topic_model.hierarchy_) > 0
+    assert topic_model.hierarchy_.select(pl.col("Parent_ID").cast(pl.Int64).min()).item() > max(topics)
 
     # Test creation of topic tree
-    tree = topic_model.get_topic_tree(hier_topics, tight_layout=False)
+    tree = topic_model.get_topic_tree(tight_layout=False)
     assert isinstance(tree, str)
     assert len(tree) > 10
 
@@ -105,7 +106,7 @@ def test_full_model(model, documents, request):
 
     # Test topic reduction
     nr_topics = len(set(topics))
-    nr_topics = 2 if nr_topics < 2 else nr_topics - 1
+    nr_topics = 2 if nr_topics < 2 else nr_topics
     topic_model.reduce_topics(documents, nr_topics=nr_topics)
 
     assert len(topic_model.get_topic_freq()) == nr_topics
@@ -126,7 +127,9 @@ def test_full_model(model, documents, request):
         assert topic != original_topic
 
     # Test updating topic labels
-    topic_labels = topic_model.generate_topic_labels(nr_words=3, topic_prefix=False, word_length=10, separator=", ")
+    topic_labels = topic_model.generate_topic_labels(
+        nr_words=3, topic_prefix=False, word_length=10, separator=", "
+    )
     assert len(topic_labels) == len(set(topic_model.topics_))
 
     # Test setting topic labels

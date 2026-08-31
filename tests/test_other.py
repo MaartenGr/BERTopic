@@ -1,5 +1,7 @@
+import pytest
+import copy
+
 from bertopic import BERTopic
-from bertopic.dimensionality import BaseDimensionalityReduction
 
 try:
     from plotly.graph_objects import Figure
@@ -28,18 +30,11 @@ def test_get_params():
     assert params["language"] == "english"
 
 
-def test_no_plotly():
-    model = BERTopic(
-        language="Dutch",
-        embedding_model=None,
-        min_topic_size=2,
-        top_n_words=1,
-        umap_model=BaseDimensionalityReduction(),
-    )
-    model.fit(["hello", "hi", "goodbye", "goodbye", "whats up"] * 10)
-
+@pytest.mark.parametrize("model", [("base_topic_model")])
+def test_no_plotly(model, request):
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
     try:
-        out = model.visualize_topics()
+        out = topic_model.visualize_topics()
         assert isinstance(out, Figure) if Figure else False
     except ImportError as e:
         assert "Plotly is required to use" in str(e)

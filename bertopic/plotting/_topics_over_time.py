@@ -1,12 +1,16 @@
-import pandas as pd
-from typing import List, Union
+import polars as pl
+from typing import List, Union, TYPE_CHECKING
 import plotly.graph_objects as go
 from sklearn.preprocessing import normalize
+from bertopic.plotting._utils import select_topics
+
+if TYPE_CHECKING:
+    from bertopic import BERTopic
 
 
 def visualize_topics_over_time(
-    topic_model,
-    topics_over_time: pd.DataFrame,
+    topic_model: "BERTopic",
+    topics_over_time: pl.DataFrame,
     top_n_topics: int | None = None,
     topics: List[int] | None = None,
     normalize_frequency: bool = False,
@@ -62,45 +66,44 @@ def visualize_topics_over_time(
     ]
 
     # Select topics based on top_n and topics args
-    freq_df = topic_model.get_topic_freq()
-    freq_df = freq_df.loc[freq_df.Topic != -1, :]
-    if topics is not None:
-        selected_topics = list(topics)
-    elif top_n_topics is not None:
-        selected_topics = sorted(freq_df.Topic.to_list()[:top_n_topics])
-    else:
-        selected_topics = sorted(freq_df.Topic.to_list())
+    selected_topics = select_topics(topic_model, topics, top_n_topics)
 
     # Prepare data
     if isinstance(custom_labels, str):
-        topic_names = [[[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics]
+        topic_names = [
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics
+        ]
         topic_names = ["_".join([label[0] for label in labels[:4]]) for labels in topic_names]
         topic_names = [label if len(label) < 30 else label[:27] + "..." for label in topic_names]
         topic_names = {key: topic_names[index] for index, key in enumerate(topic_model.topic_labels_.keys())}
     elif topic_model.custom_labels_ is not None and custom_labels:
         topic_names = {
-            key: topic_model.custom_labels_[key + topic_model._outliers] for key, _ in topic_model.topic_labels_.items()
+            key: topic_model.custom_labels_[key + topic_model._outliers]
+            for key, _ in topic_model.topic_labels_.items()
         }
     else:
         topic_names = {
-            key: value[:40] + "..." if len(value) > 40 else value for key, value in topic_model.topic_labels_.items()
+            key: value[:40] + "..." if len(value) > 40 else value
+            for key, value in topic_model.topic_labels_.items()
         }
-    topics_over_time["Name"] = topics_over_time.Topic.map(topic_names)
-    data = topics_over_time.loc[topics_over_time.Topic.isin(selected_topics), :].sort_values(["Topic", "Timestamp"])
+    topics_over_time = topics_over_time.with_columns(
+        pl.col("Topic").replace_strict(topic_names, default=None).alias("Name")
+    )
+    data = topics_over_time.filter(pl.col("Topic").is_in(selected_topics)).sort("Topic", "Timestamp")
 
     # Add traces
     fig = go.Figure()
-    for index, topic in enumerate(data.Topic.unique()):
-        trace_data = data.loc[data.Topic == topic, :]
-        topic_name = trace_data.Name.to_numpy()[0]
-        words = trace_data.Words.to_numpy()
+    for index, topic in enumerate(data["Topic"].unique().sort().to_list()):
+        trace_data = data.filter(pl.col("Topic") == topic)
+        topic_name = trace_data["Name"][0]
+        words = trace_data["Words"].to_list()
         if normalize_frequency:
-            y = normalize(trace_data.Frequency.to_numpy().reshape(1, -1))[0]
+            y = normalize(trace_data["Frequency"].to_numpy().reshape(1, -1))[0]
         else:
-            y = trace_data.Frequency
+            y = trace_data["Frequency"].to_list()
         fig.add_trace(
             go.Scatter(
-                x=trace_data.Timestamp,
+                x=trace_data["Timestamp"].to_list(),
                 y=y,
                 mode="lines",
                 marker_color=colors[index % 7],
