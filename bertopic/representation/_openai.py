@@ -225,7 +225,12 @@ class OpenAI(BaseRepresentation):
             if self.exponential_backoff:
                 response = chat_completions_with_backoff(self.client, **kwargs)
             else:
-                response = self.client.chat.completions.create(**kwargs)
+                try:
+                    response = self.client.chat.completions.create(**kwargs)
+                except openai.BadRequestError as e:
+                    if "stop" in kwargs and "unsupported parameter" in str(e).lower() and "stop" in str(e).lower():
+                        kwargs.pop("stop", None)
+                        response = self.client.chat.completions.create(**kwargs)
 
             # Check whether content was actually generated
             # Addresses #1570 for potential issues with OpenAI's content filter
@@ -268,7 +273,17 @@ class OpenAI(BaseRepresentation):
 
 
 def chat_completions_with_backoff(client, **kwargs):
-    return retry_with_exponential_backoff(
+    create_with_backoff = retry_with_exponential_backoff(
         client.chat.completions.create,
         errors=(openai.RateLimitError,),
-    )(**kwargs)
+    )
+    try:
+        return create_with_backoff(**kwargs)
+    except openai.BadRequestError as e:
+        # Addresses an issue where
+        if "stop" in kwargs and "unsupported parameter" in str(e).lower() and "stop" in str(e).lower():
+            kwargs = kwargs.copy()
+            kwargs.pop("stop", None)
+            return create_with_backoff(**kwargs)
+
+        raise
