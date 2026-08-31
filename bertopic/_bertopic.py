@@ -1,5 +1,6 @@
 # ruff: noqa: E402
 import yaml
+import hashlib
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -4232,6 +4233,31 @@ class BERTopic:
         )
         self.representative_docs_ = repr_docs
 
+    @staticmethod
+    def _image_dedup_key(image) -> str | int:
+        """Hashable stand-in for an image, for use as a `drop_duplicates` subset key.
+
+        `drop_duplicates` hashes its subset columns, but PIL sets `Image.__hash__ =
+        None`, so a loaded `Image` can't be used as a key directly. Paths key on
+        themselves; loaded images key on their content (mode, size, pixel bytes),
+        matching PIL's own content-based `Image.__eq__` - so two pixel-identical
+        images collapse just as PIL considers them equal, while distinct images
+        (even with an identical caption) do not.
+
+        Arguments:
+            image: An image path (`str`) or a loaded image object (e.g. `PIL.Image`).
+
+        Returns:
+            A hashable key such that two images compare equal under this key iff
+            they should be treated as duplicates.
+        """
+        if isinstance(image, str):
+            return image
+        to_bytes = getattr(image, "tobytes", None)  # duck-typed: Pillow is an optional dep
+        if to_bytes is None:
+            return id(image)
+        return f"{image.mode}|{image.size}|{hashlib.sha1(to_bytes()).hexdigest()}"
+
     def _extract_representative_docs(
         self,
         c_tf_idf: csr_matrix,
@@ -4240,7 +4266,7 @@ class BERTopic:
         nr_samples: int = 500,
         nr_repr_docs: int = 5,
         diversity: float | None = None,
-    ) -> Union[List[str], List[List[int]]]:
+    ) -> Tuple[Mapping[int, List[str]], List[str], List[List[int]], List[List[int]]]:
         """Approximate most representative documents per topic by sampling
         a subset of the documents in each topic and calculating which are
         most representative to their topic based on the cosine similarity between
@@ -4258,18 +4284,52 @@ class BERTopic:
         Returns:
             repr_docs_mappings: A dictionary from topic to representative documents
             representative_docs: A flat list of representative documents
-            repr_doc_indices: Ordered indices of representative documents
-                              that belong to each topic
+            repr_doc_indices: Positions into the flat `repr_docs` list, grouped by topic
             repr_doc_ids: The indices of representative documents
                           that belong to each topic
         """
         # Sample documents per topic
+        # Dedup on (Topic, Document) first; `Image` isn't hashable (PIL sets
+        # `Image.__hash__ = None`), so it can't be a `drop_duplicates` subset column
+        # directly, and content-hashing every image up front would cost a full
+        # pixel-buffer read per document. Only rows that collide on (Topic, Document)
+        # need their images compared - a row with unique text is already unique - so
+        # `_image_dedup_key` is computed for those rows only. In the multimodal path,
+        # distinct images can produce identical captions in `Document`; without this,
+        # deduplicating on `Document` alone would silently collapse them into a single
+        # candidate, starving `VisualRepresentation` of images below `nr_repr_images`.
+        dedup_keys = pd.DataFrame({"Topic": documents["Topic"], "Document": documents["Document"]})
+        if "Image" in documents.columns:
+            duplicated = dedup_keys.duplicated(keep=False).to_numpy()
+            dedup_keys["Image"] = [
+                self._image_dedup_key(image) if is_duplicate else None
+                for is_duplicate, image in zip(duplicated, documents["Image"].to_numpy())
+            ]
+        deduplicated_documents = documents[~dedup_keys.duplicated()].drop("Image", axis=1, errors="ignore")
+
+        # Sample without replacement, capped at each topic's size. Shuffling the whole frame
+        # once and then taking each topic's first `nr_samples` rows draws exactly that: a
+        # uniform sample of `min(nr_samples, len(group))` rows per topic. `GroupBy.sample`
+        # cannot express the per-group cap - it raises when a group holds fewer rows than `n`,
+        # and `n` is a scalar in every pandas release - while a per-group Python loop costs a
+        # `sample` call and a `concat` block per topic, which is ~10x slower at a few thousand
+        # topics. `head` preserves the original document index, which `selection.index` below
+        # relies on. A single global shuffle also decorrelates topics by construction: a fixed
+        # seed applied per group would draw the same positional pattern for equally-sized
+        # topics, so their samples would agree on e.g. "first document, third document, ...".
         documents_per_topic = (
-            documents.drop("Image", axis=1, errors="ignore")
-            .groupby("Topic")
-            .sample(n=nr_samples, replace=True, random_state=42)
-            .drop_duplicates()
+            deduplicated_documents.sample(frac=1, random_state=42).groupby("Topic", sort=False).head(nr_samples)
         )
+        if documents_per_topic.empty:
+            # `groupby` silently drops NaN keys, so an empty `documents` or an all-NaN
+            # `Topic` column both leave nothing here. Without this guard the failure
+            # surfaces much later as an empty or partial result with no indication that
+            # the real cause is upstream: no document has a valid topic assignment yet.
+            raise ValueError(
+                "No documents with a valid `Topic` assignment were found to extract "
+                "representative documents from. This happens when `documents` is empty "
+                "or every document's `Topic` is NaN (topics have not been assigned yet)."
+            )
 
         # Find and extract documents that are most similar to the topic
         repr_docs = []
@@ -4291,24 +4351,32 @@ class BERTopic:
 
             # Use MMR to find representative but diverse documents
             if diversity:
-                docs = mmr(
+                # `mmr()` only inspects `word_embeddings`/`doc_embedding` for its
+                # similarity math; the `words` argument is returned as-is at the
+                # end (`[words[idx] for idx in keywords_idx]`) and is never used
+                # to compute anything. Passing positions instead of the document
+                # strings lets `mmr()` hand back the selected positions directly,
+                # so there is no text-keyed reverse lookup and therefore no
+                # assumption that `selected_docs` contains unique text.
+                selected_indices = mmr(
                     c_tf_idf[index],
                     ctfidf,
-                    selected_docs,
+                    list(range(len(selected_docs))),
                     top_n=nr_docs,
                     diversity=diversity,
                 )
+                docs = [selected_docs[i] for i in selected_indices]
 
             # Extract top n most representative documents
             else:
-                indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
-                docs = [selected_docs[index] for index in indices]
+                selected_indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
+                docs = [selected_docs[i] for i in selected_indices]
 
-            doc_ids = [selected_docs_ids[index] for index, doc in enumerate(selected_docs) if doc in docs]
+            doc_ids = [selected_docs_ids[i] for i in selected_indices]
             repr_docs_ids.append(doc_ids)
             repr_docs.extend(docs)
             repr_docs_indices.append([repr_docs_indices[-1][-1] + i + 1 if index != 0 else i for i in range(nr_docs)])
-        repr_docs_mappings = {topic: repr_docs[i[0] : i[-1] + 1] for topic, i in zip(topics.keys(), repr_docs_indices)}
+        repr_docs_mappings = {topic: repr_docs[i[0] : i[-1] + 1] for topic, i in zip(labels, repr_docs_indices)}
 
         return repr_docs_mappings, repr_docs, repr_docs_indices, repr_docs_ids
 

@@ -92,7 +92,9 @@ class VisualRepresentation(BaseRepresentation):
             representative_images: Representative images per topic
         """
         # Extract image ids of most representative documents
-        images = documents["Image"].to_numpy().tolist()
+        # NOTE: `repr_docs_ids` (below) contains index labels, not positions, so keep
+        # `images` as a label-indexed Series rather than flattening it to a plain list.
+        images = documents["Image"]
         (_, _, _, repr_docs_ids) = topic_model._extract_representative_docs(
             c_tf_idf,
             documents,
@@ -110,8 +112,8 @@ class VisualRepresentation(BaseRepresentation):
             sliced_examplars = [sliced_examplars[i : i + 3] for i in range(0, len(sliced_examplars), 3)]
             images_to_combine = [
                 [
-                    Image.open(images[index]) if isinstance(images[index], str) else images[index]
-                    for index in sub_indices
+                    Image.open(img) if isinstance(img, str) else img
+                    for img in (images.loc[index] for index in sub_indices)
                 ]
                 for sub_indices in sliced_examplars
             ]
@@ -121,7 +123,7 @@ class VisualRepresentation(BaseRepresentation):
             representative_images[topic] = representative_image
 
             # Make sure to properly close images
-            if isinstance(images[0], str):
+            if isinstance(images.iloc[0], str):
                 for image_list in images_to_combine:
                     for image in image_list:
                         image.close()
