@@ -124,7 +124,7 @@ def combine_zeroshot_topics(topic_model: "BERTopic", corpus: Corpus, zeroshot_da
 
         # Create new Topics
         topic_model._topics = Topics().initialize(corpus.topics, corpus._zeroshot_labels).sort_by_frequency()
-        corpus.map_topics_and_probabilities(topic_model._topics, from_original=True)
+        corpus.topics = topic_model._topics.predictions
         logger.info("Zeroshot Step 2 - Completed \u2713")
 
     return corpus
@@ -149,5 +149,5 @@ def update_probabilities(topic_model: "BERTopic", corpus: Corpus, zeroshot_docs:
         corpus.probabilities = (
             sim_matrix if topic_model.calculate_probabilities else np.max(sim_matrix, axis=1)
         )
-        topic_model._topics._zeroshot_probabilities = corpus.probabilities
+        topic_model._topics.probabilities = corpus.probabilities
     return corpus

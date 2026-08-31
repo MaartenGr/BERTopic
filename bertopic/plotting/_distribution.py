@@ -58,9 +58,11 @@ def visualize_distribution(
             "probabilities that were supplied. Lower `min_probability` to prevent this error."
         )
 
-    # Get values and indices equal or exceed the minimum probability
-    labels_idx = np.argwhere(probabilities >= min_probability).flatten()
-    vals = probabilities[labels_idx].tolist()
+    # Get values and topics whose probability equals or exceeds the minimum. Column `j`
+    # holds topic `topic_ids()[j]`, which is not the same number once outliers exist.
+    topic_ids = topic_model._topics.topic_ids()
+    labels_idx = [topic_ids[column] for column in np.argwhere(probabilities >= min_probability).flatten()]
+    vals = probabilities[probabilities >= min_probability].tolist()
 
     # Create labels
     if isinstance(custom_labels, str):
@@ -70,7 +72,7 @@ def visualize_distribution(
         labels = ["_".join([label[0] for label in l[:4]]) for l in labels]  # noqa: E741
         labels = [label if len(label) < 30 else label[:27] + "..." for label in labels]
     elif topic_model.custom_labels_ is not None and custom_labels:
-        labels = [topic_model.custom_labels_[idx + topic_model._outliers] for idx in labels_idx]
+        labels = [topic_model.custom_labels_[topic_ids.index(topic)] for topic in labels_idx]
     else:
         labels = []
         for idx in labels_idx:
@@ -81,7 +83,7 @@ def visualize_distribution(
                 label = label[:40] + "..." if len(label) > 40 else label
                 labels.append(label)
             else:
-                vals.remove(probabilities[idx])
+                vals.remove(probabilities[topic_ids.index(idx)])
 
     # Create Figure
     fig = go.Figure(

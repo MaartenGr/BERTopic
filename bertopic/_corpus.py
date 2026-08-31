@@ -4,8 +4,6 @@ import numpy as np
 from scipy.sparse import csr_matrix
 from collections import defaultdict
 
-from bertopic._topics import Topics
-
 
 class Modality(str, Enum):
     """What a row is, which determines whether its source lives in `documents` or `media`."""
@@ -156,80 +154,6 @@ class Corpus:
         averaged = {topic: np.mean(embs, axis=0) for topic, embs in grouped.items()}
         averaged_sorted = dict(sorted(averaged.items()))
         return averaged_sorted
-
-    def map_topics_and_probabilities(self, topics: Topics, from_original: bool = False) -> None:
-        """Map both topics and probabilities to the reduced topics using the provided Topics object.
-
-        Arguments:
-            topics: A Topics object containing the mapping information.
-            from_original: Whether to map from the original topics to the current ones.
-        """
-        self.map_topics(topics, from_original=from_original)
-
-        # Only map probabilities if they are 2-dimensional since only then they
-        # correspond to topic probabilities which might be reduced or reordered.
-        if self.probabilities is not None:
-            if len(self.probabilities.shape) > 1:
-                self.map_probabilities(topics, from_original=from_original)
-
-    def map_topics(self, topics: Topics, from_original: bool = False) -> None:
-        """Map the topics to the reduced topics using the provided Topics object.
-
-        Arguments:
-            topics: A Topics object containing the mapping information.
-            from_original: Whether to map from the original topics to the current ones.
-        """
-        self.topics = [
-            topics.mapping.map(prediction, from_original=from_original) for prediction in self.topics
-        ]
-
-    def map_probabilities(self, topics: Topics, from_original: bool = False) -> None:
-        """Map the (2-dimensional) probabilities to the reduced topics.
-
-        There are two scenarios based on the mappings in the Topics object:
-        * The order of topics has changed (e.g., after sorting by frequency).
-          In this case, the probabilities are simply reordered.
-        * Some topics have been merged. In this case, the probabilities
-          of the merged topics are summed together and assigned to the new topic.
-
-        Note that the outlier topic (-1), if present, is skipped during this process.
-        If it is present, it is always at the zero-th index of the initial probabilities matrix
-        and should remain so after mapping.
-
-        Arguments:
-            topics: A Topics object containing the mapping information.
-            from_original: If True, mappings are obtained from the original topics.
-                           If False, mappings are obtained from the most recent topics.
-        """
-        # Check scenario based on mappings
-        mappings = topics.get_mappings(from_original=from_original)
-
-        # Scenario 1: Reordering
-        if len(set(mappings.values())) == len(mappings):
-            nr_topics = len(set(mappings.values()))
-            new_order = [0] * nr_topics
-            for old_topic, new_topic in mappings.items():
-                if old_topic == -1:
-                    continue  # Skip outlier topic
-                new_topic_idx = new_topic + self._outliers
-                old_topic_idx = old_topic + self._outliers
-                new_order[new_topic_idx] = old_topic_idx
-
-            self.probabilities = self.probabilities[:, new_order]
-
-        # Scenario 2: Merging
-        else:
-            nr_new_topics = len(set(mappings.values()))
-            new_probabilities = np.zeros((self.probabilities.shape[0], nr_new_topics))
-
-            for old_topic, new_topic in mappings.items():
-                if old_topic == -1:
-                    continue  # Skip outlier topic
-                new_topic_idx = new_topic + self._outliers
-                old_topic_idx = old_topic + self._outliers
-                new_probabilities[:, new_topic_idx] += self.probabilities[:, old_topic_idx]
-
-            self.probabilities = new_probabilities
 
     def sort_topics_by_frequency(self) -> "Corpus":
         """Maps the label of each topic to its frequency rank with

@@ -129,7 +129,7 @@ def migrate_topics_pre_0_17_4(topics_dict: dict) -> Topics:
 
     # Build Topics object
     topics = Topics()
-    topics._original_predictions = np.array(topics_dict.get("topics", []))
+    topics.predictions = list(topics_dict.get("topics", []))
     topics.actions = [TopicAction.INITIALIZED]
 
     # Reconstruct mapping from topic_mapper (2D array of mappings history)

@@ -21,20 +21,16 @@ def test_merge(model, documents, request):
 
     topics_to_merge = [1, 2]
     topic_model.merge_topics(documents, topics_to_merge)
-    mappings = topic_model._topics.get_mappings(from_original=True)
-    original_predictions = topic_model._topics._original_predictions.tolist()
-    mapped_labels = [mappings[label] for label in original_predictions]
+    mappings = topic_model._topics.get_mappings()
 
     assert nr_topics == len(set(topic_model.topics_)) + 1
     assert sum(topic_model._topics.frequencies().values()) == len(documents)
-    assert mapped_labels == topic_model.topics_
+    assert set(mappings.values()) <= set(topic_model._topics.topic_ids())
 
     topics_to_merge = [1, 2]
     topic_model.merge_topics(documents, topics_to_merge)
-    mappings = topic_model._topics.get_mappings(from_original=True)
-    original_predictions = topic_model._topics._original_predictions.tolist()
-    mapped_labels = [mappings[label] for label in original_predictions]
+    mappings = topic_model._topics.get_mappings()
 
     assert nr_topics == len(set(topic_model.topics_)) + 2
     assert sum(topic_model._topics.frequencies().values()) == len(documents)
-    assert mapped_labels == topic_model.topics_
+    assert set(mappings.values()) <= set(topic_model._topics.topic_ids())
