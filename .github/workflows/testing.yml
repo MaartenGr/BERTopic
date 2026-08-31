@@ -38,6 +38,6 @@ jobs:
     - name: Install dependencies (including test group)
       run: uv sync --extra test
     - name: Display the project's dependency tree (including information on outdated packages)
-      run: uv tree --outdated
+      run: uv tree --outdated --depth=1
     - name: Run Checking Mechanisms
       run: make check
