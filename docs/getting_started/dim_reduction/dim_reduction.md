@@ -97,22 +97,17 @@ topic_model = BERTopic(umap_model=umap_model)
 ```
 
 !!! note
-    To install cuML with BERTopic, run these commands:
+    To install cuML with BERTopic, run one of these commands:
 
     **For CUDA 12:**
     ```bash
-    !pip install cuml-cu12
-    !pip install bertopic
+    !pip install bertopic cuml-cu12
     ```
 
     **For CUDA 13:**
     ```bash
-    !pip install cuml-cu13
-    !pip install bertopic
+    !pip install bertopic cuml-cu13
     ```
-
-    !!! warning
-        Install cuML first, then BERTopic. Installing both in a single command can fail due to pip resolver limitations with CUDA runtime dependencies.
 
     **Note:** cuML is already installed on Google Colab.
 
