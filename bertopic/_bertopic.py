@@ -591,10 +591,14 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        check_embeddings_shape(embeddings, documents)
-
+        
         if isinstance(documents, str) or documents is None:
             documents = [documents]
+        
+        if len(documents) == 1 and isinstance(embeddings, np.ndarray) and embeddings.ndim == 1:
+            embeddings = embeddings.reshape(1,-1)
+
+        check_embeddings_shape(embeddings, documents)
 
         if embeddings is None:
             embeddings = self._extract_embeddings(documents, images=images, method="document", verbose=self.verbose)
