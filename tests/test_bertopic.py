@@ -1,6 +1,8 @@
 import copy
 import pytest
+import numpy as np
 from bertopic import BERTopic
+from bertopic._bertopic import TopicMapper
 import importlib.util
 
 
@@ -153,3 +155,36 @@ def test_full_model(model, documents, request):
     merged_model = BERTopic.merge_models([topic_model, topic_model1])
 
     assert len(merged_model.get_topic_info()) > len(topic_model.get_topic_info())
+
+
+def test_topic_mapper_add_new_topics_keeps_integer_matrix():
+    """Regression test for #2432.
+
+    ``TopicMapper.add_new_topics`` used to pad the intermediate columns of a new
+    row with ``None``. Once the mapping matrix had more than two columns (which
+    happens after repeated ``partial_fit`` calls), this made ``mappings_`` a
+    non-homogeneous matrix and broke ``save`` with a ``TypeError`` when it
+    converted the mappings via ``np.array(mappings_, dtype=int)``.
+    """
+    mapper = TopicMapper([-1, 0, 1, 2])
+
+    # Simulate additional topic states, as produced by repeated ``partial_fit``
+    # calls, so that the mapping matrix has more than two columns.
+    for row in mapper.mappings_:
+        row.append(row[-1])
+    assert len(mapper.mappings_[0]) == 3
+
+    original_rows = copy.deepcopy(mapper.mappings_)
+
+    # Adding new topics must not introduce ``None`` values into the matrix.
+    mapper.add_new_topics({3: 2, 4: 3})
+
+    # ``save`` performs exactly this conversion; it must not raise.
+    np.array(mapper.mappings_, dtype=int)
+
+    # Pre-existing rows must round-trip unchanged.
+    assert mapper.mappings_[: len(original_rows)] == original_rows
+
+    # New topics map from themselves in all prior states and to their target.
+    assert mapper.mappings_[-2] == [3, 3, 2]
+    assert mapper.mappings_[-1] == [4, 4, 3]

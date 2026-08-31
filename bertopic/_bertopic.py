@@ -5011,7 +5011,12 @@ class TopicMapper:
         """
         length = len(self.mappings_[0])
         for key, value in mappings.items():
-            to_append = [key] + ([None] * (length - 2)) + [value]
+            # A brand-new topic maps from itself in all prior states. Using ``key`` for the
+            # intermediate columns (instead of ``None``) keeps ``mappings_`` a homogeneous
+            # integer matrix, which is required by ``save`` (see #2432). ``None`` would break
+            # ``np.array(mappings_, dtype=int)`` once the matrix has more than two columns
+            # (e.g. after repeated ``partial_fit`` calls).
+            to_append = [key] * (length - 1) + [value]
             self.mappings_.append(to_append)
 
 
