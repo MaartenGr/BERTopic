@@ -15,8 +15,8 @@ import joblib
 import inspect
 import numpy as np
 
-import pandas as pd
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 import scipy.sparse as sp
 
 
@@ -305,9 +305,9 @@ class BERTopic:
             logger.set_level("WARNING")
 
     @property
-    def hierarchy_(self) -> pl.DataFrame | None:
+    def hierarchy_(self) -> IntoDataFrame | None:
         """Get the TopicHierarchy object that contains all hierarchical topic information."""
-        return self._hierarchy.to_polars() if self._hierarchy is not None else None
+        return self._hierarchy.to_dataframe() if self._hierarchy is not None else None
 
     @property
     def topics(self) -> Topics:
@@ -815,7 +815,7 @@ class BERTopic:
         datetime_format: str | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
-    ) -> pl.DataFrame:
+    ) -> IntoDataFrame:
         return variations.topics_over_time(
             topic_model=self,
             docs=docs,
@@ -833,7 +833,7 @@ class BERTopic:
         docs: list[str],
         classes: list[int | str],
         global_tuning: bool = True,
-    ) -> pl.DataFrame:
+    ) -> IntoDataFrame:
         return variations.topics_per_class(
             topic_model=self,
             docs=docs,
@@ -899,7 +899,7 @@ class BERTopic:
         linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
         distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
         use_representation_model: bool | str = False,
-    ) -> pl.DataFrame:
+    ) -> IntoDataFrame:
         self._hierarchy = variations.hierarchical_topics(
             topic_model=self,
             docs=docs,
@@ -908,7 +908,7 @@ class BERTopic:
             distance_function=distance_function,
             use_representation_model=use_representation_model,
         )
-        return self._hierarchy.to_polars()
+        return self._hierarchy.to_dataframe()
 
     def find_topics(
         self, search_term: str | None = None, image: str | None = None, top_n: int = 5
@@ -1149,7 +1149,7 @@ class BERTopic:
         check_is_fitted(self)
         return self._topics[topic].representations[aspect]
 
-    def get_topic_info(self, topic: int | None = None) -> pl.DataFrame:
+    def get_topic_info(self, topic: int | None = None) -> IntoDataFrame:
         """Get information about each topic including its ID, frequency, and name.
 
         Arguments:
@@ -1164,14 +1164,9 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        df = self._topics.to_polars(topic=topic)
+        return self._topics.to_dataframe(topic=topic)
 
-        # Slice representative documents for better readability
-        if len(df) > 0 and "Representative_Docs" in df.columns:
-            df = df.with_columns(pl.col("Representative_Docs").list.eval(pl.element().str.slice(0, 80)))
-        return df
-
-    def get_topic_freq(self, topic: int | None = None) -> pl.DataFrame | int:
+    def get_topic_freq(self, topic: int | None = None) -> IntoDataFrame | int:
         """Return the size of topics (descending order).
 
         Arguments:
@@ -1198,14 +1193,16 @@ class BERTopic:
         if isinstance(topic, int):
             return self.topic_sizes_[topic]
         else:
-            return pl.DataFrame({"Topic": self.topic_sizes_.keys(), "Count": self.topic_sizes_.values()})
+            sizes = self.topic_sizes_
+            data = {"Topic": list(sizes.keys()), "Count": list(sizes.values())}
+            return nw.from_dict(data, backend="polars").to_native()
 
     def get_document_info(
         self,
         docs: list[str],
-        df: pl.DataFrame | None = None,
+        df: IntoDataFrame | None = None,
         metadata: dict[str, Any] | None = None,
-    ) -> pl.DataFrame:
+    ) -> IntoDataFrame:
         """Get information about the documents on which the topic was trained
         including the documents themselves, their respective topics, the name
         of each topic, the top n words of each topic, whether it is a
@@ -1267,11 +1264,11 @@ class BERTopic:
         if metadata is not None:
             data.update(metadata)
 
-        # Convert to polars DataFrame
-        result = pl.DataFrame(data)
+        # Any extra columns the caller supplied sit alongside, in whatever library they used
+        result = nw.from_dict(data, backend="polars")
         if df is not None:
-            result = pl.concat([df, result], how="horizontal")
-        return result
+            result = nw.concat([nw.from_native(df, eager_only=True), result], how="horizontal")
+        return result.to_native()
 
     def get_representative_docs(self, topic: int | None = None) -> list[str] | dict[int, list[str]] | None:
         """Extract the best representing documents per topic.
@@ -1814,7 +1811,7 @@ class BERTopic:
     def visualize_hierarchical_documents(
         self,
         docs: List[str],
-        hierarchical_topics: pd.DataFrame,
+        hierarchical_topics: IntoDataFrame,
         topics: List[int] | None = None,
         embeddings: np.ndarray = None,
         reduced_embeddings: np.ndarray = None,
@@ -1872,7 +1869,7 @@ class BERTopic:
     @wraps(plotting.visualize_topics_over_time)
     def visualize_topics_over_time(
         self,
-        topics_over_time: pd.DataFrame,
+        topics_over_time: IntoDataFrame,
         top_n_topics: int | None = None,
         topics: List[int] | None = None,
         normalize_frequency: bool = False,
@@ -1897,7 +1894,7 @@ class BERTopic:
     @wraps(plotting.visualize_topics_per_class)
     def visualize_topics_per_class(
         self,
-        topics_per_class: pd.DataFrame,
+        topics_per_class: IntoDataFrame,
         top_n_topics: int = 10,
         topics: List[int] | None = None,
         normalize_frequency: bool = False,
@@ -1966,7 +1963,7 @@ class BERTopic:
         title: str = "<b>Hierarchical Clustering</b>",
         width: int = 1000,
         height: int = 600,
-        hierarchical_topics: pd.DataFrame = None,
+        hierarchical_topics: IntoDataFrame = None,
         linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
         distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
         color_threshold: int = 1,

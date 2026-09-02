@@ -1,5 +1,5 @@
 import numpy as np
-import polars as pl
+import narwhals.stable.v2 as nw
 
 try:
     from great_tables import loc, style  # noqa: F401
@@ -69,23 +69,24 @@ def visualize_approximate_distribution(
     columns = [f"{token}{' ' * i}" for i, token in enumerate(tokens)]
     topic_labels = list(topic_model.topic_labels_.values())[topic_model._outliers :]
 
-    df = pl.from_numpy(data, schema=columns)
-    df = df.insert_column(0, pl.Series("Topic", topic_labels))
+    df = nw.from_dict(
+        {"Topic": topic_labels, **{column: data[:, index] for index, column in enumerate(columns)}},
+        backend="polars",
+    )
 
     # Filter rows where all token values are 0
-    value_cols = [c for c in df.columns if c != "Topic"]
-    df = df.filter(pl.sum_horizontal(value_cols) != 0)
+    df = df.filter(nw.sum_horizontal(columns) != 0).to_native()
 
     if len(df) == 0:
         return df
 
     # Style the resulting dataframe using Great Tables
     if HAS_GREAT_TABLES:
-        max_val = df.select(value_cols).max_horizontal().max()
+        max_val = df.select(columns).max_horizontal().max()
         return (
             df.style.tab_stub(rowname_col="Topic")
-            .fmt_number(columns=value_cols, decimals=3)
-            .data_color(columns=value_cols, palette="Blues", domain=[0, max_val])
+            .fmt_number(columns=columns, decimals=3)
+            .data_color(columns=columns, palette="Blues", domain=[0, max_val])
         )
 
     return df

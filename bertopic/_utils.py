@@ -1,5 +1,5 @@
 import numpy as np
-import polars as pl
+import narwhals.stable.v2 as nw
 import logging
 from collections.abc import Iterable
 from scipy.sparse import csr_matrix
@@ -39,7 +39,7 @@ class MyLogger:
 
 def check_documents_type(documents):
     """Check whether the input documents are indeed a list of strings."""
-    if isinstance(documents, pl.DataFrame):
+    if nw.dependencies.is_into_dataframe(documents):
         raise TypeError("Make sure to supply a list of strings, not a dataframe.")
     elif isinstance(documents, Iterable) and not isinstance(documents, str):
         if not any([isinstance(doc, str) for doc in documents]):

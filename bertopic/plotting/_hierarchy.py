@@ -1,5 +1,6 @@
 import numpy as np
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 from typing import Callable, TYPE_CHECKING
 from scipy.sparse import csr_matrix
 from scipy.cluster import hierarchy as sch
@@ -27,7 +28,7 @@ def visualize_hierarchy(
     title: str = "<b>Hierarchical Clustering</b>",
     width: int = 1000,
     height: int = 600,
-    hierarchical_topics: pl.DataFrame = None,
+    hierarchical_topics: IntoDataFrame = None,
     linkage_function: Callable[[csr_matrix], np.ndarray] | None = None,
     distance_function: Callable[[csr_matrix], csr_matrix] | None = None,
     color_threshold: int = 1,
@@ -229,7 +230,7 @@ def visualize_hierarchy(
 
 def _get_annotations(
     topic_model,
-    hierarchical_topics: pl.DataFrame,
+    hierarchical_topics: IntoDataFrame,
     embeddings: csr_matrix,
     linkage_function: Callable[[csr_matrix], np.ndarray],
     distance_function: Callable[[csr_matrix], csr_matrix],
@@ -268,7 +269,7 @@ def _get_annotations(
     Returns:
         text_annotations: Annotations to be used within Plotly's `ff.create_dendogram`
     """
-    df = hierarchical_topics.filter(pl.col("Parent_Name") != "Top")
+    df = nw.from_native(hierarchical_topics, eager_only=True).filter(nw.col("Parent_Name") != "Top")
 
     # Calculate distance
     X = distance_function(embeddings)
@@ -306,7 +307,7 @@ def _get_annotations(
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(fst_topic):
-                    fst_name = df.filter(pl.col("Parent_ID") == key)["Parent_Name"][0]
+                    fst_name = df.filter(nw.col("Parent_ID") == key)["Parent_Name"][0]
 
         if len(scnd_topic) == 1:
             if isinstance(custom_labels, str):
@@ -320,7 +321,7 @@ def _get_annotations(
         else:
             for key, value in parent_topic.items():
                 if set(value) == set(scnd_topic):
-                    scnd_name = df.filter(pl.col("Parent_ID") == key)["Parent_Name"][0]
+                    scnd_name = df.filter(nw.col("Parent_ID") == key)["Parent_Name"][0]
 
         text_annotations.append([fst_name, "", "", scnd_name])
 

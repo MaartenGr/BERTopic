@@ -1,5 +1,6 @@
 import numpy as np
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 import plotly.graph_objects as go
 import math
 
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
 def visualize_hierarchical_documents(
     topic_model: "BERTopic",
     docs: list[str],
-    hierarchical_topics: pl.DataFrame | None = None,
+    hierarchical_topics: IntoDataFrame | None = None,
     topics: list[int] | None = None,
     embeddings: np.ndarray = None,
     reduced_embeddings: np.ndarray = None,
@@ -115,8 +116,9 @@ def visualize_hierarchical_documents(
     <iframe src="../../getting_started/visualization/hierarchical_documents.html"
     style="width:1000px; height: 770px; border: 0px;""></iframe>
     """
-    if not isinstance(hierarchical_topics, pl.DataFrame):
-        hierarchical_topics = topic_model._hierarchy.to_polars()
+    if hierarchical_topics is None:
+        hierarchical_topics = topic_model._hierarchy.to_dataframe()
+    hierarchical_topics = nw.from_native(hierarchical_topics, eager_only=True)
     topic_per_doc = topic_model.topics_
 
     # Sample the data to optimize for visualization and dimensionality reduction
@@ -130,11 +132,12 @@ def visualize_hierarchical_documents(
         indices.extend(np.random.choice(s, size=size, replace=False))
     indices = np.array(indices)
 
-    df = pl.DataFrame(
+    df = nw.from_dict(
         {
             "topic": [topic_per_doc[index] for index in indices],
             "doc": [docs[index] for index in indices],
-        }
+        },
+        backend="polars",
     )
 
     # Extract embeddings if not already done
@@ -169,8 +172,8 @@ def visualize_hierarchical_documents(
 
     # Combine data
     df = df.with_columns(
-        pl.Series("x", embeddings_2d[:, 0]),
-        pl.Series("y", embeddings_2d[:, 1]),
+        x=nw.new_series("x", embeddings_2d[:, 0], backend="polars"),
+        y=nw.new_series("y", embeddings_2d[:, 1], backend="polars"),
     )
 
     # Create topic list for each level, levels are created by calculating the distance
@@ -199,8 +202,8 @@ def visualize_hierarchical_documents(
     for index, max_distance in enumerate(max_distances):
         # Get topics below `max_distance`
         mapping = {topic: topic for topic in df["topic"].unique().to_list()}
-        selection = hierarchical_topics.filter(pl.col("Distance") <= max_distance)
-        selection = selection.with_columns(pl.col("Parent_ID").cast(pl.Int64))
+        selection = hierarchical_topics.filter(nw.col("Distance") <= max_distance)
+        selection = selection.with_columns(nw.col("Parent_ID").cast(nw.Int64))
         selection = selection.sort("Parent_ID")
 
         for row in selection.iter_rows(named=True):
@@ -217,13 +220,18 @@ def visualize_hierarchical_documents(
                     mappings[i] = False
 
         # Create new column
-        df = df.with_columns(pl.col("topic").replace(mapping).cast(pl.Int64).alias(f"level_{index + 1}"))
+        df = df.with_columns(
+            nw.col("topic")
+            .replace_strict(mapping, default=nw.col("topic"))
+            .cast(nw.Int64)
+            .alias(f"level_{index + 1}")
+        )
 
     # Prepare topic names of original and merged topics
     trace_names = []
     topic_names = {}
-    for topic in range(hierarchical_topics["Parent_ID"].cast(pl.Int64).max()):
-        if topic < hierarchical_topics["Parent_ID"].cast(pl.Int64).min():
+    for topic in range(hierarchical_topics["Parent_ID"].cast(nw.Int64).max()):
+        if topic < hierarchical_topics["Parent_ID"].cast(nw.Int64).min():
             if topic_model.get_topic(topic):
                 if isinstance(custom_labels, str):
                     trace_name = f"{topic}_" + "_".join(
@@ -242,7 +250,7 @@ def visualize_hierarchical_documents(
                 trace_names.append(trace_name)
         else:
             trace_name = (
-                f"{topic}_" + hierarchical_topics.filter(pl.col("Parent_ID") == str(topic))["Parent_Name"][0]
+                f"{topic}_" + hierarchical_topics.filter(nw.col("Parent_ID") == str(topic))["Parent_Name"][0]
             )
             plot_text = "_".join([name[:20] for name in trace_name.split("_")[:3]])
             topic_names[topic] = {
@@ -258,7 +266,7 @@ def visualize_hierarchical_documents(
 
         # Outliers
         if topic_model._outliers:
-            outlier_df = df.filter(pl.col(f"level_{level + 1}") == -1)
+            outlier_df = df.filter(nw.col(f"level_{level + 1}") == -1)
             traces.append(
                 go.Scattergl(
                     x=outlier_df["x"],
@@ -274,7 +282,7 @@ def visualize_hierarchical_documents(
 
         # Selected topics
         if topics:
-            selection = df.filter(pl.col("topic").is_in(topics))
+            selection = df.filter(nw.col("topic").is_in(topics))
             unique_topics = sorted(
                 [int(topic) for topic in selection[f"level_{level + 1}"].unique().to_list()]
             )
@@ -285,19 +293,19 @@ def visualize_hierarchical_documents(
             if topic != -1:
                 if topics:
                     selection = df.filter(
-                        (pl.col(f"level_{level + 1}") == topic) & (pl.col("topic").is_in(topics))
+                        (nw.col(f"level_{level + 1}") == topic) & (nw.col("topic").is_in(topics))
                     )
                 else:
-                    selection = df.filter(pl.col(f"level_{level + 1}") == topic)
+                    selection = df.filter(nw.col(f"level_{level + 1}") == topic)
 
                 if not hide_annotations:
-                    selection = selection.with_columns(pl.lit("").alias("text"))
+                    selection = selection.with_columns(nw.lit("").alias("text"))
                     annotation_data = {col: [None] for col in selection.columns}
                     annotation_data["x"] = [selection["x"].mean()]
                     annotation_data["y"] = [selection["y"].mean()]
                     annotation_data["text"] = [topic_names[int(topic)]["plot_text"]]
-                    selection = pl.concat(
-                        [selection, pl.DataFrame(annotation_data, schema=selection.schema)],
+                    selection = nw.concat(
+                        [selection, nw.from_dict(annotation_data, backend="polars", schema=selection.schema)],
                         how="vertical",
                     )
 

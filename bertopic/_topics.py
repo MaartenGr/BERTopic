@@ -4,7 +4,8 @@ from enum import Enum
 from typing import Any
 from importlib.metadata import version
 
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 from scipy.sparse import csr_matrix, vstack
 from scipy.cluster.hierarchy import fcluster
 import numpy as np
@@ -360,8 +361,9 @@ class Topic:
             if name != "Main":
                 info[name] = str(rep)
 
-        # Representative documents and images
-        info["Representative_Docs"] = self.representative_documents if self.representative_documents else [""]
+        # Representative documents and images + truncate documents for readability
+        documents = self.representative_documents or [""]
+        info["Representative_Docs"] = [document[:80] for document in documents]
 
         return info
 
@@ -859,8 +861,8 @@ class Topics:
         """Get the mapping from the cluster model's original labels to current topic IDs."""
         return self.mapping._mapping.copy()
 
-    def to_polars(self, topic: int | None = None) -> pl.DataFrame:
-        """Convert topic info to a polars DataFrame."""
+    def to_dataframe(self, topic: int | None = None) -> IntoDataFrame:
+        """Convert topic info to a dataframe."""
         if topic is not None:
             selected_topic = self.topics.get(topic)
             rows = [selected_topic.to_info_dict()] if selected_topic else []
@@ -868,11 +870,10 @@ class Topics:
             rows = [t.to_info_dict() for t in self]
 
         if not rows:
-            return pl.DataFrame()
+            return nw.from_dict({}, backend="polars").to_native()
 
-        columns = list(rows[0].keys())
-        data = {col: [row.get(col) for row in rows] for col in columns}
-        return pl.DataFrame(data)
+        data = {column: [row.get(column) for row in rows] for column in rows[0]}
+        return nw.from_dict(data, backend="polars").to_native()
 
     def to_dict(self, full: bool = False) -> dict:
         """Serialize Topics for storage.
@@ -1143,8 +1144,8 @@ class TopicHierarchy:
         copied.leaf_topic_ids = []
         return copied
 
-    def to_polars(self) -> "pl.DataFrame":
-        """Convert hierarchy to a polars DataFrame."""
+    def to_dataframe(self) -> IntoDataFrame:
+        """Convert hierarchy to a dataframe."""
         rows = []
         for node_id in sorted(self.nodes.keys(), reverse=True):
             topic = self.nodes[node_id]
@@ -1163,7 +1164,8 @@ class TopicHierarchy:
                     }
                 )
 
-        return pl.DataFrame(rows)
+        data = {column: [row.get(column) for row in rows] for column in rows[0]}
+        return nw.from_dict(data, backend="polars").to_native()
 
     def to_dict(self) -> dict:
         """Serialize hierarchy for storage."""

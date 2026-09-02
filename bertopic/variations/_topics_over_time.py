@@ -4,7 +4,8 @@ See: https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicso
 
 import numpy as np
 import pandas as pd
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
@@ -30,7 +31,7 @@ def topics_over_time(
     datetime_format: str | None = None,
     evolution_tuning: bool = True,
     global_tuning: bool = True,
-) -> pl.DataFrame:
+) -> IntoDataFrame:
     """Create topics over time.
 
     To create the topics over time, BERTopic needs to be already fitted once.
@@ -158,7 +159,7 @@ def topics_over_time(
     return _topics_over_time_to_dataframe(topics_dict)
 
 
-def _topics_over_time_to_dataframe(topics_dict: dict) -> pl.DataFrame:
+def _topics_over_time_to_dataframe(topics_dict: dict) -> IntoDataFrame:
     """Convert topics over time dictionary to a polars DataFrame.
 
     Arguments:
@@ -181,16 +182,16 @@ def _topics_over_time_to_dataframe(topics_dict: dict) -> pl.DataFrame:
     if timestamps and isinstance(timestamps[0], np.datetime64):
         timestamps = np.array(timestamps, dtype="datetime64[ns]").tolist()
 
-    df = pl.DataFrame(
+    df = nw.from_dict(
         {
             "Topic": topic_ids,
             "Words": words_list,
             "Frequency": frequencies,
             "Timestamp": timestamps,
-        }
-    )
-    df = df.sort(["Timestamp", "Frequency"], descending=[False, True])
-    return df
+        },
+        backend="polars",
+    ).sort(["Timestamp", "Frequency"], descending=[False, True])
+    return df.to_native()
 
 
 def bin_timestamps(corpus: Corpus, nr_bins: int) -> None:

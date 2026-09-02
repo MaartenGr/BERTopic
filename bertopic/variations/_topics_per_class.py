@@ -3,7 +3,8 @@ See: https://maartengr.github.io/BERTopic/getting_started/topicsperclass/topicsp
 """
 
 import numpy as np
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
@@ -25,7 +26,7 @@ def topics_per_class(
     docs: list[str],
     classes: list[int | str],
     global_tuning: bool = True,
-) -> pl.DataFrame:
+) -> IntoDataFrame:
     """Create topics per class.
 
     To create the topics per class, BERTopic needs to be already fitted once.
@@ -93,7 +94,7 @@ def topics_per_class(
     return _topics_per_class_to_dataframe(topics_dict)
 
 
-def _topics_per_class_to_dataframe(topics_dict: dict[str | int, Topics]) -> pl.DataFrame:
+def _topics_per_class_to_dataframe(topics_dict: dict[str | int, Topics]) -> IntoDataFrame:
     """Convert topics per class dictionary to a polars DataFrame.
 
     Arguments:
@@ -115,6 +116,6 @@ def _topics_per_class_to_dataframe(topics_dict: dict[str | int, Topics]) -> pl.D
                 }
             )
 
-    df = pl.DataFrame(rows)
-    df = df.sort(["Class", "Frequency"], descending=[False, True])
-    return df
+    data = {column: [row.get(column) for row in rows] for column in rows[0]}
+    df = nw.from_dict(data, backend="polars")
+    return df.sort(["Class", "Frequency"], descending=[False, True]).to_native()

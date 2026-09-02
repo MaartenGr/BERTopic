@@ -1,4 +1,5 @@
-import polars as pl
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
 from typing import List, Union, TYPE_CHECKING
 import plotly.graph_objects as go
 from sklearn.preprocessing import normalize
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
 
 def visualize_topics_over_time(
     topic_model: "BERTopic",
-    topics_over_time: pl.DataFrame,
+    topics_over_time: IntoDataFrame,
     top_n_topics: int | None = None,
     topics: List[int] | None = None,
     normalize_frequency: bool = False,
@@ -86,15 +87,15 @@ def visualize_topics_over_time(
             key: value[:40] + "..." if len(value) > 40 else value
             for key, value in topic_model.topic_labels_.items()
         }
-    topics_over_time = topics_over_time.with_columns(
-        pl.col("Topic").replace_strict(topic_names, default=None).alias("Name")
+    topics_over_time = nw.from_native(topics_over_time, eager_only=True).with_columns(
+        nw.col("Topic").replace_strict(topic_names, default=None).alias("Name")
     )
-    data = topics_over_time.filter(pl.col("Topic").is_in(selected_topics)).sort("Topic", "Timestamp")
+    data = topics_over_time.filter(nw.col("Topic").is_in(selected_topics)).sort("Topic", "Timestamp")
 
     # Add traces
     fig = go.Figure()
     for index, topic in enumerate(data["Topic"].unique().sort().to_list()):
-        trace_data = data.filter(pl.col("Topic") == topic)
+        trace_data = data.filter(nw.col("Topic") == topic)
         topic_name = trace_data["Name"][0]
         words = trace_data["Words"].to_list()
         if normalize_frequency:
