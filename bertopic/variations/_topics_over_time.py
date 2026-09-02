@@ -3,6 +3,7 @@ See: https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicso
 """
 
 import numpy as np
+import pandas as pd
 import polars as pl
 
 from typing import TYPE_CHECKING
@@ -26,6 +27,7 @@ def topics_over_time(
     timestamps: list[str] | list[int],
     topics: list[int] | None = None,
     nr_bins: int | None = None,
+    datetime_format: str | None = None,
     evolution_tuning: bool = True,
     global_tuning: bool = True,
 ) -> pl.DataFrame:
@@ -48,9 +50,7 @@ def topics_over_time(
         topic_model: The BERTopic instance
         docs: The documents you used when calling either `fit` or `fit_transform`
         timestamps: The timestamp of each document. This can be either a list of strings or ints.
-                    If it is a list of strings, then the datetime format will be automatically
-                    inferred. If it is a list of ints, then the documents will be ordered in
-                    ascending order.
+                    If it is a list of ints, then the documents will be ordered in ascending order.
         topics: A list of topics where each topic is related to a document in `docs` and
                 a timestamp in `timestamps`. You can use this to apply topics_over_time on
                 a subset of the data. Make sure that `docs`, `timestamps`, and `topics`
@@ -58,6 +58,8 @@ def topics_over_time(
         nr_bins: The number of bins you want to create for the timestamps. The left interval will
                     be chosen as the timestamp. An additional column will be created with the
                     entire interval.
+        datetime_format: The datetime format of `timestamps` if they are strings, eg "%d/%m/%Y".
+                    Leave this at None for ISO 8601 timestamps, such as "2024-01-15".
         evolution_tuning: Fine-tune each topic representation at timestamp *t* by averaging its
                             c-TF-IDF matrix with the c-TF-IDF matrix at timestamp *t-1*. This creates
                             evolutionary topic representations.
@@ -84,6 +86,10 @@ def topics_over_time(
     ```
     """
     check_is_fitted(topic_model)
+
+    # Parse timestamp strings here, since numpy's datetime64 only accepts ISO 8601
+    if len(timestamps) > 0 and isinstance(timestamps[0], str):
+        timestamps = pd.to_datetime(timestamps, format=datetime_format).to_numpy()
 
     corpus = Corpus(
         documents=docs, topics=topics if topics else topic_model._topics.predictions, timestamps=timestamps

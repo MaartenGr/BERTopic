@@ -748,7 +748,7 @@ class BERTopic:
         corpus = Corpus(documents=documents, embeddings=embeddings, y=y)
         is_first_fit = self._topics is None or len(self._topics) == 0
 
-        if is_first_fit and self.embedding_model is not None:
+        if is_first_fit and (corpus.embeddings is None or self.embedding_model is not None):
             self.embedding_model = select_backend(
                 self.embedding_model, language=self.language, verbose=self.verbose
             )
@@ -815,6 +815,7 @@ class BERTopic:
         timestamps: list[str] | list[int],
         topics: list[int] | None = None,
         nr_bins: int | None = None,
+        datetime_format: str | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
     ) -> pl.DataFrame:
@@ -824,6 +825,7 @@ class BERTopic:
             timestamps=timestamps,
             topics=topics,
             nr_bins=nr_bins,
+            datetime_format=datetime_format,
             evolution_tuning=evolution_tuning,
             global_tuning=global_tuning,
         )

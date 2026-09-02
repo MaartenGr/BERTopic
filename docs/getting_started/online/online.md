@@ -72,6 +72,9 @@ for docs in doc_chunks:
 ```
 
 And that is it! During each iteration, you can access the predicted topics through the `.topics_` attribute.
+It accumulates, so after the loop it holds a topic for every document seen so far and variations such as
+hierarchical topic modeling work as usual. Older versions tracked only the most recent batch and advised
+collecting the topics by hand; that is no longer necessary.
 
 !!! note
     Do note that in BERTopic it is not possible to use `.partial_fit` after the `.fit` as they work quite differently concerning internally updating topics, frequencies, representations, etc.
