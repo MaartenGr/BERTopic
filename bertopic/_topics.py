@@ -28,6 +28,20 @@ class TopicRepresentation:
         """
         return []
 
+    @property
+    def scores(self) -> list[float]:
+        """One score per word, weighting every word equally.
+
+        Only `Keywords` ranks the words within a topic. Everything else names the topic
+        instead of weighting what is in it, so no word is more representative than another.
+        """
+        return [1.0] * len(self.words)
+
+    @property
+    def word_scores(self) -> list[tuple[str, float]]:
+        """Words paired with their scores, which is how `get_topic` returns a topic."""
+        return list(zip(self.words, self.scores))
+
     def __str__(self) -> str:
         """String representation of the topic representation."""
         return str(self.data)
@@ -463,6 +477,17 @@ class Topics:
         """Get labels for all topics."""
         labels = {topic.id: topic.label if topic.label is not None else "" for topic in self.topics.values()}
         return dict(sorted(labels.items()))
+
+    @property
+    def custom_labels(self) -> list[str] | None:
+        """The labels a user set, or None when every label is still derived.
+
+        `Topic._label` is only filled in by `set_topic_labels`, which is what separates
+        a label the user chose from one generated out of the topic's keywords.
+        """
+        if all(topic._label is None for topic in self):
+            return None
+        return [topic.label for topic in self]
 
     @property
     def c_tf_idf(self) -> csr_matrix:

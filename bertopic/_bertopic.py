@@ -327,21 +327,18 @@ class BERTopic:
     @property
     def topic_representations_(self) -> dict[int, list[tuple[str, float]]]:
         """For backwards compatibility."""
-        representations = {}
-        for topic in self._topics:
-            representations[topic.id] = topic.representations["Main"].data
-        return representations if representations else None
+        return {topic.id: topic.representations["Main"].word_scores for topic in self._topics} or None
 
     @property
     def topic_aspects_(self) -> dict[int, dict[str, list[tuple[str, float]]]]:
         """For backwards compatibility."""
         first_topic = next(iter(self._topics), None)
-        aspect_names = list(first_topic.representations) if first_topic else []
-        aspects = {
-            aspect_name: {topic.id: topic.representations[aspect_name].data for topic in self._topics}
-            for aspect_name in aspect_names
+        aspects = first_topic.representations if first_topic else []
+        return {
+            name: {topic.id: topic.representations[name].word_scores for topic in self._topics}
+            for name in aspects
+            if name != "Main"
         }
-        return aspects
 
     @property
     def topic_sizes_(self) -> dict[int, int]:
@@ -364,9 +361,9 @@ class BERTopic:
         return self._topics.labels
 
     @property
-    def custom_labels_(self) -> list[str]:
-        """For backwards compatibility."""
-        return [topic.label for topic in self._topics]
+    def custom_labels_(self) -> list[str] | None:
+        """For backwards compatibility. None until `set_topic_labels` is called."""
+        return self._topics.custom_labels
 
     @property
     def representative_docs_(self) -> dict[int, str]:
@@ -1128,6 +1125,29 @@ class BERTopic:
                 return self.topic_representations_[topic]
         else:
             return False
+
+    def get_representation(self, topic: int, aspect: str = "Main") -> TopicRepresentation:
+        """Return a topic's representation with its structure intact.
+
+        `get_topic` flattens every representation to words and scores, which loses the shape
+        of anything richer than keywords, such as the dictionary an LLM returns. This returns
+        the representation itself.
+
+        Arguments:
+            topic: A specific topic for which you want its representation
+            aspect: Which representation to return, defaulting to the main one
+
+        Returns:
+            The `TopicRepresentation` for that topic and aspect
+
+        Examples:
+        ```python
+        representation = topic_model.get_representation(12)
+        representation.words
+        ```
+        """
+        check_is_fitted(self)
+        return self._topics[topic].representations[aspect]
 
     def get_topic_info(self, topic: int | None = None) -> pl.DataFrame:
         """Get information about each topic including its ID, frequency, and name.

@@ -40,6 +40,9 @@ def test_generate_topic_labels(model, request):
 def test_set_labels(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
 
+    # Nothing is custom until the user says so, which is what the plotting guards test for
+    assert topic_model.custom_labels_ is None
+
     labels = topic_model.generate_topic_labels()
     topic_model.set_topic_labels(labels)
     assert topic_model.custom_labels_ == labels

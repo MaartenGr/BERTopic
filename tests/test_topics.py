@@ -24,7 +24,17 @@ import pytest
 from scipy.sparse import csr_matrix
 
 from bertopic._corpus import Corpus
-from bertopic._topics import Images, Keywords, Topic, TopicHierarchy, TopicMapping, Topics, TopicType
+from bertopic._topics import (
+    Images,
+    Keywords,
+    Label,
+    StructuredJSON,
+    Topic,
+    TopicHierarchy,
+    TopicMapping,
+    Topics,
+    TopicType,
+)
 
 
 def build_topics(counts: dict[int, int], probabilities: np.ndarray | None = None) -> Topics:
@@ -401,6 +411,42 @@ def test_mapping_rejects_an_incomplete_new_mapping():
 # --------------------------------------------------------------------------------------
 # Representations
 # --------------------------------------------------------------------------------------
+
+
+def test_keywords_carry_their_own_scores():
+    """Keywords are the one representation that ranks the words within a topic."""
+    keywords = Keywords(data=[("cat", 0.8), ("dog", 0.4)])
+
+    assert keywords.words == ["cat", "dog"]
+    assert keywords.scores == [0.8, 0.4]
+    assert keywords.word_scores == [("cat", 0.8), ("dog", 0.4)]
+
+
+@pytest.mark.parametrize(
+    "representation,expected_words",
+    [
+        (Label(data="animals"), ["animals"]),
+        (StructuredJSON(data={"topic": "animals", "theme": "pets"}), ["animals", "pets"]),
+        (Images(data="collage", captions=["a cat", "a dog"]), ["a cat", "a dog"]),
+    ],
+)
+def test_representations_without_scores_weight_every_word_equally(representation, expected_words):
+    """`words` reads any representation as text, and `scores` is what ranks those words.
+
+    Only keywords rank them. Everything else names the topic, so each word counts the same
+    and `word_scores` is what `get_topic` hands back.
+    """
+    assert representation.words == expected_words
+    assert representation.scores == [1.0] * len(expected_words)
+    assert representation.word_scores == [(word, 1.0) for word in expected_words]
+
+
+def test_a_representation_with_no_text_view_has_no_scores():
+    """Scores follow words, so a payload with no text view yields neither."""
+    images = Images(data="collage")
+
+    assert images.words == []
+    assert images.word_scores == []
 
 
 def test_images_have_no_words_until_they_are_captioned():

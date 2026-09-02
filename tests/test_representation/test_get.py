@@ -2,6 +2,8 @@ import copy
 import pytest
 import polars as pl
 
+from bertopic._topics import Label, StructuredJSON
+
 
 @pytest.mark.parametrize(
     "model",
@@ -123,3 +125,60 @@ def test_get_topic_info(model, request):
         assert len(topic_model.get_topic_info(topic)) == 1
 
     assert len(topic_model.get_topic_info(200)) == 0
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
+def test_get_topic_always_returns_words_with_scores(model, request):
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+
+    for topic in set(topic_model.topics_):
+        representation = topic_model.get_topic(topic)
+        assert all(isinstance(word, str) and isinstance(score, float) for word, score in representation)
+
+
+def test_get_topic_flattens_a_label_representation(base_topic_model):
+    """The regression this unit exists for: a label used to come back as a bare string.
+
+    `get_topic` returned `'label_0'`, so `visualize_barchart` raised on `for word, _ in ...`
+    and `_create_topic_vectors` would have embedded individual characters.
+    """
+    topic_model = copy.deepcopy(base_topic_model)
+    topic_ids = topic_model._topics.topic_ids()
+    topic_model._topics.set_data(
+        representations={"Main": {topic_id: Label(data=f"label_{topic_id}") for topic_id in topic_ids}}
+    )
+    first = topic_ids[0]
+
+    assert topic_model.get_topic(first) == [(f"label_{first}", 1.0)]
+    assert topic_model.visualize_barchart() is not None
+
+
+def test_get_representation_keeps_the_structure_get_topic_flattens(base_topic_model):
+    """Flattening is lossy, so the representation itself stays reachable."""
+    topic_model = copy.deepcopy(base_topic_model)
+    first = topic_model._topics.topic_ids()[0]
+    topic_model._topics.set_data(representations={"Main": {first: StructuredJSON(data={"topic": "cats"})}})
+
+    representation = topic_model.get_representation(first)
+
+    assert isinstance(representation, StructuredJSON)
+    assert representation.data == {"topic": "cats"}
+    assert topic_model.get_topic(first) == [("cats", 1.0)]
+
+
+def test_topic_aspects_excludes_the_main_representation(representation_topic_model):
+    """Aspects are the additional representations; Main is reached through `get_topic`."""
+    aspects = representation_topic_model.topic_aspects_
+
+    assert "Main" not in aspects
+    assert "MMR" in aspects
