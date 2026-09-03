@@ -3,9 +3,10 @@ See: https://maartengr.github.io/BERTopic/getting_started/topicsovertime/topicso
 """
 
 import numpy as np
-import pandas as pd
 import narwhals.stable.v2 as nw
 from narwhals.stable.v2.typing import IntoDataFrame
+
+from bertopic._config import get_output
 
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
@@ -90,7 +91,8 @@ def topics_over_time(
 
     # Parse timestamp strings here, since numpy's datetime64 only accepts ISO 8601
     if len(timestamps) > 0 and isinstance(timestamps[0], str):
-        timestamps = pd.to_datetime(timestamps, format=datetime_format).to_numpy()
+        parsed = nw.from_dict({"timestamp": timestamps}, backend=get_output())
+        timestamps = parsed["timestamp"].str.to_datetime(format=datetime_format).to_numpy()
 
     corpus = Corpus(
         documents=docs, topics=topics if topics else topic_model._topics.predictions, timestamps=timestamps
@@ -189,7 +191,7 @@ def _topics_over_time_to_dataframe(topics_dict: dict) -> IntoDataFrame:
             "Frequency": frequencies,
             "Timestamp": timestamps,
         },
-        backend="polars",
+        backend=get_output(),
     ).sort(["Timestamp", "Frequency"], descending=[False, True])
     return df.to_native()
 

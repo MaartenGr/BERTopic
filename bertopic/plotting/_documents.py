@@ -1,5 +1,8 @@
 import numpy as np
-import pandas as pd
+import narwhals.stable.v2 as nw
+
+from bertopic._config import get_output
+from bertopic.plotting._utils import with_annotation
 import plotly.graph_objects as go
 
 
@@ -99,21 +102,25 @@ def visualize_documents(
         indices.extend(np.random.choice(s, size=size, replace=False))
     indices = np.array(indices)
 
-    df = pd.DataFrame({"topic": np.array(topic_per_doc)[indices]})
-    df["doc"] = [docs[index] for index in indices]
-    df["topic"] = [topic_per_doc[index] for index in indices]
+    df = nw.from_dict(
+        {
+            "topic": [topic_per_doc[index] for index in indices],
+            "doc": [docs[index] for index in indices],
+        },
+        backend=get_output(),
+    )
 
     # Extract embeddings if not already done
     if sample is None:
         if embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list())
+            embeddings_to_reduce = topic_model._extract_embeddings(df["doc"].to_list())
         else:
             embeddings_to_reduce = embeddings
     else:
         if embeddings is not None:
             embeddings_to_reduce = embeddings[indices]
         elif embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(df.doc.to_list())
+            embeddings_to_reduce = topic_model._extract_embeddings(df["doc"].to_list())
 
     # Reduce input embeddings
     if reduced_embeddings is None:
@@ -138,8 +145,10 @@ def visualize_documents(
         topics = unique_topics
 
     # Combine data
-    df["x"] = embeddings_2d[:, 0]
-    df["y"] = embeddings_2d[:, 1]
+    df = df.with_columns(
+        x=nw.new_series("x", embeddings_2d[:, 0], backend=get_output()),
+        y=nw.new_series("y", embeddings_2d[:, 1], backend=get_output()),
+    )
 
     # Prepare text and names
     if isinstance(custom_labels, str):
@@ -164,21 +173,15 @@ def visualize_documents(
     if len(non_selected_topics) == 0:
         non_selected_topics = [-1]
 
-    selection = df.loc[df.topic.isin(non_selected_topics), :]
-    selection["text"] = ""
-    selection.loc[len(selection), :] = [
-        None,
-        None,
-        selection.x.mean(),
-        selection.y.mean(),
-        "Other documents",
-    ]
+    selection = df.filter(nw.col("topic").is_in(list(non_selected_topics)))
+    selection = selection.with_columns(nw.lit("").alias("text"))
+    selection = with_annotation(selection, "Other documents")
 
     fig.add_trace(
         go.Scattergl(
-            x=selection.x,
-            y=selection.y,
-            hovertext=selection.doc if not hide_document_hover else None,
+            x=selection["x"],
+            y=selection["y"],
+            hovertext=selection["doc"] if not hide_document_hover else None,
             hoverinfo="text",
             mode="markers+text",
             name="other",
@@ -190,25 +193,19 @@ def visualize_documents(
     # Selected topics
     for name, topic in zip(names, unique_topics):
         if topic in topics and topic != -1:
-            selection = df.loc[df.topic == topic, :]
-            selection["text"] = ""
+            selection = df.filter(nw.col("topic") == topic)
+            selection = selection.with_columns(nw.lit("").alias("text"))
 
             if not hide_annotations:
-                selection.loc[len(selection), :] = [
-                    None,
-                    None,
-                    selection.x.mean(),
-                    selection.y.mean(),
-                    name,
-                ]
+                selection = with_annotation(selection, name)
 
             fig.add_trace(
                 go.Scattergl(
-                    x=selection.x,
-                    y=selection.y,
-                    hovertext=selection.doc if not hide_document_hover else None,
+                    x=selection["x"],
+                    y=selection["y"],
+                    hovertext=selection["doc"] if not hide_document_hover else None,
                     hoverinfo="text",
-                    text=selection.text,
+                    text=selection["text"],
                     mode="markers+text",
                     name=name,
                     textfont=dict(
@@ -220,12 +217,12 @@ def visualize_documents(
 
     # Add grid in a 'plus' shape
     x_range = (
-        df.x.min() - abs((df.x.min()) * 0.15),
-        df.x.max() + abs((df.x.max()) * 0.15),
+        df["x"].min() - abs((df["x"].min()) * 0.15),
+        df["x"].max() + abs((df["x"].max()) * 0.15),
     )
     y_range = (
-        df.y.min() - abs((df.y.min()) * 0.15),
-        df.y.max() + abs((df.y.max()) * 0.15),
+        df["y"].min() - abs((df["y"].min()) * 0.15),
+        df["y"].max() + abs((df["y"].max()) * 0.15),
     )
     fig.add_shape(
         type="line",

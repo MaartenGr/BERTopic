@@ -6,6 +6,8 @@ import numpy as np
 import narwhals.stable.v2 as nw
 from narwhals.stable.v2.typing import IntoDataFrame
 
+from bertopic._config import get_output
+
 from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
 from tqdm import tqdm
@@ -117,5 +119,5 @@ def _topics_per_class_to_dataframe(topics_dict: dict[str | int, Topics]) -> Into
             )
 
     data = {column: [row.get(column) for row in rows] for column in rows[0]}
-    df = nw.from_dict(data, backend="polars")
+    df = nw.from_dict(data, backend=get_output())
     return df.sort(["Class", "Frequency"], descending=[False, True]).to_native()

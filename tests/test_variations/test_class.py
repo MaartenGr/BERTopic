@@ -19,7 +19,7 @@ def test_class(model, documents, classes, request):
 
     assert topics_per_class_global["Frequency"].sum() == len(documents)
     assert topics_per_class_local["Frequency"].sum() == len(documents)
-    assert set(topics_per_class_global["Topic"].unique().to_list()) == set(topic_model.topics_)
-    assert set(topics_per_class_local["Topic"].unique().to_list()) == set(topic_model.topics_)
+    assert set(topics_per_class_global["Topic"].unique()) == set(topic_model.topics_)
+    assert set(topics_per_class_local["Topic"].unique()) == set(topic_model.topics_)
     assert len(topics_per_class_global["Class"].unique()) == len(set(classes))
     assert len(topics_per_class_local["Class"].unique()) == len(set(classes))

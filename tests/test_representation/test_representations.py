@@ -1,7 +1,7 @@
 import copy
 import pytest
 import numpy as np
-import polars as pl
+import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
 from bertopic._corpus import Corpus
@@ -60,7 +60,7 @@ def test_extract_representations(model, documents, document_embeddings, request)
     assert topic_model.c_tf_idf_.shape[1] > 100
 
     freq = topic_model.get_topic_freq()
-    assert isinstance(freq, pl.DataFrame)
+    assert isinstance(freq, pd.DataFrame)
     assert len(freq["Topic"].unique()) == len(set(topic_model.topics_))
     assert len(freq["Topic"].unique()) == len(freq)
 
@@ -88,7 +88,7 @@ def test_extract_representations_custom_cv(model, documents, document_embeddings
     assert topic_model.c_tf_idf_.shape[1] > 100
 
     freq = topic_model.get_topic_freq()
-    assert isinstance(freq, pl.DataFrame)
+    assert isinstance(freq, pd.DataFrame)
     assert len(freq["Topic"].unique()) == len(set(topic_model.topics_))
     assert len(freq["Topic"].unique()) == len(freq)
 

@@ -1,6 +1,9 @@
 import numpy as np
 import narwhals.stable.v2 as nw
 from narwhals.stable.v2.typing import IntoDataFrame
+
+from bertopic._config import get_output
+from bertopic.plotting._utils import with_annotation
 import plotly.graph_objects as go
 import math
 
@@ -137,7 +140,7 @@ def visualize_hierarchical_documents(
             "topic": [topic_per_doc[index] for index in indices],
             "doc": [docs[index] for index in indices],
         },
-        backend="polars",
+        backend=get_output(),
     )
 
     # Extract embeddings if not already done
@@ -172,8 +175,8 @@ def visualize_hierarchical_documents(
 
     # Combine data
     df = df.with_columns(
-        x=nw.new_series("x", embeddings_2d[:, 0], backend="polars"),
-        y=nw.new_series("y", embeddings_2d[:, 1], backend="polars"),
+        x=nw.new_series("x", embeddings_2d[:, 0], backend=get_output()),
+        y=nw.new_series("y", embeddings_2d[:, 1], backend=get_output()),
     )
 
     # Create topic list for each level, levels are created by calculating the distance
@@ -300,14 +303,7 @@ def visualize_hierarchical_documents(
 
                 if not hide_annotations:
                     selection = selection.with_columns(nw.lit("").alias("text"))
-                    annotation_data = {col: [None] for col in selection.columns}
-                    annotation_data["x"] = [selection["x"].mean()]
-                    annotation_data["y"] = [selection["y"].mean()]
-                    annotation_data["text"] = [topic_names[int(topic)]["plot_text"]]
-                    selection = nw.concat(
-                        [selection, nw.from_dict(annotation_data, backend="polars", schema=selection.schema)],
-                        how="vertical",
-                    )
+                    selection = with_annotation(selection, topic_names[int(topic)]["plot_text"])
 
                 traces.append(
                     go.Scattergl(

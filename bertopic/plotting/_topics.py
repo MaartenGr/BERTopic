@@ -1,5 +1,8 @@
 import numpy as np
-import pandas as pd
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrame
+
+from bertopic._config import get_output
 
 try:
     from umap import UMAP
@@ -108,19 +111,22 @@ def visualize_topics(
         )
 
     # Visualize with plotly
-    df = pd.DataFrame(
+    df = nw.from_dict(
         {
             "x": embeddings[:, 0],
             "y": embeddings[:, 1],
             "Topic": topic_list,
             "Words": words,
             "Size": frequencies,
-        }
+        },
+        backend=get_output(),
     )
     return _plotly_topic_visualization(df, topic_list, title, width, height)
 
 
-def _plotly_topic_visualization(df: pd.DataFrame, topic_list: List[str], title: str, width: int, height: int):
+def _plotly_topic_visualization(
+    df: IntoDataFrame, topic_list: List[str], title: str, width: int, height: int
+):
     """Create plotly-based visualization of topics with a slider for topic selection."""
 
     def get_color(topic_selected):
@@ -132,17 +138,17 @@ def _plotly_topic_visualization(df: pd.DataFrame, topic_list: List[str], title: 
 
     # Prepare figure range
     x_range = (
-        df.x.min() - abs((df.x.min()) * 0.15),
-        df.x.max() + abs((df.x.max()) * 0.15),
+        df["x"].min() - abs((df["x"].min()) * 0.15),
+        df["x"].max() + abs((df["x"].max()) * 0.15),
     )
     y_range = (
-        df.y.min() - abs((df.y.min()) * 0.15),
-        df.y.max() + abs((df.y.max()) * 0.15),
+        df["y"].min() - abs((df["y"].min()) * 0.15),
+        df["y"].max() + abs((df["y"].max()) * 0.15),
     )
 
     # Plot topics
     fig = px.scatter(
-        df,
+        df.to_native(),
         x="x",
         y="y",
         size="Size",

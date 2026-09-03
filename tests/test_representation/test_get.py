@@ -1,6 +1,6 @@
 import copy
 import pytest
-import polars as pl
+import pandas as pd
 
 from bertopic._topics import Label, StructuredJSON
 
@@ -61,13 +61,13 @@ def test_get_topics(model, request):
 def test_get_topic_freq(model, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     for topic in set(topic_model.topics_):
-        assert not isinstance(topic_model.get_topic_freq(topic), pl.DataFrame)
+        assert not isinstance(topic_model.get_topic_freq(topic), pd.DataFrame)
 
     topic_freq = topic_model.get_topic_freq()
     unique_topics = set(topic_model.topics_)
     topics_in_model = set(topic_model._topics.topic_ids())
 
-    assert isinstance(topic_freq, pl.DataFrame)
+    assert isinstance(topic_freq, pd.DataFrame)
 
     assert len(topic_freq) == len(set(topic_model.topics_))
     assert len(topics_in_model.difference(unique_topics)) == 0
@@ -117,9 +117,9 @@ def test_get_topic_info(model, request):
     info = topic_model.get_topic_info()
 
     if topic_model._outliers:
-        assert info.row(0, named=True)["Topic"] == -1
+        assert info.iloc[0]["Topic"] == -1
     else:
-        assert info.row(0, named=True)["Topic"] == 0
+        assert info.iloc[0]["Topic"] == 0
 
     for topic in set(topic_model.topics_):
         assert len(topic_model.get_topic_info(topic)) == 1

@@ -1,7 +1,7 @@
 import copy
 import pytest
 from bertopic import BERTopic
-import polars as pl
+import pandas as pd  # noqa: F401
 
 from tests.conftest import ALL_MODEL_FIXTURES
 
@@ -61,14 +61,14 @@ def test_full_model(model, documents, request):
     timestamps = [i % 10 for i in range(len(documents))]
     topics_over_time = topic_model.topics_over_time(documents, timestamps)
 
-    assert topics_over_time.select(pl.sum("Frequency")).item() == len(documents)
-    assert topics_over_time.select(pl.col("Topic").n_unique()).item() == len(set(topics))
+    assert topics_over_time["Frequency"].sum() == len(documents)
+    assert topics_over_time["Topic"].nunique() == len(set(topics))
 
     # Test hierarchical topics
     topic_model.hierarchical_topics(documents)
 
     assert len(topic_model.hierarchy_) > 0
-    assert topic_model.hierarchy_.select(pl.col("Parent_ID").cast(pl.Int64).min()).item() > max(topics)
+    assert topic_model.hierarchy_["Parent_ID"].astype(int).min() > max(topics)
 
     # Test creation of topic tree
     tree = topic_model.get_topic_tree(tight_layout=False)

@@ -88,6 +88,29 @@ words = topic_model.vectorizer_model.get_feature_names()
 ```
 
 
+## **Polars instead of pandas**
+Methods like `get_topic_info()` and `topics_over_time()` return a pandas DataFrame. If you would rather work
+in [polars](https://pola.rs/), install it and you only need to define it once:
+
+```python
+import bertopic
+
+bertopic.set_output("polars")
+topic_model.get_topic_info()  # now a polars DataFrame
+```
+
+The setting applies to every method that returns a dataframe, and `bertopic.get_output()` tells you which one
+is active. Only pandas is installed with BERTopic, so you can add polars to use it instead.
+
+You can also use either in various functions. `visualize_hierarchy()`, `visualize_topics_over_time()` and the other
+plots accept a pandas or a polars frame regardless of the setting, so converting one in between is fine:
+
+```python
+hierarchical_topics = topic_model.hierarchical_topics(docs)
+topic_model.visualize_hierarchy(hierarchical_topics=hierarchical_topics.head(20))
+```
+
+
 ## **Pre-compute embeddings**
 Typically, we want to iterate fast over different versions of our BERTopic model whilst we are trying to optimize it to a specific use case. To speed up this process, we can pre-compute the embeddings, save them,
 and pass them to BERTopic so it does not need to calculate the embeddings each time:

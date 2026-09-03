@@ -17,6 +17,8 @@ import numpy as np
 
 import narwhals.stable.v2 as nw
 from narwhals.stable.v2.typing import IntoDataFrame
+
+from bertopic._config import get_output
 import scipy.sparse as sp
 
 
@@ -1195,7 +1197,7 @@ class BERTopic:
         else:
             sizes = self.topic_sizes_
             data = {"Topic": list(sizes.keys()), "Count": list(sizes.values())}
-            return nw.from_dict(data, backend="polars").to_native()
+            return nw.from_dict(data, backend=get_output()).to_native()
 
     def get_document_info(
         self,
@@ -1265,7 +1267,7 @@ class BERTopic:
             data.update(metadata)
 
         # Any extra columns the caller supplied sit alongside, in whatever library they used
-        result = nw.from_dict(data, backend="polars")
+        result = nw.from_dict(data, backend=get_output())
         if df is not None:
             result = nw.concat([nw.from_native(df, eager_only=True), result], how="horizontal")
         return result.to_native()

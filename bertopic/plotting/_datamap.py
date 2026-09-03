@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 try:
     import datamapplot
-    import pandas as pd
 
     HAS_DATAMAPPLOT = True
 except (ImportError, ModuleNotFoundError):
@@ -174,7 +173,7 @@ def visualize_document_datamap(
                 topic_name_mapping[topic_num] = "Unlabelled"
 
     # Map in topic names and plot
-    named_topic_per_doc = pd.Series(topic_per_doc).map(topic_name_mapping).to_numpy()
+    named_topic_per_doc = np.array([topic_name_mapping[topic] for topic in topic_per_doc])
 
     if interactive:
         figure = datamapplot.create_interactive_plot(

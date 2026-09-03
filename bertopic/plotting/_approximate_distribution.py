@@ -1,8 +1,10 @@
 import numpy as np
 import narwhals.stable.v2 as nw
 
+from bertopic._config import get_output
+
 try:
-    from great_tables import loc, style  # noqa: F401
+    from great_tables import GT, loc, style  # noqa: F401
 
     HAS_GREAT_TABLES = True
 except (ModuleNotFoundError, ImportError):
@@ -69,24 +71,28 @@ def visualize_approximate_distribution(
     columns = [f"{token}{' ' * i}" for i, token in enumerate(tokens)]
     topic_labels = list(topic_model.topic_labels_.values())[topic_model._outliers :]
 
+    # Drop topics with no weight on any token before building, rather than filtering
+    # after: a pandas filter keeps the original row labels, leaving gaps in the index.
+    keep = data.sum(axis=1) != 0
+    data = data[keep]
+    topic_labels = [label for label, keep_label in zip(topic_labels, keep) if keep_label]
+
+    if len(topic_labels) == 0:
+        return nw.from_dict({}, backend=get_output()).to_native()
+
     df = nw.from_dict(
         {"Topic": topic_labels, **{column: data[:, index] for index, column in enumerate(columns)}},
-        backend="polars",
+        backend=get_output(),
     )
-
-    # Filter rows where all token values are 0
-    df = df.filter(nw.sum_horizontal(columns) != 0).to_native()
-
-    if len(df) == 0:
-        return df
 
     # Style the resulting dataframe using Great Tables
     if HAS_GREAT_TABLES:
-        max_val = df.select(columns).max_horizontal().max()
+        max_val = df.select(nw.max_horizontal(columns).alias("max"))["max"].max()
         return (
-            df.style.tab_stub(rowname_col="Topic")
+            GT(df.to_native())
+            .tab_stub(rowname_col="Topic")
             .fmt_number(columns=columns, decimals=3)
             .data_color(columns=columns, palette="Blues", domain=[0, max_val])
         )
 
-    return df
+    return df.to_native()

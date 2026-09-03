@@ -45,7 +45,6 @@ dependencies = [
     "tqdm>=4.41.1", # To prevent conflicts with `uv` dependency manager
     "llvmlite>0.36.0",
     "narwhals>=2.0",
-    "polars>=1.37.1",
 ]
 
 [project.optional-dependencies]

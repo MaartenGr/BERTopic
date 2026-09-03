@@ -1,7 +1,33 @@
 from typing import TYPE_CHECKING
 
+import narwhals.stable.v2 as nw
+from narwhals.stable.v2.typing import IntoDataFrameT
+
+from bertopic._config import get_output
+
 if TYPE_CHECKING:
     from bertopic import BERTopic
+
+
+def with_annotation(selection: IntoDataFrameT, label: str) -> IntoDataFrameT:
+    """Append one extra point at the centre of a cluster, carrying its label.
+
+    The row is copied from an existing one so that every column keeps its type, then x, y
+    and text are overridden. A row of nulls would not do: pandas has no null for an integer
+    column, and the explicit schema keeps x and y at the width they were built with.
+
+    A cluster with no documents has no centre to label, so it is handed back untouched.
+    """
+    if len(selection) == 0:
+        return selection
+
+    annotation = {column: [selection[column][0]] for column in selection.columns}
+    annotation["x"] = [selection["x"].mean()]
+    annotation["y"] = [selection["y"].mean()]
+    annotation["text"] = [label]
+
+    extra_row = nw.from_dict(annotation, backend=get_output(), schema=selection.schema)
+    return nw.concat([selection, extra_row], how="vertical")
 
 
 def select_topics(

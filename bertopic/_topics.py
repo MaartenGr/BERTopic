@@ -6,6 +6,8 @@ from importlib.metadata import version
 
 import narwhals.stable.v2 as nw
 from narwhals.stable.v2.typing import IntoDataFrame
+
+from bertopic._config import get_output
 from scipy.sparse import csr_matrix, vstack
 from scipy.cluster.hierarchy import fcluster
 import numpy as np
@@ -870,10 +872,10 @@ class Topics:
             rows = [t.to_info_dict() for t in self]
 
         if not rows:
-            return nw.from_dict({}, backend="polars").to_native()
+            return nw.from_dict({}, backend=get_output()).to_native()
 
         data = {column: [row.get(column) for row in rows] for column in rows[0]}
-        return nw.from_dict(data, backend="polars").to_native()
+        return nw.from_dict(data, backend=get_output()).to_native()
 
     def to_dict(self, full: bool = False) -> dict:
         """Serialize Topics for storage.
@@ -1165,7 +1167,7 @@ class TopicHierarchy:
                 )
 
         data = {column: [row.get(column) for row in rows] for column in rows[0]}
-        return nw.from_dict(data, backend="polars").to_native()
+        return nw.from_dict(data, backend=get_output()).to_native()
 
     def to_dict(self) -> dict:
         """Serialize hierarchy for storage."""
