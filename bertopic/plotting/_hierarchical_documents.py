@@ -181,6 +181,7 @@ def visualize_hierarchical_documents(
 
     # Create topic list for each level, levels are created by calculating the distance
     distances = hierarchical_topics["Distance"].to_list()
+    nr_levels = min(nr_levels, len(hierarchical_topics))
     if level_scale == "log" or level_scale == "logarithmic":
         log_indices = (
             np.round(
@@ -233,7 +234,7 @@ def visualize_hierarchical_documents(
     # Prepare topic names of original and merged topics
     trace_names = []
     topic_names = {}
-    for topic in range(hierarchical_topics["Parent_ID"].cast(nw.Int64).max()):
+    for topic in range(hierarchical_topics["Parent_ID"].cast(nw.Int64).max() + 1):
         if topic < hierarchical_topics["Parent_ID"].cast(nw.Int64).min():
             if topic_model.get_topic(topic):
                 if isinstance(custom_labels, str):

@@ -2,14 +2,17 @@
 
 BERTopic builds a dataframe only at the very end, so which library it builds with is a
 presentation choice. Pandas is the default because that is what every existing notebook
-expects; polars and pyarrow are one call away.
+expects, and polars is one call away.
 """
 
 import pandas as pd
-import polars as pl
 import pytest
 
 import bertopic
+
+# Polars is a test dependency rather than a runtime one, so skip rather than fail
+# collection when the suite is run without the `test` extra
+pl = pytest.importorskip("polars")
 
 
 @pytest.fixture(autouse=True)
