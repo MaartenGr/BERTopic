@@ -180,3 +180,94 @@ def test_mismatched_media_is_rejected():
 
     with pytest.raises(ValueError):
         corpus.media = ["only one"]
+
+
+def test_every_row_is_its_own_document_by_default():
+    """1.0 fits on whole documents, so the grouping key is the identity."""
+    corpus = Corpus(documents=["first", "second", "third"])
+
+    assert list(corpus.document_ids) == [0, 1, 2]
+    assert corpus.nr_documents == len(corpus)
+
+
+def test_rows_may_share_a_document():
+    """What a sentence splitter would produce: four rows from two documents.
+
+    Nothing generates this in 1.0. The key exists so that 1.1 can add a splitter without
+    a second pass over the data layer.
+    """
+    corpus = Corpus(
+        documents=["first half", "second half", "another one", "and its tail"],
+        document_ids=np.array([0, 0, 1, 1]),
+    )
+
+    assert corpus.nr_documents == 2
+    assert len(corpus) == 4
+
+
+def test_selecting_by_index_carries_document_ids():
+    """Slicing a corpus keeps each row pointing at the document it came from."""
+    corpus = Corpus(documents=["a", "b", "c", "d"], document_ids=np.array([0, 0, 1, 1]))
+
+    selected = corpus.get_corpus_by_indices([1, 2])
+
+    assert list(selected.document_ids) == [0, 1]
+    assert selected.nr_documents == 2
+
+
+def test_selecting_by_topic_carries_document_ids():
+    corpus = Corpus(
+        documents=["a", "b", "c"],
+        document_ids=np.array([0, 0, 1]),
+        topics=np.array([0, 1, 0]),
+    )
+
+    selected = corpus.get_topic(0)
+
+    assert list(selected.document_ids) == [0, 1]
+
+
+def test_combining_corpora_carries_document_ids():
+    """Zero-shot splits a corpus and recombines it, which must not renumber the rows."""
+    first = Corpus(
+        documents=["first"], topics=np.array([0]), embeddings=np.zeros((1, 4)), original_indices=[0]
+    )
+    second = Corpus(
+        documents=["second"], topics=np.array([1]), embeddings=np.ones((1, 4)), original_indices=[1]
+    )
+
+    combined = first + second
+
+    assert len(combined.document_ids) == 2
+
+
+def test_mismatched_document_ids_are_rejected():
+    """A grouping key that is not one-per-row would silently misalign every later zip."""
+    corpus = Corpus(documents=["first", "second"])
+
+    with pytest.raises(ValueError):
+        corpus.document_ids = np.array([0])
+
+
+def test_recombining_a_split_corpus_keeps_documents_distinct():
+    """Zero-shot builds two corpora from one input and adds them back together.
+
+    Each defaults its own ids, so numbering them from scratch would make row 0 of each
+    half look like the same document. `original_indices` is what keeps them apart.
+    """
+    first = Corpus(
+        documents=["a", "c", "e"],
+        topics=np.array([0, 1, 0]),
+        embeddings=np.zeros((3, 4)),
+        original_indices=[0, 2, 4],
+    )
+    second = Corpus(
+        documents=["b", "d", "f"],
+        topics=np.array([1, 0, 1]),
+        embeddings=np.ones((3, 4)),
+        original_indices=[1, 3, 5],
+    )
+
+    combined = first + second
+
+    assert combined.nr_documents == 6

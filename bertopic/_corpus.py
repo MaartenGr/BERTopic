@@ -45,6 +45,9 @@ class Corpus:
     # For tracking ID mappings (e.g., during zero-shot)
     original_indices: np.ndarray = None
 
+    # Which document each row belongs to.
+    document_ids: np.ndarray = None
+
     # Zero-shot topic labels
     _zeroshot_labels: list[str] = field(default_factory=list)
 
@@ -73,6 +76,10 @@ class Corpus:
 
         if self.original_indices is None:
             self.original_indices = np.arange(nr_rows)
+
+        # A row is currently a document.
+        if self.document_ids is None:
+            self.document_ids = np.asarray(self.original_indices)
 
         if isinstance(self.classes, list):
             self.classes = np.array(self.classes)
@@ -212,6 +219,7 @@ class Corpus:
         self.original_indices = (
             np.array(self.original_indices)[sort_order] if self.original_indices is not None else None
         )
+        self.document_ids = np.array(self.document_ids)[sort_order]
 
         return self
 
@@ -235,6 +243,7 @@ class Corpus:
             topics=selected_topics,
             embeddings=selected_embeddings,
             original_indices=selected_original_indices,
+            document_ids=[self.document_ids[index] for index in sorted_indices],
             _zeroshot_labels=self._zeroshot_labels,
         )
 
@@ -268,6 +277,7 @@ class Corpus:
             topics=[topic_id] * len(filtered_docs),
             embeddings=filtered_embeddings,
             original_indices=filtered_indices,
+            document_ids=[self.document_ids[index] for index in filtered_indices],
         )
 
     def __add__(self, other: "Corpus") -> "Corpus":
@@ -304,6 +314,7 @@ class Corpus:
 
         # Combine and reorder original_indices
         sorted_indices = [combined_indices[i] for i in sort_order]
+        combined_document_ids = list(self.document_ids) + list(other.document_ids)
 
         return Corpus(
             documents=sorted_documents,
@@ -312,8 +323,16 @@ class Corpus:
             topics=sorted_topics,
             embeddings=sorted_embeddings,
             original_indices=sorted_indices,
+            document_ids=[combined_document_ids[index] for index in sort_order],
             _zeroshot_labels=other._zeroshot_labels if other.has_zeroshot_labels else None,
         )
+
+    @property
+    def nr_documents(self) -> int:
+        """How many distinct documents these rows came from, which equals the row count
+        until something starts splitting documents into several rows.
+        """
+        return len(np.unique(self.document_ids))
 
     def __len__(self):
         return len(self.documents)
@@ -327,7 +346,9 @@ class Corpus:
 
     def __setattr__(self, name: str, value) -> None:
         """Whenever we update a per-row field after construction, validate its length."""
-        if name in ("embeddings", "media", "modality", "topics") and getattr(self, "_initialized", False):
+        if name in ("embeddings", "media", "modality", "topics", "document_ids") and getattr(
+            self, "_initialized", False
+        ):
             self._validate_length(name, value)
         super().__setattr__(name, value)
 
