@@ -271,3 +271,27 @@ def test_recombining_a_split_corpus_keeps_documents_distinct():
     combined = first + second
 
     assert combined.nr_documents == 6
+
+
+def test_candidate_sampling_is_repeatable():
+    """Representative documents feed LLM representations, so they must not drift.
+
+    The sampling was unseeded, so every fit chose different candidates and any label
+    built from them changed run to run. `random_state` on UMAP does not reach here.
+    """
+    corpus = Corpus(
+        documents=[f"document {index}" for index in range(1000)],
+        topics=np.array([0] * 1000),
+        embeddings=np.zeros((1000, 4)),
+    )
+
+    runs = [corpus.get_topic(0, nr_samples=100).documents for _ in range(3)]
+
+    assert runs[0] == runs[1] == runs[2]
+
+
+def test_sampling_only_kicks_in_above_the_limit():
+    """A topic smaller than `nr_samples` keeps every document, in order."""
+    corpus = Corpus(documents=["a", "b", "c"], topics=np.array([0, 0, 0]))
+
+    assert corpus.get_topic(0, nr_samples=100).documents == ["a", "b", "c"]

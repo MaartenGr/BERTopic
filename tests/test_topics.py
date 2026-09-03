@@ -579,3 +579,64 @@ def test_topics_keeps_rows_and_probabilities_consistent_through_a_merge():
     assert set(topics.predictions) <= set(topics.topic_ids())
     assert topics.probabilities.shape == (19, len(topics.topic_ids()))
     assert topics.probabilities[0].sum() == pytest.approx(1.0)
+
+
+# --------------------------------------------------------------------------------------
+# get_topic_info columns
+# --------------------------------------------------------------------------------------
+
+
+def test_representation_is_the_whole_word_list():
+    """0.17 returned every word; a `str(...)` here silently truncated to the top five."""
+    topics = build_topics({0: 4})
+    words = [(f"word{index}", 1.0 - index / 100) for index in range(10)]
+    topics.set_data(representations={"Main": {0: Keywords(data=words)}})
+
+    info = topics[0].to_info_dict()
+
+    assert info["Representation"] == [f"word{index}" for index in range(10)]
+
+
+def test_aspect_columns_are_word_lists_too():
+    """An aspect had the same bug, and `str(rep)` was never meaningful in a table."""
+    topics = build_topics({0: 4})
+    topics.set_data(representations={"Main": {0: Keywords(data=[("cat", 0.8)])}})
+    topics.set_data(representations={"Visual": {0: Images(data="collage", captions=["a cat"])}})
+
+    info = topics[0].to_info_dict()
+
+    assert info["Visual"] == ["a cat"]
+
+
+def test_name_carries_the_topic_id():
+    """What tells two topics with similar keywords apart, and what 0.17's `Name` had."""
+    topics = build_topics({0: 4})
+    topics.set_data(representations={"Main": {0: Keywords(data=[("cat", 0.9), ("dog", 0.8)])}})
+
+    assert topics[0].name == "0_cat_dog"
+    assert topics[0].to_info_dict()["Name"] == "0_cat_dog"
+
+
+def test_a_user_label_is_never_prefixed():
+    """`set_topic_labels("Politics")` should not become `0_Politics`."""
+    topics = build_topics({0: 4})
+    topics[0]._label = "Politics"
+
+    assert topics[0].name == "Politics"
+
+
+def test_label_stays_unprefixed():
+    """`TopicHierarchy` names its nodes from `label`, which 0.17 left unprefixed."""
+    topics = build_topics({0: 4})
+    topics.set_data(representations={"Main": {0: Keywords(data=[("cat", 0.9), ("dog", 0.8)])}})
+
+    assert topics[0].label == "cat_dog"
+
+
+def test_representative_documents_are_not_truncated():
+    """`get_topic_info` is a data accessor; the display layer already elides long text."""
+    topics = build_topics({0: 4})
+    long_document = "word " * 200
+    topics.set_data(representative_documents={0: [long_document]})
+
+    assert topics[0].to_info_dict()["Representative_Docs"] == [long_document]

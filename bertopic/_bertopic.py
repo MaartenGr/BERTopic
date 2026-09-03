@@ -2869,6 +2869,13 @@ class BERTopic:
                 c_tf_idf=c_tf_idf,
                 name="Main",
             )
+        else:
+            # Without a representation model the top c-TF-IDF words are the representation,
+            # so cut the extra candidates back to the `top_n_words` that were asked for
+            topic_representations = {
+                topic_id: Keywords(keywords.data[: self.top_n_words])
+                for topic_id, keywords in topic_representations.items()
+            }
 
         # Extract topic representations other than the Main one (called aspects)
         if calculate_aspects and isinstance(self.representation_model, dict):

@@ -160,3 +160,20 @@ def test_reduction_fixtures_have_more_topics_than_they_are_reduced_to(model, req
         f"{model} produced only {nr_topics} topics; the reduction tests reduce to 10 "
         "and need more than that to exercise a real reduction"
     )
+
+
+@pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
+def test_topic_names_carry_their_id(model, request):
+    """A generated name is `{topic}_{words}`, which tells similar topics apart.
+
+    Names the user chose are left alone, which is why zero-shot topics read as `cars`
+    rather than `0_cars` — 0.17 overwrote the generated label for those too. The prefix
+    was lost during the refactor and nothing noticed, because no test read the shape of
+    the column.
+    """
+    topic_model = request.getfixturevalue(model)
+
+    generated = [topic for topic in topic_model._topics if topic._label is None]
+    assert generated, "every topic was given a label, so nothing exercises the prefix"
+    for topic in generated:
+        assert topic.name.startswith(f"{topic.id}_")

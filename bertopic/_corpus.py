@@ -258,9 +258,12 @@ class Corpus:
         filtered_docs = [doc for doc, topic in zip(self.documents, self.topics) if topic == topic_id]
         filtered_indices = [i for i, topic in enumerate(self.topics) if topic == topic_id]
 
-        # Sample documents if nr_samples is specified
+        # Sample documents if nr_samples is specified, seeded so that representative
+        # documents — and any LLM representation built from them — repeat across runs
         if nr_samples is not None and len(filtered_docs) > nr_samples:
-            sampled_indices = np.random.choice(len(filtered_docs), size=nr_samples, replace=False)
+            sampled_indices = np.random.default_rng(42).choice(
+                len(filtered_docs), size=nr_samples, replace=False
+            )
             filtered_docs = [filtered_docs[i] for i in sampled_indices]
             filtered_indices = [filtered_indices[i] for i in sampled_indices]
 

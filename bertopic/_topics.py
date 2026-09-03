@@ -345,6 +345,15 @@ class Topic:
         else:
             return "No label could be created"
 
+    @property
+    def name(self) -> str:
+        """How the topic is named in `get_topic_info` and `topic_labels_`.
+
+        The topic's ID followed by its label, which is what makes two topics with similar
+        keywords tellable apart. A label the user set is returned as it was given.
+        """
+        return self._label if self._label is not None else f"{self.id}_{self.label}"
+
     def __getitem__(self, source: str) -> TopicRepresentation:
         """Get representation for a specific source, or default if not found."""
         return self.representations.get(source, TopicRepresentation())
@@ -355,17 +364,15 @@ class Topic:
 
     def to_info_dict(self) -> dict:
         """Serialize topic info to a flat dictionary for tabular output."""
-        info = {"Topic": self.id, "Count": self.nr_documents, "Name": self.label}
-        info["Representation"] = str(self.representations.get("Main"))
+        info = {"Topic": self.id, "Count": self.nr_documents, "Name": self.name}
+        info["Representation"] = self["Main"].words
 
         # Extract all other representations
         for name, rep in self.representations.items():
             if name != "Main":
-                info[name] = str(rep)
+                info[name] = rep.words
 
-        # Representative documents and images + truncate documents for readability
-        documents = self.representative_documents or [""]
-        info["Representative_Docs"] = [document[:80] for document in documents]
+        info["Representative_Docs"] = self.representative_documents or [""]
 
         return info
 
@@ -479,7 +486,7 @@ class Topics:
     @property
     def labels(self) -> dict[int, str]:
         """Get labels for all topics."""
-        labels = {topic.id: topic.label if topic.label is not None else "" for topic in self.topics.values()}
+        labels = {topic.id: topic.name if topic.name is not None else "" for topic in self.topics.values()}
         return dict(sorted(labels.items()))
 
     @property
