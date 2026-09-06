@@ -2219,11 +2219,9 @@ class BERTopic:
             if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
                 self.custom_labels_[-1] = ""
 
-            # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
-            if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
-                n_features = self.ctfidf_model._idf_diag.shape[1]
-                outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
-                self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
+            # NOTE: `ctfidf_model._idf_diag` is a (n_features, n_features) diagonal matrix
+            # over the vocabulary and is independent of the number of topics, so it must
+            # not be modified when adding the -1 topic.
 
             # Initialize topic aspects for -1 topic (empty dict for each aspect) if they exist
             if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
@@ -2305,10 +2303,10 @@ class BERTopic:
             mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
             setattr(self, attr, matrix[mask])
 
-        # Update ctfidf model to remove deleted topics if it exists
-        if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
-            mask = np.array([topic not in topics_to_delete for topic in range(self.ctfidf_model._idf_diag.shape[0])])
-            self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
+        # NOTE: `ctfidf_model._idf_diag` is a (n_features, n_features) diagonal matrix over
+        # the vocabulary. Deleting topics does not change the vocabulary, so it is left
+        # unchanged here; masking it along the topic axis would corrupt its shape and break
+        # any later `ctfidf_model.transform` call (e.g. `topics_over_time`).
 
     def reduce_topics(
         self,

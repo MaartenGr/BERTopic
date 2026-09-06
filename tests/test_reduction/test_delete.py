@@ -57,3 +57,34 @@ def test_delete(model, request):
         assert mapped_labels == topic_model.topics_[950:]
     else:
         assert mapped_labels == topic_model.topics_
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+    ],
+)
+def test_delete_topics_preserves_ctfidf_idf_diag(model, documents, request):
+    """`delete_topics` must not corrupt the c-TF-IDF idf diagonal (see #2530).
+
+    `ctfidf_model._idf_diag` is a (n_features, n_features) matrix over the vocabulary
+    and is independent of the number of topics. Deleting topics used to mutate it along
+    the topic axis, leaving it non-square and breaking any later `ctfidf_model.transform`
+    call, such as the one in `topics_over_time`.
+    """
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+    idf_shape = topic_model.ctfidf_model._idf_diag.shape
+
+    topic_model.delete_topics([1, 2])
+
+    # The idf diagonal must remain the same square vocabulary-sized matrix
+    assert idf_shape[0] == idf_shape[1]
+    assert topic_model.ctfidf_model._idf_diag.shape == idf_shape
+
+    # `topics_over_time` relies on `ctfidf_model.transform` and must not raise
+    timestamps = [i % 10 for i in range(len(documents))]
+    topics_over_time = topic_model.topics_over_time(documents, timestamps)
+    assert topics_over_time.Frequency.sum() == len(documents)
+    assert set(topics_over_time.Topic.unique()) == set(topic_model.topics_)
