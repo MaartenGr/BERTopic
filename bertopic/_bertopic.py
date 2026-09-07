@@ -1429,7 +1429,7 @@ class BERTopic:
         return topic_distributions, topic_token_distributions
 
     def find_topics(
-        self, search_term: str | None = None, image: str | None = None, top_n: int = 5
+        self, search_term: str | List[str] | None = None, image: str | None = None, top_n: int = 5
     ) -> Tuple[List[int], List[float]]:
         """Find topics most similar to a search_term.
 
@@ -1444,7 +1444,10 @@ class BERTopic:
         below 5 words.
 
         Arguments:
-            search_term: the term you want to use to search for topics.
+            search_term: the term you want to use to search for topics. Either a
+                         single string or a list of strings. When a list is passed,
+                         the embeddings of the individual terms are averaged into a
+                         single query embedding.
             image: path to the image you want to use to search for topics.
             top_n: the number of topics to return
 
@@ -1460,6 +1463,13 @@ class BERTopic:
         topics, similarity = topic_model.find_topics("sports", top_n=5)
         ```
 
+        Multiple search terms can be combined into a single query by
+        passing a list of strings:
+
+        ```python
+        topics, similarity = topic_model.find_topics(["sports", "football"], top_n=5)
+        ```
+
         Note that the search query is typically more accurate if the
         search_term consists of a phrase or multiple words.
         """
@@ -1471,7 +1481,12 @@ class BERTopic:
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
-            search_embedding = self._extract_embeddings([search_term], method="word", verbose=False).flatten()
+            search_terms = [search_term] if isinstance(search_term, str) else list(search_term)
+            if not search_terms:
+                raise ValueError("Make sure to pass at least one search term to `search_term`.")
+            if not all(isinstance(term, str) for term in search_terms):
+                raise TypeError("`search_term` should either be a string or a list of strings.")
+            search_embedding = self._extract_embeddings(search_terms, method="word", verbose=False).mean(axis=0)
         elif image is not None:
             search_embedding = self._extract_embeddings(
                 [None], images=[image], method="document", verbose=False

@@ -182,3 +182,58 @@ def test_find_topics(model, request):
 
     assert np.mean(similarity) > 0.1
     assert len(similar_topics) > 0
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+    ],
+)
+def test_find_topics_single_element_list(model, request):
+    """A one-element list should behave the same as passing the string itself."""
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+
+    topics_str, similarity_str = topic_model.find_topics("car")
+    topics_list, similarity_list = topic_model.find_topics(["car"])
+
+    assert topics_list == topics_str
+    assert np.allclose(similarity_list, similarity_str)
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+    ],
+)
+def test_find_topics_multiple_search_terms(model, request):
+    """All search terms should contribute, regardless of the order they are passed in."""
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+
+    topics, similarity = topic_model.find_topics(["car", "computer"])
+    reversed_topics, reversed_similarity = topic_model.find_topics(["computer", "car"])
+
+    assert len(topics) > 0
+    assert topics == reversed_topics
+    assert np.allclose(similarity, reversed_similarity)
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+    ],
+)
+def test_find_topics_invalid_search_term(model, request):
+    """Invalid search terms should raise an informative error."""
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+
+    with pytest.raises(ValueError):
+        topic_model.find_topics([])
+
+    with pytest.raises(TypeError):
+        topic_model.find_topics(["car", 1])
