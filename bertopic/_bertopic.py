@@ -2193,6 +2193,10 @@ class BERTopic:
         # Check if -1 exists in the current topics
         had_outliers = -1 in set(self.topics_)
 
+        # `custom_labels_` is a list ordered by topic rather than a mapping, so keep
+        # track of the topics it currently refers to in order to remap it below
+        custom_labels_topics = sorted(set(self.topics_))
+
         # If adding -1 for the first time, initialize its attributes
         if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
             # Initialize c-TF-IDF for -1 topic (zeros)
@@ -2215,9 +2219,11 @@ class BERTopic:
                 outlier_image = np.zeros((1, self.representative_images_.shape[1]))
                 self.representative_images_ = np.vstack([outlier_image, self.representative_images_])
 
-            # Initialize custom labels for -1 topic if they exist
+            # Initialize custom labels for -1 topic if they exist. Topic -1 sorts
+            # first, so its label is prepended rather than assigned to index -1.
             if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-                self.custom_labels_[-1] = ""
+                self.custom_labels_.insert(0, "")
+                custom_labels_topics.insert(0, -1)
 
             # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
             if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
@@ -2270,12 +2276,13 @@ class BERTopic:
 
         # Update custom labels if they exist
         if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-            new_labels = {
-                (final_mapping[old_topic] if old_topic != -1 else -1): label
-                for old_topic, label in self.custom_labels_.items()
-                if old_topic not in topics_to_delete
-            }
-            self.custom_labels_ = new_labels
+            if len(self.custom_labels_) == len(custom_labels_topics):
+                new_labels = {
+                    (final_mapping[old_topic] if old_topic != -1 else -1): label
+                    for old_topic, label in zip(custom_labels_topics, self.custom_labels_)
+                    if old_topic not in topics_to_delete
+                }
+                self.custom_labels_ = [new_labels[topic] for topic in sorted(new_labels)]
 
         # Update topic representations
         new_representations = {
