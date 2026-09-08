@@ -57,3 +57,43 @@ def test_delete(model, request):
         assert mapped_labels == topic_model.topics_[950:]
     else:
         assert mapped_labels == topic_model.topics_
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        ("kmeans_pca_topic_model"),
+        ("base_topic_model"),
+        ("custom_topic_model"),
+        ("merged_topic_model"),
+        ("reduced_topic_model"),
+        ("online_topic_model"),
+    ],
+)
+def test_delete_with_custom_labels(model, request):
+    """Custom labels are a list, so deleting topics must remap them positionally."""
+    topic_model = copy.deepcopy(request.getfixturevalue(model))
+
+    # Label every topic after itself so misalignment is detectable
+    original_topics = sorted(set(topic_model.topics_))
+    topic_model.set_topic_labels([f"label of topic {topic}" for topic in original_topics])
+    labels_before = dict(zip(original_topics, topic_model.custom_labels_))
+
+    topics_to_delete = [topic for topic in original_topics if topic != -1][:2]
+    topic_model.delete_topics(topics_to_delete)
+
+    remaining_topics = sorted(set(topic_model.topics_))
+    assert isinstance(topic_model.custom_labels_, list)
+    assert len(topic_model.custom_labels_) == len(remaining_topics)
+
+    # Every surviving topic keeps its own label, even though topics are renumbered
+    labels_after = dict(zip(remaining_topics, topic_model.custom_labels_))
+    mappings = topic_model.topic_mapper_.get_mappings(original_topics=False)
+    for topic in original_topics:
+        if topic in topics_to_delete or topic == -1:
+            continue
+        assert labels_after[mappings[topic]] == labels_before[topic]
+
+    # A newly created outlier topic gets an empty label rather than stealing one
+    if -1 not in original_topics:
+        assert labels_after[-1] == ""
