@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
+import logging
 import numpy as np
 from scipy.sparse import csr_matrix
 from collections import defaultdict
@@ -94,6 +95,69 @@ class Corpus:
 
         # Later assignments are guarded too, now that every channel is normalised
         self._initialized = True
+
+    @classmethod
+    def from_inputs(
+        cls,
+        documents: list[str] | str | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
+        **fields,
+    ) -> "Corpus":
+        """Build a corpus from the media arguments the public API accepts.
+
+        Each media argument contributes its own rows carrying its own modality, so images
+        and video side by side are two sets of rows rather than one ambiguous set.
+
+        `documents` is the text channel, and its length decides what it means. Matching the
+        media row count makes it their surrogate, which is how a captioned image becomes one
+        row with both channels filled and one averaged embedding. Any other length makes it
+        rows of its own, so unrelated text, images and audio can be modelled together. Code
+        is text that c-TF-IDF can read directly, so it fills `documents` too, tagged `CODE`
+        so an encoder can tell it apart.
+
+        Rows of different modalities only share a vector space when one model embeds them
+        all, so mixed input wants a joint encoder rather than one model per modality.
+
+        Arguments:
+            documents: Text, either standing alone or describing the media rows
+            images: Image paths or images
+            audio: Audio paths or clips
+            video: Video paths or clips
+            code: Source code, which is its own text surrogate
+            **fields: Anything else `Corpus` takes, such as embeddings or timestamps
+        """
+        if isinstance(documents, str):
+            documents = [documents]
+        documents = list(documents) if documents is not None else []
+
+        media_rows, modalities = [], []
+        for items, modality in ((images, Modality.IMAGE), (audio, Modality.AUDIO), (video, Modality.VIDEO)):
+            if items is not None and len(items) > 0:
+                media_rows.extend(items)
+                modalities.extend([modality] * len(items))
+
+        # Documents describe the media rows when the counts line up, and are rows of their own otherwise
+        if media_rows and len(documents) == len(media_rows):
+            logging.getLogger("BERTopic").info(
+                f"Corpus - Pairing {len(documents)} documents with {len(media_rows)} media rows and "
+                "averaging their embeddings, since the counts match."
+            )
+            surrogates = documents
+        else:
+            surrogates = [""] * len(media_rows)
+            media_rows.extend([None] * len(documents))
+            modalities.extend([Modality.TEXT] * len(documents))
+            surrogates.extend(documents)
+
+        if code:
+            surrogates.extend(code)
+            media_rows.extend([None] * len(code))
+            modalities.extend([Modality.CODE] * len(code))
+
+        return cls(documents=surrogates, media=media_rows, modality=modalities, **fields)
 
     @property
     def images(self) -> list:

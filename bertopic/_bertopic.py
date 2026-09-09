@@ -68,7 +68,7 @@ from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
 from bertopic.representation._base import TextConverter
-from bertopic._topics import Images, Keywords, Topic, Topics, TopicRepresentation, TopicHierarchy
+from bertopic._topics import Keywords, Media, Topic, Topics, TopicRepresentation, TopicHierarchy
 from bertopic._corpus import Corpus, Modality
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
@@ -381,9 +381,9 @@ class BERTopic:
         """For backwards compatibility."""
         representative_images = {}
         for topic in self._topics:
-            images = next((rep for rep in topic.representations.values() if isinstance(rep, Images)), None)
-            if images is not None and images.data is not None:
-                representative_images[topic.id] = images.data
+            media = next((rep for rep in topic.representations.values() if isinstance(rep, Media)), None)
+            if media is not None and media.collage is not None:
+                representative_images[topic.id] = media.collage
         return representative_images
 
     @property
@@ -399,9 +399,12 @@ class BERTopic:
 
     def fit_transform(
         self,
-        documents: list[str],
+        documents: list[str] | None = None,
         embeddings: np.ndarray | None = None,
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
         y: list[int] | np.ndarray | None = None,
     ) -> tuple[list[int], np.ndarray | None]:
         """Fit the models on a collection of documents, generate topics,
@@ -420,7 +423,10 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
-            images: A list of paths to the images to fit on or the images themselves
+            images: A list of paths to the images to fit on, or the images themselves
+            audio: A list of paths to the audio to fit on, or the clips themselves
+            video: A list of paths to the video to fit on, or the clips themselves
+            code: A list of source code snippets to fit on
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -459,10 +465,12 @@ class BERTopic:
         topics, probs = topic_model.fit_transform(docs, embeddings)
         ```
         """
-        corpus = Corpus(
+        corpus = Corpus.from_inputs(
             documents=documents,
-            media=images,
-            modality=Modality.IMAGE if images else Modality.TEXT,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
             embeddings=embeddings,
             y=y,
         )
@@ -474,11 +482,7 @@ class BERTopic:
             )
 
         if corpus.embeddings is None:
-            corpus.embeddings = self._extract_embeddings(
-                documents=corpus.documents,
-                images=corpus.images,
-                verbose=self.verbose,
-            )
+            corpus.embeddings = self._embed_corpus(corpus, verbose=self.verbose)
 
         # Guided Topic Modeling
         corpus = guided.guided_tm(self, corpus)
@@ -513,9 +517,12 @@ class BERTopic:
 
     def fit(
         self,
-        documents: list[str],
+        documents: list[str] | None = None,
         embeddings: np.ndarray = None,
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
         y: list[int] | np.ndarray = None,
     ) -> "BERTopic":
         """Fit the models on a collection of documents and generate topics.
@@ -524,7 +531,10 @@ class BERTopic:
             documents: A list of documents to fit on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model
-            images: A list of paths to the images to fit on or the images themselves
+            images: A list of paths to the images to fit on, or the images themselves
+            audio: A list of paths to the audio to fit on, or the clips themselves
+            video: A list of paths to the video to fit on, or the clips themselves
+            code: A list of source code snippets to fit on
             y: The target class for (semi)-supervised modeling. Use -1 if no class for a
                specific instance is specified.
 
@@ -553,14 +563,25 @@ class BERTopic:
         topic_model = BERTopic().fit(docs, embeddings)
         ```
         """
-        self.fit_transform(documents=documents, embeddings=embeddings, y=y, images=images)
+        self.fit_transform(
+            documents=documents,
+            embeddings=embeddings,
+            y=y,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
+        )
         return self
 
     def transform(
         self,
-        documents: str | list[str],
+        documents: str | list[str] | None = None,
         embeddings: np.ndarray = None,
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
     ) -> tuple[list[int], np.ndarray]:
         """After having fit a model, use transform to predict new instances.
 
@@ -568,7 +589,10 @@ class BERTopic:
             documents: A single document or a list of documents to predict on
             embeddings: Pre-trained document embeddings. These can be used
                         instead of the sentence-transformer model.
-            images: A list of paths to the images to predict on or the images themselves
+            images: A list of paths to the images to predict on, or the images themselves
+            audio: A list of paths to the audio to predict on, or the clips themselves
+            video: A list of paths to the video to predict on, or the clips themselves
+            code: A list of source code snippets to predict on
 
         Returns:
             predictions: Topic predictions for each documents
@@ -605,18 +629,18 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        corpus = Corpus(
+        corpus = Corpus.from_inputs(
             documents=documents,
-            media=images,
-            modality=Modality.IMAGE if images else Modality.TEXT,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
             embeddings=embeddings,
         )
 
         # Extract embeddings
         if corpus.embeddings is None:
-            corpus.embeddings = self._extract_embeddings(
-                documents=corpus.documents, images=corpus.images, verbose=self.verbose
-            )
+            corpus.embeddings = self._embed_corpus(corpus, verbose=self.verbose)
 
         # Check if an embedding model was found
         if corpus.embeddings is None:
@@ -753,7 +777,7 @@ class BERTopic:
             )
 
         if corpus.embeddings is None:
-            corpus.embeddings = self._extract_embeddings(corpus.documents, verbose=self.verbose)
+            corpus.embeddings = self._embed_corpus(corpus, verbose=self.verbose)
 
         # Guided Topic Modeling
         if self.seed_topic_list is not None and self.embedding_model is not None:
@@ -874,7 +898,10 @@ class BERTopic:
         self,
         documents: list[str],
         topics: list[int],
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
         strategy: str = "distributions",
         probabilities: np.ndarray = None,
         threshold: float = 0,
@@ -886,6 +913,9 @@ class BERTopic:
             documents=documents,
             topics=topics,
             images=images,
+            audio=audio,
+            video=video,
+            code=code,
             strategy=strategy,
             probabilities=probabilities,
             threshold=threshold,
@@ -955,9 +985,9 @@ class BERTopic:
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
-            search_embedding = self._extract_embeddings([search_term], verbose=False).flatten()
+            search_embedding = self.embedding_model.embed_documents([search_term], verbose=False).flatten()
         elif image is not None:
-            search_embedding = self._extract_embeddings([None], images=[image], verbose=False).flatten()
+            search_embedding = self.embedding_model.embed_media([image], Modality.IMAGE).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings_).flatten()
 
         # Extract topics most similar to search_term
@@ -970,7 +1000,10 @@ class BERTopic:
     def update_topics(
         self,
         docs: list[str],
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
         topics: list[int] | None = None,
         top_n_words: int = 10,
         n_gram_range: tuple[int, int] | None = None,
@@ -989,6 +1022,9 @@ class BERTopic:
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
             images: The images you used when calling either `fit` or `fit_transform`
+            audio: The audio you used when calling either `fit` or `fit_transform`
+            video: The video you used when calling either `fit` or `fit_transform`
+            code: The source code you used when calling either `fit` or `fit_transform`
             topics: A list of topics where each topic is related to a document in `docs`.
                     Use this variable to change or map the topics.
                     NOTE: Using a custom list of topic assignments may lead to errors if
@@ -1063,10 +1099,12 @@ class BERTopic:
         # (duplicate topic embedding for each document based on assignment)
         topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
         doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in topics])
-        corpus = Corpus(
+        corpus = Corpus.from_inputs(
             documents=docs,
-            media=images,
-            modality=Modality.IMAGE if images else Modality.TEXT,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
             topics=np.array(topics),
             embeddings=doc_embeddings,
         )
@@ -1557,7 +1595,10 @@ class BERTopic:
         self,
         docs: list[str],
         topics_to_merge: list[Iterable[int] | int],
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
     ) -> None:
         """Merge multiple topics into a single topic.
 
@@ -1570,6 +1611,11 @@ class BERTopic:
                                 separately merge topics 3 and 4.
             images: A list of paths to the images used when calling either
                     `fit` or `fit_transform`.
+            audio: A list of paths to the audio used when calling either
+                   `fit` or `fit_transform`.
+            video: A list of paths to the video used when calling either
+                   `fit` or `fit_transform`.
+            code: The source code used when calling either `fit` or `fit_transform`.
 
         Examples:
         If you want to merge topics 1, 2, and 3:
@@ -1610,10 +1656,12 @@ class BERTopic:
         # the mean embedding correctly produces a weighted average.
         topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
         doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
-        corpus = Corpus(
+        corpus = Corpus.from_inputs(
             documents=docs,
-            media=images,
-            modality=Modality.IMAGE if images else Modality.TEXT,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
             topics=np.array(self.topics_),
             embeddings=doc_embeddings,
         )
@@ -1653,7 +1701,10 @@ class BERTopic:
         self,
         docs: list[str],
         nr_topics: int | str = 20,
-        images: list[str] | None = None,
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
         use_ctfidf: bool = False,
     ) -> "BERTopic":
         """Reduce the number of topics to a fixed number of topics
@@ -1673,6 +1724,11 @@ class BERTopic:
             nr_topics: The number of topics you want reduced to
             images: A list of paths to the images used when calling either
                     `fit` or `fit_transform`
+            audio: A list of paths to the audio used when calling either
+                   `fit` or `fit_transform`
+            video: A list of paths to the video used when calling either
+                   `fit` or `fit_transform`
+            code: The source code used when calling either `fit` or `fit_transform`
             use_ctfidf: Whether to calculate distances between topics based on c-TF-IDF embeddings. If False, the
                         embeddings from the embedding model are used.
 
@@ -1700,10 +1756,12 @@ class BERTopic:
         # Add embedings by duplicating the topic embedding for each document
         topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
         doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
-        corpus = Corpus(
+        corpus = Corpus.from_inputs(
             documents=docs,
-            media=images,
-            modality=Modality.IMAGE if images else Modality.TEXT,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
             topics=np.array(self.topics_),
             embeddings=doc_embeddings,
         )
@@ -2369,41 +2427,47 @@ class BERTopic:
             out[key] = value
         return out
 
-    def _extract_embeddings(
-        self,
-        documents: Union[List[str], str],
-        images: List[str] | None = None,
-        verbose: bool | None = None,
-    ) -> np.ndarray:
-        """Extract sentence/document embeddings through pre-trained embeddings
-        For an overview of pre-trained models: https://www.sbert.net/docs/pretrained_models.html.
+    def _embed_corpus(self, corpus: Corpus, verbose: bool | None = None) -> np.ndarray:
+        """Embed every row of a corpus, sending each modality to the model that handles it.
+
+        Rows are grouped by modality rather than by which argument they arrived in, so a
+        code snippet reaches a code encoder even though c-TF-IDF reads it as text. A row
+        carrying both channels — a captioned image — is the mean of the two, which is what
+        `documents=` alongside `images=` has always meant.
 
         Arguments:
-            documents: Dataframe with documents and their corresponding IDs
-            images: A list of paths to the images to fit on or the images themselves
+            corpus: The corpus whose rows are to be embedded
             verbose: Whether to show a progressbar demonstrating the time to extract embeddings
 
         Returns:
-            embeddings: The extracted embeddings.
+            embeddings: One row of embeddings per row of the corpus, in corpus order.
         """
-        if isinstance(documents, str):
-            documents = [documents]
+        # Backends that only speak text have nothing to group
+        if not hasattr(self.embedding_model, "embed_media"):
+            return self.embedding_model.embed_documents(corpus.documents, verbose=verbose)
 
-        if images is not None and hasattr(self.embedding_model, "embed_images"):
-            documents = documents if any(documents) else [None]
-            embeddings = self.embedding_model.embed(documents=documents, images=images, verbose=verbose)
-        elif documents is not None:
-            embeddings = self.embedding_model.embed_documents(documents, verbose=verbose)
-        elif documents[0] is None and images is None:
-            raise ValueError(
-                "Make sure to use an embedding model that can either embed documents"
-                "or images depending on which you want to embed."
+        embeddings = None
+        for modality in set(corpus.modality):
+            rows = [index for index, value in enumerate(corpus.modality) if value == modality]
+            source = corpus.documents if modality in (Modality.TEXT, Modality.CODE) else corpus.media
+            vectors = self.embedding_model.embed_media([source[index] for index in rows], modality, verbose)
+
+            if embeddings is None:
+                embeddings = np.empty((len(corpus.documents), vectors.shape[1]), dtype=vectors.dtype)
+            embeddings[rows] = vectors
+
+        # A media row that also carries text is described by both, so average them in
+        captioned = [
+            index
+            for index, (modality, document) in enumerate(zip(corpus.modality, corpus.documents))
+            if document and modality not in (Modality.TEXT, Modality.CODE)
+        ]
+        if captioned:
+            surrogates = self.embedding_model.embed_documents(
+                [corpus.documents[index] for index in captioned], verbose
             )
-        else:
-            raise ValueError(
-                "Wrong method for extracting document/word embeddings. "
-                "Either choose 'word' or 'document' as the method. "
-            )
+            embeddings[captioned] = np.mean([embeddings[captioned], surrogates], axis=0)
+
         return embeddings
 
     def _flatten_representation_models(self) -> list[BaseRepresentation]:
@@ -2424,7 +2488,8 @@ class BERTopic:
         """Let each converter turn the rows of its own modality into text for c-TF-IDF."""
         for model in self._flatten_representation_models():
             if isinstance(model, TextConverter):
-                logger.info(f"Media - Converting {model.modality.value} to text. This might take a while.")
+                kinds = ", ".join(sorted(modality.value for modality in model.modalities))
+                logger.info(f"Media - Converting {kinds} to text. This might take a while.")
                 corpus = model.to_text(corpus)
                 logger.info("Media - Completed ✓")
         return corpus
@@ -2638,8 +2703,12 @@ class BERTopic:
         topic_ids = corpus.topic_ids()
 
         for index, topic_id in enumerate(topic_ids):
-            # Slice data
+            # Slice data, skipping rows with no text: only a sample of a topic's media is
+            # ever described, so most media rows are blank and represent nothing
             selection = corpus.get_topic(topic_id, nr_samples=nr_samples)
+            with_text = [row for row, document in enumerate(selection.documents) if document]
+            if with_text:
+                selection = selection.get_corpus_by_indices(with_text)
 
             # Calculate similarity
             nr_docs = nr_repr_docs if len(selection.documents) > nr_repr_docs else len(selection.documents)
@@ -2723,7 +2792,7 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            word_embeddings = self._extract_embeddings(topic_words, verbose=False)
+            word_embeddings = self.embedding_model.embed_documents(topic_words, verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to
@@ -3274,10 +3343,10 @@ def _create_model_from_files(
         topic = topic_model._topics.get(topic_id)
         if topic is None:
             continue
-        restored = next((rep for rep in topic.representations.values() if isinstance(rep, Images)), None)
+        restored = next((rep for rep in topic.representations.values() if isinstance(rep, Media)), None)
         if restored is None:
-            restored = Images()
-            topic.representations["Visual_Aspect"] = restored
-        restored.data = image
+            restored = Media()
+            topic.representations["Media"] = restored
+        restored.collage = image
 
     return topic_model

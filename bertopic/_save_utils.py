@@ -40,7 +40,7 @@ try:
 except ImportError:
     _has_vision = False
 
-from bertopic._topics import Topics
+from bertopic._topics import Media, Topics
 
 
 TOPICS_NAME = "topics.json"
@@ -506,31 +506,19 @@ def check_has_visual_aspect(model):
     if _has_vision:
         for topic in model._topics:
             for rep in topic.representations.values():
-                if hasattr(rep, "data") and isinstance(rep.data, Image.Image):
+                if isinstance(rep, Media) and isinstance(rep.collage, Image.Image):
                     return True
     return False
 
 
 def save_images(model, path: str):
-    """Save topic images by inspecting _topics directly."""
+    """Save each topic's collage beside the model, since JSON is no place for a picture."""
     if _has_vision:
-        # Find visual aspect name
-        visual_aspect_name = None
+        path.mkdir(exist_ok=True, parents=True)
         for topic in model._topics:
-            for aspect_name, rep in topic.representations.items():
-                if hasattr(rep, "data") and isinstance(rep.data, Image.Image):
-                    visual_aspect_name = aspect_name
-                    break
-            if visual_aspect_name:
-                break
-
-        # Save images if found
-        if visual_aspect_name:
-            path.mkdir(exist_ok=True, parents=True)
-            for topic in model._topics:
-                rep = topic.representations.get(visual_aspect_name)
-                if rep and hasattr(rep, "data") and isinstance(rep.data, Image.Image):
-                    rep.data.save(path / f"{topic.id}.jpg")
+            for rep in topic.representations.values():
+                if isinstance(rep, Media) and isinstance(rep.collage, Image.Image):
+                    rep.collage.save(path / f"{topic.id}.jpg")
 
 
 def save_topics(model, path: str):

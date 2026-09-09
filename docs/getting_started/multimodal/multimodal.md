@@ -30,21 +30,21 @@ The `docs` variable contains the captions for each image in `images`. We can now
 
 ```python
 from bertopic import BERTopic
-from bertopic.representation import VisualRepresentation
+from bertopic.representation import MultiModalRepresentation
 
 # Additional ways of representing a topic
-visual_model = VisualRepresentation()
+media_model = MultiModalRepresentation()
 
-# Make sure to add the `visual_model` to a dictionary
+# Make sure to add the `media_model` to a dictionary
 representation_model = {
-   "Visual_Aspect":  visual_model,
+   "Media":  media_model,
 }
 topic_model = BERTopic(representation_model=representation_model, verbose=True)
 ```
 
 In this example, we are clustering the documents and are then looking for the best matching images to the resulting clusters.
 
-We can now access our image representations for each topic with `topic_model.topic_aspects_["Visual_Aspect"]`.
+We can now access our media representations for each topic with `topic_model.topic_aspects_["Media"]`.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
 
 ```python
@@ -67,7 +67,7 @@ def image_formatter(im):
 df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
 
 # Visualize the images
-HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
+HTML(df.to_html(formatters={'Media': image_formatter}, escape=False))
 ```
 
 <br><br>
@@ -88,7 +88,7 @@ HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
     doc_embeddings = model.embed_documents(docs)
 
     # Embedding images only
-    image_embeddings = model.embed_images(images)
+    image_embeddings = model.embed_media(images, "image")
 
     # Embed both images and documents, then average them
     doc_image_embeddings = model.embed(docs, images)
@@ -136,15 +136,15 @@ Next, we can run our pipeline:
 
 
 ```python
-from bertopic.representation import KeyBERTInspired, VisualRepresentation
+from bertopic.representation import KeyBERTInspired, MultiModalRepresentation
 from bertopic.backend import MultiModalBackend
 
 # Image embedding model
 embedding_model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
 
-# Image to text representation model
+# Describing the images is what gives an image-only corpus its keywords
 representation_model = {
-    "Visual_Aspect": VisualRepresentation(image_to_text_model="nlpconnect/vit-gpt2-image-captioning")
+    "Media": MultiModalRepresentation("HuggingFaceTB/SmolVLM-256M-Instruct")
 }
 
 ```
@@ -159,7 +159,7 @@ topic_model = BERTopic(embedding_model=embedding_model, representation_model=rep
 topics, probs = topic_model.fit_transform(documents=None, images=images)
 ```
 
-We can now access our image representations for each topic with `topic_model.topic_aspects_["Visual_Aspect"]`.
+We can now access our media representations for each topic with `topic_model.topic_aspects_["Media"]`.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
 
 ```python
@@ -182,7 +182,7 @@ def image_formatter(im):
 df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
 
 # Visualize the images
-HTML(df.to_html(formatters={'Visual_Aspect': image_formatter}, escape=False))
+HTML(df.to_html(formatters={'Media': image_formatter}, escape=False))
 ```
 
 <br><br>

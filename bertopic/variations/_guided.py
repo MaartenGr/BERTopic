@@ -41,7 +41,9 @@ def guided_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
 
         # Create embeddings from the seeded topics
         seed_topic_list = [" ".join(seed_topic) for seed_topic in topic_model.seed_topic_list]
-        seed_topic_embeddings = topic_model._extract_embeddings(seed_topic_list, verbose=topic_model.verbose)
+        seed_topic_embeddings = topic_model.embedding_model.embed_documents(
+            seed_topic_list, verbose=topic_model.verbose
+        )
         seed_topic_embeddings = np.vstack([seed_topic_embeddings, embeddings.mean(axis=0)])
 
         # Label documents that are most similar to one of the seeded topics

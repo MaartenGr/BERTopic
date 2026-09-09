@@ -7,6 +7,7 @@ says what `media` holds. These tests pin down that contract.
 """
 
 import importlib.util
+import logging
 
 import numpy as np
 import pytest
@@ -295,3 +296,90 @@ def test_sampling_only_kicks_in_above_the_limit():
     corpus = Corpus(documents=["a", "b", "c"], topics=np.array([0, 0, 0]))
 
     assert corpus.get_topic(0, nr_samples=100).documents == ["a", "b", "c"]
+
+
+# --------------------------------------------------------------------------------------
+# Building a corpus from the public API's media arguments
+# --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "argument,expected",
+    [
+        ("images", Modality.IMAGE),
+        ("audio", Modality.AUDIO),
+        ("video", Modality.VIDEO),
+    ],
+)
+def test_each_media_argument_tags_its_rows(argument, expected):
+    """A row's modality says which encoder it needs and where its source lives."""
+    corpus = Corpus.from_inputs(**{argument: ["first", "second"]})
+
+    assert corpus.modality == [expected, expected]
+    assert corpus.media == ["first", "second"]
+    assert corpus.documents == ["", ""]
+
+
+def test_code_is_text_rather_than_media():
+    """Code is its own surrogate, so c-TF-IDF reads it directly out of `documents`."""
+    corpus = Corpus.from_inputs(code=["import os", "def f(): pass"])
+
+    assert corpus.documents == ["import os", "def f(): pass"]
+    assert corpus.media == [None, None]
+    assert corpus.modality == [Modality.CODE, Modality.CODE]
+
+
+def test_media_arguments_concatenate():
+    """Images beside video is two sets of rows, which is unambiguous by construction."""
+    corpus = Corpus.from_inputs(images=["a.png", "b.png"], video=["c.mp4"])
+
+    assert len(corpus) == 3
+    assert corpus.modality == [Modality.IMAGE, Modality.IMAGE, Modality.VIDEO]
+    assert corpus.images == ["a.png", "b.png"]
+
+
+def test_documents_describe_a_single_media_set():
+    """A captioned image is one row with both channels filled, as it has always been."""
+    corpus = Corpus.from_inputs(documents=["a cat", "a dog"], images=["c.png", "d.png"])
+
+    assert len(corpus) == 2
+    assert corpus.documents == ["a cat", "a dog"]
+    assert corpus.media == ["c.png", "d.png"]
+    assert corpus.modality == [Modality.IMAGE, Modality.IMAGE]
+
+
+def test_unrelated_documents_and_media_become_separate_rows():
+    """Independent text beside independent media is the point of accepting both."""
+    corpus = Corpus.from_inputs(documents=["d"] * 5, images=["i.png"] * 3)
+
+    assert len(corpus) == 8
+    assert corpus.modality == [Modality.IMAGE] * 3 + [Modality.TEXT] * 5
+    assert corpus.media == ["i.png"] * 3 + [None] * 5
+    assert corpus.documents == [""] * 3 + ["d"] * 5
+
+
+def test_documents_pair_across_several_media_sets_when_the_total_matches():
+    """Pairing counts every media row, so captions may describe a mixed set at once."""
+    corpus = Corpus.from_inputs(
+        documents=["a cat", "a bark", "a meow"], images=["c.png"], audio=["b.wav", "m.wav"]
+    )
+
+    assert len(corpus) == 3
+    assert corpus.modality == [Modality.IMAGE, Modality.AUDIO, Modality.AUDIO]
+    assert corpus.documents == ["a cat", "a bark", "a meow"]
+
+
+def test_pairing_is_announced(caplog):
+    """Equal counts are read as pairs, so the inference has to be visible in the log."""
+    with caplog.at_level(logging.INFO, logger="BERTopic"):
+        Corpus.from_inputs(documents=["a cat", "a dog"], images=["c.png", "d.png"])
+
+    assert "Pairing 2 documents with 2 media rows" in caplog.text
+
+
+def test_text_only_input_is_unchanged():
+    """The overwhelmingly common case still produces plain text rows."""
+    corpus = Corpus.from_inputs(documents=["first", "second"])
+
+    assert corpus.documents == ["first", "second"]
+    assert corpus.modality == [Modality.TEXT, Modality.TEXT]

@@ -43,7 +43,7 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
     )
 
     # Similarity between document and zero-shot topic embeddings
-    zeroshot_embeddings = topic_model._extract_embeddings(topic_model.zeroshot_topic_list)
+    zeroshot_embeddings = topic_model.embedding_model.embed_documents(topic_model.zeroshot_topic_list)
     cosine_similarities = cosine_similarity(corpus.embeddings, zeroshot_embeddings)
     assignment = np.argmax(cosine_similarities, 1)
     assignment_vals = np.max(cosine_similarities, 1)

@@ -119,7 +119,7 @@ def visualize_document_datamap(
 
     # Extract embeddings if not already done
     if embeddings is None and reduced_embeddings is None:
-        embeddings_to_reduce = topic_model._extract_embeddings(docs)
+        embeddings_to_reduce = topic_model.embedding_model.embed_documents(docs)
     else:
         embeddings_to_reduce = embeddings
 
