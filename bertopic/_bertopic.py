@@ -1471,6 +1471,8 @@ class BERTopic:
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
+            if isinstance(search_term, list):
+                search_term = search_term[0]
             search_embedding = self._extract_embeddings([search_term], method="word", verbose=False).flatten()
         elif image is not None:
             search_embedding = self._extract_embeddings(
@@ -2217,13 +2219,9 @@ class BERTopic:
 
             # Initialize custom labels for -1 topic if they exist
             if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-                self.custom_labels_[-1] = ""
+                self.custom_labels_ = [""] + self.custom_labels_
 
-            # Initialize ctfidf model diagonal for -1 topic (ones) if it exists
-            if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
-                n_features = self.ctfidf_model._idf_diag.shape[1]
-                outlier_diag = sp.csr_matrix(([1.0], ([0], [0])), shape=(1, n_features))
-                self.ctfidf_model._idf_diag = sp.vstack([outlier_diag, self.ctfidf_model._idf_diag])
+
 
             # Initialize topic aspects for -1 topic (empty dict for each aspect) if they exist
             if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
@@ -2270,12 +2268,16 @@ class BERTopic:
 
         # Update custom labels if they exist
         if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-            new_labels = {
+            old_unique_topics = sorted(set(self.topics_))
+            if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
+                old_unique_topics = [-1] + old_unique_topics
+
+            new_labels_dict = {
                 (final_mapping[old_topic] if old_topic != -1 else -1): label
-                for old_topic, label in self.custom_labels_.items()
+                for old_topic, label in zip(old_unique_topics, self.custom_labels_)
                 if old_topic not in topics_to_delete
             }
-            self.custom_labels_ = new_labels
+            self.custom_labels_ = [new_labels_dict[t] for t in sorted(new_labels_dict.keys())]
 
         # Update topic representations
         new_representations = {
@@ -2305,10 +2307,7 @@ class BERTopic:
             mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
             setattr(self, attr, matrix[mask])
 
-        # Update ctfidf model to remove deleted topics if it exists
-        if hasattr(self, "ctfidf_model") and self.ctfidf_model is not None:
-            mask = np.array([topic not in topics_to_delete for topic in range(self.ctfidf_model._idf_diag.shape[0])])
-            self.ctfidf_model._idf_diag = self.ctfidf_model._idf_diag[mask]
+
 
     def reduce_topics(
         self,
