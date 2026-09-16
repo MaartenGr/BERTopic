@@ -2219,9 +2219,7 @@ class BERTopic:
 
             # Initialize custom labels for -1 topic if they exist
             if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
-                self.custom_labels_ = [""] + self.custom_labels_
-
-
+                self.custom_labels_ = ["", *self.custom_labels_]
 
             # Initialize topic aspects for -1 topic (empty dict for each aspect) if they exist
             if hasattr(self, "topic_aspects_") and self.topic_aspects_ is not None:
@@ -2270,7 +2268,7 @@ class BERTopic:
         if hasattr(self, "custom_labels_") and self.custom_labels_ is not None:
             old_unique_topics = sorted(set(self.topics_))
             if not had_outliers and any(topic in topics_to_delete for topic in self.topics_):
-                old_unique_topics = [-1] + old_unique_topics
+                old_unique_topics = [-1, *old_unique_topics]
 
             new_labels_dict = {
                 (final_mapping[old_topic] if old_topic != -1 else -1): label
@@ -2306,8 +2304,6 @@ class BERTopic:
             matrix = getattr(self, attr)
             mask = np.array([topic not in topics_to_delete for topic in range(matrix.shape[0])])
             setattr(self, attr, matrix[mask])
-
-
 
     def reduce_topics(
         self,
