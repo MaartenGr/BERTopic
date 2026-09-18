@@ -61,6 +61,7 @@ docs/_build/
 .ipynb_checkpoints
 *.ipynb
 notebooks/
+scripts/
 
 # IPython
 profile_default/

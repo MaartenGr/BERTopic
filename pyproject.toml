@@ -48,6 +48,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+audio = [
+    "librosa>=0.10.0", # Reads clips that transformers hands to an ASR pipeline
+    "soundfile>=0.12.0",
+]
 datamap = [
     "datamapplot>=0.1",
     "matplotlib>=3.8",
@@ -77,6 +81,7 @@ spacy = [
 ]
 test = [
     "great-tables>=0.10",
+    "Pillow>=9.2.0",
     "polars>=1.0",
     "pytest>=5.4.3",
     "pytest-cov>=2.6.1",
@@ -86,6 +91,9 @@ use = [
     "tensorflow",
     "tensorflow_hub",
     "tensorflow_text",
+]
+video = [
+    "torchcodec>=0.2.0", # Decodes the frames that describe a clip
 ]
 vision = [
     "accelerate>=0.19.0", # To prevent "cannot import name 'PartialState' from 'accelerate'"

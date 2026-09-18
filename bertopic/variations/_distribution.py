@@ -176,7 +176,7 @@ def approximate_distribution(
 
         # Calculate similarity between embeddings of token sets and the topics
         if use_embedding_model:
-            embeddings = topic_model._extract_embeddings(all_sentences, verbose=True)
+            embeddings = topic_model.embedding_model.embed_documents(all_sentences, verbose=True)
             similarity = cosine_similarity(embeddings, topic_model.topic_embeddings_[topic_model._outliers :])
 
         # Calculate similarity between c-TF-IDF of token sets and the topics
