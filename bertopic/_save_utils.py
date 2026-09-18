@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np
 
+from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -23,7 +24,7 @@ except ImportError:
     _has_hf_hub = False
 
 # Typing
-from typing import Union
+from typing import Callable, Union
 
 # Pytorch check
 try:
@@ -41,11 +42,16 @@ try:
 except ImportError:
     _has_vision = False
 
+from bertopic._corpus import Modality
 from bertopic._topics import Topics
 
 
 TOPICS_NAME = "topics.json"
 CONFIG_NAME = "config.json"
+
+# Summaries are files beside the model, one folder per modality. `images/` predates the
+# others, which is why every save back to 0.17 still loads its collages.
+SUMMARY_FOLDERS = {Modality.IMAGE: "images", Modality.VIDEO: "videos", Modality.AUDIO: "audio"}
 
 HF_WEIGHTS_NAME = "topic_embeddings.bin"  # default pytorch pkl
 HF_SAFE_WEIGHTS_NAME = "topic_embeddings.safetensors"  # safetensors version
@@ -300,12 +306,11 @@ def load_local_files(path):
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
-    # Load the collage of every topic that has one, since a topic of text has none
-    images = None
-    if _has_vision and (path / "images").is_dir():
-        images = {int(file.stem): Image.open(file) for file in (path / "images").glob("*.jpg")}
+    # Load the summaries of every topic that has them, since a topic of text has none
+    names = [file.relative_to(path).as_posix() for file in path.glob("*/*")]
+    summaries = read_summaries(names, lambda name: path / name)
 
-    return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
+    return topics, params, tensors, ctfidf_tensors, ctfidf_config, summaries
 
 
 def load_files_from_hf(path):
@@ -336,17 +341,38 @@ def load_files_from_hf(path):
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
-    # Load the collage of every topic that has one, since a topic of text has none
-    images = None
-    if _has_vision:
-        # Listing needs the Hub itself, so offline the model still loads, only without collages
-        try:
-            names = [name for name in list_repo_files(path) if name.startswith("images/")]
-        except:  # noqa: E722
-            names = []
-        images = {int(Path(name).stem): Image.open(hf_hub_download(path, name)) for name in names}
+    # Load the summaries of every topic that has them. Listing needs the Hub itself, so
+    # offline the model still loads, only without them
+    try:
+        names = list_repo_files(path)
+    except:  # noqa: E722
+        names = []
+    summaries = read_summaries(names, lambda name: hf_hub_download(path, name))
 
-    return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
+    return topics, params, tensors, ctfidf_tensors, ctfidf_config, summaries
+
+
+def read_summaries(names: list[str], fetch: Callable[[str], Union[str, Path]]) -> dict[int, dict]:
+    """Read the saved summaries among `names`, keyed by topic and then by modality.
+
+    A picture opens as an image and a montage is read back as the WAV bytes it was saved
+    as. `fetch` turns a name into a local file, which for a model on the Hub is a download.
+    """
+    modalities = {folder: modality for modality, folder in SUMMARY_FOLDERS.items()}
+    summaries = defaultdict(dict)
+    for name in names:
+        folder, _, file = name.partition("/")
+        modality, suffix = modalities.get(folder), Path(file).suffix
+
+        # Only the pictures and montages BERTopic wrote count, not what an operating system
+        # leaves in a folder, and pictures need Pillow, which is an extra
+        if modality is None or suffix not in (".jpg", ".wav") or (suffix == ".jpg" and not _has_vision):
+            continue
+
+        local = Path(fetch(name))
+        summary = local.read_bytes() if suffix == ".wav" else Image.open(local)
+        summaries[int(local.stem)][modality] = summary
+    return dict(summaries)
 
 
 def generate_readme(model, repo_id: str):
@@ -492,13 +518,17 @@ def check_has_visual_aspect(model):
     return False
 
 
-def save_images(model, path: str):
-    """Save each topic's collage beside the model, since JSON is no place for a picture."""
-    if _has_vision:
-        for topic in model._topics:
-            if topic.media is not None and isinstance(topic.media.collage, Image.Image):
-                path.mkdir(exist_ok=True, parents=True)
-                topic.media.collage.save(path / f"{topic.id}.jpg")
+def save_summaries(model, directory: Path):
+    """Save each topic's summaries beside the model, since JSON is no place for a picture or a sound."""
+    for topic in model._topics:
+        summaries = topic.media.summaries if topic.media is not None else {}
+        for modality, summary in summaries.items():
+            folder = directory / SUMMARY_FOLDERS[modality]
+            folder.mkdir(exist_ok=True, parents=True)
+            if isinstance(summary, bytes):
+                (folder / f"{topic.id}.wav").write_bytes(summary)
+            else:
+                summary.save(folder / f"{topic.id}.jpg")
 
 
 def save_topics(model, path: str):
@@ -506,7 +536,7 @@ def save_topics(model, path: str):
     path = Path(path)
     topics_dict = model._topics.to_dict()
 
-    # Mark visual aspects (images saved separately by save_images)
+    # Mark visual aspects (images saved separately by save_summaries)
     if check_has_visual_aspect(model):
         topics_dict["has_visual_aspect"] = True
 

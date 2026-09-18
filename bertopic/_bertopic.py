@@ -2194,7 +2194,7 @@ class BERTopic:
             # Minimal
             save_utils.save_hf(model=self, save_directory=save_directory, serialization=serialization)
             save_utils.save_topics(model=self, path=save_directory / "topics.json")
-            save_utils.save_images(model=self, path=save_directory / "images")
+            save_utils.save_summaries(model=self, directory=save_directory)
             save_utils.save_config(
                 model=self,
                 path=save_directory / "config.json",
@@ -2251,11 +2251,11 @@ class BERTopic:
 
         # Load from directory or HF
         if file_or_dir.is_dir():
-            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_local_files(
+            topics, params, tensors, ctfidf_tensors, ctfidf_config, summaries = save_utils.load_local_files(
                 file_or_dir
             )
         elif "/" in str(path):
-            topics, params, tensors, ctfidf_tensors, ctfidf_config, images = save_utils.load_files_from_hf(
+            topics, params, tensors, ctfidf_tensors, ctfidf_config, summaries = save_utils.load_files_from_hf(
                 path
             )
         else:
@@ -2266,7 +2266,7 @@ class BERTopic:
             tensors,
             ctfidf_tensors,
             ctfidf_config,
-            images,
+            summaries,
             warn_no_backend=(embedding_model is None),
         )
 
@@ -3257,7 +3257,7 @@ def _create_model_from_files(
     tensors: dict[str, np.array],
     ctfidf_tensors: dict[str, Any] | None = None,
     ctfidf_config: dict[str, Any] | None = None,
-    images: dict[int, Any] | None = None,
+    summaries: dict[int, dict[Modality, Any]] | None = None,
     warn_no_backend: bool = True,
 ):
     """Create a BERTopic model from a variety of inputs.
@@ -3268,7 +3268,7 @@ def _create_model_from_files(
         tensors: The topic embeddings.
         ctfidf_tensors: The c-TF-IDF representations.
         ctfidf_config: The config for CountVectorizer and c-TF-IDF.
-        images: The images per topic.
+        summaries: The summary of each modality per topic, such as a topic's collage.
         warn_no_backend: Whether to warn the user if no backend is given.
     """
     params["n_gram_range"] = tuple(params["n_gram_range"])
@@ -3340,14 +3340,14 @@ def _create_model_from_files(
             idf, offsets=0, shape=(len(idf), len(idf)), format="csr", dtype=np.float64
         )
 
-    # Representative images are saved beside the model as JPEGs rather than in the JSON,
-    # so they are attached back to the representation that describes them
-    for topic_id, image in (images or {}).items():
+    # Summaries are saved beside the model as files rather than in the JSON, so they are
+    # attached back to the representation that holds the topic's media
+    for topic_id, found in (summaries or {}).items():
         topic = topic_model._topics.get(topic_id)
         if topic is None:
             continue
         if topic.media is None:
             topic.representations["Media"] = Media()
-        topic.media.collage = image
+        topic.media.summaries.update(found)
 
     return topic_model

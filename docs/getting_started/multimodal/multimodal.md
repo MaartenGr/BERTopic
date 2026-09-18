@@ -46,6 +46,7 @@ topics, probs = topic_model.fit_transform(docs, images=images)
 In this example, we are clustering the documents and are then looking for the best matching images to the resulting clusters.
 
 The representative images of each topic are in `topic_model.representative_items_` and the `Representative_Items` column of `topic_model.get_topic_info()`, and `topic_model.representative_images_` holds them tiled into one collage per topic.
+Video and audio topics get a summary of their own in the same way: a sheet of each clip's middle frame, and a montage of the first two seconds of each clip, both in `topic_model.get_representation(topic, "Media").summaries`.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
 
 ```python
@@ -163,6 +164,7 @@ topics, probs = topic_model.fit_transform(documents=None, images=images)
 ```
 
 The representative images of each topic are in `topic_model.representative_items_` and the `Representative_Items` column of `topic_model.get_topic_info()`, and `topic_model.representative_images_` holds them tiled into one collage per topic.
+Video and audio topics get a summary of their own in the same way: a sheet of each clip's middle frame, and a montage of the first two seconds of each clip, both in `topic_model.get_representation(topic, "Media").summaries`.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
 
 ```python

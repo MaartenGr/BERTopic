@@ -1,10 +1,13 @@
+import io
+import wave
+
 import numpy as np
 
 from PIL import Image
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from transformers.pipelines import Pipeline, pipeline
-from typing import Callable, ClassVar
+from typing import Any, Callable, ClassVar
 
 from bertopic.representation._mmr import mmr
 from bertopic.representation._base import TextConverter
@@ -24,6 +27,11 @@ TASKS = {
     Modality.AUDIO: "automatic-speech-recognition",
 }
 
+# A bare array of audio carries no rate, so it is taken to be what Whisper expects, as the
+# transcription pipeline already does. A montage keeps this many seconds of each clip.
+SAMPLING_RATE = 16_000
+MONTAGE_SECONDS = 2
+
 
 class MultiModalRepresentation(TextConverter):
     """Represent topics by their media, and describe that media so c-TF-IDF has words.
@@ -31,7 +39,9 @@ class MultiModalRepresentation(TextConverter):
     A topic that holds photographs and voice notes is one topic, so it gets one
     representation carrying both. The same sample of representative media serves twice:
     it is described in text, which is what gives a media-only corpus any keywords at all,
-    and it is kept as the topic's `Media` representation.
+    and it is kept as the topic's `Media` representation. Each modality also gets one
+    summary that stands for the topic: a collage of its images, a sheet of its videos'
+    middle frames, and a montage of the first seconds of its audio.
 
     Describing every item would be prohibitive on a corpus of millions, so only
     `nr_repr_media` items per topic are described. MMR picks them near each topic's
@@ -54,9 +64,9 @@ class MultiModalRepresentation(TextConverter):
         nr_repr_media: Number of representative media items to describe per topic.
         nr_frames: Number of frames to sample from each video, since one still cannot
                    stand for a clip.
-        image_height: The height of the resulting collage.
-        image_squares: Whether to resize each image in the collage to a square. This can
-                       be visually more appealing if all input images are almost squares.
+        image_height: The height of the resulting collage and frame sheet.
+        image_squares: Whether to resize each image in a collage or frame sheet to a square.
+                       This can be visually more appealing if all images are almost squares.
         prompt: What to ask the model for, when it is a pipeline rather than a callable.
         batch_size: The number of items to describe at a time.
 
@@ -177,7 +187,7 @@ class MultiModalRepresentation(TextConverter):
             items = {modality: [corpus.media[row] for row in found] for modality, found in rows.items()}
             representations[topic] = Media(
                 items=items,
-                collage=self._collage(items.get(Modality.IMAGE, [])),
+                summaries=self._summarize(items),
                 captions=[
                     corpus.documents[row] for found in rows.values() for row in found if corpus.documents[row]
                 ],
@@ -234,7 +244,7 @@ class MultiModalRepresentation(TextConverter):
             return captions
 
         # A video is described by describing the frames sampled from it, joined back up
-        frames = [frame for video in items for frame in self._frames(video)]
+        frames = [frame for video in items for frame in self._frames(video, self.nr_frames)]
         captions = self._caption(frames, model)
         return [
             " ".join(captions[start : start + self.nr_frames])
@@ -258,11 +268,23 @@ class MultiModalRepresentation(TextConverter):
         outputs = model(text=messages, max_new_tokens=30, batch_size=self.batch_size)
         return [output[0]["generated_text"][-1]["content"].strip() for output in outputs]
 
-    def _collage(self, images: list) -> Image.Image | None:
-        """Tile a topic's images three to a row, so one picture stands for the topic."""
-        if not images:
-            return None
+    def _summarize(self, items: dict[Modality, list]) -> dict[Modality, Any]:
+        """One object per modality that stands for the topic, the way a label does for text."""
+        summaries = {}
+        if Modality.IMAGE in items:
+            summaries[Modality.IMAGE] = self._collage(items[Modality.IMAGE])
 
+        # A sheet of each clip's middle frame, tiled the way a collage tiles images
+        if Modality.VIDEO in items:
+            frames = [self._frames(video, nr_frames=1)[0] for video in items[Modality.VIDEO]]
+            summaries[Modality.VIDEO] = self._collage(frames)
+
+        if Modality.AUDIO in items:
+            summaries[Modality.AUDIO] = self._montage(items[Modality.AUDIO])
+        return summaries
+
+    def _collage(self, images: list) -> Image.Image:
+        """Tile a topic's images three to a row, so one picture stands for the topic."""
         opened = [self._open(image) for image in images]
         tiles = [opened[start : start + 3] for start in range(0, len(opened), 3)]
         collage = get_concat_tile_resize(tiles, self.image_height, self.image_squares)
@@ -283,21 +305,45 @@ class MultiModalRepresentation(TextConverter):
             self.pipelines[key] = pipeline(key[0], model=key[1])
         return self.pipelines[key]
 
-    def _frames(self, video) -> list:
-        """Sample frames evenly across a clip, since one still cannot stand for a video."""
+    @staticmethod
+    def _frames(video, nr_frames: int) -> list:
+        """Take the middle frame of equal stretches of a clip, clear of its black ends."""
         # Imported here because decoding video is the only thing that needs it, and video is
         # an extra: describing images and audio must work without it installed
         from torchcodec.decoders import VideoDecoder
 
         decoder = VideoDecoder(video)
-        last = decoder.metadata.num_frames - 1
-        indices = [round(index * last / max(self.nr_frames - 1, 1)) for index in range(self.nr_frames)]
+        stretch = decoder.metadata.num_frames / nr_frames
+        indices = [int((index + 0.5) * stretch) for index in range(nr_frames)]
         return [Image.fromarray(decoder[index].permute(1, 2, 0).numpy()) for index in indices]
+
+    def _montage(self, clips: list) -> bytes:
+        """The opening seconds of each clip back to back, written as one WAV file."""
+        waveforms = [self._read_audio(clip) if isinstance(clip, str) else clip for clip in clips]
+        montage = np.concatenate([waveform[: MONTAGE_SECONDS * SAMPLING_RATE] for waveform in waveforms])
+
+        # Sixteen-bit mono, which any player reads and the standard library can write
+        buffer = io.BytesIO()
+        with wave.open(buffer, "wb") as file:
+            file.setnchannels(1)
+            file.setsampwidth(2)
+            file.setframerate(SAMPLING_RATE)
+            file.writeframes((np.clip(montage, -1, 1) * 32767).astype(np.int16).tobytes())
+        return buffer.getvalue()
 
     @staticmethod
     def _open(image):
         """Open an image from a path, or copy one that is already loaded."""
         return Image.open(image) if isinstance(image, str) else image.copy()
+
+    @staticmethod
+    def _read_audio(clip: str) -> np.ndarray:
+        """Decode the opening of a clip from its path, at the rate a bare array is taken to have."""
+        # Imported here for the same reason as `torchcodec`: audio is an extra
+        import librosa
+
+        # Only what a montage keeps, since a clip may be an hour-long recording
+        return librosa.load(clip, sr=SAMPLING_RATE, duration=MONTAGE_SECONDS)[0]
 
 
 def get_concat_h_multi_resize(im_list):

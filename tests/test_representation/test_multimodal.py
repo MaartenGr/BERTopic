@@ -5,10 +5,15 @@ modality in text. These tests use a stub captioner so the protocol, the corpus
 reduction, and the plumbing are covered without downloading a captioning model.
 """
 
+import io
 import os
+import sys
+import wave
+from types import ModuleType, SimpleNamespace
 
 import numpy as np
 import pytest
+import torch
 from PIL import Image
 from typing import ClassVar
 
@@ -20,6 +25,7 @@ from bertopic.representation import MultiModalRepresentation
 from bertopic._corpus import Corpus, Modality
 from bertopic._topics import Media
 from bertopic.representation._base import TextConverter
+from bertopic.representation._multimodal import SAMPLING_RATE
 
 
 class StubCaptioner(TextConverter):
@@ -144,6 +150,33 @@ def describing(prefix):
     return lambda items: [f"{prefix} {item}" for item in items]
 
 
+@pytest.fixture
+def decoders(monkeypatch):
+    """Stand-ins for torchcodec and librosa, which CI does not install.
+
+    Every clip decodes to 100 frames or to a second of silence, and the frames asked for are
+    recorded, so a test can check which one a summary took.
+    """
+    requested = []
+
+    class VideoDecoder:
+        def __init__(self, video):
+            self.metadata = SimpleNamespace(num_frames=100)
+
+        def __getitem__(self, index):
+            requested.append(index)
+            return torch.full((3, 8, 8), index, dtype=torch.uint8)
+
+    module = ModuleType("torchcodec.decoders")
+    module.VideoDecoder = VideoDecoder
+    monkeypatch.setitem(sys.modules, "torchcodec", ModuleType("torchcodec"))
+    monkeypatch.setitem(sys.modules, "torchcodec.decoders", module)
+
+    silence = staticmethod(lambda clip: np.zeros(SAMPLING_RATE))
+    monkeypatch.setattr(MultiModalRepresentation, "_read_audio", silence)
+    return requested
+
+
 def media_corpus(image: str = "cat.png") -> Corpus:
     """One topic holding an image, a clip and a video, which is what mixed media means."""
     corpus = Corpus.from_inputs(images=[image], audio=["call.wav"], video=["scene.mp4"])
@@ -205,7 +238,7 @@ def test_models_are_loaded_only_when_their_modality_appears():
     assert converter.pipelines == {}
 
 
-def test_a_topic_carries_every_modality_it_holds(image_paths):
+def test_a_topic_carries_every_modality_it_holds(image_paths, decoders):
     """A topic of photographs and voice notes is one representation carrying both."""
     converter = MultiModalRepresentation(model=describing("this is"))
     corpus = converter.to_text(media_corpus(image_paths[0]))
@@ -218,7 +251,35 @@ def test_a_topic_carries_every_modality_it_holds(image_paths):
     assert len(representations[0].captions) == 3
 
 
-def test_every_topic_gets_media_even_without_any():
+def test_every_modality_in_a_topic_gets_a_summary(image_paths, decoders):
+    """A picture stands for images and for video, and a recording for audio."""
+    representations = MultiModalRepresentation().extract_topics(
+        BERTopic(verbose=False), media_corpus(image_paths[0]), {0: None}, None
+    )
+    summaries = representations[0].summaries
+
+    assert isinstance(summaries[Modality.IMAGE], Image.Image)
+    assert isinstance(summaries[Modality.VIDEO], Image.Image)
+    assert summaries[Modality.AUDIO].startswith(b"RIFF")
+
+
+def test_a_video_is_summarized_by_its_middle_frame(decoders):
+    """A clip's first frame is often black or a title card, so its summary takes the middle one."""
+    MultiModalRepresentation._frames("scene.mp4", nr_frames=1)
+
+    assert decoders == [50]
+
+
+def test_a_montage_keeps_the_first_two_seconds_of_each_clip():
+    """A clip shorter than that is kept whole, so one second and three seconds make three."""
+    clips = [np.zeros(SAMPLING_RATE), np.zeros(3 * SAMPLING_RATE)]
+
+    with wave.open(io.BytesIO(MultiModalRepresentation()._montage(clips))) as montage:
+        assert montage.getframerate() == SAMPLING_RATE
+        assert montage.getnframes() == 3 * SAMPLING_RATE
+
+
+def test_every_topic_gets_media_even_without_any(decoders):
     """An empty representation rather than none, so a topic of text still fills the column."""
     corpus = Corpus.from_inputs(documents=["a report on rainfall", "notes on trains"], audio=["call.wav"])
     corpus.topics = np.array([0, 1, 1])
@@ -233,7 +294,7 @@ def test_every_topic_gets_media_even_without_any():
 
 
 @pytest.mark.parametrize("nr_documents, nr_clips", [(3, 5), (5, 3)], ids=["clips_first", "documents_first"])
-def test_representative_items_is_a_column_whichever_topic_comes_first(nr_documents, nr_clips):
+def test_representative_items_is_a_column_whichever_topic_comes_first(nr_documents, nr_clips, decoders):
     """The columns follow what was configured, not which topic the frequency sort puts first."""
     clips = [f"clip_{index}.wav" for index in range(nr_clips)]
     topic_model = fit_documents_and("audio", clips, nr_documents)
@@ -274,13 +335,48 @@ def test_collages_survive_save_and_load_whichever_topic_has_them(nr_documents, n
     assert sorted(loaded.representative_images_) == sorted(topic_model.representative_images_)
 
 
-def test_a_model_without_collages_saves_no_images_folder(tmp_path):
+def test_files_an_operating_system_leaves_behind_are_not_summaries(tmp_path):
+    """macOS writes `.DS_Store` into any folder opened in Finder, and loading must not trip on it."""
+    topic_model = fit_documents_and("images", [Image.new("RGB", (40, 40), "red") for _ in range(3)], 5)
+    topic_model.save(tmp_path, serialization="safetensors")
+    (tmp_path / "images" / ".DS_Store").write_bytes(b"Bud1")
+
+    assert BERTopic.load(tmp_path).representative_images_
+
+
+def test_a_model_without_collages_saves_no_images_folder(tmp_path, decoders):
     """Only a model with pictures to keep gets a folder for them."""
     topic_model = fit_documents_and("audio", ["clip_0.wav", "clip_1.wav"], nr_documents=3)
 
     topic_model.save(tmp_path, serialization="safetensors")
 
     assert not (tmp_path / "images").exists()
+
+
+def test_summaries_and_item_paths_survive_save_and_load(image_paths, decoders, tmp_path):
+    """Pictures come back as images and a montage as the same bytes, and items only as paths."""
+    topic_model = BERTopic(
+        umap_model=BaseDimensionalityReduction(),
+        hdbscan_model=BaseCluster(),
+        representation_model={"Media": MultiModalRepresentation(model=describing("this is"))},
+    )
+    topic_model.fit(
+        images=image_paths[:2],
+        audio=[np.zeros(SAMPLING_RATE), np.full(SAMPLING_RATE, 0.5)],
+        video=["one.mp4", "two.mp4"],
+        embeddings=np.repeat(np.eye(3, 4), 2, axis=0),
+        y=[0, 0, 1, 1, 2, 2],
+    )
+
+    topic_model.save(tmp_path, serialization="safetensors")
+    loaded = BERTopic.load(tmp_path)
+
+    for topic in topic_model._topics:
+        media, restored = topic.media, loaded._topics[topic.id].media
+        paths = {modality: items for modality, items in media.items.items() if modality != Modality.AUDIO}
+        assert restored.summaries.keys() == media.summaries.keys()
+        assert restored.summaries.get(Modality.AUDIO) == media.summaries.get(Modality.AUDIO)
+        assert restored.items == paths
 
 
 def test_a_converter_keeps_the_text_it_was_given():
@@ -294,7 +390,7 @@ def test_a_converter_keeps_the_text_it_was_given():
     assert corpus.documents == ["a caller asks about a card"]
 
 
-def test_representative_docs_come_from_the_rows_that_were_described():
+def test_representative_docs_come_from_the_rows_that_were_described(decoders):
     """Sampling a big topic before dropping text-less rows kept about one of its nine captions."""
     clips = [f"clip_{index}.wav" for index in range(5000)]
     topic_model = fit_documents_and("audio", clips, nr_documents=3)
@@ -305,7 +401,7 @@ def test_representative_docs_come_from_the_rows_that_were_described():
     assert all(representative_docs)
 
 
-def test_video_only_input_yields_keywords():
+def test_video_only_input_yields_keywords(decoders):
     """The bar for 13c: a corpus of nothing but clips still has words to describe it."""
     clips = [f"clip_{index}.mp4" for index in range(6)]
     topic_model = BERTopic(

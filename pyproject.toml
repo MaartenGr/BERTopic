@@ -81,6 +81,7 @@ spacy = [
 ]
 test = [
     "great-tables>=0.10",
+    "Pillow>=9.2.0",
     "polars>=1.0",
     "pytest>=5.4.3",
     "pytest-cov>=2.6.1",
