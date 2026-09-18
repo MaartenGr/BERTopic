@@ -314,6 +314,7 @@ To create embeddings for both text and images in the same vector space, we can u
 This model uses a clip-vit based model that is capable of embedding text, images, or both:
 
 ```python
+import numpy as np
 from bertopic.backend import MultiModalBackend
 model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
 
@@ -323,8 +324,8 @@ doc_embeddings = model.embed_documents(docs)
 # Embedding images only
 image_embeddings = model.embed_media(images, "image")
 
-# Embed both images and documents, then average them
-doc_image_embeddings = model.embed(docs, images)
+# Average both, which is what passing documents and images together does
+doc_image_embeddings = np.mean([doc_embeddings, image_embeddings], axis=0)
 ```
 
 

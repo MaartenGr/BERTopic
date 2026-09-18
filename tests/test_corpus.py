@@ -298,6 +298,16 @@ def test_sampling_only_kicks_in_above_the_limit():
     assert corpus.get_topic(0, nr_samples=100).documents == ["a", "b", "c"]
 
 
+def test_rows_without_text_can_be_left_out_before_sampling():
+    """Only a sample of a topic's media is ever described, so its text is rare among the rows."""
+    corpus = Corpus(documents=["a", "", "b", ""], topics=np.array([0, 0, 0, 0]))
+
+    selected = corpus.get_topic(0, with_text=True)
+
+    assert selected.documents == ["a", "b"]
+    assert list(selected.original_indices) == [0, 2]
+
+
 # --------------------------------------------------------------------------------------
 # Building a corpus from the public API's media arguments
 # --------------------------------------------------------------------------------------

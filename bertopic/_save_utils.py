@@ -13,6 +13,7 @@ try:
         get_hf_file_metadata,
         hf_hub_download,
         hf_hub_url,
+        list_repo_files,
         repo_type_and_id_from_hf_id,
         upload_folder,
     )
@@ -40,7 +41,7 @@ try:
 except ImportError:
     _has_vision = False
 
-from bertopic._topics import Media, Topics
+from bertopic._topics import Topics
 
 
 TOPICS_NAME = "topics.json"
@@ -160,13 +161,19 @@ def migrate_topics_pre_0_17_4(topics_dict: dict) -> Topics:
     # Create Topic objects
     for topic_id in topic_ids:
         str_id = str(topic_id)
-        label = custom_labels_dict.get(topic_id) or topics_dict.get("topic_labels", {}).get(str_id)
         topic_type = TopicType.OUTLIER if topic_id == -1 else TopicType.NORMAL
         nr_documents = topics_dict.get("topic_sizes", {}).get(str_id, 0)
 
         # Main representation in <= v0.17.4 is always "Keywords"
         rep_data = topics_dict.get("topic_representations", {}).get(str_id, [])
         representations = {"Main": Keywords(data=[tuple(item) for item in rep_data])}
+
+        # Every label was saved, so one the keywords generate anyway stays derived, and only a
+        # label they would not produce, such as a zero-shot topic's name, is kept as set
+        saved_label = topics_dict.get("topic_labels", {}).get(str_id)
+        if saved_label == f"{topic_id}_" + "_".join(word for word, _ in rep_data[:4]):
+            saved_label = None
+        label = custom_labels_dict.get(topic_id) or saved_label
 
         # Topic aspects (additional representations)
         for aspect_name, aspect_data in topics_dict.get("topic_aspects", {}).items():
@@ -293,25 +300,10 @@ def load_local_files(path):
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
-    # Load images
+    # Load the collage of every topic that has one, since a topic of text has none
     images = None
-    if _has_vision:
-        try:
-            Image.open(path / "images/0.jpg")
-            _has_images = True
-        except:  # noqa: E722
-            _has_images = False
-
-        if _has_images:
-            # Detect format: new format has "bertopic_version", old has "topic_representations"
-            if "bertopic_version" in topics:
-                topic_list = list(topics["topics"].keys())
-            else:
-                topic_list = list(topics["topic_representations"].keys())
-            images = {}
-            for topic in topic_list:
-                image = Image.open(path / f"images/{topic}.jpg")
-                images[int(topic)] = image
+    if _has_vision and (path / "images").is_dir():
+        images = {int(file.stem): Image.open(file) for file in (path / "images").glob("*.jpg")}
 
     return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
@@ -344,25 +336,15 @@ def load_files_from_hf(path):
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
-    # Load images if they exist
+    # Load the collage of every topic that has one, since a topic of text has none
     images = None
     if _has_vision:
+        # Listing needs the Hub itself, so offline the model still loads, only without collages
         try:
-            hf_hub_download(path, "images/0.jpg", revision=None)
-            _has_images = True
+            names = [name for name in list_repo_files(path) if name.startswith("images/")]
         except:  # noqa: E722
-            _has_images = False
-
-        if _has_images:
-            # Detect format: new format has "bertopic_version", old has "topic_representations"
-            if "bertopic_version" in topics:
-                topic_list = list(topics["topics"].keys())
-            else:
-                topic_list = list(topics["topic_representations"].keys())
-            images = {}
-            for topic in topic_list:
-                image = Image.open(hf_hub_download(path, f"images/{topic}.jpg", revision=None))
-                images[int(topic)] = image
+            names = []
+        images = {int(Path(name).stem): Image.open(hf_hub_download(path, name)) for name in names}
 
     return topics, params, tensors, ctfidf_tensors, ctfidf_config, images
 
@@ -505,20 +487,18 @@ def check_has_visual_aspect(model):
     """Check if model has visual aspect by inspecting _topics directly."""
     if _has_vision:
         for topic in model._topics:
-            for rep in topic.representations.values():
-                if isinstance(rep, Media) and isinstance(rep.collage, Image.Image):
-                    return True
+            if topic.media is not None and isinstance(topic.media.collage, Image.Image):
+                return True
     return False
 
 
 def save_images(model, path: str):
     """Save each topic's collage beside the model, since JSON is no place for a picture."""
     if _has_vision:
-        path.mkdir(exist_ok=True, parents=True)
         for topic in model._topics:
-            for rep in topic.representations.values():
-                if isinstance(rep, Media) and isinstance(rep.collage, Image.Image):
-                    rep.collage.save(path / f"{topic.id}.jpg")
+            if topic.media is not None and isinstance(topic.media.collage, Image.Image):
+                path.mkdir(exist_ok=True, parents=True)
+                topic.media.collage.save(path / f"{topic.id}.jpg")
 
 
 def save_topics(model, path: str):

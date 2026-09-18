@@ -24,6 +24,7 @@ import pytest
 from scipy.sparse import csr_matrix
 
 from bertopic._corpus import Corpus, Modality
+from bertopic._save_utils import migrate_topics_pre_0_17_4
 from bertopic._topics import (
     Media,
     Keywords,
@@ -559,6 +560,33 @@ def test_hierarchy_round_trip_preserves_node_data():
     assert restored.nodes[0].embedding.tolist() == [1.0, 2.0, 3.0]
 
 
+def old_save(topic_labels: dict[str, str]) -> dict:
+    """A topics.json as 0.17.4 and earlier wrote it: the outliers and one topic of pets."""
+    return {
+        "topic_representations": {"-1": [["the", 0.1], ["of", 0.1]], "0": [["cat", 0.9], ["dog", 0.8]]},
+        "topics": [-1, 0, 0],
+        "topic_sizes": {"-1": 1, "0": 2},
+        "topic_labels": topic_labels,
+        "custom_labels": None,
+        "_outliers": 1,
+    }
+
+
+def test_labels_an_old_save_generated_stay_derived():
+    """0.17 saved every label, so one the keywords produce anyway was never set by a user."""
+    topics = migrate_topics_pre_0_17_4(old_save({"-1": "-1_the_of", "0": "0_cat_dog"}))
+
+    assert topics.custom_labels is None
+    assert [topic.name for topic in topics] == ["-1_the_of", "0_cat_dog"]
+
+
+def test_a_label_the_keywords_would_not_generate_is_kept():
+    """A zero-shot topic is named after its zero-shot label rather than its keywords."""
+    topics = migrate_topics_pre_0_17_4(old_save({"-1": "-1_the_of", "0": "Pets"}))
+
+    assert [topic.name for topic in topics] == ["-1_the_of", "Pets"]
+
+
 # --------------------------------------------------------------------------------------
 # Target design: a single store of document assignments
 # --------------------------------------------------------------------------------------
@@ -609,11 +637,32 @@ def test_aspect_columns_are_word_lists_too():
     """An aspect had the same bug, and `str(rep)` was never meaningful in a table."""
     topics = build_topics({0: 4})
     topics.set_data(representations={"Main": {0: Keywords(data=[("cat", 0.8)])}})
-    topics.set_data(representations={"Media": {0: Media(collage="collage", captions=["a cat"])}})
+    topics.set_data(representations={"KeyBERT": {0: Keywords(data=[("feline", 0.7), ("pet", 0.5)])}})
 
     info = topics[0].to_info_dict()
 
-    assert info["Media"] == ["a cat"]
+    assert info["KeyBERT"] == ["feline", "pet"]
+
+
+def test_media_is_shown_as_its_items():
+    """One column holds the media itself, whichever aspect it came from and whatever its modality."""
+    topics = build_topics({0: 4, 1: 4})
+    media = Media(items={Modality.IMAGE: ["a.png"], Modality.AUDIO: ["b.wav"]}, captions=["a cat"])
+    topics.set_data(representations={"Pictures": {0: media}})
+
+    info = topics[0].to_info_dict()
+
+    assert info["Representative_Items"] == ["a.png", "b.wav"]
+    assert "Pictures" not in info
+    assert "Representative_Items" not in topics[1].to_info_dict()
+
+
+def test_a_column_does_not_depend_on_which_topic_comes_first():
+    """Only the second topic has the aspect, which used to drop the column for every topic."""
+    topics = build_topics({0: 4, 1: 4})
+    topics.set_data(representations={"KeyBERT": {1: Keywords(data=[("feline", 0.7)])}})
+
+    assert list(topics.to_dataframe()["KeyBERT"]) == [None, ["feline"]]
 
 
 def test_name_carries_the_topic_id():

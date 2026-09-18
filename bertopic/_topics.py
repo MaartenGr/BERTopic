@@ -365,6 +365,18 @@ class Topic:
         """
         return self._label if self._label is not None else f"{self.id}_{self.label}"
 
+    @property
+    def media(self) -> Media | None:
+        """The representation holding this topic's media, under whichever aspect it was given."""
+        return next((rep for rep in self.representations.values() if isinstance(rep, Media)), None)
+
+    @property
+    def representative_items(self) -> list:
+        """The media that represent this topic, one modality after another."""
+        if self.media is None:
+            return []
+        return [item for items in self.media.items.values() for item in items]
+
     def __getitem__(self, source: str) -> TopicRepresentation:
         """Get representation for a specific source, or default if not found."""
         return self.representations.get(source, TopicRepresentation())
@@ -374,16 +386,22 @@ class Topic:
         self.representations[source] = rep
 
     def to_info_dict(self) -> dict:
-        """Serialize topic info to a flat dictionary for tabular output."""
+        """Serialize topic info to a flat dictionary for tabular output.
+
+        Media is shown as the items themselves, under `Representative_Items` rather than
+        its aspect's name, so the columns stay the same whatever modalities a topic holds.
+        """
         info = {"Topic": self.id, "Count": self.nr_documents, "Name": self.name}
         info["Representation"] = self["Main"].words
 
         # Extract all other representations
         for name, rep in self.representations.items():
-            if name != "Main":
+            if name != "Main" and not isinstance(rep, Media):
                 info[name] = rep.words
 
         info["Representative_Docs"] = self.representative_documents or [""]
+        if self.media is not None:
+            info["Representative_Items"] = self.representative_items
 
         return info
 
@@ -892,8 +910,18 @@ class Topics:
         if not rows:
             return nw.from_dict({}, backend=get_output()).to_native()
 
-        data = {column: [row.get(column) for row in rows] for column in rows[0]}
-        return nw.from_dict(data, backend=get_output()).to_native()
+        # Columns come from every topic, since the first may lack an aspect the others have
+        columns = dict.fromkeys(column for row in rows for column in row)
+        data = {column: [row.get(column) for row in rows] for column in columns}
+
+        # Media is kept as the objects it is, since polars has no type for a list of images
+        items = data.pop("Representative_Items", None)
+        frame = nw.from_dict(data, backend=get_output())
+        if items is not None:
+            frame = frame.with_columns(
+                nw.new_series("Representative_Items", items, dtype=nw.Object(), backend=get_output())
+            )
+        return frame.to_native()
 
     def to_dict(self, full: bool = False) -> dict:
         """Serialize Topics for storage.

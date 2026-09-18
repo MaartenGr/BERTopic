@@ -9,8 +9,10 @@ import os
 
 import numpy as np
 import pytest
+from PIL import Image
 from typing import ClassVar
 
+import bertopic
 from bertopic import BERTopic
 from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
@@ -150,6 +152,21 @@ def media_corpus(image: str = "cat.png") -> Corpus:
     return corpus
 
 
+def fit_documents_and(kind: str, media: list, nr_documents: int) -> BERTopic:
+    """Fit unrelated documents and media as a topic each, the larger becoming topic 0."""
+    topic_model = BERTopic(
+        umap_model=BaseDimensionalityReduction(),
+        hdbscan_model=BaseCluster(),
+        representation_model={"Media": MultiModalRepresentation(model=describing("this is"))},
+    )
+    documents = [f"the quarterly budget report {index}" for index in range(nr_documents)]
+
+    # Media rows come before documents in the corpus, so embeddings and labels follow that order
+    embeddings = np.repeat(np.eye(2, 4), [len(media), nr_documents], axis=0)
+    labels = [1] * len(media) + [0] * nr_documents
+    return topic_model.fit(documents=documents, embeddings=embeddings, y=labels, **{kind: media})
+
+
 def test_each_modality_is_described_by_its_own_model():
     """One model rarely captions and transcribes, so each modality may name its own."""
     converter = MultiModalRepresentation(
@@ -199,6 +216,93 @@ def test_a_topic_carries_every_modality_it_holds(image_paths):
     assert representations[0].images == [image_paths[0]]
     assert representations[0].collage is not None
     assert len(representations[0].captions) == 3
+
+
+def test_every_topic_gets_media_even_without_any():
+    """An empty representation rather than none, so a topic of text still fills the column."""
+    corpus = Corpus.from_inputs(documents=["a report on rainfall", "notes on trains"], audio=["call.wav"])
+    corpus.topics = np.array([0, 1, 1])
+    corpus.embeddings = np.eye(3, 4)
+
+    representations = MultiModalRepresentation().extract_topics(
+        BERTopic(verbose=False), corpus, {0: None, 1: None}, None
+    )
+
+    assert representations[0].items == {Modality.AUDIO: ["call.wav"]}
+    assert representations[1] == Media()
+
+
+@pytest.mark.parametrize("nr_documents, nr_clips", [(3, 5), (5, 3)], ids=["clips_first", "documents_first"])
+def test_representative_items_is_a_column_whichever_topic_comes_first(nr_documents, nr_clips):
+    """The columns follow what was configured, not which topic the frequency sort puts first."""
+    clips = [f"clip_{index}.wav" for index in range(nr_clips)]
+    topic_model = fit_documents_and("audio", clips, nr_documents)
+
+    info = topic_model.get_topic_info()
+
+    assert "Media" not in info.columns
+    assert sorted(len(items) for items in info["Representative_Items"]) == [0, nr_clips]
+    assert [sorted(items) for items in topic_model.representative_items_.values()] == [sorted(clips)]
+
+
+@pytest.mark.parametrize("backend", ["pandas", "polars"])
+def test_representative_items_hold_images_on_either_backend(backend):
+    """Polars has no type for a list of images, so the column keeps them as the objects they are."""
+    pytest.importorskip(backend)
+    images = [Image.new("RGB", (40, 40), "red") for _ in range(3)]
+    topic_model = fit_documents_and("images", images, nr_documents=5)
+
+    bertopic.set_output(backend)
+    try:
+        info = topic_model.get_topic_info()
+    finally:
+        bertopic.set_output("pandas")
+
+    assert sorted(len(items) for items in info["Representative_Items"]) == [0, 3]
+
+
+@pytest.mark.parametrize("nr_documents, nr_images", [(3, 5), (5, 3)], ids=["images_first", "documents_first"])
+def test_collages_survive_save_and_load_whichever_topic_has_them(nr_documents, nr_images, tmp_path):
+    """Loading used to look for topic 0's collage, then expect every other topic to have one too."""
+    images = [Image.new("RGB", (40, 40), "red") for _ in range(nr_images)]
+    topic_model = fit_documents_and("images", images, nr_documents)
+
+    topic_model.save(tmp_path, serialization="safetensors")
+    loaded = BERTopic.load(tmp_path)
+
+    assert topic_model.representative_images_
+    assert sorted(loaded.representative_images_) == sorted(topic_model.representative_images_)
+
+
+def test_a_model_without_collages_saves_no_images_folder(tmp_path):
+    """Only a model with pictures to keep gets a folder for them."""
+    topic_model = fit_documents_and("audio", ["clip_0.wav", "clip_1.wav"], nr_documents=3)
+
+    topic_model.save(tmp_path, serialization="safetensors")
+
+    assert not (tmp_path / "images").exists()
+
+
+def test_a_converter_keeps_the_text_it_was_given():
+    """A captioned clip is described already, so its caption is not replaced."""
+    corpus = Corpus.from_inputs(documents=["a caller asks about a card"], audio=["call.wav"])
+    corpus.topics = np.zeros(1, dtype=int)
+    corpus.embeddings = np.eye(1, 4)
+
+    corpus = MultiModalRepresentation(model=describing("someone saying")).to_text(corpus)
+
+    assert corpus.documents == ["a caller asks about a card"]
+
+
+def test_representative_docs_come_from_the_rows_that_were_described():
+    """Sampling a big topic before dropping text-less rows kept about one of its nine captions."""
+    clips = [f"clip_{index}.wav" for index in range(5000)]
+    topic_model = fit_documents_and("audio", clips, nr_documents=3)
+
+    representative_docs = topic_model.representative_docs_[next(iter(topic_model.representative_items_))]
+
+    assert len(representative_docs) == 3
+    assert all(representative_docs)
 
 
 def test_video_only_input_yields_keywords():

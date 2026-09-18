@@ -311,16 +311,19 @@ class Corpus:
             _zeroshot_labels=self._zeroshot_labels,
         )
 
-    def get_topic(self, topic_id: int, nr_samples: int | None = None) -> "Corpus":
+    def get_topic(self, topic_id: int, nr_samples: int | None = None, with_text: bool = False) -> "Corpus":
         """Return a Corpus object containing only documents of the specified topic.
 
         Arguments:
             topic_id: The topic ID to filter by.
             nr_samples: The number of documents to randomly sample for the topic.
+            with_text: Whether to keep only the rows that have text, before any sampling.
         """
-        # Filter documents by topic
-        filtered_docs = [doc for doc, topic in zip(self.documents, self.topics) if topic == topic_id]
-        filtered_indices = [i for i, topic in enumerate(self.topics) if topic == topic_id]
+        # Filter documents by topic, and to the rows with text when asked
+        filtered_indices = [index for index, topic in enumerate(self.topics) if topic == topic_id]
+        if with_text:
+            filtered_indices = [index for index in filtered_indices if self.documents[index]]
+        filtered_docs = [self.documents[index] for index in filtered_indices]
 
         # Sample documents if nr_samples is specified, seeded so that representative
         # documents — and any LLM representation built from them — repeat across runs

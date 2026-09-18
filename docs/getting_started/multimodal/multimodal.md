@@ -40,34 +40,36 @@ representation_model = {
    "Media":  media_model,
 }
 topic_model = BERTopic(representation_model=representation_model, verbose=True)
+topics, probs = topic_model.fit_transform(docs, images=images)
 ```
 
 In this example, we are clustering the documents and are then looking for the best matching images to the resulting clusters.
 
-We can now access our media representations for each topic with `topic_model.topic_aspects_["Media"]`.
+The representative images of each topic are in `topic_model.representative_items_` and the `Representative_Items` column of `topic_model.get_topic_info()`, and `topic_model.representative_images_` holds them tiled into one collage per topic.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
 
 ```python
 import base64
 from io import BytesIO
 from IPython.display import HTML
+from PIL import Image, ImageOps
 
-def image_base64(im):
-    if isinstance(im, str):
-        im = get_thumbnail(im)
+def image_base64(image):
+    if isinstance(image, str):
+        image = Image.open(image)
     with BytesIO() as buffer:
-        im.save(buffer, 'jpeg')
+        ImageOps.contain(image, (150, 150)).convert('RGB').save(buffer, 'jpeg')
         return base64.b64encode(buffer.getvalue()).decode()
 
 
-def image_formatter(im):
-    return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
+def image_formatter(images):
+    return ''.join(f'<img src="data:image/jpeg;base64,{image_base64(image)}">' for image in images)
 
 # Extract dataframe
-df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
+df = topic_model.get_topic_info().drop(columns=["Representative_Docs", "Name"])
 
 # Visualize the images
-HTML(df.to_html(formatters={'Media': image_formatter}, escape=False))
+HTML(df.to_html(formatters={'Representative_Items': image_formatter}, escape=False))
 ```
 
 <br><br>
@@ -81,6 +83,7 @@ HTML(df.to_html(formatters={'Media': image_formatter}, escape=False))
     to generate embeddings:
 
     ```python
+    import numpy as np
     from bertopic.backend import MultiModalBackend
     model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
 
@@ -90,8 +93,8 @@ HTML(df.to_html(formatters={'Media': image_formatter}, escape=False))
     # Embedding images only
     image_embeddings = model.embed_media(images, "image")
 
-    # Embed both images and documents, then average them
-    doc_image_embeddings = model.embed(docs, images)
+    # Average both, which is what passing documents and images together does
+    doc_image_embeddings = np.mean([doc_embeddings, image_embeddings], axis=0)
     ```
 
 ## **Images Only**
@@ -159,30 +162,31 @@ topic_model = BERTopic(embedding_model=embedding_model, representation_model=rep
 topics, probs = topic_model.fit_transform(documents=None, images=images)
 ```
 
-We can now access our media representations for each topic with `topic_model.topic_aspects_["Media"]`.
+The representative images of each topic are in `topic_model.representative_items_` and the `Representative_Items` column of `topic_model.get_topic_info()`, and `topic_model.representative_images_` holds them tiled into one collage per topic.
 If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
 
 ```python
 import base64
 from io import BytesIO
 from IPython.display import HTML
+from PIL import Image, ImageOps
 
-def image_base64(im):
-    if isinstance(im, str):
-        im = get_thumbnail(im)
+def image_base64(image):
+    if isinstance(image, str):
+        image = Image.open(image)
     with BytesIO() as buffer:
-        im.save(buffer, 'jpeg')
+        ImageOps.contain(image, (150, 150)).convert('RGB').save(buffer, 'jpeg')
         return base64.b64encode(buffer.getvalue()).decode()
 
 
-def image_formatter(im):
-    return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
+def image_formatter(images):
+    return ''.join(f'<img src="data:image/jpeg;base64,{image_base64(image)}">' for image in images)
 
 # Extract dataframe
-df = topic_model.get_topic_info().drop("Representative_Docs", 1).drop("Name", 1)
+df = topic_model.get_topic_info().drop(columns=["Representative_Docs", "Name"])
 
 # Visualize the images
-HTML(df.to_html(formatters={'Media': image_formatter}, escape=False))
+HTML(df.to_html(formatters={'Representative_Items': image_formatter}, escape=False))
 ```
 
 <br><br>

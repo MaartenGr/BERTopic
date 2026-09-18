@@ -118,17 +118,24 @@ class MultiModalRepresentation(TextConverter):
     def to_text(self, corpus: Corpus) -> Corpus:
         """Describe a sample of each topic's media, writing into those rows' text channel.
 
-        The corpus keeps its shape. Only the sampled rows gain text, so documents and
-        modalities this model does not handle are left exactly as they were, and several
-        converters can run one after another without overwriting each other.
+        The corpus keeps its shape. Only sampled rows without text gain some, so documents,
+        captions the user gave, and modalities this model does not handle are left exactly
+        as they were, and several converters can run one after another without overwriting
+        each other.
         """
         documents = list(corpus.documents)
         for modality in self.modalities:
             if self.models[modality] is None:
                 continue
 
-            # Describe a sample of every topic at once, so the model batches them
-            rows = [row for topic in corpus.topic_ids() for row in self._sample(corpus, topic, modality)]
+            # Describe a sample of every topic at once, so the model batches them. A row that
+            # already has text, such as a captioned image, keeps the words it was given
+            rows = [
+                row
+                for topic in corpus.topic_ids()
+                for row in self._sample(corpus, topic, modality)
+                if not corpus.documents[row]
+            ]
             if not rows:
                 continue
 
@@ -157,15 +164,15 @@ class MultiModalRepresentation(TextConverter):
             embeddings: Pre-trained document embeddings (unused, for API compatibility)
 
         Returns:
-            A `Media` representation per topic, carrying its media and their descriptions
+            A `Media` representation per topic, carrying its media and their descriptions,
+            and empty for a topic without media so every topic has the same columns
         """
         representations = {}
         for topic in tqdm(sorted(topic_representations), disable=not topic_model.verbose):
-            # The same rows `to_text` described, since MMR over unchanged embeddings repeats
-            rows = {modality: self._sample(corpus, topic, modality) for modality in self.modalities}
+            # The same rows `to_text` described, since MMR over unchanged embeddings repeats. Sorted,
+            # since a set's order changes between runs and a topic should list its media the same way
+            rows = {modality: self._sample(corpus, topic, modality) for modality in sorted(self.modalities)}
             rows = {modality: found for modality, found in rows.items() if found}
-            if not rows:
-                continue
 
             items = {modality: [corpus.media[row] for row in found] for modality, found in rows.items()}
             representations[topic] = Media(

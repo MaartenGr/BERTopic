@@ -379,12 +379,16 @@ class BERTopic:
     @property
     def representative_images_(self) -> dict[int, Any]:
         """For backwards compatibility."""
-        representative_images = {}
-        for topic in self._topics:
-            media = next((rep for rep in topic.representations.values() if isinstance(rep, Media)), None)
-            if media is not None and media.collage is not None:
-                representative_images[topic.id] = media.collage
-        return representative_images
+        return {
+            topic.id: topic.media.collage
+            for topic in self._topics
+            if topic.media is not None and topic.media.collage is not None
+        }
+
+    @property
+    def representative_items_(self) -> dict[int, list]:
+        """The media that represent each topic, whatever their modality."""
+        return {topic.id: topic.representative_items for topic in self._topics if topic.representative_items}
 
     @property
     def _outliers(self) -> int:
@@ -2703,12 +2707,11 @@ class BERTopic:
         topic_ids = corpus.topic_ids()
 
         for index, topic_id in enumerate(topic_ids):
-            # Slice data, skipping rows with no text: only a sample of a topic's media is
-            # ever described, so most media rows are blank and represent nothing
-            selection = corpus.get_topic(topic_id, nr_samples=nr_samples)
-            with_text = [row for row, document in enumerate(selection.documents) if document]
-            if with_text:
-                selection = selection.get_corpus_by_indices(with_text)
+            # Slice data from the rows with text, since a topic's media is only ever described
+            # for a sample; a topic with no text at all falls back to every row
+            selection = corpus.get_topic(topic_id, nr_samples=nr_samples, with_text=True)
+            if len(selection.documents) == 0:
+                selection = corpus.get_topic(topic_id, nr_samples=nr_samples)
 
             # Calculate similarity
             nr_docs = nr_repr_docs if len(selection.documents) > nr_repr_docs else len(selection.documents)
@@ -3343,10 +3346,8 @@ def _create_model_from_files(
         topic = topic_model._topics.get(topic_id)
         if topic is None:
             continue
-        restored = next((rep for rep in topic.representations.values() if isinstance(rep, Media)), None)
-        if restored is None:
-            restored = Media()
-            topic.representations["Media"] = restored
-        restored.collage = image
+        if topic.media is None:
+            topic.representations["Media"] = Media()
+        topic.media.collage = image
 
     return topic_model
