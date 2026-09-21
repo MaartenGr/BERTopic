@@ -47,30 +47,17 @@ In this example, we are clustering the documents and are then looking for the be
 
 The representative images of each topic are in `topic_model.representative_items_` and the `Representative_Items` column of `topic_model.get_topic_info()`, and `topic_model.representative_images_` holds them tiled into one collage per topic.
 Video and audio topics get a summary of their own in the same way: a sheet of each clip's middle frame, and a montage of the first two seconds of each clip, both in `topic_model.get_representation(topic, "Media").summaries`.
-If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
+To see each topic's media beside its name, with its collage, its frame sheet and a montage you can play, run:
 
 ```python
-import base64
-from io import BytesIO
-from IPython.display import HTML
-from PIL import Image, ImageOps
+topic_model.visualize_media()
+```
 
-def image_base64(image):
-    if isinstance(image, str):
-        image = Image.open(image)
-    with BytesIO() as buffer:
-        ImageOps.contain(image, (150, 150)).convert('RGB').save(buffer, 'jpeg')
-        return base64.b64encode(buffer.getvalue()).decode()
+The page is IPython's `HTML`, so a notebook shows it inline, and its `data` is a page that any browser opens once saved:
 
-
-def image_formatter(images):
-    return ''.join(f'<img src="data:image/jpeg;base64,{image_base64(image)}">' for image in images)
-
-# Extract dataframe
-df = topic_model.get_topic_info().drop(columns=["Representative_Docs", "Name"])
-
-# Visualize the images
-HTML(df.to_html(formatters={'Representative_Items': image_formatter}, escape=False))
+```python
+with open("media.html", "w", encoding="utf-8") as file:
+    file.write(topic_model.visualize_media().data)
 ```
 
 <br><br>
@@ -165,30 +152,17 @@ topics, probs = topic_model.fit_transform(documents=None, images=images)
 
 The representative images of each topic are in `topic_model.representative_items_` and the `Representative_Items` column of `topic_model.get_topic_info()`, and `topic_model.representative_images_` holds them tiled into one collage per topic.
 Video and audio topics get a summary of their own in the same way: a sheet of each clip's middle frame, and a montage of the first two seconds of each clip, both in `topic_model.get_representation(topic, "Media").summaries`.
-If you want an overview of the topic images together with their textual representations in jupyter, you can run the following:
+To see each topic's media beside its name, with its collage, its frame sheet and a montage you can play, run:
 
 ```python
-import base64
-from io import BytesIO
-from IPython.display import HTML
-from PIL import Image, ImageOps
+topic_model.visualize_media()
+```
 
-def image_base64(image):
-    if isinstance(image, str):
-        image = Image.open(image)
-    with BytesIO() as buffer:
-        ImageOps.contain(image, (150, 150)).convert('RGB').save(buffer, 'jpeg')
-        return base64.b64encode(buffer.getvalue()).decode()
+The page is IPython's `HTML`, so a notebook shows it inline, and its `data` is a page that any browser opens once saved:
 
-
-def image_formatter(images):
-    return ''.join(f'<img src="data:image/jpeg;base64,{image_base64(image)}">' for image in images)
-
-# Extract dataframe
-df = topic_model.get_topic_info().drop(columns=["Representative_Docs", "Name"])
-
-# Visualize the images
-HTML(df.to_html(formatters={'Representative_Items': image_formatter}, escape=False))
+```python
+with open("media.html", "w", encoding="utf-8") as file:
+    file.write(topic_model.visualize_media().data)
 ```
 
 <br><br>

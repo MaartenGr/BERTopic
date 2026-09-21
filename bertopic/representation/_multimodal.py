@@ -234,7 +234,8 @@ class MultiModalRepresentation(TextConverter):
             return model(items)
 
         if modality == Modality.AUDIO:
-            return [spoken["text"].strip() for spoken in model(items, batch_size=self.batch_size)]
+            transcripts = model(items, batch_size=self.batch_size, chunk_length_s=30, ignore_warning=True)
+            return [spoken["text"].strip() for spoken in transcripts]
 
         if modality == Modality.IMAGE:
             images = [self._open(image) for image in items]

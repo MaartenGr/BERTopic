@@ -42,6 +42,7 @@ else:
     if TYPE_CHECKING:
         import plotly.graph_objs as go
         import matplotlib.figure as fig
+        from IPython.display import HTML
 
 # Models
 try:
@@ -1870,6 +1871,16 @@ class BERTopic:
             datamap_kwds,
             int_datamap_kwds,
         )
+
+    @wraps(plotting.visualize_media)
+    def visualize_media(
+        self,
+        topics: List[int] | None = None,
+        top_n_topics: int | None = None,
+        height: int = 200,
+    ) -> "HTML":
+        check_is_fitted(self)
+        return plotting.visualize_media(self, topics=topics, top_n_topics=top_n_topics, height=height)
 
     @wraps(plotting.visualize_hierarchical_documents)
     def visualize_hierarchical_documents(
