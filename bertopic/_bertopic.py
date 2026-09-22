@@ -1852,6 +1852,10 @@ class BERTopic:
         topic_prefix: bool = False,
         datamap_kwds: dict = {},
         int_datamap_kwds: dict = {},
+        images: list | None = None,
+        audio: list | None = None,
+        video: list | None = None,
+        code: List[str] | None = None,
     ) -> "fig.Figure":
         check_is_fitted(self)
         return plotting.visualize_document_datamap(
@@ -1870,6 +1874,10 @@ class BERTopic:
             topic_prefix,
             datamap_kwds,
             int_datamap_kwds,
+            images=images,
+            audio=audio,
+            video=video,
+            code=code,
         )
 
     @wraps(plotting.visualize_media)

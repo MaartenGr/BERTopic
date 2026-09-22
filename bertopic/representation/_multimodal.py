@@ -1,9 +1,11 @@
 import io
+import math
+import statistics
 import wave
 
 import numpy as np
 
-from PIL import Image
+from PIL import Image, ImageOps
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 from transformers.pipelines import Pipeline, pipeline
@@ -65,8 +67,8 @@ class MultiModalRepresentation(TextConverter):
         nr_frames: Number of frames to sample from each video, since one still cannot
                    stand for a clip.
         image_height: The height of the resulting collage and frame sheet.
-        image_squares: Whether to resize each image in a collage or frame sheet to a square.
-                       This can be visually more appealing if all images are almost squares.
+        image_squares: Whether to crop each image in a collage or frame sheet to fill a square,
+                       rather than keep it whole in a cell of the images' typical shape.
         prompt: What to ask the model for, when it is a pipeline rather than a callable.
         batch_size: The number of items to describe at a time.
 
@@ -285,10 +287,28 @@ class MultiModalRepresentation(TextConverter):
         return summaries
 
     def _collage(self, images: list) -> Image.Image:
-        """Tile a topic's images three to a row, so one picture stands for the topic."""
+        """Tile a topic's images three to a row, so one picture stands for the topic.
+
+        Every image gets a cell of the same size, so a short last row stays short rather
+        than being stretched to the full width. Cells have the images' typical shape and
+        hold each image whole, or are squares the images are cropped to fill.
+        """
         opened = [self._open(image) for image in images]
-        tiles = [opened[start : start + 3] for start in range(0, len(opened), 3)]
-        collage = get_concat_tile_resize(tiles, self.image_height, self.image_squares)
+        columns = min(3, len(opened))
+        rows = math.ceil(len(opened) / columns)
+
+        # Together the rows are `image_height` tall
+        height = self.image_height // rows
+        shape = 1 if self.image_squares else statistics.median(image.width / image.height for image in opened)
+        cell = (round(height * shape), height)
+
+        collage = Image.new("RGB", (cell[0] * columns, cell[1] * rows), "white")
+        for index, image in enumerate(opened):
+            if self.image_squares:
+                tile = ImageOps.fit(image.convert("RGB"), cell)
+            else:
+                tile = ImageOps.pad(image.convert("RGB"), cell, color="white")
+            collage.paste(tile, ((index % columns) * cell[0], (index // columns) * cell[1]))
 
         for image in opened:
             image.close()
@@ -345,75 +365,3 @@ class MultiModalRepresentation(TextConverter):
 
         # Only what a montage keeps, since a clip may be an hour-long recording
         return librosa.load(clip, sr=SAMPLING_RATE, duration=MONTAGE_SECONDS)[0]
-
-
-def get_concat_h_multi_resize(im_list):
-    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
-    min_height = min(im.height for im in im_list)
-    min_height = max(im.height for im in im_list)
-    im_list_resize = []
-    for im in im_list:
-        im.resize((int(im.width * min_height / im.height), min_height), resample=0)
-        im_list_resize.append(im)
-
-    total_width = sum(im.width for im in im_list_resize)
-    dst = Image.new("RGB", (total_width, min_height), (255, 255, 255))
-    pos_x = 0
-    for im in im_list_resize:
-        dst.paste(im, (pos_x, 0))
-        pos_x += im.width
-    return dst
-
-
-def get_concat_v_multi_resize(im_list):
-    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
-    min_width = min(im.width for im in im_list)
-    min_width = max(im.width for im in im_list)
-    im_list_resize = [
-        im.resize((min_width, int(im.height * min_width / im.width)), resample=0) for im in im_list
-    ]
-    total_height = sum(im.height for im in im_list_resize)
-    dst = Image.new("RGB", (min_width, total_height), (255, 255, 255))
-    pos_y = 0
-    for im in im_list_resize:
-        dst.paste(im, (0, pos_y))
-        pos_y += im.height
-    return dst
-
-
-def get_concat_tile_resize(im_list_2d, image_height=600, image_squares=False):
-    """Code adapted from: https://note.nkmk.me/en/python-pillow-concat-images/."""
-    images = [[image.copy() for image in images] for images in im_list_2d]
-
-    # Create
-    if image_squares:
-        width = int(image_height / 3)
-        height = int(image_height / 3)
-        images = [[image.resize((width, height)) for image in images] for images in im_list_2d]
-
-    # Resize images based on minimum size
-    else:
-        min_width = min([min([img.width for img in imgs]) for imgs in im_list_2d])
-        min_height = min([min([img.height for img in imgs]) for imgs in im_list_2d])
-        for i, imgs in enumerate(images):
-            for j, img in enumerate(imgs):
-                if img.height > img.width:
-                    images[i][j] = img.resize(
-                        (int(img.width * min_height / img.height), min_height),
-                        resample=0,
-                    )
-                elif img.width > img.height:
-                    images[i][j] = img.resize(
-                        (min_width, int(img.height * min_width / img.width)), resample=0
-                    )
-                else:
-                    images[i][j] = img.resize((min_width, min_width))
-
-    # Resize grid image
-    images = [get_concat_h_multi_resize(im_list_h) for im_list_h in images]
-    img = get_concat_v_multi_resize(images)
-    height_percentage = image_height / float(img.size[1])
-    adjusted_width = int((float(img.size[0]) * float(height_percentage)))
-    img = img.resize((adjusted_width, image_height), Image.Resampling.LANCZOS)
-
-    return img

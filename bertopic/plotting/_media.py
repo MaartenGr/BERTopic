@@ -120,13 +120,13 @@ def visualize_media(
     return HTML(PAGE.format(rows="\n".join(rows)))
 
 
-def _embed(summary: Image.Image | bytes, height: int) -> str:
-    """Embed a summary in the page: a montage's WAV bytes as a player, or a picture as a JPEG."""
-    if isinstance(summary, bytes):
-        return f'<audio controls src="data:audio/wav;base64,{base64.b64encode(summary).decode()}"></audio>'
+def _embed(media: Image.Image | bytes, height: int) -> str:
+    """Embed media in a page: WAV bytes as a player, or a picture as a JPEG."""
+    if isinstance(media, bytes):
+        return f'<audio controls src="data:audio/wav;base64,{base64.b64encode(media).decode()}"></audio>'
 
     # Shrunk to `height` pixels first, so a 600-pixel collage does not bloat the page
-    thumbnail = summary.copy()
+    thumbnail = media.copy()
     thumbnail.thumbnail((thumbnail.width, height))
     buffer = io.BytesIO()
     thumbnail.convert("RGB").save(buffer, "JPEG")

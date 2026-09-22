@@ -279,6 +279,18 @@ def test_a_montage_keeps_the_first_two_seconds_of_each_clip():
         assert montage.getnframes() == 3 * SAMPLING_RATE
 
 
+def test_a_short_last_row_stays_short_rather_than_stretched():
+    """Four images tile as three above one, and the fourth keeps a cell the size of the others."""
+    images = [Image.new("RGB", (40, 30), "red") for _ in range(4)]
+
+    collage = MultiModalRepresentation(image_height=200)._collage(images)
+
+    # Two rows of cells 100 pixels tall and, like the images, a third wider than that
+    assert collage.size == (3 * 133, 200)
+    assert collage.getpixel((130, 150)) == (255, 0, 0)
+    assert collage.getpixel((140, 150)) == (255, 255, 255)
+
+
 def test_every_topic_gets_media_even_without_any(decoders):
     """An empty representation rather than none, so a topic of text still fills the column."""
     corpus = Corpus.from_inputs(documents=["a report on rainfall", "notes on trains"], audio=["call.wav"])
