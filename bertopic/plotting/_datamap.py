@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import narwhals.stable.v2 as nw
 import numpy as np
+from html import escape
 from typing import TYPE_CHECKING
+
+from bertopic._corpus import Corpus, Modality
+from bertopic.plotting._media import _embed
 
 try:
     import datamapplot
@@ -14,6 +19,10 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
     from bertopic import BERTopic
+
+
+# The height, in pixels, of the picture an image or a video shows when you hover over its point
+THUMBNAIL_HEIGHT = 96
 
 
 def visualize_document_datamap(
@@ -32,9 +41,17 @@ def visualize_document_datamap(
     topic_prefix: bool = False,
     datamap_kwds: dict = {},
     int_datamap_kwds: dict = {},
+    images: list | None = None,
+    audio: list | None = None,
+    video: list | None = None,
+    code: list[str] | None = None,
 ) -> Figure:
     """Visualize documents and their topics in 2D as a static plot for publication using
     DataMapPlot.
+
+    A model fitted on media is drawn from the same media, passed as it was to `fit`, so
+    that every point lines up with its topic. In the interactive plot, an image shows as
+    a thumbnail when you hover over its point, and a video as its middle frame.
 
     Arguments:
         topic_model:  A fitted BERTopic instance.
@@ -62,6 +79,10 @@ def visualize_document_datamap(
         int_datamap_kwds:  Keyword args be passed on to DataMapPlot's `create_interactive_plot` function
                            if you are using the interactive version.
                            See the DataMapPlot documentation for more details.
+        images: The images you used when calling `fit`, if any.
+        audio: The audio you used when calling `fit`, if any.
+        video: The videos you used when calling `fit`, if any.
+        code: The code you used when calling `fit`, if any.
 
     Returns:
         figure: A Matplotlib Figure object.
@@ -106,6 +127,12 @@ def visualize_document_datamap(
     fig = topic_model.visualize_document_datamap(docs, reduced_embeddings=reduced_embeddings)
     fig.savefig("path/to/file.png", bbox_inches="tight")
     ```
+
+    For a model fitted on images and their captions, hovering shows each image:
+
+    ```python
+    topic_model.visualize_document_datamap(captions, images=images, interactive=True)
+    ```
     <img src="../../getting_started/visualization/datamapplot.png",
          alt="DataMapPlot of 20-Newsgroups", width=800, height=800></img>
     """
@@ -115,11 +142,13 @@ def visualize_document_datamap(
             "Install them using `pip install datamapplot`."
         )
 
+    # The rows in the order the model was fitted on them, so that every point lines up with its topic
+    corpus = Corpus.from_inputs(docs, images=images, audio=audio, video=video, code=code)
     topic_per_doc = topic_model.topics_
 
     # Extract embeddings if not already done
     if embeddings is None and reduced_embeddings is None:
-        embeddings_to_reduce = topic_model._extract_embeddings(docs)
+        embeddings_to_reduce = topic_model._embed_corpus(corpus, verbose=False)
     else:
         embeddings_to_reduce = embeddings
 
@@ -176,14 +205,14 @@ def visualize_document_datamap(
     named_topic_per_doc = np.array([topic_name_mapping[topic] for topic in topic_per_doc])
 
     if interactive:
+        # Hover settings passed in `int_datamap_kwds` take precedence over the ones made here
         figure = datamapplot.create_interactive_plot(
             embeddings_2d,
             named_topic_per_doc,
-            hover_text=docs,
             enable_search=enable_search,
             width=width,
             height=height,
-            **int_datamap_kwds,
+            **{**_hover(corpus), **int_datamap_kwds},
         )
     else:
         figure, _ = datamapplot.create_plot(
@@ -197,3 +226,39 @@ def visualize_document_datamap(
         )
 
     return figure
+
+
+def _hover(corpus: Corpus) -> dict:
+    """What each point shows when hovered: its text, below a thumbnail if it is an image or a video."""
+    if len(corpus.documents) == 0:
+        return {}
+
+    texts = []
+    for text, item, modality in zip(corpus.documents, corpus.media, corpus.modality):
+        # A media row without text of its own shows its path, or failing that what kind of media it is
+        if not text and item is not None:
+            text = item if isinstance(item, str) else modality.value
+        texts.append(text)
+
+    if not {Modality.IMAGE, Modality.VIDEO} & set(corpus.modality):
+        return {"hover_text": texts}
+
+    # Once the hover holds pictures it is HTML, so the text is escaped to stay text
+    thumbnails = [_thumbnail(item, modality) for item, modality in zip(corpus.media, corpus.modality)]
+    return {
+        "hover_text": [escape(text) for text in texts],
+        "extra_point_data": nw.from_dict({"thumbnail": thumbnails}, backend="pandas").to_native(),
+        "hover_text_html_template": "{thumbnail}<div>{hover_text}</div>",
+    }
+
+
+def _thumbnail(item, modality: Modality) -> str:
+    """A small picture of an image, or of a video's middle frame, and nothing for any other row."""
+    # Imported here because pictures need Pillow, which is the `vision` extra
+    from bertopic.representation._multimodal import MultiModalRepresentation
+
+    if modality == Modality.IMAGE:
+        return _embed(MultiModalRepresentation._open(item), THUMBNAIL_HEIGHT)
+    if modality == Modality.VIDEO:
+        return _embed(MultiModalRepresentation._frames(item, nr_frames=1)[0], THUMBNAIL_HEIGHT)
+    return ""

@@ -75,8 +75,10 @@ class MaximalMarginalRelevance(BaseRepresentation):
         updated_topics = {}
         for topic, keywords in topic_representations.items():
             words = keywords.words
-            word_embeddings = topic_model._extract_embeddings(words, verbose=False)
-            topic_embedding = topic_model._extract_embeddings(" ".join(words), verbose=False).reshape(1, -1)
+            word_embeddings = topic_model.embedding_model.embed_documents(words, verbose=False)
+            topic_embedding = topic_model.embedding_model.embed_documents(
+                [" ".join(words)], verbose=False
+            ).reshape(1, -1)
             selected_words = mmr(
                 topic_embedding,
                 word_embeddings,

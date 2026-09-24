@@ -1,3 +1,4 @@
+from ._media import visualize_media
 from ._topics import visualize_topics
 from ._heatmap import visualize_heatmap
 from ._barchart import visualize_barchart
@@ -21,6 +22,7 @@ __all__ = [
     "visualize_heatmap",
     "visualize_hierarchical_documents",
     "visualize_hierarchy",
+    "visualize_media",
     "visualize_term_rank",
     "visualize_topics",
     "visualize_topics_over_time",

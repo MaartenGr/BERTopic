@@ -62,9 +62,9 @@ except ModuleNotFoundError:
 
 # Multimodal
 try:
-    from bertopic.representation._visual import VisualRepresentation
+    from bertopic.representation._multimodal import MultiModalRepresentation
 except ModuleNotFoundError:
-    VisualRepresentation = NotInstalled("a visual representation model", "vision")
+    MultiModalRepresentation = NotInstalled("a multimodal representation model", "vision")
 
 
 __all__ = [
@@ -75,10 +75,10 @@ __all__ = [
     "LiteLLM",
     "LlamaCPP",
     "MaximalMarginalRelevance",
+    "MultiModalRepresentation",
     "Ollama",
     "OpenAI",
     "PartOfSpeech",
     "TextGeneration",
-    "VisualRepresentation",
     "ZeroShotClassification",
 ]

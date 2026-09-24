@@ -7,6 +7,8 @@ from typing import Any
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import TYPE_CHECKING
 
+from bertopic._corpus import Corpus
+
 if TYPE_CHECKING:
     from bertopic import BERTopic
 
@@ -15,7 +17,10 @@ def reduce_outliers(
     topic_model: "BERTopic",
     documents: list[str],
     topics: list[int],
-    images: list[str] | None = None,
+    images: list | None = None,
+    audio: list | None = None,
+    video: list | None = None,
+    code: list[str] | None = None,
     strategy: str = "distributions",
     probabilities: np.ndarray = None,
     threshold: float = 0,
@@ -52,6 +57,12 @@ def reduce_outliers(
         documents: A list of documents for which we reduce or remove the outliers.
         topics: The topics that correspond to the documents
         images: A list of paths to the images used when calling either
+                `fit` or `fit_transform`
+        audio: A list of paths to the audio used when calling either
+                `fit` or `fit_transform`
+        video: A list of paths to the video used when calling either
+                `fit` or `fit_transform`
+        code: A list of source code snippets used when calling either
                 `fit` or `fit_transform`
         strategy: The strategy used for reducing outliers.
                 Options:
@@ -104,7 +115,7 @@ def reduce_outliers(
     if not topic_model._outliers:
         raise ValueError("No outliers to reduce.")
 
-    if images is not None:
+    if any(media is not None for media in (images, audio, video, code)):
         strategy = "embeddings"
 
     # Check correct use of parameters
@@ -151,21 +162,13 @@ def reduce_outliers(
                 "when instantiating BERTopic."
             )
         outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
-        if images is not None:
-            outlier_docs = [images[index] for index in outlier_ids]
-        else:
-            outlier_docs = [documents[index] for index in outlier_ids]
 
-        # Extract or calculate embeddings for outlier documents
+        # Extract or calculate embeddings for the outlier rows, whatever modality they are
         if embeddings is not None:
             outlier_embeddings = np.array([embeddings[index] for index in outlier_ids])
-        elif images is not None:
-            outlier_images = [images[index] for index in outlier_ids]
-            outlier_embeddings = topic_model.embedding_model.embed_images(
-                outlier_images, verbose=topic_model.verbose
-            )
         else:
-            outlier_embeddings = topic_model.embedding_model.embed_documents(outlier_docs)
+            corpus = Corpus.from_inputs(documents, images=images, audio=audio, video=video, code=code)
+            outlier_embeddings = topic_model._embed_corpus(corpus.get_corpus_by_indices(outlier_ids))
         similarity = cosine_similarity(
             outlier_embeddings, topic_model.topic_embeddings_[topic_model._outliers :]
         )

@@ -198,14 +198,14 @@ class KeyBERTInspired(BaseRepresentation):
         """
         # Calculate representative document embeddings if there are no precomputed embeddings.
         if repr_embeddings is None:
-            repr_embeddings = topic_model._extract_embeddings(representative_docs, verbose=False)
+            repr_embeddings = topic_model.embedding_model.embed_documents(representative_docs, verbose=False)
 
         topic_embeddings = [np.mean(repr_embeddings[i[0] : i[-1] + 1], axis=0) for i in repr_doc_indices]
 
         # Calculate word embeddings and extract best matching with updated topic_embeddings
         # vocab = list(set([word for words in topic_repr.words for word in words]))
         vocab = list(set([word for keywords in topic_representations.values() for word in keywords.words]))
-        word_embeddings = topic_model._extract_embeddings(vocab, verbose=False)
+        word_embeddings = topic_model.embedding_model.embed_documents(vocab, verbose=False)
         sim = cosine_similarity(topic_embeddings, word_embeddings)
 
         return sim, vocab

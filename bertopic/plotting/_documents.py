@@ -113,14 +113,14 @@ def visualize_documents(
     # Extract embeddings if not already done
     if sample is None:
         if embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(df["doc"].to_list())
+            embeddings_to_reduce = topic_model.embedding_model.embed_documents(df["doc"].to_list())
         else:
             embeddings_to_reduce = embeddings
     else:
         if embeddings is not None:
             embeddings_to_reduce = embeddings[indices]
         elif embeddings is None and reduced_embeddings is None:
-            embeddings_to_reduce = topic_model._extract_embeddings(df["doc"].to_list())
+            embeddings_to_reduce = topic_model.embedding_model.embed_documents(df["doc"].to_list())
 
     # Reduce input embeddings
     if reduced_embeddings is None:

@@ -53,15 +53,15 @@ class TextConverter(BaseRepresentation):
     """A representation model that can also turn its own modality into text.
 
     c-TF-IDF is defined over words, so a topic whose rows are all images or audio has
-    nothing to describe it. A converter turns the rows of the modality it declares into
-    a text surrogate, which is why it runs earlier in the pipeline than representation
-    models otherwise do. Several converters can coexist, each handling its own rows.
+    nothing to describe it. A converter fills the text channel of the rows it declares,
+    leaving the corpus its shape so that documents, other modalities, and other converters
+    all survive.
     """
 
-    modality: Modality
+    modalities: set[Modality]
 
     def to_text(self, corpus: Corpus) -> Corpus:
-        """Return a corpus whose text channel describes this modality's rows."""
+        """Return a corpus whose text channel describes this converter's rows."""
         raise NotImplementedError
 
 
