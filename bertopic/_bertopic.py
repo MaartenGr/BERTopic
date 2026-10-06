@@ -4202,6 +4202,12 @@ class BERTopic:
 
         documents_per_topic = documents.groupby(["Topic"], as_index=False).agg({"Document": " ".join})
         self.c_tf_idf_, words = self._c_tf_idf(documents_per_topic)
+
+        # Aspects are recalculated below for the new topics. Aspects whose model is no longer part of
+        # `representation_model` (e.g., after `update_topics`) would still describe the old topics, so drop them.
+        if fine_tune_representation:
+            self.topic_aspects_ = {}
+
         self.topic_representations_ = self._extract_words_per_topic(
             words,
             documents,
