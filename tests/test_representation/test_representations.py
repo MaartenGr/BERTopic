@@ -182,3 +182,20 @@ def test_find_topics(model, request):
 
     assert np.mean(similarity) > 0.1
     assert len(similar_topics) > 0
+
+
+def test_merge_topics_updates_aspects(representation_topic_model, documents):
+    topic_model = copy.deepcopy(representation_topic_model)
+    topic_model.merge_topics(documents, [1, 2])
+
+    assert "MMR" in topic_model.topic_aspects_
+    assert set(topic_model.topic_aspects_["MMR"]) == set(topic_model.topic_representations_)
+
+
+def test_merge_topics_after_update_topics_drops_stale_aspects(representation_topic_model, documents):
+    topic_model = copy.deepcopy(representation_topic_model)
+    topic_model.update_topics(documents, vectorizer_model=CountVectorizer(stop_words="english"))
+    topic_model.merge_topics(documents, [1, 2])
+
+    for aspect in topic_model.topic_aspects_.values():
+        assert set(aspect) == set(topic_model.topic_representations_)
