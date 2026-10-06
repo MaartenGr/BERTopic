@@ -22,10 +22,18 @@ jobs:
     - uses: tox-dev/action-pre-commit-uv@e09b8958484dfe71f4ac3bc7afb230ba506402ec # v1.0.5
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
+        platform: [ubuntu-latest, windows-11-arm]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        exclude:
+          - platform: windows-11-arm
+            python-version: "3.10"
+          - platform: windows-11-arm
+            python-version: "3.11"
+          - platform: windows-11-arm
+            python-version: "3.14"
 
     steps:
     - uses: actions/checkout@v7
@@ -35,7 +43,15 @@ jobs:
         python-version: ${{ matrix.python-version }}
         activate-environment: "true"
         enable-cache: false
+    - name: Install dependencies (including test group) (Windows ARM64)
+      if: matrix.platform == 'windows-11-arm'
+      run: |
+        uv pip install numpy
+        uv pip install -i https://download.pytorch.org/whl/cpu torch
+        uv pip install -i https://pypi.anaconda.org/numba/label/dev/simple --pre numba
+        uv sync --extra test --inexact --no-install-package torch --no-install-package numba --no-install-package llvmlite
     - name: Install dependencies (including test group)
+      if: matrix.platform != 'windows-11-arm'
       run: uv sync --extra test
     - name: Display the project's dependency tree (including information on outdated packages)
       run: uv tree --outdated

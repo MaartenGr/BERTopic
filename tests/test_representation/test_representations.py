@@ -1,4 +1,6 @@
 import copy
+import platform
+import sys
 import pytest
 import numpy as np
 import pandas as pd
@@ -118,6 +120,10 @@ def test_extract_topics_custom_cv(model, documents, request):
     ],
 )
 @pytest.mark.parametrize("reduced_topics", [2, 4, 10])
+@pytest.mark.skipif(
+    sys.platform == "win32" and platform.machine().lower() in ("arm64", "aarch64"),
+    reason="Fewer topics on Windows ARM64 make reduction a no-op",
+)
 def test_topic_reduction(model, reduced_topics, documents, request):
     topic_model = copy.deepcopy(request.getfixturevalue(model))
     old_topics = copy.deepcopy(topic_model.topics_)
