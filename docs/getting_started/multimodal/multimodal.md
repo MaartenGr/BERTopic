@@ -6,13 +6,12 @@ Images need `pip install bertopic[vision]`, audio `bertopic[audio]`, and video `
 
 ## **Models**
 
-Two models make this work. The first is an **embedding model** that places your media in a vector space. `MultiModalBackend` wraps a sentence-transformers model, and a model that handles every kind of input lets you cluster any of them:
+Two models make this work. The first is an **embedding model** that places your media in a vector space. Every example on this page uses `jina-embeddings-v5-omni-nano`, which embeds text, images, audio and video in one space, wrapped in `MultiModalBackend`:
 
 ```python
 from sentence_transformers import SentenceTransformer
 from bertopic.backend import MultiModalBackend
 
-# One model for text, images, audio and video
 model = SentenceTransformer(
     "jinaai/jina-embeddings-v5-omni-nano",
     trust_remote_code=True,
@@ -22,28 +21,25 @@ model = SentenceTransformer(
 embedding_model = MultiModalBackend(model)
 ```
 
-For `jina-embeddings-v5-omni-nano`, the `retrieval` setting with the `document` prompt is the one that keeps media apart; under `clustering`, audio clips all end up with nearly the same embedding. It needs `transformers>=5`. For images and text alone, CLIP works too:
+The `retrieval` setting with the `document` prompt is the one that gives each item its own embedding; under `clustering`, audio clips all end up with nearly the same one. The model needs `transformers>=5`. Each kind can also be given an embedding model of its own (`image_model=`, `audio_model=`, `video_model=` and `code_model=`), but rows of different kinds are only comparable when one model embeds them all.
 
-```python
-embedding_model = MultiModalBackend("clip-ViT-B-32")
-```
-
-Each kind can also be given a model of its own (`image_model=`, `audio_model=`, `video_model=` and `code_model=`), but rows of different kinds are only comparable when one model embeds them all, so a model per kind suits a corpus of one kind.
-
-The second is a **representation model**. `MultiModalRepresentation` describes up to nine items of each kind per topic with the model for that kind, and is passed as an additional aspect:
+The second is a **representation model**. `MultiModalRepresentation` describes up to nine items of each kind per topic, with a model for each kind, and is passed as an additional aspect. Each example below builds the one it needs, such as:
 
 ```python
 from bertopic.representation import MultiModalRepresentation
 
 representation_model = {
     "Media": MultiModalRepresentation(
-        "HuggingFaceTB/SmolVLM-256M-Instruct",        # describes images and video frames
-        audio_model="openai/whisper-large-v3-turbo",  # transcribes audio
+        image_model="HuggingFaceTB/SmolVLM-256M-Instruct",  # describes images
+        video_model="HuggingFaceTB/SmolVLM-256M-Instruct",  # describes frames of each video
+        audio_model="openai/whisper-small",                 # transcribes audio
     )
 }
 ```
 
-Each model is loaded the first time a topic needs it. Instead of a model's name, you can also pass any callable that takes a list of items and returns one description each, such as a call to an API. Items that already have text, such as captioned images, keep it.
+Each model is loaded the first time a topic needs it, and a model that describes both images and video is loaded once. Instead of a model's name, you can also pass any callable that takes a list of items and returns one description each, such as a call to an API. Items that already have text, such as captioned images, keep it.
+
+Descriptions and captions are written as sentences, so every example leaves English stop words out of the keywords with `CountVectorizer(stop_words="english")`.
 
 ## **Text + Images**
 
@@ -69,49 +65,29 @@ docs = ds["train"]["caption"]
 The `docs` variable contains the captions for each image in `images`. We can now use these variables to run our multimodal example:
 
 !!! Tip
-    Do note that it is better to pass the paths of the images instead of the images themselves as there is no need to keep all images in memory. When passing the paths of the images, they are only opened temporarily when they are needed.
+    Do note that it is better to pass the paths of the images instead of the images themselves as there is no need to keep all images in memory. When passing the paths of the images, they are only opened temporarily when they are needed. The examples on this page pass the dataset's images directly, since that is how they arrive; the cost is that a saved model cannot bring its representative items back, as those are kept as paths (see [Saving](#saving)).
 
 ```python
+from sklearn.feature_extraction.text import CountVectorizer
 from bertopic import BERTopic
 from bertopic.representation import MultiModalRepresentation
 
-# Additional ways of representing a topic
-media_model = MultiModalRepresentation()
+# Every image already has its caption, so no model needs to describe them
+representation_model = {"Media": MultiModalRepresentation()}
 
-# Make sure to add the `media_model` to a dictionary
-representation_model = {
-   "Media":  media_model,
-}
-topic_model = BERTopic(representation_model=representation_model, verbose=True)
+topic_model = BERTopic(
+    embedding_model=embedding_model,
+    vectorizer_model=CountVectorizer(stop_words="english"),
+    representation_model=representation_model,
+)
 topics, probs = topic_model.fit_transform(docs, images=images)
 ```
 
-In this example, we are clustering the documents and are then looking for the best matching images to the resulting clusters. Each topic's images are tiled into a collage, which `topic_model.visualize_media()` shows beside its name (see [Visualizing media](#visualizing-media)):
+Each caption is embedded together with its image, and the captions give the topics their words. Each topic's images are tiled into a collage, which `topic_model.visualize_media()` shows beside its name (see [Visualizing media](#visualizing-media)):
 
 <br><br>
 <img src="images_and_text.jpg">
 <br><br>
-
-!!! Tip
-    In the example above, we are clustering the documents but since you have
-    images, you might want to cluster those or cluster an aggregation of both
-    images and documents. For that, you can use the new `MultiModalBackend`
-    to generate embeddings:
-
-    ```python
-    import numpy as np
-    from bertopic.backend import MultiModalBackend
-    model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
-
-    # Embed documents only
-    doc_embeddings = model.embed_documents(docs)
-
-    # Embedding images only
-    image_embeddings = model.embed_media(images, "image")
-
-    # Average both, which is what passing documents and images together does
-    doc_image_embeddings = np.mean([doc_embeddings, image_embeddings], axis=0)
-    ```
 
 ## **Images Only**
 
@@ -122,162 +98,168 @@ Traditional topic modeling techniques can only be run on textual data, as is sho
   <figcaption></figcaption>
 </figure>
 
-To run BERTopic on images only, we first need to embed our images and then define a model that convert images to text. To do so, we are going to need some images. We will take the same images as the above but instead save them locally and pass the paths to the images instead. As mentioned before, this will make sure that we do not hold too many images in memory whilst only a small subset is needed:
-
-
-```python
-import os
-import glob
-import zipfile
-import numpy as np
-import pandas as pd
-from tqdm import tqdm
-from sentence_transformers import util
-
-# Flickr 8k images
-img_folder = 'photos/'
-caps_folder = 'captions/'
-if not os.path.exists(img_folder) or len(os.listdir(img_folder)) == 0:
-    os.makedirs(img_folder, exist_ok=True)
-
-    if not os.path.exists('Flickr8k_Dataset.zip'):   #Download dataset if does not exist
-        util.http_get('https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_Dataset.zip', 'Flickr8k_Dataset.zip')
-        util.http_get('https://github.com/jbrownlee/Datasets/releases/download/Flickr8k/Flickr8k_text.zip', 'Flickr8k_text.zip')
-
-    for folder, file in [(img_folder, 'Flickr8k_Dataset.zip'), (caps_folder, 'Flickr8k_text.zip')]:
-        with zipfile.ZipFile(file, 'r') as zf:
-            for member in tqdm(zf.infolist(), desc='Extracting'):
-                zf.extract(member, folder)
-images = list(glob.glob('photos/Flicker8k_Dataset/*.jpg'))
-```
-
-Next, we can run our pipeline:
-
+Without captions there are no words to count, so a vision model describes a sample of each topic's images, and those descriptions become its keywords. Here, the same photographs as above without their captions:
 
 ```python
-from bertopic.representation import KeyBERTInspired, MultiModalRepresentation
-from bertopic.backend import MultiModalBackend
-
-# Image embedding model
-embedding_model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
-
-# Describing the images is what gives an image-only corpus its keywords
-representation_model = {
-    "Media": MultiModalRepresentation("HuggingFaceTB/SmolVLM-256M-Instruct")
-}
-
-```
-
-Using these models, we can run our pipeline:
-
-```python
+from datasets import load_dataset
+from sklearn.feature_extraction.text import CountVectorizer
 from bertopic import BERTopic
+from bertopic.representation import MultiModalRepresentation
 
-# Train our model with images only
-topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model, min_topic_size=30)
-topics, probs = topic_model.fit_transform(documents=None, images=images)
+images = load_dataset("maderix/flickr_bw_rgb", split="train")["image"]
+
+# A vision model describes nine images from each topic
+representation_model = {"Media": MultiModalRepresentation(image_model="HuggingFaceTB/SmolVLM-256M-Instruct")}
+
+topic_model = BERTopic(
+    embedding_model=embedding_model,
+    vectorizer_model=CountVectorizer(stop_words="english"),
+    representation_model=representation_model,
+    min_topic_size=30,
+)
+topics, probs = topic_model.fit_transform(images=images)
 ```
 
-The descriptions become each topic's keywords, and `topic_model.get_representation(topic, "Media").captions` holds what was written about a topic's images:
+`topic_model.get_representation(0, "Media").captions` holds what the vision model wrote about a topic's images. It starts almost every description with "In this image we can see", which the stop words leave out of the keywords.
 
 <br><br>
 <img src="images_only.jpg">
 <br><br>
 
-!!! Tip
-    A vision model tends to start every description the same way, such as "In this image we can see", and those words would then top every topic's keywords. Passing `vectorizer_model=CountVectorizer(stop_words="english")` to BERTopic leaves them out.
-
-When text and images share one space, as they do with CLIP, image topics can be searched with a sentence: `topic_model.find_topics("dogs playing in the snow")`.
+Text and images share one space, so image topics can also be searched with a sentence: `topic_model.find_topics("dogs playing in the snow")`.
 
 ## **Audio**
 
-This section and the ones after it use the jina embedding model and the describing model from [Models](#models). Audio is passed as file paths or as arrays. An array is taken to be sampled at 16 kHz, which is what Whisper expects. Here, 563 recordings of people calling their bank:
+Audio is passed as file paths or as arrays. An array is taken to be sampled at 16 kHz, which is what Whisper expects. Here, 563 recordings of people calling their bank about one of 14 things, such as a lost card or opening a joint account:
 
 ```python
 import io
 import librosa
 from datasets import Audio, load_dataset
+from sklearn.feature_extraction.text import CountVectorizer
+from bertopic import BERTopic
+from bertopic.representation import MultiModalRepresentation
 
 # `decode=False` hands over each recording's bytes, which librosa reads at 16 kHz
 minds = load_dataset("PolyAI/minds14", "en-US", split="train").cast_column("audio", Audio(decode=False))
 clips = [librosa.load(io.BytesIO(row["bytes"]), sr=16_000)[0] for row in minds["audio"]]
 
-# Representation model
-representation_model = {
-    "Media": MultiModalRepresentation(
-        audio_model="openai/whisper-large-v3-turbo",  # transcribes audio
-    )
-}
+# Whisper transcribes nine calls from each topic
+representation_model = {"Media": MultiModalRepresentation(audio_model="openai/whisper-small")}
 
-# Fit BERTopic
-topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model)
+topic_model = BERTopic(
+    embedding_model=embedding_model,
+    vectorizer_model=CountVectorizer(stop_words="english"),
+    representation_model=representation_model,
+)
 topics, probs = topic_model.fit_transform(audio=clips)
 ```
 
-Whisper transcribes nine calls from each topic, and their transcripts become its keywords. A call longer than Whisper's 30 seconds is transcribed in 30-second windows. Transcribing audio given as file paths needs [ffmpeg](https://ffmpeg.org/) installed, which arrays do not.
+The transcripts become each topic's keywords. A call longer than Whisper's 30 seconds is transcribed in 30-second windows. Transcribing audio given as file paths needs [ffmpeg](https://ffmpeg.org/) installed, which arrays do not.
 
 ## **Video**
 
-Videos are passed as file paths:
+Videos are passed as file paths. Here, the 1,000 clips of MSR-VTT's test set, short YouTube videos in 20 categories such as music, sports and cooking:
 
 ```python
-from pathlib import Path
+import json
+from huggingface_hub import hf_hub_download, snapshot_download
+from sklearn.feature_extraction.text import CountVectorizer
+from bertopic import BERTopic
+from bertopic.representation import MultiModalRepresentation
 
-videos = [str(path) for path in Path("videos").glob("*.mp4")]
+# Download only the clips of the test set
+metadata = hf_hub_download("VLM2Vec/MSR-VTT", "msrvtt_test_1k.json", repo_type="dataset")
+with open(metadata, encoding="utf-8") as file:
+    test = json.load(file)
+folder = snapshot_download(
+    "VLM2Vec/MSR-VTT", repo_type="dataset", allow_patterns=[f"raw_videos/{clip['video']}" for clip in test]
+)
+videos = [f"{folder}/raw_videos/{clip['video']}" for clip in test]
 
-# Representation model
-representation_model = {
-    "Media": MultiModalRepresentation(
-        "HuggingFaceTB/SmolVLM-256M-Instruct",        # describes images and video frames
-    )
-}
+# A vision model describes frames of nine clips from each topic
+representation_model = {"Media": MultiModalRepresentation(video_model="HuggingFaceTB/SmolVLM-256M-Instruct")}
 
-# Fit BERTopic
-topic_model = BERTopic(embedding_model=embedding_model, representation_model=representation_model)
+topic_model = BERTopic(
+    embedding_model=embedding_model,
+    vectorizer_model=CountVectorizer(stop_words="english"),
+    representation_model=representation_model,
+)
 topics, probs = topic_model.fit_transform(video=videos)
 ```
 
-The vision model describes three frames of each representative clip (`nr_frames`), taken from the middle of equal stretches of the clip so that black openings and endings are skipped, and the descriptions of a clip's frames are joined into one. A topic needs ten items by default, so for a folder of only a few dozen clips, lower `min_topic_size`.
+The vision model describes three frames of each clip (`nr_frames`), taken from the middle of equal stretches of the clip so that black openings and endings are skipped, and the descriptions of a clip's frames are joined into one. A topic needs ten items by default, so for a folder of only a few dozen clips, lower `min_topic_size`.
 
 ## **Code**
 
-Code is its own kind of input. It is embedded by the code model when the backend has one (`code_model=`), and c-TF-IDF reads it as it is, so it needs no describing model. For example, every function in a project:
+Code is its own kind of input. It is embedded by the code model when the backend has one (`code_model=`), and c-TF-IDF reads it as it is, so it needs no representation model. Here, 974 short Python programs, each solving a small task such as finding the area of a circle:
 
 ```python
-import ast
-from pathlib import Path
+from datasets import load_dataset
+from sklearn.feature_extraction.text import CountVectorizer
+from bertopic import BERTopic
 
-functions = []
-for path in Path("my_project").rglob("*.py"):
-    source = path.read_text(encoding="utf-8")
-    nodes = ast.walk(ast.parse(source))
-    functions += [ast.get_source_segment(source, node) for node in nodes if isinstance(node, ast.FunctionDef)]
+mbpp = load_dataset("google-research-datasets/mbpp", "full", split="train+validation+test+prompt")
 
-topic_model = BERTopic(embedding_model=embedding_model)
-topics, probs = topic_model.fit_transform(code=functions)
+topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=CountVectorizer(stop_words="english"))
+topics, probs = topic_model.fit_transform(code=mbpp["code"])
 ```
 
 ## **Several kinds at once**
 
-Several kinds can be passed together, and are then clustered in one model:
+Several kinds can be passed together, and are then clustered in one model. Here, 2,000 of the photographs from above and the calls to a bank:
 
 ```python
-topics, probs = topic_model.fit_transform(images=images, audio=clips, video=videos)
+import io
+import librosa
+from datasets import Audio, load_dataset
+from sklearn.feature_extraction.text import CountVectorizer
+from bertopic import BERTopic
+from bertopic.representation import MultiModalRepresentation
+
+photos = load_dataset("maderix/flickr_bw_rgb", split="train[:2000]")["image"]
+minds = load_dataset("PolyAI/minds14", "en-US", split="train").cast_column("audio", Audio(decode=False))
+calls = [librosa.load(io.BytesIO(row["bytes"]), sr=16_000)[0] for row in minds["audio"]]
+
+# A model for each kind: a vision model for the photographs and Whisper for the calls
+representation_model = {
+    "Media": MultiModalRepresentation(
+        image_model="HuggingFaceTB/SmolVLM-256M-Instruct",
+        audio_model="openai/whisper-small",
+    )
+}
+
+topic_model = BERTopic(
+    embedding_model=embedding_model,
+    vectorizer_model=CountVectorizer(stop_words="english"),
+    representation_model=representation_model,
+)
+topics, probs = topic_model.fit_transform(images=photos, audio=calls)
 ```
 
-How documents are read depends on how many there are. When there are as many documents as media, each document describes the item at its position, as captions do, and each pair becomes one row. With any other number, the documents are rows of their own beside the media. The rows are ordered images, audio, video, documents and then code, which is also the order of `topics`.
+The rows are ordered images, audio, video, documents and then code, which is also the order of `topics`. How documents are read depends on how many there are. When there are as many documents as media rows, each document describes the item at its position, as captions do, and each pair becomes one row. With any other number, the documents are rows of their own beside the media. So to caption the photographs here, pass a document for every media row, with an empty string for each call: `topic_model.fit_transform(captions + [""] * len(calls), images=photos, audio=calls)`.
 
-Rows of different kinds are only comparable when one model embeds them all. Whether a photograph and a call about the same subject end up in the same topic depends on that model.
+Rows of different kinds are only comparable when one model embeds them all, and whether a photograph and a call about the same subject end up in one topic depends on that model. Words can find topics of either kind:
+
+```python
+photo_topics, _ = topic_model.find_topics("a child on a swing", top_n=2)
+call_topics, _ = topic_model.find_topics("I lost my bank card", top_n=2)
+topic_model.visualize_media(topics=photo_topics + call_topics)
+```
+
+<br><br>
+<img src="media_page.jpg">
+<br><br>
 
 ## **Visualizing media**
 
-Each topic keeps its representative media, the items chosen to stand for it, and one summary per kind of media: its images tiled into a collage, the middle frame of each clip tiled into a frame sheet, and the first two seconds of each recording joined into a montage.
+The examples in this section continue with the model from [Several kinds at once](#several-kinds-at-once). Each topic keeps its representative media, the items chosen to stand for it, and one summary per kind of media: its images tiled into a collage, the middle frame of each clip tiled into a frame sheet, and the first two seconds of each recording joined into a montage.
 
 ```python
 topic_model.representative_items_     # every topic's representative media, whatever their kind
 topic_model.representative_images_    # every topic's collage
 
-media = topic_model.get_representation(topic, "Media")
+media = topic_model.get_representation(0, "Media")
 media.items, media.summaries, media.captions
 ```
 
@@ -286,10 +268,6 @@ The representative items are also in the `Representative_Items` column of `topic
 ```python
 topic_model.visualize_media()
 ```
-
-<br><br>
-<img src="media_page.jpg">
-<br><br>
 
 Each montage adds about 0.8 MB to the page, so for a model with many audio topics, `top_n_topics=10` keeps the page small. The page is IPython's `HTML`, so a notebook shows it inline, and its `data` is a page that any browser opens once saved:
 
@@ -301,14 +279,14 @@ with open("media.html", "w", encoding="utf-8") as file:
 The interactive datamap shows every image and video. Pass the same documents and media you passed to `fit`, so that every point lines up with its topic. Hovering over an image then shows it, and hovering over a video shows its middle frame, at about 3 KB of page per picture:
 
 ```python
-topic_model.visualize_document_datamap(docs, images=images, interactive=True)
+topic_model.visualize_document_datamap(images=photos, audio=calls, interactive=True)
 ```
 
 <br><br>
 <img src="datamap_media.jpg">
 <br><br>
 
-The datamap needs `pip install bertopic[datamap]`.
+Under each thumbnail is that row's own text, so a caption, a transcript or a document appears beneath its point. The photographs here were passed without captions, which is why the tooltip above says only what kind of media it is. The datamap needs `pip install bertopic[datamap]`.
 
 ## **Saving**
 
