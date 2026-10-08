@@ -18,7 +18,7 @@ logger = MyLogger()
 logger.configure("WARNING")
 
 
-def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
+def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> tuple[Corpus, Corpus]:
     """Find documents that could be assigned to either one of the topics in topic_model.zeroshot_topic_list.
 
     We transform the topics in `topic_model.zeroshot_topic_list` to embeddings and
@@ -30,8 +30,8 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
         corpus: The documents and their embeddings
 
     Returns:
-        zeroshot_data: Documents containing documents assigned to zero-shot topics
         cluster_data: Documents containing documents to be clustered
+        zeroshot_data: Documents containing documents assigned to zero-shot topics
     """
     zeroshot_data = Corpus()
     if not topic_model._is_zeroshot():
@@ -58,8 +58,8 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
     zeroshot_data = Corpus()
     if len(assigned_ids) > 0:
         zeroshot_documents = corpus.get_documents_by_indices(assigned_ids)
-        zeroshot_topics = [topic for topic in assignment[assigned_ids]]
-        zeroshot_labels = [topic_model.zeroshot_topic_list[i] for i in sorted(list(set(zeroshot_topics)))]
+        matched, zeroshot_topics = np.unique(assignment[assigned_ids], return_inverse=True)
+        zeroshot_labels = [topic_model.zeroshot_topic_list[index] for index in matched]
         zeroshot_data = Corpus(
             documents=zeroshot_documents,
             embeddings=corpus.embeddings[assigned_ids],
@@ -75,10 +75,8 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> Corpus:
         original_indices=non_assigned_ids,
         y=corpus.y[non_assigned_ids] if corpus.y is not None else None,
     )
-    cluster_data.umap_embeddings = topic_model.umap_model.transform(cluster_data.embeddings)
-    # If all documents were assigned to zero-shot topics
-    if len(assigned_ids) == len(corpus.documents):
-        corpus.topics = zeroshot_data.topics
+    if non_assigned_ids:
+        cluster_data.umap_embeddings = topic_model.umap_model.transform(cluster_data.embeddings)
 
     logger.info("Zeroshot Step 1 - Completed \u2713")
 
@@ -112,15 +110,14 @@ def combine_zeroshot_topics(topic_model: "BERTopic", corpus: Corpus, zeroshot_da
     Returns:
         corpus: Documents containing all the original documents with their topic assignments
     """
-    if len(corpus) > 0 and len(zeroshot_data) > 0:
+    if len(zeroshot_data) > 0:
         logger.info(
             "Zeroshot Step 2 - Combining topics from zero-shot topic modeling with topics from clustering..."
         )
 
-        # Combine data
-        corpus.sort_topics_by_frequency()
+        # Combine data, or keep the zero-shot rows alone when every document matched a zero-shot topic
         zeroshot_data.sort_topics_by_frequency()
-        corpus = corpus + zeroshot_data
+        corpus = corpus.sort_topics_by_frequency() + zeroshot_data if len(corpus) > 0 else zeroshot_data
 
         # Create new Topics
         topic_model._topics = Topics().initialize(corpus.topics, corpus._zeroshot_labels).sort_by_frequency()

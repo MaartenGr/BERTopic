@@ -2,7 +2,11 @@ import copy
 import pytest
 import numpy as np
 from bertopic import BERTopic
+from sklearn.cluster import KMeans
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.pipeline import make_pipeline
 
 
 @pytest.mark.parametrize(
@@ -65,3 +69,15 @@ def test_extract_incorrect_embeddings():
     with pytest.raises(ValueError):
         model = BERTopic(language="Unknown language")
         model.fit(["some document"])
+
+
+def test_sklearn_embedder_with_sparse_output(documents):
+    topic_model = BERTopic(
+        embedding_model=make_pipeline(TfidfVectorizer()),
+        umap_model=TruncatedSVD(n_components=5, random_state=42),
+        hdbscan_model=KMeans(n_clusters=5, random_state=42),
+    )
+    topic_model.fit(documents)
+    topics, _ = topic_model.transform(documents[:5])
+
+    assert len(topics) == 5

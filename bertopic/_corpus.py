@@ -409,9 +409,14 @@ class Corpus:
 
     def _validate_length(self, name: str, value) -> None:
         """Checks that the length of the value matches the number of documents."""
-        if value is not None and len(value) != len(self.documents):
+        if value is None:
+            return
+
+        # Sparse embeddings have a number of rows, but no len()
+        nr_rows = value.shape[0] if hasattr(value, "shape") else len(value)
+        if nr_rows != len(self.documents):
             raise ValueError(
-                f"Length of {name} ({len(value)}) does not match number of documents ({len(self.documents)})"
+                f"Length of {name} ({nr_rows}) does not match number of documents ({len(self.documents)})"
             )
 
     def __setattr__(self, name: str, value) -> None:

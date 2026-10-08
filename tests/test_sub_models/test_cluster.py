@@ -2,6 +2,7 @@ import pytest
 
 from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from hdbscan import HDBSCAN
 
 from bertopic import BERTopic
@@ -74,3 +75,14 @@ def test_custom_hdbscan_cluster_embeddings(cluster_model, samples, features, cen
     corpus = model._cluster_embeddings(corpus)
 
     assert len(set(corpus.topics)) == centers
+
+
+def test_transform_with_float64_embeddings(documents, document_embeddings):
+    embeddings = document_embeddings.astype("float64")
+    topic_model = BERTopic(
+        umap_model=PCA(n_components=5, random_state=42), hdbscan_model=KMeans(n_clusters=5, random_state=42)
+    )
+    topic_model.fit(documents, embeddings)
+    topics, _ = topic_model.transform(documents[:5], embeddings[:5])
+
+    assert len(topics) == 5

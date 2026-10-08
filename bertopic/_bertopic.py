@@ -671,7 +671,7 @@ class BERTopic:
         # Transform with full pipeline
         else:
             logger.info("Dimensionality - Reducing dimensionality of input embeddings.")
-            corpus.umap_embeddings = self.umap_model.transform(corpus.embeddings)
+            corpus.umap_embeddings = self.umap_model.transform(corpus.embeddings).astype(np.float32)
             logger.info("Dimensionality - Completed \u2713")
 
             # Extract predictions and probabilities if it is a HDBSCAN-like model
@@ -689,7 +689,6 @@ class BERTopic:
                     )
                     logger.info("Probabilities - Completed \u2713")
             else:
-                corpus.umap_embeddings = corpus.umap_embeddings.astype(np.float32)  # Fixes #2097
                 predictions = self.hdbscan_model.predict(corpus.umap_embeddings)
                 probabilities = None
             logger.info("Cluster - Completed \u2713")
@@ -790,7 +789,6 @@ class BERTopic:
 
         # Reduce dimensionality and cluster
         corpus = self._reduce_dimensionality(corpus, partial_fit=True)
-        corpus.umap_embeddings = corpus.umap_embeddings.astype(np.float32)  # Fixes #2097
         corpus = self._cluster_embeddings(corpus, partial_fit=True)
 
         # Use cluster labels directly as topic IDs
@@ -2583,6 +2581,7 @@ class BERTopic:
             return corpus
 
         logger.info("Cluster - Start clustering the reduced embeddings")
+        corpus.umap_embeddings = corpus.umap_embeddings.astype(np.float32, copy=False)
 
         # Fit cluster model
         if partial_fit:
