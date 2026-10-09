@@ -168,7 +168,7 @@ def merged_topic_model(custom_topic_model, documents):
 
 
 @pytest.fixture(scope="session")
-def kmeans_pca_topic_model(documents, document_embeddings):
+def kmeans_pca_topic_model(documents, document_embeddings, embedding_model):
     hdbscan_model = KMeans(n_clusters=15, random_state=42)
     dim_model = PCA(n_components=5)
     model = BERTopic(

@@ -136,6 +136,14 @@ def select_backend(embedding_model, language: str | None = None, verbose: bool =
 
         return FastEmbedBackend(embedding_model)
 
+    # Anything else is not a model BERTopic can embed with, rather than one to silently replace
+    if embedding_model is not None:
+        raise TypeError(
+            f"An embedding_model of type {type(embedding_model).__name__} is not supported. Pass a model name, "
+            "a SentenceTransformer or a subclass of bertopic.backend.BaseEmbedder, or see the embeddings "
+            "guide for the other libraries BERTopic supports."
+        )
+
     # Select embedding model based on language
     if language:
         try:

@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import narwhals.stable.v2 as nw
 import logging
@@ -96,6 +97,11 @@ class NotInstalled:
             msg += custom_msg
         else:
             msg += f"pip install bertopic[{self.dep}]\n\n"
+
+        # A package that is installed but fails to import is described by its own error instead
+        error = sys.exc_info()[1]
+        if error is not None and not isinstance(error, ModuleNotFoundError):
+            msg = f"{self.tool} is installed but could not be imported: {error!r}\n\n"
         self.msg = msg
 
     def __getattr__(self, *args, **kwargs):

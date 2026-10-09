@@ -42,6 +42,8 @@ try:
 except ImportError:
     _has_vision = False
 
+from sklearn.feature_extraction.text import CountVectorizer
+
 from bertopic._corpus import Modality
 from bertopic._topics import Topics
 
@@ -288,7 +290,7 @@ def load_local_files(path):
     else:
         torch_path = path / HF_WEIGHTS_NAME
         if torch_path.is_file():
-            tensors = torch.load(torch_path, map_location="cpu")
+            tensors = torch.load(torch_path, map_location="cpu", weights_only=True)
             tensors = {k: v.numpy() for k, v in tensors.items()}
 
     # c-TF-IDF
@@ -300,7 +302,7 @@ def load_local_files(path):
         else:
             torch_path = path / CTFIDF_WEIGHTS_NAME
             if torch_path.is_file():
-                ctfidf_tensors = torch.load(torch_path, map_location="cpu")
+                ctfidf_tensors = torch.load(torch_path, map_location="cpu", weights_only=True)
                 ctfidf_tensors = {k: v.numpy() for k, v in ctfidf_tensors.items()}
         ctfidf_config = load_cfg_from_json(path / CTFIDF_CFG_NAME)
     except:  # noqa: E722
@@ -327,7 +329,7 @@ def load_files_from_hf(path):
         tensors = load_safetensors(tensors)
     except:  # noqa: E722
         tensors = hf_hub_download(path, HF_WEIGHTS_NAME, revision=None)
-        tensors = torch.load(tensors, map_location="cpu")
+        tensors = torch.load(tensors, map_location="cpu", weights_only=True)
 
     # c-TF-IDF
     try:
@@ -337,7 +339,7 @@ def load_files_from_hf(path):
             ctfidf_tensors = load_safetensors(ctfidf_tensors)
         except:  # noqa: E722
             ctfidf_tensors = hf_hub_download(path, CTFIDF_WEIGHTS_NAME, revision=None)
-            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu")
+            ctfidf_tensors = torch.load(ctfidf_tensors, map_location="cpu", weights_only=True)
     except:  # noqa: E722
         ctfidf_config, ctfidf_tensors = None, None
 
@@ -478,8 +480,8 @@ def save_ctfidf_config(model, path):
         "reduce_frequent_words": model.ctfidf_model.reduce_frequent_words,
     }
 
-    # Recreate CountVectorizer
-    cv_params = model.vectorizer_model.get_params()
+    # Recreate CountVectorizer, reading its parameters from any subclass, such as OnlineCountVectorizer
+    cv_params = {name: getattr(model.vectorizer_model, name) for name in CountVectorizer().get_params()}
     del cv_params["tokenizer"], cv_params["preprocessor"], cv_params["dtype"]
     if not isinstance(cv_params["analyzer"], str):
         del cv_params["analyzer"]

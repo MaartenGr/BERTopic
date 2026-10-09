@@ -1,7 +1,11 @@
 import copy
+import subprocess
+import sys
+
 import pytest
 import numpy as np
 from bertopic import BERTopic
+from bertopic.backend._utils import select_backend
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -81,3 +85,21 @@ def test_sklearn_embedder_with_sparse_output(documents):
     topics, _ = topic_model.transform(documents[:5])
 
     assert len(topics) == 5
+
+
+def test_a_broken_optional_package_does_not_break_the_import():
+    # openai<1.0 has no OpenAI class, which an empty module stands in for
+    code = (
+        "import sys, types; sys.modules['openai'] = types.ModuleType('openai'); "
+        "import bertopic.backend as backend; "
+        "print(type(backend.OpenAIBackend).__name__, 'no attribute' in backend.OpenAIBackend.msg)"
+    )
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+
+    # The placeholder names the import error rather than asking to install what is installed
+    assert result.stdout.strip() == "NotInstalled True", result.stderr[-500:]
+
+
+def test_select_backend_rejects_an_unrecognised_model():
+    with pytest.raises(TypeError, match="not supported"):
+        select_backend(lambda documents: documents)

@@ -55,13 +55,13 @@ class Model2VecBackend(BaseEmbedder):
         self,
         embedding_model: Union[str, StaticModel],
         distill: bool = False,
-        distill_kwargs: dict = {},
+        distill_kwargs: dict | None = None,
         distill_vectorizer: str | None = None,
     ):
         super().__init__()
 
         self.distill = distill
-        self.distill_kwargs = distill_kwargs
+        self.distill_kwargs = dict(distill_kwargs or {})
         self.distill_vectorizer = distill_vectorizer
         self._has_distilled = False
 

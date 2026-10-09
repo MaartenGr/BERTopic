@@ -2308,7 +2308,7 @@ class BERTopic:
             ctfidf_tensors,
             ctfidf_config,
             summaries,
-            warn_no_backend=(embedding_model is None),
+            load_embedding_model=(embedding_model is None),
         )
 
         # Replace embedding model if one is specifically chosen
@@ -3303,7 +3303,7 @@ def _create_model_from_files(
     ctfidf_tensors: dict[str, Any] | None = None,
     ctfidf_config: dict[str, Any] | None = None,
     summaries: dict[int, dict[Modality, Any]] | None = None,
-    warn_no_backend: bool = True,
+    load_embedding_model: bool = True,
 ):
     """Create a BERTopic model from a variety of inputs.
 
@@ -3314,7 +3314,8 @@ def _create_model_from_files(
         ctfidf_tensors: The c-TF-IDF representations.
         ctfidf_config: The config for CountVectorizer and c-TF-IDF.
         summaries: The summary of each modality per topic, such as a topic's collage.
-        warn_no_backend: Whether to warn the user if no backend is given.
+        load_embedding_model: Whether to load the saved embedding model, which is skipped when
+                              `load` is given one.
     """
     params["n_gram_range"] = tuple(params["n_gram_range"])
 
@@ -3322,15 +3323,14 @@ def _create_model_from_files(
         ngram_range = ctfidf_config["vectorizer_model"]["params"]["ngram_range"]
         ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
 
-    # Select HF model through SentenceTransformers
-    try:
-        from sentence_transformers import SentenceTransformer
+    # Select HF model through SentenceTransformers, unless `load` was given an embedding model
+    embedding_model = BaseEmbedder()
+    if load_embedding_model:
+        try:
+            from sentence_transformers import SentenceTransformer
 
-        embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
-    except:  # noqa: E722
-        embedding_model = BaseEmbedder()
-
-        if warn_no_backend:
+            embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
+        except Exception:
             logger.warning(
                 "You are loading a BERTopic model without explicitly defining an embedding model."
                 " If you want to also load in an embedding model, make sure to use"

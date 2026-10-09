@@ -137,3 +137,22 @@ def test_full_model(model, documents, request):
 def test_transform_one_document_with_a_1d_embedding(kmeans_pca_topic_model, documents, document_embeddings):
     topics, _ = kmeans_pca_topic_model.transform(documents[0], document_embeddings[0])
     assert len(topics) == 1
+
+
+def test_load_with_an_embedding_model_skips_the_saved_one(base_topic_model, tmp_path, monkeypatch):
+    base_topic_model.save(
+        tmp_path, serialization="safetensors", save_embedding_model="sentence-transformers/all-MiniLM-L6-v2"
+    )
+
+    # Record any attempt to build the saved model, raising as an unreachable Hub would
+    attempts = []
+
+    def unreachable_hub(name, *args, **kwargs):
+        attempts.append(name)
+        raise OSError("no connection")
+
+    monkeypatch.setattr("sentence_transformers.SentenceTransformer", unreachable_hub)
+    loaded_model = BERTopic.load(tmp_path, embedding_model=base_topic_model.embedding_model)
+
+    assert attempts == []
+    assert loaded_model.embedding_model is base_topic_model.embedding_model

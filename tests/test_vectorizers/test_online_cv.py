@@ -1,5 +1,6 @@
 import copy
 import pytest
+from bertopic import BERTopic
 from bertopic.vectorizers import OnlineCountVectorizer
 
 
@@ -45,3 +46,9 @@ def test_refit_restarts_bow(documents):
     # A refit renumbers the vocabulary, so the kept bag-of-words must start over from it
     X = vectorizer_model.fit_transform(documents[50:100])
     assert vectorizer_model.X_.shape == X.shape and (vectorizer_model.X_ != X).nnz == 0
+
+
+def test_save_and_load_with_an_online_vectorizer(online_topic_model, tmp_path):
+    online_topic_model.save(tmp_path, serialization="safetensors", save_ctfidf=True)
+    loaded_model = BERTopic.load(tmp_path)
+    assert loaded_model.vectorizer_model.stop_words == "english"
