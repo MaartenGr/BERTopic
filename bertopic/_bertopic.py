@@ -635,6 +635,10 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
+
+        # A single document may come with its embedding as a 1-D array
+        if isinstance(embeddings, np.ndarray) and embeddings.ndim == 1:
+            embeddings = embeddings.reshape(1, -1)
         corpus = Corpus.from_inputs(
             documents=documents,
             images=images,
@@ -947,7 +951,7 @@ class BERTopic:
         return self._hierarchy.to_dataframe()
 
     def find_topics(
-        self, search_term: str | None = None, image: str | None = None, top_n: int = 5
+        self, search_term: str | list[str] | None = None, image: str | None = None, top_n: int = 5
     ) -> tuple[list[int], list[float]]:
         """Find topics most similar to a search_term.
 
@@ -962,7 +966,8 @@ class BERTopic:
         below 5 words.
 
         Arguments:
-            search_term: the term you want to use to search for topics.
+            search_term: the term you want to use to search for topics, or a list of terms whose
+                         embeddings are averaged into one query.
             image: path to the image you want to use to search for topics.
             top_n: the number of topics to return
 
@@ -989,7 +994,8 @@ class BERTopic:
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
-            search_embedding = self.embedding_model.embed_documents([search_term], verbose=False).flatten()
+            search_terms = [search_term] if isinstance(search_term, str) else search_term
+            search_embedding = self.embedding_model.embed_documents(search_terms, verbose=False).mean(axis=0)
         elif image is not None:
             search_embedding = self.embedding_model.embed_media([image], Modality.IMAGE).flatten()
         sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings_).flatten()
@@ -1086,11 +1092,14 @@ class BERTopic:
         self.ctfidf_model = ctfidf_model or self.ctfidf_model
         self.representation_model = representation_model or self.representation_model
 
-        # Without embeddings, approximate each document's embedding by that of its current topic,
-        # as merge_topics does, so that topic embeddings follow the documents that change topic
+        # Without embeddings, approximate each document's embedding by that of its current topic, as
+        # merge_topics does, so that topic embeddings follow the documents that change topic. Documents
+        # the model was not fitted on have no current topic, so they count as their new one
+        fitted = topics is None or len(topics) == len(self.topics_)
         if embeddings is None:
+            current_topics = self.topics_ if fitted else topics
             topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
-            embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
+            embeddings = np.array([topic_embeddings[topic_id] for topic_id in current_topics])
 
         # Determine topic assignments
         if topics is None:
@@ -1106,9 +1115,12 @@ class BERTopic:
             self._topics = Topics().initialize(predictions=topics)
             self._topics.mapping = mapping
         else:
-            # Same topics with other documents, so keep each topic and its label
+            # Same topics with documents moved between them, so keep each topic and its label. Fitted
+            # probabilities only describe the documents they were fitted on
             sizes = Counter(topics)
             self._topics.predictions = list(topics)
+            if not fitted:
+                self._topics.probabilities = None
             for topic in self._topics:
                 topic.nr_documents = sizes[topic.id]
 

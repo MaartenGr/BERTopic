@@ -132,3 +132,8 @@ def test_full_model(model, documents, request):
     merged_model = BERTopic.merge_models([topic_model, topic_model1])
 
     assert len(merged_model.get_topic_info()) > len(topic_model.get_topic_info())
+
+
+def test_transform_one_document_with_a_1d_embedding(kmeans_pca_topic_model, documents, document_embeddings):
+    topics, _ = kmeans_pca_topic_model.transform(documents[0], document_embeddings[0])
+    assert len(topics) == 1

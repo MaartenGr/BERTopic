@@ -121,7 +121,7 @@ def mmr(
     keywords_idx = [np.argmax(word_doc_similarity)]
     candidates_idx = [i for i in range(len(words)) if i != keywords_idx[0]]
 
-    for _ in range(top_n - 1):
+    for _ in range(min(top_n, len(words)) - 1):
         # Extract similarities within candidates and
         # between candidates and selected keywords/phrases
         candidate_similarities = word_doc_similarity[candidates_idx, :]

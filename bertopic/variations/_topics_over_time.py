@@ -99,6 +99,7 @@ def topics_over_time(
     )
     selected_topics = topics if topics else topic_model._topics.predictions
     global_c_tf_idf = normalize(topic_model.c_tf_idf_, axis=1, norm="l1", copy=False)
+    global_rows = {topic_id: index for index, topic_id in enumerate(topic_model._topics.topic_ids())}
     corpus.timestamps = bin_timestamps(corpus, nr_bins=nr_bins) if nr_bins else corpus.timestamps
     corpus.sort_by_timestamps()
 
@@ -110,7 +111,7 @@ def topics_over_time(
         )
 
     topics_dict: dict = {}
-    for index, timestamp in tqdm(enumerate(set(corpus.timestamps))):
+    for index, timestamp in tqdm(enumerate(np.unique(corpus.timestamps)), disable=not topic_model.verbose):
         timestamp_indices = np.where(corpus.timestamps == timestamp)[0]
         selected_corpus = corpus.get_corpus_by_indices(indices=timestamp_indices)
         documents_per_topic = selected_corpus.group_documents_by_topic()
@@ -132,18 +133,16 @@ def topics_over_time(
                 for topic in overlapping_topics
             ]
 
-            c_tf_idf.tolil()[current_overlap_idx] = (
-                (
-                    c_tf_idf[current_overlap_idx] + previous_c_tf_idf[previous_overlap_idx]  # noqa: F821
-                )
-                / 2.0
-            ).tolil()
+            c_tf_idf = c_tf_idf.tolil()
+            c_tf_idf[current_overlap_idx] = (
+                c_tf_idf[current_overlap_idx] + previous_c_tf_idf[previous_overlap_idx]  # noqa: F821
+            ) / 2.0
+            c_tf_idf = c_tf_idf.tocsr()
 
         # Fine-tune the timestamp c-TF-IDF representation based on the global c-TF-IDF representation
         # by simply taking the average of the two
         if global_tuning:
-            topic_indices = {topic_id: index for index, topic_id in enumerate(selected_corpus.topic_ids())}
-            selected_topics = [topic_indices[topic_id] for topic_id in documents_per_topic.keys()]
+            selected_topics = [global_rows[topic_id] for topic_id in documents_per_topic.keys()]
             c_tf_idf = (global_c_tf_idf[selected_topics] + c_tf_idf) / 2.0
 
         if evolution_tuning:

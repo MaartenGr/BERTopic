@@ -166,7 +166,7 @@ def hierarchical_topics(
         )
 
     # Build merged topics from linkage matrix
-    for index in tqdm(range(len(Z))):
+    for index in tqdm(range(len(Z)), disable=not topic_model.verbose):
         left_child_id = int(Z[index][0])
         right_child_id = int(Z[index][1])
         merge_distance = Z[index][2]

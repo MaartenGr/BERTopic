@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
 from bertopic._corpus import Corpus
+from bertopic.representation._mmr import mmr
 
 
 @pytest.mark.parametrize(
@@ -73,6 +74,16 @@ def test_update_topics_moves_documents_between_topics(kmeans_pca_topic_model, do
 
     assert topic_model.topics_ == topics
     assert topic_model.topic_sizes_ == {topic: topics.count(topic) for topic in set(topics)}
+
+
+def test_update_topics_with_more_documents(base_topic_model, documents):
+    # As when the rest of a corpus was predicted with transform after fitting on a sample
+    topic_model = copy.deepcopy(base_topic_model)
+    topics = topic_model.topics_ + topic_model.topics_[:20]
+    topic_model.update_topics(documents + documents[:20], topics=topics)
+
+    assert topic_model.topics_ == topics
+    assert len(topic_model.get_document_info(documents + documents[:20])) == len(topics)
 
 
 def test_update_topics_keeps_the_models_own(representation_topic_model, documents):
@@ -209,3 +220,16 @@ def test_find_topics(model, request):
 
     assert np.mean(similarity) > 0.1
     assert len(similar_topics) > 0
+
+
+def test_find_topics_with_a_list(base_topic_model):
+    # One term in a list finds what the term finds, and several terms are averaged into one query
+    assert base_topic_model.find_topics(["car"]) == base_topic_model.find_topics("car")
+    topics, _ = base_topic_model.find_topics(["car", "engine"])
+    assert len(topics) == 5
+
+
+def test_mmr_with_fewer_words_than_top_n():
+    words = ["space", "nasa", "orbit"]
+    selected = mmr(np.ones((1, 3)), np.eye(3), words, top_n=10)
+    assert sorted(selected) == sorted(words)

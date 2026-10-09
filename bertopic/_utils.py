@@ -147,7 +147,8 @@ def validate_distance_matrix(X, n_samples):
             "Got a distance matrix of shape %s" % str(s)
         )
 
-    # Make sure its entries are non-negative
+    # Make sure its entries are non-negative, once floating point noise around zero is cleared
+    X = np.where(np.isclose(X, 0), 0, X)
     if np.any(X < 0):
         raise ValueError("Distance matrix cannot contain negative values.")
 

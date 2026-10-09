@@ -68,6 +68,8 @@ def visualize_topics(
     """
     # Select topics based on top_n and topics args
     topics = select_topics(topic_model, topics, top_n_topics)
+    if len(topics) < 3:
+        raise ValueError(f"visualize_topics needs at least 3 topics to lay out in 2D, but got {len(topics)}.")
 
     # Extract topic words and their frequencies
     topic_list = sorted(topics)

@@ -50,3 +50,8 @@ def test_topics_outlier(model, request):
     for slider in fig.to_dict()["layout"]["sliders"]:
         for step in slider["steps"]:
             assert int(step["label"].split(" ")[-1]) != -1
+
+
+def test_visualize_topics_with_too_few_topics(kmeans_pca_topic_model):
+    with pytest.raises(ValueError, match="at least 3 topics"):
+        kmeans_pca_topic_model.visualize_topics(topics=[0, 1])
