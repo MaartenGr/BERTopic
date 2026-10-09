@@ -136,7 +136,7 @@ When outlier documents are generated, they are not used when modeling the topic 
 topic_model.update_topics(docs, topics=new_topics)
 ```
 
-As seen above, you will only need to pass the documents on which the model was trained including the new topics that were generated using one of the above four strategies.
+As seen above, you will only need to pass the documents on which the model was trained including the new topics that were generated using one of the above four strategies. The model keeps its vectorizer, c-TF-IDF and representation models, and if you have the document embeddings, passing them as well (`embeddings=embeddings`) recomputes the topic embeddings from them.
 
 ### **Exploration**
 

@@ -122,11 +122,12 @@ def reduce_outliers(
     if strategy.lower() == "probabilities" and probabilities is None:
         raise ValueError("Make sure to pass in `probabilities` in order to use the probabilities strategy")
 
-    # Reduce outliers by extracting most likely topics through the topic-term probability matrix
+    # Reduce outliers by extracting most likely topics through the topic-term probability matrix,
+    # leaving out the outlier column so that a column's index is its topic
     if strategy.lower() == "probabilities":
         new_topics = [
             np.argmax(prob) if np.max(prob) >= threshold and topic == -1 else topic
-            for topic, prob in zip(topics, probabilities)
+            for topic, prob in zip(topics, np.asarray(probabilities)[:, topic_model._outliers :])
         ]
 
     # Reduce outliers by extracting most frequent topics through calculating of Topic Distributions

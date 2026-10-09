@@ -36,3 +36,12 @@ def test_clean_bow(model, request):
 
     assert original_shape[0] == topic_model.vectorizer_model.X_.shape[0]
     assert original_shape[1] > topic_model.vectorizer_model.X_.shape[1]
+
+
+def test_refit_restarts_bow(documents):
+    vectorizer_model = OnlineCountVectorizer()
+    vectorizer_model.partial_fit(documents[:50]).update_bow(documents[:50])
+
+    # A refit renumbers the vocabulary, so the kept bag-of-words must start over from it
+    X = vectorizer_model.fit_transform(documents[50:100])
+    assert vectorizer_model.X_.shape == X.shape and (vectorizer_model.X_ != X).nnz == 0

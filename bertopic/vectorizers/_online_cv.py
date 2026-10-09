@@ -99,6 +99,15 @@ class OnlineCountVectorizer(CountVectorizer):
 
         return self
 
+    def fit_transform(self, raw_documents: List[str], y=None) -> csr_matrix:
+        """Fit a new vocabulary, restarting a kept bag-of-words matrix from these documents
+        since the new vocabulary renumbers its columns.
+        """
+        X = super().fit_transform(raw_documents, y)
+        if hasattr(self, "X_"):
+            self.X_ = X
+        return X
+
     def update_bow(self, raw_documents: List[str]) -> csr_matrix:
         """Create or update the bag-of-words matrix.
 

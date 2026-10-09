@@ -24,6 +24,7 @@ import scipy.sparse as sp
 
 from pathlib import Path
 from functools import wraps
+from collections import Counter
 from packaging import version
 from scipy.sparse import csr_matrix
 from importlib.util import find_spec
@@ -1013,6 +1014,7 @@ class BERTopic:
         vectorizer_model: CountVectorizer = None,
         ctfidf_model: ClassTfidfTransformer = None,
         representation_model: BaseRepresentation = None,
+        embeddings: np.ndarray | None = None,
     ):
         """Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
@@ -1020,7 +1022,8 @@ class BERTopic:
         When you have trained a model and viewed the topics and the words that represent them,
         you might not be satisfied with the representation. Perhaps you forgot to remove
         stop_words or you want to try out a different `n_gram_range`. This function allows you
-        to update the topic representation after they have been formed.
+        to update the topic representation after they have been formed. The vectorizer, c-TF-IDF
+        and representation models you do not pass are kept as they are.
 
         Arguments:
             docs: The documents you used when calling either `fit` or `fit_transform`
@@ -1036,12 +1039,14 @@ class BERTopic:
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
                          are typically best represented by at most 10 words.
-            n_gram_range: The n-gram range for the CountVectorizer.
+            n_gram_range: The n-gram range for a new CountVectorizer, replacing the model's own.
             vectorizer_model: Pass in your own CountVectorizer from scikit-learn
             ctfidf_model: Pass in your own c-TF-IDF model to update the representations
             representation_model: Pass in a model that fine-tunes the topic representations
                                   calculated through c-TF-IDF. Models from `bertopic.representation`
                                   are supported.
+            embeddings: The document embeddings, to recompute topic embeddings from. Without them,
+                        each document counts as the embedding of the topic it was in.
 
         Examples:
         In order to update the topic representation, you will need to first fit the topic
@@ -1075,33 +1080,38 @@ class BERTopic:
                 "Note that extracting more than 100 words from a sparse can slow down computation quite a bit."
             )
         self.top_n_words = top_n_words
-        self.vectorizer_model = vectorizer_model or CountVectorizer(
-            ngram_range=n_gram_range or self.n_gram_range
-        )
-        self.ctfidf_model = ctfidf_model or ClassTfidfTransformer()
-        self.representation_model = representation_model
+        if n_gram_range:
+            vectorizer_model = vectorizer_model or CountVectorizer(ngram_range=n_gram_range)
+        self.vectorizer_model = vectorizer_model or self.vectorizer_model
+        self.ctfidf_model = ctfidf_model or self.ctfidf_model
+        self.representation_model = representation_model or self.representation_model
+
+        # Without embeddings, approximate each document's embedding by that of its current topic,
+        # as merge_topics does, so that topic embeddings follow the documents that change topic
+        if embeddings is None:
+            topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
+            embeddings = np.array([topic_embeddings[topic_id] for topic_id in self.topics_])
 
         # Determine topic assignments
-        topics_changed = False
         if topics is None:
             topics = self.topics_
+        elif set(topics) != set(self.topics_):
+            logger.warning(
+                "Using a custom list of topic assignments may lead to errors if "
+                "topic reduction techniques are used afterwards. Make sure that "
+                "manually assigning topics is the last step in the pipeline."
+            )
+            # Rebuild Topics from scratch, keeping which topic each of the cluster model's clusters is
+            mapping = self._topics.mapping
+            self._topics = Topics().initialize(predictions=topics)
+            self._topics.mapping = mapping
         else:
-            topics_changed = set(topics) != set(self.topics_)
-            if topics_changed:
-                logger.warning(
-                    "Using a custom list of topic assignments may lead to errors if "
-                    "topic reduction techniques are used afterwards. Make sure that "
-                    "manually assigning topics is the last step in the pipeline. "
-                    "Note that topic embeddings will also be created through weighted "
-                    "c-TF-IDF embeddings instead of centroid embeddings."
-                )
-                # Rebuild Topics from scratch
-                self._topics = Topics().initialize(predictions=topics)
+            # Same topics with other documents, so keep each topic and its label
+            sizes = Counter(topics)
+            self._topics.predictions = list(topics)
+            for topic in self._topics:
+                topic.nr_documents = sizes[topic.id]
 
-        # Build corpus with embeddings from existing topic embeddings
-        # (duplicate topic embedding for each document based on assignment)
-        topic_embeddings = {topic.id: topic.embedding for topic in self._topics}
-        doc_embeddings = np.array([topic_embeddings[topic_id] for topic_id in topics])
         corpus = Corpus.from_inputs(
             documents=docs,
             images=images,
@@ -1109,7 +1119,7 @@ class BERTopic:
             video=video,
             code=code,
             topics=np.array(topics),
-            embeddings=doc_embeddings,
+            embeddings=embeddings,
         )
 
         self._extract_representations(corpus, fine_tune=True)

@@ -39,6 +39,51 @@ def test_update_topics(model, documents, request):
     assert len(set(old_topics)) - 1 == len(set(topic_model.topics_))
 
 
+def test_update_topics_moves_topic_embeddings(kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    embeddings, sizes = topic_model.topic_embeddings_, topic_model.topic_sizes_
+
+    # Merge topic 1 into topic 0
+    topics = [0 if topic == 1 else topic for topic in topic_model.topics_]
+    topic_model.update_topics(documents, topics=topics)
+
+    # Topic 0's embedding is the size-weighted mean of both, as merge_topics gives
+    expected = np.average(embeddings[:2], axis=0, weights=[sizes[0], sizes[1]])
+    assert topic_model.topic_embeddings_.shape == (len(embeddings) - 1, embeddings.shape[1])
+    assert np.allclose(topic_model.topic_embeddings_[0], expected)
+
+
+def test_update_topics_with_embeddings(kmeans_pca_topic_model, documents, document_embeddings):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topics = [0 if topic == 1 else topic for topic in topic_model.topics_]
+    topic_model.update_topics(documents, topics=topics, embeddings=document_embeddings)
+
+    # With the documents' own embeddings, topic 0's embedding is their centroid
+    expected = document_embeddings[np.array(topics) == 0].mean(axis=0)
+    assert np.allclose(topic_model.topic_embeddings_[0], expected)
+
+
+def test_update_topics_moves_documents_between_topics(kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+
+    # Move five documents from topic 0 to topic 1, keeping the same set of topics
+    moved = [index for index, topic in enumerate(topic_model.topics_) if topic == 0][:5]
+    topics = [1 if index in moved else topic for index, topic in enumerate(topic_model.topics_)]
+    topic_model.update_topics(documents, topics=topics)
+
+    assert topic_model.topics_ == topics
+    assert topic_model.topic_sizes_ == {topic: topics.count(topic) for topic in set(topics)}
+
+
+def test_update_topics_keeps_the_models_own(representation_topic_model, documents):
+    topic_model = copy.deepcopy(representation_topic_model)
+    before = (topic_model.vectorizer_model, topic_model.ctfidf_model, topic_model.representation_model)
+    topic_model.update_topics(documents)
+    after = (topic_model.vectorizer_model, topic_model.ctfidf_model, topic_model.representation_model)
+
+    assert after == before
+
+
 @pytest.mark.parametrize(
     "model",
     [
