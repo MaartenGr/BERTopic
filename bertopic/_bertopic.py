@@ -1041,7 +1041,9 @@ class BERTopic:
                     Use this variable to change or map the topics.
                     NOTE: Using a custom list of topic assignments may lead to errors if
                           topic reduction techniques are used afterwards. Make sure that
-                          manually assigning topics is the last step in the pipeline
+                          manually assigning topics is the last step in the pipeline.
+                          Number them without gaps (-1 for outliers, then 0, 1, 2, ...);
+                          to merge topics, use `merge_topics`.
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
                          are typically best represented by at most 10 words.
@@ -3159,7 +3161,10 @@ class BERTopic:
         )[0]
         norm_data = normalize(embeddings, norm="l2")
 
-        if HAS_HDBSCAN:
+        # Fewer than two topics, such as when every document is an outlier, leaves nothing to cluster
+        if len(unique_topics) < 2:
+            predictions = [-1] * len(unique_topics)
+        elif HAS_HDBSCAN:
             predictions = HDBSCAN(
                 min_cluster_size=2,
                 metric="euclidean",
@@ -3209,7 +3214,7 @@ class BERTopic:
 
         Steps:
             * Replace \n and \t with whitespace
-            * Only keep alpha-numerical characters
+            * Only keep alpha-numerical characters when `language` is "english"
         """
         cleaned_documents = [doc.replace("\n", " ") for doc in documents]
         cleaned_documents = [doc.replace("\t", " ") for doc in cleaned_documents]

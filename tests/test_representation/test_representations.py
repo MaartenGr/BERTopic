@@ -4,7 +4,10 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 
+from bertopic import BERTopic
 from bertopic._corpus import Corpus
+from bertopic.cluster import BaseCluster
+from bertopic.dimensionality import BaseDimensionalityReduction
 from bertopic.representation._mmr import mmr
 
 
@@ -201,6 +204,15 @@ def test_topic_reduction_edge_cases(model, documents, document_embeddings, reque
 
     nr_topics_after = len(set(topic_model.topics_))
     assert nr_topics_before == nr_topics_after
+
+
+def test_auto_reduction_with_every_document_an_outlier(documents, document_embeddings):
+    # BaseCluster takes the topics as given, here every document an outlier
+    topic_model = BERTopic(
+        umap_model=BaseDimensionalityReduction(), hdbscan_model=BaseCluster(), nr_topics="auto"
+    )
+    topic_model.fit(documents, document_embeddings, y=[-1] * len(documents))
+    assert set(topic_model.topics_) == {-1}
 
 
 @pytest.mark.parametrize(

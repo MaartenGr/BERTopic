@@ -99,3 +99,8 @@ def test_ctfidf_custom_cv(model, documents, request):
     assert c_tf_idf.shape[1] == len(words)
 
     assert np.min(X) == 0
+
+
+def test_ctfidf_with_a_one_word_vocabulary():
+    c_tf_idf = ClassTfidfTransformer().fit_transform(csr_matrix([[3], [1]]))
+    assert c_tf_idf.shape == (2, 1)

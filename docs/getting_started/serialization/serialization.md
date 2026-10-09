@@ -142,3 +142,12 @@ embedding_model = OpenAIBackend(client, "text-embedding-ada-002")
 # Load model and add embedding model
 loaded_model = BERTopic.load("path/to/my/model_dir", embedding_model=embedding_model)
 ```
+
+Representation models are never saved with `safetensors` or `pytorch`: these keep the topic representations the models created, but not the models themselves. To create them again when you use `.update_topics`, `.reduce_topics` or `.merge_topics` on a loaded model, set the representation model after loading:
+
+```python
+from bertopic.representation import KeyBERTInspired
+
+loaded_model = BERTopic.load("path/to/my/model_dir")
+loaded_model.representation_model = KeyBERTInspired()
+```

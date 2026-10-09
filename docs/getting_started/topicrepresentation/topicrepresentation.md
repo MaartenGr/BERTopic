@@ -64,8 +64,9 @@ topic_model.update_topics(docs, vectorizer_model=vectorizer_model)
 ```
 
 !!! Tip "Tip!"
-    If you want to change the topics to something else, whether that is merging them or removing outliers, you can pass
-    a custom list of topics to update them: `topic_model.update_topics(docs, topics=my_updated_topics)`
+    If you want to change the topics to something else, such as after removing outliers, you can pass a custom list
+    of topics to update them: `topic_model.update_topics(docs, topics=my_updated_topics)`. Number them without gaps
+    (-1 for outliers, then 0, 1, 2, ...), and use `.merge_topics` to merge topics.
 
 ### **Custom labels**
 
