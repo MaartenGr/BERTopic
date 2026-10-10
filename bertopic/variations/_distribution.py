@@ -9,7 +9,7 @@ from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
 from tqdm import tqdm
 
-from bertopic._utils import MyLogger
+from bertopic._utils import check_vectorizer_is_fitted, MyLogger
 
 if TYPE_CHECKING:
     from bertopic import BERTopic
@@ -109,6 +109,8 @@ def approximate_distribution(
     The `topic_token_distr` then contains, for each token, the best fitting topics.
     As with `topic_distr`, it can contain multiple topics for a single token.
     """
+    if not use_embedding_model:
+        check_vectorizer_is_fitted(topic_model)
     if isinstance(documents, str):
         documents = [documents]
 

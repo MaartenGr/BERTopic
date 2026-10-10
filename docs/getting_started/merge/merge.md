@@ -59,6 +59,11 @@ It seems that by merging these three models, there were 6 undiscovered topics th
     Note that the models are merged sequentially. This means that the comparison starts with `topic_model_1` and that
     each new topic from `topic_model_2` and `topic_model_3` will be added to `topic_model_1`.
 
+!!! Tip
+    A merged model has no fitted vectorizer, since each model counted words over its own documents. Before methods
+    that read the documents' words, such as `.hierarchical_topics` or `.topics_over_time`, run
+    `merged_model.update_topics(docs)` on the documents of all the merged models, in the order they were merged.
+
 We can check the newly added topics in the `merged_model` by simply looking at the 6 latest topics that were added. The order of topics from `topic_model_1`
 remains the same. All new topics are simply added on top of them.
 

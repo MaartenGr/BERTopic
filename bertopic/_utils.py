@@ -83,6 +83,17 @@ def check_is_fitted(topic_model):
         raise ValueError(msg % {"name": type(topic_model).__name__})
 
 
+def check_vectorizer_is_fitted(topic_model):
+    """Checks that the vectorizer is fitted, which it is not after `merge_models` or after loading a
+    model saved without `save_ctfidf=True`.
+    """
+    if not hasattr(topic_model.vectorizer_model, "vocabulary_"):
+        raise ValueError(
+            "The vectorizer is not fitted, as after merge_models or loading a model saved without "
+            "save_ctfidf=True. Run topic_model.update_topics(docs) first, which fits it on your documents."
+        )
+
+
 class NotInstalled:
     """This object is used to notify the user that additional dependencies need to be
     installed in order to use the string matching model.

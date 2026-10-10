@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
 from tqdm import tqdm
 
-from bertopic._utils import MyLogger
+from bertopic._utils import check_vectorizer_is_fitted, MyLogger
 from bertopic._corpus import Corpus
 from bertopic._topics import Topics
 
@@ -66,6 +66,7 @@ def topics_per_class(
     topics_per_class = topic_model.topics_per_class(docs, classes)
     ```
     """
+    check_vectorizer_is_fitted(topic_model)
     corpus = Corpus(documents=docs, topics=topic_model._topics.predictions, classes=classes)
     global_c_tf_idf = normalize(topic_model.c_tf_idf_, axis=1, norm="l1", copy=False)
 

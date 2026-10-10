@@ -13,6 +13,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # BERTopic
 from bertopic._utils import (
     check_documents_type,
+    check_vectorizer_is_fitted,
     validate_distance_matrix,
     select_topic_representation,
     get_unique_distances,
@@ -90,6 +91,7 @@ def hierarchical_topics(
     ```
     """
     check_documents_type(docs)
+    check_vectorizer_is_fitted(topic_model)
     if distance_function is None:
         distance_function = lambda x: 1 - cosine_similarity(x)
 

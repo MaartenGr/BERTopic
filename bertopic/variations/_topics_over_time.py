@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
 from tqdm import tqdm
 
-from bertopic._utils import check_is_fitted, MyLogger
+from bertopic._utils import check_is_fitted, check_vectorizer_is_fitted, MyLogger
 from bertopic._corpus import Corpus
 from bertopic._topics import Topics
 
@@ -88,6 +88,7 @@ def topics_over_time(
     ```
     """
     check_is_fitted(topic_model)
+    check_vectorizer_is_fitted(topic_model)
 
     # Parse timestamp strings here, since numpy's datetime64 only accepts ISO 8601
     if len(timestamps) > 0 and isinstance(timestamps[0], str):

@@ -350,9 +350,10 @@ class BERTopic:
         return {topic.id: topic.nr_documents for topic in self._topics}
 
     @property
-    def c_tf_idf_(self) -> csr_matrix:
+    def c_tf_idf_(self) -> csr_matrix | None:
         """For backwards compatibility."""
-        return self._topics.c_tf_idf
+        c_tf_idf = self._topics.c_tf_idf
+        return c_tf_idf if c_tf_idf.shape[1] > 0 else None
 
     @property
     def topic_embeddings_(self) -> np.ndarray:
@@ -2370,6 +2371,10 @@ class BERTopic:
         )
         merged_model._topics = merged_topics
         merged_model._hierarchy = None
+
+        # Each model counted words over its own vocabulary, so their c-TF-IDF rows do not fit together
+        for topic in merged_model._topics:
+            topic.c_tf_idf = csr_matrix([])
 
         # Set embedding model
         merged_model.embedding_model = models[0].embedding_model

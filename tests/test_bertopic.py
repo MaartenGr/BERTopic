@@ -1,6 +1,8 @@
 import copy
 import pytest
 from bertopic import BERTopic
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 import pandas as pd  # noqa: F401
 
 from tests.conftest import ALL_MODEL_FIXTURES
@@ -156,3 +158,44 @@ def test_load_with_an_embedding_model_skips_the_saved_one(base_topic_model, tmp_
 
     assert attempts == []
     assert loaded_model.embedding_model is base_topic_model.embedding_model
+
+
+# Each method reads the documents' words, which a merged model has no fitted vectorizer for
+NEEDS_A_FITTED_VECTORIZER = {
+    "hierarchy": lambda model, docs: model.hierarchical_topics(docs),
+    "over time": lambda model, docs: model.topics_over_time(docs, [index % 10 for index in range(len(docs))]),
+    "per class": lambda model, docs: model.topics_per_class(docs, [index % 3 for index in range(len(docs))]),
+    "distribution": lambda model, docs: model.approximate_distribution(docs),
+    "c-tf-idf outliers": lambda model, docs: model.reduce_outliers(docs, model.topics_, strategy="c-tf-idf"),
+}
+
+
+@pytest.mark.parametrize("method", NEEDS_A_FITTED_VECTORIZER.values(), ids=NEEDS_A_FITTED_VECTORIZER.keys())
+def test_merged_model_asks_for_update_topics(method, kmeans_pca_topic_model, custom_topic_model, documents):
+    merged_model = BERTopic.merge_models([kmeans_pca_topic_model, custom_topic_model])
+    with pytest.raises(ValueError, match="update_topics"):
+        method(merged_model, documents + documents)
+
+
+def test_merged_model_works_after_update_topics(kmeans_pca_topic_model, custom_topic_model, documents):
+    merged_model = BERTopic.merge_models([kmeans_pca_topic_model, custom_topic_model])
+    merged_model.update_topics(documents + documents)
+    assert len(merged_model.hierarchical_topics(documents + documents)) > 0
+
+
+def test_merged_model_works_with_topic_embeddings(documents, document_embeddings, embedding_model):
+    # Models fitted on different documents count words over different vocabularies
+    models = [
+        BERTopic(
+            embedding_model=embedding_model,
+            umap_model=PCA(n_components=5, random_state=42),
+            hdbscan_model=KMeans(n_clusters=6, random_state=42),
+        ).fit(documents[part], document_embeddings[part])
+        for part in (slice(0, 500), slice(500, None))
+    ]
+    merged_model = BERTopic.merge_models(models, min_similarity=0.9)
+    assert len(merged_model.topic_sizes_) > len(models[0].topic_sizes_), "the second model must add topics"
+
+    merged_model.visualize_topics()
+    distribution, _ = merged_model.approximate_distribution(documents[:5], use_embedding_model=True)
+    assert distribution.shape[0] == 5

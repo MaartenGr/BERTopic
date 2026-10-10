@@ -8,6 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from typing import TYPE_CHECKING
 
 from bertopic._corpus import Corpus
+from bertopic._utils import check_vectorizer_is_fitted
 
 if TYPE_CHECKING:
     from bertopic import BERTopic
@@ -142,6 +143,7 @@ def reduce_outliers(
 
     # Reduce outliers by finding the most similar c-TF-IDF representations
     elif strategy.lower() == "c-tf-idf":
+        check_vectorizer_is_fitted(topic_model)
         outlier_ids = [index for index, topic in enumerate(topics) if topic == -1]
         outlier_docs = [documents[index] for index in outlier_ids]
 
