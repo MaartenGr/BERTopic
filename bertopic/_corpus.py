@@ -190,15 +190,6 @@ class Corpus:
             topics = [int(topic) for topic in set(self.topics)] if self.topics is not None else []
             return sorted(topics)
 
-    def nr_topics(self, include_outliers: bool = True) -> int:
-        """Returns the number of unique topics in the data."""
-        if self.topics is None:
-            return 0
-        elif include_outliers:
-            return len(set(self.topics))
-        else:
-            return len(set(self.topics)) - (1 if -1 in self.topics else 0)
-
     def group_documents_by_topic(self) -> dict[int, str]:
         """Groups documents by their assigned topic."""
         # Group documents by topic

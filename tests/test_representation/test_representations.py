@@ -215,6 +215,14 @@ def test_auto_reduction_with_every_document_an_outlier(documents, document_embed
     assert set(topic_model.topics_) == {-1}
 
 
+def test_nr_topics_counts_the_outlier_topic(documents, document_embeddings):
+    # BaseCluster takes the topics as given, here an outlier topic and five others
+    topic_model = BERTopic(umap_model=BaseDimensionalityReduction(), hdbscan_model=BaseCluster(), nr_topics=4)
+    topic_model.fit(documents, document_embeddings, y=[index % 6 - 1 for index in range(len(documents))])
+    assert len(topic_model.topic_sizes_) == 4
+    assert -1 in topic_model.topic_sizes_
+
+
 @pytest.mark.parametrize(
     "model",
     [

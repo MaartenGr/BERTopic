@@ -70,7 +70,7 @@ from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
 from bertopic.representation._base import TextConverter
-from bertopic._topics import Keywords, Media, Topic, Topics, TopicRepresentation, TopicHierarchy
+from bertopic._topics import Keywords, Media, Topic, Topics, TopicRepresentation, TopicHierarchy, TopicType
 from bertopic._corpus import Corpus, Modality
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
@@ -191,7 +191,8 @@ class BERTopic:
                        number of topics to the value specified. This reduction can take
                        a while as each reduction in topics (-1) activates a c-TF-IDF
                        calculation. If this is set to None, no reduction is applied. Use
-                       "auto" to automatically reduce topics using HDBSCAN.
+                       "auto" to automatically reduce topics using HDBSCAN. Zero-shot topics
+                       are never merged.
                        NOTE: Controlling the number of topics is best done by adjusting
                        `min_topic_size` first before adjusting this parameter.
             low_memory: Sets UMAP low memory to True to make sure less memory is used.
@@ -3117,25 +3118,37 @@ class BERTopic:
         Returns:
             corpus: Updated Corpus and the reduced number of Topics
         """
+        # The outlier and zero-shot topics are never merged, since the user named the zero-shot ones
+        nr_kept = self._outliers + sum(topic.topic_type == TopicType.ZERO_SHOT for topic in self._topics)
+        nr_clusters = self.nr_topics - nr_kept
+        if nr_clusters < 1:
+            raise ValueError(
+                f"nr_topics ({self.nr_topics}) must exceed the {nr_kept} outlier and zero-shot topics, "
+                "which topic reduction never merges."
+            )
+
+        # Sorting puts the kept topics first, even after merge_models
+        self._topics.sort_by_frequency()
+        topic_ids = self._topics.topic_ids()
+
         # Create topic distance matrix
         topic_embeddings = select_topic_representation(
             self._topics.c_tf_idf, self._topics.embeddings, use_ctfidf, output_ndarray=True
-        )[0][self._outliers :]
+        )[0][nr_kept:]
         distance_matrix = 1 - cosine_similarity(topic_embeddings)
         np.fill_diagonal(distance_matrix, 0)
 
         # Cluster the topic embeddings using AgglomerativeClustering
         if version.parse(sklearn_version) >= version.parse("1.4.0"):
-            cluster = AgglomerativeClustering(self.nr_topics, metric="precomputed", linkage="average")
+            cluster = AgglomerativeClustering(nr_clusters, metric="precomputed", linkage="average")
         else:
-            cluster = AgglomerativeClustering(self.nr_topics, affinity="precomputed", linkage="average")
+            cluster = AgglomerativeClustering(nr_clusters, affinity="precomputed", linkage="average")
         cluster.fit(distance_matrix)
 
-        # Map every topic, not just those holding documents, so no topic is left behind
-        mappings = {
-            topic_id: -1 if topic_id == -1 else int(cluster.labels_[topic_id])
-            for topic_id in self._topics.topic_ids()
-        }
+        # Kept topics map to themselves, clustered topics to IDs after them, until sort_by_frequency renumbers
+        mappings = {topic_id: topic_id for topic_id in topic_ids[:nr_kept]}
+        for topic_id, label in zip(topic_ids[nr_kept:], cluster.labels_):
+            mappings[topic_id] = nr_kept + int(label)
         self._topics.merge(mappings)
 
         # Update frequency, then take the rows back from the single store that owns them
@@ -3158,7 +3171,11 @@ class BERTopic:
         Returns:
             corpus: Updated Corpus and the reduced number of Topics
         """
-        unique_topics = self._topics.topic_ids(outliers=False)
+        # The outlier and zero-shot topics are never merged, since the user named the zero-shot ones,
+        # and sorting puts them first, even after merge_models
+        self._topics.sort_by_frequency()
+        nr_kept = self._outliers + sum(topic.topic_type == TopicType.ZERO_SHOT for topic in self._topics)
+        unique_topics = self._topics.topic_ids()[nr_kept:]
 
         # Find similar topics
         embeddings = select_topic_representation(
@@ -3175,11 +3192,11 @@ class BERTopic:
                 metric="euclidean",
                 cluster_selection_method="eom",
                 prediction_data=True,
-            ).fit_predict(norm_data[self._outliers :])
+            ).fit_predict(norm_data[nr_kept:])
         else:
             predictions = SK_HDBSCAN(
                 min_cluster_size=2, metric="euclidean", cluster_selection_method="eom", n_jobs=-1
-            ).fit_predict(norm_data[self._outliers :])
+            ).fit_predict(norm_data[nr_kept:])
 
         # Map clusters to their lowest topic_id
         cluster_to_lowest = {}
@@ -3199,10 +3216,7 @@ class BERTopic:
                 mapped_topics[topic_id] = cluster_to_lowest[cluster]
 
         # Map every topic, not just those holding documents, so no topic is left behind
-        mappings = {
-            topic_id: -1 if topic_id == -1 else mapped_topics[topic_id]
-            for topic_id in self._topics.topic_ids()
-        }
+        mappings = {topic_id: mapped_topics.get(topic_id, topic_id) for topic_id in self._topics.topic_ids()}
         self._topics.merge(mappings)
 
         # Update frequency, then take the rows back from the single store that owns them

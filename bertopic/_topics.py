@@ -755,7 +755,7 @@ class Topics:
             * Sum nr_documents for merged topics
             * Keep the representations of the most prominent topic (highest nr_documents)
             * Combine representative documents from all merged topics
-            * Make TopicType NORMAL if any merged topic is NORMAL
+            * Make TopicType NORMAL if any merged topic is NORMAL, or else keep the zero-shot name
             * Map original IDs to new IDs in the cumulative mapping
 
         Arguments:
@@ -809,6 +809,7 @@ class Topics:
                 id=new_id,
                 representations=prominent.representations.copy(),
                 representative_documents=rep_docs,
+                _label=prominent._label if topic_type == TopicType.ZERO_SHOT else None,
                 embedding=embedding,
                 c_tf_idf=c_tf_idf,
                 topic_type=topic_type,

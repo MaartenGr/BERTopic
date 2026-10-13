@@ -253,6 +253,16 @@ def test_zeroshot_topics_survive_alongside_an_outlier():
 # --------------------------------------------------------------------------------------
 
 
+def test_merge_keeps_a_zeroshot_name_unless_merged_with_a_clustered_topic():
+    """A topic that stays zero-shot keeps the name the user gave it."""
+    topics = Topics().initialize([0] * 2 + [1] * 3 + [2] * 4, zeroshot_labels=["alpha", "beta"])
+    topics.merge({0: 0, 1: 1, 2: 1})
+
+    assert topics.labels[0] == "alpha"
+    assert topics[1].topic_type == TopicType.NORMAL
+    assert topics.labels[1] != "beta"
+
+
 def test_merge_sums_document_counts():
     """A merged topic holds every document of the topics it absorbed."""
     topics = build_topics({-1: 5, 0: 8, 1: 4, 2: 2})

@@ -79,17 +79,6 @@ def zeroshot_tm(topic_model: "BERTopic", corpus: Corpus) -> tuple[Corpus, Corpus
         cluster_data.umap_embeddings = topic_model.umap_model.transform(cluster_data.embeddings)
 
     logger.info("Zeroshot Step 1 - Completed \u2713")
-
-    # Check that if a number of topics was specified, it exceeds the number of zeroshot topics matched
-    num_zeroshot_topics = zeroshot_data.nr_topics() if zeroshot_data is not None else 0
-    if topic_model.nr_topics != "auto":
-        if topic_model.nr_topics and not topic_model.nr_topics > num_zeroshot_topics:
-            raise ValueError(
-                f"The set nr_topics ({topic_model.nr_topics}) must exceed the number of matched zero-shot topics "
-                f"({num_zeroshot_topics}). Consider raising nr_topics or raising the "
-                f"zeroshot_min_similarity ({topic_model.zeroshot_min_similarity})."
-            )
-
     return cluster_data, zeroshot_data
 
 

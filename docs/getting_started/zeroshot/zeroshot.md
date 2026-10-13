@@ -65,6 +65,10 @@ The `zeroshot_min_similarity` parameter controls how many of the documents are a
     models have different similarity distributions, so trying out the values manually and exploring the results
     is highly advised.
 
+!!! Note
+    Topic reduction, through `nr_topics` or `reduce_topics`, never merges zero-shot topics, so they keep their names.
+    `nr_topics` counts them, along with the outlier topic, and must exceed them.
+
 
 !!! Tip
     Because zero-shot topic modeling is essentially merging two different topic models, the
