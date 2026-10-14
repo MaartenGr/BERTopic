@@ -90,3 +90,13 @@ def test_hierarchical_documents_caps_levels_at_the_hierarchy_size(
     )
 
     assert len(fig.to_dict()["data"]) > 0
+
+
+def test_visualize_hierarchy_with_an_aspect_as_labels(representation_topic_model):
+    """Each label starts with the ID of the topic it names, whose aspect gives the words."""
+    fig = representation_topic_model.visualize_hierarchy(custom_labels="MMR")
+
+    labelled_topics = sorted(int(label.split("_")[0]) for label in fig.layout.yaxis.ticktext)
+    assert labelled_topics == [
+        topic for topic in sorted(representation_topic_model.topic_sizes_) if topic != -1
+    ]

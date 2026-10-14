@@ -73,7 +73,8 @@ def visualize_topics_per_class(
     # Prepare data
     if isinstance(custom_labels, str):
         topic_names = [
-            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic] for topic in topics
+            [[str(topic), None]] + topic_model.topic_aspects_[custom_labels][topic]
+            for topic in topic_model.topic_labels_
         ]
         topic_names = ["_".join([label[0] for label in labels[:4]]) for labels in topic_names]
         topic_names = [label if len(label) < 30 else label[:27] + "..." for label in topic_names]

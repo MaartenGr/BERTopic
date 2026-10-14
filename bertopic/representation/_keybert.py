@@ -86,8 +86,7 @@ class KeyBERTInspired(BaseRepresentation):
             corpus: The input documents including (calculated) embeddings
             topic_representations: The candidate topic representations
             c_tf_idf: The topic c-TF-IDF representation
-            embeddings: Pre-trained document embeddings. These can be used
-                        instead of an embedding model
+            embeddings: Pre-trained document embeddings (not used)
 
         Returns:
             updated_topics: Updated topic representations
@@ -99,11 +98,6 @@ class KeyBERTInspired(BaseRepresentation):
             nr_samples=self.nr_samples,
             nr_repr_docs=self.nr_repr_docs,
         )
-
-        # If document embeddings are precomputed, extract the embeddings of the representative documents based on repr_doc_indices
-        repr_embeddings = None
-        if embeddings is not None:
-            repr_embeddings = [embeddings[index] for index in np.concatenate(repr_doc_indices)]
 
         # We extract the top n words per class
         topic_representations = self._extract_candidate_words(
@@ -117,7 +111,6 @@ class KeyBERTInspired(BaseRepresentation):
             topic_representations=topic_representations,
             representative_docs=representative_docs,
             repr_doc_indices=repr_doc_indices,
-            repr_embeddings=repr_embeddings,
         )
         # Find the best matching words based on the similarity matrix for each topic
         updated_topics = self._extract_top_words(
@@ -177,7 +170,6 @@ class KeyBERTInspired(BaseRepresentation):
         topic_representations: dict[int, Keywords],
         representative_docs: list[str],
         repr_doc_indices: list[list[int]],
-        repr_embeddings: np.ndarray = None,
     ) -> tuple[np.ndarray, list[str]]:
         """Extract the representative document embeddings and create topic embeddings.
         Then extract word embeddings and calculate the cosine similarity between topic
@@ -190,15 +182,13 @@ class KeyBERTInspired(BaseRepresentation):
             representative_docs: A flat list of representative documents
             repr_doc_indices: The indices of representative documents
                               that belong to each topic
-            repr_embeddings: Embeddings of respective representative_docs
 
         Returns:
             sim: The similarity matrix between word and topic embeddings
             vocab: The complete vocabulary of input documents
         """
-        # Calculate representative document embeddings if there are no precomputed embeddings.
-        if repr_embeddings is None:
-            repr_embeddings = topic_model.embedding_model.embed_documents(representative_docs, verbose=False)
+        # Calculate representative document embeddings
+        repr_embeddings = topic_model.embedding_model.embed_documents(representative_docs, verbose=False)
 
         topic_embeddings = [np.mean(repr_embeddings[i[0] : i[-1] + 1], axis=0) for i in repr_doc_indices]
 

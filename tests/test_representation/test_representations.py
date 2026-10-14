@@ -8,6 +8,7 @@ from bertopic import BERTopic
 from bertopic._corpus import Corpus
 from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.representation import MaximalMarginalRelevance
 from bertopic.representation._mmr import mmr
 
 
@@ -253,3 +254,21 @@ def test_mmr_with_fewer_words_than_top_n():
     words = ["space", "nasa", "orbit"]
     selected = mmr(np.ones((1, 3)), np.eye(3), words, top_n=10)
     assert sorted(selected) == sorted(words)
+
+
+def test_mmr_without_an_embedding_model_keeps_top_n_words(kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topic_model.embedding_model = None
+    with pytest.warns(UserWarning, match="embedding_model"):
+        topic_model.update_topics(documents, representation_model=MaximalMarginalRelevance())
+    assert {len(words) for words in topic_model.get_topics().values()} == {10}
+
+
+def test_repeated_documents_are_representative_only_once(kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topics = topic_model.topics_
+
+    # Repeat the first 300 documents three times, as cross-posts or boilerplate would be
+    topic_model.update_topics(documents + documents[:300] * 3, topics=topics + topics[:300] * 3)
+    for representative_docs in topic_model.representative_docs_.values():
+        assert len(representative_docs) == len(set(representative_docs))

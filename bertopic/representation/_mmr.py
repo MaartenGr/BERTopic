@@ -67,10 +67,13 @@ class MaximalMarginalRelevance(BaseRepresentation):
         """
         if topic_model.embedding_model is None:
             warnings.warn(
-                "MaximalMarginalRelevance can only be used BERTopic was instantiated"
+                "MaximalMarginalRelevance can only be used if BERTopic was instantiated "
                 "with the `embedding_model` parameter."
             )
-            return topic_representations
+            return {
+                topic: Keywords(keywords.top_n(self.top_n_words))
+                for topic, keywords in topic_representations.items()
+            }
 
         updated_topics = {}
         for topic, keywords in topic_representations.items():

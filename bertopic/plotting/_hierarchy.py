@@ -155,7 +155,7 @@ def visualize_hierarchy(
     axis = "yaxis" if orientation == "left" else "xaxis"
     if isinstance(custom_labels, str):
         new_labels = [
-            [[str(x), None]] + topic_model.topic_aspects_[custom_labels][x]
+            [[str(topics[int(x)]), None]] + topic_model.topic_aspects_[custom_labels][topics[int(x)]]
             for x in fig.layout[axis]["ticktext"]
         ]
         new_labels = ["_".join([label[0] for label in labels[:4]]) for labels in new_labels]

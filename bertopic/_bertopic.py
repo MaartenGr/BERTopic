@@ -2761,9 +2761,12 @@ class BERTopic:
             if len(selection.documents) == 0:
                 selection = corpus.get_topic(topic_id, nr_samples=nr_samples)
 
+            # Repeated documents, such as cross-posts, are candidates only once
+            documents = list(dict.fromkeys(selection.documents))
+
             # Calculate similarity
-            nr_docs = nr_repr_docs if len(selection.documents) > nr_repr_docs else len(selection.documents)
-            bow = self.vectorizer_model.transform(selection.documents)
+            nr_docs = nr_repr_docs if len(documents) > nr_repr_docs else len(documents)
+            bow = self.vectorizer_model.transform(documents)
             ctfidf = self.ctfidf_model.transform(bow)
             sim_matrix = cosine_similarity(ctfidf, c_tf_idf[index])
 
@@ -2772,7 +2775,7 @@ class BERTopic:
                 docs = mmr(
                     c_tf_idf[index],
                     ctfidf,
-                    selection.documents,
+                    documents,
                     top_n=nr_docs,
                     diversity=diversity,
                 )
@@ -2780,7 +2783,7 @@ class BERTopic:
             # Extract top n most representative documents
             else:
                 indices = np.argpartition(sim_matrix.reshape(1, -1)[0], -nr_docs)[-nr_docs:]
-                docs = [selection.documents[index] for index in indices]
+                docs = [documents[index] for index in indices]
 
             doc_ids = [
                 selection.original_indices[index]
