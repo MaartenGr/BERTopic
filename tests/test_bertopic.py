@@ -1,6 +1,9 @@
 import copy
+import numpy as np
 import pytest
 from bertopic import BERTopic
+from bertopic.cluster import BaseCluster
+from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import pandas as pd  # noqa: F401
@@ -134,6 +137,34 @@ def test_full_model(model, documents, request):
     merged_model = BERTopic.merge_models([topic_model, topic_model1])
 
     assert len(merged_model.get_topic_info()) > len(topic_model.get_topic_info())
+
+
+def test_refit_starts_from_fresh_topics(documents, document_embeddings):
+    topic_model = BERTopic(
+        umap_model=PCA(n_components=5, random_state=42), hdbscan_model=KMeans(n_clusters=8, random_state=42)
+    )
+    topic_model.fit(documents[:500], document_embeddings[:500])
+    topic_model.fit(documents[500:], document_embeddings[500:])
+
+    # The second fit's clusters map to its own topics, not through the first fit's renumbering
+    predicted, _ = topic_model.transform(documents[500:], document_embeddings[500:])
+    assert list(predicted) == topic_model.topics_
+
+
+def test_refit_with_fewer_topics(documents, document_embeddings):
+    # BaseCluster takes the topics as given: six in the first fit, three in the second
+    topic_model = BERTopic(umap_model=BaseDimensionalityReduction(), hdbscan_model=BaseCluster())
+    topic_model.fit(documents, document_embeddings, y=[index % 6 for index in range(len(documents))])
+    topic_model.fit(documents[:300], document_embeddings[:300], y=[index % 3 for index in range(300)])
+    assert sorted(topic_model.topic_sizes_) == [0, 1, 2]
+
+
+def test_update_topics_with_numpy_topic_ids(kmeans_pca_topic_model, documents):
+    # Custom topics as reduce_outliers returns them, here with an outlier added
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topics = [np.int64(-1)] + [np.int64(topic) for topic in topic_model.topics_[1:]]
+    topic_model.update_topics(documents, topics=topics)
+    assert all(type(topic_id) is int for topic_id in topic_model.topic_labels_)
 
 
 def test_transform_one_document_with_a_1d_embedding(kmeans_pca_topic_model, documents, document_embeddings):

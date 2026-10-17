@@ -804,7 +804,7 @@ class BERTopic:
 
         # Add new topics and accumulate predictions/counts
         else:
-            new_topic_ids = set(corpus.topics) - set(self._topics.topic_ids())
+            new_topic_ids = {int(topic) for topic in corpus.topics} - set(self._topics.topic_ids())
 
             for topic_id in new_topic_ids:
                 self._topics.topics[topic_id] = Topic(id=topic_id, nr_documents=0)
@@ -820,18 +820,17 @@ class BERTopic:
                 count = int(np.sum(corpus.topics == topic_id))
                 self._topics[topic_id].nr_documents += count
 
-        # Update topic representations
-        documents_per_topic = corpus.group_documents_by_topic()
-        for topic_id in self._topics.topic_ids():
-            if topic_id not in documents_per_topic:
-                documents_per_topic[topic_id] = " "  # Keep missing topics in vocabulary
+        # Update topic representations. Every topic keeps a row, in topic ID order, including topics
+        # missing from this batch
+        grouped = corpus.group_documents_by_topic()
+        documents_per_topic = {topic_id: grouped.get(topic_id, " ") for topic_id in self._topics.topic_ids()}
 
         c_tf_idf, words = self._c_tf_idf(documents_per_topic, partial_fit=True)
         self._topics.set_data(c_tf_idf=c_tf_idf)
 
         topic_representations = self._extract_words_per_topic(
             words=words,
-            corpus=corpus,
+            corpus=Corpus(documents=list(documents_per_topic.values()), topics=list(documents_per_topic)),
             c_tf_idf=c_tf_idf,
             fine_tune=False,
             calculate_aspects=False,
@@ -1106,27 +1105,31 @@ class BERTopic:
             embeddings = np.array([topic_embeddings[topic_id] for topic_id in current_topics])
 
         # Determine topic assignments
-        if topics is None:
-            topics = self.topics_
-        elif set(topics) != set(self.topics_):
+        topics = [int(topic) for topic in (self.topics_ if topics is None else topics)]
+        new_ids, old_ids = set(topics), set(self._topics.topic_ids())
+        if new_ids != old_ids:
             logger.warning(
                 "Using a custom list of topic assignments may lead to errors if "
                 "topic reduction techniques are used afterwards. Make sure that "
                 "manually assigning topics is the last step in the pipeline."
             )
-            # Rebuild Topics from scratch, keeping which topic each of the cluster model's clusters is
-            mapping = self._topics.mapping
-            self._topics = Topics().initialize(predictions=topics)
-            self._topics.mapping = mapping
-        else:
-            # Same topics with documents moved between them, so keep each topic and its label. Fitted
-            # probabilities only describe the documents they were fitted on
-            sizes = Counter(topics)
-            self._topics.predictions = list(topics)
-            if not fitted:
-                self._topics.probabilities = None
-            for topic in self._topics:
-                topic.nr_documents = sizes[topic.id]
+            # Missing topics are moved to outliers
+            self._topics.mapping.apply(
+                {topic_id: topic_id if topic_id in new_ids else -1 for topic_id in old_ids}
+            )
+            for topic_id in old_ids - new_ids:
+                del self._topics.topics[topic_id]
+            for topic_id in new_ids - old_ids:
+                self._topics.topics[topic_id] = Topic(id=topic_id)
+            self._topics.probabilities = None
+
+        # Move documents between topics. Fitted probabilities only describe the documents they were fitted on
+        sizes = Counter(topics)
+        self._topics.predictions = topics
+        if not fitted:
+            self._topics.probabilities = None
+        for topic in self._topics:
+            topic.nr_documents = sizes[topic.id]
 
         corpus = Corpus.from_inputs(
             documents=docs,
@@ -2645,7 +2648,9 @@ class BERTopic:
 
         # Hand the rows to Topics, which owns them from here on, and renumber by frequency
         if not partial_fit:
-            self._topics.initialize(corpus.topics, probabilities=corpus.probabilities).sort_by_frequency()
+            self._topics = (
+                Topics().initialize(corpus.topics, probabilities=corpus.probabilities).sort_by_frequency()
+            )
             corpus.topics, corpus.probabilities = self._topics.predictions, self._topics.probabilities
 
         logger.info("Cluster - Completed \u2713")

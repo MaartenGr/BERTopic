@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from bertopic import BERTopic
@@ -62,3 +63,32 @@ def test_hierarchical_topics_works_after_partial_fit(chunks, embedding_model):
         topic_model.partial_fit(chunk)
 
     assert len(topic_model.hierarchical_topics(seen)) > 0
+
+
+class PresetClusters:
+    """Labels each batch with the topics it is handed, so a test decides which topics a batch holds."""
+
+    def __init__(self, batches):
+        self.batches = iter(batches)
+
+    def partial_fit(self, embeddings):
+        self.labels_ = np.array(next(self.batches))
+        return self
+
+
+def test_partial_fit_with_a_topic_missing_from_a_batch():
+    words = ["apple", "banana", "cherry", "grape"]
+    batches = [[0, 1, 2] * 4, [0, 2, 3] * 4]
+    topic_model = BERTopic(
+        umap_model=IncrementalPCA(n_components=2),
+        hdbscan_model=PresetClusters(batches),
+        vectorizer_model=OnlineCountVectorizer(),
+    )
+    rng = np.random.default_rng(42)
+    for labels in batches:
+        topic_model.partial_fit([words[label] for label in labels], rng.normal(size=(len(labels), 5)))
+
+    # The second batch holds no documents of topic 1, which must not shift the topics after it, and
+    # adds topic 3, which joins as a plain integer like the others
+    assert [topic_model.get_topic(topic)[0][0] for topic in range(4)] == words
+    assert all(type(topic_id) is int for topic_id in topic_model.topic_labels_)

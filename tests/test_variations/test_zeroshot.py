@@ -72,3 +72,13 @@ def test_reducing_to_the_zeroshot_topics_raises(documents, document_embeddings, 
     topic_model.fit(documents, document_embeddings)
     with pytest.raises(ValueError, match="never merges"):
         topic_model.reduce_topics(documents, nr_topics=3)
+
+
+def test_update_topics_keeps_zeroshot_names(documents, document_embeddings, embedding_model):
+    zeroshot_topic_list = ["religion", "cars", "electronics"]
+    topic_model = zeroshot_model(embedding_model, zeroshot_topic_list, zeroshot_min_similarity=0.3)
+    topic_model.fit(documents, document_embeddings)
+
+    # Custom topics that change the set of topics, here by making the first document an outlier
+    topic_model.update_topics(documents, topics=[-1, *topic_model.topics_[1:]])
+    assert set(zeroshot_topic_list) <= set(topic_model.topic_labels_.values())

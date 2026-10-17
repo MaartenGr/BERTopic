@@ -261,13 +261,16 @@ class TopicMapping:
             self._mapping = old_to_new.copy()
             return
 
-        missing = sorted(set(self._mapping.values()) - set(old_to_new))
+        # Outliers remain as -1 and do not need to be included in the mapping
+        missing = sorted(set(self._mapping.values()) - set(old_to_new) - {-1})
         if missing:
             raise ValueError(
                 f"The mapping is missing topics {missing}. Every current topic must appear "
                 "in a new mapping, including topics that hold no documents."
             )
-        self._mapping = {original: old_to_new[current] for original, current in self._mapping.items()}
+        self._mapping = {
+            original: old_to_new.get(current, current) for original, current in self._mapping.items()
+        }
 
     def map(self, topic_id: int) -> int:
         """Translate one original cluster label into its current topic ID."""
