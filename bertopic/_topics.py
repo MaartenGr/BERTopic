@@ -46,6 +46,11 @@ class TopicRepresentation:
         """Words paired with their scores, which is how `get_topic` returns a topic."""
         return list(zip(self.words, self.scores))
 
+    @property
+    def label(self) -> str:
+        """A short name for the topic, which only some representations can give."""
+        return "No label could be created"
+
     def __str__(self) -> str:
         """String representation of the topic representation."""
         return str(self.data)
@@ -80,6 +85,11 @@ class Keywords(TopicRepresentation):
         """Get just the keyword scores."""
         return [score for _, score in self.data]
 
+    @property
+    def label(self) -> str:
+        """The top four keywords joined, which is how a topic is named by default."""
+        return "_".join(self.words[:4])
+
     def __str__(self) -> str:
         """String representation of the top 5 keywords."""
         return ", ".join([word for word, _ in self.top_n(5)])
@@ -103,6 +113,11 @@ class Label(TopicRepresentation):
         """Return the label as a single-element list."""
         return [self.data] if self.data else []
 
+    @property
+    def label(self) -> str:
+        """The label itself."""
+        return self.data
+
     def to_dict(self) -> dict:
         return {"type": "label", "data": self.data}
 
@@ -121,6 +136,11 @@ class StructuredJSON(TopicRepresentation):
     def words(self) -> list[str]:
         """Return the values of the structured JSON as a list of strings."""
         return [str(v) for v in self.data.values()] if self.data else []
+
+    @property
+    def label(self) -> str:
+        """The `topic_label` or `label` field, or the whole JSON when it has neither."""
+        return self.data.get("topic_label", self.data.get("label", str(self.data)))
 
     def to_dict(self) -> dict:
         return {"type": "structured_json", "data": self.data}
@@ -356,23 +376,12 @@ class Topic:
         """Get the label of the topic.
 
         If a custom label was set via `_label`, return it.
-        Otherwise, generate a label from the Main representation.
+        Otherwise, the Main representation gives the label.
         """
         if self._label is not None:
             return self._label
-
-        # Generate label from representation
         representation = self.representations.get("Main")
-        if isinstance(representation, Label):
-            return representation.data
-        elif isinstance(representation, StructuredJSON):
-            return representation.data.get(
-                "topic_label", representation.data.get("label", str(representation.data))
-            )
-        elif isinstance(representation, Keywords):
-            return "_".join(representation.words[:4])
-        else:
-            return "No label could be created"
+        return representation.label if representation else "No label could be created"
 
     @property
     def name(self) -> str:

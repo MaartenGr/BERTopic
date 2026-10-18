@@ -28,6 +28,7 @@ def topics_per_class(
     docs: list[str],
     classes: list[int | str],
     global_tuning: bool = True,
+    use_representation_model: bool = False,
 ) -> IntoDataFrame:
     """Create topics per class.
 
@@ -50,6 +51,10 @@ def topics_per_class(
         global_tuning: Fine-tune each topic representation for class c by averaging its c-TF-IDF matrix
                        with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                        topic representations that could not be found in the documents for class c.
+        use_representation_model: Whether to use the representation model to extract topic words for each
+                                  class. This can yield better topic representations, but the model then
+                                  runs for every topic in every class, which is slow and, with an LLM,
+                                  costly.
 
     Returns:
         topics_per_class: A polars DataFrame with columns:
@@ -88,7 +93,7 @@ def topics_per_class(
 
         # Extract the words per topic
         topic_representations = topic_model._extract_words_per_topic(
-            words, selected_corpus, c_tf_idf, calculate_aspects=False, fine_tune=False
+            words, selected_corpus, c_tf_idf, calculate_aspects=False, fine_tune=use_representation_model
         )
         new_topics = Topics().initialize(selected_corpus.topics)
         new_topics.set_data(representations={"Main": topic_representations})

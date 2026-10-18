@@ -1,5 +1,4 @@
 from ._base import BaseEmbedder
-from ._word_doc import WordDocEmbedder
 from ._utils import languages
 from bertopic._utils import NotInstalled
 
@@ -55,6 +54,5 @@ __all__ = [
     "Model2VecBackend",
     "MultiModalBackend",
     "OpenAIBackend",
-    "WordDocEmbedder",
     "languages",
 ]

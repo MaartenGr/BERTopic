@@ -32,6 +32,7 @@ def topics_over_time(
     datetime_format: str | None = None,
     evolution_tuning: bool = True,
     global_tuning: bool = True,
+    use_representation_model: bool = False,
 ) -> IntoDataFrame:
     """Create topics over time.
 
@@ -68,6 +69,10 @@ def topics_over_time(
         global_tuning: Fine-tune each topic representation at timestamp *t* by averaging its c-TF-IDF matrix
                     with the global c-TF-IDF matrix. Turn this off if you want to prevent words in
                     topic representations that could not be found in the documents at timestamp *t*.
+        use_representation_model: Whether to use the representation model to extract topic words at each
+                                  timestamp. This can yield better topic representations, but the model then
+                                  runs for every topic at every timestamp, which is slow and, with an LLM,
+                                  costly.
 
     Returns:
         topics_over_time: A polars DataFrame with columns:
@@ -152,7 +157,7 @@ def topics_over_time(
 
         # Extract the words per topic
         topic_representations = topic_model._extract_words_per_topic(
-            words, selected_corpus, c_tf_idf, calculate_aspects=False, fine_tune=False
+            words, selected_corpus, c_tf_idf, calculate_aspects=False, fine_tune=use_representation_model
         )
         new_topics = Topics().initialize(selected_corpus.topics)
         new_topics.set_data(representations={"Main": topic_representations})

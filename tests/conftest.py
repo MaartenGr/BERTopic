@@ -10,7 +10,8 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans, MiniBatchKMeans
 from sklearn.decomposition import PCA
 from bertopic.vectorizers import OnlineCountVectorizer
-from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
+from bertopic.representation import BaseRepresentation, KeyBERTInspired, MaximalMarginalRelevance
+from bertopic._topics import Label
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.linear_model import LogisticRegression
 
@@ -39,6 +40,26 @@ ALL_MODEL_FIXTURES = [
         marks=pytest.mark.skipif(not cuml_available(), reason="cuML not available"),
     ),
 ]
+
+
+class UppercaseLabel(BaseRepresentation):
+    """Labels each topic with its top two keywords in uppercase, and records the keywords it was handed."""
+
+    def __init__(self):
+        self.calls = []
+
+    def extract_topics(self, topic_model, corpus, topic_representations, c_tf_idf):
+        self.calls.append(topic_representations)
+        return {
+            topic: Label(" ".join(keywords.words[:2]).upper())
+            for topic, keywords in topic_representations.items()
+        }
+
+
+@pytest.fixture
+def uppercase_label():
+    """A representation model whose output is easy to recognize, so a test can tell whether it ran."""
+    return UppercaseLabel()
 
 
 @pytest.fixture(scope="session")

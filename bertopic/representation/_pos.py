@@ -110,7 +110,7 @@ class PartOfSpeech(BaseRepresentation):
             topic_model: A BERTopic model
             corpus: The input documents including (calculated) embeddings
             topic_representations: The candidate topic representations
-            c_tf_idf: Not used
+            c_tf_idf: The topic c-TF-IDF representation, with a row per topic in `topic_representations`
             embeddings: Not used
 
         Returns:
@@ -156,11 +156,11 @@ class PartOfSpeech(BaseRepresentation):
         words_lookup = dict(zip(words, range(len(words))))
         updated_topics = {}
 
-        for topic, candidate_keywords in candidate_topics.items():
+        for index, (topic, candidate_keywords) in enumerate(candidate_topics.items()):
             word_indices = np.sort(
                 [words_lookup.get(keyword) for keyword in candidate_keywords if keyword in words_lookup]
             )
-            vals = topic_model.c_tf_idf_[:, word_indices][topic + corpus._outliers]
+            vals = c_tf_idf[:, word_indices][index]
             indices = np.argsort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words :][::-1]
             vals = np.sort(np.array(vals.todense().reshape(1, -1))[0])[-self.top_n_words :][::-1]
             topic_words = [(words[word_indices[index]], val) for index, val in zip(indices, vals)]

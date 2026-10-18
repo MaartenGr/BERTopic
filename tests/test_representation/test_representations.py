@@ -2,6 +2,8 @@ import copy
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import CountVectorizer
 
 from bertopic import BERTopic
@@ -272,3 +274,58 @@ def test_repeated_documents_are_representative_only_once(kmeans_pca_topic_model,
     topic_model.update_topics(documents + documents[:300] * 3, topics=topics + topics[:300] * 3)
     for representative_docs in topic_model.representative_docs_.values():
         assert len(representative_docs) == len(set(representative_docs))
+
+
+def fast_model(embedding_model, representation_model):
+    """A model with fast sub-models, since clustering is not what these tests check."""
+    return BERTopic(
+        embedding_model=embedding_model,
+        umap_model=PCA(n_components=5, random_state=42),
+        hdbscan_model=KMeans(n_clusters=5, random_state=42),
+        representation_model=representation_model,
+    )
+
+
+def test_aspects_start_from_the_ctfidf_keywords(
+    documents, document_embeddings, embedding_model, uppercase_label
+):
+    representation_model = {"Main": uppercase_label, "MMR": MaximalMarginalRelevance()}
+    topic_model = fast_model(embedding_model, representation_model).fit(documents, document_embeddings)
+
+    # Main runs once on the c-TF-IDF keywords, and the MMR aspect picks from them, not from Main's labels
+    assert len(uppercase_label.calls) == 1
+    assert {len(keywords.words) for keywords in uppercase_label.calls[0].values()} == {30}
+    assert {len(words) for words in topic_model.topic_aspects_["MMR"].values()} == {10}
+
+
+def test_generate_topic_labels_from_a_label_aspect(
+    documents, document_embeddings, embedding_model, uppercase_label
+):
+    topic_model = fast_model(embedding_model, {"Label": uppercase_label}).fit(documents, document_embeddings)
+    labels = topic_model.generate_topic_labels(aspect="Label", topic_prefix=False)
+    assert all(label.isupper() for label in labels)
+
+
+# Each of these views runs the Main representation model on its own c-TF-IDF keywords only when asked to,
+# since it then runs once per timestamp, class or merged topic
+APPLY_THE_MAIN_MODEL = {
+    "over time": lambda model, docs, groups, **kwargs: model.topics_over_time(docs, groups, **kwargs).Words,
+    "per class": lambda model, docs, groups, **kwargs: model.topics_per_class(docs, groups, **kwargs).Words,
+    "hierarchy": lambda model, docs, groups, **kwargs: model.hierarchical_topics(docs, **kwargs).Parent_Name,
+}
+
+
+@pytest.mark.parametrize("variation", APPLY_THE_MAIN_MODEL.values(), ids=APPLY_THE_MAIN_MODEL.keys())
+def test_variations_apply_the_main_model_when_asked(
+    variation, kmeans_pca_topic_model, documents, uppercase_label
+):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topic_model.representation_model = uppercase_label
+    groups = [index % 3 for index in range(len(documents))]
+
+    # By default the keywords come from c-TF-IDF alone, so the representation model never runs
+    variation(topic_model, documents, groups)
+    assert uppercase_label.calls == []
+
+    # A topic whose documents in a group are all empty has no words to raise, so none may be left lowercase
+    assert not variation(topic_model, documents, groups, use_representation_model=True).str.islower().any()

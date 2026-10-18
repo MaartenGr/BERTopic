@@ -850,6 +850,7 @@ class BERTopic:
         datetime_format: str | None = None,
         evolution_tuning: bool = True,
         global_tuning: bool = True,
+        use_representation_model: bool = False,
     ) -> IntoDataFrame:
         return variations.topics_over_time(
             topic_model=self,
@@ -860,6 +861,7 @@ class BERTopic:
             datetime_format=datetime_format,
             evolution_tuning=evolution_tuning,
             global_tuning=global_tuning,
+            use_representation_model=use_representation_model,
         )
 
     @wraps(variations.topics_per_class)
@@ -868,12 +870,14 @@ class BERTopic:
         docs: list[str],
         classes: list[int | str],
         global_tuning: bool = True,
+        use_representation_model: bool = False,
     ) -> IntoDataFrame:
         return variations.topics_per_class(
             topic_model=self,
             docs=docs,
             classes=classes,
             global_tuning=global_tuning,
+            use_representation_model=use_representation_model,
         )
 
     @wraps(variations.approximate_distribution)
@@ -1593,15 +1597,12 @@ class BERTopic:
         check_is_fitted(self)
         topic_labels = []
         for topic in self._topics:
-            if aspect:
-                representation = topic.representations.get(aspect)
-            else:
-                representation = topic.representations.get("Main")
+            representation = topic.representations.get(aspect or "Main")
 
-            # For non-keyword representations (Label, StructuredJSON), use the
-            # topic label directly since word-level operations don't apply.
+            # For non-keyword representations (Label, StructuredJSON), use their
+            # label directly since word-level operations don't apply.
             if representation and not isinstance(representation, Keywords):
-                label = topic.label
+                label = representation.label
                 if topic_prefix:
                     topic_label = f"{topic.id}{separator}{label}"
                 else:
@@ -2974,8 +2975,8 @@ class BERTopic:
         indices = np.take_along_axis(indices, sorted_indices, axis=1)
         scores = np.take_along_axis(scores, sorted_indices, axis=1)
 
-        # Get top 30 words per topic based on c-TF-IDF score
-        topic_representations = {
+        # Get top 30 words per topic based on c-TF-IDF score, the candidates every representation starts from
+        candidates = {
             topic_id: Keywords(
                 [
                     (words[word_index], score) if word_index is not None and score > 0 else ("", 0.00001)
@@ -2993,7 +2994,7 @@ class BERTopic:
             topic_representations = self._apply_representation_models(
                 representation_models=self.representation_model,
                 corpus=corpus,
-                topic_representations=topic_representations,
+                topic_representations=candidates.copy(),
                 c_tf_idf=c_tf_idf,
                 name="Main",
             )
@@ -3002,10 +3003,10 @@ class BERTopic:
             # so cut the extra candidates back to the `top_n_words` that were asked for
             topic_representations = {
                 topic_id: Keywords(keywords.data[: self.top_n_words])
-                for topic_id, keywords in topic_representations.items()
+                for topic_id, keywords in candidates.items()
             }
 
-        # Extract topic representations other than the Main one (called aspects)
+        # Extract topic representations other than the Main one (called aspects), each from the candidates
         if calculate_aspects and isinstance(self.representation_model, dict):
             if aspect_to_return is not None:
                 if aspect_to_return not in self.representation_model:
@@ -3016,20 +3017,21 @@ class BERTopic:
                 return self._apply_representation_models(
                     representation_models=self.representation_model[aspect_to_return],
                     corpus=corpus,
-                    topic_representations=topic_representations.copy(),
+                    topic_representations=candidates.copy(),
                     c_tf_idf=c_tf_idf,
                     name=aspect_to_return,
                 )
             else:
                 for name, aspect_model in self.representation_model.items():
-                    aspect = self._apply_representation_models(
-                        representation_models=aspect_model,
-                        corpus=corpus,
-                        topic_representations=topic_representations.copy(),
-                        c_tf_idf=c_tf_idf,
-                        name=name,
-                    )
-                    self._topics.set_data(representations={name: aspect})
+                    if name != "Main":
+                        aspect = self._apply_representation_models(
+                            representation_models=aspect_model,
+                            corpus=corpus,
+                            topic_representations=candidates.copy(),
+                            c_tf_idf=c_tf_idf,
+                            name=name,
+                        )
+                        self._topics.set_data(representations={name: aspect})
 
         return topic_representations
 
