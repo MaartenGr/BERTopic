@@ -1,18 +1,8 @@
-import numpy as np
-from tqdm import tqdm
-from scipy.sparse import csr_matrix
 from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
 from typing import Any, Callable, Union
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
-from bertopic._topics import Keywords, Label, TopicRepresentation
-from bertopic._corpus import Corpus
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bertopic import BERTopic
 
 
 class TextGeneration(LLMRepresentation):
@@ -118,45 +108,6 @@ class TextGeneration(LLMRepresentation):
             )
         self.pipeline_kwargs = pipeline_kwargs
 
-    def extract_topics(
-        self,
-        topic_model: "BERTopic",
-        corpus: Corpus,
-        topic_representations: dict[int, Keywords],
-        c_tf_idf: csr_matrix,
-        embeddings: np.ndarray = None,
-    ) -> dict[int, TopicRepresentation]:
-        """Extract topic representations and return a single label.
-
-        Arguments:
-            topic_model: A BERTopic model
-            corpus: The input documents including (calculated) embeddings
-            topic_representations: The candidate topic representations
-            c_tf_idf: The topic c-TF-IDF representation
-            embeddings: Pre-trained document embeddings (unused, for API compatibility)
-
-        Returns:
-            updated_topics: Updated topic representations
-        """
-        # Extract the top n representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf=c_tf_idf,
-            corpus=corpus,
-            nr_samples=500,
-            nr_repr_docs=self.nr_docs,
-            diversity=self.diversity,
-        )
-
-        updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(
-                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
-            )
-            self.prompts_.append(prompt)
-
-            # Extract result from generator and use that as label
-            topic_description = self.model(prompt, **self.pipeline_kwargs)
-            label = topic_description[0]["generated_text"].replace(prompt, "").strip()
-            updated_topics[topic] = Label(data=label)
-
-        return updated_topics
+    def _generate(self, prompt: str) -> str:
+        """Continue the prompt with the transformers pipeline, keeping only what it generated."""
+        return self.model(prompt, **self.pipeline_kwargs)[0]["generated_text"].replace(prompt, "")

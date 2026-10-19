@@ -69,8 +69,12 @@ def uppercase_label():
 def stand_in_clients(monkeypatch):
     """Import a module against stand-ins for the LLM client libraries, which CI never installs."""
     libraries = {
-        "openai": {"OpenAI": object, "RateLimitError": type("RateLimitError", (Exception,), {})},
-        "ollama": {"chat": None, "ChatResponse": object},
+        "openai": {
+            "OpenAI": object,
+            "RateLimitError": type("RateLimitError", (Exception,), {}),
+            "BadRequestError": type("BadRequestError", (Exception,), {"code": None}),
+        },
+        "ollama": {"chat": None},
         "litellm": {"completion": None, "RateLimitError": type("RateLimitError", (Exception,), {})},
         "llama_cpp": {"Llama": type("Llama", (), {})},
     }

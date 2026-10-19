@@ -1,6 +1,4 @@
-import numpy as np
-from tqdm import tqdm
-from scipy.sparse import csr_matrix
+import json
 from typing import Any, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import (
@@ -9,13 +7,6 @@ from bertopic.representation._prompts import (
     DEFAULT_JSON_SCHEMA,
     DEFAULT_JSON_PROMPT,
 )
-from bertopic._topics import Keywords, StructuredJSON, TopicRepresentation
-from bertopic._corpus import Corpus
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bertopic import BERTopic
 
 
 class LangChain(LLMRepresentation):
@@ -124,64 +115,19 @@ class LangChain(LLMRepresentation):
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.generator_kwargs = generator_kwargs
 
-    def extract_topics(
-        self,
-        topic_model: "BERTopic",
-        corpus: Corpus,
-        topic_representations: dict[int, Keywords],
-        c_tf_idf: csr_matrix,
-        embeddings: np.ndarray = None,
-    ) -> dict[int, TopicRepresentation]:
-        """Extract topics.
+    def _generate(self, prompt: str) -> str:
+        """Send one prompt to the LangChain chat model."""
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": prompt},
+        ]
 
-        Arguments:
-            topic_model: A BERTopic model
-            corpus: The input documents including (calculated) embeddings
-            topic_representations: The candidate topic representations
-            c_tf_idf: The topic c-TF-IDF representation
-            embeddings: Pre-trained document embeddings (unused, for API compatibility)
+        # A JSON schema is answered with a dict, or with a pydantic model when the schema is one
+        if self.json_schema:
+            structured_model = self.model.with_structured_output(self.json_schema)
+            response = structured_model.invoke(messages, **self.generator_kwargs)
+            return json.dumps(response if isinstance(response, dict) else response.model_dump(mode="json"))
 
-        Returns:
-            updated_topics: Updated topic representations
-        """
-        # Extract the top n representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf=c_tf_idf,
-            corpus=corpus,
-            nr_samples=500,
-            nr_repr_docs=self.nr_docs,
-            diversity=self.diversity,
-        )
-
-        # Create structured model once if json_schema is set
-        llm = self.model.with_structured_output(self.json_schema) if self.json_schema else self.model
-
-        # Generate using LangChain model
-        updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(
-                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
-            )
-            self.prompts_.append(prompt)
-
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-            response = llm.invoke(messages, **self.generator_kwargs)
-
-            # Update representation
-            if self.json_schema:
-                # with_structured_output returns a dict for JSON Schema input
-                if isinstance(response, dict):
-                    updated_topics[topic] = StructuredJSON(data=response)
-                else:
-                    updated_topics[topic] = StructuredJSON(
-                        data=response.model_dump() if hasattr(response, "model_dump") else dict(response)
-                    )
-            else:
-                # Some models answer with a list of blocks, such as reasoning followed by text
-                text = response.content if isinstance(response.content, str) else response.text
-                updated_topics[topic] = self._parse_response(text.strip())
-
-        return updated_topics
+        # Some models answer with a list of blocks, such as reasoning followed by text
+        response = self.model.invoke(messages, **self.generator_kwargs)
+        return response.content if isinstance(response.content, str) else response.text

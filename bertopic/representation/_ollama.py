@@ -1,8 +1,4 @@
-import numpy as np
 from ollama import chat
-from ollama import ChatResponse
-from tqdm import tqdm
-from scipy.sparse import csr_matrix
 from typing import Any, Callable
 from bertopic.representation._base import LLMRepresentation
 from bertopic.representation._prompts import (
@@ -11,13 +7,6 @@ from bertopic.representation._prompts import (
     DEFAULT_JSON_SCHEMA,
     DEFAULT_JSON_PROMPT,
 )
-from bertopic._topics import Keywords, TopicRepresentation
-from bertopic._corpus import Corpus
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bertopic import BERTopic
 
 
 class Ollama(LLMRepresentation):
@@ -112,54 +101,11 @@ class Ollama(LLMRepresentation):
         if self.json_schema:
             self.generator_kwargs["format"] = self.json_schema
 
-    def extract_topics(
-        self,
-        topic_model: "BERTopic",
-        corpus: Corpus,
-        topic_representations: dict[int, Keywords],
-        c_tf_idf: csr_matrix,
-        embeddings: np.ndarray = None,
-    ) -> dict[int, TopicRepresentation]:
-        """Extract topics.
-
-        Arguments:
-            topic_model: A BERTopic model
-            corpus: The input documents including (calculated) embeddings
-            topic_representations: The candidate topic representations
-            c_tf_idf: The topic c-TF-IDF representation
-            embeddings: Pre-trained document embeddings (unused, for API compatibility)
-
-        Returns:
-            updated_topics: Updated topic representations
-        """
-        # Extract the top n representative documents per topic
-        repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
-            c_tf_idf=c_tf_idf,
-            corpus=corpus,
-            nr_samples=500,
-            nr_repr_docs=self.nr_docs,
-            diversity=self.diversity,
-        )
-
-        # Generate using Ollama's Language Model
-        updated_topics = {}
-        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
-            prompt = self._create_prompt(
-                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
-            )
-            self.prompts_.append(prompt)
-
-            # Call Ollama API
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-            kwargs = {
-                "model": self.model,
-                "messages": messages,
-                **self.generator_kwargs,
-            }
-            response: ChatResponse = chat(**kwargs)
-            updated_topics[topic] = self._parse_response(response.message.content.strip())
-
-        return updated_topics
+    def _generate(self, prompt: str) -> str:
+        """Send one prompt to the local Ollama server."""
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+        kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
+        return chat(**kwargs).message.content

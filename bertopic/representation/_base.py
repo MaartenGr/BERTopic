@@ -3,7 +3,9 @@ from sklearn.base import BaseEstimator
 from typing import Callable
 
 import json
+import warnings
 import numpy as np
+from tqdm import tqdm
 
 from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 from bertopic.representation._utils import truncate_document, validate_truncate_document_parameters
@@ -66,7 +68,13 @@ class TextConverter(BaseRepresentation):
 
 
 class LLMRepresentation(BaseRepresentation):
-    """Base class for LLM-based representation models."""
+    """Base class for LLM-based representation models.
+
+    Every LLM is prompted the same way, so this class holds the loop and each subclass only says how a prompt
+    is sent to its LLM, in `_generate`.
+    """
+
+    json_schema: dict | bool = False
 
     def __init__(
         self,
@@ -106,7 +114,7 @@ class LLMRepresentation(BaseRepresentation):
                             the document. These tokens are counted and truncated depending
                             on `doc_length`
         """
-        self.prompt = prompt
+        self.prompt = prompt if prompt is not None else DEFAULT_CHAT_PROMPT
 
         # Representative document extraction parameters
         self.nr_docs = nr_docs
@@ -119,6 +127,55 @@ class LLMRepresentation(BaseRepresentation):
 
         # Store prompts for inspection
         self.prompts_ = []
+
+    def extract_topics(
+        self,
+        topic_model: "BERTopic",
+        corpus: Corpus,
+        topic_representations: dict[int, Keywords],
+        c_tf_idf: csr_matrix,
+        embeddings: np.ndarray | None = None,
+    ) -> dict[int, TopicRepresentation]:
+        """Label each topic with the LLM, prompted with the topic's keywords and representative documents.
+
+        Arguments:
+            topic_model: A BERTopic model
+            corpus: The input documents including (calculated) embeddings
+            topic_representations: The candidate topic representations
+            c_tf_idf: The topic c-TF-IDF representation
+            embeddings: Pre-trained document embeddings (unused, for API compatibility)
+
+        Returns:
+            updated_topics: A `Label` per topic, or a `StructuredJSON` when a JSON schema is used
+        """
+        # Extract the top n representative documents per topic, if the prompt uses them
+        repr_docs_mappings = {topic: [] for topic in topic_representations}
+        if "[DOCUMENTS]" in self.prompt:
+            repr_docs_mappings, _, _, _ = topic_model._extract_representative_docs(
+                c_tf_idf=c_tf_idf,
+                corpus=corpus,
+                nr_samples=500,
+                nr_repr_docs=self.nr_docs,
+                diversity=self.diversity,
+            )
+
+        # Ask the LLM for each topic's label, marking a topic whose answer holds none
+        updated_topics = {}
+        for topic, docs in tqdm(repr_docs_mappings.items(), disable=not topic_model.verbose):
+            prompt = self._create_prompt(
+                docs=docs, topic=topic, topics=topic_representations, topic_model=topic_model
+            )
+            self.prompts_.append(prompt)
+            answer = (self._generate(prompt) or "").strip()
+            if not answer:
+                warnings.warn(f"The LLM returned no label for topic {topic}.")
+            updated_topics[topic] = self._parse_response(answer) if answer else Label("No label returned")
+
+        return updated_topics
+
+    def _generate(self, prompt: str) -> str | None:
+        """Send one prompt to the LLM and return its answer, or None when it gave none."""
+        raise NotImplementedError
 
     def _parse_response(self, response_text: str) -> TopicRepresentation:
         """Parse an LLM response into a TopicRepresentation.

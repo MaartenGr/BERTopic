@@ -94,3 +94,142 @@ def test_litellm_retries_a_rate_limit(stand_in_clients, monkeypatch):
 
     assert len(attempts) == 2
     assert response["choices"][0]["message"]["content"] == "topic: Space"
+
+
+@Pipeline.register
+class StandInLLM:
+    """Answers each prompt in the shape every client library uses, and records the prompts it was sent.
+
+    `answer` maps a prompt's position to its answer, so a test can leave one topic without a label.
+    """
+
+    def __init__(self, answer=lambda index: "Space"):
+        self.answer = answer
+        self.prompts = []
+        self.responses = self
+
+    def _reply(self, prompt):
+        self.prompts.append(prompt)
+        return self.answer(len(self.prompts) - 1)
+
+    def create(self, input, **kwargs):  # OpenAI's responses.create
+        return types.SimpleNamespace(output_text=self._reply(input[-1]["content"]))
+
+    def chat(self, messages, **kwargs):  # Cohere
+        text = types.SimpleNamespace(text=self._reply(messages[-1]["content"]))
+        return types.SimpleNamespace(message=types.SimpleNamespace(content=[text]))
+
+    def ollama_chat(self, messages, **kwargs):
+        message = types.SimpleNamespace(content=self._reply(messages[-1]["content"]))
+        return types.SimpleNamespace(message=message)
+
+    def completion(self, messages, **kwargs):  # LiteLLM, and llama.cpp's create_chat_completion
+        return {"choices": [{"message": {"content": self._reply(messages[-1]["content"])}}]}
+
+    create_chat_completion = completion
+
+    def invoke(self, messages, **kwargs):  # LangChain
+        return types.SimpleNamespace(content=self._reply(messages[-1]["content"]))
+
+    def with_structured_output(self, schema):  # LangChain with a JSON schema
+        return types.SimpleNamespace(
+            invoke=lambda messages, **kwargs: {"topic_label": self.invoke(messages).content}
+        )
+
+    def __call__(self, prompt, **kwargs):  # a transformers pipeline
+        return [{"generated_text": prompt + self._reply(prompt)}]
+
+
+LLM_REPRESENTATIONS = ["OpenAI", "Ollama", "Cohere", "LiteLLM", "LlamaCPP", "LangChain", "TextGeneration"]
+
+
+def build(name, load, llm, **kwargs):
+    """An LLM representation sending its requests to the stand-in, wherever its library would send them."""
+    module = load(f"bertopic.representation._{name.lower()}")
+    vars(module).update(chat=llm.ollama_chat, completion=llm.completion, Llama=StandInLLM)
+    client = "gemma4:e4b-it-qat" if name in ("Ollama", "LiteLLM") else llm
+    return getattr(module, name)(client, **kwargs)
+
+
+@pytest.mark.parametrize(
+    "name, kwargs", [(name, {}) for name in LLM_REPRESENTATIONS] + [("LangChain", {"json_schema": True})]
+)
+def test_every_llm_representation_labels_its_topics(
+    name, kwargs, stand_in_clients, kmeans_pca_topic_model, documents
+):
+    llm = StandInLLM()
+    representation_model = build(name, stand_in_clients, llm, **kwargs)
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topic_model.update_topics(documents, representation_model=representation_model)
+
+    # Each topic is asked for once, with the prompt that was built for it, and labelled with the answer
+    assert llm.prompts == representation_model.prompts_
+    assert len(llm.prompts) == len(topic_model.topic_sizes_)
+    assert {topic_model.get_topic(topic)[0][0] for topic in topic_model.topic_sizes_} == {"Space"}
+
+
+@pytest.mark.parametrize("name", LLM_REPRESENTATIONS)
+def test_an_answer_without_a_label_is_marked(name, stand_in_clients, kmeans_pca_topic_model, documents):
+    # The first topic's answer holds nothing, as when a provider withholds it
+    llm = StandInLLM(answer=lambda index: "" if index == 0 else "Space")
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    with pytest.warns(UserWarning, match="no label"):
+        topic_model.update_topics(documents, representation_model=build(name, stand_in_clients, llm))
+
+    labels = [topic_model.get_topic(topic)[0][0] for topic in topic_model.topic_sizes_]
+    assert sorted(labels) == ["No label returned"] + ["Space"] * (len(labels) - 1)
+
+
+def refusal(code):
+    """An answer that refuses the first prompt with an OpenAI error carrying this code."""
+
+    def answer(index):
+        if index == 0:
+            error = sys.modules["openai"].BadRequestError("The prompt was refused")
+            error.code = code
+            raise error
+        return "Space"
+
+    return answer
+
+
+def test_openai_marks_a_prompt_refused_for_its_content(stand_in_clients, kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    representation_model = build("OpenAI", stand_in_clients, StandInLLM(refusal("content_filter")))
+    with pytest.warns(UserWarning, match="no label"):
+        topic_model.update_topics(documents, representation_model=representation_model)
+    assert "No label returned" in {topic_model.get_topic(topic)[0][0] for topic in topic_model.topic_sizes_}
+
+    # Any other bad request still stops the fit
+    representation_model = build("OpenAI", stand_in_clients, StandInLLM(refusal("invalid_request")))
+    with pytest.raises(sys.modules["openai"].BadRequestError):
+        topic_model.update_topics(documents, representation_model=representation_model)
+
+
+def test_documents_are_fetched_only_when_the_prompt_uses_them(
+    stand_in_clients, kmeans_pca_topic_model, documents, monkeypatch
+):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    representation_model = build(
+        "OpenAI", stand_in_clients, StandInLLM(), prompt="Keywords: [KEYWORDS]", nr_docs=7
+    )
+    extract, requested = topic_model._extract_representative_docs, []
+
+    def recording_extract(**kwargs):
+        requested.append(kwargs["nr_repr_docs"])
+        return extract(**kwargs)
+
+    monkeypatch.setattr(topic_model, "_extract_representative_docs", recording_extract)
+    topic_model.update_topics(documents, representation_model=representation_model)
+
+    # Only BERTopic's own representative documents were extracted, not seven per topic for the prompt
+    assert 7 not in requested
+
+
+@pytest.mark.parametrize("name", ["Cohere", "LiteLLM", "LlamaCPP"])
+def test_a_response_format_without_a_schema_is_kept(name, stand_in_clients):
+    response_format = {"type": "text"}
+    representation_model = build(
+        name, stand_in_clients, StandInLLM(), generator_kwargs={"response_format": response_format}
+    )
+    assert representation_model.generator_kwargs["response_format"] == response_format
