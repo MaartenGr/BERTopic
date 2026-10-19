@@ -1,6 +1,6 @@
 import time
 import numpy as np
-from litellm import completion
+from litellm import RateLimitError, completion
 from typing import Callable
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
@@ -115,7 +115,7 @@ class LiteLLM(LLMRepresentation):
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: Mapping[str, Any] | bool = False,
-        generator_kwargs: Mapping[str, Any] = {},
+        generator_kwargs: Mapping[str, Any] | None = None,
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
         nr_docs: int = 4,
@@ -135,7 +135,7 @@ class LiteLLM(LLMRepresentation):
         self.model = model
         self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
-        self.generator_kwargs = generator_kwargs
+        self.generator_kwargs = dict(generator_kwargs or {})
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
         self.generator_kwargs["response_format"] = (
@@ -203,4 +203,5 @@ class LiteLLM(LLMRepresentation):
 def chat_completions_with_backoff(**kwargs):
     return retry_with_exponential_backoff(
         completion,
+        errors=(RateLimitError,),
     )(**kwargs)

@@ -103,3 +103,15 @@ def test_a_broken_optional_package_does_not_break_the_import():
 def test_select_backend_rejects_an_unrecognised_model():
     with pytest.raises(TypeError, match="not supported"):
         select_backend(lambda documents: documents)
+
+
+@pytest.mark.parametrize(
+    "module, backend, default_model",
+    [("_openai", "OpenAIBackend", "text-embedding-ada-002"), ("_cohere", "CohereBackend", "large")],
+)
+def test_embedding_backends_keep_their_own_model(module, backend, default_model, stand_in_clients):
+    embedder = getattr(stand_in_clients(f"bertopic.backend.{module}"), backend)
+
+    # A backend given another model must not pass it on to the next one
+    embedder(None, "a-newer-model")
+    assert embedder(None).embedding_model == default_model

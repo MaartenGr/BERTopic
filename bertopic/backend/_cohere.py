@@ -46,17 +46,17 @@ class CohereBackend(BaseEmbedder):
         embedding_model: str = "large",
         delay_in_seconds: float | None = None,
         batch_size: int | None = None,
-        embed_kwargs: Mapping[str, Any] = {},
+        embed_kwargs: Mapping[str, Any] | None = None,
     ):
         super().__init__()
         self.client = client
         self.embedding_model = embedding_model
         self.delay_in_seconds = delay_in_seconds
         self.batch_size = batch_size
-        self.embed_kwargs = embed_kwargs
+        self.embed_kwargs = dict(embed_kwargs or {})
 
         if self.embed_kwargs.get("model"):
-            self.embedding_model = embed_kwargs.get("model")
+            self.embedding_model = self.embed_kwargs.get("model")
         else:
             self.embed_kwargs["model"] = self.embedding_model
 

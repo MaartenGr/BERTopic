@@ -5,7 +5,7 @@ from transformers import pipeline, set_seed
 from transformers.pipelines.base import Pipeline
 from typing import Any, Callable, Union
 from bertopic.representation._base import LLMRepresentation
-from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
+from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
 from bertopic._topics import Keywords, Label, TopicRepresentation
 from bertopic._corpus import Corpus
 
@@ -24,7 +24,7 @@ class TextGeneration(LLMRepresentation):
                For example, `pipeline('text-generation', model='gpt2')`. If a string
                is passed, "text-generation" will be selected by default.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
+                `bertopic.representation._prompts.DEFAULT_COMPLETION_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
@@ -95,7 +95,7 @@ class TextGeneration(LLMRepresentation):
         tokenizer: str | Callable | None = None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_CHAT_PROMPT,
+            prompt=prompt if prompt is not None else DEFAULT_COMPLETION_PROMPT,
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,

@@ -1,5 +1,8 @@
 import copy
+import importlib
 import importlib.util
+import sys
+import types
 
 import pytest
 from umap import UMAP
@@ -60,6 +63,27 @@ class UppercaseLabel(BaseRepresentation):
 def uppercase_label():
     """A representation model whose output is easy to recognize, so a test can tell whether it ran."""
     return UppercaseLabel()
+
+
+@pytest.fixture
+def stand_in_clients(monkeypatch):
+    """Import a module against stand-ins for the LLM client libraries, which CI never installs."""
+    libraries = {
+        "openai": {"OpenAI": object, "RateLimitError": type("RateLimitError", (Exception,), {})},
+        "ollama": {"chat": None, "ChatResponse": object},
+        "litellm": {"completion": None, "RateLimitError": type("RateLimitError", (Exception,), {})},
+        "llama_cpp": {"Llama": type("Llama", (), {})},
+    }
+    for name, attributes in libraries.items():
+        monkeypatch.setitem(sys.modules, name, types.SimpleNamespace(**attributes))
+
+    def load(module):
+        # Recorded before it is dropped, so the module bound to the stand-ins goes again after the test
+        monkeypatch.setitem(sys.modules, module, None)
+        del sys.modules[module]
+        return importlib.import_module(module)
+
+    return load
 
 
 @pytest.fixture(scope="session")

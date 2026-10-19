@@ -108,7 +108,7 @@ class LlamaCPP(LLMRepresentation):
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: dict[str, Any] | bool = False,
-        generator_kwargs: dict[str, Any] = {},
+        generator_kwargs: dict[str, Any] | None = None,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
@@ -135,7 +135,7 @@ class LlamaCPP(LLMRepresentation):
             )
         self.system_prompt = system_prompt if system_prompt is not None else DEFAULT_SYSTEM_PROMPT
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
-        self.generator_kwargs = generator_kwargs
+        self.generator_kwargs = dict(generator_kwargs or {})
         self.generator_kwargs["response_format"] = (
             {"type": "json_object", "schema": self.json_schema} if self.json_schema else None
         )

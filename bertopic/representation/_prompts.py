@@ -1,4 +1,7 @@
-DEFAULT_COMPLETION_PROMPT = "What are these documents about? Please give a single label."
+DEFAULT_COMPLETION_PROMPT = """
+I have a topic described by the following keywords: [KEYWORDS].
+The name of this topic is:
+"""
 DEFAULT_CHAT_PROMPT = """You will extract a short topic label from given documents and keywords.
 Here are two examples of topics you created before:
 

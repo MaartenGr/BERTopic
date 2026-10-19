@@ -90,7 +90,7 @@ class Ollama(LLMRepresentation):
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: dict[str, Any] | bool = False,
-        generator_kwargs: dict[str, Any] = {},
+        generator_kwargs: dict[str, Any] | None = None,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
@@ -108,8 +108,9 @@ class Ollama(LLMRepresentation):
         self.model = model
         self.system_prompt = DEFAULT_SYSTEM_PROMPT if system_prompt is None else system_prompt
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
-        self.generator_kwargs = generator_kwargs
-        self.generator_kwargs["format"] = self.json_schema
+        self.generator_kwargs = dict(generator_kwargs or {})
+        if self.json_schema:
+            self.generator_kwargs["format"] = self.json_schema
 
     def extract_topics(
         self,

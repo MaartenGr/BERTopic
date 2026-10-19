@@ -120,7 +120,7 @@ class OpenAI(LLMRepresentation):
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: dict[str, Any] | bool = False,
-        generator_kwargs: dict[str, Any] = {},
+        generator_kwargs: dict[str, Any] | None = None,
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
         nr_docs: int = 4,
@@ -143,13 +143,14 @@ class OpenAI(LLMRepresentation):
         self.json_schema = DEFAULT_JSON_SCHEMA if json_schema is True else json_schema
         self.delay_in_seconds = delay_in_seconds
         self.exponential_backoff = exponential_backoff
-        self.generator_kwargs = generator_kwargs
+        self.generator_kwargs = dict(generator_kwargs or {})
         if self.json_schema:
+            # OpenAI's strict mode only accepts schemas that allow no other properties
             self.generator_kwargs["text"] = {
                 "format": {
                     "type": "json_schema",
                     "name": "Topic",
-                    "schema": self.json_schema,
+                    "schema": {"additionalProperties": False, **self.json_schema},
                     "strict": True,
                 }
             }

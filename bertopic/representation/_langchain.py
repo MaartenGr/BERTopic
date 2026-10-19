@@ -180,6 +180,8 @@ class LangChain(LLMRepresentation):
                         data=response.model_dump() if hasattr(response, "model_dump") else dict(response)
                     )
             else:
-                updated_topics[topic] = self._parse_response(response.content.strip())
+                # Some models answer with a list of blocks, such as reasoning followed by text
+                text = response.content if isinstance(response.content, str) else response.text
+                updated_topics[topic] = self._parse_response(text.strip())
 
         return updated_topics

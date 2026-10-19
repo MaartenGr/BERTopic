@@ -37,17 +37,17 @@ class OpenAIBackend(BaseEmbedder):
         embedding_model: str = "text-embedding-ada-002",
         delay_in_seconds: float | None = None,
         batch_size: int | None = None,
-        generator_kwargs: Mapping[str, Any] = {},
+        generator_kwargs: Mapping[str, Any] | None = None,
     ):
         super().__init__()
         self.client = client
         self.embedding_model = embedding_model
         self.delay_in_seconds = delay_in_seconds
         self.batch_size = batch_size
-        self.generator_kwargs = generator_kwargs
+        self.generator_kwargs = dict(generator_kwargs or {})
 
         if self.generator_kwargs.get("model"):
-            self.embedding_model = generator_kwargs.get("model")
+            self.embedding_model = self.generator_kwargs.get("model")
         elif not self.generator_kwargs.get("engine"):
             self.generator_kwargs["model"] = self.embedding_model
 
