@@ -927,13 +927,15 @@ class Topics:
         """Get the mapping from the cluster model's original labels to current topic IDs."""
         return self.mapping._mapping.copy()
 
-    def to_dataframe(self, topic: int | None = None) -> IntoDataFrame:
-        """Convert topic info to a dataframe."""
-        if topic is not None:
-            selected_topic = self.topics.get(topic)
-            rows = [selected_topic.to_info_dict()] if selected_topic else []
-        else:
-            rows = [t.to_info_dict() for t in self]
+    def to_dataframe(self, topics: int | list[int] | None = None) -> IntoDataFrame:
+        """Convert topic info to a dataframe, a row per topic or for each of `topics`, repeats included."""
+        # Each topic's row is built once, since a topic can be asked for once per document
+        info = {topic.id: topic.to_info_dict() for topic in self}
+        if topics is None:
+            topics = list(info)
+        elif not isinstance(topics, list):
+            topics = [topics]
+        rows = [info[topic] for topic in topics if topic in info]
 
         if not rows:
             return nw.from_dict({}, backend=get_output()).to_native()

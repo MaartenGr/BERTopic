@@ -838,6 +838,9 @@ class BERTopic:
         self._topics.set_data(representations={"Main": topic_representations})
         self._create_topic_vectors(corpus)
 
+        # A hierarchy made earlier describes topics that may no longer exist
+        self._hierarchy = None
+
         return self
 
     @wraps(variations.topics_over_time)
@@ -1240,7 +1243,7 @@ class BERTopic:
         ```
         """
         check_is_fitted(self)
-        return self._topics.to_dataframe(topic=topic)
+        return self._topics.to_dataframe(topics=topic)
 
     def get_topic_freq(self, topic: int | None = None) -> IntoDataFrame | int:
         """Return the size of topics (descending order).
@@ -1271,7 +1274,7 @@ class BERTopic:
         else:
             sizes = self.topic_sizes_
             data = {"Topic": list(sizes.keys()), "Count": list(sizes.values())}
-            return nw.from_dict(data, backend=get_output()).to_native()
+            return nw.from_dict(data, backend=get_output()).sort("Count", descending=True).to_native()
 
     def get_document_info(
         self,
@@ -1287,7 +1290,7 @@ class BERTopic:
 
         Arguments:
             docs: The documents on which the topic model was trained.
-            df: A polars DataFrame with extra columns to include in the output.
+            df: A dataframe with extra columns to include in the output.
             metadata: A dictionary with meta data for each document in the form
                       of column name (key) and the respective values (value).
 
@@ -1305,22 +1308,14 @@ class BERTopic:
 
         predictions = self.topics_
         topics_lookup = self._topics.topics
+        representative_docs = {doc for topic in self._topics for doc in topic.representative_documents or []}
 
-        # Build per-document info from Topic objects
-        repr_docs_set = set()
-        for topic in self._topics:
-            if topic.representative_documents:
-                repr_docs_set.update(topic.representative_documents)
-
-        # Core columns
+        # Each document gets its topic's row of `get_topic_info`, as in 0.17
+        topic_info = nw.from_native(self._topics.to_dataframe(topics=predictions), eager_only=True)
         data: dict[str, list] = {
-            "Document": docs,
-            "Topic": predictions,
-            "Name": [topics_lookup[tid].label for tid in predictions],
             "Top_n_words": [
                 " - ".join(topics_lookup[tid].representations["Main"].words) for tid in predictions
             ],
-            "Representative_document": [doc in repr_docs_set for doc in docs],
         }
 
         # Probabilities
@@ -1336,14 +1331,23 @@ class BERTopic:
                     for topic_id, probabilities in zip(predictions, self.probabilities_)
                 ]
 
+        data["Representative_document"] = [doc in representative_docs for doc in docs]
+
         # Custom metadata
         if metadata is not None:
             data.update(metadata)
 
-        # Any extra columns the caller supplied sit alongside, in whatever library they used
-        result = nw.from_dict(data, backend=get_output())
+        # The document comes first, then its topic's information and the columns above, which replace any of
+        # the same name
+        documents = nw.from_dict({"Document": docs}, backend=get_output())
+        columns = nw.from_dict(data, backend=get_output())
+        topic_info = topic_info.drop(["Count", *data], strict=False)
+        result = nw.concat([documents, topic_info, columns], how="horizontal")
+
+        # The caller's own columns come first, in whatever library they used, unless ours replace them
         if df is not None:
-            result = nw.concat([nw.from_native(df, eager_only=True), result], how="horizontal")
+            df = nw.from_native(df, eager_only=True)
+            result = nw.concat([df.drop(result.columns, strict=False), result], how="horizontal")
         return result.to_native()
 
     def get_representative_docs(self, topic: int | None = None) -> list[str] | dict[int, list[str]] | None:
@@ -1382,15 +1386,16 @@ class BERTopic:
 
     def get_topic_tree(
         self,
+        hier_topics: IntoDataFrame | None = None,
         max_distance: float | None = None,
         tight_layout: bool = False,
     ) -> str:
         """Extract the topic tree such that it can be printed.
 
         Arguments:
-            hierarchy: A TopicHierarchy containing the tree structure.
-                       This is stored in `topic_model._hierarchy` after calling
-                       `topic_model.hierarchical_topics()`.
+            hier_topics: A dataframe containing the structure of the topic tree.
+                         This is the output of `topic_model.hierarchical_topics()`. If None,
+                         the hierarchy that it created last is used.
             max_distance: The maximum distance between two topics. Topics merged
                           at distances greater than this are shown as 'O'.
             tight_layout: Whether to use a tight layout (narrow width) for
@@ -1417,85 +1422,56 @@ class BERTopic:
         from bertopic import BERTopic
         topic_model = BERTopic()
         topics, probs = topic_model.fit_transform(docs)
-        topic_model.hierarchical_topics(docs)
+        hierarchical_topics = topic_model.hierarchical_topics(docs)
 
         # Print topic tree
-        tree = topic_model.get_topic_tree()
+        tree = topic_model.get_topic_tree(hierarchical_topics)
         print(tree)
         ```
         """
-        if isinstance(self._hierarchy, TopicHierarchy) is False:
-            raise ValueError(
-                "You need to first create a topic hierarchy through "
-                "`topic_model.hierarchical_topics()` before you can "
-                "extract the topic tree."
-            )
+        if hier_topics is None:
+            if self._hierarchy is None:
+                raise ValueError(
+                    "You need to first create a topic hierarchy through "
+                    "`topic_model.hierarchical_topics()` before you can "
+                    "extract the topic tree."
+                )
+            hier_topics = self._hierarchy.to_dataframe()
+
+        # Map each merged topic to its children, and each child to its name and the distance it was merged at
+        tree, names, distances = {}, {}, {}
+        for row in nw.from_native(hier_topics, eager_only=True).rows(named=True):
+            tree[row["Parent_ID"]] = [row["Child_Left_ID"], row["Child_Right_ID"]]
+            for side in ["Left", "Right"]:
+                names[row[f"Child_{side}_ID"]] = row[f"Child_{side}_Name"][:100]
+                distances[row[f"Child_{side}_ID"]] = row["Distance"]
+        root = next(topic for topic in tree if topic not in distances)
+        max_distance = max(distances.values()) + 1 if max_distance is None else max_distance
         width = 1 if tight_layout else 4
-        root_id = self._hierarchy.root.id
 
-        if max_distance is None:
-            max_distance = self._hierarchy.root.merge_distance + 1
-
-        # Extract mapping from ID to label (truncated to 100 chars)
-        topic_to_name = {node_id: topic.label[:100] for node_id, topic in self._hierarchy.nodes.items()}
-
-        # Create tree structure: parent_id -> [left_child_id, right_child_id]
-        tree = {}
-        for node_id, topic in self._hierarchy.nodes.items():
-            if topic.child_ids is not None:
-                tree[str(node_id)] = [str(topic.child_ids[0]), str(topic.child_ids[1])]
-
-        def get_tree(start, tree):
+        def _tree(to_print, topic, indent=""):
             """Based on: https://stackoverflow.com/a/51920869/10532563."""
-
-            def _tree(to_print, start, parent, tree, grandpa=None, indent=""):
-                parent_int = int(parent)
-                topic = self._hierarchy.nodes.get(parent_int)
-
-                # Get distance: use the parent's merge_distance if this node was merged
-                if topic and topic.parent_id is not None:
-                    parent_topic = self._hierarchy.nodes.get(topic.parent_id)
-                    distance = parent_topic.merge_distance if parent_topic else 10
+            # An original topic is shown with its ID, unless it was merged beyond `max_distance`
+            if topic != root:
+                if topic in tree:
+                    to_print += names[topic] + "\n"
+                elif distances[topic] < max_distance:
+                    to_print += "■──" + names[topic] + f" ── Topic: {topic}" + "\n"
                 else:
-                    distance = 10
+                    to_print += "O \n"
 
-                if parent != start:
-                    if grandpa is None:
-                        to_print += topic_to_name.get(parent_int, str(parent_int))
-                    else:
-                        if topic and topic.is_leaf:
-                            # Leaf topic - show with block marker
-                            if distance < max_distance:
-                                to_print += (
-                                    "■──"
-                                    + topic_to_name.get(parent_int, "")
-                                    + f" ── Topic: {parent_int}"
-                                    + "\n"
-                                )
-                            else:
-                                to_print += "O \n"
-                        else:
-                            # Merged topic - just show name
-                            to_print += topic_to_name.get(parent_int, str(parent_int)) + "\n"
-
-                if parent not in tree:
-                    return to_print
-
-                for child in tree[parent][:-1]:
-                    to_print += indent + "├" + "─"
-                    to_print = _tree(to_print, start, child, tree, parent, indent + "│" + " " * width)
-
-                child = tree[parent][-1]
-                to_print += indent + "└" + "─"
-                to_print = _tree(to_print, start, child, tree, parent, indent + " " * (width + 1))
-
+            if topic not in tree:
                 return to_print
 
-            to_print = "." + "\n"
-            to_print = _tree(to_print, start, start, tree)
-            return to_print
+            for child in tree[topic][:-1]:
+                to_print += indent + "├" + "─"
+                to_print = _tree(to_print, child, indent + "│" + " " * width)
 
-        return get_tree(str(root_id), tree)
+            child = tree[topic][-1]
+            to_print += indent + "└" + "─"
+            return _tree(to_print, child, indent + " " * (width + 1))
+
+        return _tree("." + "\n", root)
 
     def set_topic_labels(self, topic_labels: list[str] | dict[int, str]) -> None:
         """Set custom topic labels in your fitted BERTopic model.
@@ -1729,6 +1705,9 @@ class BERTopic:
 
         self._topics.delete(topics_to_delete)
         self._topics.sort_by_frequency()
+
+        # A hierarchy made earlier describes topics that may no longer exist
+        self._hierarchy = None
 
     def reduce_topics(
         self,
@@ -2704,6 +2683,9 @@ class BERTopic:
         )
         self._topics.set_data(representations={"Main": topic_representations})
         self._create_topic_vectors(corpus, mappings=mappings)
+
+        # A hierarchy made earlier describes topics that may no longer exist
+        self._hierarchy = None
 
         if verbose:
             logger.info("Representation - Completed \u2713")

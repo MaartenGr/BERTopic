@@ -71,6 +71,44 @@ def test_tree(model, documents, request):
     assert merged_topics == set(topic_model.topics_).difference({-1})
 
 
+def test_topic_tree_from_the_hierarchy_dataframe(kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    hierarchical_topics = topic_model.hierarchical_topics(documents)
+
+    # 0.17's documented call passes the dataframe, which draws the model's own hierarchy
+    tree = topic_model.get_topic_tree(hierarchical_topics)
+    assert tree == topic_model.get_topic_tree()
+    assert "── Topic: " in tree
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda topic_model, docs: topic_model.reduce_topics(docs, 5),
+        lambda topic_model, docs: topic_model.merge_topics(docs, [0, 1]),
+        lambda topic_model, docs: topic_model.update_topics(docs),
+        lambda topic_model, docs: topic_model.delete_topics(0),
+    ],
+    ids=["reduce_topics", "merge_topics", "update_topics", "delete_topics"],
+)
+def test_changing_the_topics_clears_the_hierarchy(change, kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    topic_model.hierarchical_topics(documents)
+    change(topic_model, documents)
+
+    # A hierarchy of topics that may no longer exist is not shown
+    assert topic_model.hierarchy_ is None
+    with pytest.raises(ValueError, match="hierarchical_topics"):
+        topic_model.get_topic_tree()
+
+
+def test_partial_fit_clears_the_hierarchy(online_topic_model, documents, document_embeddings):
+    topic_model = copy.deepcopy(online_topic_model)
+    topic_model.hierarchical_topics(documents)
+    topic_model.partial_fit(documents, document_embeddings)
+    assert topic_model.hierarchy_ is None
+
+
 def test_hierarchy_with_identical_topics(kmeans_pca_topic_model, documents):
     topic_model = copy.deepcopy(kmeans_pca_topic_model)
 

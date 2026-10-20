@@ -2,6 +2,7 @@ import copy
 import pytest
 import pandas as pd
 
+from bertopic import BERTopic
 from bertopic._topics import Label, StructuredJSON
 
 
@@ -68,6 +69,7 @@ def test_get_topic_freq(model, request):
     topics_in_model = set(topic_model._topics.topic_ids())
 
     assert isinstance(topic_freq, pd.DataFrame)
+    assert topic_freq["Count"].is_monotonic_decreasing
 
     assert len(topic_freq) == len(set(topic_model.topics_))
     assert len(topics_in_model.difference(unique_topics)) == 0
@@ -182,3 +184,28 @@ def test_topic_aspects_excludes_the_main_representation(representation_topic_mod
 
     assert "Main" not in aspects
     assert "MMR" in aspects
+
+
+def test_document_info_holds_each_documents_topic_info(representation_topic_model, documents):
+    topic_info = representation_topic_model.get_topic_info()
+    df = pd.DataFrame({"Document": documents, "Class": range(len(documents))})
+    document_info = representation_topic_model.get_document_info(documents, df=df)
+
+    # As in 0.17, a document has its topic's row of `get_topic_info`, and the caller's columns are kept
+    topic_columns = list(topic_info.columns.drop("Count"))
+    own_columns = ["Top_n_words", "Probability", "Representative_document"]
+    assert list(document_info.columns) == ["Class", "Document", *topic_columns, *own_columns]
+    assert document_info["Class"].tolist() == list(range(len(documents)))
+    names = dict(zip(topic_info["Topic"], topic_info["Name"]))
+    assert document_info["Name"].tolist() == [names[topic] for topic in representation_topic_model.topics_]
+
+
+def test_document_info_metadata_replaces_a_column_of_the_same_name(kmeans_pca_topic_model, documents):
+    labels = [f"document_{index}" for index in range(len(documents))]
+    document_info = kmeans_pca_topic_model.get_document_info(documents, metadata={"Name": labels})
+    assert document_info["Name"].tolist() == labels
+
+
+def test_an_unfitted_model_says_so():
+    with pytest.raises(ValueError, match="not fitted"):
+        BERTopic().get_topic_info()
