@@ -21,7 +21,7 @@ class LiteLLM(LLMRepresentation):
     https://docs.litellm.ai/docs/providers
 
     Arguments:
-        model: Model to use. Defaults to OpenAI's "gpt-3.5-turbo".
+        model: Model to use. Defaults to OpenAI's "gpt-6-luna".
         generator_kwargs: Kwargs passed to `litellm.completion`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
@@ -79,7 +79,7 @@ class LiteLLM(LLMRepresentation):
     os.environ["OPENAI_API_KEY"] = "your-openai-key"
 
     # Create your representation model
-    representation_model = LiteLLM(model="gpt-3.5-turbo")
+    representation_model = LiteLLM(model="gpt-6-luna")
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -89,19 +89,19 @@ class LiteLLM(LLMRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = LiteLLM(model="gpt", prompt=prompt)
+    representation_model = LiteLLM(model="gpt-6-luna", prompt=prompt)
     ```
 
     You can also use structured output with a JSON schema:
 
     ```python
-    representation_model = LiteLLM(model="gpt-4o-mini", json_schema=True)
+    representation_model = LiteLLM(model="gpt-6-luna", json_schema=True)
     ```
     """  # noqa: D301
 
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-6-luna",
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: Mapping[str, Any] | bool = False,

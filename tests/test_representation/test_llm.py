@@ -6,6 +6,7 @@ import pytest
 from transformers.pipelines.base import Pipeline
 
 from bertopic.representation import LangChain, TextGeneration
+from bertopic.representation._prompts import DEFAULT_CHAT_PROMPT
 
 
 @pytest.mark.parametrize(
@@ -14,7 +15,7 @@ from bertopic.representation import LangChain, TextGeneration
         ("_openai", lambda module, **kwargs: module.OpenAI(None, **kwargs)),
         ("_ollama", lambda module, **kwargs: module.Ollama("gemma4:e4b-it-qat", **kwargs)),
         ("_cohere", lambda module, **kwargs: module.Cohere(None, **kwargs)),
-        ("_litellm", lambda module, **kwargs: module.LiteLLM("gpt-4o-mini", **kwargs)),
+        ("_litellm", lambda module, **kwargs: module.LiteLLM("gpt-6-luna", **kwargs)),
         ("_llamacpp", lambda module, **kwargs: module.LlamaCPP(module.Llama(), **kwargs)),
     ],
 )
@@ -38,14 +39,16 @@ def test_ollama_sends_a_format_only_when_given_one(stand_in_clients):
 
 def test_openai_strict_schema_allows_no_other_properties(stand_in_clients):
     module = stand_in_clients("bertopic.representation._openai")
-    text_format = module.OpenAI(None, json_schema=True).generator_kwargs["text"]["format"]
-    assert text_format["strict"]
-    assert text_format["schema"]["additionalProperties"] is False
+    json_schema = module.OpenAI(None, json_schema=True).generator_kwargs["response_format"]["json_schema"]
+    assert json_schema["strict"]
+    assert json_schema["schema"]["additionalProperties"] is False
 
 
 @Pipeline.register
 class Continuation:
     """A text-generation pipeline that continues every prompt with the same label."""
+
+    tokenizer = types.SimpleNamespace(chat_template=None)
 
     def __call__(self, prompt, **kwargs):
         return [{"generated_text": f"{prompt} space exploration"}]
@@ -59,6 +62,45 @@ def test_text_generation_prompts_with_keywords_only(kmeans_pca_topic_model, docu
     # A completion model such as gpt2 reads 1,024 positions, so the default prompt leaves the documents out
     assert all(len(prompt.split()) < 100 for prompt in representation_model.prompts_)
     assert {topic_model.get_topic(topic)[0][0] for topic in topic_model.topic_sizes_} == {"space exploration"}
+
+
+@Pipeline.register
+class ChatPipeline:
+    """A text-generation pipeline for a chat model, which answers a conversation as transformers does."""
+
+    tokenizer = types.SimpleNamespace(chat_template="{{ messages }}")
+
+    def __init__(self, answer="Space"):
+        self.answer = answer
+        self.conversations = []
+
+    def __call__(self, messages, return_full_text=True, **kwargs):
+        self.conversations.append(messages)
+
+        # The answer is a message only within the full conversation, and an empty one has no content
+        reply = {"role": "assistant", "content": self.answer} if self.answer else {"role": "assistant"}
+        return [{"generated_text": [*messages, reply] if return_full_text else self.answer}]
+
+
+@pytest.mark.parametrize("pipeline_kwargs", [{}, {"return_full_text": False}])
+def test_text_generation_sends_a_chat_model_messages(pipeline_kwargs, kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    generator = ChatPipeline()
+    representation_model = TextGeneration(generator, pipeline_kwargs=pipeline_kwargs)
+    topic_model.update_topics(documents, representation_model=representation_model)
+
+    # A chat model is asked like the other LLMs, and the pipeline writes the prompt in its chat template
+    assert representation_model.prompt == DEFAULT_CHAT_PROMPT
+    sent = [conversation[0]["content"] for conversation in generator.conversations]
+    assert sent == representation_model.prompts_
+    assert {topic_model.get_topic(topic)[0][0] for topic in topic_model.topic_sizes_} == {"Space"}
+
+
+def test_text_generation_marks_a_chat_answer_without_a_label(kmeans_pca_topic_model, documents):
+    topic_model = copy.deepcopy(kmeans_pca_topic_model)
+    with pytest.warns(UserWarning, match="no label"):
+        topic_model.update_topics(documents, representation_model=TextGeneration(ChatPipeline(answer="")))
+    assert {topic_model.get_topic(topic)[0][0] for topic in topic_model.topic_sizes_} == {"No label returned"}
 
 
 class ReasoningChatModel:
@@ -90,7 +132,7 @@ def test_litellm_retries_a_rate_limit(stand_in_clients, monkeypatch):
 
     monkeypatch.setattr(module, "completion", completion)
     monkeypatch.setattr("time.sleep", lambda seconds: None)
-    response = module.chat_completions_with_backoff(model="gpt-4o-mini", messages=[])
+    response = module.chat_completions_with_backoff(model="gpt-6-luna", messages=[])
 
     assert len(attempts) == 2
     assert response["choices"][0]["message"]["content"] == "topic: Space"
@@ -103,17 +145,25 @@ class StandInLLM:
     `answer` maps a prompt's position to its answer, so a test can leave one topic without a label.
     """
 
+    tokenizer = types.SimpleNamespace(chat_template=None)
+
     def __init__(self, answer=lambda index: "Space"):
         self.answer = answer
         self.prompts = []
-        self.responses = self
 
     def _reply(self, prompt):
         self.prompts.append(prompt)
         return self.answer(len(self.prompts) - 1)
 
-    def create(self, input, **kwargs):  # OpenAI's responses.create
-        return types.SimpleNamespace(output_text=self._reply(input[-1]["content"]))
+    @property
+    def openai_client(self):
+        """An OpenAI client whose chat.completions.create answers through this stand-in."""
+        completions = types.SimpleNamespace(create=self.openai_create)
+        return types.SimpleNamespace(chat=types.SimpleNamespace(completions=completions))
+
+    def openai_create(self, messages, **kwargs):
+        message = types.SimpleNamespace(content=self._reply(messages[-1]["content"]))
+        return types.SimpleNamespace(choices=[types.SimpleNamespace(message=message)])
 
     def chat(self, messages, **kwargs):  # Cohere
         text = types.SimpleNamespace(text=self._reply(messages[-1]["content"]))
@@ -147,8 +197,8 @@ def build(name, load, llm, **kwargs):
     """An LLM representation sending its requests to the stand-in, wherever its library would send them."""
     module = load(f"bertopic.representation._{name.lower()}")
     vars(module).update(chat=llm.ollama_chat, completion=llm.completion, Llama=StandInLLM)
-    client = "gemma4:e4b-it-qat" if name in ("Ollama", "LiteLLM") else llm
-    return getattr(module, name)(client, **kwargs)
+    clients = {"OpenAI": llm.openai_client, "Ollama": "gemma4:e4b-it-qat", "LiteLLM": "gpt-6-luna"}
+    return getattr(module, name)(clients.get(name, llm), **kwargs)
 
 
 @pytest.mark.parametrize(

@@ -59,7 +59,7 @@ class Ollama(LLMRepresentation):
     from bertopic import BERTopic
 
     # Create your representation model
-    representation_model = Ollama("gemma3")
+    representation_model = Ollama("gemma4")
 
     # Use the representation model in BERTopic on top of the default pipeline
     topic_model = BERTopic(representation_model=representation_model)
@@ -69,7 +69,7 @@ class Ollama(LLMRepresentation):
 
     ```python
     prompt = "I have the following documents: [DOCUMENTS] \nThese documents are about the following topic: '"
-    representation_model = Ollama("gemma3", prompt=prompt)
+    representation_model = Ollama("gemma4", prompt=prompt)
     ```
     """
 

@@ -14,10 +14,11 @@ from bertopic.representation._prompts import (
 
 
 class OpenAI(LLMRepresentation):
-    r"""Using the OpenAI Responses API to generate topic labels.
+    r"""Using the OpenAI Chat Completions API to generate topic labels.
 
-    Uses OpenAI's recommended Responses API with Structured Outputs
-    for schema-adherent JSON generation.
+    Uses OpenAI's Chat Completions API, which OpenAI-compatible servers such as vLLM,
+    LM Studio and Ollama serve as well, with Structured Outputs for schema-adherent
+    JSON generation.
 
     For an overview see:
     https://developers.openai.com/api/docs/guides/text
@@ -25,7 +26,7 @@ class OpenAI(LLMRepresentation):
 
     Arguments:
         client: A `openai.OpenAI` client
-        model: Model to use within OpenAI, defaults to `"gpt-4o-mini"`.
+        model: Model to use within OpenAI, defaults to `"gpt-6-luna"`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -35,9 +36,9 @@ class OpenAI(LLMRepresentation):
                        `bertopic.representation._prompts.DEFAULT_SYSTEM_PROMPT` is used instead.
         json_schema: A dictionary representing the JSON schema to enforce structured output.
                      If set to True, a default schema will be used (`bertopic.representation._prompts.DEFAULT_JSON_SCHEMA`).
-                     Uses OpenAI's Structured Outputs via the `text.format` parameter with
+                     Uses OpenAI's Structured Outputs via the `response_format` parameter with
                      `json_schema` type for strict schema adherence.
-        generator_kwargs: Kwargs passed to `openai.responses.create`
+        generator_kwargs: Kwargs passed to `client.chat.completions.create`
                           for fine-tuning the output.
         delay_in_seconds: The delay in seconds between consecutive prompts
                           in order to prevent RateLimitErrors.
@@ -106,7 +107,7 @@ class OpenAI(LLMRepresentation):
     def __init__(
         self,
         client,
-        model: str = "gpt-4o-mini",
+        model: str = "gpt-6-luna",
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: dict[str, Any] | bool = False,
@@ -136,39 +137,40 @@ class OpenAI(LLMRepresentation):
         self.generator_kwargs = dict(generator_kwargs or {})
         if self.json_schema:
             # OpenAI's strict mode only accepts schemas that allow no other properties
-            self.generator_kwargs["text"] = {
-                "format": {
-                    "type": "json_schema",
+            self.generator_kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
                     "name": "Topic",
                     "schema": {"additionalProperties": False, **self.json_schema},
                     "strict": True,
-                }
+                },
             }
 
     def _generate(self, prompt: str) -> str | None:
-        """Send one prompt through OpenAI's Responses API."""
+        """Send one prompt through OpenAI's Chat Completions API."""
         if self.delay_in_seconds:
             time.sleep(self.delay_in_seconds)
 
-        kwargs = {
-            "model": self.model,
-            "instructions": self.system_prompt,
-            "input": [{"role": "user", "content": prompt}],
-            **self.generator_kwargs,
-        }
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+        kwargs = {"model": self.model, "messages": messages, **self.generator_kwargs}
         try:
             if self.exponential_backoff:
-                return responses_create_with_backoff(self.client, **kwargs).output_text
-            return self.client.responses.create(**kwargs).output_text
+                response = chat_completions_with_backoff(self.client, **kwargs)
+            else:
+                response = self.client.chat.completions.create(**kwargs)
         except openai.BadRequestError as error:
             # A prompt OpenAI refuses for its content gets no label, rather than stopping the fit (#2342)
             if error.code == "content_filter":
                 return None
             raise
+        return response.choices[0].message.content
 
 
-def responses_create_with_backoff(client, **kwargs):
+def chat_completions_with_backoff(client, **kwargs):
     return retry_with_exponential_backoff(
-        client.responses.create,
+        client.chat.completions.create,
         errors=(openai.RateLimitError,),
     )(**kwargs)

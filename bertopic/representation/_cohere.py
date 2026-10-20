@@ -18,7 +18,7 @@ class Cohere(LLMRepresentation):
 
     Arguments:
         client: A `cohere.ClientV2`
-        model: Model to use within Cohere, defaults to `"command-r"`.
+        model: Model to use within Cohere, defaults to `"command-r7b-12-2024"`.
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -92,7 +92,7 @@ class Cohere(LLMRepresentation):
     def __init__(
         self,
         client,
-        model: str = "command-r",
+        model: str = "command-r7b-12-2024",
         prompt: str | None = None,
         system_prompt: str | None = None,
         json_schema: dict[str, Any] | bool = False,

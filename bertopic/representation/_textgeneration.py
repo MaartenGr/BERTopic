@@ -6,24 +6,26 @@ from bertopic.representation._prompts import DEFAULT_COMPLETION_PROMPT
 
 
 class TextGeneration(LLMRepresentation):
-    """Text2Text or text generation with transformers.
+    """Text generation with transformers.
 
     Arguments:
-        model: A transformers pipeline that should be initialized as "text-generation"
-               for gpt-like models or "text2text-generation" for T5-like models.
-               For example, `pipeline('text-generation', model='gpt2')`. If a string
-               is passed, "text-generation" will be selected by default.
+        model: A transformers pipeline that should be initialized as "text-generation",
+               for example `pipeline('text-generation', model='google/gemma-4-E2B-it')`. If a string
+               is passed, a "text-generation" pipeline is created for it. A model with
+               a chat template, as instruction-tuned models have, is sent the prompt as
+               a chat message, so its template is applied and only its answer is kept.
         prompt: The prompt to be used in the model. If no prompt is given,
-                `bertopic.representation._prompts.DEFAULT_COMPLETION_PROMPT` is used instead.
+                `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used for a model
+                with a chat template, and `DEFAULT_COMPLETION_PROMPT` for any other model.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
                 to decide where the keywords and documents need to be
                 inserted.
         pipeline_kwargs: Kwargs that you can pass to the transformers.pipeline
                          when it is called.
         random_state: A random state to be passed to `transformers.set_seed`
-        nr_docs: The number of documents to pass to OpenAI if a prompt
+        nr_docs: The number of documents to pass to the model if a prompt
                  with the `["DOCUMENTS"]` tag is used.
-        diversity: The diversity of documents to pass to OpenAI.
+        diversity: The diversity of documents to pass to the model.
                    Accepts values between 0 and 1. A higher
                    values results in passing more diverse documents
                    whereas lower values passes more similar documents.
@@ -45,31 +47,34 @@ class TextGeneration(LLMRepresentation):
 
     Usage:
 
-    To use a gpt-like model:
+    To use a model from the Hugging Face Hub:
 
     ```python
     from bertopic.representation import TextGeneration
     from bertopic import BERTopic
 
     # Create your representation model
-    generator = pipeline('text-generation', model='gpt2')
-    representation_model = TextGeneration(generator)
+    representation_model = TextGeneration('google/gemma-4-E2B-it')
 
     # Use the representation model in BERTopic on top of the default pipeline
-    topic_model = BERTo pic(representation_model=representation_model)
+    topic_model = BERTopic(representation_model=representation_model)
     ```
 
     You can use a custom prompt and decide where the keywords should
-    be inserted by using the `[KEYWORDS]` or documents with thte `[DOCUMENTS]` tag:
+    be inserted by using the `[KEYWORDS]` or documents with the `[DOCUMENTS]` tag:
 
     ```python
+    from transformers import pipeline
     from bertopic.representation import TextGeneration
 
-    prompt = "I have a topic described by the following keywords: [KEYWORDS]. Based on the previous keywords, what is this topic about?""
+    prompt = (
+        "I have a topic described by the following keywords: [KEYWORDS]. "
+        "Give a short label for this topic, and nothing else."
+    )
 
     # Create your representation model
-    generator = pipeline('text2text-generation', model='google/flan-t5-base')
-    representation_model = TextGeneration(generator)
+    generator = pipeline('text-generation', model='google/gemma-4-E2B-it')
+    representation_model = TextGeneration(generator, prompt=prompt)
     ```
     """
 
@@ -85,7 +90,7 @@ class TextGeneration(LLMRepresentation):
         tokenizer: str | Callable | None = None,
     ):
         super().__init__(
-            prompt=prompt if prompt is not None else DEFAULT_COMPLETION_PROMPT,
+            prompt=prompt,
             nr_docs=nr_docs,
             diversity=diversity,
             doc_length=doc_length,
@@ -108,6 +113,19 @@ class TextGeneration(LLMRepresentation):
             )
         self.pipeline_kwargs = pipeline_kwargs
 
-    def _generate(self, prompt: str) -> str:
-        """Continue the prompt with the transformers pipeline, keeping only what it generated."""
+        # A base model without a chat template completes a short prompt instead, as on 0.17
+        if prompt is None and not self.model.tokenizer.chat_template:
+            self.prompt = DEFAULT_COMPLETION_PROMPT
+
+    def _generate(self, prompt: str) -> str | None:
+        """Ask the transformers pipeline, as a chat when the model has a chat template."""
+        # A chat model answers a conversation, which the pipeline writes in the model's own chat template
+        if self.model.tokenizer.chat_template:
+            messages = [{"role": "user", "content": prompt}]
+
+            # The answer is a message only within the full conversation, and an empty one has no content
+            output = self.model(messages, **{**self.pipeline_kwargs, "return_full_text": True})
+            return output[0]["generated_text"][-1].get("content")
+
+        # Any other model continues the prompt
         return self.model(prompt, **self.pipeline_kwargs)[0]["generated_text"].replace(prompt, "")

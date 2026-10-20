@@ -54,7 +54,7 @@ class LlamaCPP(LLMRepresentation):
     To use a llama.cpp, first download the LLM:
 
     ```bash
-    wget https://huggingface.co/TheBloke/zephyr-7B-alpha-GGUF/resolve/main/zephyr-7b-alpha.Q4_K_M.gguf
+    wget https://huggingface.co/ggml-org/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf
     ```
 
     Then, we can now use the model the model with BERTopic in just a couple of lines:
@@ -63,8 +63,8 @@ class LlamaCPP(LLMRepresentation):
     from bertopic import BERTopic
     from bertopic.representation import LlamaCPP
 
-    # Use llama.cpp to load in a 4-bit quantized version of Zephyr 7B Alpha
-    representation_model = LlamaCPP("zephyr-7b-alpha.Q4_K_M.gguf")
+    # Use llama.cpp to load in a 4-bit quantized version of Gemma 4 E2B
+    representation_model = LlamaCPP("gemma-4-E2B-it-Q4_0.gguf")
 
     # Create our BERTopic model
     topic_model = BERTopic(representation_model=representation_model, verbose=True)
@@ -77,8 +77,8 @@ class LlamaCPP(LLMRepresentation):
     from bertopic.representation import LlamaCPP
     from llama_cpp import Llama
 
-    # Use llama.cpp to load in a 4-bit quantized version of Zephyr 7B Alpha
-    llm = Llama(model_path="zephyr-7b-alpha.Q4_K_M.gguf", n_gpu_layers=-1, n_ctx=4096, stop="Q:")
+    # Use llama.cpp to load in a 4-bit quantized version of Gemma 4 E2B
+    llm = Llama(model_path="gemma-4-E2B-it-Q4_0.gguf", n_gpu_layers=-1, n_ctx=16384)
     representation_model = LlamaCPP(llm)
 
     # Create our BERTopic model
@@ -88,7 +88,7 @@ class LlamaCPP(LLMRepresentation):
     You can also use structured output with a JSON schema:
 
     ```python
-    representation_model = LlamaCPP("zephyr-7b-alpha.Q4_K_M.gguf", json_schema=True)
+    representation_model = LlamaCPP("gemma-4-E2B-it-Q4_0.gguf", json_schema=True)
     ```
     """
 
@@ -114,7 +114,8 @@ class LlamaCPP(LLMRepresentation):
 
         # Llama.cpp specific parameters
         if isinstance(model, str):
-            self.model = Llama(model_path=model, n_gpu_layers=-1, stop="\n", chat_format="ChatML")
+            # A local file is loaded with its own chat template, and room for the prompt's documents
+            self.model = Llama(model_path=model, n_gpu_layers=-1, n_ctx=16384)
         elif isinstance(model, Llama):
             self.model = model
         else:

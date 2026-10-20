@@ -18,7 +18,7 @@ class LangChain(LLMRepresentation):
 
     Arguments:
         model: A LangChain chat model instance (e.g. `ChatOpenAI(...)`,
-               `init_chat_model("gpt-4")`, etc.).
+               `init_chat_model("gpt-6-luna")`, etc.).
         prompt: The prompt to be used in the model. If no prompt is given,
                 `bertopic.representation._prompts.DEFAULT_CHAT_PROMPT` is used instead.
                 NOTE: Use `"[KEYWORDS]"` and `"[DOCUMENTS]"` in the prompt
@@ -68,7 +68,7 @@ class LangChain(LLMRepresentation):
     from bertopic import BERTopic
 
     # Create your representation model
-    model = init_chat_model("gpt-4")
+    model = init_chat_model("gpt-6-luna")
     representation_model = LangChain(model)
 
     # Use the representation model in BERTopic on top of the default pipeline
