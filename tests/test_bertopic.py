@@ -6,7 +6,7 @@ from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-import pandas as pd  # noqa: F401
+import pandas as pd
 
 from tests.conftest import ALL_MODEL_FIXTURES
 
@@ -230,3 +230,32 @@ def test_merged_model_works_with_topic_embeddings(documents, document_embeddings
     merged_model.visualize_topics()
     distribution, _ = merged_model.approximate_distribution(documents[:5], use_embedding_model=True)
     assert distribution.shape[0] == 5
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        lambda model, docs: model.topics_over_time(docs, [index % 5 for index in range(len(docs))]),
+        lambda model, docs: model.topics_per_class(docs, [index % 3 for index in range(len(docs))]),
+        lambda model, docs: model.hierarchical_topics(docs),
+    ],
+    ids=["topics_over_time", "topics_per_class", "hierarchical_topics"],
+)
+def test_documents_as_a_pandas_series(method, kmeans_pca_topic_model, documents):
+    # 0.17 took a pandas Series of documents wherever it took a list
+    method(copy.deepcopy(kmeans_pca_topic_model), pd.Series(documents))
+
+
+def test_partial_fit_with_a_pandas_series(online_topic_model, documents, document_embeddings):
+    topic_model = copy.deepcopy(online_topic_model)
+    topic_model.partial_fit(pd.Series(documents[:200]), document_embeddings[:200])
+    assert len(topic_model.topics_) == len(documents) + 200
+
+
+def test_documents_as_a_dataframe_are_refused(kmeans_pca_topic_model, documents):
+    # As in 0.17, a dataframe of documents gets a clear error rather than its column names read as documents
+    df = pd.DataFrame({"Document": documents})
+    with pytest.raises(TypeError, match="not a dataframe"):
+        kmeans_pca_topic_model.topics_over_time(df, [index % 5 for index in range(len(documents))])
+    with pytest.raises(TypeError, match="not a dataframe"):
+        kmeans_pca_topic_model.topics_per_class(df, [index % 3 for index in range(len(documents))])

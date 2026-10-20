@@ -60,8 +60,8 @@ class Corpus:
         if isinstance(self.documents, np.ndarray):
             self.documents = self.documents.tolist()
 
-        if self.documents is None:
-            self.documents = []
+        # Any other sequence of documents, such as a pandas Series, becomes a list
+        self.documents = list(self.documents) if self.documents is not None else []
 
         if self.media is None:
             self.media = []
@@ -85,8 +85,11 @@ class Corpus:
         if isinstance(self.classes, list):
             self.classes = np.array(self.classes)
 
+        # Numbers stay numbers, as in 0.17, and anything else is a date
         if self.timestamps is not None:
-            self.timestamps = np.array(self.timestamps, dtype="datetime64[ns]")
+            self.timestamps = np.asarray(self.timestamps)
+            if not np.issubdtype(self.timestamps.dtype, np.number):
+                self.timestamps = self.timestamps.astype("datetime64[ns]")
 
         check_documents_type(self.documents)
         check_embeddings_shape(self.embeddings, self.documents)

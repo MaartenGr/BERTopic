@@ -1,4 +1,5 @@
 import copy
+import pandas as pd
 import pytest
 
 
@@ -41,6 +42,17 @@ def test_dynamic_string_timestamps(timestamp, datetime_format, base_topic_model,
 
     assert topics_over_time["Frequency"].sum() == len(documents)
     assert len(topics_over_time["Timestamp"].unique()) == len(set(timestamps))
+    assert pd.api.types.is_datetime64_any_dtype(topics_over_time["Timestamp"])
+
+
+@pytest.mark.parametrize("nr_bins", [None, 5])
+def test_dynamic_float_timestamps(nr_bins, kmeans_pca_topic_model, documents):
+    # 0.17 kept numbers as numbers, so fractional years work as well as whole ones
+    timestamps = [2000 + (index % 10) / 4 for index in range(len(documents))]
+    topics_over_time = kmeans_pca_topic_model.topics_over_time(documents, timestamps, nr_bins=nr_bins)
+
+    assert topics_over_time["Frequency"].sum() == len(documents)
+    assert topics_over_time["Timestamp"].between(2000, 2003).all()
 
 
 def test_evolution_tuning_changes_representations(kmeans_pca_topic_model, documents):

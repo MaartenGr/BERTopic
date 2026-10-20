@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from sklearn.preprocessing import normalize
 from tqdm import tqdm
 
-from bertopic._utils import check_is_fitted, check_vectorizer_is_fitted, MyLogger
+from bertopic._utils import check_documents_type, check_is_fitted, check_vectorizer_is_fitted, MyLogger
 from bertopic._corpus import Corpus
 from bertopic._topics import Topics
 
@@ -92,6 +92,7 @@ def topics_over_time(
     topics_over_time = topic_model.topics_over_time(docs, timestamps, nr_bins=20)
     ```
     """
+    check_documents_type(docs)
     check_is_fitted(topic_model)
     check_vectorizer_is_fitted(topic_model)
 
@@ -185,37 +186,36 @@ def _topics_over_time_to_dataframe(topics_dict: dict) -> IntoDataFrame:
             frequencies.append(topic.nr_documents)
             timestamps.append(timestamp)
 
-    # Convert numpy datetime64 values to Python datetime so polars infers a Datetime column
-    if timestamps and isinstance(timestamps[0], np.datetime64):
-        timestamps = np.array(timestamps, dtype="datetime64[ns]").tolist()
-
+    # A numpy array keeps dates as dates and numbers as numbers in either backend
     df = nw.from_dict(
         {
             "Topic": topic_ids,
             "Words": words_list,
             "Frequency": frequencies,
-            "Timestamp": timestamps,
+            "Timestamp": np.array(timestamps),
         },
         backend=get_output(),
     ).sort(["Timestamp", "Frequency"], descending=[False, True])
     return df.to_native()
 
 
-def bin_timestamps(corpus: Corpus, nr_bins: int) -> None:
-    """Bins timestamps into specified number of bins and updates the corpus timestamps.
+def bin_timestamps(corpus: Corpus, nr_bins: int) -> np.ndarray:
+    """Bins timestamps into specified number of bins and returns the start of each timestamp's bin.
 
     Args:
         corpus: The Corpus object containing timestamps.
         nr_bins: The number of bins to create.
     """
-    # Convert to datetime64[ns] first, then view as int64
-    timestamps = corpus.timestamps.view(np.int64)
+    # Dates are binned on their nanoseconds, and numbers as they are
+    timestamps = corpus.timestamps
+    if np.issubdtype(timestamps.dtype, np.datetime64):
+        timestamps = timestamps.view(np.int64)
 
-    # Create bin edges as integers
-    bin_edges = np.linspace(timestamps.min(), timestamps.max(), nr_bins + 1).astype(np.int64)
+    # Create bin edges of the same type
+    bin_edges = np.linspace(timestamps.min(), timestamps.max(), nr_bins + 1).astype(timestamps.dtype)
 
     # Assign each timestamp to a bin (returns bin indices) and last bin should include the max value
     bin_indices = np.digitize(timestamps, bin_edges) - 1
     bin_indices = np.clip(bin_indices, 0, nr_bins - 1)
 
-    return bin_edges[bin_indices].astype("datetime64[ns]")
+    return bin_edges[bin_indices].astype(corpus.timestamps.dtype)
