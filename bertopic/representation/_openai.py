@@ -110,7 +110,6 @@ class OpenAI(LLMRepresentation):
         model: str = "gpt-6-luna",
         prompt: str | None = None,
         system_prompt: str | None = None,
-        json_schema: dict[str, Any] | bool = False,
         generator_kwargs: dict[str, Any] | None = None,
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
@@ -118,6 +117,8 @@ class OpenAI(LLMRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: str | Callable | None = None,
+        *,
+        json_schema: dict[str, Any] | bool = False,
     ):
         super().__init__(
             prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),

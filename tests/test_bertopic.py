@@ -1,7 +1,9 @@
 import copy
+import inspect
 import numpy as np
 import pytest
 from bertopic import BERTopic
+from bertopic.backend import MultiModalBackend
 from bertopic.cluster import BaseCluster
 from bertopic.dimensionality import BaseDimensionalityReduction
 from sklearn.cluster import KMeans
@@ -259,3 +261,27 @@ def test_documents_as_a_dataframe_are_refused(kmeans_pca_topic_model, documents)
         kmeans_pca_topic_model.topics_over_time(df, [index % 5 for index in range(len(documents))])
     with pytest.raises(TypeError, match="not a dataframe"):
         kmeans_pca_topic_model.topics_per_class(df, [index % 3 for index in range(len(documents))])
+
+
+# 0.17.4's positional parameters, which keep their places in 1.0
+POSITIONAL_0_17 = {
+    BERTopic.fit: "documents embeddings images y",
+    BERTopic.fit_transform: "documents embeddings images y",
+    BERTopic.transform: "documents embeddings images",
+    BERTopic.update_topics: "docs images topics top_n_words n_gram_range vectorizer_model ctfidf_model "
+    "representation_model",
+    BERTopic.merge_topics: "docs topics_to_merge images",
+    BERTopic.reduce_topics: "docs nr_topics images use_ctfidf",
+    BERTopic.reduce_outliers: "documents topics images strategy probabilities threshold embeddings "
+    "distributions_params",
+    MultiModalBackend.__init__: "embedding_model image_model batch_size",
+}
+
+
+@pytest.mark.parametrize("method", POSITIONAL_0_17, ids=lambda method: method.__qualname__)
+def test_positional_parameters_keep_their_0_17_places(method):
+    # Parameters added since 0.17 are keyword-only, so a positional call written for 0.17 binds as it did
+    positional = POSITIONAL_0_17[method].split()
+    parameters = inspect.signature(method, follow_wrapped=False).parameters.values()
+    names = [parameter.name for parameter in parameters if parameter.kind == parameter.POSITIONAL_OR_KEYWORD]
+    assert names[1 : len(positional) + 1] == positional

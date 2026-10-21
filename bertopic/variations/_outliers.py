@@ -19,14 +19,15 @@ def reduce_outliers(
     documents: list[str],
     topics: list[int],
     images: list | None = None,
-    audio: list | None = None,
-    video: list | None = None,
-    code: list[str] | None = None,
     strategy: str = "distributions",
     probabilities: np.ndarray = None,
     threshold: float = 0,
     embeddings: np.ndarray = None,
     distributions_params: dict[str, Any] = {},
+    *,
+    audio: list | None = None,
+    video: list | None = None,
+    code: list[str] | None = None,
 ) -> list[int]:
     """Reduce outliers by merging them with their nearest topic according
     to one of several strategies.

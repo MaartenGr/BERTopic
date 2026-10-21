@@ -410,10 +410,11 @@ class BERTopic:
         documents: list[str] | None = None,
         embeddings: np.ndarray | None = None,
         images: list | None = None,
+        y: list[int] | np.ndarray | None = None,
+        *,
         audio: list | None = None,
         video: list | None = None,
         code: list[str] | None = None,
-        y: list[int] | np.ndarray | None = None,
     ) -> tuple[list[int], np.ndarray | None]:
         """Fit the models on a collection of documents, generate topics,
         and return the probabilities and topic per document.
@@ -528,10 +529,11 @@ class BERTopic:
         documents: list[str] | None = None,
         embeddings: np.ndarray = None,
         images: list | None = None,
+        y: list[int] | np.ndarray = None,
+        *,
         audio: list | None = None,
         video: list | None = None,
         code: list[str] | None = None,
-        y: list[int] | np.ndarray = None,
     ) -> "BERTopic":
         """Fit the models on a collection of documents and generate topics.
 
@@ -587,6 +589,7 @@ class BERTopic:
         documents: str | list[str] | None = None,
         embeddings: np.ndarray = None,
         images: list | None = None,
+        *,
         audio: list | None = None,
         video: list | None = None,
         code: list[str] | None = None,
@@ -915,14 +918,15 @@ class BERTopic:
         documents: list[str],
         topics: list[int],
         images: list | None = None,
-        audio: list | None = None,
-        video: list | None = None,
-        code: list[str] | None = None,
         strategy: str = "distributions",
         probabilities: np.ndarray = None,
         threshold: float = 0,
         embeddings: np.ndarray = None,
         distributions_params: dict[str, Any] = {},
+        *,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
     ) -> list[int]:
         return variations.reduce_outliers(
             topic_model=self,
@@ -1019,9 +1023,6 @@ class BERTopic:
         self,
         docs: list[str],
         images: list | None = None,
-        audio: list | None = None,
-        video: list | None = None,
-        code: list[str] | None = None,
         topics: list[int] | None = None,
         top_n_words: int = 10,
         n_gram_range: tuple[int, int] | None = None,
@@ -1029,6 +1030,10 @@ class BERTopic:
         ctfidf_model: ClassTfidfTransformer = None,
         representation_model: BaseRepresentation = None,
         embeddings: np.ndarray | None = None,
+        *,
+        audio: list | None = None,
+        video: list | None = None,
+        code: list[str] | None = None,
     ):
         """Updates the topic representation by recalculating c-TF-IDF with the new
         parameters as defined in this function.
@@ -1605,6 +1610,7 @@ class BERTopic:
         docs: list[str],
         topics_to_merge: list[Iterable[int] | int],
         images: list | None = None,
+        *,
         audio: list | None = None,
         video: list | None = None,
         code: list[str] | None = None,
@@ -1714,10 +1720,11 @@ class BERTopic:
         docs: list[str],
         nr_topics: int | str = 20,
         images: list | None = None,
+        use_ctfidf: bool = False,
+        *,
         audio: list | None = None,
         video: list | None = None,
         code: list[str] | None = None,
-        use_ctfidf: bool = False,
     ) -> "BERTopic":
         """Reduce the number of topics to a fixed number of topics
         or automatically.
@@ -1859,6 +1866,7 @@ class BERTopic:
         topic_prefix: bool = False,
         datamap_kwds: dict = {},
         int_datamap_kwds: dict = {},
+        *,
         images: list | None = None,
         audio: list | None = None,
         video: list | None = None,

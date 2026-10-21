@@ -51,10 +51,11 @@ class MultiModalBackend(BaseEmbedder):
         self,
         embedding_model: Union[str, SentenceTransformer],
         image_model: Union[str, SentenceTransformer] = None,
+        batch_size: int = 32,
+        *,
         audio_model: Union[str, SentenceTransformer] = None,
         video_model: Union[str, SentenceTransformer] = None,
         code_model: Union[str, SentenceTransformer] = None,
-        batch_size: int = 32,
     ):
         super().__init__()
         self.batch_size = batch_size

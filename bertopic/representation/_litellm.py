@@ -103,8 +103,6 @@ class LiteLLM(LLMRepresentation):
         self,
         model: str = "gpt-6-luna",
         prompt: str | None = None,
-        system_prompt: str | None = None,
-        json_schema: Mapping[str, Any] | bool = False,
         generator_kwargs: Mapping[str, Any] | None = None,
         delay_in_seconds: float | None = None,
         exponential_backoff: bool = False,
@@ -112,6 +110,9 @@ class LiteLLM(LLMRepresentation):
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: str | Callable | None = None,
+        *,
+        system_prompt: str | None = None,
+        json_schema: Mapping[str, Any] | bool = False,
     ):
         super().__init__(
             prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),

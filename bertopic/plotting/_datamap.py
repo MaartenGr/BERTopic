@@ -41,6 +41,7 @@ def visualize_document_datamap(
     topic_prefix: bool = False,
     datamap_kwds: dict = {},
     int_datamap_kwds: dict = {},
+    *,
     images: list | None = None,
     audio: list | None = None,
     video: list | None = None,

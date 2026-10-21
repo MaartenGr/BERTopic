@@ -97,12 +97,13 @@ class LlamaCPP(LLMRepresentation):
         model: str | Llama,
         prompt: str | None = None,
         system_prompt: str | None = None,
-        json_schema: dict[str, Any] | bool = False,
         generator_kwargs: dict[str, Any] | None = None,
         nr_docs: int = 4,
         diversity: float | None = None,
         doc_length: int | None = None,
         tokenizer: str | Callable | None = None,
+        *,
+        json_schema: dict[str, Any] | bool = False,
     ):
         super().__init__(
             prompt=DEFAULT_JSON_PROMPT if json_schema else (prompt or DEFAULT_CHAT_PROMPT),

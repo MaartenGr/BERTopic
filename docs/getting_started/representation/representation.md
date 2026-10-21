@@ -198,20 +198,19 @@ from bertopic.representation._base import BaseRepresentation
 
 
 class CustomRepresentationModel(BaseRepresentation):
-    def extract_topics(self, topic_model, documents, c_tf_idf, topics
-                      ) -> Mapping[str, List[Tuple[str, float]]]:
+    def extract_topics(self, topic_model, corpus, topic_representations, c_tf_idf):
         """ Extract topics
 
         Arguments:
             topic_model: The BERTopic model
-            documents: A dataframe of documents with their related topics
+            corpus: The documents with their related topics
+            topic_representations: The candidate keywords per topic as calculated with c-TF-IDF
             c_tf_idf: The c-TF-IDF matrix
-            topics: The candidate topics as calculated with c-TF-IDF
 
         Returns:
             updated_topics: Updated topic representations
         """
-        updated_topics = topics.copy()
+        updated_topics = topic_representations.copy()
         return updated_topics
 ```
 
@@ -229,13 +228,15 @@ topic_model = BERTopic(representation_model=representation_model)
 
 There are a few things to take into account when creating your custom model:
 
-* It needs to have the exact same parameter input: `topic_model`, `documents`, `c_tf_idf`, `topics`.
-* Make sure that `updated_topics` has the exact same structure as `topics`:
+* It needs to have the exact same parameter input: `topic_model`, `corpus`, `topic_representations`, `c_tf_idf`.
+* Make sure that `updated_topics` maps each topic ID to a representation, such as keywords or a label:
 
 ```python
+from bertopic._topics import Keywords, Label
+
 updated_topics = {
-    "1", [("space", 0.9), ("nasa", 0.7)],
-    "2": [("science", 0.66), ("article", 0.6)]
+    1: Keywords([("space", 0.9), ("nasa", 0.7)]),
+    2: Label("Science articles")
 }
 ```
 

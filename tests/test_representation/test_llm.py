@@ -1,4 +1,5 @@
 import copy
+import inspect
 import sys
 import types
 
@@ -283,3 +284,29 @@ def test_a_response_format_without_a_schema_is_kept(name, stand_in_clients):
         name, stand_in_clients, StandInLLM(), generator_kwargs={"response_format": response_format}
     )
     assert representation_model.generator_kwargs["response_format"] == response_format
+
+
+# 0.17.4's positional parameters, which keep their places in 1.0. LlamaCPP's pipeline_kwargs became
+# generator_kwargs and LangChain's chain became model, each in the same place
+LLM_POSITIONAL_0_17 = {
+    "_openai.OpenAI": "client model prompt system_prompt generator_kwargs delay_in_seconds "
+    "exponential_backoff nr_docs diversity doc_length tokenizer",
+    "_cohere.Cohere": "client model prompt system_prompt delay_in_seconds nr_docs diversity doc_length "
+    "tokenizer",
+    "_litellm.LiteLLM": "model prompt generator_kwargs delay_in_seconds exponential_backoff nr_docs "
+    "diversity",
+    "_llamacpp.LlamaCPP": "model prompt system_prompt generator_kwargs nr_docs diversity doc_length "
+    "tokenizer",
+    "_langchain.LangChain": "model prompt nr_docs diversity doc_length tokenizer",
+}
+
+
+@pytest.mark.parametrize("name", LLM_POSITIONAL_0_17)
+def test_llm_positional_parameters_keep_their_0_17_places(name, stand_in_clients):
+    # Parameters added since 0.17 are keyword-only, so a positional call written for 0.17 binds as it did
+    positional = LLM_POSITIONAL_0_17[name].split()
+    module, class_name = name.split(".")
+    representation = getattr(stand_in_clients(f"bertopic.representation.{module}"), class_name)
+    parameters = inspect.signature(representation.__init__).parameters.values()
+    names = [parameter.name for parameter in parameters if parameter.kind == parameter.POSITIONAL_OR_KEYWORD]
+    assert names[1 : len(positional) + 1] == positional
