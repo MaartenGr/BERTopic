@@ -1,10 +1,13 @@
-import warnings
 import numpy as np
 import pandas as pd
 from typing import List, Mapping, Tuple
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
+from bertopic._utils import MyLogger
 from bertopic.representation._base import BaseRepresentation
+
+logger = MyLogger()
+logger.configure("WARNING")
 
 
 class MaximalMarginalRelevance(BaseRepresentation):
@@ -59,11 +62,12 @@ class MaximalMarginalRelevance(BaseRepresentation):
             updated_topics: Updated topic representations
         """
         if topic_model.embedding_model is None:
-            warnings.warn(
-                "MaximalMarginalRelevance can only be used BERTopic was instantiated"
-                "with the `embedding_model` parameter."
+            logger.warning(
+                "MaximalMarginalRelevance can only be used when BERTopic was instantiated "
+                "with the `embedding_model` parameter. Skipping MMR and keeping the "
+                f"top {self.top_n_words} words per topic."
             )
-            return topics
+            return {topic: topic_words[: self.top_n_words] for topic, topic_words in topics.items()}
 
         updated_topics = {}
         for topic, topic_words in topics.items():
