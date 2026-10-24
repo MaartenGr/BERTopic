@@ -155,7 +155,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
 umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine', random_state=42)
 vectorizer_model = CountVectorizer(stop_words="english")
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+sentence_model.max_seq_length = 1024
 embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
 # We reduce our embeddings to 2D as it will allows us to quickly iterate later on

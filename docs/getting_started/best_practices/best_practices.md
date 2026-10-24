@@ -44,7 +44,8 @@ BERTopic works by converting documents into numerical values, called embeddings.
 from sentence_transformers import SentenceTransformer
 
 # Pre-calculate embeddings
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+embedding_model.max_seq_length = 1024
 embeddings = embedding_model.encode(abstracts, show_progress_bar=True)
 ```
 
@@ -358,12 +359,12 @@ When saving a model with `safetensors`, it skips over saving the dimensionality 
 As a result, the `.transform` step might give different results but it is generally worth it considering the smaller and significantly faster model.
 
 ```python
-embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_model = "google/embeddinggemma-2"
 topic_model.save("my_model_dir", serialization="safetensors", save_ctfidf=True, save_embedding_model=embedding_model)
 ```
 
 !!! Note "Embedding Model"
-    Using `safetensors`, we are not saving the underlying embedding model but merely a pointer to the model. For example, in the above example we are saving the string `"sentence-transformers/all-MiniLM-L6-v2"` so that we can load in the embedding model alongside the topic model.
+    Using `safetensors`, we are not saving the underlying embedding model but merely a pointer to the model. For example, in the above example we are saving the string `"google/embeddinggemma-2"` so that we can load in the embedding model alongside the topic model. Loaded by name, it gets the clustering prompt and the 1,024-token limit again.
 
     This currently only works if you are using a sentence transformer model. If you are using a different model, you can load it in when loading the topic model like this:
 
@@ -371,7 +372,8 @@ topic_model.save("my_model_dir", serialization="safetensors", save_ctfidf=True, 
     from sentence_transformers import SentenceTransformer
 
     # Define embedding model
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+    embedding_model.max_seq_length = 1024
 
     # Load model and add embedding model
     loaded_model = BERTopic.load("my_model_dir", embedding_model=embedding_model)

@@ -47,7 +47,8 @@ from bertopic.vectorizers import ClassTfidfTransformer
 
 
 # Step 1 - Extract embeddings
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+embedding_model.max_seq_length = 1024
 
 # Step 2 - Reduce dimensionality
 umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine')

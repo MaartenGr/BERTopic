@@ -63,7 +63,8 @@ def visualize_documents(
 
     # Prepare embeddings
     docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-    sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+    sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+    sentence_model.max_seq_length = 1024
     embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
     # Train BERTopic

@@ -73,12 +73,14 @@ def test_embedding_documents_goes_through_the_text_model(embedding_model):
     assert backend.models[Modality.TEXT].seen == [["first", "second"]]
 
 
-def test_media_a_model_takes_is_passed_as_media(embedding_model):
+@pytest.mark.parametrize("modality", [Modality.AUDIO, "audio"], ids=["enum", "string"])
+def test_media_a_model_takes_is_passed_as_media(embedding_model, modality):
     """A path could be read as text, and the clustering prompt and the length limit are for text only."""
     backend = MultiModalBackend(embedding_model)
     backend.models[Modality.AUDIO] = RecordingModel(modalities=("text", "audio"))
 
-    backend.embed_media(["clip.m4a"], Modality.AUDIO)
+    # The embeddings guide names the modality as a plain string
+    backend.embed_media(["clip.m4a"], modality)
 
     model = backend.models[Modality.AUDIO]
     assert model.seen == [[{"audio": "clip.m4a"}]]

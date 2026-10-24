@@ -20,7 +20,7 @@ and pass it through BERTopic with `embedding_model`:
 
 ```python
 from bertopic import BERTopic
-topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2")
+topic_model = BERTopic(embedding_model="google/embeddinggemma-2")
 ```
 
 Or select a SentenceTransformer model with your parameters:
@@ -28,9 +28,25 @@ Or select a SentenceTransformer model with your parameters:
 ```python
 from sentence_transformers import SentenceTransformer
 
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+sentence_model.max_seq_length = 1024
 topic_model = BERTopic(embedding_model=sentence_model)
 ```
+
+!!! tip "BERTopic's default model"
+    `BERTopic()` loads only the text model of EmbeddingGemma 2, and runs it in float32 unless a GPU runs bfloat16 natively, since bfloat16 is several times slower without hardware support, as on most CPUs. To do the same on a CPU with a model you create:
+
+    ```python
+    import torch
+
+    sentence_model = SentenceTransformer(
+        "google/embeddinggemma-2",
+        default_prompt_name="Clustering",
+        config_kwargs={"vision_config": None, "audio_config": None},
+        model_kwargs={"dtype": torch.float32},
+    )
+    sentence_model.max_seq_length = 1024
+    ```
 
 !!! tip "Tip 1!"
     This embedding back-end was put here first for a reason, sentence-transformers works amazing out of the box! Playing around with different models can give you great results. Also, make sure to frequently visit [this](https://www.sbert.net/docs/pretrained_models.html) page as new models are often released.
@@ -311,12 +327,12 @@ topic_model = BERTopic(embedding_model=embedding_model)
 
 ## **Multimodal**
 To create embeddings for both text and images in the same vector space, we can use the `MultiModalBackend`.
-A sentence-transformers model that also embeds images, audio and video is used as the default in BERTopic that you can activate with `BERTopic(embedding_model="google/embeddinggemma-2")`. If you want to do it by hand, you can use the `MultiModalBackend` explicity to define the model:
+A sentence-transformers model that also embeds images, audio and video is used in BERTopic and can be activated with `BERTopic(embedding_model="google/embeddinggemma-2")`. If you want to do it by hand, you can use the `MultiModalBackend` explicitly to define the model:
 
 ```python
 import numpy as np
 from bertopic.backend import MultiModalBackend
-model = MultiModalBackend('clip-ViT-B-32', batch_size=32)
+model = MultiModalBackend("google/embeddinggemma-2", batch_size=32)
 
 # Embed documents only
 doc_embeddings = model.embed_documents(docs)
@@ -347,7 +363,8 @@ class CustomEmbedder(BaseEmbedder):
         return embeddings
 
 # Create custom backend
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+embedding_model.max_seq_length = 1024
 custom_embedder = CustomEmbedder(embedding_model=embedding_model)
 
 # Pass custom backend to bertopic
@@ -366,7 +383,8 @@ from sentence_transformers import SentenceTransformer
 
 # Prepare embeddings
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+sentence_model.max_seq_length = 1024
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Train our topic model using our pre-trained sentence-transformers embeddings

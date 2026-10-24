@@ -55,7 +55,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     ```python
     from bertopic.backend import SentenceTransformerBackend
 
-    sentence_model = SentenceTransformerBackend("all-MiniLM-L6-v2")
+    sentence_model = SentenceTransformerBackend("google/embeddinggemma-2")
     ```
 
     or  you can instantiate a model yourself:
@@ -64,7 +64,8 @@ class SentenceTransformerBackend(BaseEmbedder):
     from bertopic.backend import SentenceTransformerBackend
     from sentence_transformers import SentenceTransformer
 
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+    embedding_model.max_seq_length = 1024
     sentence_model = SentenceTransformerBackend(embedding_model)
     ```
 
@@ -96,7 +97,7 @@ class SentenceTransformerBackend(BaseEmbedder):
             raise ValueError(
                 "Please select a correct SentenceTransformers model: \n"
                 "`from sentence_transformers import SentenceTransformer` \n"
-                "`model = SentenceTransformer('all-MiniLM-L6-v2')`"
+                "`model = SentenceTransformer('google/embeddinggemma-2')`"
             )
 
     def embed(self, documents: List[str], verbose: bool = False) -> np.ndarray:

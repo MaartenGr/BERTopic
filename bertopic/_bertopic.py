@@ -133,11 +133,9 @@ class BERTopic:
     ```python
     from bertopic import BERTopic
     from sklearn.datasets import fetch_20newsgroups
-    from sentence_transformers import SentenceTransformer
 
     docs = fetch_20newsgroups(subset='all')['data']
-    sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
-    topic_model = BERTopic(embedding_model=sentence_model)
+    topic_model = BERTopic(embedding_model="google/embeddinggemma-2")
     ```
 
     Due to the stochastic nature of UMAP, the results from BERTopic might differ
@@ -463,7 +461,8 @@ class BERTopic:
 
         # Create embeddings
         docs = fetch_20newsgroups(subset='all')['data']
-        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+        sentence_model.max_seq_length = 1024
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
@@ -563,7 +562,8 @@ class BERTopic:
 
         # Create embeddings
         docs = fetch_20newsgroups(subset='all')['data']
-        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+        sentence_model.max_seq_length = 1024
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
@@ -628,7 +628,8 @@ class BERTopic:
 
         # Create embeddings
         docs = fetch_20newsgroups(subset='all')['data']
-        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+        sentence_model.max_seq_length = 1024
         embeddings = sentence_model.encode(docs, show_progress_bar=True)
 
         # Create topic model
@@ -2219,7 +2220,7 @@ class BERTopic:
                     "You are saving a BERTopic model without explicitly defining an embedding model."
                     "If you are using a sentence-transformers model or a HuggingFace model supported"
                     "by sentence-transformers, please save the model by using a pointer towards that model."
-                    "For example, `save_embedding_model='sentence-transformers/all-mpnet-base-v2'`"
+                    "For example, `save_embedding_model='google/embeddinggemma-2'`"
                 )
 
             # Minimal

@@ -69,7 +69,8 @@ from bertopic import BERTopic
 from bertopic.representation import MaximalMarginalRelevance
 from sentence_transformers import SentenceTransformer
 
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+sentence_model.max_seq_length = 1024
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 representation_model = MaximalMarginalRelevance(diversity=0.2)
 topic_model = BERTopic(embedding_model=sentence_model, representation_model=representation_model)
@@ -121,7 +122,8 @@ from sentence_transformers import SentenceTransformer
 
 # Prepare embeddings
 docs = fetch_20newsgroups(subset='all',  remove=('headers', 'footers', 'quotes'))['data']
-sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+sentence_model.max_seq_length = 1024
 embeddings = sentence_model.encode(docs, show_progress_bar=False)
 
 # Train our topic model using our pre-trained sentence-transformers embeddings
@@ -310,7 +312,8 @@ from umap import UMAP
 
 # The same embedding model needs to be used for both topic models
 # and since we are dealing with multiple languages, the model needs to be multi-lingual
-sentence_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+sentence_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+sentence_model.max_seq_length = 1024
 
 # To make this example reproducible
 umap_model = UMAP(n_neighbors=15, n_components=5,
@@ -395,11 +398,10 @@ with captions:
 import os
 import glob
 import zipfile
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from PIL import Image
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import util
 
 # Flickr 8k images
 img_folder = 'photos/'
@@ -431,26 +433,9 @@ docs = captions.img_caption.to_list()
 Now that we have our images and captions, we need to generate our image embeddings:
 
 ```python
-model = SentenceTransformer('clip-ViT-B-32')
+from bertopic.backend import MultiModalBackend
 
-# Prepare images
-batch_size = 32
-nr_iterations = int(np.ceil(len(images) / batch_size))
-
-# Embed images per batch
-embeddings = []
-for i in tqdm(range(nr_iterations)):
-    start_index = i * batch_size
-    end_index = (i * batch_size) + batch_size
-
-    images_to_embed = [Image.open(filepath) for filepath in images[start_index:end_index]]
-    img_emb = model.encode(images_to_embed, show_progress_bar=False)
-    embeddings.extend(img_emb.tolist())
-
-    # Close images
-    for image in images_to_embed:
-        image.close()
-embeddings = np.array(embeddings)
+embeddings = MultiModalBackend("google/embeddinggemma-2").embed_media(images, "image")
 ```
 
 Finally, we can fit BERTopic the way we are used to, with documents and embeddings:
@@ -465,6 +450,10 @@ topic_model = BERTopic(vectorizer_model=vectorizer_model)
 topics, probs = topic_model.fit_transform(docs, embeddings)
 captions["Topic"] = topics
 ```
+
+To embed the captions as well, each averaged with its image, pass the images to BERTopic instead with
+`BERTopic(embedding_model="google/embeddinggemma-2").fit_transform(docs, images=images)`, as the
+[multimodal guide](https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html) shows.
 
 After fitting our model, let's inspect a topic about skateboarders:
 

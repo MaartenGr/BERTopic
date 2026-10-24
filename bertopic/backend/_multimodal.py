@@ -33,7 +33,7 @@ class MultiModalBackend(BaseEmbedder):
     ```python
     from bertopic.backend import MultiModalBackend
 
-    sentence_model = MultiModalBackend("clip-ViT-B-32")
+    sentence_model = MultiModalBackend("google/embeddinggemma-2")
     ```
 
     or  you can instantiate a model yourself:
@@ -41,7 +41,8 @@ class MultiModalBackend(BaseEmbedder):
     from bertopic.backend import MultiModalBackend
     from sentence_transformers import SentenceTransformer
 
-    embedding_model = SentenceTransformer("clip-ViT-B-32")
+    embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+    embedding_model.max_seq_length = 1024
     sentence_model = MultiModalBackend(embedding_model)
     ```
     """
@@ -78,7 +79,7 @@ class MultiModalBackend(BaseEmbedder):
                 raise ValueError(
                     "Please select a correct SentenceTransformers model: \n"
                     "`from sentence_transformers import SentenceTransformer` \n"
-                    "`model = SentenceTransformer('clip-ViT-B-32')`"
+                    "`model = SentenceTransformer('google/embeddinggemma-2')`"
                 )
 
         self.embedding_model = self.models[Modality.TEXT]
@@ -110,6 +111,7 @@ class MultiModalBackend(BaseEmbedder):
             Embeddings with shape (n, m) with `n` items that each have an
             embeddings size of `m`
         """
+        modality = Modality(modality)
         model = self.models[modality]
 
         # A model that takes this kind of media is told what each item is, so a path is never read as text.
