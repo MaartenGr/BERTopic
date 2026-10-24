@@ -22,9 +22,9 @@ topic_model = BERTopic(umap_model=umap_model)
 ```
 
 ## **Which embedding model should I choose?**
-Unfortunately, there is not a definitive list of the best models for each language, this highly depends on your data, the model, and your specific use case. However, the default model in BERTopic (`"all-MiniLM-L6-v2"`) works great for **English** documents. In contrast, for **multi-lingual** documents or any other language, `"paraphrase-multilingual-MiniLM-L12-v2"` has shown great performance.
+Unfortunately, there is not a definitive list of the best models for each language, this highly depends on your data, the model, and your specific use case. However, the default model in BERTopic, the text model of `"google/embeddinggemma-2"`, works great for **English** and **multi-lingual** documents alike, since it supports 100+ languages.
 
-If you want to use a model that provides a higher quality, but takes more computing time, then I would advise using `all-mpnet-base-v2` and `paraphrase-multilingual-mpnet-base-v2` instead.
+If you need speed more than quality, for example on a CPU, then I would advise using `"all-MiniLM-L6-v2"`, the default before BERTopic 1.0, or `"paraphrase-multilingual-MiniLM-L12-v2"` for other languages.
 
 **MTEB Leaderboard**
 New embedding models are released frequently and their performance keeps getting better. To keep track of the best embedding models out there, you can visit the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard). It is an excellent place for selecting the embedding that works best for you. For example, if you want the best of the best, then the top 5 models might the place to look.

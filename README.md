@@ -151,7 +151,7 @@ Think! It's the SCSI card doing...	49     49_windows_drive_dos_file	windows - dr
 1) I have an old Jasmine drive...	49     49_windows_drive_dos_file	windows - drive - docs...	0.038983       ...
 ```
 
-**`🔥 Tip`**: Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages. 
+**`🔥 Tip`**: The default embedding model supports 100+ languages. For documents that are not in English, use `BERTopic(language="multilingual")` so that keywords keep characters outside A-Z. 
 
 ## Fine-tune Topic Representations
 

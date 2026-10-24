@@ -4,7 +4,10 @@ import sys
 
 import pytest
 import numpy as np
+import torch
+from sentence_transformers import SentenceTransformer
 from bertopic import BERTopic
+from bertopic.backend import MultiModalBackend
 from bertopic.backend._utils import select_backend
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
@@ -103,6 +106,35 @@ def test_a_broken_optional_package_does_not_break_the_import():
 def test_select_backend_rejects_an_unrecognised_model():
     with pytest.raises(TypeError, match="not supported"):
         select_backend(lambda documents: documents)
+
+
+def test_the_default_is_the_text_model_of_embeddinggemma_2(monkeypatch):
+    # Downloaded in CI on purpose: a fresh install resolves the default's dependencies anew
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    backend = select_backend(None, language="english")
+    model = backend.embedding_model
+
+    # Text only: the image and audio encoders are not loaded, and media is not accepted
+    assert model[0].model.config.vision_config is None and model[0].model.config.audio_config is None
+    assert not isinstance(backend, MultiModalBackend)
+
+    # Set up for clustering, cut at 1,024 tokens since the model sets no length limit of its own, and in
+    # float32 on a CPU, where its bfloat16 weights would run several times slower without hardware support
+    assert model.default_prompt_name == "Clustering"
+    assert model.max_seq_length == 1024
+    assert next(model.parameters()).dtype == torch.float32
+    assert backend.embed_documents(["a rocket launch", "a recipe for cake"]).shape == (2, 768)
+
+
+def test_a_model_that_embeds_media_is_wrapped_to_embed_it(embedding_model, monkeypatch):
+    assert not isinstance(select_backend(embedding_model), MultiModalBackend)
+
+    # MiniLM stands in for a model that also takes images
+    monkeypatch.setattr(SentenceTransformer, "modalities", property(lambda model: ["text", "image"]))
+    backend = select_backend("sentence-transformers/all-MiniLM-L6-v2")
+
+    assert isinstance(backend, MultiModalBackend)
+    assert backend._hf_model == "sentence-transformers/all-MiniLM-L6-v2"
 
 
 @pytest.mark.parametrize(

@@ -1,11 +1,10 @@
 import numpy as np
-from PIL import Image
-from tqdm import tqdm
 from typing import List, Union
 from sentence_transformers import SentenceTransformer
 
 from bertopic._corpus import Modality
 from bertopic.backend import BaseEmbedder
+from bertopic.backend._sentencetransformers import load_sentence_transformer
 
 
 class MultiModalBackend(BaseEmbedder):
@@ -25,7 +24,7 @@ class MultiModalBackend(BaseEmbedder):
         audio_model: A sentence-transformers embedding model used to embed only audio.
         video_model: A sentence-transformers embedding model used to embed only video.
         code_model: A sentence-transformers embedding model used to embed only code.
-        batch_size: The sizes of image batches to pass
+        batch_size: The number of items to embed at a time
 
     Examples:
     To create a model, you can load in a string pointing to a
@@ -72,7 +71,7 @@ class MultiModalBackend(BaseEmbedder):
             if isinstance(model, SentenceTransformer):
                 self.models[modality] = model
             elif isinstance(model, str):
-                self.models[modality] = SentenceTransformer(model)
+                self.models[modality] = load_sentence_transformer(model)
             elif model is None:
                 self.models[modality] = self.models[Modality.TEXT]
             else:
@@ -113,27 +112,15 @@ class MultiModalBackend(BaseEmbedder):
         """
         model = self.models[modality]
 
-        if modality == Modality.IMAGE:
-            return self._embed_images(media, model, verbose)
+        # A model that takes this kind of media is told what each item is, so a path is never read as text.
+        # The clustering prompt and the length limit are for text, so media goes without both
+        if modality != Modality.TEXT and modality in model.modalities:
+            items = [{modality.value: item} for item in media]
+            return model.encode(
+                items,
+                batch_size=self.batch_size,
+                show_progress_bar=verbose,
+                prompt="",
+                processing_kwargs={"text": {"truncation": False}},
+            )
         return model.encode(media, batch_size=self.batch_size, show_progress_bar=verbose)
-
-    def _embed_images(self, images: List, model: SentenceTransformer, verbose: bool) -> np.ndarray:
-        """Embed images a batch at a time, opening any paths and closing them again.
-
-        `encode` decides what an item is from its Python type, so a path reaches the text
-        tower and returns an embedding of the filename rather than of the picture. Opening
-        them in batches keeps that correct without holding every image in memory at once,
-        which is why paths are the documented way to pass a large set.
-        """
-        embeddings = []
-        for start_index in tqdm(range(0, len(images), self.batch_size), disable=not verbose):
-            batch = images[start_index : start_index + self.batch_size]
-            opened = [Image.open(image) if isinstance(image, str) else image for image in batch]
-            embeddings.extend(model.encode(opened, show_progress_bar=False))
-
-            # Close only the handles we opened ourselves
-            for image, handle in zip(batch, opened):
-                if isinstance(image, str):
-                    handle.close()
-
-        return np.array(embeddings)

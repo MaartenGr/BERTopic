@@ -19,11 +19,11 @@ The methods are used as follows:
 topic_model = BERTopic().fit(my_docs)
 
 # Method 1 - safetensors
-embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_model = "google/embeddinggemma-2"
 topic_model.save("path/to/my/model_dir", serialization="safetensors", save_ctfidf=True, save_embedding_model=embedding_model)
 
 # Method 2 - pytorch
-embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_model = "google/embeddinggemma-2"
 topic_model.save("path/to/my/model_dir", serialization="pytorch", save_ctfidf=True, save_embedding_model=embedding_model)
 
 # Method 3 - pickle
@@ -108,7 +108,7 @@ There are number of parameters that may be worthwhile to know:
 * `serialization`
     * The type of serialization. Either `safetensors` or `pytorch`. Make sure to run `pip install safetensors` for safetensors.
 * `save_embedding_model`
-    * A pointer towards a HuggingFace model to be loaded in with SentenceTransformers. E.g., `sentence-transformers/all-MiniLM-L6-v2`
+    * A pointer towards a HuggingFace model to be loaded in with SentenceTransformers. E.g., `google/embeddinggemma-2`
 * `save_ctfidf`
     * Whether to save c-TF-IDF information
 

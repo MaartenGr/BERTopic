@@ -83,15 +83,7 @@ This overview describes each step in more detail such that you can get an intuit
 ###  **1. Embed documents**
 We start by converting our documents to numerical representations. Although there are many methods for doing so the default in BERTopic is [sentence-transformers](https://github.com/UKPLab/sentence-transformers). These models are often optimized for semantic similarity which helps tremendously in our clustering task. Moreover, they are great for creating either document- or sentence-embeddings.
 <br>
-In BERTopic, you can choose any sentence-transformers model but two models are set as defaults:
-
-* `"all-MiniLM-L6-v2"`
-* `"paraphrase-multilingual-MiniLM-L12-v2"`
-
-The first is an English language model trained specifically for semantic similarity tasks which works quite
-well for most use cases. The second model is very similar to the first with one major difference being that the
-`multilingual` models work for 50+ languages. This model is quite a bit larger than the first and is only selected if
-you select any language other than English.
+In BERTopic, you can choose any sentence-transformers model, but the default is the text model of [EmbeddingGemma 2](https://huggingface.co/google/embeddinggemma-2) (`"google/embeddinggemma-2"`). It supports 100+ languages, so it is the default whatever the language, and BERTopic gives it the prompt it was trained with for clustering. The full model also embeds images, audio and video, which you can load with `BERTopic(embedding_model="google/embeddinggemma-2")`.
 
 !!! tip Embedding models
 

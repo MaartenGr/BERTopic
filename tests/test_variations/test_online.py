@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from bertopic import BERTopic
+from bertopic.backend import _sentencetransformers
 from bertopic.vectorizers import OnlineCountVectorizer
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import IncrementalPCA
@@ -26,8 +27,12 @@ def online_model(**kwargs):
     )
 
 
-def test_partial_fit_selects_a_default_embedding_backend(chunks):
+def test_partial_fit_selects_a_default_embedding_backend(chunks, embedding_model, monkeypatch):
     """The documented example passes no `embedding_model` and used to raise on the first batch."""
+    # The default model has a test of its own, so MiniLM stands in for it here
+    monkeypatch.setattr(
+        _sentencetransformers, "load_sentence_transformer", lambda name, **kwargs: embedding_model
+    )
     topic_model = online_model()
 
     for chunk in chunks:

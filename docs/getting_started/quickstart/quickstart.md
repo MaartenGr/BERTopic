@@ -75,7 +75,7 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 ```
 
 !!! Tip "Multilingual"
-    Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages.
+    The default embedding model supports 100+ languages. For documents that are not in English, use `BERTopic(language="multilingual")` so that keywords keep characters outside A-Z.
 
 
 ## **Fine-tune Topic Representations**
@@ -152,11 +152,11 @@ The methods are as used as follows:
 topic_model = BERTopic().fit(my_docs)
 
 # Method 1 - safetensors
-embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_model = "google/embeddinggemma-2"
 topic_model.save("path/to/my/model_dir", serialization="safetensors", save_ctfidf=True, save_embedding_model=embedding_model)
 
 # Method 2 - pytorch
-embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_model = "google/embeddinggemma-2"
 topic_model.save("path/to/my/model_dir", serialization="pytorch", save_ctfidf=True, save_embedding_model=embedding_model)
 
 # Method 3 - pickle

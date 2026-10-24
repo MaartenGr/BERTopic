@@ -235,7 +235,7 @@ def push_to_hf_hub(
                        Either `safetensors` or `pytorch`
         save_embedding_model: A pointer towards a HuggingFace model to be loaded in with
                                 SentenceTransformers. E.g.,
-                                `sentence-transformers/all-MiniLM-L6-v2`
+                                `google/embeddinggemma-2`
         save_ctfidf: Whether to save c-TF-IDF information
     """
     if not _has_hf_hub:

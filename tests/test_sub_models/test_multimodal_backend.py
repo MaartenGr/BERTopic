@@ -8,22 +8,26 @@ routing table so the dispatch is covered without loading a model per modality.
 import copy
 
 import numpy as np
+import pytest
 
 from bertopic import BERTopic
 from bertopic._corpus import Corpus, Modality
 from bertopic.backend import MultiModalBackend
+from bertopic.backend._sentencetransformers import SentenceTransformerBackend
 
 
 class RecordingModel:
     """Stands in for a sentence-transformers model and remembers what it was asked to embed."""
 
-    def __init__(self, value: float = 0.0, dimension: int = 4):
+    def __init__(self, value: float = 0.0, dimension: int = 4, modalities: tuple = ("text",)):
         self.value = value
         self.dimension = dimension
+        self.modalities = list(modalities)
         self.seen = []
 
     def encode(self, items, **kwargs):
         self.seen.append(list(items))
+        self.kwargs = kwargs
         return np.full((len(items), self.dimension), self.value)
 
 
@@ -69,17 +73,28 @@ def test_embedding_documents_goes_through_the_text_model(embedding_model):
     assert backend.models[Modality.TEXT].seen == [["first", "second"]]
 
 
-def test_image_paths_are_opened_before_they_are_embedded(embedding_model, image_paths):
-    """`encode` reads an item's type, so a path would embed the filename as text."""
-    backend = MultiModalBackend(embedding_model, batch_size=2)
-    backend.models[Modality.IMAGE] = RecordingModel()
+def test_media_a_model_takes_is_passed_as_media(embedding_model):
+    """A path could be read as text, and the clustering prompt and the length limit are for text only."""
+    backend = MultiModalBackend(embedding_model)
+    backend.models[Modality.AUDIO] = RecordingModel(modalities=("text", "audio"))
 
-    embeddings = backend.embed_media(image_paths, Modality.IMAGE)
+    backend.embed_media(["clip.m4a"], Modality.AUDIO)
 
-    opened = [image for batch in backend.models[Modality.IMAGE].seen for image in batch]
-    assert len(opened) == len(image_paths)
-    assert all(hasattr(image, "size") for image in opened)
-    assert embeddings.shape == (len(image_paths), 4)
+    model = backend.models[Modality.AUDIO]
+    assert model.seen == [[{"audio": "clip.m4a"}]]
+    assert model.kwargs["prompt"] == ""
+    assert model.kwargs["processing_kwargs"] == {"text": {"truncation": False}}
+
+
+def test_media_without_text_needs_a_model_that_embeds_it(embedding_model, image_paths):
+    """A text-only model would embed every image as an empty string, so they would all look alike."""
+    with pytest.raises(ValueError, match="google/embeddinggemma-2"):
+        BERTopic(embedding_model=embedding_model).fit(images=image_paths)
+
+    # Captioned media is embedded through its captions, as on 0.17
+    topic_model = BERTopic(embedding_model=SentenceTransformerBackend(embedding_model))
+    captioned = Corpus.from_inputs(documents=["a cat", "a dog"], images=image_paths[:2])
+    assert topic_model._embed_corpus(captioned).shape == (2, embedding_model.get_embedding_dimension())
 
 
 def test_documents_reach_the_model_whole(embedding_model):
@@ -99,7 +114,7 @@ def test_text_only_input_does_not_take_the_image_branch(embedding_model):
 
     embeddings = topic_model._embed_corpus(Corpus.from_inputs(documents=["first", "second"]))
 
-    assert embeddings.shape == (2, embedding_model.get_sentence_embedding_dimension())
+    assert embeddings.shape == (2, embedding_model.get_embedding_dimension())
 
 
 def test_captioned_media_averages_both_channels(embedding_model, image_paths):

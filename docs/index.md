@@ -120,10 +120,6 @@ Think! It is the SCSI card doing...	    49     49_windows_drive_dos_file	windows
 1) I have an old Jasmine drive...	    49     49_windows_drive_dos_file	windows - drive - docs...	    0.038983       ...
 ```
 
-!!! tip "Multilingual"
-
-    Use `BERTopic(language="multilingual")` to select a model that supports 50+ languages.
-
 
 ## **Fine-tune Topic Representations**
 

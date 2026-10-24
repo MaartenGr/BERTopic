@@ -1,5 +1,5 @@
 # Embedding Models
-BERTopic starts with transforming our input documents into numerical representations. Although there are many ways this can be achieved, we typically use sentence-transformers (`"all-MiniLM-L6-v2"`) as it is quite capable of capturing the semantic similarity between documents.
+BERTopic starts with transforming our input documents into numerical representations. Although there are many ways this can be achieved, we typically use sentence-transformers (`"google/embeddinggemma-2"`) as it is quite capable of capturing the semantic similarity between documents, in 100+ languages.
 
 However, there is not one perfect
 embedding model and you might want to be using something entirely different for your use case. Since BERTopic assumes some independence among steps, we can allow for this modularity:
@@ -311,7 +311,7 @@ topic_model = BERTopic(embedding_model=embedding_model)
 
 ## **Multimodal**
 To create embeddings for both text and images in the same vector space, we can use the `MultiModalBackend`.
-This model uses a clip-vit based model that is capable of embedding text, images, or both:
+A sentence-transformers model that also embeds images, audio and video is used as the default in BERTopic that you can activate with `BERTopic(embedding_model="google/embeddinggemma-2")`. If you want to do it by hand, you can use the `MultiModalBackend` explicity to define the model:
 
 ```python
 import numpy as np

@@ -95,8 +95,8 @@ class BERTopic:
     c-TF-IDF to create dense clusters allowing for easily interpretable topics
     whilst keeping important words in the topic descriptions.
 
-    The default embedding model is `all-MiniLM-L6-v2` when selecting `language="english"`
-    and `paraphrase-multilingual-MiniLM-L12-v2` when selecting `language="multilingual"`.
+    The default embedding model is the text model of `google/embeddinggemma-2`, which supports 100+ languages.
+    To also model images, audio or video, pass `embedding_model="google/embeddinggemma-2"`.
 
     # TODO: Update docstrings
     Attributes:
@@ -169,12 +169,9 @@ class BERTopic:
         """BERTopic initialization.
 
         Arguments:
-            language: The main language used in your documents. The default sentence-transformers
-                      model for "english" is `all-MiniLM-L6-v2`. For a full overview of
-                      supported languages see bertopic.backend.languages. Select
-                      "multilingual" to load in the `paraphrase-multilingual-MiniLM-L12-v2`
-                      sentence-transformers model that supports 50+ languages.
-                      NOTE: This is not used if `embedding_model` is used.
+            language: The main language used in your documents, one of bertopic.backend.languages
+                      or "multilingual". The default embedding model, EmbeddingGemma 2, supports
+                      100+ languages.
             top_n_words: The number of words per topic to extract. Setting this
                          too high can negatively impact topic embeddings as topics
                          are typically best represented by at most 10 words.
@@ -2172,7 +2169,7 @@ class BERTopic:
         HuggingFace upon loading:
 
         ```python
-        embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+        embedding_model = "google/embeddinggemma-2"
         topic_model.save("model_dir", serialization="safetensors", save_embedding_model=embedding_model)
         ```
 
@@ -2268,7 +2265,7 @@ class BERTopic:
         or if you did not save the embedding model:
 
         ```python
-        BERTopic.load("model_dir", embedding_model="all-MiniLM-L6-v2")
+        BERTopic.load("model_dir", embedding_model="google/embeddinggemma-2")
         ```
         """
         file_or_dir = Path(path)
@@ -2419,7 +2416,7 @@ class BERTopic:
                            Either `safetensors` or `pytorch`
             save_embedding_model: A pointer towards a HuggingFace model to be loaded in with
                                   SentenceTransformers. E.g.,
-                                  `sentence-transformers/all-MiniLM-L6-v2`
+                                  `google/embeddinggemma-2`
             save_ctfidf: Whether to save c-TF-IDF information
 
 
@@ -2428,7 +2425,7 @@ class BERTopic:
         topic_model.push_to_hf_hub(
             repo_id="ArXiv",
             save_ctfidf=True,
-            save_embedding_model="sentence-transformers/all-MiniLM-L6-v2"
+            save_embedding_model="google/embeddinggemma-2"
         )
         ```
         """
@@ -2484,8 +2481,17 @@ class BERTopic:
         Returns:
             embeddings: One row of embeddings per row of the corpus, in corpus order.
         """
-        # Backends that only speak text have nothing to group
+        # Backends that only embed text have nothing to group, but would embed media without text as ""
         if not hasattr(self.embedding_model, "embed_media"):
+            if any(
+                not document and modality not in (Modality.TEXT, Modality.CODE)
+                for modality, document in zip(corpus.modality, corpus.documents)
+            ):
+                raise ValueError(
+                    "The embedding model only embeds text, so images, audio or video without documents "
+                    "cannot be embedded. Use a model that embeds them, such as "
+                    'BERTopic(embedding_model="google/embeddinggemma-2"), or pass a document describing each.'
+                )
             return self.embedding_model.embed_documents(corpus.documents, verbose=verbose)
 
         embeddings = None
@@ -3342,13 +3348,11 @@ def _create_model_from_files(
         ngram_range = ctfidf_config["vectorizer_model"]["params"]["ngram_range"]
         ctfidf_config["vectorizer_model"]["params"]["ngram_range"] = tuple(ngram_range)
 
-    # Select HF model through SentenceTransformers, unless `load` was given an embedding model
+    # Select HF model by name, as it was set up when fitted, unless `load` was given an embedding model
     embedding_model = BaseEmbedder()
     if load_embedding_model:
         try:
-            from sentence_transformers import SentenceTransformer
-
-            embedding_model = select_backend(SentenceTransformer(params["embedding_model"]))
+            embedding_model = select_backend(params["embedding_model"])
         except Exception:
             logger.warning(
                 "You are loading a BERTopic model without explicitly defining an embedding model."

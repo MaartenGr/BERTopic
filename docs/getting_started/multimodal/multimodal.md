@@ -6,7 +6,15 @@ Images need `pip install bertopic[vision]`, audio `bertopic[audio]`, and video `
 
 ## **Models**
 
-Two models make this work. The first is an **embedding model** that places your media in a vector space. Every example on this page uses `jina-embeddings-v5-omni-nano`, which embeds text, images, audio and video in one space, wrapped in `MultiModalBackend`:
+Two models make this work. The first is an **embedding model** that places your media in a vector space. The simplest is EmbeddingGemma 2, which embeds text, images, audio and video in one space. Passing its name is enough, since BERTopic loads it with every modality:
+
+```python
+from bertopic import BERTopic
+
+topic_model = BERTopic(embedding_model="google/embeddinggemma-2")
+```
+
+`BERTopic()` on its own loads only the text model of EmbeddingGemma 2, so media needs this one line. Every example on this page uses `jina-embeddings-v5-omni-nano` instead, which also embeds text, images, audio and video in one space, wrapped in `MultiModalBackend`:
 
 ```python
 from sentence_transformers import SentenceTransformer

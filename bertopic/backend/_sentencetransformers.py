@@ -1,9 +1,38 @@
 import numpy as np
+import torch
 from typing import List, Union
 from sentence_transformers import SentenceTransformer
-from sentence_transformers.models import StaticEmbedding
+from sentence_transformers.sentence_transformer.modules import StaticEmbedding
+from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
 
 from bertopic.backend import BaseEmbedder
+
+
+def load_sentence_transformer(name: str, **kwargs) -> SentenceTransformer:
+    """Load a sentence-transformers model by name, ready to embed documents for clustering.
+
+    A model trained with a clustering prompt, such as EmbeddingGemma 2, prepends it to every text.
+    A model that sets no length limit of its own, which transformers reports as `VERY_LARGE_INTEGER`,
+    embeds the first 1,024 tokens of a document rather than all of it, however long it is. And
+    without a GPU that runs bfloat16 natively, as on most CPUs, bfloat16 weights run several times
+    slower than float32 ones, so the model is loaded in float32 there.
+
+    Arguments:
+        name: The name of the model on the Hugging Face Hub, or a local path
+        **kwargs: Passed to `SentenceTransformer`, such as `config_kwargs`
+
+    Returns:
+        model: The loaded model
+    """
+    # Ampere and newer GPUs run bfloat16 natively
+    if not (torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8):
+        kwargs["model_kwargs"] = {"dtype": torch.float32, **kwargs.get("model_kwargs", {})}
+    model = SentenceTransformer(name, **kwargs)
+    if "Clustering" in model.prompts:
+        model.default_prompt_name = "Clustering"
+    if model.max_seq_length == VERY_LARGE_INTEGER:
+        model.max_seq_length = 1024
+    return model
 
 
 class SentenceTransformerBackend(BaseEmbedder):
@@ -17,6 +46,7 @@ class SentenceTransformerBackend(BaseEmbedder):
         model2vec: Indicates whether `embedding_model` is a model2vec model.
                    NOTE: Only works if `embedding_model` is a string.
                    Otherwise, you can pass the model2vec model directly to `embedding_model`.
+        **kwargs: Passed to `SentenceTransformer` when `embedding_model` is a name, such as `config_kwargs`.
 
     Examples:
     To create a model, you can load in a string pointing to a
@@ -50,7 +80,7 @@ class SentenceTransformerBackend(BaseEmbedder):
     ```
     """
 
-    def __init__(self, embedding_model: Union[str, SentenceTransformer], model2vec: bool = False):
+    def __init__(self, embedding_model: Union[str, SentenceTransformer], model2vec: bool = False, **kwargs):
         super().__init__()
 
         self._hf_model = None
@@ -60,7 +90,7 @@ class SentenceTransformerBackend(BaseEmbedder):
         elif isinstance(embedding_model, SentenceTransformer):
             self.embedding_model = embedding_model
         elif isinstance(embedding_model, str):
-            self.embedding_model = SentenceTransformer(embedding_model)
+            self.embedding_model = load_sentence_transformer(embedding_model, **kwargs)
             self._hf_model = embedding_model
         else:
             raise ValueError(

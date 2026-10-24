@@ -70,8 +70,8 @@ languages = [
 
 def select_backend(embedding_model, language: str | None = None, verbose: bool = False) -> BaseEmbedder:
     """Select an embedding model based on language or a specific provided model.
-    When selecting a language, we choose all-MiniLM-L6-v2 for English and
-    paraphrase-multilingual-MiniLM-L12-v2 for all other languages as it support 100+ languages.
+    Without a model, we choose the text model of EmbeddingGemma 2, which supports 100+ languages.
+    A sentence-transformers model that also embeds images, audio or video is wrapped to embed them.
     If sentence-transformers is not installed, in the case of a lightweight installation,
     a scikit-learn backend is default.
 
@@ -116,7 +116,16 @@ def select_backend(embedding_model, language: str | None = None, verbose: bool =
     if "sentence_transformers" in str(type(embedding_model)) or isinstance(embedding_model, str):
         from ._sentencetransformers import SentenceTransformerBackend
 
-        return SentenceTransformerBackend(embedding_model)
+        backend = SentenceTransformerBackend(embedding_model)
+
+        # Multimodal model
+        if {"image", "audio", "video"} & set(backend.embedding_model.modalities):
+            from ._multimodal import MultiModalBackend
+
+            multimodal_backend = MultiModalBackend(backend.embedding_model)
+            multimodal_backend._hf_model = backend._hf_model
+            return multimodal_backend
+        return backend
 
     # Hugging Face embeddings
     if "transformers" and "pipeline" in str(type(embedding_model)):
@@ -144,38 +153,32 @@ def select_backend(embedding_model, language: str | None = None, verbose: bool =
             "guide for the other libraries BERTopic supports."
         )
 
-    # Select embedding model based on language
-    if language:
-        try:
-            from ._sentencetransformers import SentenceTransformerBackend
+    # One model covers every supported language, so the language is only checked
+    if language and language.lower() not in [*languages, "en", "multilingual"]:
+        raise ValueError(
+            f"{language} is currently not supported. However, you can "
+            f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
+            "Else, please select a language from the following list:\n"
+            f"{languages}"
+        )
 
-            if language.lower() in ["English", "english", "en"]:
-                return SentenceTransformerBackend("sentence-transformers/all-MiniLM-L6-v2")
-            elif language.lower() in languages or language == "multilingual":
-                return SentenceTransformerBackend(
-                    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-                )
-            else:
-                raise ValueError(
-                    f"{language} is currently not supported. However, you can "
-                    f"create any embeddings yourself and pass it through fit_transform(docs, embeddings)\n"
-                    "Else, please select a language from the following list:\n"
-                    f"{languages}"
-                )
+    try:
+        from ._sentencetransformers import SentenceTransformerBackend
 
-        # A ModuleNotFoundError might be a lightweight installation
-        except ModuleNotFoundError as e:
-            if e.name != "sentence_transformers":
-                # Error occurred in a downstream module, probably not a lightweight install
-                raise e
-            # Whole sentence_transformers module is missing, probably a lightweight install
-            if verbose:
-                logger.info(
-                    "Automatically selecting lightweight scikit-learn embedding backend as sentence-transformers appears to not be installed."
-                )
-            pipe = make_pipeline(TfidfVectorizer(), TruncatedSVD(100))
-            return SklearnEmbedder(pipe)
+        # EmbeddingGemma 2's text model, without the image and audio encoders that only media needs
+        return SentenceTransformerBackend(
+            "google/embeddinggemma-2", config_kwargs={"vision_config": None, "audio_config": None}
+        )
 
-    from ._sentencetransformers import SentenceTransformerBackend
-
-    return SentenceTransformerBackend("sentence-transformers/all-MiniLM-L6-v2")
+    # A ModuleNotFoundError might be a lightweight installation
+    except ModuleNotFoundError as e:
+        if e.name != "sentence_transformers":
+            # Error occurred in a downstream module, probably not a lightweight install
+            raise e
+        # Whole sentence_transformers module is missing, probably a lightweight install
+        if verbose:
+            logger.info(
+                "Automatically selecting lightweight scikit-learn embedding backend as sentence-transformers appears to not be installed."
+            )
+        pipe = make_pipeline(TfidfVectorizer(), TruncatedSVD(100))
+        return SklearnEmbedder(pipe)

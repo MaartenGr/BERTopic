@@ -9,16 +9,9 @@ such as HDBSCAN and UMAP.
 When instantiating BERTopic, there are several hyperparameters that you can directly adjust that could significantly improve the performance of your topic model. In this section, we will go through the most impactful parameters in BERTopic and directions on how to optimize them.
 
 ### **language**
-The `language` parameter is used to simplify the selection of models for those who are not familiar with sentence-transformers models.
+The `language` parameter tells BERTopic the main language of your documents, such as `language = "english"` or `language = "multilingual"`.
 
-In essence, there are two options to choose from:
-
-* `language = "english"` or
-* `language = "multilingual"`
-
-The English model is "all-MiniLM-L6-v2" and can be found [here](https://www.sbert.net/docs/pretrained_models.html). It is the default model that is used in BERTopic and works great for English documents.
-
-The multilingual model is "paraphrase-multilingual-MiniLM-L12-v2" and supports over 50+ languages which can be found [here](https://www.sbert.net/docs/pretrained_models.html). The model is very similar to the base model but is trained on many languages and has a slightly different architecture.
+The default embedding model is the text model of [EmbeddingGemma 2](https://huggingface.co/google/embeddinggemma-2), which supports 100+ languages, so it is the same model whichever language you select. `language = "english"` also removes every character other than A-Z, a-z, 0-9 and spaces from the text that keywords are extracted from, so select another language for documents in other scripts.
 
 ### **top_n_words**
 
