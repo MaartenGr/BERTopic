@@ -101,7 +101,7 @@ class MultiModalRepresentation(TextConverter):
         image_height: int = 600,
         image_squares: bool = False,
         prompt: str = "Describe this image in one short sentence.",
-        batch_size: int = 32,
+        batch_size: int = 4,
     ):
         # A modality without its own model is described by the main one
         self.models = {}

@@ -6,6 +6,9 @@ from bertopic._corpus import Modality
 from bertopic.backend import BaseEmbedder
 from bertopic.backend._sentencetransformers import load_sentence_transformer
 
+# One video or recording can run to thousands of tokens, so media is embedded a few items at a time
+MEDIA_BATCH_SIZES = {Modality.IMAGE: 16, Modality.AUDIO: 4, Modality.VIDEO: 1}
+
 
 class MultiModalBackend(BaseEmbedder):
     """Multimodal backend using Sentence-transformers.
@@ -24,7 +27,8 @@ class MultiModalBackend(BaseEmbedder):
         audio_model: A sentence-transformers embedding model used to embed only audio.
         video_model: A sentence-transformers embedding model used to embed only video.
         code_model: A sentence-transformers embedding model used to embed only code.
-        batch_size: The number of items to embed at a time
+        batch_size: The number of items to embed at a time. Images, audio and video are capped at
+                    smaller batches of their own to prevent using too much memory.
 
     Examples:
     To create a model, you can load in a string pointing to a
@@ -113,6 +117,7 @@ class MultiModalBackend(BaseEmbedder):
         """
         modality = Modality(modality)
         model = self.models[modality]
+        batch_size = min(self.batch_size, MEDIA_BATCH_SIZES.get(modality, self.batch_size))
 
         # A model that takes this kind of media is told what each item is, so a path is never read as text.
         # The clustering prompt and the length limit are for text, so media goes without both
@@ -120,9 +125,9 @@ class MultiModalBackend(BaseEmbedder):
             items = [{modality.value: item} for item in media]
             return model.encode(
                 items,
-                batch_size=self.batch_size,
+                batch_size=batch_size,
                 show_progress_bar=verbose,
                 prompt="",
                 processing_kwargs={"text": {"truncation": False}},
             )
-        return model.encode(media, batch_size=self.batch_size, show_progress_bar=verbose)
+        return model.encode(media, batch_size=batch_size, show_progress_bar=verbose)

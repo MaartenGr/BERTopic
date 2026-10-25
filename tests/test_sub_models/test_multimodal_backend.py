@@ -87,6 +87,14 @@ def test_media_a_model_takes_is_passed_as_media(embedding_model, modality):
     assert model.kwargs["prompt"] == ""
     assert model.kwargs["processing_kwargs"] == {"text": {"truncation": False}}
 
+    # A recording can run to thousands of tokens, so it goes in a smaller batch than text
+    assert model.kwargs["batch_size"] < backend.batch_size
+
+    # An even smaller batch size of your own is kept
+    backend.batch_size = 1
+    backend.embed_media(["clip.m4a"], modality)
+    assert model.kwargs["batch_size"] == 1
+
 
 def test_media_without_text_needs_a_model_that_embeds_it(embedding_model, image_paths):
     """A text-only model would embed every image as an empty string, so they would all look alike."""
