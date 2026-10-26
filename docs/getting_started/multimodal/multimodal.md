@@ -14,22 +14,16 @@ from bertopic import BERTopic
 topic_model = BERTopic(embedding_model="google/embeddinggemma-2")
 ```
 
-`BERTopic()` on its own loads only the text model of EmbeddingGemma 2, so media needs this one line. Every example on this page uses `jina-embeddings-v5-omni-nano` instead, which also embeds text, images, audio and video in one space, wrapped in `MultiModalBackend`:
+`BERTopic()` on its own loads only the text model of EmbeddingGemma 2, so media needs this one line. In the examples on this page, we load the model once and pass it to each topic model instead:
 
 ```python
 from sentence_transformers import SentenceTransformer
-from bertopic.backend import MultiModalBackend
 
-model = SentenceTransformer(
-    "jinaai/jina-embeddings-v5-omni-nano",
-    trust_remote_code=True,
-    model_kwargs={"default_task": "retrieval"},
-    default_prompt_name="document",
-)
-embedding_model = MultiModalBackend(model)
+embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
+embedding_model.max_seq_length = 1024
 ```
 
-The `retrieval` setting with the `document` prompt is the one that gives each item its own embedding; under `clustering`, audio clips all end up with nearly the same one. The model needs `transformers>=5`. Each kind can also be given an embedding model of its own (`image_model=`, `audio_model=`, `video_model=` and `code_model=`), but rows of different kinds are only comparable when one model embeds them all.
+Do note that we set the prompt and the maximum sequence length ourselves here, which BERTopic does automatically when you pass the name of the model. Using the `MultiModalBackend`, each kind can also be given an embedding model of its own (`image_model=`, `audio_model=`, `video_model=` and `code_model=`), but rows of different kinds are only comparable when the same model embeds them all.
 
 The second is a **representation model**. `MultiModalRepresentation` describes up to nine items of each kind per topic, with a model for each kind, and is passed as an additional aspect. Each example below builds the one it needs, such as:
 
@@ -192,11 +186,11 @@ topic_model = BERTopic(
     embedding_model=embedding_model,
     vectorizer_model=CountVectorizer(stop_words="english"),
     representation_model=representation_model,
+    min_topic_size=5,
 )
 topics, probs = topic_model.fit_transform(video=videos)
 ```
 
-The vision model describes three frames of each clip (`nr_frames`), taken from the middle of equal stretches of the clip so that black openings and endings are skipped, and the descriptions of a clip's frames are joined into one. A topic needs ten items by default, so for a folder of only a few dozen clips, lower `min_topic_size`.
 
 ## **Code**
 
@@ -299,3 +293,9 @@ Under each thumbnail is that row's own text, so a caption, a transcript or a doc
 ## **Saving**
 
 With `serialization="safetensors"` or `"pytorch"`, `topic_model.save` keeps each topic's summaries, with collages and frame sheets as images and montages as audio files. Representative items are kept only as their paths, since the media they point to is already on disk, so pass your media as paths if you want them back after loading. The default, `pickle`, pickles the whole model, media included.
+
+Since we created the embedding model ourselves, we pass its name when saving so that it is loaded together with the topic model:
+
+```python
+topic_model.save("my_model", serialization="safetensors", save_embedding_model="google/embeddinggemma-2")
+```
