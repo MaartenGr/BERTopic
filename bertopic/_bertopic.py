@@ -999,16 +999,17 @@ class BERTopic:
         if self.embedding_model is None:
             raise Exception("This method can only be used if you did not use custom embeddings.")
 
-        topic_list = list(self.topic_representations_.keys())
-        topic_list.sort()
+        # The outlier topic holds what fits no topic, so it is not a topic to find
+        topic_list = self._topics.topic_ids(outliers=False)
+        topic_embeddings = self.topic_embeddings_[self._outliers :]
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
             search_terms = [search_term] if isinstance(search_term, str) else search_term
-            search_embedding = self.embedding_model.embed_documents(search_terms, verbose=False).mean(axis=0)
+            search_embedding = self.embedding_model.embed_words(search_terms, verbose=False).mean(axis=0)
         elif image is not None:
             search_embedding = self.embedding_model.embed_media([image], Modality.IMAGE).flatten()
-        sims = cosine_similarity(search_embedding.reshape(1, -1), self.topic_embeddings_).flatten()
+        sims = cosine_similarity(search_embedding.reshape(1, -1), topic_embeddings).flatten()
 
         # Extract topics most similar to search_term
         ids = np.argsort(sims)[-top_n:]
@@ -2849,7 +2850,7 @@ class BERTopic:
             # Extract embeddings for all words in all topics
             topic_words = [self.get_topic(topic) for topic in topic_list]
             topic_words = [word[0] for topic in topic_words for word in topic]
-            word_embeddings = self.embedding_model.embed_documents(topic_words, verbose=False)
+            word_embeddings = self.embedding_model.embed_words(topic_words, verbose=False)
 
             # Take the weighted average of word embeddings in a topic based on their c-TF-IDF value
             # The embeddings var is a single numpy matrix and therefore slicing is necessary to

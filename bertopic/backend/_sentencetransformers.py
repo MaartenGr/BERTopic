@@ -11,7 +11,8 @@ from bertopic.backend import BaseEmbedder
 def load_sentence_transformer(name: str, **kwargs) -> SentenceTransformer:
     """Load a sentence-transformers model by name, ready to embed documents for clustering.
 
-    A model trained with a clustering prompt, such as EmbeddingGemma 2, prepends it to every text.
+    A model trained with a clustering prompt, such as EmbeddingGemma 2, prepends it to every document,
+    while words, which BERTopic compares with documents, go without it (see `embed_words`).
     A model that sets no length limit of its own, which transformers reports as `VERY_LARGE_INTEGER`,
     embeds the first 1,024 tokens of a document rather than all of it, however long it is. And
     without a GPU that runs bfloat16 natively, as on most CPUs, bfloat16 weights run several times
@@ -114,3 +115,19 @@ class SentenceTransformerBackend(BaseEmbedder):
         """
         embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
         return embeddings
+
+    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n words into an n-dimensional matrix of embeddings.
+
+        A clustering prompt is meant for texts that are clustered together, and on a few
+        words it outweighs what they say, so words are embedded without the model's prompt.
+
+        Arguments:
+            words: A list of words to be embedded
+            verbose: Controls the verbosity of the process
+
+        Returns:
+            Word embeddings with shape (n, m) with `n` words
+            that each have an embeddings size of `m`
+        """
+        return self.embedding_model.encode(words, show_progress_bar=verbose, prompt="")

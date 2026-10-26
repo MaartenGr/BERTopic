@@ -252,6 +252,15 @@ def test_find_topics_with_a_list(base_topic_model):
     assert len(topics) == 5
 
 
+def test_find_topics_leaves_out_the_outlier_topic(base_topic_model):
+    # The outlier topic holds what fits no topic, so it is not a topic to find
+    topics = set(base_topic_model.topic_sizes_)
+    assert -1 in topics
+
+    found, _ = base_topic_model.find_topics("car", top_n=len(topics))
+    assert set(found) == topics - {-1}
+
+
 def test_mmr_with_fewer_words_than_top_n():
     words = ["space", "nasa", "orbit"]
     selected = mmr(np.ones((1, 3)), np.eye(3), words, top_n=10)

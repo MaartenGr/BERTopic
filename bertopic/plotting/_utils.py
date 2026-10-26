@@ -45,7 +45,7 @@ def select_topics(
     """
     all_topic_ids = topic_model._topics.topic_ids(outliers=False)
     if topics is not None:
-        topics = list(topics)
+        topics = list(dict.fromkeys(topics))
     elif top_n_topics is not None:
         frequencies = topic_model._topics.frequencies()
         top_n = sorted(all_topic_ids, key=lambda t: frequencies.get(t, 0), reverse=True)[:top_n_topics]

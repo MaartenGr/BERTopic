@@ -53,3 +53,10 @@ def test_barchart_outlier(model, request):
     assert len(fig.to_dict()["layout"]["annotations"]) == 5
     for annotation in fig.to_dict()["layout"]["annotations"]:
         assert int(annotation["text"].split(" ")[-1]) != -1
+
+
+def test_a_topic_listed_twice_is_drawn_once(kmeans_pca_topic_model):
+    # Every plot that takes `topics=` selects them the same way
+    fig = kmeans_pca_topic_model.visualize_barchart(topics=[1, 0, 1])
+
+    assert len(fig.to_dict()["layout"]["annotations"]) == 2

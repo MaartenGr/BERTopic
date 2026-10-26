@@ -101,6 +101,24 @@ class MultiModalBackend(BaseEmbedder):
         """
         return self.embed_media(documents, Modality.TEXT, verbose)
 
+    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n words into an n-dimensional matrix of embeddings.
+
+        A clustering prompt is meant for texts that are clustered together, and on a few
+        words it outweighs what they say, so words are embedded without the model's prompt.
+
+        Arguments:
+            words: A list of words to be embedded
+            verbose: Controls the verbosity of the process
+
+        Returns:
+            Word embeddings with shape (n, m) with `n` words
+            that each have an embeddings size of `m`
+        """
+        return self.models[Modality.TEXT].encode(
+            words, batch_size=self.batch_size, show_progress_bar=verbose, prompt=""
+        )
+
     def embed_media(
         self, media: List, modality: Modality = Modality.TEXT, verbose: bool = False
     ) -> np.ndarray:

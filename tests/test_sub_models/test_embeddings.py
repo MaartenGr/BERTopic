@@ -7,8 +7,10 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
 from bertopic import BERTopic
-from bertopic.backend import MultiModalBackend
+from bertopic.backend import BaseEmbedder, MultiModalBackend
 from bertopic.backend._utils import select_backend
+from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic.representation import KeyBERTInspired
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -124,6 +126,70 @@ def test_the_default_is_the_text_model_of_embeddinggemma_2(monkeypatch):
     assert model.max_seq_length == 1024
     assert next(model.parameters()).dtype == torch.float32
     assert backend.embed_documents(["a rocket launch", "a recipe for cake"]).shape == (2, 768)
+
+    # On a few words the prompt outweighs what they say, so words go without it and stay further apart
+    phrases = ["gun control", "ice hockey playoffs"]
+    as_words = cosine_similarity(backend.embed_words(phrases))[0, 1]
+    assert as_words < cosine_similarity(backend.embed_documents(phrases))[0, 1]
+
+
+def test_words_are_embedded_as_documents_unless_a_backend_says_otherwise(embedding_model):
+    class DocumentsOnly(BaseEmbedder):
+        def embed_documents(self, documents, verbose=False):
+            return embedding_model.encode(documents)
+
+    assert DocumentsOnly().embed_words(["space shuttle"]).shape == (1, 384)
+
+
+class WordRecorder(BaseEmbedder):
+    """Embeds with MiniLM and remembers what it was asked to embed as words."""
+
+    def __init__(self, embedding_model):
+        super().__init__(embedding_model)
+        self.words = []
+
+    def embed(self, documents, verbose=False):
+        return self.embedding_model.encode(documents)
+
+    def embed_words(self, words, verbose=False):
+        self.words.extend(words)
+        return self.embed(words)
+
+
+# Each compares short texts with documents or topics, set up when the model is built or used after the fit
+SHORT_TEXTS = {
+    "find_topics": ({}, lambda topic_model, documents: topic_model.find_topics("space shuttle")),
+    "zero-shot labels": ({"zeroshot_topic_list": ["space travel"], "zeroshot_min_similarity": 0.3}, None),
+    "seed words": ({"seed_topic_list": [["space", "nasa", "orbit"]]}, None),
+    "KeyBERTInspired": ({"representation_model": KeyBERTInspired()}, None),
+    "approximate_distribution": (
+        {},
+        lambda topic_model, documents: topic_model.approximate_distribution(
+            documents[:2], use_embedding_model=True
+        ),
+    ),
+}
+
+
+@pytest.mark.parametrize("case", SHORT_TEXTS)
+def test_short_texts_compared_with_documents_are_embedded_as_words(
+    case, documents, document_embeddings, embedding_model
+):
+    settings, use = SHORT_TEXTS[case]
+    backend = WordRecorder(embedding_model)
+    topic_model = BERTopic(
+        embedding_model=backend,
+        umap_model=BaseDimensionalityReduction(),
+        hdbscan_model=KMeans(n_clusters=5, random_state=42),
+        **settings,
+    )
+    topic_model.fit(documents, document_embeddings)
+    if use is not None:
+        use(topic_model, documents)
+
+    # The short texts reach `embed_words`, and documents, such as KeyBERTInspired's representative ones, do not
+    assert backend.words
+    assert not set(backend.words) & {document for document in documents if len(document.split()) > 4}
 
 
 def test_a_model_that_embeds_media_is_wrapped_to_embed_it(embedding_model, monkeypatch):

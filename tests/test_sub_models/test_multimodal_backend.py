@@ -73,6 +73,17 @@ def test_embedding_documents_goes_through_the_text_model(embedding_model):
     assert backend.models[Modality.TEXT].seen == [["first", "second"]]
 
 
+def test_words_reach_the_text_model_without_its_prompt(embedding_model):
+    """Search terms, labels and keywords are compared with documents, which the clustering prompt is not for."""
+    backend = MultiModalBackend(embedding_model)
+    backend.models = {modality: RecordingModel() for modality in Modality}
+
+    backend.embed_words(["space shuttle"])
+
+    assert backend.models[Modality.TEXT].seen == [["space shuttle"]]
+    assert backend.models[Modality.TEXT].kwargs["prompt"] == ""
+
+
 @pytest.mark.parametrize("modality", [Modality.AUDIO, "audio"], ids=["enum", "string"])
 def test_media_a_model_takes_is_passed_as_media(embedding_model, modality):
     """A path could be read as text, and the clustering prompt and the length limit are for text only."""

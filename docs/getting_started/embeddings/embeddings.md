@@ -362,6 +362,10 @@ class CustomEmbedder(BaseEmbedder):
         embeddings = self.embedding_model.encode(documents, show_progress_bar=verbose)
         return embeddings
 
+    def embed_words(self, words, verbose=False):
+        embeddings = self.embedding_model.encode(words, show_progress_bar=verbose, prompt="")
+        return embeddings
+
 # Create custom backend
 embedding_model = SentenceTransformer("google/embeddinggemma-2", default_prompt_name="Clustering")
 embedding_model.max_seq_length = 1024
@@ -370,6 +374,8 @@ custom_embedder = CustomEmbedder(embedding_model=embedding_model)
 # Pass custom backend to bertopic
 topic_model = BERTopic(embedding_model=custom_embedder)
 ```
+
+Short texts that BERTopic compares with your documents, such as the search term in `.find_topics` or the labels in zero-shot topic modeling, are passed to `embed_words`. If you do not define it, they are embedded like your documents. In this example, we embed them without the `Clustering` prompt since a prompt that is meant for documents can overpower a few words.
 
 ## **Custom Embeddings**
 The base models in BERTopic are BERT-based models that work well with document similarity tasks. Your documents,

@@ -27,8 +27,26 @@ class BaseEmbedder:
         """
         pass
 
-    def embed_documents(self, document: List[str], verbose: bool = False) -> np.ndarray:
+    def embed_words(self, words: List[str], verbose: bool = False) -> np.ndarray:
         """Embed a list of n words into an n-dimensional
+        matrix of embeddings.
+
+        Words are the short texts BERTopic compares with documents or topics, such as
+        a search term, a zero-shot label or a keyword. They are embedded as documents,
+        unless a backend embeds them differently, such as without a prompt meant for documents.
+
+        Arguments:
+            words: A list of words to be embedded
+            verbose: Controls the verbosity of the process
+
+        Returns:
+            Word embeddings with shape (n, m) with `n` words
+            that each have an embeddings size of `m`
+        """
+        return self.embed_documents(words, verbose)
+
+    def embed_documents(self, document: List[str], verbose: bool = False) -> np.ndarray:
+        """Embed a list of n documents into an n-dimensional
         matrix of embeddings.
 
         Arguments:
