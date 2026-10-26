@@ -42,7 +42,7 @@ dependencies = [
     "plotly>=4.7.0",
     "scikit-learn>=1.0",
     "sentence-transformers>=6.1.0",
-    "transformers>=5.19.0",
+    "transformers[vision]>=5.19.0",
     "tqdm>=4.41.1", # To prevent conflicts with `uv` dependency manager
     "llvmlite>0.36.0",
     "narwhals>=2.0",
