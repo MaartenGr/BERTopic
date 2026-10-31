@@ -2186,9 +2186,9 @@ class BERTopic:
         """
         if serialization == "pickle":
             logger.warning(
-                "When you use `pickle` to save/load a BERTopic model,"
-                "please make sure that the environments in which you save"
-                "and load the model are **exactly** the same. The version of BERTopic,"
+                "When you use `pickle` to save/load a BERTopic model, "
+                "please make sure that the environments in which you save "
+                "and load the model are **exactly** the same. The version of BERTopic, "
                 "its dependencies, and python need to remain the same."
             )
 
@@ -2272,15 +2272,22 @@ class BERTopic:
         """
         file_or_dir = Path(path)
 
-        # Load from Pickle
+        # Load from Pickle, which only works with the versions that saved it
         if file_or_dir.is_file():
             with open(file_or_dir, "rb") as file:
-                if embedding_model:
+                try:
                     topic_model = joblib.load(file)
-                    topic_model.embedding_model = select_backend(embedding_model, verbose=topic_model.verbose)
-                else:
-                    topic_model = joblib.load(file)
-                return topic_model
+                except (AttributeError, ModuleNotFoundError) as error:
+                    raise ValueError(
+                        "This model could not be unpickled. A pickle needs BERTopic and the packages it "
+                        "was saved with, at the same versions, so a model that BERTopic 0.17.4 or earlier "
+                        "pickled does not load in 1.0. Load it with those versions, save it again with "
+                        'serialization="safetensors", and load that folder instead. See '
+                        "https://maartengr.github.io/BERTopic/migration.html#saved-models"
+                    ) from error
+            if embedding_model:
+                topic_model.embedding_model = select_backend(embedding_model, verbose=topic_model.verbose)
+            return topic_model
 
         # Load from directory or HF
         if file_or_dir.is_dir():

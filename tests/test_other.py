@@ -19,6 +19,22 @@ def test_load_save_model():
     assert model.top_n_words == loaded_model.top_n_words
 
 
+@pytest.mark.parametrize(
+    "pickled",
+    [
+        # A pickle from 0.17.4 holds its TopicMapper, a class that 1.0 no longer has,
+        b"cbertopic._bertopic\nTopicMapper\n.",
+        # and can hold a VisualRepresentation, from a module that 1.0 no longer has
+        b"cbertopic.representation._visual\nVisualRepresentation\n.",
+    ],
+)
+def test_load_a_model_pickled_before_1_0(tmp_path, pickled):
+    path = tmp_path / "model"
+    path.write_bytes(pickled)
+    with pytest.raises(ValueError, match="safetensors"):
+        BERTopic.load(path)
+
+
 def test_get_params():
     model = BERTopic()
     params = model.get_params()

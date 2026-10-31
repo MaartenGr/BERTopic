@@ -6,6 +6,204 @@ hide:
 # Changelog
 
 
+## **Version 1.0.0rc1**
+*Release date: 26 October, 2026*
+
+It's finally here! This is the first release candidate of BERTopic 1.0 (there will definitely be more).
+
+My idea was to rewrite a lot of what was under the hood while its API stays as it was wherever possible. This would make it easier for future development and increase stability of the underlying code.
+
+As with release candidates, you can only install it when explicitly running:
+
+`pip install bertopic==1.0.0rc1`
+
+Nothing changes for those that are using BERTopic in production or in their pipelines, you will still install `0.17.4` unless you specifically run the above command.
+
+If anything breaks (and I have no doubt it will with this first candidate), please let me know in the [issues](https://github.com/MaartenGr/BERTopic/issues).
+
+Some code will need a small update, which the [migration guide](https://maartengr.github.io/BERTopic/migration.html) shows for every change.
+
+<figure markdown>
+  ![EmbeddingGemma 2](img/embeddinggemma_2.png)
+  <figcaption>EmbeddingGemma 2, the new default embedding model, embeds text, code, images, video and audio in one space.</figcaption>
+</figure>
+
+<h3><b>Highlights:</a></b></h3>
+
+* [**Multimodal**](https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html) topic modeling with text, images, audio, video and code
+    * Pass them to `.fit_transform` with `images=`, `audio=`, `video=` and `code=`, with or without documents
+    * `MultiModalRepresentation` describes images and frames of videos with a vision model and transcribes audio with a speech model, such as Whisper, so topics of media get keywords too
+    * See each topic's collage, frame sheet and audio montage with `.visualize_media()`
+* [**EmbeddingGemma 2**](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) is the new default embedding model
+    * `BERTopic()` uses its text model for every language, and `BERTopic(embedding_model="google/embeddinggemma-2")` also embeds images, audio and video in the same space
+    * BERTopic embeds the first 1,024 tokens of each document, since the model sets no length limit of its own
+* [**LLM representations**](https://maartengr.github.io/BERTopic/getting_started/representation/llm.html) were rewritten around one request loop, with `Ollama` as a new representation model, structured output and current default models
+* Get polars instead of pandas dataframes with `bertopic.set_output("polars")`
+* Added support for Python 3.14
+* 80 issues fixed, all listed below
+
+<h3><b>Multimodal:</a></b></h3>
+
+* `.fit`, `.fit_transform`, `.transform`, `.update_topics`, `.merge_topics`, `.reduce_topics` and `.reduce_outliers` take `images=`, `audio=`, `video=` and `code=`
+    * With as many documents as items, each document describes the item at its position, as a caption does
+    * With any other number, the documents are rows of their own, so you can model unrelated documents and media together
+    * Media can be passed as file paths, which is advised, or in memory
+* `MultiModalBackend` takes one model for every kind, or a model for each kind with `image_model=`, `audio_model=`, `video_model=` and `code_model=`
+    * `.embed_media(items, modality)` embeds items of one kind, such as `.embed_media(images, "image")`
+    * Media is embedded a few items at a time (16 images, 4 recordings or 1 video), since one video can be thousands of tokens
+* `MultiModalRepresentation` replaces `VisualRepresentation`
+    * It describes up to nine items of each kind per topic, with a model for each kind (`image_model=`, `audio_model=` and `video_model=`), and the descriptions become the topic's keywords
+    * A model can be a name, a transformers pipeline or any callable, such as a call to an API
+    * Items that already have text, such as captioned images, keep it
+    * Video is described through three frames of each clip, taken from the middle of equal stretches of the clip, which you can change with `nr_frames=`
+* Every topic gets one summary per kind of media: a collage of its images, a frame sheet of its videos and a montage of the first two seconds of its recordings
+    * `representative_items_` holds every topic's representative media, and `representative_images_` its collage
+    * `.get_topic_info()` shows them in a `Representative_Items` column
+* `.visualize_media()` shows each topic's collage, frame sheet and montage in a table, which a notebook shows inline
+* `.visualize_document_datamap()` takes the same media as `.fit`, and shows an image, or a video's middle frame, when you hover over its point
+* Saving with `safetensors` or `pytorch` keeps every summary, and the representative items as their paths
+* Two new extras: `pip install bertopic[audio]` and `pip install bertopic[video]`
+
+<h3><b>Embeddings:</a></b></h3>
+
+* EmbeddingGemma 2 (`google/embeddinggemma-2`) is the default embedding model for every language
+    * `BERTopic()` loads only its text model, and passing its name loads the full model, which also embeds images, audio and video
+    * Documents get its `Clustering` prompt, and short texts that BERTopic compares with documents, such as search terms, zero-shot labels, seed words and keywords, are embedded without it
+    * Without a GPU that runs bfloat16 natively, as on most CPUs, a model loaded by name runs in float32, which is several times faster there
+* A custom backend can define `embed_words` to embed those short texts differently from documents
+* `.update_topics` takes `embeddings=` to calculate the topic embeddings from your document embeddings
+
+<h3><b>Representations:</a></b></h3>
+
+* `.get_representation(topic, aspect)` returns a topic's full representation, such as its `Keywords`, an LLM's `Label`, a `StructuredJSON` answer or its `Media`, while `.get_topic` keeps returning words and scores
+* LLM representations share one request loop, so a custom LLM representation only needs to implement `_generate(prompt)`
+    * Added `Ollama` as a representation model
+    * Pass `json_schema=True`, or a schema of your own, for a structured answer, which is kept as a `StructuredJSON` representation
+    * An answer without a label, or a prompt that OpenAI refuses for its content, gets "No label returned" and a warning, so one topic does not stop the fit
+    * `OpenAI` and `LiteLLM` default to `gpt-6-luna` and `Cohere` to `command-r7b-12-2024`
+* `TextGeneration` sends models with a chat template their prompt as a chat message, and uses `DEFAULT_CHAT_PROMPT` for them by default
+* `LlamaCPP("model.gguf")` works again and uses the chat template in the GGUF, with a 16,384-token context
+
+<h3><b>Changes in behaviour:</a></b></h3>
+
+These change your output without raising an error:
+
+* `probabilities_` has one column per topic, including the outlier topic when there is one, and each row sums to 1. The matrix from `.transform` has the same columns, and `.delete_topics` adds the probabilities of a deleted topic to the outlier topic
+* Representative documents are sampled differently than in 0.17, so they can differ, and a topic no longer lists the same document twice
+* `evolution_tuning=True`, the default in `.topics_over_time`, now averages each timestamp with the previous one as documented, and global tuning uses each topic's own row
+* `.update_topics` keeps your vectorizer, c-TF-IDF and representation models instead of resetting them to their defaults
+* `.topics_over_time`, `.topics_per_class` and `.hierarchical_topics` show c-TF-IDF keywords. Pass `use_representation_model=True` to run your representation model on every timestamp, class or merged topic
+* `nr_topics` and `.reduce_topics` never merge zero-shot topics, which keep their names, so `nr_topics` must be larger than the number of zero-shot topics plus the outlier topic
+* `MaximalMarginalRelevance` without an embedding model returns its `top_n_words` instead of 30 words
+* `.find_topics` no longer returns the outlier topic
+* A topic that is listed twice in a plot's `topics=` is drawn once
+* `.get_document_info(docs, df=df)` puts the columns of `df` first
+
+<h3><b>API Changes:</a></b></h3>
+
+The [migration guide](https://maartengr.github.io/BERTopic/migration.html) shows the code for each of these:
+
+* `VisualRepresentation` is replaced by `MultiModalRepresentation(image_model=...)`
+* Fitted attributes, such as `topics_`, `topic_sizes_` and `c_tf_idf_`, can no longer be overwritten. Use `.update_topics(docs, topics=new_topics)` instead, and remove `topic_model.topics_ = ...` from online topic modeling, since `.partial_fit` now keeps track of all topics itself
+* The media aspect no longer gets a column of its own in `.get_topic_info()`, and `topic_aspects_` holds its captions
+* `LangChain` takes a chat model instead of a chain, `Cohere` takes a `cohere.ClientV2`, `LlamaCPP`'s `pipeline_kwargs` is now `generator_kwargs`, and `OpenAI` no longer accepts `chat=True`
+* `TopicMapper`, `topic_mapper_` and `mappings_` are removed
+* An `embedding_model` that BERTopic does not recognise, such as a lambda, raises a `TypeError` instead of being replaced by `all-MiniLM-L6-v2`
+* Models that 0.17 saved with `safetensors` or `pytorch` load as before, but a pickled model, which `.save` gives by default, has to be saved again with `safetensors` in 0.17 first
+* A saved pointer to a model with a `Clustering` prompt, such as `google/embeddinggemma-300m`, now embeds new documents with that prompt
+
+<h3><b>Under the hood:</a></b></h3>
+
+* Topics are no longer tracked in pandas dataframes. `Topics`, `Topic`, `Corpus`, `TopicMapping` and `TopicHierarchy` hold all topic and document information, and `topic_model.topics` gives you the `Topics` object
+* Each row of the `Corpus` has a modality and a document ID, which is what multimodal and, later, multi-topic modeling build on
+* Representations are typed: `Keywords`, `Label`, `StructuredJSON` and `Media`
+* Probability columns follow the topic IDs, and one mapping keeps predictions, probabilities and topics in line through merging, reducing and deleting topics
+* Dataframes are created through [narwhals](https://narwhals-dev.github.io/narwhals/), so BERTopic returns pandas by default and polars with `bertopic.set_output("polars")`
+* `hierarchy_` holds the last calculated hierarchy, which `.get_topic_tree()` uses when you pass none
+* A much larger test suite, with tests on the topic data layer, rules that hold for every fitted model, the public signatures of 0.17, and every LLM representation without an API key
+* Custom representation models implement `.extract_topics(topic_model, corpus, topic_representations, c_tf_idf)` and return a representation for each topic, such as `Keywords` or `Label`
+* `MultiModalBackend.embed_images` is replaced by `.embed_media(images, "image")`, and `.embed` no longer takes images
+* `TextGeneration` takes `text-generation` pipelines only, since transformers 5 removed `text2text-generation`, and a prompt with a chat template written in by hand gets it twice
+* `WordDocEmbedder` and `BaseEmbedder`'s `word_embedding_model` are removed
+* CI runs on Python 3.11 to 3.14
+
+<h3><b>Dependencies:</a></b></h3>
+
+* Python 3.11 or newer, so Python 3.10 is no longer supported
+* `sentence-transformers>=6.1` and `transformers[vision]>=5.19`, which installs Pillow and torchvision since EmbeddingGemma 2 needs them even for text
+* `narwhals>=2.0`
+* polars is optional, for `bertopic.set_output("polars")`
+* New extras: `audio` (librosa and soundfile) and `video` (torchcodec)
+
+<h3><b>Fixes:</a></b></h3>
+
+* **Probabilities and `.transform`**
+    * `probabilities_` has a column for every topic, including the outlier topic, so each row sums to 1 and every column lines up with its topic ([#905](https://github.com/MaartenGr/BERTopic/issues/905), [#1508](https://github.com/MaartenGr/BERTopic/issues/1508), [#1807](https://github.com/MaartenGr/BERTopic/issues/1807), [#2017](https://github.com/MaartenGr/BERTopic/issues/2017))
+    * Probabilities follow the custom topics passed to `.update_topics` ([#1387](https://github.com/MaartenGr/BERTopic/issues/1387))
+    * `.visualize_distribution` shows the outlier topic ([#1424](https://github.com/MaartenGr/BERTopic/issues/1424))
+    * Documents are optional in `.transform`, so you can predict from embeddings alone ([#366](https://github.com/MaartenGr/BERTopic/issues/366))
+    * `.transform` takes a single document with a 1-D embedding ([#2018](https://github.com/MaartenGr/BERTopic/issues/2018))
+* **Outlier reduction and `.update_topics`**
+    * `.update_topics` keeps your vectorizer, c-TF-IDF and representation models, so stop words and n-grams survive outlier reduction ([#1638](https://github.com/MaartenGr/BERTopic/issues/1638), [#2114](https://github.com/MaartenGr/BERTopic/issues/2114), [#2148](https://github.com/MaartenGr/BERTopic/issues/2148))
+    * Topic embeddings follow the documents in `.update_topics`, also after saving and loading, and `embeddings=` gives the exact centroids ([#1861](https://github.com/MaartenGr/BERTopic/issues/1861), [#2198](https://github.com/MaartenGr/BERTopic/issues/2198), [#2316](https://github.com/MaartenGr/BERTopic/issues/2316))
+    * `.reduce_outliers` on a merged or loaded model raises a clear error that points to `.update_topics(docs)` ([#1944](https://github.com/MaartenGr/BERTopic/issues/1944))
+* **Topic reduction, merging and deleting**
+    * `nr_topics="auto"` works when every document is an outlier ([#1559](https://github.com/MaartenGr/BERTopic/issues/1559), [#1893](https://github.com/MaartenGr/BERTopic/issues/1893), [#1925](https://github.com/MaartenGr/BERTopic/issues/1925))
+    * `.merge_models` keeps custom labels and representative documents ([#1692](https://github.com/MaartenGr/BERTopic/issues/1692), [#2222](https://github.com/MaartenGr/BERTopic/issues/2222))
+    * `.delete_topics` works after `.set_topic_labels`, and `.topics_over_time` after `.delete_topics` ([#2529](https://github.com/MaartenGr/BERTopic/issues/2529), [#2530](https://github.com/MaartenGr/BERTopic/issues/2530))
+    * `.hierarchical_topics` and `.topics_over_time` on a merged model raise a clear error that points to `.update_topics(docs)` ([#1682](https://github.com/MaartenGr/BERTopic/issues/1682), [#1700](https://github.com/MaartenGr/BERTopic/issues/1700), [#2152](https://github.com/MaartenGr/BERTopic/issues/2152), [#2343](https://github.com/MaartenGr/BERTopic/issues/2343))
+    * Documented that saved models do not keep their representation models, so set `topic_model.representation_model` after loading to update aspects with `.reduce_topics` ([#2035](https://github.com/MaartenGr/BERTopic/issues/2035))
+* **Zero-shot and guided topic modeling**
+    * Topic reduction no longer merges zero-shot topics away ([#2409](https://github.com/MaartenGr/BERTopic/issues/2409))
+    * Topic names and sizes are right when every document matches a zero-shot topic ([#2384](https://github.com/MaartenGr/BERTopic/issues/2384), [#2447](https://github.com/MaartenGr/BERTopic/issues/2447))
+    * Guided topic modeling no longer changes the embeddings you pass to it ([#2277](https://github.com/MaartenGr/BERTopic/issues/2277))
+* **Hierarchical topics and topics over time**
+    * Distances within floating-point noise of zero no longer crash `.hierarchical_topics` ([#1418](https://github.com/MaartenGr/BERTopic/issues/1418), [#1573](https://github.com/MaartenGr/BERTopic/issues/1573))
+    * The progress bar of `.hierarchical_topics` follows `verbose` ([#1908](https://github.com/MaartenGr/BERTopic/issues/1908))
+    * `.hierarchical_topics(use_representation_model=True)` names the merged topics with your representation model ([#2503](https://github.com/MaartenGr/BERTopic/issues/2503))
+    * Evolution tuning in `.topics_over_time` takes effect ([#2370](https://github.com/MaartenGr/BERTopic/issues/2370))
+* **Online topic modeling**
+    * `topics_` covers every document after `.partial_fit` ([#1427](https://github.com/MaartenGr/BERTopic/issues/1427), [#1626](https://github.com/MaartenGr/BERTopic/issues/1626))
+    * The documented online example runs on scikit-learn 1.8 ([#2097](https://github.com/MaartenGr/BERTopic/issues/2097))
+    * Models with an `OnlineCountVectorizer` can be saved with `safetensors` and `pytorch` ([#1431](https://github.com/MaartenGr/BERTopic/issues/1431), [#2196](https://github.com/MaartenGr/BERTopic/issues/2196))
+* **Saving and loading**
+    * Representative documents are saved and loaded ([#1811](https://github.com/MaartenGr/BERTopic/issues/1811), [#1975](https://github.com/MaartenGr/BERTopic/issues/1975))
+    * Saving no longer fails after `.partial_fit` ([#2432](https://github.com/MaartenGr/BERTopic/issues/2432))
+    * `pytorch` models are loaded with `weights_only=True` ([#2264](https://github.com/MaartenGr/BERTopic/issues/2264))
+    * `BERTopic.load(path, embedding_model=...)` no longer loads the saved embedding model first ([#2493](https://github.com/MaartenGr/BERTopic/issues/2493))
+* **Representations**
+    * A topic no longer lists the same representative document twice ([#1736](https://github.com/MaartenGr/BERTopic/issues/1736), [#2495](https://github.com/MaartenGr/BERTopic/issues/2495))
+    * `MaximalMarginalRelevance` works with fewer words than `top_n_words` ([#2266](https://github.com/MaartenGr/BERTopic/issues/2266)), and keeps `top_n_words` without an embedding model ([#2323](https://github.com/MaartenGr/BERTopic/issues/2323))
+    * A list of representation models works as the main representation ([#1846](https://github.com/MaartenGr/BERTopic/issues/1846))
+* **LLM representations**
+    * Added `Ollama` ([#1824](https://github.com/MaartenGr/BERTopic/issues/1824)) and moved `LangChain` to chat models ([#2187](https://github.com/MaartenGr/BERTopic/issues/2187))
+    * `OpenAI` no longer forces `stop="\n"`, which GPT-5 rejects and which cut thinking models short ([#2423](https://github.com/MaartenGr/BERTopic/issues/2423), [#2469](https://github.com/MaartenGr/BERTopic/issues/2469), [#2481](https://github.com/MaartenGr/BERTopic/issues/2481))
+    * A prompt that OpenAI refuses for its content, or an empty answer, gets "No label returned" instead of stopping the fit ([#2342](https://github.com/MaartenGr/BERTopic/issues/2342), [#1979](https://github.com/MaartenGr/BERTopic/issues/1979), [#2353](https://github.com/MaartenGr/BERTopic/issues/2353))
+    * Every LLM representation is tested without an API key ([#2051](https://github.com/MaartenGr/BERTopic/issues/2051))
+* **Embeddings and installation**
+    * `import bertopic` no longer fails when an optional package, such as `openai` or `langchain`, cannot be imported ([#1655](https://github.com/MaartenGr/BERTopic/issues/1655), [#1973](https://github.com/MaartenGr/BERTopic/issues/1973))
+    * The minimum version of sentence-transformers is one that BERTopic runs on ([#2331](https://github.com/MaartenGr/BERTopic/issues/2331))
+    * An `embedding_model` that BERTopic does not recognise raises a `TypeError` instead of being replaced by MiniLM ([#1952](https://github.com/MaartenGr/BERTopic/issues/1952))
+    * Model2Vec backends no longer share their distillation vocabulary ([#2544](https://github.com/MaartenGr/BERTopic/issues/2544))
+    * A vocabulary of a single word works ([#2034](https://github.com/MaartenGr/BERTopic/issues/2034))
+    * Documented that `language="english"` removes characters such as German umlauts, which `language="multilingual"` keeps ([#2468](https://github.com/MaartenGr/BERTopic/issues/2468))
+* **Visualizations and search**
+    * `custom_labels` with an aspect works in `.visualize_hierarchy` and `.visualize_topics_over_time` ([#1503](https://github.com/MaartenGr/BERTopic/issues/1503), [#1504](https://github.com/MaartenGr/BERTopic/issues/1504))
+    * `.visualize_topics` raises a clear error with fewer than 3 topics ([#1512](https://github.com/MaartenGr/BERTopic/issues/1512), [#2247](https://github.com/MaartenGr/BERTopic/issues/2247), [#2363](https://github.com/MaartenGr/BERTopic/issues/2363))
+    * A dataframe passed as `docs` raises a clear error ([#1589](https://github.com/MaartenGr/BERTopic/issues/1589))
+    * `.visualize_topics_per_class` and `.visualize_topics_over_time` no longer change the dataframe you pass ([#2154](https://github.com/MaartenGr/BERTopic/issues/2154))
+    * `.find_topics` takes a list of search terms ([#2392](https://github.com/MaartenGr/BERTopic/issues/2392), [#2475](https://github.com/MaartenGr/BERTopic/issues/2475))
+* **Multimodal**
+    * Each topic's images, with `.visualize_media()` and in the datamap ([#2236](https://github.com/MaartenGr/BERTopic/issues/2236))
+    * The multimodal guide works with pandas 2 ([#1884](https://github.com/MaartenGr/BERTopic/issues/1884))
+* **Development**
+    * Tests for every step of the pipeline ([#2206](https://github.com/MaartenGr/BERTopic/issues/2206)), and the duplicated code in `_bertopic.py` is gone ([#2497](https://github.com/MaartenGr/BERTopic/issues/2497))
+
+<h3><b>Thank you:</a></b></h3>
+
+A big thank you to everyone who opened an issue that is fixed in this release: [@1jamesthompson1](https://github.com/1jamesthompson1), [@6801318d8d](https://github.com/6801318d8d), [@aerithnetzer](https://github.com/aerithnetzer), [@Afloat16](https://github.com/Afloat16), [@ajdapretnar](https://github.com/ajdapretnar), [@akalra03](https://github.com/akalra03), [@alegallo1511](https://github.com/alegallo1511), [@anirban-mu](https://github.com/anirban-mu), [@aw578](https://github.com/aw578), [@aymanmh](https://github.com/aymanmh), [@chadlillian](https://github.com/chadlillian), [@chentitus](https://github.com/chentitus), [@daianacric95](https://github.com/daianacric95), [@DamienBukudjian](https://github.com/DamienBukudjian), [@dhammo2](https://github.com/dhammo2), [@donottakemyusername](https://github.com/donottakemyusername), [@ElskeNijhof](https://github.com/ElskeNijhof), [@eschaffn](https://github.com/eschaffn), [@felipeinagaki](https://github.com/felipeinagaki), [@franz101](https://github.com/franz101), [@GiannisKav](https://github.com/GiannisKav), [@gnimpf](https://github.com/gnimpf), [@Hanqingxu123](https://github.com/Hanqingxu123), [@henrique-back](https://github.com/henrique-back), [@huisman](https://github.com/huisman), [@inesmcm26](https://github.com/inesmcm26), [@IsaacGreenMachine](https://github.com/IsaacGreenMachine), [@jhrystrom](https://github.com/jhrystrom), [@jianzhang-ia](https://github.com/jianzhang-ia), [@kevinmneal-archive](https://github.com/kevinmneal-archive), [@luismavs](https://github.com/luismavs), [@mad-carto](https://github.com/mad-carto), [@manas007](https://github.com/manas007), [@mepearson](https://github.com/mepearson), [@MHZach](https://github.com/MHZach), [@mjaved-nz](https://github.com/mjaved-nz), [@mzeres](https://github.com/mzeres), [@nabsiddiqui](https://github.com/nabsiddiqui), [@nhansendev](https://github.com/nhansendev), [@noelleninja](https://github.com/noelleninja), [@nrydanov](https://github.com/nrydanov), [@OnAnd0n](https://github.com/OnAnd0n), [@Paignn](https://github.com/Paignn), [@peiguo9028](https://github.com/peiguo9028), [@pidefrem](https://github.com/pidefrem), [@PipaFlores](https://github.com/PipaFlores), [@powerhorse1986](https://github.com/powerhorse1986), [@raffaelemancuso](https://github.com/raffaelemancuso), [@rap8](https://github.com/rap8), [@rcprati](https://github.com/rcprati), [@rhys-thompson-deel](https://github.com/rhys-thompson-deel), [@sam-baumann](https://github.com/sam-baumann), [@schoobani](https://github.com/schoobani), [@sdehm](https://github.com/sdehm), [@sercankiyak](https://github.com/sercankiyak), [@shivamtawari](https://github.com/shivamtawari), [@shj37](https://github.com/shj37), [@Skar0](https://github.com/Skar0), [@SkylarOconnell](https://github.com/SkylarOconnell), [@soonernotfaster](https://github.com/soonernotfaster), [@stevetracvc](https://github.com/stevetracvc), [@sutgeorge](https://github.com/sutgeorge), [@terilias](https://github.com/terilias), [@TheAIMagics](https://github.com/TheAIMagics), [@vidieo](https://github.com/vidieo), [@yml-blog](https://github.com/yml-blog), [@yourlogarithm](https://github.com/yourlogarithm), [@zilch42](https://github.com/zilch42), [@zpbrent](https://github.com/zpbrent).
+
+
 ## **Version 0.17.4**
 *Release date: 3 December, 2025*
 

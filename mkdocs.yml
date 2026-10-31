@@ -76,6 +76,7 @@ nav:
         - Term Scores: api/plotting/term.md
         - Topics: api/plotting/topics.md
         - Topics per Class: api/plotting/topics_per_class.md
+  - Migrating to 1.0: migration.md
   - Changelog: changelog.md
 
 plugins:
@@ -105,6 +106,7 @@ theme:
     - navigation.tracking
     - toc.follow
     - content.code.copy
+    - content.tabs.link
   palette:
   - media: "(prefers-color-scheme: light)"
     primary: custom
@@ -126,5 +128,7 @@ markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
   - toc:
       permalink: true
