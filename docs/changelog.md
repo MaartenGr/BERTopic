@@ -21,7 +21,7 @@ Nothing changes for those that are using BERTopic in production or in their pipe
 
 If anything breaks (and I have no doubt it will with this first candidate), please let me know in the [issues](https://github.com/MaartenGr/BERTopic/issues).
 
-Some code will need a small update, which the [migration guide](https://maartengr.github.io/BERTopic/migration.html) shows for every change.
+Some code will need a small update, which the [migration guide](migration.md) shows for every change.
 
 <figure markdown>
   ![EmbeddingGemma 2](img/embeddinggemma_2.png)
@@ -30,14 +30,14 @@ Some code will need a small update, which the [migration guide](https://maarteng
 
 <h3><b>Highlights:</a></b></h3>
 
-* [**Multimodal**](https://maartengr.github.io/BERTopic/getting_started/multimodal/multimodal.html) topic modeling with text, images, audio, video and code
+* [**Multimodal**](getting_started/multimodal/multimodal.md) topic modeling with text, images, audio, video and code
     * Pass them to `.fit_transform` with `images=`, `audio=`, `video=` and `code=`, with or without documents
     * `MultiModalRepresentation` describes images and frames of videos with a vision model and transcribes audio with a speech model, such as Whisper, so topics of media get keywords too
     * See each topic's collage, frame sheet and audio montage with `.visualize_media()`
-* [**EmbeddingGemma 2**](https://maartengr.github.io/BERTopic/getting_started/embeddings/embeddings.html) is the new default embedding model
+* [**EmbeddingGemma 2**](getting_started/embeddings/embeddings.md) is the new default embedding model
     * `BERTopic()` uses its text model for every language, and `BERTopic(embedding_model="google/embeddinggemma-2")` also embeds images, audio and video in the same space
     * BERTopic embeds the first 1,024 tokens of each document, since the model sets no length limit of its own
-* [**LLM representations**](https://maartengr.github.io/BERTopic/getting_started/representation/llm.html) were rewritten around one request loop, with `Ollama` as a new representation model, structured output and current default models
+* [**LLM representations**](getting_started/representation/llm.md) were rewritten around one request loop, with `Ollama` as a new representation model, structured output and current default models
 * Get polars instead of pandas dataframes with `bertopic.set_output("polars")`
 * Added support for Python 3.14
 * 80 issues fixed, all listed below
@@ -89,7 +89,7 @@ Some code will need a small update, which the [migration guide](https://maarteng
 These change your output without raising an error:
 
 * `probabilities_` has one column per topic, including the outlier topic when there is one, and each row sums to 1. The matrix from `.transform` has the same columns, and `.delete_topics` adds the probabilities of a deleted topic to the outlier topic
-* Representative documents are sampled differently than in 0.17, so they can differ, and a topic no longer lists the same document twice
+* Representative documents are sampled differently than in 0.17.4, so they can differ, and a topic no longer lists the same document twice
 * `evolution_tuning=True`, the default in `.topics_over_time`, now averages each timestamp with the previous one as documented, and global tuning uses each topic's own row
 * `.update_topics` keeps your vectorizer, c-TF-IDF and representation models instead of resetting them to their defaults
 * `.topics_over_time`, `.topics_per_class` and `.hierarchical_topics` show c-TF-IDF keywords. Pass `use_representation_model=True` to run your representation model on every timestamp, class or merged topic
@@ -101,7 +101,7 @@ These change your output without raising an error:
 
 <h3><b>API Changes:</a></b></h3>
 
-The [migration guide](https://maartengr.github.io/BERTopic/migration.html) shows the code for each of these:
+The [migration guide](migration.md) shows the code for each of these:
 
 * `VisualRepresentation` is replaced by `MultiModalRepresentation(image_model=...)`
 * Fitted attributes, such as `topics_`, `topic_sizes_` and `c_tf_idf_`, can no longer be overwritten. Use `.update_topics(docs, topics=new_topics)` instead, and remove `topic_model.topics_ = ...` from online topic modeling, since `.partial_fit` now keeps track of all topics itself
@@ -109,7 +109,7 @@ The [migration guide](https://maartengr.github.io/BERTopic/migration.html) shows
 * `LangChain` takes a chat model instead of a chain, `Cohere` takes a `cohere.ClientV2`, `LlamaCPP`'s `pipeline_kwargs` is now `generator_kwargs`, and `OpenAI` no longer accepts `chat=True`
 * `TopicMapper`, `topic_mapper_` and `mappings_` are removed
 * An `embedding_model` that BERTopic does not recognise, such as a lambda, raises a `TypeError` instead of being replaced by `all-MiniLM-L6-v2`
-* Models that 0.17 saved with `safetensors` or `pytorch` load as before, but a pickled model, which `.save` gives by default, has to be saved again with `safetensors` in 0.17 first
+* Models that 0.17.4 or earlier saved with `safetensors` or `pytorch` load as before, but a pickled model, which `.save` gives by default, has to be saved again with `safetensors` in 0.17.4 first
 * A saved pointer to a model with a `Clustering` prompt, such as `google/embeddinggemma-300m`, now embeds new documents with that prompt
 
 <h3><b>Under the hood:</a></b></h3>
@@ -120,7 +120,7 @@ The [migration guide](https://maartengr.github.io/BERTopic/migration.html) shows
 * Probability columns follow the topic IDs, and one mapping keeps predictions, probabilities and topics in line through merging, reducing and deleting topics
 * Dataframes are created through [narwhals](https://narwhals-dev.github.io/narwhals/), so BERTopic returns pandas by default and polars with `bertopic.set_output("polars")`
 * `hierarchy_` holds the last calculated hierarchy, which `.get_topic_tree()` uses when you pass none
-* A much larger test suite, with tests on the topic data layer, rules that hold for every fitted model, the public signatures of 0.17, and every LLM representation without an API key
+* A much larger test suite, with tests on the topic data layer, rules that hold for every fitted model, the public signatures of 0.17.4, and every LLM representation without an API key
 * Custom representation models implement `.extract_topics(topic_model, corpus, topic_representations, c_tf_idf)` and return a representation for each topic, such as `Keywords` or `Label`
 * `MultiModalBackend.embed_images` is replaced by `.embed_media(images, "image")`, and `.embed` no longer takes images
 * `TextGeneration` takes `text-generation` pipelines only, since transformers 5 removed `text2text-generation`, and a prompt with a chat template written in by hand gets it twice
