@@ -92,10 +92,14 @@ def test_sklearn_embedder_with_sparse_output(documents):
     assert len(topics) == 5
 
 
-def test_a_broken_optional_package_does_not_break_the_import():
-    # openai<1.0 has no OpenAI class, which an empty module stands in for
+def test_a_broken_optional_package_does_not_break_the_import(tmp_path):
+    # An installed openai that fails while importing, as one built against other dependencies does
+    (tmp_path / "openai").mkdir()
+    (tmp_path / "openai" / "__init__.py").write_text(
+        "raise AttributeError(\"module 'httpx' has no attribute 'Client'\")"
+    )
     code = (
-        "import sys, types; sys.modules['openai'] = types.ModuleType('openai'); "
+        f"import sys; sys.path.insert(0, {str(tmp_path)!r}); "
         "import bertopic.backend as backend; "
         "print(type(backend.OpenAIBackend).__name__, 'no attribute' in backend.OpenAIBackend.msg)"
     )

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bertopic"
-version = "0.17.4"
+version = "1.0.0rc1"
 description = "BERTopic performs topic Modeling with state-of-the-art transformer models."
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -31,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
@@ -61,7 +62,9 @@ dev = [
     "bertopic[docs,test]",
 ]
 docs = [
+    "griffe==0.44.0",
     "mkdocs==1.5.3",
+    "mkdocs-autorefs==1.0.1",
     "mkdocs-material==9.5.18",
     "mkdocstrings-python==1.10.0",
     "mkdocstrings==0.24.3",
