@@ -1429,7 +1429,7 @@ class BERTopic:
         return topic_distributions, topic_token_distributions
 
     def find_topics(
-        self, search_term: str | None = None, image: str | None = None, top_n: int = 5
+        self, search_term: str | List[str] | None = None, image: str | None = None, top_n: int = 5
     ) -> Tuple[List[int], List[float]]:
         """Find topics most similar to a search_term.
 
@@ -1462,6 +1462,10 @@ class BERTopic:
 
         Note that the search query is typically more accurate if the
         search_term consists of a phrase or multiple words.
+
+        When ``search_term`` is a list of strings, each term is embedded
+        independently and the resulting vectors are averaged into a single
+        query embedding before computing similarity against topic embeddings.
         """
         if self.embedding_model is None:
             raise Exception("This method can only be used if you did not use custom embeddings.")
@@ -1471,7 +1475,11 @@ class BERTopic:
 
         # Extract search_term embeddings and compare with topic embeddings
         if search_term is not None:
-            search_embedding = self._extract_embeddings([search_term], method="word", verbose=False).flatten()
+            search_terms = [search_term] if isinstance(search_term, str) else list(search_term)
+            if not search_terms:
+                raise ValueError("search_term must be a non-empty string or list of strings.")
+            search_embeddings = self._extract_embeddings(search_terms, method="word", verbose=False)
+            search_embedding = np.mean(search_embeddings, axis=0).flatten()
         elif image is not None:
             search_embedding = self._extract_embeddings(
                 [None], images=[image], method="document", verbose=False
