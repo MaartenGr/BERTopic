@@ -6,20 +6,20 @@ hide:
 # Changelog
 
 
-## **Version 1.0.0rc1**
-*Release date: 26 October, 2026*
+## **Version 1.0.0b1**
+*Release date: 1 November, 2026*
 
-It's finally here! This is the first release candidate of BERTopic 1.0 (there will definitely be more).
+It's finally here! This is the first beta of BERTopic 1.0 (there will definitely be more).
 
 My idea was to rewrite a lot of what was under the hood while its API stays as it was wherever possible. This would make it easier for future development and increase stability of the underlying code.
 
-As with release candidates, you can only install it when explicitly running:
+As with any pre-release, you can only install it when explicitly running:
 
-`pip install bertopic==1.0.0rc1`
+`pip install bertopic==1.0.0b1`
 
 Nothing changes for those that are using BERTopic in production or in their pipelines, you will still install `0.17.4` unless you specifically run the above command.
 
-If anything breaks (and I have no doubt it will with this first candidate), please let me know in the [issues](https://github.com/MaartenGr/BERTopic/issues).
+If anything breaks (and I have no doubt it will with this first beta), please let me know in the [issues](https://github.com/MaartenGr/BERTopic/issues).
 
 Some code will need a small update, which the [migration guide](migration.md) shows for every change.
 
@@ -115,7 +115,7 @@ The [migration guide](migration.md) shows the code for each of these:
 <h3><b>Under the hood:</a></b></h3>
 
 * Topics are no longer tracked in pandas dataframes. `Topics`, `Topic`, `Corpus`, `TopicMapping` and `TopicHierarchy` hold all topic and document information, and `topic_model.topics` gives you the `Topics` object
-* Each row of the `Corpus` has a modality and a document ID, which is what multimodal and, later, multi-topic modeling build on
+* Each row of the `Corpus` has a modality, which is what multimodal topic modeling builds on
 * Representations are typed: `Keywords`, `Label`, `StructuredJSON` and `Media`
 * Probability columns follow the topic IDs, and one mapping keeps predictions, probabilities and topics in line through merging, reducing and deleting topics
 * Dataframes are created through [narwhals](https://narwhals-dev.github.io/narwhals/), so BERTopic returns pandas by default and polars with `bertopic.set_output("polars")`
