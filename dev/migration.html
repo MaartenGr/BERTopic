@@ -1,0 +1,2880 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/dev/migration.html">
+      
+      
+        <link rel="prev" href="api/plotting/topics_per_class.html">
+      
+      
+        <link rel="next" href="changelog.html">
+      
+      
+      <link rel="icon" href="icon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
+    
+    
+      
+        <title>Migrating to 1.0 - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.66ac8b77.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CUbuntu+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#migrating-to-10" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BERTopic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Migrating to 1.0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="algorithm/algorithm.html" class="md-tabs__link">
+        
+  
+    
+  
+  The Algorithm
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="getting_started/quickstart/quickstart.html" class="md-tabs__link">
+          
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="faq.html" class="md-tabs__link">
+        
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="usecases.html" class="md-tabs__link">
+        
+  
+    
+  
+  Use Cases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="api/bertopic.html" class="md-tabs__link">
+          
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="migration.html" class="md-tabs__link">
+        
+  
+    
+  
+  Migrating to 1.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="changelog.html" class="md-tabs__link">
+        
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="img/icon.png" alt="logo">
+
+    </a>
+    BERTopic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="algorithm/algorithm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Algorithm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/quickstart/quickstart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/serialization/serialization.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Serialization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/search/search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Search Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/best_practices/best_practices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Best Practices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    In-depth
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            In-depth
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_1" id="__nav_3_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Visualizations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Visualizations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_terms.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_2" id="__nav_3_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Update Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Update Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicreduction/topicreduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Update Topic Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Outlier reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/parameter%20tuning/parametertuning.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameter tuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tips & Tricks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/embeddings/embeddings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Embeddings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/dim_reduction/dim_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/clustering/clustering.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6_6" id="__nav_3_6_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6. Fine-tune Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            6. Fine-tune Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/representation/representation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6A. Representation Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/representation/llm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6B. LLM & Generative AI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/multiaspect/multiaspect.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6C. Multiple Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Variations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            Variations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicsovertime/topicsovertime.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dynamic Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/multimodal/multimodal.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodal Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/online/online.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Online Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/merge/merge.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Merge Multiple Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_6" id="__nav_3_7_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    (semi)-supervised
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            (semi)-supervised
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/semisupervised/semisupervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Semi-supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/supervised/supervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/manual/manual.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/guided/guided.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guided Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/zeroshot/zeroshot.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zero-shot Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/distribution/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Distributions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicsperclass/topicsperclass.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/seed_words/seed_words.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Seed Words
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="faq.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="usecases.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use Cases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/bertopic.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BERTopic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/backends.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Backends
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/dimensionality.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/cluster.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/representations.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Fine-Tune Topic Representation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Plotting
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Plotting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/barchart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Barchart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/document_datamap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents with DataMapPlot
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/media.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Media
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/dtm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DTM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchical_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/heatmap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Heatmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/term.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Term Scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/topics_per_class.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Migrating to 1.0
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="migration.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Migrating to 1.0
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Images
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-topics_" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changing topics_
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update_topics-keeps-your-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      .update_topics keeps your models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#probabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Probabilities
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#representation-models-over-time-per-class-and-in-hierarchies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Representation models over time, per class and in hierarchies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zero-shot-topics-and-nr_topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Zero-shot topics and nr_topics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-representations" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM representations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-representation-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom representation models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-embedding-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom embedding backends
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#topicmapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      TopicMapper
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-embedding-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The embedding model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saved-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saved models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python and dependencies
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="changelog.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Images
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-topics_" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changing topics_
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update_topics-keeps-your-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      .update_topics keeps your models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#probabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Probabilities
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#representation-models-over-time-per-class-and-in-hierarchies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Representation models over time, per class and in hierarchies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zero-shot-topics-and-nr_topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Zero-shot topics and nr_topics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-representations" class="md-nav__link">
+    <span class="md-ellipsis">
+      LLM representations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-representation-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom representation models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-embedding-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom embedding backends
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#topicmapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      TopicMapper
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-embedding-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The embedding model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saved-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saved models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python and dependencies
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="migrating-to-10">Migrating to 1.0<a class="headerlink" href="#migrating-to-10" title="Permanent link">&para;</a></h1>
+<p>BERTopic 1.0 rewrote most of what happens under the hood, while keeping its API as it was wherever possible. Most code written for 0.17.4 runs as it is, but some of it needs a small update. Below, you can find each of those changes with the code for 0.17.4 and for 1.0. For everything else that changed, see the <a href="changelog.html">changelog</a>.</p>
+<p>In the examples, <code>topic_model</code> is a fitted model and <code>docs</code> the documents it was fitted on.</p>
+<h2 id="images"><strong>Images</strong><a class="headerlink" href="#images" title="Permanent link">&para;</a></h2>
+<p><code>VisualRepresentation</code> is replaced by <code>MultiModalRepresentation</code>, which describes images, audio and video, each with a model of its own. CLIP still works, but you can now embed the images with EmbeddingGemma 2, which embeds text, images, audio and video in one space:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input checked="checked" id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">0.17.4</label><label for="__tabbed_1_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiModalBackend</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">VisualRepresentation</span>
+
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">MultiModalBackend</span><span class="p">(</span><span class="s2">"clip-ViT-B-32"</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"Visual_Aspect"</span><span class="p">:</span> <span class="n">VisualRepresentation</span><span class="p">(</span><span class="n">image_to_text_model</span><span class="o">=</span><span class="s2">"nlpconnect/vit-gpt2-image-captioning"</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">,</span> <span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">documents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiModalRepresentation</span>
+
+<span class="n">representation_model</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Media"</span><span class="p">:</span> <span class="n">MultiModalRepresentation</span><span class="p">(</span><span class="n">image_model</span><span class="o">=</span><span class="s2">"HuggingFaceTB/SmolVLM-256M-Instruct"</span><span class="p">)}</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="s2">"google/embeddinggemma-2"</span><span class="p">,</span> <span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+<span class="n">topics</span><span class="p">,</span> <span class="n">probs</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Each topic's collage, which 0.17.4 kept in <code>topic_aspects_["Visual_Aspect"]</code>, is now in <code>topic_model.representative_images_</code>. In <code>.get_topic_info()</code>, the images themselves are in a <code>Representative_Items</code> column instead of a column named after the aspect, and the aspect, <code>topic_model.topic_aspects_["Media"]</code>, holds the captions. See the <a href="getting_started/multimodal/multimodal.html">multimodal guide</a> for audio, video and code.</p>
+<h2 id="changing-topics_"><strong>Changing <code>topics_</code></strong><a class="headerlink" href="#changing-topics_" title="Permanent link">&para;</a></h2>
+<p><code>topics_</code>, <code>probabilities_</code>, <code>topic_sizes_</code> and the other fitted attributes can no longer be overwritten, since BERTopic keeps them in line with each other. To change the topics, for example after reducing outliers, pass them to <code>.update_topics</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input checked="checked" id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">0.17.4</label><label for="__tabbed_2_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">new_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">reduce_outliers</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span> <span class="o">=</span> <span class="n">new_topics</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">new_topics</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">reduce_outliers</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="n">new_topics</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>In online topic modeling, <code>.partial_fit</code> now keeps track of the topics of every batch itself, so you no longer need to collect them:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input checked="checked" id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">0.17.4</label><label for="__tabbed_3_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topics</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="n">topics</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span><span class="p">)</span>
+
+<span class="n">topic_model</span><span class="o">.</span><span class="n">topics_</span> <span class="o">=</span> <span class="n">topics</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">doc_chunks</span><span class="p">:</span>
+    <span class="n">topic_model</span><span class="o">.</span><span class="n">partial_fit</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="update_topics-keeps-your-models"><strong><code>.update_topics</code> keeps your models</strong><a class="headerlink" href="#update_topics-keeps-your-models" title="Permanent link">&para;</a></h2>
+<p>In 0.17.4, <code>.update_topics</code> went back to the default vectorizer, c-TF-IDF and representation models unless you passed yours again, so stop words returned after reducing outliers. In 1.0, it keeps the models of your topic model:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input checked="checked" id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">0.17.4</label><label for="__tabbed_4_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="n">new_topics</span><span class="p">,</span> <span class="n">vectorizer_model</span><span class="o">=</span><span class="n">vectorizer_model</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="n">new_topics</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>If you relied on the reset, set the default models yourself before updating:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.feature_extraction.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">CountVectorizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.vectorizers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassTfidfTransformer</span>
+
+<span class="n">topic_model</span><span class="o">.</span><span class="n">vectorizer_model</span> <span class="o">=</span> <span class="n">CountVectorizer</span><span class="p">(</span><span class="n">ngram_range</span><span class="o">=</span><span class="n">topic_model</span><span class="o">.</span><span class="n">n_gram_range</span><span class="p">)</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">ctfidf_model</span> <span class="o">=</span> <span class="n">ClassTfidfTransformer</span><span class="p">()</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">representation_model</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">update_topics</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">topics</span><span class="o">=</span><span class="n">new_topics</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="probabilities"><strong>Probabilities</strong><a class="headerlink" href="#probabilities" title="Permanent link">&para;</a></h2>
+<p>With <code>calculate_probabilities=True</code>, <code>probabilities_</code>, and the probabilities from <code>.transform</code>, have a column for every topic, including the outlier topic when there is one, so each row sums to 1. In 0.17.4, column 3 was topic 3, but with outliers, column 3 is now topic 2. Look the column up by its topic instead:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input checked="checked" id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">0.17.4</label><label for="__tabbed_5_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">probabilities</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">probabilities_</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">column</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics</span><span class="o">.</span><span class="n">topic_ids</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">probabilities_</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="representation-models-over-time-per-class-and-in-hierarchies"><strong>Representation models over time, per class and in hierarchies</strong><a class="headerlink" href="#representation-models-over-time-per-class-and-in-hierarchies" title="Permanent link">&para;</a></h2>
+<p><code>.topics_over_time</code>, <code>.topics_per_class</code> and <code>.hierarchical_topics</code> show c-TF-IDF keywords, since running a representation model, such as an LLM, for every timestamp, class or merged topic can be costly. To run your representation model, as 0.17.4 did, pass <code>use_representation_model=True</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input checked="checked" id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">0.17.4</label><label for="__tabbed_6_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topics_over_time</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics_over_time</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">use_representation_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="zero-shot-topics-and-nr_topics"><strong>Zero-shot topics and <code>nr_topics</code></strong><a class="headerlink" href="#zero-shot-topics-and-nr_topics" title="Permanent link">&para;</a></h2>
+<p><code>nr_topics</code> and <code>.reduce_topics</code> no longer merge zero-shot topics, so they keep their names. This means that <code>nr_topics</code> has to be larger than the number of zero-shot topics plus the outlier topic:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input checked="checked" id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">0.17.4</label><label for="__tabbed_7_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">zeroshot_topic_list</span><span class="o">=</span><span class="p">[</span><span class="s2">"space"</span><span class="p">,</span> <span class="s2">"religion"</span><span class="p">,</span> <span class="s2">"cars"</span><span class="p">,</span> <span class="s2">"hockey"</span><span class="p">],</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">zeroshot_topic_list</span><span class="o">=</span><span class="p">[</span><span class="s2">"space"</span><span class="p">,</span> <span class="s2">"religion"</span><span class="p">,</span> <span class="s2">"cars"</span><span class="p">,</span> <span class="s2">"hockey"</span><span class="p">],</span> <span class="n">nr_topics</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="llm-representations"><strong>LLM representations</strong><a class="headerlink" href="#llm-representations" title="Permanent link">&para;</a></h2>
+<p><code>OpenAI</code> no longer accepts <code>chat=True</code>, which already did nothing in 0.17.4. Its default model is now <code>gpt-6-luna</code>, since <code>gpt-4o-mini</code> shuts down in January 2027:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input checked="checked" id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">0.17.4</label><label for="__tabbed_8_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">"gpt-4o-mini"</span><span class="p">,</span> <span class="n">chat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><code>LangChain</code> takes a chat model instead of a chain, since LangChain removed <code>load_qa_chain</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input checked="checked" id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">0.17.4</label><label for="__tabbed_9_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">langchain.chains.question_answering</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_qa_chain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain.llms</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="n">chain</span> <span class="o">=</span> <span class="n">load_qa_chain</span><span class="p">(</span><span class="n">OpenAI</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">openai_api_key</span><span class="o">=</span><span class="n">my_openai_api_key</span><span class="p">),</span> <span class="n">chain_type</span><span class="o">=</span><span class="s2">"stuff"</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LangChain</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">langchain.chat_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_chat_model</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">init_chat_model</span><span class="p">(</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">model_provider</span><span class="o">=</span><span class="s2">"openai"</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LangChain</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><code>Cohere</code> uses Cohere's v2 API, so it takes a <code>cohere.ClientV2</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input checked="checked" id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">0.17.4</label><label for="__tabbed_10_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">Cohere</span><span class="p">(</span><span class="n">cohere</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">my_api_key</span><span class="p">))</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">Cohere</span><span class="p">(</span><span class="n">cohere</span><span class="o">.</span><span class="n">ClientV2</span><span class="p">(</span><span class="n">my_api_key</span><span class="p">))</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><code>LlamaCPP</code>'s <code>pipeline_kwargs</code> is now <code>generator_kwargs</code>, as in the other LLM representations:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input checked="checked" id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">0.17.4</label><label for="__tabbed_11_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">LlamaCPP</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="n">pipeline_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"max_tokens"</span><span class="p">:</span> <span class="mi">50</span><span class="p">})</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">LlamaCPP</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="n">generator_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"max_tokens"</span><span class="p">:</span> <span class="mi">50</span><span class="p">})</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><code>TextGeneration</code> takes <code>text-generation</code> pipelines only, since transformers 5 removed <code>text2text-generation</code>. A model with a chat template now gets its prompt as a chat message, so if your prompt writes a chat template by hand, as 0.17.4's Zephyr and Llama 2 examples did, remove it:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input checked="checked" id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">0.17.4</label><label for="__tabbed_12_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">generator</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s2">"text2text-generation"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">"google/flan-t5-base"</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">TextGeneration</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">generator</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s2">"text-generation"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">"google/gemma-4-E2B-it"</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">TextGeneration</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="custom-representation-models"><strong>Custom representation models</strong><a class="headerlink" href="#custom-representation-models" title="Permanent link">&para;</a></h2>
+<p>A custom representation model gets the documents as a <code>corpus</code> and the keywords of each topic as <code>topic_representations</code>, and returns a representation for each topic, such as <code>Keywords</code> or <code>Label</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input checked="checked" id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">0.17.4</label><label for="__tabbed_13_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRepresentation</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomRepresentationModel</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic_model</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">,</span> <span class="n">topics</span><span class="p">):</span>
+        <span class="n">updated_topics</span> <span class="o">=</span> <span class="n">topics</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">updated_topics</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRepresentation</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomRepresentationModel</span><span class="p">(</span><span class="n">BaseRepresentation</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic_model</span><span class="p">,</span> <span class="n">corpus</span><span class="p">,</span> <span class="n">topic_representations</span><span class="p">,</span> <span class="n">c_tf_idf</span><span class="p">):</span>
+        <span class="n">updated_topics</span> <span class="o">=</span> <span class="n">topic_representations</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">updated_topics</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Where 0.17.4 returned a list of words and scores for each topic, 1.0 returns a representation:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input checked="checked" id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">0.17.4</label><label for="__tabbed_14_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[(</span><span class="s2">"space"</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span> <span class="p">(</span><span class="s2">"nasa"</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)]}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic._topics</span><span class="w"> </span><span class="kn">import</span> <span class="n">Keywords</span><span class="p">,</span> <span class="n">Label</span>
+
+<span class="n">updated_topics</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">Keywords</span><span class="p">([(</span><span class="s2">"space"</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">),</span> <span class="p">(</span><span class="s2">"nasa"</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)]),</span> <span class="mi">2</span><span class="p">:</span> <span class="n">Label</span><span class="p">(</span><span class="s2">"Science articles"</span><span class="p">)}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="custom-embedding-backends"><strong>Custom embedding backends</strong><a class="headerlink" href="#custom-embedding-backends" title="Permanent link">&para;</a></h2>
+<p><code>WordDocEmbedder</code> and <code>BaseEmbedder</code>'s <code>word_embedding_model</code> are removed. Instead, a custom backend can define <code>embed_words</code> for the short texts that BERTopic compares with your documents, such as the search term in <code>.find_topics</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input checked="checked" id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">0.17.4</label><label for="__tabbed_15_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">WordDocEmbedder</span>
+
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">WordDocEmbedder</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="n">document_model</span><span class="p">,</span> <span class="n">word_embedding_model</span><span class="o">=</span><span class="n">word_model</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEmbedder</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomEmbedder</span><span class="p">(</span><span class="n">BaseEmbedder</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">document_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">embed_words</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">word_model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">show_progress_bar</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="n">CustomEmbedder</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><code>MultiModalBackend.embed_images</code> is replaced by <code>.embed_media</code>, which takes any kind of media, and <code>.embed</code> no longer takes images:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input checked="checked" id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">0.17.4</label><label for="__tabbed_16_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">image_embeddings</span> <span class="o">=</span> <span class="n">embedding_model</span><span class="o">.</span><span class="n">embed_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">image_embeddings</span> <span class="o">=</span> <span class="n">embedding_model</span><span class="o">.</span><span class="n">embed_media</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="s2">"image"</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="topicmapper"><strong><code>TopicMapper</code></strong><a class="headerlink" href="#topicmapper" title="Permanent link">&para;</a></h2>
+<p><code>TopicMapper</code>, <code>topic_mapper_</code> and <code>mappings_</code> are removed. To find the topic that an original cluster belongs to after merging or reducing topics, use the mapping of <code>topic_model.topics</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input checked="checked" id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">0.17.4</label><label for="__tabbed_17_2">1.0</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topic</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topic_mapper_</span><span class="o">.</span><span class="n">get_mappings</span><span class="p">()[</span><span class="n">cluster</span><span class="p">]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">topic</span> <span class="o">=</span> <span class="n">topic_model</span><span class="o">.</span><span class="n">topics</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="the-embedding-model"><strong>The embedding model</strong><a class="headerlink" href="#the-embedding-model" title="Permanent link">&para;</a></h2>
+<p>The default embedding model is now EmbeddingGemma 2 for every language. To keep the model of 0.17.4, pass <code>"sentence-transformers/all-MiniLM-L6-v2"</code> for English, or <code>"paraphrase-multilingual-MiniLM-L12-v2"</code> for other languages:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">embedding_model</span><span class="o">=</span><span class="s2">"sentence-transformers/all-MiniLM-L6-v2"</span><span class="p">)</span>
+</code></pre></div>
+<p>An <code>embedding_model</code> that BERTopic does not recognise, such as a lambda or a model loaded with <code>transformers</code>, now raises a <code>TypeError</code>. 0.17.4 replaced it with <code>all-MiniLM-L6-v2</code> without a word. Pass a model name or a <code>SentenceTransformer</code> instead, or wrap your model in a <a href="#custom-embedding-backends">custom backend</a>.</p>
+<h2 id="saved-models"><strong>Saved models</strong><a class="headerlink" href="#saved-models" title="Permanent link">&para;</a></h2>
+<p>Models saved with <code>safetensors</code> or <code>pytorch</code> by 0.17.4 or earlier load as before. A pickled model, which <code>.save</code> gives by default, only loads in the version that saved it, so load it with 0.17.4 and save it again with <code>safetensors</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"my_model"</span><span class="p">)</span>
+<span class="n">embedding_model</span> <span class="o">=</span> <span class="s2">"sentence-transformers/all-MiniLM-L6-v2"</span>
+<span class="n">topic_model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"my_model_dir"</span><span class="p">,</span> <span class="n">serialization</span><span class="o">=</span><span class="s2">"safetensors"</span><span class="p">,</span> <span class="n">save_ctfidf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_embedding_model</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
+</code></pre></div>
+<p>Then, load it with 1.0:</p>
+<div class="highlight"><pre><span></span><code><span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"my_model_dir"</span><span class="p">)</span>
+</code></pre></div>
+<p>A model saved with <code>safetensors</code> keeps its topics but not its UMAP and HDBSCAN models, so <code>.transform</code> assigns documents by their similarity to the topic embeddings. To keep those models, fit the model again with 1.0.</p>
+<p>If a saved model points to an embedding model with a <code>Clustering</code> prompt, such as <code>google/embeddinggemma-300m</code>, BERTopic now embeds new documents with that prompt. To embed them as 0.17.4 did, pass the model yourself:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sentence_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SentenceTransformer</span>
+
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"my_model"</span><span class="p">,</span> <span class="n">embedding_model</span><span class="o">=</span><span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">"google/embeddinggemma-300m"</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="python-and-dependencies"><strong>Python and dependencies</strong><a class="headerlink" href="#python-and-dependencies" title="Permanent link">&para;</a></h2>
+<p>BERTopic 1.0 needs Python 3.11 or newer, so on Python 3.10, pip installs 0.17.4. It also needs <code>sentence-transformers&gt;=6.1</code> and <code>transformers[vision]&gt;=5.19</code>, which installs Pillow and torchvision, since EmbeddingGemma 2 needs them even for text.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Maintained by <a href="https://github.com/MaartenGr">Maarten Grootendorst</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy", "content.tabs.link"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.3220b9d7.min.js"></script>
+      
+    
+  </body>
+</html>

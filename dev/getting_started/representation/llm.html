@@ -1,0 +1,2926 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/dev/getting_started/representation/llm.html">
+      
+      
+        <link rel="prev" href="representation.html">
+      
+      
+        <link rel="next" href="../multiaspect/multiaspect.html">
+      
+      
+      <link rel="icon" href="../../icon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
+    
+    
+      
+        <title>6B. LLM & Generative AI - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CUbuntu+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#prompt-engineering" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BERTopic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              6B. LLM & Generative AI
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../algorithm/algorithm.html" class="md-tabs__link">
+        
+  
+    
+  
+  The Algorithm
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../quickstart/quickstart.html" class="md-tabs__link">
+          
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq.html" class="md-tabs__link">
+        
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../usecases.html" class="md-tabs__link">
+        
+  
+    
+  
+  Use Cases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/bertopic.html" class="md-tabs__link">
+          
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../migration.html" class="md-tabs__link">
+        
+  
+    
+  
+  Migrating to 1.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog.html" class="md-tabs__link">
+        
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    BERTopic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithm/algorithm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Algorithm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/quickstart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../serialization/serialization.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Serialization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../search/search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Search Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../best_practices/best_practices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Best Practices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    In-depth
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            In-depth
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_1" id="__nav_3_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Visualizations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Visualizations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_terms.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/visualize_hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_2" id="__nav_3_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Update Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Update Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicreduction/topicreduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Update Topic Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Outlier reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter%20tuning/parametertuning.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameter tuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tips & Tricks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../embeddings/embeddings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Embeddings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dim_reduction/dim_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clustering/clustering.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vectorizers/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ctfidf/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_6_6" id="__nav_3_6_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6. Fine-tune Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            6. Fine-tune Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="representation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6A. Representation Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    6B. LLM & Generative AI
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="llm.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    6B. LLM & Generative AI
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prompt-engineering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prompt Engineering
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prompt Engineering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selecting-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Selecting Documents
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#truncating-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Truncating Documents
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transformers" class="md-nav__link">
+    <span class="md-ellipsis">
+      🤗 Transformers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llamacpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      llama.cpp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openai" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OpenAI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing a model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summarization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ollama
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#litellm" class="md-nav__link">
+    <span class="md-ellipsis">
+      LiteLLM
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#langchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      LangChain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cohere" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cohere
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multiaspect/multiaspect.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6C. Multiple Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Variations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            Variations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsovertime/topicsovertime.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dynamic Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multimodal/multimodal.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodal Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../online/online.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Online Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../merge/merge.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Merge Multiple Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_6" id="__nav_3_7_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    (semi)-supervised
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            (semi)-supervised
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semisupervised/semisupervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Semi-supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../supervised/supervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manual/manual.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guided/guided.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guided Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zeroshot/zeroshot.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zero-shot Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distribution/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Distributions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../topicsperclass/topicsperclass.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../seed_words/seed_words.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Seed Words
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usecases.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use Cases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/bertopic.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BERTopic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/backends.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Backends
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dimensionality.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cluster.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/representations.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Fine-Tune Topic Representation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Plotting
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Plotting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/barchart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Barchart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/document_datamap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents with DataMapPlot
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/media.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Media
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/dtm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DTM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchical_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/heatmap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Heatmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/term.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Term Scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/plotting/topics_per_class.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migrating to 1.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prompt-engineering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prompt Engineering
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prompt Engineering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selecting-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Selecting Documents
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#truncating-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Truncating Documents
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transformers" class="md-nav__link">
+    <span class="md-ellipsis">
+      🤗 Transformers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llamacpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      llama.cpp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openai" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OpenAI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-a-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing a model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summarization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summarization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ollama
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#litellm" class="md-nav__link">
+    <span class="md-ellipsis">
+      LiteLLM
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#langchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      LangChain
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cohere" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cohere
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>6B. LLM & Generative AI</h1>
+
+<p>As we have seen in the <a href="https://maartengr.github.io/BERTopic/getting_started/representation/representation.html">previous section</a>, the topics that you get from BERTopic can be fine-tuned using a number of approaches. Here, we are going to focus on text generation Large Language Models such as OpenAI's GPT models and open-source models such as Gemma.</p>
+<p>Using these techniques, we can further fine-tune topics to generate labels, summaries, poems of topics, and more. To do so, we first generate a set of keywords and documents that describe a topic best using BERTopic's c-TF-IDF calculate. Then, these candidate keywords and documents are passed to the text generation model and asked to generate output that fits the topic best.</p>
+<p>A huge benefit of this is that we can describe a topic with only a few documents and we therefore do not need to pass all documents to the text generation model. Not only speeds this the generation of topic labels up significantly, you also do not need a massive amount of credits when using an external API, such as Cohere or OpenAI.</p>
+<h2 id="prompt-engineering"><strong>Prompt Engineering</strong><a class="headerlink" href="#prompt-engineering" title="Permanent link">&para;</a></h2>
+<p>In most of the examples below, we use certain tags to customize our prompts. There are currently two tags, namely <code>"[KEYWORDS]"</code> and <code>"[DOCUMENTS]"</code>.
+These tags indicate where in the prompt they are to be replaced with a topics keywords and top 4 most representative documents respectively.
+For example, if we have the following prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">I have topic that contains the following documents: </span><span class="se">\n</span><span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+
+<span class="s2">Based on the above information, can you give a short label of the topic?</span>
+<span class="s2">"""</span>
+</code></pre></div>
+<p>then that will be rendered as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="sd">"""</span>
+<span class="sd">I have a topic that contains the following documents:</span>
+<span class="sd">- Our videos are also made possible by your support on patreon.co.</span>
+<span class="sd">- If you want to help us make more videos, you can do so on patreon.com or get one of our posters from our shop.</span>
+<span class="sd">- If you want to help us make more videos, you can do so there.</span>
+<span class="sd">- And if you want to support us in our endeavor to survive in the world of online video, and make more videos, you can do so on patreon.com.</span>
+
+<span class="sd">The topic is described by the following keywords: videos video you our support want this us channel patreon make on we if facebook to patreoncom can for and more watch</span>
+
+<span class="sd">Based on the above information, can you give a short label of the topic?</span>
+<span class="sd">"""</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip 1</p>
+<p>You can access the default prompts of these models with <code>representation_model.default_prompt_</code>. The prompts that were generated after training can be accessed with <code>topic_model.representation_model.prompts_</code>.</p>
+</div>
+<h3 id="selecting-documents"><strong>Selecting Documents</strong><a class="headerlink" href="#selecting-documents" title="Permanent link">&para;</a></h3>
+<p>By default, four of the most representative documents will be passed to <code>[DOCUMENTS]</code>. These documents are selected by calculating their similarity (through c-TF-IDF representations) with the main c-TF-IDF representation of the topics. The four best matching documents per topic are selected.</p>
+<p>To increase the number of documents passed to <code>[DOCUMENTS]</code>, we can use the <code>nr_docs</code> parameter which is accessible in all LLMs on this page. Using this value allows you to select the top <em>n</em> most representative documents instead. If you have a long enough context length, then you could even give the LLM dozens of documents.</p>
+<p>However, some of these documents might be very similar to one another and might be near duplicates. They will not provide much additional information about the content of the topic. Instead, we can use the <code>diversity</code> parameter in each LLM to only select documents that are sufficiently diverse. It takes values between 0 and 1 but a value of 0.1 already does wonders!</p>
+<h3 id="truncating-documents"><strong>Truncating Documents</strong><a class="headerlink" href="#truncating-documents" title="Permanent link">&para;</a></h3>
+<p>We can truncate the input documents in <code>[DOCUMENTS]</code> in order to reduce the number of tokens that we have in our input prompt. To do so, all text generation modules have two parameters that we can tweak:</p>
+<ul>
+<li><code>doc_length</code><ul>
+<li>The maximum length of each document. If a document is longer, it will be truncated. If None, the entire document is passed.</li>
+</ul>
+</li>
+<li><code>tokenizer</code><ul>
+<li>The tokenizer used to calculate to split the document into segments used to count the length of a document.<ul>
+<li>If tokenizer is  <code>'char'</code>, then the document is split up into characters which are counted to adhere to <code>doc_length</code></li>
+<li>If tokenizer is <code>'whitespace'</code>, the document is split up into words separated by whitespaces. These words are counted       and truncated depending on <code>doc_length</code></li>
+<li>If tokenizer is <code>'vectorizer'</code>, then the internal CountVectorizer is used to tokenize the document. These tokens are counted and truncated depending on <code>doc_length</code></li>
+<li>If tokenizer is a callable, then that callable is used to tokenized the document. These tokens are counted and truncated depending on <code>doc_length</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>This means that the definition of <code>doc_length</code> changes depending on what constitutes a token in the <code>tokenizer</code> parameter. If a token is a character, then <code>doc_length</code> refers to max length in characters. If a token is a word, then <code>doc_length</code> refers to the max length in words.</p>
+<p>Let's illustrate this with an example. In the code below, we will use <a href="https://github.com/openai/tiktoken"><code>tiktoken</code></a> to count the number of tokens in each document and limit them to 100 tokens. All documents that have more than 100 tokens will be truncated.</p>
+<p>We start by installing the relevant packages:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>tiktoken<span class="w"> </span>openai
+</code></pre></div>
+<p>Then, we use <code>bertopic.representation.OpenAI</code> to represent our topics with nicely written labels. We specify that documents that we put in the prompt cannot exceed 100 tokens each. Since we will put 4 documents in the prompt, they will total roughly 400 tokens:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tiktoken</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="c1"># Tokenizer</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tiktoken</span><span class="o">.</span><span class="n">get_encoding</span><span class="p">(</span><span class="s2">"o200k_base"</span><span class="p">)</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">"sk-..."</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span>
+    <span class="n">client</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span>
+    <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">nr_docs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">doc_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span>
+<span class="p">)</span>
+
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="transformers"><strong>🤗 Transformers</strong><a class="headerlink" href="#transformers" title="Permanent link">&para;</a></h2>
+<p>Nearly every week, there are new and improved models released on the 🤗 <a href="https://huggingface.co/models">Model Hub</a> that, with some creativity, allow for
+further fine-tuning of our c-TF-IDF based topics. These models range from text generation to zero-classification. In BERTopic, wrappers around these
+methods are created as a way to support whatever might be released in the future.</p>
+<p>Using a model from the huggingface hub, such as Gemma 4, is rather straightforward:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">TextGeneration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">TextGeneration</span><span class="p">(</span><span class="s1">'google/gemma-4-E2B-it'</span><span class="p">)</span>
+
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+</code></pre></div>
+<p>You can also pass your own pipeline and prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">TextGeneration</span>
+
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">"I have a topic described by the following keywords: [KEYWORDS]. Give a short label for this topic, and nothing else."</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s1">'text-generation'</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">'google/gemma-4-E2B-it'</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">TextGeneration</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+</code></pre></div>
+<p><br></p>
+<div class="svg_image">
+<svg width="687" height="199" viewBox="0 0 687 199" fill="none" xmlns="http://www.w3.org/2000/svg">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="12" letter-spacing="0em"><tspan x="0" y="19.8636">&#10;</tspan><tspan x="18" y="34.8636">meat | organic | food | beef | emissions | eat | of | eating | is&#10;</tspan><tspan x="18" y="64.8636">the | explosion | atmosphere | eruption | kilometers | of | &#10;</tspan><tspan x="0" y="79.8636">&#10;</tspan><tspan x="18" y="94.8636">immune | system | your | cells | my | and | is | the | how | of&#10;</tspan><tspan x="0" y="109.864">&#10;</tspan><tspan x="18" y="124.864">moon | earth | lunar | tides | the | water | orbit | base | moons &#10;</tspan><tspan x="0" y="139.864">&#10;</tspan><tspan x="18" y="154.864">eu | european | democratic | vote | parliament | member | union&#10;</tspan><tspan x="0" y="169.864">&#10;</tspan><tspan x="18" y="184.864">plastic | plastics | tons | pollution | waste | microplastics | polymers</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="0" y="49.8636">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="6" y="13.5909">Default Representation</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="12" letter-spacing="0em"><tspan x="452" y="19.8636">&#10;</tspan><tspan x="470" y="34.8636">beef&#10;</tspan><tspan x="452" y="49.8636">&#10;</tspan><tspan x="470" y="64.8636">volcanoes&#10;</tspan><tspan x="452" y="79.8636">&#10;</tspan><tspan x="470" y="94.8636">immune system&#10;</tspan><tspan x="452" y="109.864">&#10;</tspan><tspan x="470" y="124.864">earth&#10;</tspan><tspan x="452" y="139.864">&#10;</tspan><tspan x="470" y="154.864">european union&#10;</tspan><tspan x="452" y="169.864">&#10;</tspan><tspan x="470" y="184.864">cotton</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="458" y="17.5909">&#x1f917; Transformers</tspan></text>
+<path d="M448.354 182.354C448.549 182.158 448.549 181.842 448.354 181.646L445.172 178.464C444.976 178.269 444.66 178.269 444.464 178.464C444.269 178.66 444.269 178.976 444.464 179.172L447.293 182L444.464 184.828C444.269 185.024 444.269 185.34 444.464 185.536C444.66 185.731 444.976 185.731 445.172 185.536L448.354 182.354ZM418 182.5H448V181.5H418V182.5Z" fill="black"/>
+<path d="M448.354 152.354C448.549 152.158 448.549 151.842 448.354 151.646L445.172 148.464C444.976 148.269 444.66 148.269 444.464 148.464C444.269 148.66 444.269 148.976 444.464 149.172L447.293 152L444.464 154.828C444.269 155.024 444.269 155.34 444.464 155.536C444.66 155.731 444.976 155.731 445.172 155.536L448.354 152.354ZM418 152.5H448V151.5H418V152.5Z" fill="black"/>
+<path d="M448.354 122.354C448.549 122.158 448.549 121.842 448.354 121.646L445.172 118.464C444.976 118.269 444.66 118.269 444.464 118.464C444.269 118.66 444.269 118.976 444.464 119.172L447.293 122L444.464 124.828C444.269 125.024 444.269 125.34 444.464 125.536C444.66 125.731 444.976 125.731 445.172 125.536L448.354 122.354ZM418 122.5H448V121.5H418V122.5Z" fill="black"/>
+<path d="M448.354 92.3536C448.549 92.1583 448.549 91.8417 448.354 91.6464L445.172 88.4645C444.976 88.2692 444.66 88.2692 444.464 88.4645C444.269 88.6597 444.269 88.9763 444.464 89.1716L447.293 92L444.464 94.8284C444.269 95.0237 444.269 95.3403 444.464 95.5355C444.66 95.7308 444.976 95.7308 445.172 95.5355L448.354 92.3536ZM418 92.5H448V91.5H418V92.5Z" fill="black"/>
+<path d="M448.354 62.3536C448.549 62.1583 448.549 61.8417 448.354 61.6464L445.172 58.4645C444.976 58.2692 444.66 58.2692 444.464 58.4645C444.269 58.6597 444.269 58.9763 444.464 59.1716L447.293 62L444.464 64.8284C444.269 65.0237 444.269 65.3403 444.464 65.5355C444.66 65.7308 444.976 65.7308 445.172 65.5355L448.354 62.3536ZM418 62.5H448V61.5H418V62.5Z" fill="black"/>
+<path d="M448.354 32.3536C448.549 32.1583 448.549 31.8417 448.354 31.6464L445.172 28.4645C444.976 28.2692 444.66 28.2692 444.464 28.4645C444.269 28.6597 444.269 28.9763 444.464 29.1716L447.293 32L444.464 34.8284C444.269 35.0237 444.269 35.3403 444.464 35.5355C444.66 35.7308 444.976 35.7308 445.172 35.5355L448.354 32.3536ZM418 32.5H448V31.5H418V32.5Z" fill="black"/>
+</svg>
+
+</div>
+<p><br></p>
+<p>A model with a chat template, as instruction-tuned models have, is sent the prompt as a chat message, so you write
+the prompt as plain text and its template is applied for you. In a custom prompt, the <code>[KEYWORDS]</code> and <code>[DOCUMENTS]</code>
+tags decide where the keywords and documents are inserted.</p>
+<h2 id="llamacpp"><strong>llama.cpp</strong><a class="headerlink" href="#llamacpp" title="Permanent link">&para;</a></h2>
+<p>An amazing framework for using LLMs for inference is <a href="https://github.com/ggerganov/llama.cpp"><code>llama.cpp</code></a> which has <a href="https://github.com/abetlen/llama-cpp-python">python bindings</a> that we can use in BERTopic. To start with, we first need to install <code>llama-cpp-python</code>:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>llama-cpp-python
+</code></pre></div>
+<p>or using the following for hardware acceleration:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">CMAKE_ARGS</span><span class="o">=</span><span class="s2">"-DLLAMA_CUBLAS=on"</span><span class="w"> </span><span class="nv">FORCE_CMAKE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>llama-cpp-python
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There are a number of <a href="https://github.com/abetlen/llama-cpp-python#installation-with-hardware-acceleration">installation options</a> depending on your hardware and OS. Make sure that you select the correct one to optimize your performance.</p>
+</div>
+<p>After installation, you need to download your LLM locally before we use it in BERTopic, like so:</p>
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://huggingface.co/ggml-org/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf
+</code></pre></div>
+<p>Finally, we can now use the model with BERTopic in just a couple of lines:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">LlamaCPP</span>
+
+<span class="c1"># Use llama.cpp to load in a 4-bit quantized version of Gemma 4 E2B</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LlamaCPP</span><span class="p">(</span><span class="s2">"gemma-4-E2B-it-Q4_0.gguf"</span><span class="p">)</span>
+
+<span class="c1"># Create our BERTopic model</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">,</span>  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>If you want to have more control over the LLMs parameters, you can run it like so:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">LlamaCPP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">llama_cpp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Llama</span>
+
+<span class="c1"># Use llama.cpp to load in a 4-bit quantized version of Gemma 4 E2B</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="n">Llama</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s2">"gemma-4-E2B-it-Q4_0.gguf"</span><span class="p">,</span> <span class="n">n_gpu_layers</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_ctx</span><span class="o">=</span><span class="mi">16384</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LlamaCPP</span><span class="p">(</span><span class="n">llm</span><span class="p">)</span>
+
+<span class="c1"># Create our BERTopic model</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">,</span>  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>The model is prompted through its own chat template, which llama.cpp reads from the GGUF file.</p>
+<h2 id="openai"><strong>OpenAI</strong><a class="headerlink" href="#openai" title="Permanent link">&para;</a></h2>
+<p>Instead of using a language model from 🤗 transformers, we can use external APIs instead that
+do the work for you. Here, we can use <a href="https://openai.com/api/">OpenAI</a> to extract our topic labels from the candidate documents and keywords.
+To use this, you will need to install openai first:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>openai
+</code></pre></div>
+<p>Then, get yourself an API key and use OpenAI's API as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">"sk-..."</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+</code></pre></div>
+<p><br></p>
+<div class="svg_image">
+<svg width="956" height="199" viewBox="0 0 956 199" fill="none" xmlns="http://www.w3.org/2000/svg">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="12" letter-spacing="0em"><tspan x="0" y="19.8636">&#10;</tspan><tspan x="18" y="34.8636">meat | organic | food | beef | emissions | eat | of | eating | is&#10;</tspan><tspan x="18" y="64.8636">the | explosion | atmosphere | eruption | kilometers | of | &#10;</tspan><tspan x="0" y="79.8636">&#10;</tspan><tspan x="18" y="94.8636">immune | system | your | cells | my | and | is | the | how | of&#10;</tspan><tspan x="0" y="109.864">&#10;</tspan><tspan x="18" y="124.864">moon | earth | lunar | tides | the | water | orbit | base | moons &#10;</tspan><tspan x="0" y="139.864">&#10;</tspan><tspan x="18" y="154.864">eu | european | democratic | vote | parliament | member | union&#10;</tspan><tspan x="0" y="169.864">&#10;</tspan><tspan x="18" y="184.864">plastic | plastics | tons | pollution | waste | microplastics | polymers</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="0" y="49.8636">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="6" y="13.5909">Default Representation</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="12" letter-spacing="0em"><tspan x="452" y="19.8636">&#10;</tspan><tspan x="470" y="34.8636">Organic vs Conventional Food: Environmental and Health Considerations&#10;</tspan><tspan x="452" y="49.8636">&#10;</tspan><tspan x="470" y="64.8636">Volcanic Eruptions and Impacts&#10;</tspan><tspan x="452" y="79.8636">&#10;</tspan><tspan x="470" y="94.8636">The Immune System: Understanding and Boosting Immunity&#10;</tspan><tspan x="452" y="109.864">&#10;</tspan><tspan x="470" y="124.864">The Moon&#39;s Tides and Orbit Phenomena&#10;</tspan><tspan x="452" y="139.864">&#10;</tspan><tspan x="470" y="154.864">Democracy in the European Union&#10;</tspan><tspan x="452" y="169.864">&#10;</tspan><tspan x="470" y="184.864">Plastic Pollution and its environmental impact</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="458" y="17.5909">OpenAI</tspan></text>
+<path d="M448.354 182.354C448.549 182.158 448.549 181.842 448.354 181.646L445.172 178.464C444.976 178.269 444.66 178.269 444.464 178.464C444.269 178.66 444.269 178.976 444.464 179.172L447.293 182L444.464 184.828C444.269 185.024 444.269 185.34 444.464 185.536C444.66 185.731 444.976 185.731 445.172 185.536L448.354 182.354ZM418 182.5H448V181.5H418V182.5Z" fill="black"/>
+<path d="M448.354 152.354C448.549 152.158 448.549 151.842 448.354 151.646L445.172 148.464C444.976 148.269 444.66 148.269 444.464 148.464C444.269 148.66 444.269 148.976 444.464 149.172L447.293 152L444.464 154.828C444.269 155.024 444.269 155.34 444.464 155.536C444.66 155.731 444.976 155.731 445.172 155.536L448.354 152.354ZM418 152.5H448V151.5H418V152.5Z" fill="black"/>
+<path d="M448.354 122.354C448.549 122.158 448.549 121.842 448.354 121.646L445.172 118.464C444.976 118.269 444.66 118.269 444.464 118.464C444.269 118.66 444.269 118.976 444.464 119.172L447.293 122L444.464 124.828C444.269 125.024 444.269 125.34 444.464 125.536C444.66 125.731 444.976 125.731 445.172 125.536L448.354 122.354ZM418 122.5H448V121.5H418V122.5Z" fill="black"/>
+<path d="M448.354 92.3536C448.549 92.1583 448.549 91.8417 448.354 91.6464L445.172 88.4645C444.976 88.2692 444.66 88.2692 444.464 88.4645C444.269 88.6597 444.269 88.9763 444.464 89.1716L447.293 92L444.464 94.8284C444.269 95.0237 444.269 95.3403 444.464 95.5355C444.66 95.7308 444.976 95.7308 445.172 95.5355L448.354 92.3536ZM418 92.5H448V91.5H418V92.5Z" fill="black"/>
+<path d="M448.354 62.3536C448.549 62.1583 448.549 61.8417 448.354 61.6464L445.172 58.4645C444.976 58.2692 444.66 58.2692 444.464 58.4645C444.269 58.6597 444.269 58.9763 444.464 59.1716L447.293 62L444.464 64.8284C444.269 65.0237 444.269 65.3403 444.464 65.5355C444.66 65.7308 444.976 65.7308 445.172 65.5355L448.354 62.3536ZM418 62.5H448V61.5H418V62.5Z" fill="black"/>
+<path d="M448.354 32.3536C448.549 32.1583 448.549 31.8417 448.354 31.6464L445.172 28.4645C444.976 28.2692 444.66 28.2692 444.464 28.4645C444.269 28.6597 444.269 28.9763 444.464 29.1716L447.293 32L444.464 34.8284C444.269 35.0237 444.269 35.3403 444.464 35.5355C444.66 35.7308 444.976 35.7308 445.172 35.5355L448.354 32.3536ZM418 32.5H448V31.5H418V32.5Z" fill="black"/>
+</svg>
+
+</div>
+<p><br></p>
+<p>You can also use a custom prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"I have the following documents: [DOCUMENTS] </span><span class="se">\n</span><span class="s2">These documents are about the following topic: '"</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="choosing-a-model"><strong>Choosing a model</strong><a class="headerlink" href="#choosing-a-model" title="Permanent link">&para;</a></h3>
+<p>To choose a specific model from OpenAI's offering:</p>
+<div class="highlight"><pre><span></span><code><span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6.1-sol"</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<p>Prompting with their models is very satisfying and is customizable as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">I have a topic that contains the following documents:</span>
+<span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+
+<span class="s2">Based on the information above, extract a short topic label in the following format:</span>
+<span class="s2">topic: &lt;topic label&gt;</span>
+<span class="s2">"""</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whenever you create a custom prompt, it is important to add
+<div class="highlight"><pre><span></span><code>Based on the information above, extract a short topic label in the following format:
+topic: &lt;topic label&gt;
+</code></pre></div>
+at the end of your prompt as BERTopic extracts everything that comes after <code>topic:</code>. Having
+said that, if <code>topic:</code> is not in the output, then it will simply extract the entire response, so
+feel free to experiment with the prompts.</p>
+</div>
+<h3 id="summarization"><strong>Summarization</strong><a class="headerlink" href="#summarization" title="Permanent link">&para;</a></h3>
+<p>Due to the structure of the prompts in OpenAI's chat models, we can extract different types of topic representations from their GPT models.
+Instead of extracting a topic label, we can instead ask it to extract a short description of the topic instead:</p>
+<div class="highlight"><pre><span></span><code><span class="n">summarization_prompt</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">I have a topic that is described by the following keywords: [KEYWORDS]</span>
+<span class="s2">In this topic, the following documents are a small but representative subset of all documents in the topic:</span>
+<span class="s2">[DOCUMENTS]</span>
+
+<span class="s2">Based on the information above, please give a description of this topic in the following format:</span>
+<span class="s2">topic: &lt;description&gt;</span>
+<span class="s2">"""</span>
+
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">summarization_prompt</span><span class="p">,</span> <span class="n">nr_docs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">delay_in_seconds</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<p>The above is not constrained to just creating a short description or summary of the topic, we can extract labels, keywords, poems, example documents, extensitive descriptions, and more using this method!
+If you want to have multiple representations of a single topic, it might be worthwhile to also check out <a href="https://maartengr.github.io/BERTopic/getting_started/multiaspect/multiaspect.html"><strong>multi-aspect</strong></a> topic modeling with BERTopic.</p>
+<h2 id="ollama"><strong>Ollama</strong><a class="headerlink" href="#ollama" title="Permanent link">&para;</a></h2>
+<p>To use <a href="https://github.com/ollama/ollama">Ollama</a> within BERTopic, it is advised to use the <code>openai</code> package as it allows to pass through a model using the url on which the model is running.</p>
+<p>You will first need to install <code>openai</code>:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>openai
+</code></pre></div>
+<p>After installation, usage is straightforward and you can select any model that you have prepared in your <code>ollama</code> model list. You can see all models by running <code>ollama list</code>.</p>
+<p>Select one from the list and you can use it in BERTopic as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenAI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span>
+    <span class="n">base_url</span> <span class="o">=</span> <span class="s1">'http://localhost:11434/v1'</span><span class="p">,</span> <span class="c1">#wherever ollama is running</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s1">'ollama'</span><span class="p">,</span> <span class="c1"># required, but unused</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Create your representation model</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">'gemma4'</span><span class="p">)</span>
+
+<span class="c1"># Create your BERTopic model</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">,</span>  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="litellm"><strong>LiteLLM</strong><a class="headerlink" href="#litellm" title="Permanent link">&para;</a></h2>
+<p>An amazing framework to simplify connecting to external LLMs, is <a href="https://docs.litellm.ai">LiteLLM</a>. This package allows you to connect to OpenAI, Cohere, Anthropic, etc. all within one package. This makes iteration and testing out different models a breeze!</p>
+<p>o start with, we first need to install <code>litellm</code>:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>litellm
+</code></pre></div>
+<p>After installation, usage is straightforward and you can select any model found in their <a href="https://docs.litellm.ai/docs/providers">docs</a>.
+Let's show an example with OpenAI:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">LiteLLM</span>
+
+<span class="c1"># set ENV variables</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"MY_KEY"</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LiteLLM</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"gpt-6-luna"</span><span class="p">)</span>
+
+<span class="c1"># Create our BERTopic model</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">,</span>  <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="langchain"><strong>LangChain</strong><a class="headerlink" href="#langchain" title="Permanent link">&para;</a></h2>
+<p><a href="https://github.com/langchain-ai/langchain">LangChain</a> is a framework for building applications with large language
+models, and it offers one interface to the chat models of many providers. In BERTopic, any LangChain chat model can
+label the topics.</p>
+<p>To use LangChain, you will need to install the langchain package first, together with the package of the provider you
+want to use, like openai:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>langchain<span class="w"> </span>langchain-openai
+</code></pre></div>
+<p>Then, you can create your chat model and pass it to BERTopic as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">langchain.chat_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_chat_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">LangChain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">init_chat_model</span><span class="p">(</span><span class="s2">"gpt-6-luna"</span><span class="p">,</span> <span class="n">model_provider</span><span class="o">=</span><span class="s2">"openai"</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LangChain</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+</code></pre></div>
+<p>You can also use a custom prompt, in which the <code>[DOCUMENTS]</code> and <code>[KEYWORDS]</code> tags decide where the representative
+documents and keywords are inserted:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">I have a topic that contains the following documents:</span>
+<span class="s2">[DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS]</span>
+<span class="s2">Based on the above information, give a short label for the topic, and nothing else.</span>
+<span class="s2">"""</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">LangChain</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="cohere"><strong>Cohere</strong><a class="headerlink" href="#cohere" title="Permanent link">&para;</a></h2>
+<p>Instead of using a language model from 🤗 transformers, we can use external APIs instead that
+do the work for you. Here, we can use <a href="https://docs.cohere.ai/">Cohere</a> to extract our topic labels from the candidate documents and keywords.
+To use this, you will need to install cohere first:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>cohere
+</code></pre></div>
+<p>Then, get yourself an API key and use Cohere's API as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">cohere</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic.representation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cohere</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bertopic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BERTopic</span>
+
+<span class="c1"># Create your representation model</span>
+<span class="n">co</span> <span class="o">=</span> <span class="n">cohere</span><span class="o">.</span><span class="n">ClientV2</span><span class="p">(</span><span class="n">my_api_key</span><span class="p">)</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">Cohere</span><span class="p">(</span><span class="n">co</span><span class="p">)</span>
+
+<span class="c1"># Use the representation model in BERTopic on top of the default pipeline</span>
+<span class="n">topic_model</span> <span class="o">=</span> <span class="n">BERTopic</span><span class="p">(</span><span class="n">representation_model</span><span class="o">=</span><span class="n">representation_model</span><span class="p">)</span>
+</code></pre></div>
+<p><br></p>
+<div class="svg_image">
+<svg width="705" height="199" viewBox="0 0 705 199" fill="none" xmlns="http://www.w3.org/2000/svg">
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" font-weight="bold" letter-spacing="0em"><tspan x="0" y="47.7637">&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" letter-spacing="0em"><tspan x="0" y="19.7637">&#10;</tspan><tspan x="18" y="33.7637">meat | organic | food | beef | emissions | eat | of | eating | is&#10;</tspan><tspan x="18" y="61.7637">the | explosion | atmosphere | eruption | kilometers | of | &#10;</tspan><tspan x="0" y="75.7637">&#10;</tspan><tspan x="18" y="89.7637">immune | system | your | cells | my | and | is | the | how | of&#10;</tspan><tspan x="0" y="103.764">&#10;</tspan><tspan x="18" y="117.764">moon | earth | lunar | tides | the | water | orbit | base | moons &#10;</tspan><tspan x="0" y="131.764">&#10;</tspan><tspan x="18" y="145.764">eu | european | democratic | vote | parliament | member | union&#10;</tspan><tspan x="0" y="159.764">&#10;</tspan><tspan x="18" y="173.764">plastic | plastics | tons | pollution | waste | microplastics | polymers</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="6" y="14.0576">Default Representation</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="12" letter-spacing="0em"><tspan x="452" y="19.7637">&#10;</tspan><tspan x="470" y="33.7637">Organic food&#10;</tspan><tspan x="452" y="47.7637">&#10;</tspan><tspan x="470" y="61.7637">Exploding planets&#10;</tspan><tspan x="452" y="75.7637">&#10;</tspan><tspan x="470" y="89.7637">How your immune system works&#10;</tspan><tspan x="452" y="103.764">&#10;</tspan><tspan x="470" y="117.764">How tides work&#10;</tspan><tspan x="452" y="131.764">&#10;</tspan><tspan x="470" y="145.764">How democratic is the European Union?&#10;</tspan><tspan x="452" y="159.764">&#10;</tspan><tspan x="470" y="173.764">Plastic pollution&#10;</tspan></text>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Tahoma" font-size="14" font-weight="bold" letter-spacing="0em"><tspan x="458" y="18.0576">Cohere</tspan></text>
+<path d="M448.354 170.354C448.549 170.158 448.549 169.842 448.354 169.646L445.172 166.464C444.976 166.269 444.66 166.269 444.464 166.464C444.269 166.66 444.269 166.976 444.464 167.172L447.293 170L444.464 172.828C444.269 173.024 444.269 173.34 444.464 173.536C444.66 173.731 444.976 173.731 445.172 173.536L448.354 170.354ZM418 170.5H448V169.5H418V170.5Z" fill="black"/>
+<path d="M448.354 143.354C448.549 143.158 448.549 142.842 448.354 142.646L445.172 139.464C444.976 139.269 444.66 139.269 444.464 139.464C444.269 139.66 444.269 139.976 444.464 140.172L447.293 143L444.464 145.828C444.269 146.024 444.269 146.34 444.464 146.536C444.66 146.731 444.976 146.731 445.172 146.536L448.354 143.354ZM418 143.5H448V142.5H418V143.5Z" fill="black"/>
+<path d="M448.354 114.354C448.549 114.158 448.549 113.842 448.354 113.646L445.172 110.464C444.976 110.269 444.66 110.269 444.464 110.464C444.269 110.66 444.269 110.976 444.464 111.172L447.293 114L444.464 116.828C444.269 117.024 444.269 117.34 444.464 117.536C444.66 117.731 444.976 117.731 445.172 117.536L448.354 114.354ZM418 114.5H448V113.5H418V114.5Z" fill="black"/>
+<path d="M448.354 86.3536C448.549 86.1583 448.549 85.8417 448.354 85.6464L445.172 82.4645C444.976 82.2692 444.66 82.2692 444.464 82.4645C444.269 82.6597 444.269 82.9763 444.464 83.1716L447.293 86L444.464 88.8284C444.269 89.0237 444.269 89.3403 444.464 89.5355C444.66 89.7308 444.976 89.7308 445.172 89.5355L448.354 86.3536ZM418 86.5H448V85.5H418V86.5Z" fill="black"/>
+<path d="M448.354 58.3536C448.549 58.1583 448.549 57.8417 448.354 57.6464L445.172 54.4645C444.976 54.2692 444.66 54.2692 444.464 54.4645C444.269 54.6597 444.269 54.9763 444.464 55.1716L447.293 58L444.464 60.8284C444.269 61.0237 444.269 61.3403 444.464 61.5355C444.66 61.7308 444.976 61.7308 445.172 61.5355L448.354 58.3536ZM418 58.5H448V57.5H418V58.5Z" fill="black"/>
+<path d="M448.354 30.3536C448.549 30.1583 448.549 29.8417 448.354 29.6464L445.172 26.4645C444.976 26.2692 444.66 26.2692 444.464 26.4645C444.269 26.6597 444.269 26.9763 444.464 27.1716L447.293 30L444.464 32.8284C444.269 33.0237 444.269 33.3403 444.464 33.5355C444.66 33.7308 444.976 33.7308 445.172 33.5355L448.354 30.3536ZM418 30.5H448V29.5H418V30.5Z" fill="black"/>
+</svg>
+
+</div>
+<p><br></p>
+<p>You can also use a custom prompt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"""</span>
+<span class="s2">I have topic that contains the following documents: [DOCUMENTS]</span>
+<span class="s2">The topic is described by the following keywords: [KEYWORDS].</span>
+<span class="s2">Based on the above information, can you give a short label of the topic?</span>
+<span class="s2">"""</span>
+<span class="n">representation_model</span> <span class="o">=</span> <span class="n">Cohere</span><span class="p">(</span><span class="n">co</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Maintained by <a href="https://github.com/MaartenGr">Maarten Grootendorst</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.3220b9d7.min.js"></script>
+      
+    
+  </body>
+</html>

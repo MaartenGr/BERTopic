@@ -1,0 +1,2722 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Leveraging BERT and a class-based TF-IDF to create easily interpretable topics.">
+      
+      
+        <meta name="author" content="Maarten P. Grootendorst">
+      
+      
+        <link rel="canonical" href="https://maartengr.github.io/BERTopic/dev/usecases.html">
+      
+      
+        <link rel="prev" href="faq.html">
+      
+      
+        <link rel="next" href="api/bertopic.html">
+      
+      
+      <link rel="icon" href="icon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
+    
+    
+      
+        <title>Use Cases - BERTopic</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.66ac8b77.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CUbuntu+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#examples" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="BERTopic" class="md-header__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BERTopic
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Use Cases
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="black" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="algorithm/algorithm.html" class="md-tabs__link">
+        
+  
+    
+  
+  The Algorithm
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="getting_started/quickstart/quickstart.html" class="md-tabs__link">
+          
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="faq.html" class="md-tabs__link">
+        
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="usecases.html" class="md-tabs__link">
+        
+  
+    
+  
+  Use Cases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="api/bertopic.html" class="md-tabs__link">
+          
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="migration.html" class="md-tabs__link">
+        
+  
+    
+  
+  Migrating to 1.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="changelog.html" class="md-tabs__link">
+        
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="BERTopic" class="md-nav__button md-logo" aria-label="BERTopic" data-md-component="logo">
+      
+  <img src="img/icon.png" alt="logo">
+
+    </a>
+    BERTopic
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/MaartenGr/BERTopic" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="algorithm/algorithm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    The Algorithm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/quickstart/quickstart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/serialization/serialization.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Serialization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/search/search.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Search Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/best_practices/best_practices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Best Practices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    In-depth
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            In-depth
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_1" id="__nav_3_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Visualizations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Visualizations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_terms.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terms
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/visualization/visualize_hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5_2" id="__nav_3_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Update Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Update Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicreduction/topicreduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicrepresentation/topicrepresentation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Update Topic Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/outlier_reduction/outlier_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Outlier reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/parameter%20tuning/parametertuning.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameter tuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/tips_and_tricks/tips_and_tricks.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tips & Tricks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/embeddings/embeddings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Embeddings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/dim_reduction/dim_reduction.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/clustering/clustering.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/vectorizers/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/ctfidf/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6_6" id="__nav_3_6_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    6. Fine-tune Topics
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            6. Fine-tune Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/representation/representation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6A. Representation Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/representation/llm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6B. LLM & Generative AI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/multiaspect/multiaspect.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6C. Multiple Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Variations
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            Variations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicsovertime/topicsovertime.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dynamic Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/hierarchicaltopics/hierarchicaltopics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/multimodal/multimodal.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Multimodal Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/online/online.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Online Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/merge/merge.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Merge Multiple Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_6" id="__nav_3_7_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    (semi)-supervised
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            (semi)-supervised
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/semisupervised/semisupervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Semi-supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/supervised/supervised.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supervised Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/manual/manual.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/guided/guided.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guided Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/zeroshot/zeroshot.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zero-shot Topic Modeling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/distribution/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topic Distributions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/topicsperclass/topicsperclass.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/seed_words/seed_words.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Seed Words
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="faq.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Use Cases
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="usecases.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Use Cases
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#app-user-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      App User Feedback
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#employee-surveys" class="md-nav__link">
+    <span class="md-ellipsis">
+      Employee Surveys
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-perception" class="md-nav__link">
+    <span class="md-ellipsis">
+      Voice Perception
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#social-media" class="md-nav__link">
+    <span class="md-ellipsis">
+      Social Media
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#it-service-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      IT Service Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colon-cancer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Colon Cancer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telephone-help-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      Telephone Help Line
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-newspaper" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Newspaper
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intelligent-virtual-assistants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intelligent Virtual Assistants
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#electronic-health-records" class="md-nav__link">
+    <span class="md-ellipsis">
+      Electronic Health Records
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#teaching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Teaching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zero-hunger-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Zero Hunger Lab
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#papers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Papers
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/bertopic.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    BERTopic
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sub-models
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sub-models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/backends.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Backends
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/dimensionality.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Dimensionality Reduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/cluster.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Clustering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/vectorizers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Vectorizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/ctfidf.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. c-TF-IDF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/representations.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Fine-Tune Topic Representation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Plotting
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Plotting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/barchart.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Barchart
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/document_datamap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Documents with DataMapPlot
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/media.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Media
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/dtm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DTM
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchical_documents.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical documents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/hierarchy.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hierarchical topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/distribution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/heatmap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Heatmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/term.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Term Scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/topics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/plotting/topics_per_class.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Topics per Class
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="migration.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migrating to 1.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="changelog.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#app-user-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      App User Feedback
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#employee-surveys" class="md-nav__link">
+    <span class="md-ellipsis">
+      Employee Surveys
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#voice-perception" class="md-nav__link">
+    <span class="md-ellipsis">
+      Voice Perception
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#social-media" class="md-nav__link">
+    <span class="md-ellipsis">
+      Social Media
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#it-service-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      IT Service Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colon-cancer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Colon Cancer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telephone-help-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      Telephone Help Line
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regional-newspaper" class="md-nav__link">
+    <span class="md-ellipsis">
+      Regional Newspaper
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intelligent-virtual-assistants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intelligent Virtual Assistants
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#electronic-health-records" class="md-nav__link">
+    <span class="md-ellipsis">
+      Electronic Health Records
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#teaching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Teaching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zero-hunger-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      Zero Hunger Lab
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#papers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Papers
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Use Cases</h1>
+
+<p>Over the last few years, BERTopic has been used on a wide variety of use cases and domains, from cancer research and voice perception, to employee surveys and social media. This diversity allows for interesting use cases but it might quickly become overwhelming. This page is meant to demonstrate how, when, and why BERTopic is used in practice.</p>
+<p><br>
+<img src="img/logos.svg" width="80%">
+<br></p>
+<h2 id="examples"><strong>Examples</strong><a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<p>Below are a number of use cases that have been applied in practice. These use cases are collected from and written by data-professionals.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you would like to add your use case, feel free open up a PR! You only need to update <a href="https://github.com/MaartenGr/BERTopic/blob/master/docs/usecases.md">this file</a> and add your example.
+You can just copy-paste one of the existing examples and adjust it contain a description of your use case.</p>
+</div>
+<!-- Use the following template to create and share your own use -->
+
+<!-- #### Employee Surveys
+
+!!! quote ""
+    <p align="center" style="font-size:15px;">
+        <img src="URL_TO_LOGO_OF_MY_ORGANIZATION.svg" width="100"/><br><i>
+        "A DESCRIPTION OF MY USE CASE. IF YOU HAVE THE TIME, PLEASE BE AS EXTENSIVE AS POSSIBLE."
+        </i><br>
+        •••<br>First Name Last Name<br><b>My Profession</b><br>My Organization<br>
+    </p> -->
+
+<h4 id="app-user-feedback">App User Feedback<a class="headerlink" href="#app-user-feedback" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center" style="font-size:15px;">
+    <img src="https://www.telefonica.de/static/layout/2021_telefonica/header/logo_telefonica_o2_blue.png" width="250"/><br><i>
+    "Analyzing user reviews from the App Store and Play Store helps us reveal valuable customer information, fix technical or usability issues, and help constantly improve customer experience. We utilize BERTopic for topic modeling and supervised classification of predefined categories."
+    </i><br>
+    •••<br>Tibor Fabian, Ph.D.<br><b>Lead/Master Data Scientist</b><br>Telefónica Germany<br>
+</p></p>
+</div>
+<h4 id="employee-surveys">Employee Surveys<a class="headerlink" href="#employee-surveys" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center" style="font-size:15px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Seal_of_the_United_States_Department_of_Homeland_Security.svg" width="100"/><br><i>
+    "We are using BERTopic to support analysis of employee surveys. Here, we use BERTopic to compute the topics of discussion found in employee responses to open-ended survey questions. To further understand how employees feel about certain topics, we combined BERTopic with sentiment analysis to identify the sentiments associated with different topics and vice versa."
+    </i><br>
+    •••<br>Steve Quirolgico, Ph.D.<b><br>Principal Engineer</b><br> U.S. Department of Homeland Security<br>
+</p></p>
+</div>
+<h4 id="voice-perception">Voice Perception<a class="headerlink" href="#voice-perception" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <img src="https://cdn.worldvectorlogo.com/logos/mcmaster-university.svg" width=200/><br>
+    <i>"A research project on voice perception to categorize what people describe when they make first impressions based on hearing people say, "Hi"." <a href="https://psyarxiv.com/9ysqx/">preprint</a> | <a href="https://osf.io/5t4b7/">code</a></i><br>
+    •••<br>David Feinberg<b><br>Associate Professor</b><br>McMaster University<br>
+</p></p>
+</div>
+<h4 id="social-media">Social Media<a class="headerlink" href="#social-media" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <img src="https://www.aimtechnologies.co/wp-content/uploads/2022/12/aim_logo.svg" width=200/><br>
+    <i>"We use BERTopic to detect trending topics in social media, Our product (AIM Insights) is a social media monitoring tool so detecting trending topics in social media helps our clients to capitalize on them for their campaigns.<br><br>
+    We use BERTopic to group social media posts into clusters, sort them by engagement to detect the ones that are trending, and then use OpenAI's GPT-3 to generate a label for each of the top clusters based on the most relevant documents in it. This is all done on Arabic posts using an in-house sentence embeddings model."</i><br>
+    •••<br>Ahmed Rashwan<b><br>AI lead</b><br>AIM Technologies<br>
+</p></p>
+</div>
+<h4 id="it-service-management">IT Service Management<a class="headerlink" href="#it-service-management" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <br><img src="https://upload.wikimedia.org/wikipedia/commons/a/a3/DXC_Technology_logo_%282021%29.svg" width=150/><br><br>
+    <i>"In IT Service Management systems (e.g., Service Now) we receive Incidents, Problems, Change requests etc. We use BERTopic to categorize them into a group of topics/clusters to understand the distribution of the work requests over the period of time to plan and act accordingly for the future."</i><br>
+    •••<br>Rajesh Thanaseelan<b><br>Data Science Consultant</b><br>DXC Technology<br>
+</p></p>
+</div>
+<h4 id="colon-cancer">Colon Cancer<a class="headerlink" href="#colon-cancer" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <br>
+    <img src="https://www.utas.edu.au/__data/assets/git_bridge/0012/1368768/dist/mysource_files/logo.svg" width=300/><br><br>
+    <i>"We use BERTopic to evaluate P53 in Ovarian cancer for Computational backgrounds researchers, who find it easier to relate Artificial Intelligence with advancing the transformer model and unstructured medical data. The paper explores the heterogeneity of keyBERT, BERTopic, PyCaret, and LDAs as key phrase generators and topic model extractors, with P53 in ovarian cancer as a use case."</i><br>
+    •••<br>
+    Mary Adewunmi<b><br>PhD Student in Colon Cancer and AI</b><br>UTAS<br>
+</p></p>
+</div>
+<h4 id="telephone-help-line">Telephone Help Line<a class="headerlink" href="#telephone-help-line" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <img src="https://gopf.ai/images/logo-gopf.svg" width=200/><br>
+    <i>"We analyzed 100K+ phone call memos from a telephone help line. The Help Line is open to all people, regardless of religion, culture, and origin. It follows the principles of IFOTES (International Federation Of Telephone Emergency Services). The regional offices each offer independent counseling services via telephone or online.<br><br>
+    The phone call memos are written by hundreds of independent volunteers and come in various shapes, lengths, forms, and wordings - additionally to have them in multiple languages. While using BERTopic we ran a few tests to figure out if the topic modeling works. Selecting only one language with ~60K data points and a mixed language model we achieved good results. It helped identify topics within the calls and therefore show the organization what reasons there are for people calling them. We identified in a workshop a few interesting topics, which they were not aware of, for example, religious topics.<br><br>
+    The identification of existing and new, arising topics is crucial for the service quality of the organization. It furthermore helps detect trends over time, which can then be reported directly to Public Health institutions, which can then come up with campaigns to inform the public and help reduce certain psychological concerns. It acts as a representative psychological health barometer of the population."</i><br>
+    •••<br>Kevin Kuhn<b><br>Chief Executive Officer</b><br>gopf<br>
+</p></p>
+</div>
+<h4 id="regional-newspaper">Regional Newspaper<a class="headerlink" href="#regional-newspaper" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <img src="https://mediacitybergen.blob.core.windows.net/mediacitybergen-cache/6/4/b/d/4/b/64bd4b7ff7f98b66a1b6bee510f0fcc9350537d0.jpg" width=400/><br><br>
+    <i>"Recently, we wanted to evaluate our overall section structure, especially our local news section. As you can imagine, local news is quite a big part of what we do in a regional newspaper. We used BERTopic on a year's worth of local news data to explore the topics in local news and define a new section structure. The results from this analysis helped to define the new section structure, which was implemented this month. "</i><br>
+    •••<br>Thomas Husken<br><b>Data Scientist</b><br>Bergens Tidende<br>
+</p></p>
+</div>
+<h4 id="intelligent-virtual-assistants">Intelligent Virtual Assistants<a class="headerlink" href="#intelligent-virtual-assistants" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <i>"We have been using BERTopic as an early step in our exploratory analysis for intelligent virtual assistants. It helps us get a quick read on what some of the intents may be. The results help in the design discussions with customers."</i><br>
+    •••<br>Stephen Drew<b><br>VP, AI and Automation Solutions</b><br>Five9<br>
+</p></p>
+</div>
+<h4 id="electronic-health-records">Electronic Health Records<a class="headerlink" href="#electronic-health-records" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <br><img src="https://iodinesoftware.com/wp-content/themes/iodine_2020/images/logo_color.svg" width=200/><br><br>
+    <i>"Given physician-created documents from hospitals, find themes in the text as well as differentiate between "relevant" and "irrelevant" text, and disambiguate homonyms. "</i><br>
+    •••<br>
+    Alexis Raykhel<br><b>Senior NLP Engineer</b><br>Iodine Software<br>
+</p></p>
+</div>
+<h4 id="teaching">Teaching<a class="headerlink" href="#teaching" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <i>"BERTopic was used to determine a taxonomy of climate change risks discussed in financial news, and to compute firms' related exposure. It was used in a context a course offering on Climate Risks modelling with NLP."</i><br>
+    •••<br>
+    Thomas Lorans<b><br>Senior Associate, Quantitative Analyst</b><br>
+</p></p>
+</div>
+<h4 id="zero-hunger-lab">Zero Hunger Lab<a class="headerlink" href="#zero-hunger-lab" title="Permanent link">&para;</a></h4>
+<div class="admonition quote">
+<p><p align="center">
+    <img src="https://www.universiteitenvannederland.nl/ezine-digitale-samenleving/images/logo-tilburg-university.svg" width=300/><br><br>
+    <i>"I am a PhD student at Tilburg University, at a lab called Zero Hunger Lab, where we try to use data science methods to improve food insecurity. One key issue is classifying and predicting food insecurity in food-insecure nations. The Integrated Food Security Phase Classification (IPC) system serves this purpose. The IPC categorizes food insecurity into five phases, ranging from minimal food insecurity to famine, and serves as a guide for directing humanitarian resources to the most affected regions.<br><br>
+    The IPC system strives to be based on evidence, however, obtaining accurate information about food insecurity in remote regions can prove challenging. Despite the availability of weather data, data in the socio-economic domain, such as food prices and conflict, can be scarce or unreliable due to limited infrastructure and bureaucratic obstacles. These complications often result in infrequent releases of IPC classifications and projections, making it difficult to effectively respond to food insecurity in these areas.<br><br>
+    One large source of daily-updated information is local news. Thus, one can build a model that classifies/predicts IPC by relying on news features obtained by NLP methods in addition to stuff like weather data. Previous research shows this is possible (see https://arxiv.org/pdf/2111.15602.pdf). The authors find words related to food insecurity using semantic frame parsing. After which, they count the occurrence of these words to create features. The features are put into a linear classifier. We wanted to apply more advanced methods and use local news sources (which we suppose contain more localized information). We used BERTopic on over a million articles scraped from Somali news websites. Because articles are both in English and Somali, we use a multilingual sentence encoder (LaBSE, which outperforms newer models in Somali). The results are quite nice. For example, topics most strongly correlated with known conflict casualty data are topics about terrorist attacks, car bombings, etc. And topics most negatively correlated with known conflict casualty data are about peace talks. We can also get an indication of food price development and forced migration. Most importantly, we can track the development of topics relating to food insecurity over time. While topic modelling cannot replace evidence-based food insecurity assessment, it can give a quick insight into a local situation when 'hard data' is lacking.<br><br>
+    I applaud you on your success with BERTopic. The package is incredibly clean and easy to use, and the method works well with little parameter tuning. To me, the fact that you were able to deliver such a useful tool on your own is incredible, especially in the field of NLP, which is dominated by large organizations such as Google and Meta.  "</i><br>
+    •••<br>Cascha van Wanrooij<br><b>PhD Student</b><br>Tilburg University<br>
+</p></p>
+</div>
+<h2 id="papers"><strong>Papers</strong><a class="headerlink" href="#papers" title="Permanent link">&para;</a></h2>
+<p>BERTopic has also been adopted more and more in the academic field. Here are a few from all different kinds of research domains with interesting applications:</p>
+<ul>
+<li><em>Adewunmi, M., Sharma, S. K., Sharma, N., Sushma, N. S., &amp; Mounmo, B.</em> (2022). <a href="https://companyofscientists.com/index.php/chd/article/download/217/232">Cancer Health Disparities drivers with BERTopic modelling and PyCaret Evaluation</a>. Cancer Health Disparities, 6.</li>
+<li><em>Ebeling, R., Sáenz, C. A. C., Nobre, J. C., &amp; Becker, K.</em> (2022, May). <a href="https://ojs.aaai.org/index.php/ICWSM/article/download/19281/19053">Analysis of the influence of political polarization in the vaccination stance: the Brazilian COVID-19 scenario</a>. In Proceedings of the International AAAI Conference on Web and Social Media (Vol. 16, pp. 159-170).</li>
+<li><em>Hoseini, M., Melo, P., Benevenuto, F., Feldmann, A., &amp; Zannettou, S.</em> (2021). <a href="https://arxiv.org/pdf/2105.13020">On the globalization of the QAnon conspiracy theory through Telegram.</a> arXiv preprint arXiv:2105.13020.</li>
+<li><em>Falkenberg, M., Galeazzi, A., Torricelli, M., Di Marco, N., Larosa, F., Sas, M., ... &amp; Baronchelli, A.</em> (2022). <a href="https://www.nature.com/articles/s41558-022-01527-x">Growing polarization around climate change on social media.</a> Nature Climate Change, 1-8.</li>
+<li><em>Sánchez‐Franco, M. J., &amp; Rey‐Moreno, M.</em> (2022). <a href="https://onlinelibrary.wiley.com/doi/pdf/10.1002/mar.21608">Do travelers' reviews depend on the destination? An analysis in coastal and urban peer‐to‐peer lodgings.</a> Psychology &amp; Marketing, 39(2), 441-459.</li>
+<li>Zhunis, A., Lima, G., Song, H., Han, J., &amp; Cha, M. (2022, April). <a href="https://dl.acm.org/doi/pdf/10.1145/3485447.3512132">Emotion bubbles: Emotional composition of online discourse before and after the COVID-19 outbreak.</a> In Proceedings of the ACM Web Conference 2022 (pp. 2603-2613).</li>
+<li><em>Alhaj, F., Al-Haj, A., Sharieh, A., &amp; Jabri, R.</em> (2022). <a href="https://oars.uos.ac.uk/2327/1/Paper_99-Improving_Arabic_Cognitive_Distortion_Classification_in_Twitter.pdf">Improving Arabic cognitive distortion classification in Twitter using BERTopic.</a> International Journal of Advanced Computer Science and Applications, 13(1), 854-860.</li>
+</ul>
+<p>Click <a href="https://scholar.google.nl/scholar?oi=bibs&amp;hl=nl&amp;cites=17397195143750028634,8180869421575866889,8997387995186833349,18341994629392979746,1103958012065447153,735156116265912963,513933600215578884">here</a> for a full overview of papers citing BERTopic.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2024 Maintained by <a href="https://github.com/MaartenGr">Maarten Grootendorst</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.instant", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy", "content.tabs.link"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.3220b9d7.min.js"></script>
+      
+    
+  </body>
+</html>
