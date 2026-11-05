@@ -10,6 +10,7 @@ import copy
 import tempfile
 
 import pytest
+from sklearn.metrics.pairwise import cosine_similarity
 
 from bertopic import BERTopic
 
@@ -51,8 +52,14 @@ def reduce_outliers(topic_model, documents, embeddings):
         documents, topic_model.topics_, strategy="embeddings", embeddings=embeddings
     )
 
-    # Outliers can only move to topics that exist
-    assert set(topics) <= set(topic_model.topic_sizes_)
+    # Each outlier moves to its nearest topic, found by topic ID, or stays one when no topic is similar
+    outliers = [index for index, topic in enumerate(topic_model.topics_) if topic == -1]
+    topic_ids = topic_model._topics.topic_ids(outliers=False)
+    topic_embeddings = [topic_model._topics[topic_id].embedding for topic_id in topic_ids]
+    similarity = cosine_similarity(embeddings[outliers], topic_embeddings)
+    nearest = [topic_ids[row.argmax()] if row.max() > 0 else -1 for row in similarity]
+    assert [topics[index] for index in outliers] == nearest
+
     topic_model.update_topics(documents, topics=topics, embeddings=embeddings)
     return topic_model
 
