@@ -74,10 +74,19 @@ def test_names_are_escaped():
     topic_model = media_model()
     topic_model.set_topic_labels({0: "<b>budget</b>"})
 
-    page = topic_model.visualize_media().data
+    page = topic_model.visualize_media(custom_labels=True).data
 
     assert "&lt;b&gt;budget&lt;/b&gt;" in page
     assert "<b>budget</b>" not in page
+
+
+def test_a_custom_label_shows_only_when_asked_for():
+    """As in the other plots, each topic shows its name unless `custom_labels=True`."""
+    topic_model = media_model()
+    topic_model.set_topic_labels({0: "Quarterly figures"})
+
+    assert "Quarterly figures" not in topic_model.visualize_media().data
+    assert "Quarterly figures" in topic_model.visualize_media(custom_labels=True).data
 
 
 def test_the_page_is_html_that_a_notebook_shows():

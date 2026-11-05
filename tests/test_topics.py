@@ -215,8 +215,8 @@ def test_zeroshot_topics_are_placed_before_clustered_topics():
     # Zero-shot topics keep their order even though topic 0 holds the fewest documents,
     # while the clustered topics 2, 3 and 4 are sorted by frequency behind them
     assert topics.get_mappings() == {0: 0, 1: 1, 3: 2, 4: 3, 2: 4}
-    assert topics.labels[0] == "alpha"
-    assert topics.labels[1] == "beta"
+    assert topics.names[0] == "alpha"
+    assert topics.names[1] == "beta"
 
 
 def test_zeroshot_only_model_keeps_every_topic_in_label_order():
@@ -260,9 +260,9 @@ def test_merge_keeps_a_zeroshot_name_unless_merged_with_a_clustered_topic():
     topics = Topics().initialize([0] * 2 + [1] * 3 + [2] * 4, zeroshot_labels=["alpha", "beta"])
     topics.merge({0: 0, 1: 1, 2: 1})
 
-    assert topics.labels[0] == "alpha"
+    assert topics.names[0] == "alpha"
     assert topics[1].topic_type == TopicType.NORMAL
-    assert topics.labels[1] != "beta"
+    assert topics.names[1] != "beta"
 
 
 def test_merge_sums_document_counts():
@@ -557,6 +557,18 @@ def test_disk_round_trip_omits_data_matrices():
     assert restored[0].embedding.size == 0
 
 
+def test_round_trip_keeps_custom_labels_apart_from_zeroshot_labels():
+    """Custom labels and zero-shot labels are saved under their own keys."""
+    topics = Topics().initialize([0] * 3 + [1] * 2, zeroshot_labels=["Pets"])
+    topics[0].custom_label = "Animals"
+    topics[1].custom_label = "Other"
+
+    restored = Topics.from_dict(topics.to_dict())
+
+    assert [topic.zeroshot_label for topic in restored] == ["Pets", None]
+    assert [topic.custom_label for topic in restored] == ["Animals", "Other"]
+
+
 def test_round_trip_preserves_the_width_of_an_all_zero_c_tf_idf_row():
     """A topic whose c-TF-IDF is entirely zero keeps its column count.
 
@@ -617,6 +629,17 @@ def test_an_old_save_of_a_reduced_model_keeps_every_rule():
     save["topic_mapper"] = [[-1, -1, -1], [0, 0, 0], [1, 1, 0]]
 
     migrate_topics_pre_0_17_4(save).check()
+
+
+def test_the_custom_labels_of_an_old_save_stay_custom():
+    """An old save keeps its custom labels in topic order, with names for the topics nobody labelled."""
+    save = old_save({"-1": "-1_the_of", "0": "0_cat_dog"})
+    save["custom_labels"] = ["-1_the_of", "Pets"]
+
+    topics = migrate_topics_pre_0_17_4(save)
+
+    assert [topic.name for topic in topics] == ["-1_the_of", "0_cat_dog"]
+    assert topics.custom_labels == ["-1_the_of", "Pets"]
 
 
 def test_a_label_the_keywords_would_not_generate_is_kept():
@@ -806,12 +829,56 @@ def test_name_carries_the_topic_id():
     assert topics[0].to_info_dict()["Name"] == "0_cat_dog"
 
 
-def test_a_user_label_is_never_prefixed():
-    """`set_topic_labels("Politics")` should not become `0_Politics`."""
-    topics = build_topics({0: 4})
-    topics[0]._label = "Politics"
+def keyword_topics() -> Topics:
+    """The outlier and two topics, each named by its keywords."""
+    topics = build_topics({-1: 2, 0: 4, 1: 3})
+    keywords = {
+        -1: Keywords(data=[("the", 0.1), ("of", 0.1)]),
+        0: Keywords(data=[("cat", 0.9), ("dog", 0.8)]),
+        1: Keywords(data=[("car", 0.9), ("bike", 0.8)]),
+    }
+    topics.set_data(representations={"Main": keywords})
+    return topics
+
+
+def test_a_custom_label_leaves_the_names_alone():
+    """`custom_labels_` holds the custom labels and every other topic's name; names stay unchanged."""
+    topics = keyword_topics()
+    assert topics.custom_labels is None
+
+    topics[0].custom_label = "Pets"
+
+    assert topics.custom_labels == ["-1_the_of", "Pets", "1_car_bike"]
+    assert topics.names == {-1: "-1_the_of", 0: "0_cat_dog", 1: "1_car_bike"}
+
+
+def test_a_zeroshot_label_is_never_prefixed():
+    """A zero-shot topic is named after its zero-shot label, which is not a custom label."""
+    topics = Topics().initialize([0] * 4, zeroshot_labels=["Politics"])
 
     assert topics[0].name == "Politics"
+    assert topics.custom_labels is None
+
+
+def test_a_custom_label_leaves_a_zeroshot_label_alone():
+    """Labelling a zero-shot topic leaves its zero-shot label as its name."""
+    topics = Topics().initialize([0] * 4, zeroshot_labels=["Politics"])
+    topics[0].custom_label = "Elections"
+
+    assert topics[0].name == "Politics"
+    assert topics.custom_labels == ["Elections"]
+
+
+def test_custom_name_is_a_column_once_a_topic_is_labelled():
+    """`get_topic_info` shows `CustomName` beside `Name` once a topic has a custom label."""
+    topics = keyword_topics()
+    assert "CustomName" not in topics.to_dataframe().columns
+
+    topics[0].custom_label = "Pets"
+    info = topics.to_dataframe()
+
+    assert list(info.columns[:4]) == ["Topic", "Count", "Name", "CustomName"]
+    assert list(info["CustomName"]) == ["-1_the_of", "Pets", "1_car_bike"]
 
 
 def test_label_stays_unprefixed():

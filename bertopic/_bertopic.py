@@ -359,7 +359,7 @@ class BERTopic:
     @property
     def topic_labels_(self) -> dict[int, str]:
         """For backwards compatibility."""
-        return self._topics.labels
+        return self._topics.names
 
     @property
     def custom_labels_(self) -> list[str] | None:
@@ -1480,7 +1480,8 @@ class BERTopic:
     def set_topic_labels(self, topic_labels: list[str] | dict[int, str]) -> None:
         """Set custom topic labels in your fitted BERTopic model.
 
-        Labels are stored directly on each `Topic` object via `topic._label`.
+        The labels show in `custom_labels_`, in the `CustomName` column of `get_topic_info` and in
+        plots drawn with `custom_labels=True`. `topic_labels_` and the `Name` column keep their names.
 
         Arguments:
             topic_labels: If a list of topic labels, it should contain the same number
@@ -1528,7 +1529,7 @@ class BERTopic:
             for topic_id, label in topic_labels.items():
                 selected_topic = self._topics.get(topic_id)
                 if selected_topic is not None:
-                    selected_topic._label = label
+                    selected_topic.custom_label = label
 
         elif isinstance(topic_labels, list):
             if len(topic_labels) != len(sorted_topics):
@@ -1536,7 +1537,7 @@ class BERTopic:
                     "Make sure that `topic_labels` contains the same number of labels as there are topics."
                 )
             for selected_topic, label in zip(sorted_topics, topic_labels):
-                selected_topic._label = label
+                selected_topic.custom_label = label
 
     def generate_topic_labels(
         self,
@@ -1900,9 +1901,12 @@ class BERTopic:
         topics: List[int] | None = None,
         top_n_topics: int | None = None,
         height: int = 200,
+        custom_labels: bool = False,
     ) -> "HTML":
         check_is_fitted(self)
-        return plotting.visualize_media(self, topics=topics, top_n_topics=top_n_topics, height=height)
+        return plotting.visualize_media(
+            self, topics=topics, top_n_topics=top_n_topics, height=height, custom_labels=custom_labels
+        )
 
     @wraps(plotting.visualize_hierarchical_documents)
     def visualize_hierarchical_documents(
