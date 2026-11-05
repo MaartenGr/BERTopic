@@ -177,11 +177,10 @@ def migrate_topics_pre_0_17_4(topics_dict: dict) -> Topics:
         representations = {"Main": Keywords(data=[tuple(item) for item in rep_data])}
 
         # Every label was saved, so one the keywords generate anyway stays derived, and only a
-        # label they would not produce, such as a zero-shot topic's name, is kept as set
-        saved_label = topics_dict.get("topic_labels", {}).get(str_id)
-        if saved_label == f"{topic_id}_" + "_".join(word for word, _ in rep_data[:4]):
-            saved_label = None
-        label = custom_labels_dict.get(topic_id) or saved_label
+        # label they would not produce, a zero-shot label, is kept
+        zeroshot_label = topics_dict.get("topic_labels", {}).get(str_id)
+        if zeroshot_label == f"{topic_id}_" + "_".join(word for word, _ in rep_data[:4]):
+            zeroshot_label = None
 
         # Topic aspects (additional representations)
         for aspect_name, aspect_data in topics_dict.get("topic_aspects", {}).items():
@@ -195,7 +194,8 @@ def migrate_topics_pre_0_17_4(topics_dict: dict) -> Topics:
         # Create Topic
         topic = Topic(
             id=topic_id,
-            _label=label,
+            custom_label=custom_labels_dict.get(topic_id),
+            zeroshot_label=zeroshot_label,
             nr_documents=nr_documents,
             topic_type=topic_type,
             representations=representations,

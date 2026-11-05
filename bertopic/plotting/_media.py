@@ -57,6 +57,7 @@ def visualize_media(
     topics: list[int] | None = None,
     top_n_topics: int | None = None,
     height: int = 200,
+    custom_labels: bool = False,
 ) -> HTML:
     """Show each topic's media beside its name: its pictures, and a montage to play.
 
@@ -73,6 +74,8 @@ def visualize_media(
         topics: A selection of topics to show.
         top_n_topics: Only show the top n most frequent topics.
         height: The height of each picture on the page, in pixels.
+        custom_labels: Whether to show the custom topic labels that were defined using
+                       `topic_model.set_topic_labels`.
 
     Returns:
         An `IPython.display.HTML`, which a notebook shows inline. Its `data` is the page
@@ -101,6 +104,7 @@ def visualize_media(
     rows = []
     for topic_id in select_topics(topic_model, topics, top_n_topics):
         topic = topic_model._topics[topic_id]
+        name = (topic.custom_label or topic.name) if custom_labels else topic.name
         summaries = topic.media.summaries if topic.media is not None else {}
 
         # One figure per summary, captioned with what it is, so a collage and a frame sheet are told apart
@@ -111,7 +115,7 @@ def visualize_media(
         ]
         rows.append(
             f'<tr><td class="number">{topic.id}</td><td class="number">{topic.nr_documents}</td>'
-            f"<td>{escape(topic.name)}</td><td>{''.join(figures)}</td></tr>"
+            f"<td>{escape(name)}</td><td>{''.join(figures)}</td></tr>"
         )
 
     # Imported here because IPython comes with every notebook, but BERTopic does not depend on it

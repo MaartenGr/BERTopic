@@ -12,7 +12,7 @@ from bertopic._corpus import Modality
 from scipy.sparse import csr_matrix, vstack
 from scipy.cluster.hierarchy import fcluster
 import numpy as np
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 BERTOPIC_VERSION = version("bertopic")
 
@@ -325,7 +325,8 @@ class Topic:
         id: Unique identifier for the topic.
         representations: A dictionary mapping source names to TopicRepresentation instances.
         representative_documents: A list of representative documents for the topic.
-        label: A human-readable label for the topic.
+        custom_label: A label the user set with `set_topic_labels`, shown where custom labels are asked for.
+        zeroshot_label: The label a zero-shot topic was given in `zeroshot_topic_list`.
         embedding: The embedding vector representing the topic.
         c_tf_idf: The c-TF-IDF vector representing the topic.
         topic_type: The type of topic (NORMAL, ZERO_SHOT, OUTLIER).
@@ -341,7 +342,8 @@ class Topic:
     # Representations
     representations: dict[str, TopicRepresentation] = field(default_factory=dict)
     representative_documents: list[str] = field(default_factory=list)
-    _label: str | None = None
+    custom_label: str | None = None
+    zeroshot_label: str | None = None
 
     # Data matrices
     embedding: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -373,13 +375,9 @@ class Topic:
 
     @property
     def label(self) -> str:
-        """Get the label of the topic.
-
-        If a custom label was set via `_label`, return it.
-        Otherwise, the Main representation gives the label.
-        """
-        if self._label is not None:
-            return self._label
+        """The topic's zero-shot label, or else the label its Main representation gives."""
+        if self.zeroshot_label is not None:
+            return self.zeroshot_label
         representation = self.representations.get("Main")
         return representation.label if representation else "No label could be created"
 
@@ -388,9 +386,9 @@ class Topic:
         """How the topic is named in `get_topic_info` and `topic_labels_`.
 
         The topic's ID followed by its label, which is what makes two topics with similar
-        keywords tellable apart. A label the user set is returned as it was given.
+        keywords tellable apart. A zero-shot topic keeps its zero-shot label as it is.
         """
-        return self._label if self._label is not None else f"{self.id}_{self.label}"
+        return self.zeroshot_label if self.zeroshot_label is not None else f"{self.id}_{self.label}"
 
     @property
     def media(self) -> Media | None:
@@ -412,13 +410,17 @@ class Topic:
         """Set representation for a specific source."""
         self.representations[source] = rep
 
-    def to_info_dict(self) -> dict:
+    def to_info_dict(self, custom_labels: bool = False) -> dict:
         """Serialize topic info to a flat dictionary for tabular output.
+
+        With `custom_labels`, a `CustomName` column follows `Name`.
 
         Media is shown as the items themselves, under `Representative_Items` rather than
         its aspect's name, so the columns stay the same whatever modalities a topic holds.
         """
         info = {"Topic": self.id, "Count": self.nr_documents, "Name": self.name}
+        if custom_labels:
+            info["CustomName"] = self.custom_label or self.name
         info["Representation"] = self["Main"].words
 
         # Extract all other representations
@@ -441,7 +443,8 @@ class Topic:
         """
         data = {
             "id": self.id,
-            "label": self._label,
+            "custom_label": self.custom_label,
+            "zeroshot_label": self.zeroshot_label,
             "nr_documents": self.nr_documents,
             "topic_type": self.topic_type.value,
             "representations": {name: rep.to_dict() for name, rep in self.representations.items()},
@@ -489,7 +492,8 @@ class Topic:
 
         return cls(
             id=data["id"],
-            _label=data.get("label"),
+            custom_label=data.get("custom_label"),
+            zeroshot_label=data.get("zeroshot_label"),
             nr_documents=data.get("nr_documents", 0),
             topic_type=TopicType(data.get("topic_type", "normal")),
             representations=representations,
@@ -540,21 +544,16 @@ class Topics:
         return {topic.id: topic.nr_documents for topic in self.topics.values()}
 
     @property
-    def labels(self) -> dict[int, str]:
-        """Get labels for all topics."""
-        labels = {topic.id: topic.name if topic.name is not None else "" for topic in self.topics.values()}
-        return dict(sorted(labels.items()))
+    def names(self) -> dict[int, str]:
+        """The name of every topic, by topic ID."""
+        return {topic.id: topic.name for topic in self}
 
     @property
     def custom_labels(self) -> list[str] | None:
-        """The labels a user set, or None when every label is still derived.
-
-        `Topic._label` is only filled in by `set_topic_labels`, which is what separates
-        a label the user chose from one generated out of the topic's keywords.
-        """
-        if all(topic._label is None for topic in self):
+        """The labels a user set, with every other topic's name, or None while no topic has one."""
+        if all(topic.custom_label is None for topic in self):
             return None
-        return [topic.label for topic in self]
+        return [topic.custom_label or topic.name for topic in self]
 
     @property
     def c_tf_idf(self) -> csr_matrix:
@@ -614,6 +613,37 @@ class Topics:
         """Get topic by ID, returning None if not found."""
         return self.topics.get(topic_id)
 
+    def check(self) -> None:
+        """Raise a ValueError naming every rule these topics break.
+
+        These are the rules every operation must leave intact. Topic IDs may have gaps and a
+        topic may hold no documents, since custom topics and `partial_fit` produce both.
+        """
+        topic_ids = self.topic_ids()
+        counts = Counter(self.predictions)
+        mapped = set(self.get_mappings().values())
+        rules = {
+            "topic IDs are plain ints": all(type(topic_id) is int for topic_id in [*topic_ids, *counts]),
+            "every prediction is a known topic": set(counts) <= set(topic_ids),
+            "topic sizes match the predictions": all(
+                topic.nr_documents == counts[topic.id] for topic in self
+            ),
+            "only topic -1 is the outlier": all(
+                (topic.id == -1) == (topic.topic_type == TopicType.OUTLIER) for topic in self
+            ),
+            "the cluster mapping points at known topics": mapped <= {*topic_ids, -1},
+            "c-TF-IDF rows share one width": len({topic.c_tf_idf.shape[1] for topic in self}) <= 1,
+            "embeddings share one shape": len({topic.embedding.shape for topic in self}) <= 1,
+        }
+        if self.probabilities is not None:
+            rules["one probability row per prediction"] = len(self.probabilities) == len(self.predictions)
+            if self.probabilities.ndim == 2:
+                rules["one probability column per topic"] = self.probabilities.shape[1] == len(topic_ids)
+
+        broken = [rule for rule, holds in rules.items() if not holds]
+        if broken:
+            raise ValueError(f"The topics break {len(broken)} rule(s): {'; '.join(broken)}.")
+
     def initialize(
         self,
         predictions: list[int] | np.ndarray = None,
@@ -638,7 +668,7 @@ class Topics:
                 id=topic_id,
                 topic_type=topic_type_to_use,
                 nr_documents=predictions.count(topic_id),
-                _label=label,
+                zeroshot_label=label,
             )
 
         self.predictions = list(predictions)
@@ -821,7 +851,7 @@ class Topics:
                 id=new_id,
                 representations=prominent.representations.copy(),
                 representative_documents=rep_docs,
-                _label=prominent._label if topic_type == TopicType.ZERO_SHOT else None,
+                zeroshot_label=prominent.zeroshot_label if topic_type == TopicType.ZERO_SHOT else None,
                 embedding=embedding,
                 c_tf_idf=c_tf_idf,
                 topic_type=topic_type,
@@ -930,7 +960,8 @@ class Topics:
     def to_dataframe(self, topics: int | list[int] | None = None) -> IntoDataFrame:
         """Convert topic info to a dataframe, a row per topic or for each of `topics`, repeats included."""
         # Each topic's row is built once, since a topic can be asked for once per document
-        info = {topic.id: topic.to_info_dict() for topic in self}
+        labelled = self.custom_labels is not None
+        info = {topic.id: topic.to_info_dict(custom_labels=labelled) for topic in self}
         if topics is None:
             topics = list(info)
         elif not isinstance(topics, list):
@@ -1013,7 +1044,6 @@ class Topics:
             self (for method chaining)
         """
         from sklearn.metrics.pairwise import cosine_similarity
-        from collections import Counter
 
         self_ids = self.topic_ids(outliers=False)
         other_ids = other.topic_ids(outliers=False)
