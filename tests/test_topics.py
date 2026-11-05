@@ -19,6 +19,8 @@ strict marker means the suite fails if they start passing silently, so the unit
 that fixes them has to remove the marker deliberately.
 """
 
+import re
+
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
@@ -606,6 +608,17 @@ def test_labels_an_old_save_generated_stay_derived():
     assert [topic.name for topic in topics] == ["-1_the_of", "0_cat_dog"]
 
 
+@pytest.mark.xfail(strict=True, raises=ValueError, reason="the migration reads the last row as the mapping")
+def test_an_old_save_of_a_reduced_model_keeps_every_rule():
+    """0.17 kept a row per original topic, with its ID after each step, so the last column is the mapping."""
+    save = old_save({"-1": "-1_the_of", "0": "0_cat_dog"})
+
+    # Original topic 1 was merged into topic 0
+    save["topic_mapper"] = [[-1, -1, -1], [0, 0, 0], [1, 1, 0]]
+
+    migrate_topics_pre_0_17_4(save).check()
+
+
 def test_a_label_the_keywords_would_not_generate_is_kept():
     """A zero-shot topic is named after its zero-shot label rather than its keywords."""
     topics = migrate_topics_pre_0_17_4(old_save({"-1": "-1_the_of", "0": "Pets"}))
@@ -641,6 +654,99 @@ def test_topics_keeps_rows_and_probabilities_consistent_through_a_merge():
     assert set(topics.predictions) <= set(topics.topic_ids())
     assert topics.probabilities.shape == (19, len(topics.topic_ids()))
     assert topics.probabilities[0].sum() == pytest.approx(1.0)
+
+
+# --------------------------------------------------------------------------------------
+# The rules every operation keeps
+# --------------------------------------------------------------------------------------
+
+
+def consistent_topics() -> Topics:
+    """Topics with an outlier, data matrices and probabilities, which keep every rule."""
+    probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
+    return build_topics({-1: 5, 0: 8, 1: 4, 2: 2}, probabilities)
+
+
+def test_topics_that_keep_every_rule_pass_the_check():
+    """The check stays silent on consistent topics, gaps in their IDs included."""
+    consistent_topics().check()
+    build_topics({-1: 2, 0: 3, 2: 4, 5: 1}).check()
+
+
+@pytest.mark.parametrize(
+    ("rule", "break_rule"),
+    [
+        (
+            "topic IDs are plain ints",
+            lambda topics: setattr(topics, "predictions", list(np.array(topics.predictions))),
+        ),
+        ("every prediction is a known topic", lambda topics: topics.topics.pop(2)),
+        ("topic sizes match the predictions", lambda topics: setattr(topics[0], "nr_documents", 9)),
+        ("only topic -1 is the outlier", lambda topics: setattr(topics[0], "topic_type", TopicType.OUTLIER)),
+        ("the cluster mapping points at known topics", lambda topics: topics.mapping.apply({1: 7})),
+        (
+            "c-TF-IDF rows share one width",
+            lambda topics: setattr(topics[0], "c_tf_idf", csr_matrix(np.ones((1, 5)))),
+        ),
+        ("embeddings share one shape", lambda topics: setattr(topics[0], "embedding", np.ones(2))),
+        (
+            "one probability row per prediction",
+            lambda topics: setattr(topics, "probabilities", topics.probabilities[1:]),
+        ),
+        (
+            "one probability column per topic",
+            lambda topics: setattr(topics, "probabilities", topics.probabilities[:, 1:]),
+        ),
+    ],
+)
+def test_the_check_names_each_rule_that_is_broken(rule, break_rule):
+    """Each rule catches its own breakage, so a check that passes means something."""
+    topics = consistent_topics()
+    break_rule(topics)
+
+    with pytest.raises(ValueError, match=re.escape(rule)):
+        topics.check()
+
+
+@pytest.mark.parametrize(
+    "operations",
+    [
+        [("delete", [2]), ("merge", {-1: -1, 0: 0, 1: 0})],
+        [("delete", [2]), ("delete", [1])],
+        [("merge", {-1: -1, 0: 0, 1: 0, 2: 1}), ("sort_by_frequency",)],
+        [("sort_by_frequency",), ("delete", [0]), ("sort_by_frequency",)],
+        [("remap", {-1: -1, 0: 2, 1: 0, 2: 1}), ("merge", {-1: -1, 0: 0, 1: 1, 2: 1})],
+    ],
+    ids=["delete, then merge", "delete twice", "merge, then sort", "sort, delete, sort", "remap, then merge"],
+)
+def test_a_sequence_of_operations_keeps_every_rule(operations):
+    """However operations are combined, the topics they leave behind stay consistent."""
+    topics = consistent_topics()
+
+    for name, *arguments in operations:
+        getattr(topics, name)(*arguments)
+        topics.check()
+
+
+@pytest.mark.xfail(strict=True, raises=IndexError, reason="delete takes its columns after adding the outlier")
+def test_deleting_from_topics_without_an_outlier_keeps_every_rule():
+    """Deleting creates the outlier topic, and its probability column with it."""
+    probabilities = make_probabilities({0: 0.2, 1: 0.7, 2: 0.1}, nr_documents=14)
+    topics = build_topics({0: 8, 1: 4, 2: 2}, probabilities)
+
+    topics.delete([2])
+
+    topics.check()
+
+
+@pytest.mark.xfail(strict=True, raises=ValueError, reason="merge_similar extends the predictions only")
+def test_merging_similar_topics_keeps_every_rule():
+    """Merging in another collection adds its rows, and their probabilities with them."""
+    topics = consistent_topics()
+
+    topics.merge_similar(consistent_topics())
+
+    topics.check()
 
 
 # --------------------------------------------------------------------------------------

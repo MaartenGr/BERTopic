@@ -12,7 +12,7 @@ from bertopic._corpus import Modality
 from scipy.sparse import csr_matrix, vstack
 from scipy.cluster.hierarchy import fcluster
 import numpy as np
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 BERTOPIC_VERSION = version("bertopic")
 
@@ -614,6 +614,37 @@ class Topics:
         """Get topic by ID, returning None if not found."""
         return self.topics.get(topic_id)
 
+    def check(self) -> None:
+        """Raise a ValueError naming every rule these topics break.
+
+        These are the rules every operation must leave intact. Topic IDs may have gaps and a
+        topic may hold no documents, since custom topics and `partial_fit` produce both.
+        """
+        topic_ids = self.topic_ids()
+        counts = Counter(self.predictions)
+        mapped = set(self.get_mappings().values())
+        rules = {
+            "topic IDs are plain ints": all(type(topic_id) is int for topic_id in [*topic_ids, *counts]),
+            "every prediction is a known topic": set(counts) <= set(topic_ids),
+            "topic sizes match the predictions": all(
+                topic.nr_documents == counts[topic.id] for topic in self
+            ),
+            "only topic -1 is the outlier": all(
+                (topic.id == -1) == (topic.topic_type == TopicType.OUTLIER) for topic in self
+            ),
+            "the cluster mapping points at known topics": mapped <= {*topic_ids, -1},
+            "c-TF-IDF rows share one width": len({topic.c_tf_idf.shape[1] for topic in self}) <= 1,
+            "embeddings share one shape": len({topic.embedding.shape for topic in self}) <= 1,
+        }
+        if self.probabilities is not None:
+            rules["one probability row per prediction"] = len(self.probabilities) == len(self.predictions)
+            if self.probabilities.ndim == 2:
+                rules["one probability column per topic"] = self.probabilities.shape[1] == len(topic_ids)
+
+        broken = [rule for rule, holds in rules.items() if not holds]
+        if broken:
+            raise ValueError(f"The topics break {len(broken)} rule(s): {'; '.join(broken)}.")
+
     def initialize(
         self,
         predictions: list[int] | np.ndarray = None,
@@ -1013,7 +1044,6 @@ class Topics:
             self (for method chaining)
         """
         from sklearn.metrics.pairwise import cosine_similarity
-        from collections import Counter
 
         self_ids = self.topic_ids(outliers=False)
         other_ids = other.topic_ids(outliers=False)

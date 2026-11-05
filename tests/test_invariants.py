@@ -44,15 +44,6 @@ def test_assigned_topics_and_known_topics_agree(model, request):
 
 
 @pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
-def test_every_prediction_refers_to_a_known_topic(model, request):
-    """No document points at a topic that was deleted or merged away."""
-    topic_model = request.getfixturevalue(model)
-    known_topics = set(topic_model.topic_sizes_)
-
-    assert all(prediction in known_topics for prediction in topic_model.topics_)
-
-
-@pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
 def test_topic_ids_are_contiguous(model, request):
     """Topic IDs run from 0 upwards with no gaps, preceded by -1 when outliers exist."""
     topic_model = request.getfixturevalue(model)
@@ -73,30 +64,18 @@ def test_topic_matrices_have_one_row_per_topic(model, request):
 
 
 @pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
+def test_topics_keep_every_rule(model, request):
+    """Every fitted model passes `Topics.check()`, the rules every operation must leave intact."""
+    request.getfixturevalue(model)._topics.check()
+
+
+@pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
 def test_every_topic_has_a_representation(model, request):
     """No topic is left without a Main representation to describe it."""
     topic_model = request.getfixturevalue(model)
 
     for topic in topic_model._topics:
         assert "Main" in topic.representations
-
-
-@pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
-def test_probability_matrix_has_one_column_per_topic(model, request):
-    """The probability matrix carries a column for every topic, outlier included.
-
-    The width is already correct everywhere, because the mapping sizes the matrix from
-    the number of distinct target topics. What is wrong today is the *content*: columns
-    are shifted by one and the outlier's mass is dropped. That is specified separately
-    in `tests/test_topics.py`, which is where the fix will be verified.
-    """
-    topic_model = request.getfixturevalue(model)
-    probabilities = topic_model.probabilities_
-
-    if probabilities is None or probabilities.ndim == 1:
-        pytest.skip("This model does not produce a full probability distribution")
-
-    assert probabilities.shape[1] == len(topic_model._topics.topic_ids())
 
 
 @pytest.mark.parametrize("model", ALL_MODEL_FIXTURES)
