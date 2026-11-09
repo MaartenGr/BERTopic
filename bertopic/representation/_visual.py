@@ -20,9 +20,9 @@ class VisualRepresentation(BaseRepresentation):
         nr_repr_images: Number of representative images to extract
         nr_samples: The number of candidate documents to extract per cluster.
         image_height: The height of the resulting collage
-        image_square: Whether to resize each image in the collage
-                      to a square. This can be visually more appealing
-                      if all input images are all almost squares.
+        image_squares: Whether to resize each image in the collage
+                       to a square. This can be visually more appealing
+                       if all input images are all almost squares.
         image_to_text_model: The model to caption images.
         batch_size: The number of images to pass to the
                     `image_to_text_model`.
