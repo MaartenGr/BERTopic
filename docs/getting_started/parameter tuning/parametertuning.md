@@ -95,6 +95,11 @@ results in more micro clusters being generated. Typically, I would advise increa
 `min_cluster_size` might help you reduce the amount of noise you will get. Do note that outliers are to be expected and forcing the output
 to have no outliers may not properly represent the data.
 
+Because `min_samples` follows `min_cluster_size` unless you set it, changing `min_cluster_size` also changes how HDBSCAN estimates density.
+Small changes in `min_samples` can make a topic disappear into the outliers or merge it with another topic, most often a topic whose size
+is close to `min_cluster_size`. If the exact set of topics matters, fix the UMAP `random_state` so that the embeddings stay the same,
+try a few nearby values of `min_samples`, and check that the topics you rely on are still there.
+
 ### **metric**
 `metric`, like with HDBSCAN is used to calculate the distances. Here, we went with `euclidean` as, after reducing the dimensionality, we have
 low dimensional data and not much optimization is necessary. However, if you increase `n_components` in UMAP, then it would be advised to look into
