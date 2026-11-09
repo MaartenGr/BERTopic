@@ -2609,7 +2609,6 @@ class BERTopic:
         """Visualize documents and their topics in 2D.
 
         Arguments:
-            topic_model: A fitted BERTopic instance.
             docs: The documents you used when calling either `fit` or `fit_transform`
             topics: A selection of topics to visualize.
                     Not to be confused with the topics that you get from `.fit_transform`.
@@ -2713,7 +2712,6 @@ class BERTopic:
         to use a sufficiently large `min_topic_size` or set `nr_topics` when building the model.
 
         Arguments:
-            topic_model:  A fitted BERTopic instance.
             docs: The documents you used when calling either `fit` or `fit_transform`.
             topics: A selection of topics to visualize.
                     Not to be confused with the topics that you get from `.fit_transform`.
@@ -3157,7 +3155,6 @@ class BERTopic:
         a single document.
 
         Arguments:
-            topic_model: A fitted BERTopic instance.
             document: The document for which you want to visualize
                       the approximated topic distribution.
             topic_token_distribution: The topic-token distribution of the document as
@@ -3220,7 +3217,6 @@ class BERTopic:
         matrix between c-TF-IDF or semantic embeddings of the topics.
 
         Arguments:
-            topic_model: A fitted BERTopic instance.
             orientation: The orientation of the figure.
                          Either 'left' or 'bottom'
             topics: A selection of topics to visualize
@@ -4406,7 +4402,6 @@ class BERTopic:
         Arguments:
             documents_per_topic: The joined documents per topic such that each topic has a single
                                  string made out of multiple documents
-            m: The total number of documents (unjoined)
             fit: Whether to fit a new vectorizer or use the fitted self.vectorizer_model
             partial_fit: Whether to run `partial_fit` for online learning
 

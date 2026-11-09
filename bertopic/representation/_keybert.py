@@ -202,7 +202,6 @@ class KeyBERTInspired(BaseRepresentation):
 
         Arguments:
             vocab: The complete vocabulary of input documents
-            labels: All topic labels
             topics: The top words per topic
             sim: The similarity matrix between word and topic embeddings
 
