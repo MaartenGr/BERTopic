@@ -19,6 +19,8 @@ strict marker means the suite fails if they start passing silently, so the unit
 that fixes them has to remove the marker deliberately.
 """
 
+import re
+
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
@@ -213,8 +215,8 @@ def test_zeroshot_topics_are_placed_before_clustered_topics():
     # Zero-shot topics keep their order even though topic 0 holds the fewest documents,
     # while the clustered topics 2, 3 and 4 are sorted by frequency behind them
     assert topics.get_mappings() == {0: 0, 1: 1, 3: 2, 4: 3, 2: 4}
-    assert topics.labels[0] == "alpha"
-    assert topics.labels[1] == "beta"
+    assert topics.names[0] == "alpha"
+    assert topics.names[1] == "beta"
 
 
 def test_zeroshot_only_model_keeps_every_topic_in_label_order():
@@ -258,9 +260,9 @@ def test_merge_keeps_a_zeroshot_name_unless_merged_with_a_clustered_topic():
     topics = Topics().initialize([0] * 2 + [1] * 3 + [2] * 4, zeroshot_labels=["alpha", "beta"])
     topics.merge({0: 0, 1: 1, 2: 1})
 
-    assert topics.labels[0] == "alpha"
+    assert topics.names[0] == "alpha"
     assert topics[1].topic_type == TopicType.NORMAL
-    assert topics.labels[1] != "beta"
+    assert topics.names[1] != "beta"
 
 
 def test_merge_sums_document_counts():
@@ -336,6 +338,28 @@ def test_merge_handles_topics_without_embeddings():
     assert topics[0].embedding.size == 0
 
 
+def test_a_topic_that_is_not_merged_keeps_its_custom_label():
+    """Only topics moved onto the same ID are rebuilt, so a topic that moves alone keeps what it holds."""
+    topics = build_topics({0: 8, 1: 4, 2: 2})
+    topics[2].custom_label = "Pets"
+
+    topics.merge({0: 0, 1: 0, 2: 1})
+
+    assert topics[1].custom_label == "Pets"
+
+
+def test_merging_the_outlier_into_a_topic_makes_it_a_normal_topic():
+    """Merging the outliers into topic 1 gives topic 1 their documents, rather than topic 1 to the outliers."""
+    topics = build_topics({-1: 5, 0: 8, 1: 2})
+
+    topics.merge({-1: 1, 0: 0, 1: 1})
+    topics.check()
+
+    assert topics.topic_ids() == [0, 1]
+    assert topics[1].topic_type == TopicType.NORMAL
+    assert topics[1].nr_documents == 7
+
+
 # --------------------------------------------------------------------------------------
 # Deleting
 # --------------------------------------------------------------------------------------
@@ -361,6 +385,19 @@ def test_delete_creates_an_outlier_topic_when_none_exists():
     assert topics[-1].topic_type == TopicType.OUTLIER
 
 
+def test_deleting_several_topics_merges_them_into_a_new_outlier():
+    """Without an outlier topic, the deleted topics become it, as any topics moved onto one ID do."""
+    topics = build_topics({0: 8, 1: 4, 2: 2})
+    topics.set_data(representations={"Main": {1: Keywords([("cat", 0.9)]), 2: Keywords([("dog", 0.9)])}})
+
+    topics.delete([1, 2])
+
+    # Topic 1 holds twice the documents of topic 2, so it weighs twice as much and gives the keywords
+    assert topics[-1].embedding.tolist() == pytest.approx([(2 * 11.0 + 12.0) / 3] * 3)
+    assert topics[-1].representations["Main"].words == ["cat"]
+    topics.check()
+
+
 def test_delete_accepts_a_single_topic_id():
     """A bare integer is treated the same as a one-element list."""
     topics = build_topics({-1: 5, 0: 8, 1: 4})
@@ -378,6 +415,22 @@ def test_delete_sums_probability_mass_into_the_outlier():
 
     # Topic 2's 0.1 is added to the outlier's existing 0.1
     assert topics.probabilities[0].tolist() == pytest.approx([0.2, 0.2, 0.6])
+
+
+# --------------------------------------------------------------------------------------
+# Assigning rows
+# --------------------------------------------------------------------------------------
+
+
+def test_assign_adds_and_removes_topics_by_the_rows_that_point_at_them():
+    """A new ID gets a topic, and a topic left without rows goes, its clusters becoming outliers."""
+    topics = build_topics({0: 3, 1: 2})
+
+    topics.assign([0, 0, 2, 2, 2])
+
+    assert topics.topic_ids() == [0, 2]
+    assert topics.frequencies() == {0: 2, 2: 3}
+    assert topics.map_predictions([1]) == [-1]
 
 
 # --------------------------------------------------------------------------------------
@@ -555,19 +608,29 @@ def test_disk_round_trip_omits_data_matrices():
     assert restored[0].embedding.size == 0
 
 
+def test_round_trip_keeps_custom_labels_apart_from_zeroshot_labels():
+    """Custom labels and zero-shot labels are saved under their own keys."""
+    topics = Topics().initialize([0] * 3 + [1] * 2, zeroshot_labels=["Pets"])
+    topics[0].custom_label = "Animals"
+    topics[1].custom_label = "Other"
+
+    restored = Topics.from_dict(topics.to_dict())
+
+    assert [topic.zeroshot_label for topic in restored] == ["Pets", None]
+    assert [topic.custom_label for topic in restored] == ["Animals", "Other"]
+
+
 def test_round_trip_preserves_the_width_of_an_all_zero_c_tf_idf_row():
     """A topic whose c-TF-IDF is entirely zero keeps its column count.
 
-    `delete()` gives the outlier topic an explicitly all-zero row, so losing the width
-    here means `Topics.c_tf_idf` can no longer stack the topics after a save and load.
+    Losing the width here means `Topics.c_tf_idf` can no longer stack the topics after a save and load.
     """
-    topics = Topics().initialize([0] * 4 + [1] * 3 + [2] * 2)
-    topics.set_data(c_tf_idf=csr_matrix(np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])))
-    topics.delete([1, 2])
+    topics = Topics().initialize([0] * 4 + [1] * 3)
+    topics.set_data(c_tf_idf=csr_matrix(np.array([[1.0, 2.0], [0.0, 0.0]])))
 
     restored = Topics.from_dict(topics.to_dict(full=True))
 
-    assert restored[-1].c_tf_idf.shape == (1, 2)
+    assert restored[1].c_tf_idf.shape == (1, 2)
     assert restored.c_tf_idf.shape == (2, 2)
 
 
@@ -606,6 +669,28 @@ def test_labels_an_old_save_generated_stay_derived():
     assert [topic.name for topic in topics] == ["-1_the_of", "0_cat_dog"]
 
 
+@pytest.mark.xfail(strict=True, raises=ValueError, reason="the migration reads the last row as the mapping")
+def test_an_old_save_of_a_reduced_model_keeps_every_rule():
+    """0.17 kept a row per original topic, with its ID after each step, so the last column is the mapping."""
+    save = old_save({"-1": "-1_the_of", "0": "0_cat_dog"})
+
+    # Original topic 1 was merged into topic 0
+    save["topic_mapper"] = [[-1, -1, -1], [0, 0, 0], [1, 1, 0]]
+
+    migrate_topics_pre_0_17_4(save).check()
+
+
+def test_the_custom_labels_of_an_old_save_stay_custom():
+    """An old save keeps its custom labels in topic order, with names for the topics nobody labelled."""
+    save = old_save({"-1": "-1_the_of", "0": "0_cat_dog"})
+    save["custom_labels"] = ["-1_the_of", "Pets"]
+
+    topics = migrate_topics_pre_0_17_4(save)
+
+    assert [topic.name for topic in topics] == ["-1_the_of", "0_cat_dog"]
+    assert topics.custom_labels == ["-1_the_of", "Pets"]
+
+
 def test_a_label_the_keywords_would_not_generate_is_kept():
     """A zero-shot topic is named after its zero-shot label rather than its keywords."""
     topics = migrate_topics_pre_0_17_4(old_save({"-1": "-1_the_of", "0": "Pets"}))
@@ -641,6 +726,98 @@ def test_topics_keeps_rows_and_probabilities_consistent_through_a_merge():
     assert set(topics.predictions) <= set(topics.topic_ids())
     assert topics.probabilities.shape == (19, len(topics.topic_ids()))
     assert topics.probabilities[0].sum() == pytest.approx(1.0)
+
+
+# --------------------------------------------------------------------------------------
+# The rules every operation keeps
+# --------------------------------------------------------------------------------------
+
+
+def consistent_topics() -> Topics:
+    """Topics with an outlier, data matrices and probabilities, which keep every rule."""
+    probabilities = make_probabilities({-1: 0.1, 0: 0.2, 1: 0.6, 2: 0.1}, nr_documents=19)
+    return build_topics({-1: 5, 0: 8, 1: 4, 2: 2}, probabilities)
+
+
+def test_topics_that_keep_every_rule_pass_the_check():
+    """The check stays silent on consistent topics, gaps in their IDs included."""
+    consistent_topics().check()
+    build_topics({-1: 2, 0: 3, 2: 4, 5: 1}).check()
+
+
+@pytest.mark.parametrize(
+    ("rule", "break_rule"),
+    [
+        (
+            "topic IDs are plain ints",
+            lambda topics: setattr(topics, "predictions", list(np.array(topics.predictions))),
+        ),
+        ("every prediction is a known topic", lambda topics: topics.topics.pop(2)),
+        ("topic sizes match the predictions", lambda topics: setattr(topics[0], "nr_documents", 9)),
+        ("only topic -1 is the outlier", lambda topics: setattr(topics[0], "topic_type", TopicType.OUTLIER)),
+        ("the cluster mapping points at known topics", lambda topics: topics.mapping.apply({1: 7})),
+        (
+            "c-TF-IDF rows share one width",
+            lambda topics: setattr(topics[0], "c_tf_idf", csr_matrix(np.ones((1, 5)))),
+        ),
+        ("embeddings share one shape", lambda topics: setattr(topics[0], "embedding", np.ones(2))),
+        (
+            "one probability row per prediction",
+            lambda topics: setattr(topics, "probabilities", topics.probabilities[1:]),
+        ),
+        (
+            "one probability column per topic",
+            lambda topics: setattr(topics, "probabilities", topics.probabilities[:, 1:]),
+        ),
+    ],
+)
+def test_the_check_names_each_rule_that_is_broken(rule, break_rule):
+    """Each rule catches its own breakage, so a check that passes means something."""
+    topics = consistent_topics()
+    break_rule(topics)
+
+    with pytest.raises(ValueError, match=re.escape(rule)):
+        topics.check()
+
+
+@pytest.mark.parametrize(
+    "operations",
+    [
+        [("delete", [2]), ("merge", {-1: -1, 0: 0, 1: 0})],
+        [("delete", [2]), ("delete", [1])],
+        [("merge", {-1: -1, 0: 0, 1: 0, 2: 1}), ("sort_by_frequency",)],
+        [("sort_by_frequency",), ("delete", [0]), ("sort_by_frequency",)],
+        [("remap", {-1: -1, 0: 2, 1: 0, 2: 1}), ("merge", {-1: -1, 0: 0, 1: 1, 2: 1})],
+    ],
+    ids=["delete, then merge", "delete twice", "merge, then sort", "sort, delete, sort", "remap, then merge"],
+)
+def test_a_sequence_of_operations_keeps_every_rule(operations):
+    """However operations are combined, the topics they leave behind stay consistent."""
+    topics = consistent_topics()
+
+    for name, *arguments in operations:
+        getattr(topics, name)(*arguments)
+        topics.check()
+
+
+def test_deleting_from_topics_without_an_outlier_keeps_every_rule():
+    """Deleting creates the outlier topic, and its probability column with it."""
+    probabilities = make_probabilities({0: 0.2, 1: 0.7, 2: 0.1}, nr_documents=14)
+    topics = build_topics({0: 8, 1: 4, 2: 2}, probabilities)
+
+    topics.delete([2])
+
+    topics.check()
+
+
+def test_merging_similar_topics_keeps_every_rule():
+    """Merging in another collection adds its rows and drops the probabilities, which fit neither's topics."""
+    topics = consistent_topics()
+
+    topics.merge_similar(consistent_topics())
+
+    topics.check()
+    assert topics.probabilities is None
 
 
 # --------------------------------------------------------------------------------------
@@ -700,12 +877,56 @@ def test_name_carries_the_topic_id():
     assert topics[0].to_info_dict()["Name"] == "0_cat_dog"
 
 
-def test_a_user_label_is_never_prefixed():
-    """`set_topic_labels("Politics")` should not become `0_Politics`."""
-    topics = build_topics({0: 4})
-    topics[0]._label = "Politics"
+def keyword_topics() -> Topics:
+    """The outlier and two topics, each named by its keywords."""
+    topics = build_topics({-1: 2, 0: 4, 1: 3})
+    keywords = {
+        -1: Keywords(data=[("the", 0.1), ("of", 0.1)]),
+        0: Keywords(data=[("cat", 0.9), ("dog", 0.8)]),
+        1: Keywords(data=[("car", 0.9), ("bike", 0.8)]),
+    }
+    topics.set_data(representations={"Main": keywords})
+    return topics
+
+
+def test_a_custom_label_leaves_the_names_alone():
+    """`custom_labels_` holds the custom labels and every other topic's name; names stay unchanged."""
+    topics = keyword_topics()
+    assert topics.custom_labels is None
+
+    topics[0].custom_label = "Pets"
+
+    assert topics.custom_labels == ["-1_the_of", "Pets", "1_car_bike"]
+    assert topics.names == {-1: "-1_the_of", 0: "0_cat_dog", 1: "1_car_bike"}
+
+
+def test_a_zeroshot_label_is_never_prefixed():
+    """A zero-shot topic is named after its zero-shot label, which is not a custom label."""
+    topics = Topics().initialize([0] * 4, zeroshot_labels=["Politics"])
 
     assert topics[0].name == "Politics"
+    assert topics.custom_labels is None
+
+
+def test_a_custom_label_leaves_a_zeroshot_label_alone():
+    """Labelling a zero-shot topic leaves its zero-shot label as its name."""
+    topics = Topics().initialize([0] * 4, zeroshot_labels=["Politics"])
+    topics[0].custom_label = "Elections"
+
+    assert topics[0].name == "Politics"
+    assert topics.custom_labels == ["Elections"]
+
+
+def test_custom_name_is_a_column_once_a_topic_is_labelled():
+    """`get_topic_info` shows `CustomName` beside `Name` once a topic has a custom label."""
+    topics = keyword_topics()
+    assert "CustomName" not in topics.to_dataframe().columns
+
+    topics[0].custom_label = "Pets"
+    info = topics.to_dataframe()
+
+    assert list(info.columns[:4]) == ["Topic", "Count", "Name", "CustomName"]
+    assert list(info["CustomName"]) == ["-1_the_of", "Pets", "1_car_bike"]
 
 
 def test_label_stays_unprefixed():
