@@ -132,9 +132,6 @@ def merge_with_a_copy(topic_model, documents, embeddings):
             "base_topic_model",
             [merge_with_a_copy, delete_a_topic],
             id="merge models, then delete",
-            marks=pytest.mark.xfail(
-                strict=True, raises=ValueError, reason="merge_models extends the predictions only"
-            ),
         ),
         pytest.param(
             "online_topic_model", [learn_another_batch, delete_a_topic], id="learn another batch, then delete"
@@ -143,9 +140,6 @@ def merge_with_a_copy(topic_model, documents, embeddings):
             "zeroshot_topic_model",
             [reduce_to_ten_topics, delete_a_topic],
             id="zero-shot, reduce, then delete",
-            marks=pytest.mark.xfail(
-                strict=True, raises=IndexError, reason="delete takes its columns after adding the outlier"
-            ),
         ),
     ],
 )

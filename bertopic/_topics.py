@@ -646,38 +646,40 @@ class Topics:
 
     def initialize(
         self,
-        predictions: list[int] | np.ndarray = None,
+        predictions: list[int] | np.ndarray,
         zeroshot_labels: list[str] | None = None,
-        topic_type: TopicType = TopicType.NORMAL,
         probabilities: np.ndarray | None = None,
     ):
-        """Initialize topics from a cluster model's assignments."""
-        if isinstance(predictions, np.ndarray):
-            predictions = predictions.tolist()
+        """Initialize topics from a cluster model's labels; the first topics take the zero-shot labels."""
+        self.assign(predictions, probabilities)
+        for topic in self:
+            if zeroshot_labels and topic.id in range(len(zeroshot_labels)):
+                topic.topic_type, topic.zeroshot_label = TopicType.ZERO_SHOT, zeroshot_labels[topic.id]
 
-        for topic_id in set(predictions):
-            if zeroshot_labels and topic_id in range(len(zeroshot_labels)):
-                topic_type_to_use = TopicType.ZERO_SHOT
-                label = zeroshot_labels[topic_id]
-            else:
-                topic_type_to_use = topic_type
-                label = None
-
-            # Create Topic instance
-            self.topics[topic_id] = Topic(
-                id=topic_id,
-                topic_type=topic_type_to_use,
-                nr_documents=predictions.count(topic_id),
-                zeroshot_label=label,
-            )
-
-        self.predictions = list(predictions)
-        self.probabilities = probabilities
-
-        # Log the initialization
         self.add_action(TopicAction.INITIALIZED)
-
         return self
+
+    def assign(self, predictions: list[int] | np.ndarray, probabilities: np.ndarray | None = None) -> None:
+        """Point every row at a topic, adding a topic for each new ID and removing those left without rows.
+
+        The clusters of a removed topic count as outliers from then on.
+
+        Arguments:
+            predictions: The topic ID of every row.
+            probabilities: The probabilities of every row, which replace those stored, also when None.
+        """
+        predictions = [int(prediction) for prediction in predictions]
+        sizes = Counter(predictions)
+        self.mapping.apply({topic_id: topic_id if topic_id in sizes else -1 for topic_id in self.topics})
+
+        for topic_id in self.topics.keys() - sizes.keys():
+            del self.topics[topic_id]
+        for topic_id in sizes.keys() - self.topics.keys():
+            self.topics[topic_id] = Topic(id=topic_id)
+        for topic in self:
+            topic.nr_documents = sizes[topic.id]
+
+        self.predictions, self.probabilities = predictions, probabilities
 
     def add_action(self, action: TopicAction):
         """Register a completed action in the history log."""
@@ -776,19 +778,69 @@ class Topics:
         self.probabilities = remapped
 
     def remap(self, old_to_new: dict[int, int]) -> None:
-        """Apply an ID remapping to topics and update cumulative mapping.
-        This is expected to be a one to one mapping.
+        """Move topics to new IDs, and the rows, probability columns and cluster mapping with them.
+
+        Renumbering, sorting, merging and deleting all come down to this:
+
+            * A topic that moves alone keeps everything it holds, its labels included
+            * The outlier topic keeps its own data while it stays -1, and absorbs the documents moved onto it
+            * Topics moved onto the same ID are merged into one, as `merge` describes, and so is a topic
+              that becomes the outlier or stops being it
+
+        Arguments:
+            old_to_new: Every current topic ID, mapped to its new ID.
         """
         column_order = sorted(self.topics)
-        for topic in self.topics.values():
-            topic.id = old_to_new[topic.id]
-        self.topics = {topic.id: topic for topic in self.topics.values()}
+        new_to_old: dict[int, list[Topic]] = defaultdict(list)
+        for old_id, new_id in old_to_new.items():
+            new_to_old[new_id].append(self.topics[old_id])
+
+        self.topics = {new_id: self._combine(new_id, old_topics) for new_id, old_topics in new_to_old.items()}
         self._apply_to_rows(old_to_new, column_order)
         self.mapping.apply(old_to_new)
 
+    @staticmethod
+    def _combine(new_id: int, old_topics: list[Topic]) -> Topic:
+        """The topic that `old_topics` become once they are all moved onto `new_id`."""
+        nr_documents = sum(topic.nr_documents for topic in old_topics)
+        outliers = [topic for topic in old_topics if topic.id == -1]
+
+        # The outlier topic keeps what it holds while it stays the outlier, and so does a topic that moves
+        # alone, unless it becomes the outlier or stops being it
+        if (outliers and new_id == -1) or (len(old_topics) == 1 and not outliers and new_id != -1):
+            kept = outliers[0] if outliers else old_topics[0]
+            kept.id, kept.nr_documents = new_id, nr_documents
+            return kept
+
+        # Weight by document count, falling back to equal weights when no topic holds documents
+        if nr_documents:
+            weights = np.array([topic.nr_documents / nr_documents for topic in old_topics])
+        else:
+            weights = np.full(len(old_topics), 1 / len(old_topics))
+
+        # Average the embeddings only when every topic has one, since they may never have been computed
+        embeddings = [topic.embedding for topic in old_topics if topic.embedding.size > 0]
+        if len(embeddings) == len(old_topics):
+            embedding = np.average(embeddings, weights=weights, axis=0)
+        else:
+            embedding = np.array([])
+
+        # The result is zero-shot only if all of its parts are, and the outlier topic never is
+        zeroshot = new_id != -1 and all(topic.topic_type == TopicType.ZERO_SHOT for topic in old_topics)
+        prominent = max(old_topics, key=lambda topic: topic.nr_documents)
+        return Topic(
+            id=new_id,
+            representations=prominent.representations.copy(),
+            representative_documents=[doc for topic in old_topics for doc in topic.representative_documents],
+            zeroshot_label=prominent.zeroshot_label if zeroshot else None,
+            embedding=embedding,
+            c_tf_idf=sum(topic.c_tf_idf * weight for topic, weight in zip(old_topics, weights)),
+            topic_type=TopicType.ZERO_SHOT if zeroshot else TopicType.NORMAL,
+            nr_documents=nr_documents,
+        )
+
     def merge(self, old_to_new: dict[int, int]) -> None:
-        """Merge topics and update cumulative mapping.
-        This is expected to be a many to one mapping (e.g., merging topics).
+        """Merge the topics mapped onto the same ID.
 
         This will do the following:
 
@@ -797,135 +849,23 @@ class Topics:
             * Sum nr_documents for merged topics
             * Keep the representations of the most prominent topic (highest nr_documents)
             * Combine representative documents from all merged topics
-            * Make TopicType NORMAL if any merged topic is NORMAL, or else keep the zero-shot name
-            * Map original IDs to new IDs in the cumulative mapping
+            * Keep a zero-shot label only if every merged topic is zero-shot
+            * Leave a topic that is not merged as it is
 
         Arguments:
-            old_to_new: A dictionary mapping old topic IDs to new topic IDs.
-                        New topics are fewer than old topics.
+            old_to_new: Every current topic ID, mapped to its new ID.
         """
-        column_order = sorted(self.topics)
-
-        # Group old topic IDs by their new target ID
-        new_to_old: dict[int, list[int]] = defaultdict(list)
-        for old_id, new_id in old_to_new.items():
-            new_to_old[new_id].append(old_id)
-
-        merged_topics = {}
-        for new_id, old_ids in new_to_old.items():
-            old_topics = [self.topics[old_id] for old_id in old_ids]
-            total_docs = sum(t.nr_documents for t in old_topics)
-
-            # Weight by document count, falling back to equal weights when a group holds
-            # no documents at all, which happens transiently during `partial_fit`
-            if total_docs:
-                weights = np.array([t.nr_documents / total_docs for t in old_topics])
-            else:
-                weights = np.full(len(old_topics), 1 / len(old_topics))
-
-            # Weighted average of embeddings, which are optional and may never have been computed
-            embeddings = [t.embedding for t in old_topics if t.embedding.size > 0]
-            if len(embeddings) == len(old_topics):
-                embedding = np.average(embeddings, weights=weights, axis=0)
-            else:
-                embedding = np.array([])
-
-            # Weighted average of c-TF-IDF vectors (sparse)
-            c_tf_idf = sum(t.c_tf_idf * w for t, w in zip(old_topics, weights))
-
-            # Keep representations from most prominent topic
-            prominent = max(old_topics, key=lambda t: t.nr_documents)
-
-            # Combine representative documents from all topics
-            rep_docs = [doc for t in old_topics for doc in (t.representative_documents or [])]
-
-            # NORMAL if any merged topic is NORMAL
-            # TODO: Think about improving this for MERGED/ZEROSHOT instances.
-            topic_type = (
-                TopicType.NORMAL
-                if any(t.topic_type == TopicType.NORMAL for t in old_topics)
-                else prominent.topic_type
-            )
-
-            merged_topics[new_id] = Topic(
-                id=new_id,
-                representations=prominent.representations.copy(),
-                representative_documents=rep_docs,
-                zeroshot_label=prominent.zeroshot_label if topic_type == TopicType.ZERO_SHOT else None,
-                embedding=embedding,
-                c_tf_idf=c_tf_idf,
-                topic_type=topic_type,
-                nr_documents=total_docs,
-            )
-
-        self.topics = merged_topics
-        self._apply_to_rows(old_to_new, column_order)
-        self.mapping.apply(old_to_new)
+        self.remap(old_to_new)
         self.add_action(TopicAction.MERGED)
 
     def delete(self, topics: list[int] | int) -> None:
-        """Delete topics by mapping them to the outlier topic (-1).
-
-        This will:
-            * Create an outlier topic if it doesn't exist
-            * Map deleted topic predictions to -1
-            * Remove deleted Topic objects from the collection
-            * Update outlier's nr_documents with the sum of deleted topic counts
+        """Delete topics by moving their documents to the outlier topic (-1), which is created if needed.
 
         Arguments:
             topics: List of topic IDs to delete or a single topic ID.
         """
         topics = {topics} if isinstance(topics, int) else set(topics)
-
-        # Calculate total documents being moved to outlier
-        deleted_doc_count = sum(
-            self.topics[topic_id].nr_documents for topic_id in topics if topic_id in self.topics
-        )
-
-        # Create outlier topic if it doesn't exist
-        if -1 not in self.topics:
-            sample_topic = next(iter(self.topics.values()))
-
-            # If only one topic is deleted, we use its data for the outlier
-            if len(topics) == 1:
-                selected_topic = self.topics[next(iter(topics))]
-                embedding = selected_topic.embedding
-                c_tf_idf = selected_topic.c_tf_idf
-                representative_documents = selected_topic.representative_documents
-                representations = selected_topic.representations
-            else:
-                embedding_dim = sample_topic.embedding.shape[0]
-                embedding = np.zeros(embedding_dim) if embedding_dim > 0 else np.array([])
-                c_tf_idf_dim = sample_topic.c_tf_idf.shape[1]
-                c_tf_idf = csr_matrix((1, c_tf_idf_dim)) if c_tf_idf_dim > 0 else csr_matrix([])
-                representative_documents = [""]
-                representations = {name: type(rep)() for name, rep in sample_topic.representations.items()}
-
-            # Build outlier topic
-            self.topics[-1] = Topic(
-                id=-1,
-                representations=representations,
-                representative_documents=representative_documents,
-                embedding=embedding,
-                c_tf_idf=c_tf_idf,
-                topic_type=TopicType.OUTLIER,
-                nr_documents=deleted_doc_count,
-            )
-        else:
-            self.topics[-1].nr_documents += deleted_doc_count
-
-        # Build mapping: deleted -> -1, others -> themselves
-        column_order = sorted(self.topics)
-        old_to_new = {topic_id: -1 if topic_id in topics else topic_id for topic_id in self.topics.keys()}
-        old_to_new[-1] = -1
-
-        # Remove deleted topics
-        for topic_id in topics:
-            if topic_id in self.topics:
-                del self.topics[topic_id]
-
-        self._apply_to_rows(old_to_new, column_order)
-        self.mapping.apply(old_to_new)
+        self.remap({topic_id: -1 if topic_id in topics else topic_id for topic_id in self.topics})
         self.add_action(TopicAction.DELETED)
 
     def map_predictions(self, predictions: list[int] | np.ndarray) -> list[int]:
@@ -1033,7 +973,7 @@ class Topics:
         After merging:
         - New topics are added to self.topics
         - Predictions from other are remapped and appended to self
-        - Document counts are recalculated
+        - Document counts are recalculated, and probabilities dropped
         - The mapping is reset to identity
 
         Arguments:
@@ -1082,19 +1022,11 @@ class Topics:
         if -1 in other.topics and -1 not in self.topics:
             self.topics[-1] = other.topics[-1].copy()
 
-        # Merge predictions: get current, remap other's, concatenate
-        current_preds = list(self.predictions)
-        other_preds = [id_mapping[p] for p in other.predictions]
-        all_preds = current_preds + other_preds
+        # Add the other's rows, whose probabilities describe neither collection's topics
+        self.assign(self.predictions + [id_mapping[prediction] for prediction in other.predictions])
 
         # These rows are now the reference point, so the cluster mapping starts over
-        self.predictions = all_preds
         self.mapping.reset()
-
-        # Recalculate document counts
-        counts = Counter(all_preds)
-        for topic in self.topics.values():
-            topic.nr_documents = counts.get(topic.id, 0)
 
         self.add_action(TopicAction.MERGED)
         return self

@@ -104,3 +104,14 @@ def test_labelling_a_zeroshot_topic_keeps_its_name(zeroshot_topic_model):
 
     assert list(info["Name"]) == [name]
     assert list(info["CustomName"]) == ["My label"]
+
+
+def test_custom_labels_survive_merging_other_topics(base_topic_model, documents):
+    """Merging two topics rebuilds only the merged one, so every other topic keeps its custom label."""
+    topic_model = copy.deepcopy(base_topic_model)
+    topic_model.set_topic_labels({5: "Five"})
+
+    topic_model.merge_topics(documents, [0, 1])
+
+    assert topic_model.custom_labels_ is not None
+    assert "Five" in topic_model.custom_labels_

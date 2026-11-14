@@ -24,7 +24,6 @@ import scipy.sparse as sp
 
 from pathlib import Path
 from functools import wraps
-from collections import Counter
 from packaging import version
 from scipy.sparse import csr_matrix
 from importlib.util import find_spec
@@ -70,7 +69,7 @@ from bertopic.backend._utils import select_backend
 from bertopic.vectorizers import ClassTfidfTransformer
 from bertopic.representation import BaseRepresentation
 from bertopic.representation._base import TextConverter
-from bertopic._topics import Keywords, Media, Topic, Topics, TopicRepresentation, TopicHierarchy, TopicType
+from bertopic._topics import Keywords, Media, Topics, TopicRepresentation, TopicHierarchy, TopicType
 from bertopic._corpus import Corpus, Modality
 from bertopic.cluster._utils import hdbscan_delegator, is_supported_hdbscan
 from bertopic._utils import (
@@ -799,27 +798,8 @@ class BERTopic:
         corpus = self._reduce_dimensionality(corpus, partial_fit=True)
         corpus = self._cluster_embeddings(corpus, partial_fit=True)
 
-        # Use cluster labels directly as topic IDs
-        if is_first_fit:
-            self._topics = Topics().initialize(corpus.topics)
-
-        # Add new topics and accumulate predictions/counts
-        else:
-            new_topic_ids = {int(topic) for topic in corpus.topics} - set(self._topics.topic_ids())
-
-            for topic_id in new_topic_ids:
-                self._topics.topics[topic_id] = Topic(id=topic_id, nr_documents=0)
-
-            self._topics.predictions.extend(int(topic) for topic in corpus.topics)
-
-            if corpus.probabilities is not None and self._topics.probabilities is not None:
-                self._topics.probabilities = np.concatenate(
-                    [self._topics.probabilities, corpus.probabilities]
-                )
-
-            for topic_id in set(corpus.topics):
-                count = int(np.sum(corpus.topics == topic_id))
-                self._topics[topic_id].nr_documents += count
+        # Use cluster labels directly as topic IDs, adding this batch's rows to those of earlier batches
+        self._topics.assign(self._topics.predictions + list(corpus.topics))
 
         # Update topic representations. Every topic keeps a row, in topic ID order, including topics
         # missing from this batch
@@ -1116,31 +1096,18 @@ class BERTopic:
             embeddings = np.array([topic_embeddings[topic_id] for topic_id in current_topics])
 
         # Determine topic assignments
-        topics = [int(topic) for topic in (self.topics_ if topics is None else topics)]
-        new_ids, old_ids = set(topics), set(self._topics.topic_ids())
-        if new_ids != old_ids:
+        topics = self.topics_ if topics is None else topics
+        same_topics = set(topics) == set(self._topics.topic_ids())
+        if not same_topics:
             logger.warning(
                 "Using a custom list of topic assignments may lead to errors if "
                 "topic reduction techniques are used afterwards. Make sure that "
                 "manually assigning topics is the last step in the pipeline."
             )
-            # Missing topics are moved to outliers
-            self._topics.mapping.apply(
-                {topic_id: topic_id if topic_id in new_ids else -1 for topic_id in old_ids}
-            )
-            for topic_id in old_ids - new_ids:
-                del self._topics.topics[topic_id]
-            for topic_id in new_ids - old_ids:
-                self._topics.topics[topic_id] = Topic(id=topic_id)
-            self._topics.probabilities = None
 
-        # Move documents between topics. Fitted probabilities only describe the documents they were fitted on
-        sizes = Counter(topics)
-        self._topics.predictions = topics
-        if not fitted:
-            self._topics.probabilities = None
-        for topic in self._topics:
-            topic.nr_documents = sizes[topic.id]
+        # Move documents between topics. Fitted probabilities only describe the documents and topics they
+        # were fitted on, so they are kept only while both stay the same
+        self._topics.assign(topics, self._topics.probabilities if fitted and same_topics else None)
 
         corpus = Corpus.from_inputs(
             documents=docs,

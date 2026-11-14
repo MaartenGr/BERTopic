@@ -338,6 +338,28 @@ def test_merge_handles_topics_without_embeddings():
     assert topics[0].embedding.size == 0
 
 
+def test_a_topic_that_is_not_merged_keeps_its_custom_label():
+    """Only topics moved onto the same ID are rebuilt, so a topic that moves alone keeps what it holds."""
+    topics = build_topics({0: 8, 1: 4, 2: 2})
+    topics[2].custom_label = "Pets"
+
+    topics.merge({0: 0, 1: 0, 2: 1})
+
+    assert topics[1].custom_label == "Pets"
+
+
+def test_merging_the_outlier_into_a_topic_makes_it_a_normal_topic():
+    """Merging the outliers into topic 1 gives topic 1 their documents, rather than topic 1 to the outliers."""
+    topics = build_topics({-1: 5, 0: 8, 1: 2})
+
+    topics.merge({-1: 1, 0: 0, 1: 1})
+    topics.check()
+
+    assert topics.topic_ids() == [0, 1]
+    assert topics[1].topic_type == TopicType.NORMAL
+    assert topics[1].nr_documents == 7
+
+
 # --------------------------------------------------------------------------------------
 # Deleting
 # --------------------------------------------------------------------------------------
@@ -363,6 +385,19 @@ def test_delete_creates_an_outlier_topic_when_none_exists():
     assert topics[-1].topic_type == TopicType.OUTLIER
 
 
+def test_deleting_several_topics_merges_them_into_a_new_outlier():
+    """Without an outlier topic, the deleted topics become it, as any topics moved onto one ID do."""
+    topics = build_topics({0: 8, 1: 4, 2: 2})
+    topics.set_data(representations={"Main": {1: Keywords([("cat", 0.9)]), 2: Keywords([("dog", 0.9)])}})
+
+    topics.delete([1, 2])
+
+    # Topic 1 holds twice the documents of topic 2, so it weighs twice as much and gives the keywords
+    assert topics[-1].embedding.tolist() == pytest.approx([(2 * 11.0 + 12.0) / 3] * 3)
+    assert topics[-1].representations["Main"].words == ["cat"]
+    topics.check()
+
+
 def test_delete_accepts_a_single_topic_id():
     """A bare integer is treated the same as a one-element list."""
     topics = build_topics({-1: 5, 0: 8, 1: 4})
@@ -380,6 +415,22 @@ def test_delete_sums_probability_mass_into_the_outlier():
 
     # Topic 2's 0.1 is added to the outlier's existing 0.1
     assert topics.probabilities[0].tolist() == pytest.approx([0.2, 0.2, 0.6])
+
+
+# --------------------------------------------------------------------------------------
+# Assigning rows
+# --------------------------------------------------------------------------------------
+
+
+def test_assign_adds_and_removes_topics_by_the_rows_that_point_at_them():
+    """A new ID gets a topic, and a topic left without rows goes, its clusters becoming outliers."""
+    topics = build_topics({0: 3, 1: 2})
+
+    topics.assign([0, 0, 2, 2, 2])
+
+    assert topics.topic_ids() == [0, 2]
+    assert topics.frequencies() == {0: 2, 2: 3}
+    assert topics.map_predictions([1]) == [-1]
 
 
 # --------------------------------------------------------------------------------------
@@ -572,16 +623,14 @@ def test_round_trip_keeps_custom_labels_apart_from_zeroshot_labels():
 def test_round_trip_preserves_the_width_of_an_all_zero_c_tf_idf_row():
     """A topic whose c-TF-IDF is entirely zero keeps its column count.
 
-    `delete()` gives the outlier topic an explicitly all-zero row, so losing the width
-    here means `Topics.c_tf_idf` can no longer stack the topics after a save and load.
+    Losing the width here means `Topics.c_tf_idf` can no longer stack the topics after a save and load.
     """
-    topics = Topics().initialize([0] * 4 + [1] * 3 + [2] * 2)
-    topics.set_data(c_tf_idf=csr_matrix(np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])))
-    topics.delete([1, 2])
+    topics = Topics().initialize([0] * 4 + [1] * 3)
+    topics.set_data(c_tf_idf=csr_matrix(np.array([[1.0, 2.0], [0.0, 0.0]])))
 
     restored = Topics.from_dict(topics.to_dict(full=True))
 
-    assert restored[-1].c_tf_idf.shape == (1, 2)
+    assert restored[1].c_tf_idf.shape == (1, 2)
     assert restored.c_tf_idf.shape == (2, 2)
 
 
@@ -751,7 +800,6 @@ def test_a_sequence_of_operations_keeps_every_rule(operations):
         topics.check()
 
 
-@pytest.mark.xfail(strict=True, raises=IndexError, reason="delete takes its columns after adding the outlier")
 def test_deleting_from_topics_without_an_outlier_keeps_every_rule():
     """Deleting creates the outlier topic, and its probability column with it."""
     probabilities = make_probabilities({0: 0.2, 1: 0.7, 2: 0.1}, nr_documents=14)
@@ -762,14 +810,14 @@ def test_deleting_from_topics_without_an_outlier_keeps_every_rule():
     topics.check()
 
 
-@pytest.mark.xfail(strict=True, raises=ValueError, reason="merge_similar extends the predictions only")
 def test_merging_similar_topics_keeps_every_rule():
-    """Merging in another collection adds its rows, and their probabilities with them."""
+    """Merging in another collection adds its rows and drops the probabilities, which fit neither's topics."""
     topics = consistent_topics()
 
     topics.merge_similar(consistent_topics())
 
     topics.check()
+    assert topics.probabilities is None
 
 
 # --------------------------------------------------------------------------------------
