@@ -1,7 +1,14 @@
 import numpy as np
 from typing import List, Union
-from sentence_transformers import SentenceTransformer
-from sentence_transformers.models import StaticEmbedding
+
+try:
+    from sentence_transformers import SentenceTransformer
+    from sentence_transformers.models import StaticEmbedding
+except (ImportError, ModuleNotFoundError) as e:
+    raise ModuleNotFoundError(
+        "Sentence Transformers is required for this embedding backend. "
+        "Install it with `pip install bertopic[sentence-transformers]`."
+    ) from e
 
 from bertopic.backend import BaseEmbedder
 

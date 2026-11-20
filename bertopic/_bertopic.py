@@ -46,13 +46,17 @@ else:
 
 
 # Models
+SK_HDBSCAN = None
 try:
     from hdbscan import HDBSCAN
 
     HAS_HDBSCAN = True
 except (ImportError, ModuleNotFoundError):
     HAS_HDBSCAN = False
-    from sklearn.cluster import HDBSCAN as SK_HDBSCAN
+    try:
+        from sklearn.cluster import HDBSCAN as SK_HDBSCAN
+    except ImportError:
+        SK_HDBSCAN = None
 
 from sklearn.preprocessing import normalize
 from sklearn import __version__ as sklearn_version
@@ -286,6 +290,11 @@ class BERTopic:
                 metric="euclidean",
                 cluster_selection_method="eom",
                 prediction_data=True,
+            )
+        elif SK_HDBSCAN is None:
+            raise ModuleNotFoundError(
+                "HDBSCAN is required for the default clustering model. "
+                "Install it with `pip install bertopic[hdbscan]` or provide a custom `hdbscan_model`."
             )
         else:
             self.hdbscan_model = SK_HDBSCAN(

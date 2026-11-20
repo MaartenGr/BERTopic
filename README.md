@@ -50,7 +50,7 @@ Corresponding medium posts can be found [here](https://medium.com/data-science/t
 
 ## Installation
 
-Installation, with sentence-transformers, can be done using [uv](https://docs.astral.sh/uv/):
+The basic installation can be done using [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv add bertopic
@@ -61,6 +61,18 @@ or with [pip](https://github.com/pypa/pip):
 ```bash
 pip install bertopic
 ```
+
+This basic installation supports lightweight workflows and models that use precomputed embeddings. To use the standard
+sentence-transformers, UMAP, HDBSCAN, and Plotly features, install their optional dependencies:
+
+```bash
+uv add "bertopic[sentence-transformers,umap,hdbscan,plotting]"
+# or
+pip install "bertopic[sentence-transformers,umap,hdbscan,plotting]"
+```
+
+Install only the optional features you need. For example, when supplying your own embeddings, you can omit
+`sentence-transformers`.
 
 If you want to install BERTopic with other embedding models, you can choose one of the following:
 
