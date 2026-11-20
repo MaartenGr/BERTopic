@@ -1,10 +1,20 @@
 ## **Installation**
 
-Installation, with sentence-transformers, can be done using [pypi](https://pypi.org/project/bertopic/):
+The basic installation can be done using [pypi](https://pypi.org/project/bertopic/):
 
 ```bash
 pip install bertopic
 ```
+
+This basic installation supports lightweight workflows and models that use precomputed embeddings. To use the standard
+sentence-transformers, UMAP, HDBSCAN, and Plotly features, install their optional dependencies:
+
+```bash
+pip install "bertopic[sentence-transformers,umap,hdbscan,plotting]"
+```
+
+Install only the optional features you need. For example, when supplying your own embeddings, you can omit
+`sentence-transformers`.
 
 You may want to install more depending on the transformers and language backends that you will be using.
 The possible installations are:

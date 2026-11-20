@@ -37,18 +37,26 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "hdbscan>=0.8.29",
-    "umap-learn>=0.5.0",
     "numpy>=1.20.0",
     "pandas>=1.1.5",
-    "plotly>=4.7.0",
     "scikit-learn>=1.0",
-    "sentence-transformers>=0.4.1",
     "tqdm>=4.41.1",
     "llvmlite>0.36.0"  # To prevent conflicts with `uv` dependency manager
 ]
 
 [project.optional-dependencies]
+hdbscan = [
+    "hdbscan>=0.8.29",
+]
+plotting = [
+    "plotly>=4.7.0",
+]
+sentence-transformers = [
+    "sentence-transformers>=0.4.1",
+]
+umap = [
+    "umap-learn>=0.5.0",
+]
 datamap = [
     "datamapplot>=0.1",
     "matplotlib>=3.8",
@@ -77,9 +85,13 @@ spacy = [
     "spacy>=3.0.1",
 ]
 test = [
+    "hdbscan>=0.8.29",
+    "plotly>=4.7.0",
     "pytest>=5.4.3",
     "pytest-cov>=2.6.1",
     "ruff~=0.14.0",
+    "sentence-transformers>=0.4.1",
+    "umap-learn>=0.5.0",
 ]
 use = [
     "tensorflow",
@@ -89,6 +101,7 @@ use = [
 vision = [
     "accelerate>=0.19.0", # To prevent "cannot import name 'PartialState' from 'accelerate'"
     "Pillow>=9.2.0",
+    "sentence-transformers>=0.4.1",
 ]
 
 [project.urls]

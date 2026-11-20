@@ -1,5 +1,13 @@
+import builtins
+import importlib
+import sys
+
+import pytest
+
 from bertopic import BERTopic
 from bertopic.dimensionality import BaseDimensionalityReduction
+from bertopic._utils import MockPlotlyModule
+import bertopic._bertopic as bertopic_module
 
 try:
     from plotly.graph_objects import Figure
@@ -43,3 +51,37 @@ def test_no_plotly():
         assert isinstance(out, Figure) if Figure else False
     except ImportError as e:
         assert "Plotly is required to use" in str(e)
+        assert "bertopic[plotting]" in str(e)
+
+
+def test_missing_hdbscan_dependency(monkeypatch):
+    monkeypatch.setattr(bertopic_module, "HAS_HDBSCAN", False)
+    monkeypatch.setattr(bertopic_module, "SK_HDBSCAN", None)
+
+    with pytest.raises(ModuleNotFoundError, match=r"pip install bertopic\[hdbscan\]"):
+        BERTopic(embedding_model=None, umap_model=BaseDimensionalityReduction())
+
+
+def test_missing_sentence_transformers_dependency(monkeypatch):
+    module_name = "bertopic.backend._sentencetransformers"
+    original_module = sys.modules.pop(module_name, None)
+    original_import = builtins.__import__
+
+    def import_without_sentence_transformers(name, *args, **kwargs):
+        if name == "sentence_transformers" or name.startswith("sentence_transformers."):
+            raise ModuleNotFoundError("No module named 'sentence_transformers'", name="sentence_transformers")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", import_without_sentence_transformers)
+    try:
+        with pytest.raises(ModuleNotFoundError, match=r"pip install bertopic\[sentence-transformers\]"):
+            importlib.import_module(module_name)
+    finally:
+        sys.modules.pop(module_name, None)
+        if original_module is not None:
+            sys.modules[module_name] = original_module
+
+
+def test_mock_plotly_dependency_message():
+    with pytest.raises(ImportError, match=r"pip install bertopic\[plotting\]"):
+        MockPlotlyModule().visualize_topics()
