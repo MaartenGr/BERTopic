@@ -207,16 +207,15 @@ embeddings = normalize(embeddings)
 
 The default embedding model in BERTopic is one of the amazing sentence-transformers models, namely `"all-MiniLM-L6-v2"`. Although this model performs well out of the box, it typically needs a GPU to transform the documents into embeddings in a reasonable time. Moreover, the installation requires `pytorch` which often results in a rather large environment, memory-wise.
 
-Fortunately, it is possible to install BERTopic without `sentence-transformers`, `UMAP`, `HDBSCAN` and/or `plotly`. This can be to reduce your docker images for inference or when you do not use `pytorch` but for instance [Model2Vec](https://github.com/MinishLab/model2vec) instead. The installation can be done as follows:
+Fortunately, these are optional dependencies, so you can install BERTopic without `sentence-transformers`, `UMAP`, `HDBSCAN` and/or `plotly`. This can reduce your docker images for inference or when you do not use `pytorch` but, for instance, [Model2Vec](https://github.com/MinishLab/model2vec) instead. Install only the dependencies you need:
 
 ```bash
-pip install --no-deps bertopic
-pip install --upgrade numpy pandas scikit-learn tqdm pyyaml
+pip install bertopic
 ```
 
-This installs a bare-bones version of BERTopic. If you want to use UMAP and Model2Vec for instance, you'll need to first install them:
+This installs a lightweight version of BERTopic. If you want to use UMAP and Model2Vec, for instance, install them as well:
 
-`pip install model2vec umap-learn`
+`pip install model2vec "bertopic[umap]"`
 
 Then, you can BERTopic without needing to have a GPU:
 
